@@ -1,0 +1,286 @@
+<html lang="en">
+<head>
+    <title>JNumberTools Overview</title>
+</head>
+<body>
+<p>
+    JNumberTools is the open source combinatorics and number-theory library.
+    It provides 7 different types of permutation generation API's and 4 different types of combination
+    generation API's
+    <br>
+</p>
+
+<strong>Permutation Generators</strong>
+<table border="1px solid-black" >
+    <tr>
+        <th>Permutation API</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td><a href="#up">Unique Permutations</a></td>
+        <td>All unique (n!) permutations of input list</td>
+    </tr>
+
+    <tr>
+        <td><a href="#nup">N<sup>th</sup> unique permutation</a></td>
+        <td>Every Nth unique permutation in lex order starting from 0<sup>th</sup> permutation(input) and then generate
+            every n<sup>th</sup> permutation in lexicographical order of indices of input values where each value is
+            considered unique. Generating n<sup>th</sup> permutation is important because say, if we need to generate
+            next 100 trillionth permutation of 100 items then it will take months to compute if we go sequentially
+            and then skip the unwanted permutations because the total # of permutations is astronomical (100!= 9.3326E X 10<sup>157</sup>)
+            This API will provide a mechanism to generate directly the next n<sup>th</sup>
+            lexicographical permutation.
+        </td>
+    </tr>
+
+    <tr>
+        <td><a href="#kp">K-Permutation</a></td>
+        <td>Unique permutations of size K. Permutations are generated in lex order of indices of input values,
+            considering value at each indices as unique
+        </td>
+    </tr>
+
+    <tr>
+        <td><a href="#nkp">N<sup>th</sup> K-Permutation</a></td>
+        <td>Generating every n<sup>th</sup> unique permutation of size k. Permutations are generated in lex order of
+            indices of input values, considering value at each indices as unique.
+        </td>
+    </tr>
+
+    <tr>
+        <td><a href="#rp">Repetitive Permutation</a></td>
+        <td>Utility to generate all permutations of given items and size where items can be repeated. Permutations are
+            generated in lexicographical order of indices of input values, considering value
+            at each indices as unique.
+        </td>
+    </tr>
+    <tr>
+        <td><a href="#nrp">N<sup>th</sup> Repetitive Permutation</a></td>
+        <td>Utility to generate permutations with repeated values starting from 0<sup>th</sup> permutation(input)
+            and then generate every n<sup>th</sup> permutation in lexicographical order of indices of input values.
+            This is important because say, if we need to
+            generate next 1 billionth permutation of [A,B,C,D,E,F,G,H,I,J,K,L,M] then it is not feasible to generate
+            all 13^13=302875106592253 permutations and then skip billion permutations.
+        </td>
+    </tr>
+
+    <tr>
+        <td><a href="#rpls">Repetitive permutation with limited supply</a></td>
+        <td>repetitive permutations where every element in input has associated count which denotes home many times
+            that element can be repeated. Permutations are generated in lex order of indices of input values,
+            considering value at each indices as unique.
+        </td>
+    </tr>
+</table>
+<br>
+<br>
+<strong>Combination Generators</strong>
+<table border="1px">
+    <tr>
+        <th>Combination API</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td><a href="#uc">Unique Combinations</a></td>
+        <td>All unique combinations (nCr) of input list</td>
+    </tr>
+    <tr>
+        <td><a href="#ucn">N<sup>th</sup> Unique Combinations</a></td>
+        <td>generating every n<sup>th</sup> unique combination of size k.
+            Combinations are generated in lex order of indices of input values,
+            considering value at each indices as unique.<br>
+            This concept is important because count of combinations can grow astronomically
+            large and to generate say, every 100 trillionth combination of 50 items out of 100 (100Choose50),
+            we do not like to wait for 100's of hours to generate all 1.008913445 X 10<sup>29</sup> combinations
+            sequentially and then selecting the required one.
+        </td>
+    </tr>
+</table>
+
+<br>
+<br>
+<strong>Subset Generators</strong>
+<table border="1px solid black">
+    <tr>
+        <th>Subset Type</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td><a href="#ss_all">All Subsets</a></td>
+        <td>Generates all subsets of a given set.</td>
+    </tr>
+    <tr>
+        <td><a href="#ss_range">Subsets in given size range</a></td>
+        <td>Generates all subsets of a given set in a given size range</td>
+    </tr>
+</table>
+<hr>
+<Strong id="up">Generating unique permutations</Strong>
+<pre>
+     JNumberTools.permutationsOf("A","B","C")
+                 .unique()
+                 .forEach(System.out::println);
+
+ will generate following (all possible unique permutations of A,B and C in lex order) -
+ [A, B, C]
+ [A, C, B]
+ [B, A, C]
+ [B, C, A]
+ [C, A, B]
+ [C, B, A]
+ </pre>
+<hr>
+<Strong id="nup">Generating Nth unique permutations</Strong>
+<pre>
+         JNumberTools.permutationsOf("A","B","C")
+                 .uniqueNth(2)
+                 .forEach(System.out::println);
+
+  will generate following (0<sup>th</sup>, 2<sup>nd</sup> and 4<sup>th</sup>) unique permutations of A,B and C in lex order)-
+
+ [A, B, C]
+ [B, A, C]
+ [C, A, B]
+
+ </pre>
+<hr>
+<Strong id="kp">Generating K-permutations</Strong>
+<pre>
+  JNumberTools.permutationsOf("A","B","C")
+      .k(2)
+      .forEach(System.out::println);
+
+ will generate following (all possible unique permutations of size(K) 2)-
+ [A, B]
+ [B, A]
+ [A, C]
+ [C, A]
+ [B, C]
+ [C, B]
+  </pre>
+<hr>
+<Strong id="nkp">Generating N<sup>th</sup> K-Permutation</Strong>
+<pre>
+  JNumberTools.permutationsOf("A","B","C")
+      .kNth(2,2) //size =2 and skipTo every 2<sup>nd</sup> permutation starting from 0<sup>th</sup>
+      .forEach(System.out::println);
+
+ will generate following (0<sup>th</sup>, 2<sup>nd</sup> and 4<sup>th</sup>) K-permutation of size(K)=2 -
+ [A, B]
+ [A, C]
+ [B, C]
+ </pre>
+
+<hr>
+<Strong id="rp">Generating repetitive permutations</Strong>
+<pre>
+      JNumberTools.permutationsOf("A","B","C")
+            .repetitive(2)
+            .forEach(System.out::println);
+
+ will generate following (all possible repetitive permutations of size 2) -
+ [A, A]
+ [A, B]
+ [A, C]
+ [B, A]
+ [B, B]
+ [B, C]
+ [C, A]
+ [C, B]
+ [C, C]
+ </pre>
+
+<hr>
+<Strong id="nrp">Generating N<sup>th</sup> repetitive permutation</Strong>
+<pre>
+      JNumberTools.permutationsOf("A","B")
+                 .repetitiveNth(3,2) //size=3, repeat=2
+                 .forEach(System.out::println);
+
+ will generate following (0<sup>th</sup>, 2<sup>nd</sup> 4<sup>th</sup> and 6<sup>th</sup>) repetitive permutation of "A" and "B" of size 3 -
+
+ [A, A, A]
+ [A, B, A]
+ [B, A, A]
+ [B, B, A]
+ </pre>
+
+<hr>
+<Strong id="rpls">Generating repetitive permutations with limited supply</Strong>
+<pre>
+     //here A can be repeated max 2 times and B can not be repeated(1 time)
+     JNumberTools.permutationsOf("A","B")
+                 .repetitiveWithSupply(2,1)
+                 .forEach(System.out::println);
+
+ will generate following -
+ [A, A, B]
+ [A, B, A]
+ [B, A, A]
+ </pre>
+
+<hr>
+<Strong id="uc">Generating unique combinations</Strong>
+<pre>
+     JNumberTools.combinationsOf("A","B","C")
+        .unique(2)
+        .forEach(System.out::println);
+
+ will generate following (all unique combinations of size 2 of A and B) -
+ [A, B]
+ [A, C]
+ [B, C]
+ </pre>
+
+<hr>
+<Strong id="ucn">Generating Nth Unique Combination</Strong>
+<pre>
+     JNumberTools.combinationsOf("A","B","C","D")
+        .uniqueNth(2,1)
+        .forEach(System.out::println);
+
+ will generate following(0th, 2nd and 4th) unique combinations of all 6 possible combinations:
+ [A, B]
+ [A, D]
+ [B, D]
+ </pre>
+
+<hr>
+<Strong id="ss_all">Generating All subsets</Strong>
+<pre>
+     JNumberTools.subsetsOf("A","B","C")
+        .all()
+        .forEach(System.out::println);
+
+ will generate following -
+    []
+    [A]
+    [B]
+    [C]
+    [A, B]
+    [A, C]
+    [B, C]
+    [A, B, C]
+ </pre>
+
+<hr>
+<Strong id="ss_range">Generating subsets in a given range</Strong>
+<pre>
+     JNumberTools.subsetsOf("A","B","C")
+        .inRange(2,3)
+        .forEach(System.out::println);
+
+ will generate following -
+
+    [A]
+    [B]
+    [C]
+    [A, B]
+    [A, C]
+    [B, C]
+    [A, B, C]
+ </pre>
+
+
+</body>
+</html>
