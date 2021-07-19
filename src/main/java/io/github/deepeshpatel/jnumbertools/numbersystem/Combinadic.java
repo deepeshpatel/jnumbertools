@@ -4,9 +4,10 @@
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 
-import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCr;
+import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCrBig;
 
 /**
  * Object of this class encapsulates the Combinadic representation of a
@@ -16,17 +17,22 @@ import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCr;
 public final class Combinadic {
 
     private final int[] readOnlyValues;
-    private final long decimalValue;
+    private final BigInteger decimalValue;
 
     /**
      * @param positiveNumber positive integer to be converted to Combinadic representation
      * @param degree degree of a Combinadic representation
      */
     public Combinadic(long positiveNumber, int degree) {
+        this(BigInteger.valueOf(positiveNumber), degree);
+    }
+
+    public Combinadic(BigInteger positiveNumber, int degree) {
         this(combinadicOf(positiveNumber, degree), positiveNumber);
     }
 
-    private Combinadic(int[] values, long decimalValue) {
+
+    private Combinadic(int[] values, BigInteger decimalValue) {
         this.readOnlyValues = values;
         this.decimalValue = decimalValue;
     }
@@ -34,7 +40,7 @@ public final class Combinadic {
     /**
      * @return decimal number equivalent of a this Combinadic
      */
-    public long decimalValue() {
+    public BigInteger decimalValue() {
         return decimalValue;
     }
 
@@ -43,7 +49,7 @@ public final class Combinadic {
      */
     public Combinadic nextCombinadic() {
         int[] next = nextCombinadic(readOnlyValues);
-        return new Combinadic(next, decimalValue+1);
+        return new Combinadic(next, decimalValue.add(BigInteger.ONE));
     }
 
     /**
@@ -52,7 +58,7 @@ public final class Combinadic {
      */
     public Combinadic nextKthCombinadic(long k) {
         //TODO: Find the fast algo for this
-        return new Combinadic(decimalValue+k, readOnlyValues.length);
+        return new Combinadic(decimalValue.add(BigInteger.valueOf(k)), readOnlyValues.length);
     }
 
     @Override
@@ -65,33 +71,33 @@ public final class Combinadic {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Combinadic that = (Combinadic) o;
-        return decimalValue == that.decimalValue;
+        return decimalValue.equals(that.decimalValue);
     }
 
     @Override
     public int hashCode() {
-        return Long.hashCode(decimalValue);
+        return decimalValue.hashCode();
     }
 
-    private static int[] combinadicOf(long value, int degree) {
+    private static int[] combinadicOf(BigInteger value, int degree) {
 
         int[] combinadic = new int[degree];
 
         int r = degree;
-        long max = value;
+        BigInteger max = value;
 
         for(int i=0; i<combinadic.length; i++) {
 
-            long next = nCr(0,r);
+            BigInteger next = nCrBig(0,r);
             int n=1;
-            long result = 0;
-            while(next <= max) {
+            BigInteger result = BigInteger.ZERO;
+            while(next.compareTo(max) <= 0) {
                 result= next;
-                next = nCr(n++, r);
+                next = nCrBig(n++, r);
             }
 
             combinadic[i] = n-2;
-            max = max - result;
+            max = max.subtract(result);
             r--;
         }
         return combinadic;

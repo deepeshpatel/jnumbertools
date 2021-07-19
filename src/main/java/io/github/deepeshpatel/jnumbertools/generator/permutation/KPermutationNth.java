@@ -39,7 +39,7 @@ import java.util.List;
 public class KPermutationNth<T> extends AbstractGenerator<T> {
 
     final int k;
-    final long skip;
+    final BigInteger skip;
 
     /**
      * Implements the iterable generating every n<sup>th</sup> unique permutation of size k.
@@ -54,12 +54,16 @@ public class KPermutationNth<T> extends AbstractGenerator<T> {
      *                  and then skip to the desired position
      */
     public KPermutationNth(Collection<T> seed, int k, long skipTo) {
+        this(seed, k, BigInteger.valueOf(skipTo));
+    }
+
+    public KPermutationNth(Collection<T> seed, int k, BigInteger skipTo) {
         super(seed);
 
         if(k<0 || k>seed.size()) {
             throw new IllegalArgumentException("k must be >= 0 and < length of input");
         }
-        if(skipTo<=0) {
+        if(skipTo.compareTo(BigInteger.ZERO) <=0) {
             throw new IllegalArgumentException("skipTo must be > 0");
         }
         this.k = k;
@@ -73,37 +77,25 @@ public class KPermutationNth<T> extends AbstractGenerator<T> {
 
     private class Itr implements Iterator<List<T>> {
 
-        int currentSkip;
-        final long totalPermutations;
-        final long permutationsPerList;
-        final BigInteger permutationsInList;
-        BigInteger cumulativeCount;
-        int combinationListNumber;
+        BigInteger currentSkip = BigInteger.ZERO;
+        final BigInteger totalPermutations;
+        final BigInteger permutationsPerList;
 
         public Itr() {
-            totalPermutations = MathUtil.nPr(seed.size(), k);
-            long totalNoOfLists = MathUtil.nCr(seed.size(),k);
-            permutationsPerList = totalPermutations/totalNoOfLists;
-            permutationsInList = BigInteger.valueOf(permutationsPerList);
-            cumulativeCount = permutationsInList.add(BigInteger.ZERO);
-            combinationListNumber = 0;
+            totalPermutations = MathUtil.nPrBig(seed.size(), k);
+            permutationsPerList = MathUtil.factorial(k);
         }
 
         @Override
         public boolean hasNext() {
-            return currentSkip<totalPermutations;
+            return currentSkip.compareTo(totalPermutations) <0;
         }
 
         @Override
         public List<T> next() {
-            BigInteger currentSkipAsBig = BigInteger.valueOf(currentSkip);
-
-            while (cumulativeCount.compareTo(currentSkipAsBig) <= 0) {
-                combinationListNumber++;
-                cumulativeCount = cumulativeCount.add(permutationsInList);
-            }
-            long skipValue = currentSkip % permutationsPerList;
-            currentSkip +=skip;
+            BigInteger combinationListNumber = currentSkip.divide(permutationsPerList);
+            BigInteger skipValue = currentSkip.mod(permutationsPerList);
+            currentSkip  = currentSkip.add(skip);
 
             Iterator<List<T>> combinationIterator = new UniqueCombinationNth<>(seed, k, combinationListNumber).iterator();
             combinationIterator.next(); //0th

@@ -7,10 +7,10 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
 import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombination;
-import io.github.deepeshpatel.jnumbertools.generator.IteratorSequence;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  *
@@ -59,13 +59,42 @@ public class KPermutation<T> extends AbstractGenerator<T> {
 
     @Override
     public Iterator<List<T>> iterator() {
-        if(k==0) {
-            return emptyIterator();
+        return (k==0) ? emptyIterator() : new OnDemandIterator();
+    }
+
+    private class OnDemandIterator implements Iterator<List<T>> {
+
+        private final Iterator<List<T>> combinationIterator;
+        private Iterator<List<T>> currentIterator;
+
+        public OnDemandIterator() {
+            combinationIterator = new UniqueCombination<>(seed,k).iterator();
+            getNextIterator();
         }
-        List<Iterator<List<T>>> iterators = new UniqueCombination<>(seed, k)
-                .stream()
-                .map(e -> new UniquePermutation<>(e).iterator()).collect(Collectors.toList());
-        return new IteratorSequence<>(iterators);
+
+        @Override
+        public boolean hasNext() {
+            if(currentIterator.hasNext()) {
+                return true;
+            }
+
+            if(!combinationIterator.hasNext()) {
+                return false;
+            }
+
+            return getNextIterator().hasNext();
+
+        }
+
+        private Iterator<List<T>> getNextIterator(){
+            currentIterator = new UniquePermutation<>(combinationIterator.next()).iterator();
+            return currentIterator;
+        }
+
+        @Override
+        public List<T> next() {
+            return currentIterator.next();
+        }
     }
 
 }

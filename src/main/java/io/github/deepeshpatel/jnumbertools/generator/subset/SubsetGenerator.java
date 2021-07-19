@@ -7,13 +7,10 @@ package io.github.deepeshpatel.jnumbertools.generator.subset;
 
 import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombination;
-import io.github.deepeshpatel.jnumbertools.generator.IteratorSequence;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Implements the Iterable to generate all subsets of set in a given size range.
@@ -69,12 +66,34 @@ public class SubsetGenerator<T> extends AbstractGenerator<T> {
 
     @Override
     public Iterator<List<T>> iterator() {
+        return new OnDemandIterator(fromSize);
+    }
 
-        List<Iterator<List<T>>> subsetIterators = IntStream.range(fromSize, toSize + 1)
-                .mapToObj(i -> new UniqueCombination<>(seed, i).iterator())
-                .collect(Collectors.toList());
+    class OnDemandIterator implements Iterator<List<T>> {
+        int start;
+        Iterator<List<T>> current;
 
-        return new IteratorSequence<>(subsetIterators);
+        public OnDemandIterator(int start) {
+            this.start = start;
+            current = new UniqueCombination<>(seed,this.start).iterator();
+        }
+
+        @Override
+        public boolean hasNext() {
+            if(current.hasNext()) {
+                return true;
+            }
+            if(start < toSize) {
+                current = new UniqueCombination<>(seed,++start).iterator();
+                return hasNext();
+            }
+            return false;
+        }
+
+        @Override
+        public List<T> next() {
+            return current.next();
+        }
     }
 
     public static class Builder<T> {

@@ -5,6 +5,7 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.combination;
 
+import java.math.BigInteger;
 import java.util.Collection;
 
 public class CombinationBuilder<T> {
@@ -20,6 +21,10 @@ public class CombinationBuilder<T> {
     }
 
     public UniqueCombinationNth<T> uniqueNth(int ofSize, long skipTo) {
+        return uniqueNth(ofSize, BigInteger.valueOf(skipTo));
+    }
+
+    public UniqueCombinationNth<T> uniqueNth(int ofSize, BigInteger skipTo) {
         return new UniqueCombinationNth<>(data, ofSize, skipTo);
     }
 

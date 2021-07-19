@@ -7,6 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combinadic;
 
 import io.github.deepeshpatel.jnumbertools.numbersystem.Combinadic;
 
+import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
@@ -36,7 +37,7 @@ import java.util.stream.StreamSupport;
 public class CombinatorialNumberSystemGenerator implements Iterable<Combinadic> {
 
     private final Combinadic first;
-    private final long end;
+    private final BigInteger end;
 
     /**
      * @param degree Degree of combinadic to be generated
@@ -44,6 +45,10 @@ public class CombinatorialNumberSystemGenerator implements Iterable<Combinadic> 
      * @param endExclusive upper bound (exclusive) of the combinadic sequence
      */
     public CombinatorialNumberSystemGenerator(int degree, long startInclusive, long endExclusive) {
+        this(degree, BigInteger.valueOf(startInclusive), BigInteger.valueOf(endExclusive));
+    }
+
+    public CombinatorialNumberSystemGenerator(int degree, BigInteger startInclusive, BigInteger endExclusive) {
         first = new Combinadic(startInclusive, degree);
         this.end = endExclusive;
     }
@@ -60,7 +65,7 @@ public class CombinatorialNumberSystemGenerator implements Iterable<Combinadic> 
     private class Itr implements Iterator<Combinadic> {
 
         Combinadic current;
-        long start;
+        BigInteger start;
 
         private Itr(){
             current = first;
@@ -69,7 +74,7 @@ public class CombinatorialNumberSystemGenerator implements Iterable<Combinadic> 
 
         @Override
         public boolean hasNext() {
-            return start < end;
+            return start.compareTo(end) < 0;
         }
 
         @Override
@@ -79,7 +84,7 @@ public class CombinatorialNumberSystemGenerator implements Iterable<Combinadic> 
             }
             Combinadic old = current;
             current = current.nextCombinadic();
-            start++;
+            start = start.add(BigInteger.ONE);
             return old;
         }
     }

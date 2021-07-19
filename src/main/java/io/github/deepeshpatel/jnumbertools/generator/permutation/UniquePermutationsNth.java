@@ -48,9 +48,13 @@ import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.factoria
  */
 public class UniquePermutationsNth<T> extends AbstractGenerator<T> {
 
-    private final long withIncrement;
+    private final BigInteger withIncrement;
 
     public UniquePermutationsNth(Collection<T> seed, long skipTo) {
+        this(seed, BigInteger.valueOf(skipTo));
+    }
+
+    public UniquePermutationsNth(Collection<T> seed, BigInteger skipTo) {
         super(seed);
         this.withIncrement = skipTo;
     }
@@ -74,8 +78,8 @@ public class UniquePermutationsNth<T> extends AbstractGenerator<T> {
             initialIndices = IntStream.range(0, seed.size()).toArray();
             currentIndices = IntStream.range(0, seed.size()).toArray();
 
-            this.k = BigInteger.valueOf(withIncrement);
-            this.nextK = BigInteger.valueOf(withIncrement);
+            this.k = withIncrement;
+            this.nextK = withIncrement;
             numOfPermutations = factorial(initialIndices.length);
         }
 
@@ -101,8 +105,6 @@ public class UniquePermutationsNth<T> extends AbstractGenerator<T> {
             return createLehmerCode(input, indices);
         }
 
-        //convert to factorial number system(factoradic):
-        // see https://en.wikipedia.org/wiki/Factorial_number_system
         private  int[] factoradic(BigInteger k, int outputLength) {
 
             int[] output = new int[outputLength];
@@ -127,8 +129,6 @@ public class UniquePermutationsNth<T> extends AbstractGenerator<T> {
             int[] output = new int[input.length];
             System.arraycopy(input, 0, output,0, input.length);
 
-            // start permuting as per indices.
-            // see https://en.wikipedia.org/wiki/Factorial_number_system
             for (int i = 0; i < output.length; i++) {
                 int index = factoradic[i] + i;
 

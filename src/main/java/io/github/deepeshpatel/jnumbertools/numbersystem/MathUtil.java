@@ -29,6 +29,30 @@ public class MathUtil {
         return p;
     }
 
+    public static BigInteger nPrBig(int n, int r){
+        BigInteger p = BigInteger.ONE;
+        BigInteger nBig = BigInteger.valueOf(n);
+        for(int i=1; i<=r; i++){
+            p = p.multiply(nBig);
+            nBig = nBig.subtract(BigInteger.ONE);
+        }
+        return p;
+    }
+
+    public static BigInteger nCrBig(long n, long r) {
+        if(n<r) return BigInteger.ZERO;
+        long denominator = Math.min(r, n-r);
+
+        BigInteger p = BigInteger.ONE;
+        BigInteger nBig = BigInteger.valueOf(n);
+
+        for(int i=1; i<=denominator; i++) {
+            p = p.multiply(nBig).divide(BigInteger.valueOf(i));
+            nBig = nBig.subtract(BigInteger.ONE);
+        }
+        return p;
+    }
+
     public static BigInteger factorial(int n) {
         BigInteger product = BigInteger.ONE;
         for(int i=2; i<= n; i++) {

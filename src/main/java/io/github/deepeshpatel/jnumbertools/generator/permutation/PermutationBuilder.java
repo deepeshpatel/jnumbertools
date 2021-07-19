@@ -5,6 +5,7 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
+import java.math.BigInteger;
 import java.util.Collection;
 
 public class PermutationBuilder<T> {
@@ -20,7 +21,15 @@ public class PermutationBuilder<T> {
     }
 
     public UniquePermutationsNth<T> uniqueNth(long skipTo) {
+        return uniqueNth(BigInteger.valueOf(skipTo));
+    }
+
+    public UniquePermutationsNth<T> uniqueNth(BigInteger skipTo) {
         return new UniquePermutationsNth<>(seed, skipTo);
+    }
+
+    public UniquePermutationInSizeRange<T> uniqueInSizeRange(int fromInclusive, int toInclusive) {
+        return new UniquePermutationInSizeRange<>(seed, fromInclusive, toInclusive);
     }
 
     public RepetitivePermutation<T> repetitive(int size) {
@@ -40,6 +49,10 @@ public class PermutationBuilder<T> {
     }
 
     public KPermutationNth<T> kNth(int k, long skipTo){
+        return kNth(k, BigInteger.valueOf(skipTo));
+    }
+
+    public KPermutationNth<T> kNth(int k, BigInteger skipTo){
         return new KPermutationNth<>(seed,k, skipTo);
     }
 }

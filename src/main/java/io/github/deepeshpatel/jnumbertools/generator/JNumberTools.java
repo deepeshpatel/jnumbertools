@@ -47,7 +47,7 @@ public class JNumberTools {
     }
 
     public static FactorialNumberSystemGenerator factoradic(long fromInclusive, long toExclusive) {
-        return new FactorialNumberSystemGenerator(fromInclusive, toExclusive);
+        return factoradic(BigInteger.valueOf(fromInclusive), BigInteger.valueOf(toExclusive));
     }
 
     public static FactorialNumberSystemGenerator factoradic(BigInteger fromInclusive, BigInteger toExclusive) {
@@ -55,6 +55,10 @@ public class JNumberTools {
     }
 
     public static CombinatorialNumberSystemGenerator combinadic(int degree, long startInclusive, long endExclusive) {
+        return combinadic(degree, BigInteger.valueOf(startInclusive), BigInteger.valueOf(endExclusive));
+    }
+
+    public static CombinatorialNumberSystemGenerator combinadic(int degree, BigInteger startInclusive, BigInteger endExclusive) {
         return new CombinatorialNumberSystemGenerator(degree, startInclusive, endExclusive);
     }
 

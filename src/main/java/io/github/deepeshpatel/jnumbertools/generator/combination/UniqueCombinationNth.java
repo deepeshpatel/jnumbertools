@@ -5,13 +5,14 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.combination;
 
-import io.github.deepeshpatel.jnumbertools.numbersystem.Combinadic;
 import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.numbersystem.Combinadic;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCr;
+import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCrBig;
 
 /**
  * Implements the iterable generating every n<sup>th</sup> unique combination of size k.
@@ -19,7 +20,7 @@ import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCr;
  * considering value at each indices as unique.
  *
  * This concept is important because count of combinations can grow astronomically
- * large and to generate say, every 100 trillionth combination of 50 items out of 100 (50Choose100),
+ * large and to generate say, every 100 trillionth combination of 50 items out of 100 (100Choose50),
  * we do not like to wait for 100's of hours to generate all 1.008913445 X 10<sup>29</sup> combinations
  * sequentially and then selecting the required one.
  *
@@ -45,7 +46,7 @@ import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCr;
 public class UniqueCombinationNth<T> extends AbstractGenerator<T> {
 
     private final int r;
-    private final long k;
+    private final BigInteger k;
 
     /**
      * @param seed List of N items
@@ -54,6 +55,10 @@ public class UniqueCombinationNth<T> extends AbstractGenerator<T> {
      *               starting from the 0th(first) combination.
      */
     public UniqueCombinationNth(Collection<T> seed, int r, long skipTo) {
+        this(seed,r,BigInteger.valueOf(skipTo));
+    }
+
+    public UniqueCombinationNth(Collection<T> seed, int r, BigInteger skipTo) {
         super(seed);
         this.r = r;
         this.k = skipTo;
@@ -67,7 +72,7 @@ public class UniqueCombinationNth<T> extends AbstractGenerator<T> {
 
     private class Itr implements Iterator<List<T>> {
 
-        long currentK;
+        BigInteger currentK;
         int[] result;
 
         private Itr(){
@@ -87,13 +92,13 @@ public class UniqueCombinationNth<T> extends AbstractGenerator<T> {
             }
             int[] old = result;
             result = kthUniqueCombination(seed.size(),r,currentK);
-            currentK +=k;
+            currentK  = currentK.add(k);
             return AbstractGenerator.indicesToValues(old, seed);
         }
 
-        private int[] kthUniqueCombination(int n, int r, long k) {
-            long x = nCr(n, r) - 1 - k;
-            if (x < 0) {
+        private int[] kthUniqueCombination(int n, int r, BigInteger k) {
+            BigInteger x = nCrBig(n, r).subtract(BigInteger.ONE).subtract(k);
+            if (x.compareTo(BigInteger.ZERO) < 0) {
                 return new int[]{};
             }
 

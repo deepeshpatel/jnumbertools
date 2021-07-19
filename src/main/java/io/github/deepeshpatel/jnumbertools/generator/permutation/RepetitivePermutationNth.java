@@ -59,7 +59,7 @@ public class RepetitivePermutationNth<T>  extends AbstractGenerator<T> {
         return new NumberIterator();
     }
 
-    class NumberIterator implements Iterator<List<T>> {
+    private class NumberIterator implements Iterator<List<T>> {
 
         private final int[] currentIndices = new int[size];
         private boolean hasNext = true;
