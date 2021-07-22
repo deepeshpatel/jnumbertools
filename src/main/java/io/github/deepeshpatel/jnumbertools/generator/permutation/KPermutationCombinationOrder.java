@@ -1,5 +1,5 @@
 /*
- * JNumberTools Library v1.0.0
+ * JNumberTools Library v1.0.3
  * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
@@ -15,7 +15,7 @@ import java.util.List;
 /**
  *
  * Implements the iterable of unique permutations of size k.
- * Permutations are generated in lex order of indices of input values, considering value at each indices as unique.
+ * Permutations are generated in lex order of combinations of indices of input values, considering value at each indices as unique.
  * For example all permutations of size 2 for [1,2,3] are -
  * <pre>
  *     [1, 2], [2, 1], [1, 3], [3, 1], [2, 3] and [3, 2]
@@ -41,7 +41,7 @@ import java.util.List;
  * </pre>
  * @author Deepesh Patel
  */
-public class KPermutation<T> extends AbstractGenerator<T> {
+public class KPermutationCombinationOrder<T> extends AbstractGenerator<T> {
 
     final int k;
 
@@ -49,7 +49,7 @@ public class KPermutation<T> extends AbstractGenerator<T> {
      * @param seed Input of size n from which unique permutations of size k will be generated.
      * @param k size of permutations. k must be &lt;=n
      */
-    public KPermutation(Collection<T> seed, int k) {
+    public KPermutationCombinationOrder(Collection<T> seed, int k) {
         super(seed);
         if(k<0) {
             throw new IllegalArgumentException(" k>=0");
@@ -59,7 +59,7 @@ public class KPermutation<T> extends AbstractGenerator<T> {
 
     @Override
     public Iterator<List<T>> iterator() {
-        return (k==0) ? emptyIterator() : new OnDemandIterator();
+        return (k==0) ? newEmptyIterator() : new OnDemandIterator();
     }
 
     private class OnDemandIterator implements Iterator<List<T>> {

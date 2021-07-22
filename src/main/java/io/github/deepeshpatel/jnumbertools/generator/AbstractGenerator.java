@@ -1,5 +1,5 @@
 /*
- * JNumberTools Library v1.0.0
+ * JNumberTools Library v1.0.3
  * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
@@ -40,7 +40,7 @@ public abstract class AbstractGenerator<T> implements Iterable<List<T>> {
 
     //for making it mathematically correct.
     // for r=0, nPr = nCr = 1 and hence should contain one null(empty) value
-    public  Iterator<List<T>> emptyIterator(){
+    public  Iterator<List<T>> newEmptyIterator(){
         return empty.iterator();
     }
 

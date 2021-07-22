@@ -1,5 +1,5 @@
 /*
- * JNumberTools Library v1.0.0
+ * JNumberTools Library v1.0.3
  * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
@@ -59,7 +59,7 @@ public class RepetitiveCombination <T> extends AbstractGenerator<T> {
 
     @Override
     public Iterator<List<T>> iterator() {
-        return (r==0) ? emptyIterator() :
+        return (r==0) ? newEmptyIterator() :
                 (r<0) ? Collections.emptyIterator(): new Itr();
     }
 

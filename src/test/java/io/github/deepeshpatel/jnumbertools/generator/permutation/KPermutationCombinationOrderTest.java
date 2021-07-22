@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPr;
 import static org.junit.Assert.assertEquals;
 
-public class KPermutationTest {
+public class KPermutationCombinationOrderTest {
 
     @Test
     public void assertCount(){
@@ -21,6 +21,7 @@ public class KPermutationTest {
             for (int k = 0; k < n; k++) {
                 long size = JNumberTools.permutationsOf(input)
                         .k(k)
+                        .combinationOrder()
                         .stream().count();
                 Assert.assertEquals(nPr(n, k), size);
             }
@@ -29,7 +30,7 @@ public class KPermutationTest {
 
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForNegativeK() {
-        JNumberTools.permutationsOf(new ArrayList<>()).k(-3);
+        JNumberTools.permutationsOf(new ArrayList<>()).k(-3).combinationOrder();
     }
 
     @Test
@@ -42,6 +43,7 @@ public class KPermutationTest {
         String expected = "[[1, 2], [2, 1], [1, 3], [3, 1], [2, 3], [3, 2]]";
         String actual   = JNumberTools.permutationsOf("1", "2", "3")
                 .k(2)
+                .combinationOrder()
                 .stream().collect(Collectors.toList()).toString();
 
         assertEquals(expected,actual);
@@ -53,6 +55,7 @@ public class KPermutationTest {
 
         List<List<String>> output = JNumberTools.permutationsOf("A", "B", "C")
                 .k(2)
+                .combinationOrder()
                 .stream()
                 .collect(Collectors.toList());
         Assert.assertEquals(expected, output.toString());

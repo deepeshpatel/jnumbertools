@@ -3,11 +3,12 @@ JNumberTools is the open source java-library of combinatorics and number-theory
 
 **Currently Available Algorithms**
 
-1. Permutations (7 different types of permutation generation)
+1. Permutations (9 different types of permutation generation)
 1. Combinations (4 different types of combination generation)
 1. Set/subset generations
-1. Factoradics sequence generation.
-1. Combinadics sequence generation
+1. Factoradic sequence generation.
+1. Combinadic sequence generation.
+1. Permutadic (A new concept for Nth K-Permutation)
 
 ***
 **Permutation Generation Examples:**

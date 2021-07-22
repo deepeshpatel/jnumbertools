@@ -1,5 +1,5 @@
 /*
- * JNumberTools Library v1.0.0
+ * JNumberTools Library v1.0.3
  * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
@@ -8,7 +8,7 @@ package io.github.deepeshpatel.jnumbertools.generator;
 import io.github.deepeshpatel.jnumbertools.generator.combinadic.CombinatorialNumberSystemGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.combination.CombinationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.factoradic.FactorialNumberSystemGenerator;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.PermutationBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.builder.PermutationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetGenerator;
 
 import java.math.BigInteger;

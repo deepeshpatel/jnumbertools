@@ -1,9 +1,10 @@
 /*
- * JNumberTools Library v1.0.0
+ * JNumberTools Library v1.0.3
  * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
  */
+package io.github.deepeshpatel.jnumbertools.generator.permutation.builder;
 
-package io.github.deepeshpatel.jnumbertools.generator.permutation;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.*;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -28,9 +29,6 @@ public class PermutationBuilder<T> {
         return new UniquePermutationsNth<>(seed, skipTo);
     }
 
-    public UniquePermutationInSizeRange<T> uniqueInSizeRange(int fromInclusive, int toInclusive) {
-        return new UniquePermutationInSizeRange<>(seed, fromInclusive, toInclusive);
-    }
 
     public RepetitivePermutation<T> repetitive(int size) {
         return new RepetitivePermutation<>(seed,size);
@@ -44,15 +42,7 @@ public class PermutationBuilder<T> {
         return new RepetitivePermutationLimitedSupply<>(seed,supply);
     }
 
-    public KPermutation<T> k(int k) {
-        return new KPermutation<>(seed, k);
-    }
-
-    public KPermutationNth<T> kNth(int k, long skipTo){
-        return kNth(k, BigInteger.valueOf(skipTo));
-    }
-
-    public KPermutationNth<T> kNth(int k, BigInteger skipTo){
-        return new KPermutationNth<>(seed,k, skipTo);
+    public KPermutationBuilder<T> k(int k) {
+        return new KPermutationBuilder<>(seed, k);
     }
 }

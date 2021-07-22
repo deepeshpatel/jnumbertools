@@ -1,6 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
 import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.generator.TestUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -84,7 +85,29 @@ public class UniquePermutationNthTest {
                         .stream().collect(Collectors.toList()).toString();
 
         assertEquals(expected,actual);
+    }
 
+    @Test
+    public void shouldGeneratePermutationsSkippingInBetween() {
+
+        List<String> input = Arrays.asList("A","B","C","D","E","F");
+        for(int skip=1; skip<=32;skip++) {
+            String expected = getExpectedResultViaOneByOneIteration(input, skip);
+            String output   = getResultViaDirectSkipping(input,skip);
+            Assert.assertEquals(expected,output);
+        }
+    }
+
+    private String getResultViaDirectSkipping(List<String> input, int skip) {
+        return JNumberTools.permutationsOf(input)
+                .uniqueNth(skip).stream().collect(Collectors.toList()).toString();
+    }
+
+    private String getExpectedResultViaOneByOneIteration(List<String> input, int skip) {
+        Iterable<List<String>> iterable = JNumberTools.permutationsOf(input)
+                .unique();
+
+        return TestUtil.collectSkippedValues(iterable, skip).toString();
     }
 }
 

@@ -1,9 +1,11 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination;
 
 import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.generator.TestUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,11 +53,36 @@ public class UniqueCombinationNthTest {
                 .combinationsOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
                         "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
                         "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31","32", "33")
-//                )
                 .uniqueNth(17, 1000_000_000)// jump to 1 billionth combination
                 .stream()
                 .collect(Collectors.toList()).toString();
 
         assertEquals(expected, output);
+    }
+
+    @Test
+    public void shouldGenerateNthCombinationSkippingValuesInBetween() {
+
+        List<String> input = Arrays.asList("A","B","C","D","E","F","G","H","I","J");
+        for(int k=1; k<= input.size()/2; k++) {
+            for(int skip=1; skip<=32;skip++) {
+                String expected = getExpectedResultViaOneByOneIteration(input, k,skip);
+                String output   = getResultViaDirectSkipping(input,k,skip);
+                Assert.assertEquals(expected,output);
+            }
+        }
+    }
+
+    private String getResultViaDirectSkipping(List<String> input, int k, int skip) {
+        return JNumberTools.combinationsOf(input)
+                .uniqueNth(k, skip)
+                .stream().collect(Collectors.toList()).toString();
+    }
+
+    private String getExpectedResultViaOneByOneIteration(List<String> input, int k, int skip) {
+        Iterable<List<String>> iterable = JNumberTools.combinationsOf(input)
+                .unique(k);
+
+        return TestUtil.collectSkippedValues(iterable, skip).toString();
     }
 }

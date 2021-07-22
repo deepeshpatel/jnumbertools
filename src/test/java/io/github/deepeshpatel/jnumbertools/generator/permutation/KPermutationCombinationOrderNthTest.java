@@ -1,18 +1,16 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
 import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.generator.TestUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPr;
 
-public class KPermutationNthTest {
+public class KPermutationCombinationOrderNthTest {
 
     @Test
     public void assertCount(){
@@ -21,7 +19,8 @@ public class KPermutationNthTest {
             List<String> input = Collections.nCopies(n,"A");
             for (int k = 0; k < n; k++) {
                 long size = JNumberTools.permutationsOf(input)
-                        .kNth(k,skip)
+                        .k(k)
+                        .combinationOrderNth(skip)
                         .stream().count();
                 double expected = Math.ceil(nPr(n, k)/(double)skip);
                 Assert.assertEquals((long)expected, size);
@@ -31,17 +30,17 @@ public class KPermutationNthTest {
 
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForKLessThan0() {
-        new KPermutationNth<>(Collections.emptyList(), -1, 3);
+        new KPermutationCombinationOrderNth<>(Collections.emptyList(), -1, 3);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForKGreaterThanInputLength() {
-        new KPermutationNth<>(Collections.emptyList(), 1, 3);
+        new KPermutationCombinationOrderNth<>(Collections.emptyList(), 1, 3);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForNegativeSkipValue() {
-        new KPermutationNth<>(Collections.emptyList(), 1, 0);
+        new KPermutationCombinationOrderNth<>(Collections.emptyList(), 1, 0);
     }
 
     @Test
@@ -58,23 +57,15 @@ public class KPermutationNthTest {
     }
 
     private String getResultViaDirectSkipping(List<String> input, int k, int skip) {
-        return new KPermutationNth<>(input, k, skip)
+        return new KPermutationCombinationOrderNth<>(input, k, skip)
                 .stream().collect(Collectors.toList()).toString();
     }
 
     private String getExpectedResultViaOneByOneIteration(List<String> input, int k, int skip) {
-        List<List<String>> allPermutations = JNumberTools.permutationsOf(input)
+        Iterable<List<String>> iterable = JNumberTools.permutationsOf(input)
                 .k(k)
-                .stream().collect(Collectors.toList());
+                .combinationOrder();
 
-        List<List<String>> viaAllPermutations = new ArrayList<>();
-        int i=0;
-        for(List<String> l: allPermutations) {
-            if(skip ==0 || i%skip==0) {
-                viaAllPermutations.add(l);
-            }
-            i++;
-        }
-        return viaAllPermutations.toString();
+        return TestUtil.collectSkippedValues(iterable, skip).toString();
     }
 }

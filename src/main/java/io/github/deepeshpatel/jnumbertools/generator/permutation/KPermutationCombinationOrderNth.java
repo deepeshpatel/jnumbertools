@@ -1,5 +1,5 @@
 /*
- * JNumberTools Library v1.0.0
+ * JNumberTools Library v1.0.3
  * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * Implements the iterable generating every n<sup>th</sup> unique permutation of size k.
- * Permutations are generated in lex order of indices of input values, considering value at each indices as unique.
+ * Permutations are generated in lex order of combinations of indices of input values, considering value at each indices as unique.
  * <pre>
  * Code example -
  *
@@ -36,7 +36,7 @@ import java.util.List;
  * </pre>
  * @author Deepesh Patel
  */
-public class KPermutationNth<T> extends AbstractGenerator<T> {
+public class KPermutationCombinationOrderNth<T> extends AbstractGenerator<T> {
 
     final int k;
     final BigInteger skip;
@@ -53,11 +53,11 @@ public class KPermutationNth<T> extends AbstractGenerator<T> {
      *                  This is important because for large k, it is impractical to generate all possible k! permutations
      *                  and then skip to the desired position
      */
-    public KPermutationNth(Collection<T> seed, int k, long skipTo) {
+    public KPermutationCombinationOrderNth(Collection<T> seed, int k, long skipTo) {
         this(seed, k, BigInteger.valueOf(skipTo));
     }
 
-    public KPermutationNth(Collection<T> seed, int k, BigInteger skipTo) {
+    public KPermutationCombinationOrderNth(Collection<T> seed, int k, BigInteger skipTo) {
         super(seed);
 
         if(k<0 || k>seed.size()) {
@@ -72,7 +72,7 @@ public class KPermutationNth<T> extends AbstractGenerator<T> {
 
     @Override
     public Iterator<List<T>> iterator() {
-        return k==0 ? emptyIterator() : new Itr();
+        return k==0 ? newEmptyIterator() : new Itr();
     }
 
     private class Itr implements Iterator<List<T>> {
