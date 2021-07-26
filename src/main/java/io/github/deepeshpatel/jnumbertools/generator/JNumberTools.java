@@ -5,13 +5,10 @@
 
 package io.github.deepeshpatel.jnumbertools.generator;
 
-import io.github.deepeshpatel.jnumbertools.generator.combinadic.CombinatorialNumberSystemGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.combination.CombinationBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.factoradic.FactorialNumberSystemGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.builder.PermutationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetGenerator;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -44,22 +41,6 @@ public class JNumberTools {
     @SafeVarargs
     public static <T> SubsetGenerator.Builder<T> subsetsOf(T... data) {
         return subsetsOf(Arrays.asList(data));
-    }
-
-    public static FactorialNumberSystemGenerator factoradic(long fromInclusive, long toExclusive) {
-        return factoradic(BigInteger.valueOf(fromInclusive), BigInteger.valueOf(toExclusive));
-    }
-
-    public static FactorialNumberSystemGenerator factoradic(BigInteger fromInclusive, BigInteger toExclusive) {
-        return new FactorialNumberSystemGenerator(fromInclusive, toExclusive);
-    }
-
-    public static CombinatorialNumberSystemGenerator combinadic(int degree, long startInclusive, long endExclusive) {
-        return combinadic(degree, BigInteger.valueOf(startInclusive), BigInteger.valueOf(endExclusive));
-    }
-
-    public static CombinatorialNumberSystemGenerator combinadic(int degree, BigInteger startInclusive, BigInteger endExclusive) {
-        return new CombinatorialNumberSystemGenerator(degree, startInclusive, endExclusive);
     }
 
 }

@@ -7,6 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
 import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil;
+import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -77,7 +78,6 @@ public class KPermutationLexOrderNth<T> extends AbstractGenerator<T> {
         int[] next;
         long currentSkip;
         long nPk;
-        long divisor;
 
         public Itr() {
             //TODO: move this outside Iterator as this is not going to be changed
@@ -85,7 +85,6 @@ public class KPermutationLexOrderNth<T> extends AbstractGenerator<T> {
             next = initialValue;
             currentSkip = skip;
             nPk = MathUtil.nPr(seed.size(),initialValue.length);
-            divisor = nPk/seed.size();
         }
 
         @Override
@@ -99,32 +98,19 @@ public class KPermutationLexOrderNth<T> extends AbstractGenerator<T> {
                 throw new NoSuchElementException();
             }
             int[] old = next;
-            next = nextNthKPermutation(initialValue,seed.size(), currentSkip, divisor );
+            next = nextNthKPermutation(initialValue,seed.size(), currentSkip);
             currentSkip +=  skip;
             return  AbstractGenerator.indicesToValues(old, seed);
         }
 
-        private int[] nextNthKPermutation(int[] initialValue, int size, long n, long divisor) {
+        private int[] nextNthKPermutation(int[] initialValue, int size, long n) {
 
             if(n >= nPk) {
                 return new int[0];
             }
 
-            int[] a = new int[initialValue.length];
-            System.arraycopy(initialValue, 0, a,0, a.length );
-            List<Integer> allValues = new ArrayList<>(IntStream.range(0, size).boxed().collect(Collectors.toList()));
-            //allValues.addAll();
-
-            long next = size-1;
-            long remainingValue = n;
-
-            for(int i=0; i<a.length; i++) {
-                int quotient = (int) (remainingValue / divisor);
-                remainingValue = remainingValue % divisor;
-                a[i] = allValues.remove(quotient);
-                divisor = divisor / next;
-                next--;
-            }
+            int[] permutadic = Permutadic.permutadicOf(size,initialValue.length,n);
+            int[] a = Permutadic.decodePermutadicToNthPermutation(permutadic, size);
             return a;
         }
     }

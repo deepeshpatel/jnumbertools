@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class KPermutationLexOrderNthTest {
 
@@ -20,6 +21,7 @@ public class KPermutationLexOrderNthTest {
                 String expected = getExpectedResultViaOneByOneIteration(input, k,skip);
                 String output   = getResultViaDirectSkipping(input,k,skip);
                 Assert.assertEquals(expected,output);
+
             }
         }
     }

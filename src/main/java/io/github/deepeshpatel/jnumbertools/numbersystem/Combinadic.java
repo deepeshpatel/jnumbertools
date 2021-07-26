@@ -87,16 +87,17 @@ public final class Combinadic {
         BigInteger max = value;
 
         for(int i=0; i<combinadic.length; i++) {
-
-            BigInteger next = nCrBig(0,r);
-            int n=1;
+            int n=r;
+            BigInteger nCr = nCrBig(n,r);
             BigInteger result = BigInteger.ZERO;
-            while(next.compareTo(max) <= 0) {
-                result= next;
-                next = nCrBig(n++, r);
+            while(nCr.compareTo(max) <= 0) {
+                result = nCr;
+                n++;
+                nCr =  nCr
+                        .multiply(BigInteger.valueOf(n))
+                        .divide(BigInteger.valueOf(n-r));
             }
-
-            combinadic[i] = n-2;
+            combinadic[i] = n-1;
             max = max.subtract(result);
             r--;
         }
