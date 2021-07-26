@@ -10,7 +10,6 @@ import io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -110,8 +109,7 @@ public class KPermutationLexOrderNth<T> extends AbstractGenerator<T> {
             }
 
             int[] permutadic = Permutadic.permutadicOf(size,initialValue.length,n);
-            int[] a = Permutadic.decodePermutadicToNthPermutation(permutadic, size);
-            return a;
+            return Permutadic.decodePermutadicToNthPermutation(permutadic, size);
         }
     }
 }

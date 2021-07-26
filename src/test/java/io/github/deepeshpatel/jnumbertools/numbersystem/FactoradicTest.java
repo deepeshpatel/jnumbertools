@@ -1,6 +1,5 @@
-package io.github.deepeshpatel.jnumbertools.generator.factoradic;
+package io.github.deepeshpatel.jnumbertools.numbersystem;
 
-import io.github.deepeshpatel.jnumbertools.numbersystem.Factoradic;
 import org.junit.Assert;
 import org.junit.Test;
 
