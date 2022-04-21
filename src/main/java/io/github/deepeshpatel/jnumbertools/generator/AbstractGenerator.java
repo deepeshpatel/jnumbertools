@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v1.0.3
- * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator;
@@ -38,7 +38,7 @@ public abstract class AbstractGenerator<T> implements Iterable<List<T>> {
         return output;
     }
 
-    //for making it mathematically correct.
+    //making it mathematically correct as set should contain null/empty set by definition.
     // for r=0, nPr = nCr = 1 and hence should contain one null(empty) value
     public  Iterator<List<T>> newEmptyIterator(){
         return empty.iterator();

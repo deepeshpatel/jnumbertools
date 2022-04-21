@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v1.0.3
- * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
 
 /**
  * Implements the iterable generating every n<sup>th</sup> unique permutation of size k.
- * Permutations are generated in lex order of combinations of indices of input values, considering value at each indices as unique.
+ * Permutations are generated in lex order of combinations of indices of input values, considering value at each index as unique.
  * <pre>
  * Code example -
  *
@@ -42,7 +42,7 @@ public class KPermutationLexOrderNth<T> extends AbstractGenerator<T> {
 
     /**
      * Implements the iterable generating every n<sup>th</sup> unique permutation of size k.
-     * Permutations are generated in lex order of indices of input values, considering value at each indices as unique.
+     * Permutations are generated in lex order of indices of input values, considering value at each index as unique.
      * @param seed Input of size n from which permutations of size k will be generated
      * @param k size of permutations. k must be &lt;=n
      * @param skipTo position relative to first permutation which will be generated next in lexicographical order.
@@ -76,7 +76,7 @@ public class KPermutationLexOrderNth<T> extends AbstractGenerator<T> {
         final int[] initialValue;
         int[] next;
         long currentSkip;
-        long nPk;
+        final long nPk;
 
         public Itr() {
             //TODO: move this outside Iterator as this is not going to be changed
@@ -97,19 +97,19 @@ public class KPermutationLexOrderNth<T> extends AbstractGenerator<T> {
                 throw new NoSuchElementException();
             }
             int[] old = next;
-            next = nextNthKPermutation(initialValue,seed.size(), currentSkip);
+            next = nextNthKPermutation(currentSkip, initialValue.length,seed.size() );
             currentSkip +=  skip;
             return  AbstractGenerator.indicesToValues(old, seed);
         }
 
-        private int[] nextNthKPermutation(int[] initialValue, int size, long n) {
+        private int[] nextNthKPermutation(long decimal, int degree, int size) {
 
-            if(n >= nPk) {
+            if(decimal >= nPk) {
                 return new int[0];
             }
 
-            int[] permutadic = Permutadic.permutadicOf(size,initialValue.length,n);
-            return Permutadic.decodePermutadicToNthPermutation(permutadic, size);
+            Permutadic permutadic = new Permutadic(decimal, size,degree);
+            return permutadic.decodeToNthPermutation();
         }
     }
 }

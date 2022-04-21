@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v1.0.3
- * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * Implements the iterable of repetitive permutations where every element in input has associated count
  * which denotes home many times that element can be repeated.
- * Permutations are generated in lex order of indices of input values, considering value at each indices as unique.
+ * Permutations are generated in lex order of indices of input values, considering value at each index as unique.
  * <pre>
  *     Code example-
  *     new RepetitivePermutationLimitedSupply&lt;&gt;(Arrays.asList("A","B"),new int[]{2,1})
@@ -41,7 +41,7 @@ public class RepetitivePermutationLimitedSupply<T>  extends AbstractGenerator<T>
      *
      * @param seed input from which permutations are generated.
      *             Permutations are generated in lex order of indices of input values,
-     *             considering value at each indices as unique.
+     *             considering value at each index as unique.
      * @param supply int array containing the number of times(count) element in seed can be repeated.
      *               supply[0] contains the count for 0<sup>th</sup> element in seed
      *               supply[1] contains the count for 1<sup>st</sup> element in seed, ...

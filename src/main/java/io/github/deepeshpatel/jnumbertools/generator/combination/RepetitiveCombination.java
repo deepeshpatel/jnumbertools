@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v1.0.3
- * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.combination;
@@ -11,7 +11,7 @@ import java.util.*;
 
 /**
  *
- * Utility for generating r-combinations of Seed = {1, 2, . . ., n}
+ * Utility for generating r-combinations of Seed = {1, 2 . . ., n}
  *
  * Generates r combinations from n=seed.length items.
  * combinations are generated in Lexicographic order

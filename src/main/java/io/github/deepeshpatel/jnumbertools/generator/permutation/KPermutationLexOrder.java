@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v1.0.3
- * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
 /**
  *
  * Implements the iterable of unique permutations of size k.
- * Permutations are generated in lex order of combinations of indices of input values, considering value at each indices as unique.
+ * Permutations are generated in lex order of combinations of indices of input values, considering value at each index as unique.
  * For example all permutations of size 2 for [1,2,3] are -
  * <pre>
  *     [1, 2], [2, 1], [1, 3], [3, 1], [2, 3] and [3, 2]
@@ -64,7 +64,7 @@ public class KPermutationLexOrder<T> extends AbstractGenerator<T> {
     private class Itr implements Iterator<List<T>> {
 
         int[] indices;
-        LinkedList<Integer> list;
+        final LinkedList<Integer> list;
 
         public Itr() {
             indices = IntStream.range(0, k).toArray();

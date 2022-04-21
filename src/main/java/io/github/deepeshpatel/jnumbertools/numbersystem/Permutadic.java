@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v1.0.3
- * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.numbersystem;
@@ -14,60 +14,77 @@ import java.util.stream.IntStream;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPr;
 
 /**
+ *
  * Permutadic or Permutational-number-system is the term I introduced for a number system based on permutations.
- * Unlike Combinadic or Combinatorial Number System, it is a mixed radix system
+ * Definition: Permutational-number-system of size s and degree k, for some positive integers s and k
+ * where 1 ≤ k ≤ s , is a correspondence between natural numbers (starting from 0) and
+ * k-permutations, represented as sequence [Ck−1, Ck−2, Ck−3 . . . C1, C0][s] where Ci ∈ N.
+ * Permutational-number-system of size s and degree k also referred to as Permutadic(s, k) for short,
+ * is a mixed radix number system that has a unique representation for all natural numbers.
+ * The number n corresponding to the permutadic string -
+ * [Ck−1, Ck−2, Ck−3 . . . C1, C0][s]
  *
- * The number N corresponding to (Ck, ..., C2, C1) is given by
- * N= [ nPr(s-1,k-1) * Ck ] + [ nPr(s-2,k-2) * Ck-1 ] + .. [ nPr(s-k,k-k) * C1 ]
- *
- *  for k=s, the representation is same as factorial-number-system.
- *
- *  for k<=s there is one to one mapping between Permutadic and nth K-permutation
+ * is expressed by the following equation -
+ * n = Summation[Permutation(s-i,k-i) * Ck-i] for i= 1 to k
+ * Where s−iPk−i is the place value for the ith digit/number from right
  *
  * @author Deepesh Patel
  */
 public class Permutadic {
 
-    private final int n;
+    private final int size;
     private final int[] value;
+    private final long decimalValue;
 
-    public Permutadic(long decimalValue, int n, int r) {
-        if(r>n) {
-            throw new IllegalArgumentException(" r should be >=n");
+    public Permutadic(long decimalValue, int size, int degree) {
+        if(degree> size) {
+            throw new IllegalArgumentException(" degree " + degree + " should be <= size " + size);
         }
-        this.n = n;
-
-        this.value = permutadicOf(n,r,decimalValue);
+        this.size = size;
+        this.value = permutadicOf(decimalValue, size, degree);
+        this.decimalValue = decimalValue;
     }
 
-    //decimal to permutadic
-    public static int[] permutadicOf(int s, int r, long decimalValue) {
+    private Permutadic(long decimalValue, int[] value, int size) {
+        this.size = size;
+        this.value = value;
+        this.decimalValue = decimalValue;
+    }
 
-        int[] a = IntStream.range(0,r).toArray();
+    private static int[] permutadicOf(long decimalValue, int size, int degree) {
 
-        long j=s-r+1L;
-        for(int i=a.length-1; i>=0; i--, j++) {
+        int[] a = IntStream.range(0,degree).toArray();
+
+        long j=size-degree+1L;
+        for(int i=a.length-1; i>0; i--, j++) {
             a[i] = (int) (decimalValue % j);
             decimalValue =  decimalValue / j;
         }
+        a[0] = (int) decimalValue;
         return a;
     }
 
-    public static int[] decodePermutadicToNthPermutation(int[] v, int n) {
-        int[] a = new int[v.length];
+    public int[] decodeToNthPermutation() {
 
-        List<Integer> allValues = IntStream.range(0, n).boxed().collect(Collectors.toList());
+        long maxSupported = nPr(size, value.length);
+        if(decimalValue >= maxSupported) {
+            throw new ArithmeticException("Out of range. Can't decode " + decimalValue + " to nth permutation as it is >= Permutation(size,degree).");
+        }
+
+        int[] a = new int[value.length];
+
+        List<Integer> allValues = IntStream.range(0, size).boxed().collect(Collectors.toList());
 
         for(int i=0; i<a.length; i++) {
-            a[i] = allValues.remove(v[i]);
+            a[i] = allValues.remove(value[i]);
         }
         return a;
     }
 
-    public static int[] encodeNthPermutationToPermutadic(int[] nthPermutation, int n) {
+    public static Permutadic encodeNthPermutation(int[] nthPermutation, int size) {
         int[] a = new int[nthPermutation.length];
 
-        List<Integer> allValues = IntStream.range(0, n).boxed().collect(Collectors.toList());
+        List<Integer> allValues = IntStream.range(0, size).boxed().collect(Collectors.toList());
         allValues.removeAll(Arrays.stream(nthPermutation).boxed().collect(Collectors.toList()));
 
         for(int i=a.length-1; i>=0; i--) {
@@ -77,27 +94,29 @@ public class Permutadic {
             allValues.add(index,nthPermutation[i]);
             a[i] = index;
         }
-        return a;
+
+        return new Permutadic(toDecimal(a,size), a,size);
     }
 
-    public static long toDecimal(int[] v, int n){
-        int r= v.length;
-        long multiplier = nPr(n,r)/n;
-        int divisor = n-1;
-        long result = 0;
-        for(int value: v){
-            result = result + (value * multiplier);
-            if(divisor != 0) {
-                multiplier = multiplier/divisor;
-                divisor--;
-            }
+    public long toDecimal(){
+        return decimalValue;
+    }
+
+    private static long toDecimal(int[] value, int size){
+        long result = value[value.length-1];
+        long startingMultiplier = size - value.length+1;
+        long multiplier = startingMultiplier;
+        for(int i=value.length-2; i>=0; i--) {
+            result = result + (value[i] * multiplier);
+            startingMultiplier++;
+            multiplier = multiplier * startingMultiplier;
         }
         return result;
     }
 
     @Override
     public String toString() {
-        return Arrays.toString(value) + '[' + n + ']';
+        return Arrays.toString(value) + '[' + size + ']';
     }
 
     public int[] getValue() {

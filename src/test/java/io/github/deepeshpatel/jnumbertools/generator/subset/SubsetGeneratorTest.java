@@ -29,11 +29,12 @@ public class SubsetGeneratorTest {
     public void assertCountOfSubsetsInRange() {
         for(int n=0; n<=4; n++) {
             List<String> input = Collections.nCopies(n, "A");
-            for(int range=2; range<=n+1; range++) {
+            int from=2;
+            for(int range=from; range<=n+1; range++) {
                 int count = (int) JNumberTools.subsetsOf(input)
                         .inRange(2, range)
                         .stream().count();
-                assertSize(count,n,2,range);
+                assertSize(count,n,from,range);
             }
         }
     }

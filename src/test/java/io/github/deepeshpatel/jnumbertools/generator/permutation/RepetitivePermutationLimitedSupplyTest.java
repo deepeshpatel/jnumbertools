@@ -13,7 +13,7 @@ public class RepetitivePermutationLimitedSupplyTest {
 
     @Test
     public void assertCount() {
-        List<Long> fact = factorialList(20);
+        List<Long> fact = factorialList();
         for(int n=1; n<=6; n++){
             List<String> input = Collections.nCopies(n, "A");
             int[] supply =getRandomSupply(input.size());
@@ -38,7 +38,8 @@ public class RepetitivePermutationLimitedSupplyTest {
         return supply;
     }
 
-    private List<Long> factorialList(int n){
+    private List<Long> factorialList(){
+        int n = 20;
         long p=1;
         List<Long> factorials = new ArrayList<>(n+1);
         factorials.add(1L);

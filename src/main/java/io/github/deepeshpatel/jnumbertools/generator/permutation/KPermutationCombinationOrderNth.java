@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v1.0.3
- * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * Implements the iterable generating every n<sup>th</sup> unique permutation of size k.
- * Permutations are generated in lex order of combinations of indices of input values, considering value at each indices as unique.
+ * Permutations are generated in lex order of combinations of indices of input values, considering value at each index as unique.
  * <pre>
  * Code example -
  *
@@ -43,7 +43,7 @@ public class KPermutationCombinationOrderNth<T> extends AbstractGenerator<T> {
 
     /**
      * Implements the iterable generating every n<sup>th</sup> unique permutation of size k.
-     * Permutations are generated in lex order of indices of input values, considering value at each indices as unique.
+     * Permutations are generated in lex order of indices of input values, considering value at each index as unique.
      * @param seed Input of size n from which permutations of size k will be generated
      * @param k size of permutations. k must be &lt;=n
      * @param skipTo position relative to first permutation which will be generated next in lexicographical order.

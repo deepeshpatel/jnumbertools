@@ -9,7 +9,15 @@ import java.util.List;
 public class CombinadicTest {
 
     @Test
-    public void shouldGenerateCorrectValuesForFirst7Combinadics() {
+    public void shouldReturnCorrectDecimalEquivalentOfCombinadic() {
+        for(int i=0; i<=100; i++) {
+            Combinadic c = new Combinadic(i, 3);
+            Assert.assertEquals(i,c.decimalValue().intValue());
+        }
+    }
+
+    @Test
+    public void shouldGenerateCorrectValuesForFirst7Combinadic() {
         String expect = "[[1, 0], [2, 0], [2, 1], [3, 0], [3, 1], [3, 2], [4, 0]]";
         List<String> output = new ArrayList<>();
         for(int i=0; i<=6; i++){

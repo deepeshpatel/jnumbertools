@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v1.0.3
- * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.combination;
@@ -9,12 +9,10 @@ import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
 
 import java.util.*;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  *
- * Utility for generating r-combinations of Seed = {1, 2, . . ., n}
+ * Utility for generating r-combinations of Seed = {1, 2 . . ., n}
  *
  * Generates r combinations from n=seed.length items.
  * combinations are generated in Lexicographic order
@@ -62,11 +60,6 @@ public class UniqueCombination<T> extends AbstractGenerator<T> {
     @Override
     public Iterator<List<T>> iterator() {
         return (r>seed.size() || r<0) ? Collections.emptyIterator() : new Itr();
-    }
-
-    @Override
-    public Stream<List<T>> stream() {
-        return StreamSupport.stream(this.spliterator(), false);
     }
 
     private class Itr implements Iterator<List<T>> {

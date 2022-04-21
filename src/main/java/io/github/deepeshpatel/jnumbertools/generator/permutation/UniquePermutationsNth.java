@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v1.0.3
- * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
@@ -49,10 +49,6 @@ import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.factoria
 public class UniquePermutationsNth<T> extends AbstractGenerator<T> {
 
     private final BigInteger withIncrement;
-
-    public UniquePermutationsNth(Collection<T> seed, long skipTo) {
-        this(seed, BigInteger.valueOf(skipTo));
-    }
 
     public UniquePermutationsNth(Collection<T> seed, BigInteger skipTo) {
         super(seed);

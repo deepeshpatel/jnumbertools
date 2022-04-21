@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v1.0.3
- * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.combination;
@@ -32,7 +32,7 @@ public class CombinationBuilder<T> {
         return new RepetitiveCombination<>(data, ofSize);
     }
 
-    public RepetitiveCombinationLimitedSupply<T> repetitiveWithSupply(int ofSize, int[] supply) {
+    public RepetitiveCombinationLimitedSupply<T> repetitiveWithSupply(int ofSize, int... supply) {
         return new RepetitiveCombinationLimitedSupply<>(data, ofSize, supply);
     }
 }

@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v1.0.3
- * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
@@ -38,7 +38,7 @@ public final class Combinadic {
     }
 
     /**
-     * @return decimal number equivalent of a this Combinadic
+     * @return decimal number equivalent of this Combinadic
      */
     public BigInteger decimalValue() {
         return decimalValue;

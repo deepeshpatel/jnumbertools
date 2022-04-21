@@ -14,13 +14,12 @@ public class KPermutationLexOrderNthTest {
     @Test
     public void shouldGenerateKPermutationsSkippingInBetween() {
 
-        List<String> input = Arrays.asList("A","B","C","D","E","F","G","H","I","J");
+        List<String> input = Arrays.asList("A","B","C","D","E","F","G");
         for(int k=1; k<= input.size()/2; k++) {
-            for(int skip=1; skip<=32;skip++) {
+            for(int skip=1; skip<=5;skip++) {
                 String expected = getExpectedResultViaOneByOneIteration(input, k,skip);
                 String output   = getResultViaDirectSkipping(input,k,skip);
                 Assert.assertEquals(expected,output);
-
             }
         }
     }

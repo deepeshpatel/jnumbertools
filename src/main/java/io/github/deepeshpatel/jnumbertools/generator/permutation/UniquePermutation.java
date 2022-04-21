@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v1.0.3
- * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
 /**
  * Utility to generate all n! unique permutations (with no repeated values)
  * Permutations are generated in lex order of indices of input values,
- * considering value at each indices as unique.
+ * considering value at each index as unique.
  * For more information on Permutations see
  * @see <a href="https://en.wikipedia.org/wiki/Permutation">
  * Wikipedia Permutation</a>

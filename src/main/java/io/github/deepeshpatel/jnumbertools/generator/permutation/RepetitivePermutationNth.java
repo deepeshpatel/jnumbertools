@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v1.0.3
- * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
@@ -17,7 +17,7 @@ import java.util.NoSuchElementException;
  * 0<sup>th</sup> permutation(input) and then generate every n<sup>th</sup> permutation in
  * lexicographical order of indices of input values. This is important because say, if we need to
  * generate next 1 billionth permutation of [A,B,C,D,E,F,G,H,I,J,K,L,M] then it is not
- * feasible to generate all 13^13=302875106592253 permutations and then skip billion permutations.
+ * feasible to generate all 13^13=302875106592253 permutations and then skip a billion permutations.
  *
  * This class will provide a mechanism to generate directly the next n<sup>th</sup>
  * lexicographical permutation.

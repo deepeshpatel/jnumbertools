@@ -6,7 +6,7 @@ import org.junit.Test;
 public class FactoradicTest {
 
     @Test
-    public void shouldGenerateCorrectValuesForFirst7Factoradics() {
+    public void shouldGenerateCorrectValuesForFirst7Factoradic() {
         String[] expected = new String[] {
                 "[0]",
                 "[1, 0]",
@@ -19,6 +19,14 @@ public class FactoradicTest {
         for(int i=0; i<=6; i++) {
             Factoradic f = new Factoradic(i);
             Assert.assertEquals(expected[i], f.toString());
+        }
+    }
+
+    @Test
+    public void shouldReturnCorrectDecimalEquivalentOfFactoradic() {
+        for(int i=0; i<=100; i++) {
+            Factoradic f = new Factoradic(i);
+            Assert.assertEquals(i,f.decimalValue().intValue());
         }
     }
 

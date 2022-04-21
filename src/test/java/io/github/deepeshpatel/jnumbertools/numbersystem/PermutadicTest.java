@@ -25,11 +25,12 @@ public class PermutadicTest {
     }
 
     @Test
-    public void shouldBeEqualToFactoradicForkEqualsS() {
+    public void shouldBeEqualToFactoradicForSizeEqualsDegree() {
         int start = 565656565;
         for(int i=start; i<=start+10; i++) {
             Factoradic f = new Factoradic(i);
-            int[] permutadicValue = new Permutadic(i, f.getValues().size(),f.getValues().size()).getValue();
+            int size = f.getValues().size();
+            int[] permutadicValue = new Permutadic(i, size,size).getValue();
             String expected = f.toString();
             String output = Arrays.toString(permutadicValue);
             Assert.assertEquals(expected,output);
@@ -38,17 +39,37 @@ public class PermutadicTest {
     }
 
     @Test
-    public void calculatedDeepCodeAndDecimalValueShouldBeEqual(){
-        int s = 10;
-        int k = 5;
-        for(long i=0; i<nPr(s,k); i++) {
-            int[] p = new Permutadic(i, s, k).getValue();
-            int[] nth = Permutadic.decodePermutadicToNthPermutation(p,s);
-            int[] encode = Permutadic.encodeNthPermutationToPermutadic(nth,s);
-            long decimalValue = Permutadic.toDecimal(p,s);
-
-            Assert.assertEquals(i,decimalValue);
-            Assert.assertArrayEquals(p, encode);
+    public void shouldConvertToPermutadicToCorrectDecimalValue() {
+        int size = 8;
+        int degree = 4;
+        for(long i=0; i<1679; i++) {
+            int[] decoded = new Permutadic(i, size, degree).decodeToNthPermutation();
+            Permutadic permutadic = Permutadic.encodeNthPermutation(decoded,size);
+            Assert.assertEquals(i,permutadic.toDecimal());
         }
+    }
+
+    @Test
+    public void calculatedDeepCodeAndDecimalValueShouldBeEqual(){
+        int size = 6;
+        int degree = 3;
+        for(long i=0; i<nPr(size,degree); i++) {
+            Permutadic p1 = new Permutadic(i, size, degree);
+            int[] nth = p1.decodeToNthPermutation();
+            Permutadic p2 = Permutadic.encodeNthPermutation(nth,size);
+            Assert.assertArrayEquals(p1.getValue(), p2.getValue());
+        }
+    }
+
+    @Test
+    public void shouldDecodeToNthPermutationForLastPossibleValue() {
+        int[] perm = new Permutadic(1679,8,4).decodeToNthPermutation();
+        //8P4 = 1680 so 1679 should result is last possible permutation
+        Assert.assertEquals("[7, 6, 5, 4]", Arrays.toString(perm));
+    }
+
+    @Test (expected = ArithmeticException.class)
+    public void shouldThroughExceptionWhileDecodingOutOfRangeValue(){
+        new Permutadic(1680,8,4).decodeToNthPermutation();
     }
 }

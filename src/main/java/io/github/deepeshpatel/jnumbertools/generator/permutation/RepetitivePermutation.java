@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v1.0.3
- * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
@@ -14,7 +14,7 @@ import java.util.NoSuchElementException;
 
 /**
  * Utility to generate all permutations of given items and size where items can be repeated.
- * Permutations are generated in lexicographical order of indices of input values, considering value at each indices as unique.
+ * Permutations are generated in lexicographical order of indices of input values, considering value at each index as unique.
  *
  * <pre>
  * Following code will generate all permutations of size 2
@@ -48,9 +48,9 @@ public class RepetitivePermutation<T>  extends AbstractGenerator<T> {
 
     /**
      * Implements the iterable of repetitive permutations.
-     * Permutations are generated in lex order of indices of input values, considering value at each indices as unique.
+     * Permutations are generated in lex order of indices of input values, considering value at each index as unique.
      * @param seed Input of size n from which repeated permutations of size 'size' will be generated.
-     * @param size size of permutations. In contrast to KPermutation, size can even be even greater than
+     * @param size size of permutations. In contrast to KPermutation, size can even be greater than
      *             n, because repetition is allowed
      */
     public RepetitivePermutation(Collection<T> seed, int size) {
@@ -93,7 +93,7 @@ public class RepetitivePermutation<T>  extends AbstractGenerator<T> {
                     break;
                 }
             }
-            return (j != indices.length); //true if more number's are available
+            return (j != indices.length); //true if more numbers are available
         }
     }
 }

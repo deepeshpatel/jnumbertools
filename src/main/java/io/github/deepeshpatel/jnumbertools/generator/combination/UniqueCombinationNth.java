@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v1.0.3
- * Copyright (c) 2021 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.combination;
@@ -17,7 +17,7 @@ import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCrBig;
 /**
  * Implements the iterable generating every n<sup>th</sup> unique combination of size k.
  * Combinations are generated in lex order of indices of input values,
- * considering value at each indices as unique.
+ * considering value at each index as unique.
  *
  * This concept is important because count of combinations can grow astronomically
  * large and to generate say, every 100 trillionth combination of 50 items out of 100 (100Choose50),
@@ -54,10 +54,6 @@ public class UniqueCombinationNth<T> extends AbstractGenerator<T> {
      * @param skipTo next combination in lex order to be generated after previous combination
      *               starting from the 0th(first) combination.
      */
-    public UniqueCombinationNth(Collection<T> seed, int r, long skipTo) {
-        this(seed,r,BigInteger.valueOf(skipTo));
-    }
-
     public UniqueCombinationNth(Collection<T> seed, int r, BigInteger skipTo) {
         super(seed);
         this.r = r;
