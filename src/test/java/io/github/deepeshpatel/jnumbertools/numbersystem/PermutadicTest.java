@@ -44,7 +44,7 @@ public class PermutadicTest {
         int degree = 4;
         for(long i=0; i<1679; i++) {
             int[] decoded = new Permutadic(i, size, degree).decodeToNthPermutation();
-            Permutadic permutadic = Permutadic.encodeNthPermutation(decoded,size);
+            Permutadic permutadic = Permutadic.encodeFromNthPermutation(decoded,size);
             Assert.assertEquals(i,permutadic.toDecimal());
         }
     }
@@ -56,7 +56,7 @@ public class PermutadicTest {
         for(long i=0; i<nPr(size,degree); i++) {
             Permutadic p1 = new Permutadic(i, size, degree);
             int[] nth = p1.decodeToNthPermutation();
-            Permutadic p2 = Permutadic.encodeNthPermutation(nth,size);
+            Permutadic p2 = Permutadic.encodeFromNthPermutation(nth,size);
             Assert.assertArrayEquals(p1.getValue(), p2.getValue());
         }
     }
@@ -71,5 +71,11 @@ public class PermutadicTest {
     @Test (expected = ArithmeticException.class)
     public void shouldThroughExceptionWhileDecodingOutOfRangeValue(){
         new Permutadic(1680,8,4).decodeToNthPermutation();
+    }
+
+    @Test
+    public void shouldGenerateCorrectPermutadicForOutOofPermutationRange() {
+        String output = new Permutadic(1680,8,4).toString();
+        Assert.assertEquals("[8, 0, 0, 0][8]", output);
     }
 }

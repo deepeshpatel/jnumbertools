@@ -81,7 +81,7 @@ public class Permutadic {
         return a;
     }
 
-    public static Permutadic encodeNthPermutation(int[] nthPermutation, int size) {
+    public static Permutadic encodeFromNthPermutation(int[] nthPermutation, int size) {
         int[] a = new int[nthPermutation.length];
 
         List<Integer> allValues = IntStream.range(0, size).boxed().collect(Collectors.toList());
