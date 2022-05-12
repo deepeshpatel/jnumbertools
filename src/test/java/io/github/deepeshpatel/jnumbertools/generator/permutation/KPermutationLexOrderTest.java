@@ -10,7 +10,34 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.github.deepeshpatel.jnumbertools.generator.TestUtil.iteratorToList;
+import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPr;
+
 public class KPermutationLexOrderTest {
+
+    @Test
+    public void assertCount(){
+        for(int n=0; n<=4; n++) {
+            List<String> input = Collections.nCopies(n,"A");
+            for (int k = 0; k < n; k++) {
+                long size = JNumberTools.permutationsOf(input)
+                        .k(k)
+                        .lexOrder()
+                        .stream().count();
+                Assert.assertEquals(nPr(n, k), size);
+            }
+        }
+    }
+
+    @Test
+    public void shouldReturnSameResultForDifferentIteratorObjects(){
+        Iterable<List<String>> iterable = JNumberTools.permutationsOf("A", "B", "C")
+                .k(2)
+                .lexOrder();
+        List<List<String>> lists1 = iteratorToList(iterable.iterator());
+        List<List<String>> lists2 = iteratorToList(iterable.iterator());
+        Assert.assertEquals(lists1, lists2);
+    }
 
     @Test
     public void shouldGeneratedOutputInLexOrder(){
@@ -32,8 +59,5 @@ public class KPermutationLexOrderTest {
         Collections.sort(sorted);
         String expected = sorted.toString();
         Assert.assertEquals(expected, output);
-
-
-
     }
 }

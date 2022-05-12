@@ -27,7 +27,7 @@
             every n<sup>th</sup> permutation in lexicographical order of indices of input values where each value is
             considered unique. Generating n<sup>th</sup> permutation is important because say, if we need to generate
             next 100 trillionth permutation of 100 items then it will take months to compute if we go sequentially
-            and then skip the unwanted permutations because the total # of permutations is astronomical (100!= 9.3326E X 10<sup>157</sup>)
+            and then increment to the desired permutation, because the total # of permutations is astronomical (100!= 9.3326E X 10<sup>157</sup>)
             This API will provide a mechanism to generate directly the next n<sup>th</sup>
             lexicographical permutation.
         </td>
@@ -60,12 +60,12 @@
             and then generate every n<sup>th</sup> permutation in lexicographical order of indices of input values.
             This is important because say, if we need to
             generate next 1 billionth permutation of [A,B,C,D,E,F,G,H,I,J,K,L,M] then it is not feasible to generate
-            all 13^13=302875106592253 permutations and then skip a billion permutations.
+            all 13^13=302875106592253 permutations and then increment to a billionth permutations.
         </td>
     </tr>
 
     <tr>
-        <td><a href="#rpls">Repetitive permutation with limited supply</a></td>
+        <td><a href="#rpls">Repetitive permutation of multiset</a></td>
         <td>repetitive permutations where every element in input has associated count which denotes home many times
             that element can be repeated. Permutations are generated in lex order of indices of input values,
             considering value at each index as unique.
@@ -162,7 +162,7 @@
 <Strong id="nkp">Generating N<sup>th</sup> K-Permutation</Strong>
 <pre>
   JNumberTools.permutationsOf("A","B","C")
-      .kNth(2,2) //size =2 and skipTo every 2<sup>nd</sup> permutation starting from 0<sup>th</sup>
+      .kNth(2,2) //size =2 and increment to every 2<sup>nd</sup> permutation starting from 0<sup>th</sup>
       .forEach(System.out::println);
 
  will generate following (0<sup>th</sup>, 2<sup>nd</sup> and 4<sup>th</sup>) K-permutation of size(K)=2 -
@@ -206,11 +206,11 @@
  </pre>
 
 <hr>
-<Strong id="rpls">Generating repetitive permutations with limited supply</Strong>
+<Strong id="rpls">Generating repetitive permutations of multiset</Strong>
 <pre>
      //here A can be repeated max 2 times and B can not be repeated(1 time)
      JNumberTools.permutationsOf("A","B")
-                 .repetitiveWithSupply(2,1)
+                 ..repetitiveMultiset(2,1)
                  .forEach(System.out::println);
 
  will generate following -

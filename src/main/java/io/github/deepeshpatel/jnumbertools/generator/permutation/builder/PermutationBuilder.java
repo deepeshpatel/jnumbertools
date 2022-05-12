@@ -21,25 +21,28 @@ public class PermutationBuilder<T> {
         return new UniquePermutation<>(seed);
     }
 
-    public UniquePermutationsNth<T> uniqueNth(long skipTo) {
-        return uniqueNth(BigInteger.valueOf(skipTo));
+    public UniquePermutationsNth<T> uniqueNth(long increment) {
+        return uniqueNth(BigInteger.valueOf(increment));
     }
 
-    public UniquePermutationsNth<T> uniqueNth(BigInteger skipTo) {
-        return new UniquePermutationsNth<>(seed, skipTo);
+    public UniquePermutationsNth<T> uniqueNth(BigInteger increment) {
+        return new UniquePermutationsNth<>(seed, increment);
     }
-
 
     public RepetitivePermutation<T> repetitive(int size) {
         return new RepetitivePermutation<>(seed,size);
     }
 
-    public RepetitivePermutationNth<T> repetitiveNth(int size, long skipTo) {
-        return new RepetitivePermutationNth<>(seed,size,skipTo);
+    public RepetitivePermutationNth<T> repetitiveNth(int size, long increment) {
+        return new RepetitivePermutationNth<>(seed,size,increment);
     }
 
-    public RepetitivePermutationLimitedSupply<T> repetitiveWithSupply(int... supply){
-        return new RepetitivePermutationLimitedSupply<>(seed,supply);
+    public MultisetPermutation<T> multiset(int... multisetFreqArray){
+        return new MultisetPermutation<>(seed,multisetFreqArray);
+    }
+
+    public MultisetPermutationNth<T> multisetNth(long increment, int... multisetFreqArray){
+        return new MultisetPermutationNth<>(seed, increment, multisetFreqArray);
     }
 
     public KPermutationBuilder<T> k(int k) {

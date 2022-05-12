@@ -5,15 +5,21 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.combination;
 
-import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.getClone;
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.newEmptyIterator;
 
 /**
  *
- * Utility for generating r-combinations of Seed = {1, 2 . . ., n}
+ * Utility for generating r-combinations of input = {1, 2 . . ., n}
  *
- * Generates r combinations from n=seed.length items.
+ * Generates r combinations from n=input.length items.
  * combinations are generated in Lexicographic order
  * of indices of items in a list. This class will not check for duplicate values and
  * treats all values differently based on the index
@@ -49,18 +55,17 @@ public class RepetitiveCombination <T> extends AbstractGenerator<T> {
     private final int r;
 
     /**
-     * @param seed List of N items. N is the length of seed
+     * @param input List of N items. N is the length of input
      * @param r number of combinations from N items.
      */
-    public RepetitiveCombination(Collection<T> seed, int r) {
-        super(seed);
+    public RepetitiveCombination(Collection<T> input, int r) {
+        super(input);
         this.r = r;
     }
 
     @Override
     public Iterator<List<T>> iterator() {
-        return (r==0) ? newEmptyIterator() :
-                (r<0) ? Collections.emptyIterator(): new Itr();
+        return (r==0 || seed.isEmpty()) ? newEmptyIterator() : new Itr();
     }
 
     private class Itr implements Iterator<List<T>> {
@@ -83,14 +88,12 @@ public class RepetitiveCombination <T> extends AbstractGenerator<T> {
             }
             int[] old = indices;
             indices = nextRepetitiveCombination(indices, seed.size());
-            return AbstractGenerator.indicesToValues(old, seed);
+            return indicesToValues(old, seed);
         }
 
         private int[] nextRepetitiveCombination(int[]a, int n) {
 
-            int[] next = new int[a.length];
-            System.arraycopy(a,0,next,0, a.length);
-
+            int[] next = getClone(a);
             int i=next.length-1;
             int maxSupportedValue = n-1;
 

@@ -5,8 +5,10 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
-import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
 
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -17,7 +19,7 @@ import java.util.NoSuchElementException;
  * 0<sup>th</sup> permutation(input) and then generate every n<sup>th</sup> permutation in
  * lexicographical order of indices of input values. This is important because say, if we need to
  * generate next 1 billionth permutation of [A,B,C,D,E,F,G,H,I,J,K,L,M] then it is not
- * feasible to generate all 13^13=302875106592253 permutations and then skip a billion permutations.
+ * feasible to generate all 13^13=302875106592253 permutations and then increment to a billionth permutation.
  *
  * This class will provide a mechanism to generate directly the next n<sup>th</sup>
  * lexicographical permutation.
@@ -46,16 +48,17 @@ import java.util.NoSuchElementException;
 public class RepetitivePermutationNth<T>  extends AbstractGenerator<T> {
 
     private final int size;
-    private final long skip;
+    private final long increment;
 
-    public RepetitivePermutationNth(Collection<T> seed, int size, long skipTo) {
-        super(seed);
+    public RepetitivePermutationNth(Collection<T> input, int size, long increment) {
+        super(input);
         this.size = size;
-        this.skip = skipTo;
+        this.increment = increment;
+        CombinatoricsUtil.checkParamIncrement(BigInteger.valueOf(increment), " repetitive permutations");
     }
 
     @Override
-    public Iterator<List<T>> iterator() {
+    public  Iterator<List<T>> iterator() {
         return new NumberIterator();
     }
 
@@ -74,20 +77,24 @@ public class RepetitivePermutationNth<T>  extends AbstractGenerator<T> {
             if(!hasNext()) {
                 throw new NoSuchElementException();
             }
-            List<T> result = AbstractGenerator.indicesToValuesReverse(currentIndices, seed);
-            hasNext = nextRepetitiveKthPermutation(currentIndices,seed.size(), skip);
+
+            List<T> result = indicesToValues(currentIndices, seed);
+            hasNext = nextRepetitiveKthPermutation(currentIndices,seed.size(), increment);
             return result;
         }
 
         private boolean nextRepetitiveKthPermutation(int[] indices, int base, long k) {
+
             long nextK = k;
-            for (int i = 0; i < indices.length; i++) {
+            boolean moreElementsAvailable;
+
+            for (int i = indices.length-1; i >=0; i--) {
                 long v = (indices[i] + nextK) % base;
                 nextK = (indices[i] + nextK) / base;
                 indices[i] = (int) v;
             }
-
-            return nextK <=0; //true if more numbers available in a sequence
+            moreElementsAvailable = nextK <=0;
+            return moreElementsAvailable;
         }
     }
 }

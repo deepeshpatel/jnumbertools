@@ -5,11 +5,13 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
-import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.*;
 
 /**
  *
@@ -45,20 +47,18 @@ public class KPermutationLexOrder<T> extends AbstractGenerator<T> {
     final int k;
 
     /**
-     * @param seed Input of size n from which unique permutations of size k will be generated.
+     * @param input Input of size n from which unique permutations of size k will be generated.
      * @param k size of permutations. k must be &lt;=n
      */
-    public KPermutationLexOrder(Collection<T> seed, int k) {
-        super(seed);
-        if(k<0) {
-            throw new IllegalArgumentException(" k>=0");
-        }
+    public KPermutationLexOrder(Collection<T> input, int k) {
+        super(input);
         this.k = k;
+        checkParamKPermutation(seed.size(), k, "K-permutation");
     }
 
     @Override
     public Iterator<List<T>> iterator() {
-        return (k==0 || k> seed.size()) ? newEmptyIterator() : new Itr();
+        return (k==0) ? newEmptyIterator() : new Itr();
     }
 
     private class Itr implements Iterator<List<T>> {
@@ -86,13 +86,12 @@ public class KPermutationLexOrder<T> extends AbstractGenerator<T> {
             }
             int[] old = indices;
             indices = kPermutationNextLex(indices,list, seed.size()-1);
-            return  AbstractGenerator.indicesToValues(old, seed);
+            return  indicesToValues(old, seed);
         }
 
         private int[] kPermutationNextLex(int[] current, LinkedList<Integer> remaining, int maxAllowed) {
 
-            int[] a = new int[current.length];
-            System.arraycopy(current, 0,a,0, a.length);
+            int[] a = getClone(current);
 
             if(!remaining.isEmpty()) {
                 int next = remaining.removeFirst();
@@ -109,6 +108,7 @@ public class KPermutationLexOrder<T> extends AbstractGenerator<T> {
             }
 
             if(index ==-1) {
+                //exceeds last permutation
                 return new int[0];
             }
 
@@ -124,7 +124,7 @@ public class KPermutationLexOrder<T> extends AbstractGenerator<T> {
             a[index] = valueForCurrentIndex;
             remaining.remove(Integer.valueOf(valueForCurrentIndex));
 
-            for(int i=index+1; i< a.length; i++) {
+            for(int i=index+1; i<a.length; i++) {
                 a[i] = remaining.removeFirst();
             }
             return a;

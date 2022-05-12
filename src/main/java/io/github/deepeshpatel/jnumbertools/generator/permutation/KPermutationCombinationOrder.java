@@ -5,12 +5,15 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
-import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
 import io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombination;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.newEmptyIterator;
 
 /**
  *
@@ -46,20 +49,18 @@ public class KPermutationCombinationOrder<T> extends AbstractGenerator<T> {
     final int k;
 
     /**
-     * @param seed Input of size n from which unique permutations of size k will be generated.
+     * @param input Input of size n from which unique permutations of size k will be generated.
      * @param k size of permutations. k must be &lt;=n
      */
-    public KPermutationCombinationOrder(Collection<T> seed, int k) {
-        super(seed);
-        if(k<0) {
-            throw new IllegalArgumentException(" k>=0");
-        }
+    public KPermutationCombinationOrder(Collection<T> input, int k) {
+        super(input);
         this.k = k;
+        CombinatoricsUtil.checkParamKPermutation(seed.size(), k,"K-permutations in combination order");
     }
 
     @Override
     public Iterator<List<T>> iterator() {
-        return (k==0) ? newEmptyIterator() : new OnDemandIterator();
+        return ( k==0 || seed.isEmpty()) ? newEmptyIterator() : new OnDemandIterator();
     }
 
     private class OnDemandIterator implements Iterator<List<T>> {

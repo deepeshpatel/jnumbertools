@@ -5,12 +5,20 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
-import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
 import io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil;
-import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
+import io.github.deepeshpatel.jnumbertools.numbersystem.permutadic.PermutadicAlgorithms;
 
-import java.util.*;
+import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
+
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.checkParamKPermutation;
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.newEmptyIterator;
 
 /**
  * Implements the iterable generating every n<sup>th</sup> unique permutation of size k.
@@ -18,13 +26,13 @@ import java.util.stream.IntStream;
  * <pre>
  * Code example -
  *
- *  new KPermutationNth&lt;&gt;(Arrays.asList("A","B","C"),2,2) //size =2 and skipTo every 2nd permutation
+ *  new KPermutationNth&lt;&gt;(Arrays.asList("A","B","C"),2,2) //size =2 and increment to every 2nd permutation
  *      .forEach(System.out::println);
  *
  *  or
  *
  *  JNumberTools.permutationsOf("A","B","C")
- *      .kNth(2,2) //size =2 and skipTo every 2nd permutation starting from 0
+ *      .kNth(2,2) //size =2 and increment to every 2nd permutation starting from 0
  *      .forEach(System.out::println);
  *
  * will generate -
@@ -37,33 +45,33 @@ import java.util.stream.IntStream;
 public class KPermutationLexOrderNth<T> extends AbstractGenerator<T> {
 
     final int k;
-    //TODO: use BigInteger
-    final long skip;
+    final int[] initialValue;
+    final BigInteger nPk;
+    final BigInteger increment;
 
     /**
      * Implements the iterable generating every n<sup>th</sup> unique permutation of size k.
      * Permutations are generated in lex order of indices of input values, considering value at each index as unique.
-     * @param seed Input of size n from which permutations of size k will be generated
+     * @param input Input of size n from which permutations of size k will be generated
      * @param k size of permutations. k must be &lt;=n
-     * @param skipTo position relative to first permutation which will be generated next in lexicographical order.
-     *                  skipping every skipTo-1 permutation in a sequence.
-     *                  For example, if skipTo is set to 2, the output will generate 0<sup>th</sup>, 2<sup>nd</sup>,
+     * @param increment position relative to first permutation which will be generated next in lexicographical order.
+     *                  incrementing to every increment-1 permutation in a sequence.
+     *                  For example, if increment is set to 2, the output will generate 0<sup>th</sup>, 2<sup>nd</sup>,
      *                  4<sup>th</sup>.. permutations.
      *                  This is important because for large k, it is impractical to generate all possible k! permutations
-     *                  and then skip to the desired position
+     *                  and then increment to the desired position
      */
 
-    public KPermutationLexOrderNth(Collection<T> seed, int k, long skipTo) {
-        super(seed);
+    public KPermutationLexOrderNth(Collection<T> input, int k, BigInteger increment) {
+        super(input);
 
-        if(k<0 || k>seed.size()) {
-            throw new IllegalArgumentException("k must be >= 0 and < length of input");
-        }
-        if(skipTo <=0) {
-            throw new IllegalArgumentException("skipTo must be > 0");
-        }
+        CombinatoricsUtil.checkParamIncrement(increment, "K-Permutation");
+        checkParamKPermutation(seed.size(), k,"K-Permutation");
+
         this.k = k;
-        this.skip = skipTo;
+        this.increment = increment;
+        this.initialValue = IntStream.range(0,k).toArray();
+        this.nPk = MathUtil.nPrBig(seed.size(),initialValue.length);
     }
 
     @Override
@@ -73,22 +81,14 @@ public class KPermutationLexOrderNth<T> extends AbstractGenerator<T> {
 
     private class Itr implements Iterator<List<T>> {
 
-        final int[] initialValue;
-        int[] next;
-        long currentSkip;
-        final long nPk;
+        int[] next = initialValue;
+        BigInteger  n = BigInteger.ZERO;
 
-        public Itr() {
-            //TODO: move this outside Iterator as this is not going to be changed
-            initialValue = IntStream.range(0,k).toArray();
-            next = initialValue;
-            currentSkip = skip;
-            nPk = MathUtil.nPr(seed.size(),initialValue.length);
-        }
+        public Itr() {}
 
         @Override
         public boolean hasNext() {
-            return next.length >0;
+            return n.compareTo(nPk) < 0;
         }
 
         @Override
@@ -96,20 +96,14 @@ public class KPermutationLexOrderNth<T> extends AbstractGenerator<T> {
             if(!hasNext()) {
                 throw new NoSuchElementException();
             }
-            int[] old = next;
-            next = nextNthKPermutation(currentSkip, initialValue.length,seed.size() );
-            currentSkip +=  skip;
-            return  AbstractGenerator.indicesToValues(old, seed);
+
+            next = nextNthKPermutation(n, initialValue.length,seed.size() );
+            n =  n.add(increment);
+            return  indicesToValues(next, seed);
         }
 
-        private int[] nextNthKPermutation(long decimal, int degree, int size) {
-
-            if(decimal >= nPk) {
-                return new int[0];
-            }
-
-            Permutadic permutadic = new Permutadic(decimal, size,degree);
-            return permutadic.decodeToNthPermutation();
+        private int[] nextNthKPermutation(BigInteger n, int degree, int size) {
+            return PermutadicAlgorithms.unRankWithoutBoundCheck(n.longValue(),size,degree);
         }
     }
 }

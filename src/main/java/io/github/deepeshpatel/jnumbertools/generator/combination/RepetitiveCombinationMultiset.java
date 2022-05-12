@@ -5,15 +5,22 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.combination;
 
-import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.getClone;
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.newEmptyIterator;
 
 /**
  *
- * Utility for generating r-combinations of Seed = {1, 2 . . ., n}
+ * Utility for generating r-combinations of input = {1, 2 . . ., n}
  *
- * Generates r combinations from n=seed.length items.
+ * Generates r combinations from n=input.length items.
  * combinations are generated in Lexicographic order
  * of indices of items in a list. This class will not check for duplicate values and
  * treats all values differently based on the index
@@ -26,15 +33,15 @@ import java.util.*;
  * <pre>
  * Code example:
  *
- *         int[] supply = new int[]{2,1,1};
- *         new RepetitiveCombinationLimitedSupply&lt;&gt;(Arrays.asList("A","B","C"),3,supply)
+ *         int[] multisetFreqArray = new int[]{2,1,1};
+ *         new RepetitiveCombinationMultiset&lt;&gt;(Arrays.asList("A","B","C"),3,multisetFreqArray)
  *                 .forEach(System.out::println);
  *
  *         or
  *
  *         //here "A" can be repeated 2 times , "B" and "C" can nt be repeated(occur only once)
  *         JNumberTools.combinationsOf("A","B","C")
- *                 .repetitiveWithSupply(3, supply)
+ *                 ..repetitiveMultiset(3, multisetFreqArray)
  *                 .forEach(System.out::println);
  *
  * will generate following combinations of size 3 -
@@ -44,35 +51,32 @@ import java.util.*;
  * </pre>
  * @author Deepesh Patel
  */
-public class RepetitiveCombinationLimitedSupply <T> extends AbstractGenerator<T> {
+public class RepetitiveCombinationMultiset<T> extends AbstractGenerator<T> {
 
-    private final int[] supply;
+    private final int[] multisetFreqArray;
     private final int r;
 
     /**
-     * @param seed List of N items
+     * @param input List of N items
      * @param r number of items in every combination.
-     * @param supply int array containing the number of times(count) element in seed can be repeated.
-     *               supply[0] contains the count for 0th element in seed
-     *               supply[1] contains the count for 1st element in seed, ...
-     *               supply[n] contains the count of nth element in seed
+     * @param multisetFreqArray int array containing the number of times(count) element in input can be repeated.
+     *               multisetFreqArray[0] contains the count for 0th element in input
+     *               multisetFreqArray[1] contains the count for 1st element in input, ...
+     *               multisetFreqArray[n] contains the count of nth element in input
      *               count of every element must be &gt;=1
      */
-    public RepetitiveCombinationLimitedSupply(Collection<T> seed, int r, int[] supply) {
-        super(seed);
+    public RepetitiveCombinationMultiset(Collection<T> input, int r, int[] multisetFreqArray) {
+        super(input);
+        CombinatoricsUtil.checkParamCombination(seed.size(), r, "Repetitive Combination");
+        CombinatoricsUtil.checkParamMultisetFreqArray(seed.size(), multisetFreqArray, "Repetitive Combination");
+
         this.r = r;
-        this.supply = supply;
+        this.multisetFreqArray = multisetFreqArray;
     }
 
     @Override
     public Iterator<List<T>> iterator() {
-        return nullCase() ? Collections.emptyIterator() : new Itr();
-    }
-
-    private boolean nullCase() {
-        return seed.isEmpty()
-                || r<=0 || supply== null
-                || supply.length !=seed.size();
+        return ( r==0 || seed.isEmpty()) ? newEmptyIterator() : new Itr();
     }
 
     private class Itr implements Iterator<List<T>> {
@@ -82,7 +86,7 @@ public class RepetitiveCombinationLimitedSupply <T> extends AbstractGenerator<T>
         private Itr(){
             indices = new int[r];
             indices[0]  = -1;
-            indices = nextRepetitiveCombinationWithLimitedSupply(indices, supply);
+            indices = nextRepetitiveCombinationOfMultiset(indices, multisetFreqArray);
         }
 
         @Override
@@ -96,15 +100,13 @@ public class RepetitiveCombinationLimitedSupply <T> extends AbstractGenerator<T>
                 throw new NoSuchElementException();
             }
             int[] old = indices;
-            indices = nextRepetitiveCombinationWithLimitedSupply(indices, supply);
-            return AbstractGenerator.indicesToValues(old, seed);
+            indices = nextRepetitiveCombinationOfMultiset(indices, multisetFreqArray);
+            return indicesToValues(old, seed);
         }
 
-        private int[] nextRepetitiveCombinationWithLimitedSupply(int[]a, int[] availableCount) {
+        private int[] nextRepetitiveCombinationOfMultiset(int[]a, int[] availableCount) {
 
-            int[] next = new int[a.length];
-            System.arraycopy(a,0,next,0, a.length);
-
+            int[] next = getClone(a);
             int i=next.length-1;
             int maxSupportedValue = availableCount.length-1;
 
@@ -137,7 +139,7 @@ public class RepetitiveCombinationLimitedSupply <T> extends AbstractGenerator<T>
                 // [2] previousValue is maxSupportedValue-1;
                 // example: in 56777, count of 7 reached the availableCount(3)
                 // and previous number is 6
-                return nextRepetitiveCombinationWithLimitedSupply(next, availableCount);
+                return nextRepetitiveCombinationOfMultiset(next, availableCount);
             }
             return next;
         }

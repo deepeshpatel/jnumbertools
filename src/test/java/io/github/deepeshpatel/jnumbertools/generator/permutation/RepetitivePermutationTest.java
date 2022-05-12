@@ -5,9 +5,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import static io.github.deepeshpatel.jnumbertools.generator.TestUtil.iteratorToList;
 import static org.junit.Assert.assertEquals;
 
 public class RepetitivePermutationTest {
@@ -26,6 +29,25 @@ public class RepetitivePermutationTest {
         }
     }
 
+    @Test (expected = NoSuchElementException.class)
+    public void shouldThrowExpIfIterateAfterLastElement(){
+        Iterator<List<String>> iterator = JNumberTools.permutationsOf("A")
+                .repetitive(1).iterator();
+
+            iterator.next();
+            iterator.next();
+    }
+
+    @Test
+    public void shouldReturnSameResultForDifferentIteratorObjects(){
+        Iterable<List<String>> iterable = JNumberTools.permutationsOf("A", "B", "C")
+                .repetitive(2);
+
+        List<List<String>> lists1 = iteratorToList(iterable.iterator());
+        List<List<String>> lists2 = iteratorToList(iterable.iterator());
+        Assert.assertEquals(lists1, lists2);
+    }
+
     @Test
     public void shouldGenerateAllPermutationsOf2Values() {
         String expected = "[[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1], " +
@@ -42,11 +64,10 @@ public class RepetitivePermutationTest {
     public void shouldGenerateRepetitivePermutations() {
         String expected = "[[A, A], [A, B], [A, C], [B, A], [B, B], [B, C], [C, A], [C, B], [C, C]]";
 
-        List<List<String>> output = JNumberTools.permutationsOf("A", "B", "C")
+        String output = JNumberTools.permutationsOf("A", "B", "C")
                 .repetitive(2)
-                .stream()
-                .collect(Collectors.toList());
+                .stream().collect(Collectors.toList()).toString();
 
-        Assert.assertEquals(expected, output.toString());
+        Assert.assertEquals(expected, output);
     }
 }

@@ -9,7 +9,7 @@
  *
  * <LI><a href="#rp">Repetitive Permutation</a>: Repetitive permutations of given size</LI>
  * <LI><a href="#nrp">N<sup>th</sup> Repetitive Permutation</a>: Every Nth repetitive permutation of given size</LI>
- * <LI><a href="#rpls">Repetitive permutation with limited supply</a>: Repetitive permutations of given size with constraint on repetition count</LI>
+ * <LI><a href="#rpls">Repetitive permutation of multiset</a>: Repetitive permutations of given size with constraint on repetition count</LI>
  *
  * <hr>
  * <Strong><p id="up">Generating unique permutations</p></Strong>
@@ -59,7 +59,7 @@
  * <Strong><p id="nkp">Generating N<sup>th</sup> K permutation</p></Strong>
  * <pre>
  *  JNumberTools.permutationsOf("A","B","C")
- *      .kNth(2,2) //size =2 and skipTo every 2<sup>nd</sup> permutation starting from 0<sup>th</sup>
+ *      .kNth(2,2) //size =2 and increment to every 2<sup>nd</sup> permutation starting from 0<sup>th</sup>
  *      .forEach(System.out::println);
  *
  * will generate following (0<sup>th</sup>, 2<sup>nd</sup> and 4<sup>th</sup>) K-permutation of size(K)=2 -
@@ -103,11 +103,11 @@
  * </pre>
  *
  * <hr>
- * <Strong><p id="rpls">Generating repetitive permutations with limited supply</p></Strong>
+ * <Strong><p id="rpls">Generating repetitive permutations of multiset</p></Strong>
  * <pre>
  *     //here A can be repeated max 2 times and B can not be repeated(1 time)
  *     JNumberTools.permutationsOf("A","B")
- *                 .repetitiveWithSupply(2,1)
+ *                 ..repetitiveMultiset(2,1)
  *                 .forEach(System.out::println);
  *
  * will generate following -

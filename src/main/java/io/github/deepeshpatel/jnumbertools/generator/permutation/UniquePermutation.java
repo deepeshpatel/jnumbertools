@@ -5,13 +5,15 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
-import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.itertor.UniquePermutationIterator;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
+
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.newEmptyIterator;
 
 /**
  * Utility to generate all n! unique permutations (with no repeated values)
@@ -44,16 +46,12 @@ import java.util.stream.IntStream;
  */
 public class UniquePermutation<T> extends AbstractGenerator<T> {
 
-    public UniquePermutation(Collection<T> seed) {
-        super(seed);
+    public UniquePermutation(Collection<T> input) {
+        super(input);
     }
 
-    @Override
     public Iterator<List<T>> iterator() {
-        if(seed.isEmpty()) {
-            return newEmptyIterator();
-        }
-        return new NextItemIterator();
+        return seed.isEmpty() ? newEmptyIterator() : new NextItemIterator();
     }
 
     private class NextItemIterator implements Iterator<List<T>> {
@@ -72,13 +70,8 @@ public class UniquePermutation<T> extends AbstractGenerator<T> {
 
         @Override
         public List<T> next() {
-
-            if (hasNext()) {
-                int[] currentIndices = indicesIterator.next();
-                return AbstractGenerator.indicesToValues(currentIndices, seed);
-            }
-
-            throw new NoSuchElementException("Reached to maximum permutation");
+            int[] currentIndices = indicesIterator.next();
+            return indicesToValues(currentIndices, seed);
         }
     }
 }

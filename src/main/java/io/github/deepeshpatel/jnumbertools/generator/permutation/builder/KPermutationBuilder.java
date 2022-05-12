@@ -26,19 +26,20 @@ public class KPermutationBuilder<T> {
         return new KPermutationCombinationOrder<>(seed, k);
     }
 
-    public KPermutationCombinationOrderNth<T> combinationOrderNth(long skipTo){
-        return combinationOrderNth(BigInteger.valueOf(skipTo));
+    public KPermutationCombinationOrderNth<T> combinationOrderNth(long increment){
+        return combinationOrderNth(BigInteger.valueOf(increment));
     }
 
-    public KPermutationCombinationOrderNth<T> combinationOrderNth(BigInteger skipTo){
-        return new KPermutationCombinationOrderNth<>(seed, k, skipTo);
+    public KPermutationCombinationOrderNth<T> combinationOrderNth(BigInteger increment){
+        return new KPermutationCombinationOrderNth<>(seed, k, increment);
     }
 
     public KPermutationLexOrder<T> lexOrder(){
         return new KPermutationLexOrder<>(seed, k);
     }
 
-    public KPermutationLexOrderNth<T> lexOrderNth(long skipTo){
-        return new KPermutationLexOrderNth<>(seed, k, skipTo);
+    public KPermutationLexOrderNth<T> lexOrderNth(long increment){
+        return new KPermutationLexOrderNth<>(seed, k, BigInteger.valueOf(increment));
     }
+
 }

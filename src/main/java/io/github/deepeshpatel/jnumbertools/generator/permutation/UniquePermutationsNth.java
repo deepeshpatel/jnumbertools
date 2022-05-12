@@ -5,7 +5,8 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
-import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.numbersystem.factoradic.FactoradicAlgorithms;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.checkParamIncrement;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.factorial;
 
 /**
@@ -22,8 +24,8 @@ import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.factoria
  * lexicographical order of indices of input values where each value is considered unique.
  * Generating n<sup>th</sup> permutation is important because say, if we need to
  * generate next 100 trillionth permutation
- * of 100 items then it will take months to compute if we go sequentially and then skip
- * the unwanted permutations because the total # of permutations is astronomical (100!= 9.3326E X 10<sup>157</sup>)
+ * of 100 items then it will take months to compute if we go sequentially and then increment
+ * to the desired permutations, because the total # of permutations is astronomical (100!= 9.3326E X 10<sup>157</sup>)
  *
  * This class will provide a mechanism to generate directly the next n<sup>th</sup>
  * lexicographical permutation.
@@ -48,11 +50,12 @@ import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.factoria
  */
 public class UniquePermutationsNth<T> extends AbstractGenerator<T> {
 
-    private final BigInteger withIncrement;
+    private final BigInteger increment;
 
-    public UniquePermutationsNth(Collection<T> seed, BigInteger skipTo) {
-        super(seed);
-        this.withIncrement = skipTo;
+    public UniquePermutationsNth(Collection<T> input, BigInteger increment) {
+        super(input);
+        this.increment = increment;
+        checkParamIncrement(increment, "unique permutations");
     }
 
     @Override
@@ -62,26 +65,19 @@ public class UniquePermutationsNth<T> extends AbstractGenerator<T> {
 
     private class KthItemIterator implements  Iterator<List<T>> {
 
-        private int[] currentIndices;
         private final int[] initialIndices;
 
-        private boolean hasNext = true;
-        final BigInteger k;
-        BigInteger nextK;
+        BigInteger nextK = BigInteger.ZERO;
         final BigInteger numOfPermutations;
 
         public KthItemIterator() {
             initialIndices = IntStream.range(0, seed.size()).toArray();
-            currentIndices = IntStream.range(0, seed.size()).toArray();
-
-            this.k = withIncrement;
-            this.nextK = withIncrement;
-            numOfPermutations = factorial(initialIndices.length);
+            numOfPermutations = factorial(initialIndices.length);//.longValue();
         }
 
         @Override
         public boolean hasNext() {
-            return hasNext;
+            return nextK.compareTo(numOfPermutations) < 0;//numOfPermutations;
         }
 
         @Override
@@ -89,54 +85,15 @@ public class UniquePermutationsNth<T> extends AbstractGenerator<T> {
             if(!hasNext()) {
                 throw new NoSuchElementException();
             }
-            int[] oldIndices = currentIndices;
-            currentIndices = nextPermutation(initialIndices, nextK);
-            hasNext = nextK.compareTo(numOfPermutations) <0;
-            nextK = nextK.add(k);
-            return AbstractGenerator.indicesToValues(oldIndices, seed);
+
+            int[] currentIndices = nextPermutation(nextK, initialIndices.length);
+            nextK = nextK.add(increment);
+            return indicesToValues(currentIndices, seed);
         }
 
-        public int[] nextPermutation( int[] input, BigInteger kth) {
-            int[] indices = factoradic(kth, input.length);
-            return createLehmerCode(input, indices);
+        public int[] nextPermutation(BigInteger kth, int numberOfItems) {
+            return FactoradicAlgorithms.unRank(kth, numberOfItems);
         }
 
-        private  int[] factoradic(BigInteger k, int outputLength) {
-
-            int[] output = new int[outputLength];
-
-            BigInteger d = BigInteger.ONE;
-            long kDivideByD;
-            for (int i = 1; i <=output.length; i++) {
-
-                kDivideByD = k.divide(d).longValue();
-
-                if(kDivideByD == 0)
-                    break;
-
-                //save in reverse order for correct printing order while testing.
-                output[output.length-i] = (int)kDivideByD % i;
-                d = d.multiply(BigInteger.valueOf(i));
-            }
-            return output;
-        }
-
-        private int[] createLehmerCode(int[] input, int[] factoradic){
-            int[] output = new int[input.length];
-            System.arraycopy(input, 0, output,0, input.length);
-
-            for (int i = 0; i < output.length; i++) {
-                int index = factoradic[i] + i;
-
-                if(index != i) {
-                    int temp = output[index];
-                    if (index - i >= 0) {
-                        System.arraycopy(output, i, output, i + 1, index - i);
-                    }
-                    output[i] = temp;
-                }
-            }
-            return output;
-        }
     }
 }

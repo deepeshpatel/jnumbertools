@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.github.deepeshpatel.jnumbertools.generator.TestUtil.iteratorToList;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCr;
 import static org.junit.Assert.assertEquals;
 
@@ -27,6 +28,16 @@ public class UniqueCombinationTest {
     }
 
     @Test
+    public void shouldReturnSameResultForDifferentIteratorObjects(){
+        Iterable<List<String>> iterable = JNumberTools.combinationsOf("A", "B", "C")
+                .unique(2);
+
+        List<List<String>> lists1 = iteratorToList(iterable.iterator());
+        List<List<String>> lists2 = iteratorToList(iterable.iterator());
+        Assert.assertEquals(lists1, lists2);
+    }
+
+    @Test
     public void  shouldGenerateCombinationsInInputOrder() {
 
         String expected = "[[Red, Green], [Red, Blue], [Green, Blue]]";
@@ -41,9 +52,7 @@ public class UniqueCombinationTest {
     }
 
     @Test
-    public void shouldReturnEmptyListForSizeLessThanOrEqualsZero() {
-
-        String expected ="[[]]";
+    public void shouldReturnEmptyListForSizeEqualsZero() {
 
         String output = JNumberTools
                 .combinationsOf("A","B")
@@ -51,35 +60,24 @@ public class UniqueCombinationTest {
                 .stream()
                 .collect(Collectors.toList()).toString();
 
-        assertEquals(expected, output);
+        assertEquals("[[]]", output);
     }
 
-    @Test
-    public void shouldReturnEmptyListForSizeGreaterThanN() {
+    @Test (expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionForSizeGreaterThanN() {
 
-        String expected ="[]";
-
-        String output = JNumberTools
-                .combinationsOf("A","B")
-                .unique(3)
-                .stream()
-                .collect(Collectors.toList()).toString();
-
-        assertEquals(expected, output);
+        JNumberTools.combinationsOf("A","B")
+                .unique(3);
     }
 
     @Test
     public void  shouldGenerateEmptyListForNullInput() {
-
-        String expected = "[]";
-
         String output = JNumberTools
                 .combinationsOf()
-                .unique(2)
+                .unique(0)
                 .stream()
                 .collect(Collectors.toList()).toString();
 
-        //System.out.println(output);
-        assertEquals(expected, output);
+        assertEquals("[[]]", output);
     }
 }

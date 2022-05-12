@@ -8,23 +8,34 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.github.deepeshpatel.jnumbertools.generator.TestUtil.iteratorToList;
 import static org.junit.Assert.assertEquals;
 
 public class RepetitivePermutationNthTest {
 
     @Test
     public void assertCount(){
-        int skip=4;
+        int increment=4;
         for(int n=1; n<=5; n++) {
             List<String> input = Collections.nCopies(n, "A");
             for(int size=0; size<=3; size++){
                 long count = JNumberTools.permutationsOf(input)
-                        .repetitiveNth(size,skip)
+                        .repetitiveNth(size,increment)
                         .stream().count();
-                double expected = Math.ceil(Math.pow(n,size)/skip);
+                double expected = Math.ceil(Math.pow(n,size)/increment);
                 Assert.assertEquals((long)expected, count);
             }
         }
+    }
+
+    @Test
+    public void shouldReturnSameResultForDifferentIteratorObjects(){
+        Iterable<List<String>> iterable = JNumberTools.permutationsOf("A", "B", "C")
+                .repetitiveNth(2,2);
+
+        List<List<String>> lists1 = iteratorToList(iterable.iterator());
+        List<List<String>> lists2 = iteratorToList(iterable.iterator());
+        Assert.assertEquals(lists1, lists2);
     }
 
     @Test

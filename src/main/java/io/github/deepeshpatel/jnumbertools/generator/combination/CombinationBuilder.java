@@ -20,19 +20,19 @@ public class CombinationBuilder<T> {
         return new UniqueCombination<>(data, ofSize);
     }
 
-    public UniqueCombinationNth<T> uniqueNth(int ofSize, long skipTo) {
-        return uniqueNth(ofSize, BigInteger.valueOf(skipTo));
+    public UniqueCombinationNth<T> uniqueNth(int ofSize, long increment) {
+        return uniqueNth(ofSize, BigInteger.valueOf(increment));
     }
 
-    public UniqueCombinationNth<T> uniqueNth(int ofSize, BigInteger skipTo) {
-        return new UniqueCombinationNth<>(data, ofSize, skipTo);
+    public UniqueCombinationNth<T> uniqueNth(int ofSize, BigInteger increment) {
+        return new UniqueCombinationNth<>(data, ofSize, increment);
     }
 
     public RepetitiveCombination<T> repetitive(int ofSize) {
         return new RepetitiveCombination<>(data, ofSize);
     }
 
-    public RepetitiveCombinationLimitedSupply<T> repetitiveWithSupply(int ofSize, int... supply) {
-        return new RepetitiveCombinationLimitedSupply<>(data, ofSize, supply);
+    public RepetitiveCombinationMultiset<T> repetitiveMultiset(int ofSize, int... multisetFreqArray) {
+        return new RepetitiveCombinationMultiset<>(data, ofSize, multisetFreqArray);
     }
 }

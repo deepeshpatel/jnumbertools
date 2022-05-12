@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.github.deepeshpatel.jnumbertools.generator.TestUtil.iteratorToList;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPr;
 import static org.junit.Assert.assertEquals;
 
@@ -17,12 +18,22 @@ public class UniquePermutationNthTest {
     public void assertCount(){
         for(int n=0; n<6; n++) {
             List<String> input = Collections.nCopies(n, "A");
-            for(int skip=1; skip<=4; skip++) {
-                long size = JNumberTools.permutationsOf(input).uniqueNth(skip).stream().count();
-                double expected = Math.ceil(nPr(n,n)/(double)skip);
+            for(int increment=1; increment<=4; increment++) {
+                long size = JNumberTools.permutationsOf(input).uniqueNth(increment).stream().count();
+                double expected = Math.ceil(nPr(n,n)/(double)increment);
                 Assert.assertEquals((long)expected,size );
             }
         }
+    }
+
+    @Test
+    public void shouldReturnSameResultForDifferentIteratorObjects(){
+        Iterable<List<String>> iterable = JNumberTools.permutationsOf("A", "B", "C")
+                .uniqueNth(3);
+
+        List<List<String>> lists1 = iteratorToList(iterable.iterator());
+        List<List<String>> lists2 = iteratorToList(iterable.iterator());
+        Assert.assertEquals(lists1, lists2);
     }
 
     @Test
@@ -35,30 +46,31 @@ public class UniquePermutationNthTest {
         assertEquals(expected,actual);
     }
 
-    @Test (expected = NullPointerException.class)
-    public void shouldThrowExceptionWithNullInput(){
-        JNumberTools.permutationsOf((Collection<Object>) null)
-                .uniqueNth(2);
+    @Test
+    public void shouldGenerateEmptyListForNullInput(){
+        String actual  = JNumberTools.permutationsOf((Collection<Object>) null)
+                .uniqueNth(2)
+                .stream().collect(Collectors.toList()).toString();
+        assertEquals("[[]]",actual);
     }
 
     @Test
     public void shouldGenerateEmptyListForEmptyInput(){
-        String expected = "[[]]";
         String actual   = JNumberTools.permutationsOf(new ArrayList<String>())
                 .uniqueNth(2)
                 .stream().collect(Collectors.toList()).toString();
 
-        assertEquals(expected,actual);
+        assertEquals("[[]]",actual);
     }
 
     @Test
     public void shouldGenerateUniqueNthPermutations() {
         String expected = "[[Red, Green, Blue]," +
                 " [Green, Red, Blue]," +
-                " [Blue, Red, Green]]";// +
+                " [Blue, Red, Green]]";
 
         List<List<String>> output = JNumberTools.permutationsOf("Red", "Green", "Blue")
-                .uniqueNth(2) //skip every 1 permutation in between
+                .uniqueNth(2) //increment to every 2nd permutation
                 .stream()
                 .collect(Collectors.toList());
 
@@ -70,44 +82,46 @@ public class UniquePermutationNthTest {
 
         List<String> input = Arrays.asList("0", "1","2","3","4","5","6","7","8","9","10","11","12");
 
-        String expected = "[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], " +
-                "[2, 1, 0, 8, 10, 7, 9, 12, 4, 6, 11, 3, 5], " +
-                "[4, 2, 1, 3, 8, 5, 7, 11, 10, 6, 9, 0, 12], " +
-                "[6, 3, 1, 10, 2, 11, 0, 9, 4, 5, 7, 8, 12], " +
-                "[8, 4, 2, 3, 12, 5, 10, 7, 1, 9, 11, 0, 6], " +
-                "[10, 5, 2, 11, 7, 12, 4, 3, 8, 1, 0, 6, 9], " +
-                "[12, 6, 3, 5, 4, 8, 1, 7, 0, 2, 2, 10, 11]]";
+        String[] expected = new String[]{
+                "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]",
+                "[2, 1, 0, 8, 10, 7, 9, 12, 4, 6, 11, 3, 5]",
+                "[4, 2, 1, 3, 8, 5, 7, 11, 10, 6, 9, 0, 12]",
+                "[6, 3, 1, 10, 2, 11, 0, 9, 4, 5, 7, 8, 12]",
+                "[8, 4, 2, 3, 12, 5, 10, 7, 1, 9, 11, 0, 6]",
+                "[10, 5, 2, 11, 7, 12, 4, 3, 8, 1, 6, 0, 9]",
+                "[12, 6, 3, 5, 4, 8, 1, 7, 0, 2, 9, 10, 11]"
+        };
 
-        String actual   =
+        List<List<String>> actual = JNumberTools.permutationsOf(input)
+                .uniqueNth(1000_000_000)// jump to 1 billionth permutation
+                .stream().collect(Collectors.toList());
 
-                JNumberTools.permutationsOf(input)
-                        .uniqueNth(1000_000_000)// jump to 1 billionth permutation
-                        .stream().collect(Collectors.toList()).toString();
-
-        assertEquals(expected,actual);
+        for(int i=0; i<expected.length; i++) {
+            assertEquals(expected[i],actual.get(i).toString());
+        }
     }
 
     @Test
-    public void shouldGeneratePermutationsSkippingInBetween() {
+    public void shouldGenerateNthPermutations() {
 
         List<String> input = Arrays.asList("A","B","C","D","E","F");
-        for(int skip=1; skip<=32;skip++) {
-            String expected = getExpectedResultViaOneByOneIteration(input, skip);
-            String output   = getResultViaDirectSkipping(input,skip);
+        for(int increment=1; increment<=32;increment++) {
+            String expected = getExpectedResultViaOneByOneIteration(input, increment);
+            String output   = getResultViaDirectIncrement(input,increment);
             Assert.assertEquals(expected,output);
         }
     }
 
-    private String getResultViaDirectSkipping(List<String> input, int skip) {
+    private String getResultViaDirectIncrement(List<String> input, int increment) {
         return JNumberTools.permutationsOf(input)
-                .uniqueNth(skip).stream().collect(Collectors.toList()).toString();
+                .uniqueNth(increment).stream().collect(Collectors.toList()).toString();
     }
 
-    private String getExpectedResultViaOneByOneIteration(List<String> input, int skip) {
+    private String getExpectedResultViaOneByOneIteration(List<String> input, int increment) {
         Iterable<List<String>> iterable = JNumberTools.permutationsOf(input)
                 .unique();
 
-        return TestUtil.collectSkippedValues(iterable, skip).toString();
+        return TestUtil.collectEveryNthValue(iterable, increment).toString();
     }
 }
 

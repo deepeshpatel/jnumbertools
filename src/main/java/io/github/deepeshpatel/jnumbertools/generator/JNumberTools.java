@@ -31,7 +31,7 @@ public class JNumberTools {
 
     @SafeVarargs
     public static <T> PermutationBuilder<T>  permutationsOf(T... data) {
-        return permutationsOf(Arrays.asList(data));
+        return JNumberTools.permutationsOf(Arrays.asList(data));
     }
 
     public static <T> SubsetGenerator.Builder<T> subsetsOf(Collection<T> data) {

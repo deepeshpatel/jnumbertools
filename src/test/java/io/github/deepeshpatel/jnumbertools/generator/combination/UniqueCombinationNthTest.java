@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.github.deepeshpatel.jnumbertools.generator.TestUtil.iteratorToList;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCr;
 import static org.junit.Assert.assertEquals;
 
@@ -17,19 +18,30 @@ public class UniqueCombinationNthTest {
 
     @Test
     public void assertCount(){
-        int r=3;
-        for(int n=0; n<6; n++) {
+
+        for(int n=3; n<6; n++) {
             List<String> input = Collections.nCopies(n, "A");
-            for(int skip=1; skip<=4; skip++) {
-                long size = JNumberTools.combinationsOf(input).uniqueNth(r,skip).stream().count();
-                double expected = Math.ceil(nCr(n,r)/(double)skip);
+            for(int increment=1; increment<=4; increment++) {
+                int combinationSize=input.size()/2;
+                long size = JNumberTools.combinationsOf(input).uniqueNth(combinationSize,increment).stream().count();
+                double expected = Math.ceil(nCr(n,combinationSize)/(double)increment);
                 Assert.assertEquals((long)expected,size );
             }
         }
     }
 
     @Test
-    public void  shouldGenerateCombinationsWithSkippingToEvery2ndCombination() {
+    public void shouldReturnSameResultForDifferentIteratorObjects(){
+        Iterable<List<String>> iterable = JNumberTools.combinationsOf("A", "B", "C")
+                .uniqueNth(2,2);
+
+        List<List<String>> lists1 = iteratorToList(iterable.iterator());
+        List<List<String>> lists2 = iteratorToList(iterable.iterator());
+        Assert.assertEquals(lists1, lists2);
+    }
+
+    @Test
+    public void  shouldGenerateCombinationsWithIncrementingToEvery3rdCombination() {
 
         String expected = "[[0, 1, 2], [0, 2, 3], [1, 2, 3], [2, 3, 4]]";
 
@@ -43,7 +55,7 @@ public class UniqueCombinationNthTest {
     }
 
     @Test
-    public void  shouldSupportVeryLargeCombinationSkipping() {
+    public void  shouldSupportVeryLargeNthCombination() {
 
         String expected = "[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], " +
                 "[0, 3, 6, 9, 10, 11, 13, 15, 16, 18, 20, 23, 24, 25, 27, 31, 33], " +
@@ -61,28 +73,28 @@ public class UniqueCombinationNthTest {
     }
 
     @Test
-    public void shouldGenerateNthCombinationSkippingValuesInBetween() {
+    public void shouldGenerateNthCombinationIncrementingValuesInBetween() {
 
         List<String> input = Arrays.asList("A","B","C","D","E","F","G","H","I","J");
-        for(int k=1; k<= input.size()/2; k++) {
-            for(int skip=1; skip<=32;skip++) {
-                String expected = getExpectedResultViaOneByOneIteration(input, k,skip);
-                String output   = getResultViaDirectSkipping(input,k,skip);
+        for(int k=1; k<=input.size()/2; k++) {
+            for(int increment=1; increment<=32;increment++) {
+                String expected = getExpectedResultViaOneByOneIteration(input, k,increment);
+                String output   = getResultViaDirectIncrement(input,k,increment);
                 Assert.assertEquals(expected,output);
             }
         }
     }
 
-    private String getResultViaDirectSkipping(List<String> input, int k, int skip) {
+    private String getResultViaDirectIncrement(List<String> input, int k, int increment) {
         return JNumberTools.combinationsOf(input)
-                .uniqueNth(k, skip)
+                .uniqueNth(k, increment)
                 .stream().collect(Collectors.toList()).toString();
     }
 
-    private String getExpectedResultViaOneByOneIteration(List<String> input, int k, int skip) {
+    private String getExpectedResultViaOneByOneIteration(List<String> input, int k, int increment) {
         Iterable<List<String>> iterable = JNumberTools.combinationsOf(input)
                 .unique(k);
 
-        return TestUtil.collectSkippedValues(iterable, skip).toString();
+        return TestUtil.collectEveryNthValue(iterable, increment).toString();
     }
 }

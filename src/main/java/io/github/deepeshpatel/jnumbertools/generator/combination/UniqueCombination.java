@@ -5,16 +5,19 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.combination;
 
-import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
 import java.util.*;
 import java.util.stream.IntStream;
 
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.checkParamCombination;
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.getClone;
+
 /**
  *
- * Utility for generating r-combinations of Seed = {1, 2 . . ., n}
+ * Utility for generating r-combinations of input = {1, 2 . . ., n}
  *
- * Generates r combinations from n=seed.length items.
+ * Generates r combinations from n=input.length items.
  * combinations are generated in Lexicographic order
  * of indices of items in a list. This class will not check for duplicate values and
  * treats all values differently based on the index
@@ -49,17 +52,18 @@ public class UniqueCombination<T> extends AbstractGenerator<T> {
     private final int r;
 
     /**
-     * @param seed List of N items
+     * @param input List of N items
      * @param r number of combinations from N items. r must be &lt;= N for generating unique combinations
      */
-    public UniqueCombination(Collection<T> seed, int r) {
-        super(seed);
+    public UniqueCombination(Collection<T> input, int r) {
+        super(input);
         this.r = r;
+        checkParamCombination(seed.size(),r, "unique combinations");
     }
 
     @Override
     public Iterator<List<T>> iterator() {
-        return (r>seed.size() || r<0) ? Collections.emptyIterator() : new Itr();
+        return new Itr();
     }
 
     private class Itr implements Iterator<List<T>> {
@@ -82,14 +86,12 @@ public class UniqueCombination<T> extends AbstractGenerator<T> {
             }
             int[] old = indices;
             indices = nextCombination(indices, seed.size());
-            return AbstractGenerator.indicesToValues(old, seed);
+            return indicesToValues(old, seed);
         }
 
         private int[] nextCombination(int[]a, int n) {
 
-            int[] next = new int[a.length];
-            System.arraycopy(a,0,next,0, a.length);
-
+            int[] next = getClone(a);
             int i=next.length-1;
             int maxSupportedValueAtIndexI = n-1;
 

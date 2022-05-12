@@ -5,12 +5,9 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
-import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * Utility to generate all permutations of given items and size where items can be repeated.
@@ -49,12 +46,12 @@ public class RepetitivePermutation<T>  extends AbstractGenerator<T> {
     /**
      * Implements the iterable of repetitive permutations.
      * Permutations are generated in lex order of indices of input values, considering value at each index as unique.
-     * @param seed Input of size n from which repeated permutations of size 'size' will be generated.
+     * @param input Input of size n from which repeated permutations of size 'size' will be generated.
      * @param size size of permutations. In contrast to KPermutation, size can even be greater than
      *             n, because repetition is allowed
      */
-    public RepetitivePermutation(Collection<T> seed, int size) {
-        super(seed);
+    public RepetitivePermutation(Collection<T> input, int size) {
+        super(input);
         this.size = size;
     }
 
@@ -78,14 +75,17 @@ public class RepetitivePermutation<T>  extends AbstractGenerator<T> {
             if(!hasNext()) {
                 throw new NoSuchElementException();
             }
-            List<T> result = AbstractGenerator.indicesToValuesReverse(currentIndices, seed);
+            List<T> result = indicesToValues(currentIndices, seed);
             hasNext = nextRepetitivePermutation(currentIndices, seed.size());
             return result;
         }
 
         private boolean nextRepetitivePermutation(int[] indices, int base) {
             int j;
-            for (j=0; j <indices.length ; j++) {
+            int i=0;
+            boolean moreElementsAvailable;
+
+            for (j=indices.length-1; j >=0 ; j--,i++) {
                 if(indices[j] == base-1) {
                     indices[j] = 0;
                 } else {
@@ -93,7 +93,9 @@ public class RepetitivePermutation<T>  extends AbstractGenerator<T> {
                     break;
                 }
             }
-            return (j != indices.length); //true if more numbers are available
+
+            moreElementsAvailable = j != -1;
+            return moreElementsAvailable;
         }
     }
 }

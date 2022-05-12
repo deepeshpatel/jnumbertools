@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
+import io.github.deepeshpatel.jnumbertools.numbersystem.combinadic.Combinadic;
 import org.junit.Assert;
 import org.junit.Test;
 

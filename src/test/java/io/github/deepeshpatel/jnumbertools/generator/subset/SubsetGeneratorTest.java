@@ -29,10 +29,10 @@ public class SubsetGeneratorTest {
     public void assertCountOfSubsetsInRange() {
         for(int n=0; n<=4; n++) {
             List<String> input = Collections.nCopies(n, "A");
-            int from=2;
-            for(int range=from; range<=n+1; range++) {
+            int from=0;
+            for(int range=0; range<=n; range++) {
                 int count = (int) JNumberTools.subsetsOf(input)
-                        .inRange(2, range)
+                        .inRange(from, range)
                         .stream().count();
                 assertSize(count,n,from,range);
             }
@@ -88,15 +88,13 @@ public class SubsetGeneratorTest {
     }
 
     @Test
-    public void shouldNotGenerateForNegativeSizeButGenerateEmptyForZero() {
-        String expected = "[[], [A], [B], [C]]";
-
+    public void shouldGenerateEmptyForRangeFromZeroToZero() {
         String output = JNumberTools
                 .subsetsOf("A", "B", "C")
-                .inRange(-3, 1)
+                .inRange(0, 0)
                 .stream().collect(Collectors.toList()).toString();
 
-        assertEquals(expected, output);
+        assertEquals("[[]]", output);
     }
 
 }

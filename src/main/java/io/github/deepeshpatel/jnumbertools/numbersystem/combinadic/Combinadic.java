@@ -2,12 +2,12 @@
  * JNumberTools Library v1.0.3
  * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
-package io.github.deepeshpatel.jnumbertools.numbersystem;
+package io.github.deepeshpatel.jnumbertools.numbersystem.combinadic;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCrBig;
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.getClone;
 
 /**
  * Object of this class encapsulates the Combinadic representation of a
@@ -28,9 +28,8 @@ public final class Combinadic {
     }
 
     public Combinadic(BigInteger positiveNumber, int degree) {
-        this(combinadicOf(positiveNumber, degree), positiveNumber);
+        this(CombinadicAlgorithms.decimalToCombinadic(positiveNumber, degree), positiveNumber);
     }
-
 
     private Combinadic(int[] values, BigInteger decimalValue) {
         this.readOnlyValues = values;
@@ -48,7 +47,7 @@ public final class Combinadic {
      * @return the next successive(plus 1) Combinadic of this Combinadic
      */
     public Combinadic nextCombinadic() {
-        int[] next = nextCombinadic(readOnlyValues);
+        int[] next = CombinadicAlgorithms.nextCombinadic(readOnlyValues);
         return new Combinadic(next, decimalValue.add(BigInteger.ONE));
     }
 
@@ -79,58 +78,11 @@ public final class Combinadic {
         return decimalValue.hashCode();
     }
 
-    private static int[] combinadicOf(BigInteger value, int degree) {
-
-        int[] combinadic = new int[degree];
-
-        int r = degree;
-        BigInteger max = value;
-
-        for(int i=0; i<combinadic.length; i++) {
-            int n=r;
-            BigInteger nCr = nCrBig(n,r);
-            BigInteger result = BigInteger.ZERO;
-            while(nCr.compareTo(max) <= 0) {
-                result = nCr;
-                n++;
-                nCr =  nCr
-                        .multiply(BigInteger.valueOf(n))
-                        .divide(BigInteger.valueOf(n-r));
-            }
-            combinadic[i] = n-1;
-            max = max.subtract(result);
-            r--;
-        }
-        return combinadic;
-    }
-
     /**
      * @return int array containing the values of this Combinadic.
      * length of array is equal to the degree of this Combinadic
      */
     public int[] value() {
-        int[] a = new int[readOnlyValues.length];
-        System.arraycopy(readOnlyValues,0,a,0, a.length);
-        return a;
-    }
-
-    //This is faster than nextKthCombinadic. So must be used for +1
-    private static int[] nextCombinadic(int[] combinadic) {
-
-        int[] result = new int[combinadic.length];
-        System.arraycopy(combinadic,0, result, 0, combinadic.length);
-
-        int k=0;
-        for(int i=result.length-1; i>0; i--) {
-
-            result[i] = result[i] + 1;
-            if(result[i] < result[i-1] ) {
-                return result;
-            }
-            result[i] = k++;
-        }
-
-        result[0]++;
-        return result;
+        return getClone(readOnlyValues);
     }
 }

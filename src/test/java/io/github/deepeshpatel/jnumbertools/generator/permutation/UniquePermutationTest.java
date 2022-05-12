@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.github.deepeshpatel.jnumbertools.generator.TestUtil.iteratorToList;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPr;
 import static org.junit.Assert.assertEquals;
 
@@ -22,6 +23,16 @@ public class UniquePermutationTest {
                     .unique().stream().count();
             Assert.assertEquals(nPr(n,n), size);
         }
+    }
+
+    @Test
+    public void shouldReturnSameResultForDifferentIteratorObjects(){
+        Iterable<List<String>> iterable = JNumberTools.permutationsOf("A", "B", "C")
+                .unique();
+
+        List<List<String>> lists1 = iteratorToList(iterable.iterator());
+        List<List<String>> lists2 = iteratorToList(iterable.iterator());
+        Assert.assertEquals(lists1, lists2);
     }
 
     @Test
@@ -51,19 +62,23 @@ public class UniquePermutationTest {
         Assert.assertEquals(expected, output.toString());
     }
 
-    @Test (expected = NullPointerException.class)
-    public void shouldThrowExceptionWithNullInput(){
-        JNumberTools.permutationsOf((java.util.Collection<String>) null).unique();
-    }
-
     @Test
     public void shouldGenerateEmptyListForEmptyInput(){
-        String expected = "[[]]";
-
         String actual   = JNumberTools.permutationsOf(new ArrayList<String>())
                 .unique()
                 .stream().collect(Collectors.toList()).toString();
 
-        assertEquals(expected,actual);
+        assertEquals("[[]]",actual);
+    }
+
+    @Test
+    public void shouldConsiderNullAsEmpty(){
+        JNumberTools.permutationsOf().unique();
+
+        String actual   = JNumberTools.permutationsOf((java.util.Collection<String>) null)
+                .unique()
+                .stream().collect(Collectors.toList()).toString();
+
+        assertEquals("[[]]",actual);
     }
 }

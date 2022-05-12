@@ -3,10 +3,12 @@
  * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
-package io.github.deepeshpatel.jnumbertools.generator.permutation;
+package io.github.deepeshpatel.jnumbertools.generator.permutation.itertor;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.getClone;
 
 /**
  * Used by permutation generators in this package
@@ -16,7 +18,7 @@ public class UniquePermutationIterator implements Iterator<int[]> {
 
     private int[] indices;
 
-    protected UniquePermutationIterator(int[] indices) {
+    public UniquePermutationIterator(int[] indices) {
         this.indices = indices;
     }
 
@@ -39,10 +41,9 @@ public class UniquePermutationIterator implements Iterator<int[]> {
 
     private int[] nextPermutation(int[] n) {
 
-        int[] c = new int[n.length];
-        System.arraycopy(n,0,c,0,c.length);
-
+        int[] c =  getClone(n);
         int highestI = -1;
+
         for (int i = c.length - 2; i >= 0; i--) {
             if(c[i] <c[i+1]) {
                 highestI = i;

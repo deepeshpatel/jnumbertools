@@ -5,14 +5,19 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.combination;
 
-import io.github.deepeshpatel.jnumbertools.generator.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.numbersystem.Combinadic;
+import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
+import io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil;
+import io.github.deepeshpatel.jnumbertools.numbersystem.combinadic.CombinadicAlgorithms;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCrBig;
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.checkParamCombination;
 
 /**
  * Implements the iterable generating every n<sup>th</sup> unique combination of size k.
@@ -46,39 +51,41 @@ import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCrBig;
 public class UniqueCombinationNth<T> extends AbstractGenerator<T> {
 
     private final int r;
-    private final BigInteger k;
+    private final BigInteger increment;
+    private final BigInteger nCr;
 
     /**
-     * @param seed List of N items
+     * @param input List of N items
      * @param r size of combinations from N items. r must be &lt;= N for generating unique combinations
-     * @param skipTo next combination in lex order to be generated after previous combination
+     * @param increment next combination in lex order to be generated after previous combination
      *               starting from the 0th(first) combination.
      */
-    public UniqueCombinationNth(Collection<T> seed, int r, BigInteger skipTo) {
-        super(seed);
+    public UniqueCombinationNth(Collection<T> input, int r, BigInteger increment) {
+        super(input);
         this.r = r;
-        this.k = skipTo;
+        this.increment = increment;
+        checkParamCombination(seed.size(), r, "nth unique combination");
+        CombinatoricsUtil.checkParamIncrement(increment, "Unique Combinations");
+        this.nCr = MathUtil.nCrBig(seed.size(),r);
     }
 
     @Override
-    public Iterator<List<T>> iterator() {
-        return (r==0 || r>seed.size()) ? Collections.emptyIterator() : new Itr();
+    public  Iterator<List<T>> iterator() {
+        return new Itr();
     }
-
 
     private class Itr implements Iterator<List<T>> {
 
-        BigInteger currentK;
+        BigInteger n = BigInteger.ZERO;
         int[] result;
 
         private Itr(){
             result =  IntStream.range(0, r).toArray();
-            currentK = k;
         }
 
         @Override
         public boolean hasNext() {
-            return result.length!=0;
+            return n.compareTo(nCr) < 0;
         }
 
         @Override
@@ -86,24 +93,16 @@ public class UniqueCombinationNth<T> extends AbstractGenerator<T> {
             if(!hasNext()) {
                 throw new NoSuchElementException();
             }
-            int[] old = result;
-            result = kthUniqueCombination(seed.size(),r,currentK);
-            currentK  = currentK.add(k);
-            return AbstractGenerator.indicesToValues(old, seed);
+
+            result = kthUniqueCombination(seed.size(),r,n);
+            n = n.add(increment);
+            return indicesToValues(result, seed);
         }
 
+        //TODO: For iterator no need to un-rank if we find the algo for next Kth combinadic
+        //TODO: DO this as fun activity with Aditya
         private int[] kthUniqueCombination(int n, int r, BigInteger k) {
-            BigInteger x = nCrBig(n, r).subtract(BigInteger.ONE).subtract(k);
-            if (x.compareTo(BigInteger.ZERO) < 0) {
-                return new int[]{};
-            }
-
-            Combinadic combinadic = new Combinadic(x,r);
-            int[] a = combinadic.value();
-            for(int i=0; i<a.length; i++) {
-                a[i] = n-1-a[i];
-            }
-            return a;
+            return CombinadicAlgorithms.unRank(n,r,k);
         }
     }
 }
