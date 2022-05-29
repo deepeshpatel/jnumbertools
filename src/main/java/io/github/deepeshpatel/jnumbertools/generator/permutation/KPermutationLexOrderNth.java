@@ -103,7 +103,7 @@ public class KPermutationLexOrderNth<T> extends AbstractGenerator<T> {
         }
 
         private int[] nextNthKPermutation(BigInteger n, int degree, int size) {
-            return PermutadicAlgorithms.unRankWithoutBoundCheck(n.longValue(),size,degree);
+            return PermutadicAlgorithms.unRankWithoutBoundCheck(n,size,degree);
         }
     }
 }

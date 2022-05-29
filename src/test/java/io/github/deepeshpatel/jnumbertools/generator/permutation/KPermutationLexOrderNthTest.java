@@ -2,9 +2,11 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
 import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
 import io.github.deepeshpatel.jnumbertools.generator.TestUtil;
+import io.github.deepeshpatel.jnumbertools.numbersystem.permutadic.PermutadicAlgorithms;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -55,6 +57,26 @@ public class KPermutationLexOrderNthTest {
         }
     }
 
+    @Test
+    public void shouldSupportVeryLargeNthKPermutation() {
+
+        //find every 10^29 th 20-Permutation of 40 elements(20P40)
+        BigInteger increment = new BigInteger("100000000000000000000000000000");
+        BigInteger n = BigInteger.ZERO;
+
+        List<List<Integer>> permutations = JNumberTools.permutationsOfSize(40)
+                .k(20)
+                .lexOrderNth(increment)
+                .stream().collect(Collectors.toList());
+
+        for(List<Integer> permutation: permutations) {
+            int[] p = permutation.stream().mapToInt(Integer::intValue).toArray();
+            BigInteger rank  = PermutadicAlgorithms.rank(p,40);
+            Assert.assertEquals(n,rank);
+            n = n.add(increment);
+        }
+    }
+
     private String getResultViaDirectIncrement(List<String> input, int k, int increment) {
         return JNumberTools.permutationsOf(input)
                 .k(k)
@@ -69,5 +91,4 @@ public class KPermutationLexOrderNthTest {
 
         return TestUtil.collectEveryNthValue(iterable, increment).toString();
     }
-
 }

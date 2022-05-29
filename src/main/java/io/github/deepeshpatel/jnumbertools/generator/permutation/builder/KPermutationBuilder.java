@@ -39,7 +39,11 @@ public class KPermutationBuilder<T> {
     }
 
     public KPermutationLexOrderNth<T> lexOrderNth(long increment){
-        return new KPermutationLexOrderNth<>(seed, k, BigInteger.valueOf(increment));
+        return lexOrderNth(BigInteger.valueOf(increment));
+    }
+
+    public KPermutationLexOrderNth<T> lexOrderNth(BigInteger increment){
+        return new KPermutationLexOrderNth<>(seed, k, increment);
     }
 
 }

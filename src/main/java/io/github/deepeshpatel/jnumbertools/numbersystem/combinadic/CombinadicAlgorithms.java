@@ -7,7 +7,7 @@ import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCrBig;
 
 public class CombinadicAlgorithms {
 
-    public static BigInteger rank(int n, int r, int[] nthCombination ) {
+    public static BigInteger rank(int n, int[] nthCombination ) {
         int[] combinadic = new int[nthCombination.length];
 
         for(int i=0; i<combinadic.length; i++) {
@@ -15,10 +15,10 @@ public class CombinadicAlgorithms {
         }
 
         BigInteger x = combinadicToDecimal(combinadic);
-        return  nCrBig(n,r).subtract(x).subtract(BigInteger.ONE);
+        return  nCrBig(n,nthCombination.length).subtract(x).subtract(BigInteger.ONE);
     }
 
-    public static int[] unRank(int n, int r, BigInteger rank) {
+    public static int[] unRank(BigInteger rank, int n, int r) {
 
         BigInteger x = nCrBig(n, r).subtract(rank).subtract(BigInteger.ONE);
         int[] a = decimalToCombinadic(x,r);

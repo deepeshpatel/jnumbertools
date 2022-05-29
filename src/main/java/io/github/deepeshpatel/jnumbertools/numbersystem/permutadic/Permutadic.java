@@ -5,6 +5,7 @@
 
 package io.github.deepeshpatel.jnumbertools.numbersystem.permutadic;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 
 import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.getClone;
@@ -31,15 +32,15 @@ public class Permutadic {
 
     private final int size;
     private final int[] value;
-    private final long decimalValue;
+    private final BigInteger decimalValue;
 
-    private Permutadic(long decimalValue, int[] value, int size ) {
+    private Permutadic(BigInteger decimalValue, int[] value, int size ) {
         this.size = size;
         this.value = value;
         this.decimalValue = decimalValue;
     }
 
-    public static Permutadic of(long decimalValue, int size, int degree) {
+    public static Permutadic of(BigInteger decimalValue, int size, int degree) {
         return new Permutadic(decimalValue, decimalToPermutadic(decimalValue,size,degree), size);
     }
 
@@ -54,11 +55,11 @@ public class Permutadic {
 
     public static Permutadic fromNthPermutation(int[] nthPermutation, int size) {
         int[] permutadic = nthPermutationToPermutadic(nthPermutation, size);
-        long decimalVal = permutadicToDecimal(permutadic,size);
+        BigInteger decimalVal = permutadicToDecimal(permutadic,size);
         return new Permutadic(decimalVal, permutadic, size);
     }
 
-    public long decimalValue() {
+    public BigInteger decimalValue() {
         return decimalValue;
     }
 

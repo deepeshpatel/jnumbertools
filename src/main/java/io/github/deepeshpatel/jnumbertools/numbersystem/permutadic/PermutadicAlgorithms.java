@@ -1,24 +1,25 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem.permutadic;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPr;
+import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPrBig;
 
 public class PermutadicAlgorithms {
 
-    public  static void checkBounds(long decimal, int size, int degree) {
-        long maxSupported = nPr(size, degree);
-        if(decimal >= maxSupported) {
+    public  static void checkBounds(BigInteger decimal, int size, int degree) {
+        BigInteger maxSupported = nPrBig(size, degree);
+        if(decimal.compareTo(maxSupported) >= 0) {
             String message = String.format("Out of range. Can't decode %d to nth permutation as it is >= Permutation(%d,%d).", decimal,size,degree);
             throw new ArithmeticException(message);
         }
     }
 
-    public static int[] decimalToPermutadic(long decimalValue, int size, int degree) {
+    public static int[] decimalToPermutadic(BigInteger decimalValue, int size, int degree) {
 
         if(degree> size) {
             throw new IllegalArgumentException(" degree " + degree + " should be <= size " + size);
@@ -28,21 +29,26 @@ public class PermutadicAlgorithms {
 
         long j=size-degree+1L;
         for(int i=a.length-1; i>0; i--, j++) {
-            a[i] = (int) (decimalValue % j);
-            decimalValue =  decimalValue / j;
+            BigInteger bigJ = BigInteger.valueOf(j);
+            a[i] = decimalValue.mod(bigJ).intValue();
+            decimalValue = decimalValue.divide(bigJ);
         }
-        a[0] = (int) decimalValue;
+
+        a[0] = decimalValue.intValue();
         return a;
     }
 
-    public static long permutadicToDecimal(int[] value, int size){
-        long result = value[value.length-1];
-        long startingMultiplier = size - value.length+1;
-        long multiplier = startingMultiplier;
+    public static BigInteger permutadicToDecimal(int[] value, int size){
+
+        BigInteger result = BigInteger.valueOf(value[value.length-1]);
+        BigInteger startingMultiplier = BigInteger.valueOf(size - value.length+1);
+        BigInteger multiplier = startingMultiplier;
         for(int i=value.length-2; i>=0; i--) {
-            result = result + (value[i] * multiplier);
-            startingMultiplier++;
-            multiplier = multiplier * startingMultiplier;
+
+            BigInteger bigValueI = BigInteger.valueOf(value[i]);
+            result = result.add(bigValueI.multiply(multiplier));
+            startingMultiplier = startingMultiplier.add(BigInteger.ONE);
+            multiplier = multiplier.multiply(startingMultiplier);
         }
         return result;
     }
@@ -75,17 +81,17 @@ public class PermutadicAlgorithms {
         return a;
     }
 
-    public static long rank(int[] nthKPermutation, int size) {
+    public static BigInteger rank(int[] nthKPermutation, int size) {
         int[] perm2 = nthPermutationToPermutadic(nthKPermutation,size);
         return  permutadicToDecimal(perm2,size);
     }
 
-    public static int[] unRankWithoutBoundCheck(long rank, int size, int degree) {
+    public static int[] unRankWithoutBoundCheck(BigInteger rank, int size, int degree) {
         int [] permutadic = decimalToPermutadic(rank,size,degree);
         return permutadicToNthPermutation(permutadic, size);
     }
 
-    public static int[] unRankingWithBoundCheck(long rank, int size, int degree) {
+    public static int[] unRankingWithBoundCheck(BigInteger rank, int size, int degree) {
         checkBounds(rank,size,degree);
         return unRankWithoutBoundCheck(rank,size,degree);
     }

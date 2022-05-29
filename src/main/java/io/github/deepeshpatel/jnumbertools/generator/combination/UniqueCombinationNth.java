@@ -76,7 +76,7 @@ public class UniqueCombinationNth<T> extends AbstractGenerator<T> {
 
     private class Itr implements Iterator<List<T>> {
 
-        BigInteger n = BigInteger.ZERO;
+        BigInteger rank = BigInteger.ZERO;
         int[] result;
 
         private Itr(){
@@ -85,7 +85,7 @@ public class UniqueCombinationNth<T> extends AbstractGenerator<T> {
 
         @Override
         public boolean hasNext() {
-            return n.compareTo(nCr) < 0;
+            return rank.compareTo(nCr) < 0;
         }
 
         @Override
@@ -94,15 +94,15 @@ public class UniqueCombinationNth<T> extends AbstractGenerator<T> {
                 throw new NoSuchElementException();
             }
 
-            result = kthUniqueCombination(seed.size(),r,n);
-            n = n.add(increment);
+            result = kthUniqueCombination(rank, seed.size(),r);
+            rank = rank.add(increment);
             return indicesToValues(result, seed);
         }
 
         //TODO: For iterator no need to un-rank if we find the algo for next Kth combinadic
         //TODO: DO this as fun activity with Aditya
-        private int[] kthUniqueCombination(int n, int r, BigInteger k) {
-            return CombinadicAlgorithms.unRank(n,r,k);
+        private int[] kthUniqueCombination(BigInteger k, int n, int r) {
+            return CombinadicAlgorithms.unRank(k, n,r);
         }
     }
 }

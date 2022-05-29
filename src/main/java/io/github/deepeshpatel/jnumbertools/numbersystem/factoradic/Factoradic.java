@@ -15,13 +15,13 @@ import java.math.BigInteger;
 public final class Factoradic {
 
     private final int[] values;
-    private final long intValue;
+    private final BigInteger intValue;
 
     /**
      * @param positiveInt non -ve integer to be converted to Factoradic
      */
-    public Factoradic(long positiveInt) {
-        values =  FactoradicAlgorithms.intToFactoradic(BigInteger.valueOf(positiveInt));//factoradicOf(positiveInt);
+    public Factoradic(BigInteger positiveInt) {
+        values =  FactoradicAlgorithms.intToFactoradic(positiveInt);//factoradicOf(positiveInt);
         intValue = positiveInt;
     }
 
@@ -38,7 +38,7 @@ public final class Factoradic {
     /**
      * @return Decimal number equivalent of this Factoradic
      */
-    public long decimalValue() {
+    public BigInteger decimalValue() {
         return intValue;
     }
 

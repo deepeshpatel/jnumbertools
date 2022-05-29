@@ -4,6 +4,8 @@ import io.github.deepeshpatel.jnumbertools.numbersystem.factoradic.Factoradic;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigInteger;
+
 public class FactoradicTest {
 
     @Test
@@ -18,7 +20,7 @@ public class FactoradicTest {
                 "[1, 0, 0, 0]"
         };
         for(int i=0; i<=6; i++) {
-            Factoradic f = new Factoradic(i);
+            Factoradic f = new Factoradic(BigInteger.valueOf(i));
             Assert.assertEquals(expected[i], f.toString());
         }
     }
@@ -26,8 +28,8 @@ public class FactoradicTest {
     @Test
     public void shouldReturnCorrectDecimalEquivalentOfFactoradic() {
         for(int i=0; i<=100; i++) {
-            Factoradic f = new Factoradic(i);
-            Assert.assertEquals(i,f.decimalValue());
+            Factoradic f = new Factoradic(BigInteger.valueOf(i));
+            Assert.assertEquals(i,f.decimalValue().intValue());
         }
     }
 
@@ -44,8 +46,8 @@ public class FactoradicTest {
         };
 
         long decimalValue = 4611686018427387904L;
-        Factoradic f1 = new Factoradic(decimalValue);
-        Factoradic f2 = new Factoradic(decimalValue+1);
+        Factoradic f1 = new Factoradic(BigInteger.valueOf(decimalValue));
+        Factoradic f2 = new Factoradic(BigInteger.valueOf(decimalValue+1));
         //Factoradic f2ViaAddition = f1.add(1);
         Assert.assertEquals(expected[0],f1.toString());
         Assert.assertEquals(expected[1],f2.toString());
