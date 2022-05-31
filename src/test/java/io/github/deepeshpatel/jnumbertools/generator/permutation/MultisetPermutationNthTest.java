@@ -24,12 +24,6 @@ public class MultisetPermutationNthTest {
                 .multisetNth(-1,3,2,3);
     }
 
-    @Test (expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionForIncrementValueGreaterThanOrEqualToMaxPossiblePermutation(){
-        JNumberTools.permutationsOf("A","B")
-                .multisetNth(10,3,2);
-    }
-
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
         Iterable<List<String>> iterable = JNumberTools.permutationsOf("A", "B", "C")

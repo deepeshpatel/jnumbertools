@@ -44,10 +44,6 @@ public class MultisetPermutationNth<T>  extends AbstractGenerator<T> {
         this.increment = increment;
         checkParamIncrement(BigInteger.valueOf(increment), "Multiset permutations");
 
-        if(increment >= possiblePermutations.longValue() ) {
-            throw new IllegalArgumentException("n must be < possible permutations("  + possiblePermutations+ ")");
-        }
-
         this.multisetFreqArray = multisetFreqArray;
         this.initialSum = Arrays.stream(multisetFreqArray).sum();
     }

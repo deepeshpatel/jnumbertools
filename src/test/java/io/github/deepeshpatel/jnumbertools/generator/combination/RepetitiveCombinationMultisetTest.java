@@ -4,6 +4,7 @@ import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,6 +69,7 @@ public class RepetitiveCombinationMultisetTest {
 
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWhenMultisetFreqArrayIsNull() {
-        JNumberTools.combinationsOf("A","B").repetitiveMultiset(2,null);
+        List<String> seed = Arrays.asList("A", "B");
+        new RepetitiveCombinationMultiset<>(seed, 2, null);
     }
 }

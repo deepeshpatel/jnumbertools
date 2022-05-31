@@ -35,4 +35,9 @@ public class CombinationBuilder<T> {
     public RepetitiveCombinationMultiset<T> repetitiveMultiset(int ofSize, int... multisetFreqArray) {
         return new RepetitiveCombinationMultiset<>(data, ofSize, multisetFreqArray);
     }
+
+    public RepetitiveCombinationMultiset<T> repetitiveMultiset(int ofSize, Collection<Integer> multisetFreqList) {
+        int[] multisetFreqArray = multisetFreqList.stream().mapToInt(i->i).toArray();
+        return new RepetitiveCombinationMultiset<>(data, ofSize, multisetFreqArray);
+    }
 }
