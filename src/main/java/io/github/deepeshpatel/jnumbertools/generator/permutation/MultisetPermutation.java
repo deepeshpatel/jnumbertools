@@ -45,7 +45,7 @@ public class MultisetPermutation<T>  extends AbstractGenerator<T> {
      *               multisetFreqArray[n] contains the count of n<sup>th</sup> element in input
      *               count of every element must be &gt;=1
      */
-    public MultisetPermutation(Collection<T> input, int... multisetFreqArray) {
+    public MultisetPermutation(Collection<T> input, int[] multisetFreqArray) {
         super(input);
         initialIndices = initIndicesForMultisetPermutation(multisetFreqArray);
     }

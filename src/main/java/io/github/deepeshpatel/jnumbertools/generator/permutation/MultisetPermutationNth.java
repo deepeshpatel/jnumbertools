@@ -37,7 +37,7 @@ public class MultisetPermutationNth<T>  extends AbstractGenerator<T> {
      *               multisetFreqArray[n] contains the count of n<sup>th</sup> element in input
      *               count of every element must be &gt;=1
      */
-    public MultisetPermutationNth(Collection<T> input, long increment, int... multisetFreqArray) {
+    public MultisetPermutationNth(Collection<T> input, long increment, int[] multisetFreqArray) {
 
         super(input);
         this.possiblePermutations  = findTotalPossiblePermutations(multisetFreqArray);

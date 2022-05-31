@@ -41,9 +41,20 @@ public class PermutationBuilder<T> {
         return new MultisetPermutation<>(seed,multisetFreqArray);
     }
 
+    public MultisetPermutation<T> multiset(Collection<Integer> multisetFreqList){
+        int[] multisetFreqArray = multisetFreqList.stream().mapToInt(i->i).toArray();
+        return new MultisetPermutation<>(seed,multisetFreqArray);
+    }
+
     public MultisetPermutationNth<T> multisetNth(long increment, int... multisetFreqArray){
         return new MultisetPermutationNth<>(seed, increment, multisetFreqArray);
     }
+
+    public MultisetPermutationNth<T> multisetNth(long increment, Collection<Integer> multisetFreqList){
+        int[] multisetFreqArray = multisetFreqList.stream().mapToInt(i->i).toArray();
+        return new MultisetPermutationNth<>(seed, increment, multisetFreqArray);
+    }
+
 
     public KPermutationBuilder<T> k(int k) {
         return new KPermutationBuilder<>(seed, k);
