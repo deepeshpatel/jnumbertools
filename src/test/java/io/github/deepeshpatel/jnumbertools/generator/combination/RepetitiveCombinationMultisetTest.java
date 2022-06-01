@@ -8,8 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.github.deepeshpatel.jnumbertools.generator.TestUtil.iteratorToList;
-
 public class RepetitiveCombinationMultisetTest {
 
     @Test
@@ -19,11 +17,11 @@ public class RepetitiveCombinationMultisetTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        Iterable<List<String>> iterable = JNumberTools.combinationsOf("A", "B", "C")
+        RepetitiveCombinationMultiset<String> iterable = JNumberTools.combinationsOf("A", "B", "C")
                 .repetitiveMultiset(2,2,3,2);
 
-        List<List<String>> lists1 = iteratorToList(iterable.iterator());
-        List<List<String>> lists2 = iteratorToList(iterable.iterator());
+        List<List<String>> lists1 = iterable.stream().collect(Collectors.toList());
+        List<List<String>> lists2 = iterable.stream().collect(Collectors.toList());
         Assert.assertEquals(lists1, lists2);
     }
 

@@ -89,9 +89,9 @@ public class KPermutationCombinationOrderNth<T> extends AbstractGenerator<T> {
 
         @Override
         public List<T> next() {
-            BigInteger permutationsPerListBig = BigInteger.valueOf(permutationsPerList);
-            BigInteger combinationListNumber = currentIncrement.divide(permutationsPerListBig);
-            long permutationIncrement = currentIncrement.mod(permutationsPerListBig).longValue();
+            BigInteger[] divideAndRemainder = currentIncrement.divideAndRemainder(BigInteger.valueOf(permutationsPerList));
+            BigInteger combinationListNumber = divideAndRemainder[0];
+            long permutationIncrement = divideAndRemainder[1].longValue();
             currentIncrement  = currentIncrement.add(increment);
 
             List<T> next;

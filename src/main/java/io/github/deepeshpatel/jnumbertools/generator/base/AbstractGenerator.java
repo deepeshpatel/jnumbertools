@@ -7,6 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.base;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -16,7 +17,7 @@ public abstract class AbstractGenerator<T> implements Iterable<List<T>> {
     protected final List<T> seed;
 
     protected AbstractGenerator(Collection<T> seed) {
-        this.seed = seed == null ? new ArrayList<>() : new ArrayList<>(seed);
+        this.seed = (seed != null) ? new ArrayList<>(seed) : Collections.EMPTY_LIST;
     }
 
     protected List<T> indicesToValues(int[] indices, List<T> input) {

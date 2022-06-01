@@ -11,8 +11,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static io.github.deepeshpatel.jnumbertools.generator.TestUtil.iteratorToList;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPr;
 
 public class KPermutationLexOrderNthTest {
@@ -36,11 +36,11 @@ public class KPermutationLexOrderNthTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        Iterable<List<String>> iterable = JNumberTools.permutationsOf("A", "B", "C")
+        KPermutationLexOrderNth<String> iterable = JNumberTools.permutationsOf("A", "B", "C")
                 .k(2)
                 .lexOrderNth(2);
-        List<List<String>> lists1 = iteratorToList(iterable.iterator());
-        List<List<String>> lists2 = iteratorToList(iterable.iterator());
+        List<List<String>> lists1 = iterable.stream().collect(Collectors.toList());
+        List<List<String>> lists2 = iterable.stream().collect(Collectors.toList());
         Assert.assertEquals(lists1, lists2);
     }
 
@@ -85,10 +85,10 @@ public class KPermutationLexOrderNthTest {
     }
 
     private String getExpectedResultViaOneByOneIteration(List<String> input, int k, int increment) {
-        Iterable<List<String>> iterable = JNumberTools.permutationsOf(input)
+        Stream<List<String>> stream = JNumberTools.permutationsOf(input)
                 .k(k)
-                .lexOrder();
+                .lexOrder().stream();
 
-        return TestUtil.collectEveryNthValue(iterable, increment).toString();
+        return TestUtil.collectEveryNthValue(stream, increment).toString();
     }
 }

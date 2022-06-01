@@ -7,8 +7,8 @@ import org.junit.Test;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static io.github.deepeshpatel.jnumbertools.generator.TestUtil.iteratorToList;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPr;
 import static org.junit.Assert.assertEquals;
 
@@ -28,11 +28,9 @@ public class UniquePermutationNthTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        Iterable<List<String>> iterable = JNumberTools.permutationsOf("A", "B", "C")
-                .uniqueNth(3);
-
-        List<List<String>> lists1 = iteratorToList(iterable.iterator());
-        List<List<String>> lists2 = iteratorToList(iterable.iterator());
+        UniquePermutationsNth<String> iterable = JNumberTools.permutationsOf("A", "B", "C").uniqueNth(3);
+        List<List<String>> lists1 = iterable.stream().collect(Collectors.toList());
+        List<List<String>> lists2 = iterable.stream().collect(Collectors.toList());
         Assert.assertEquals(lists1, lists2);
     }
 
@@ -106,6 +104,8 @@ public class UniquePermutationNthTest {
 
         List<String> input = Arrays.asList("A","B","C","D","E","F");
         for(int increment=1; increment<=32;increment++) {
+
+
             String expected = getExpectedResultViaOneByOneIteration(input, increment);
             String output   = getResultViaDirectIncrement(input,increment);
             Assert.assertEquals(expected,output);
@@ -118,10 +118,8 @@ public class UniquePermutationNthTest {
     }
 
     private String getExpectedResultViaOneByOneIteration(List<String> input, int increment) {
-        Iterable<List<String>> iterable = JNumberTools.permutationsOf(input)
-                .unique();
-
-        return TestUtil.collectEveryNthValue(iterable, increment).toString();
+        Stream<List<String>> stream = JNumberTools.permutationsOf(input).unique().stream();
+        return TestUtil.collectEveryNthValue(stream, increment).toString();
     }
 }
 

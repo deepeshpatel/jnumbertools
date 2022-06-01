@@ -9,6 +9,22 @@ import java.math.BigInteger;
 
 public class MathUtil {
 
+    private static final int factorialCacheSize = 40;
+    private static final BigInteger[] factorialList = new BigInteger[factorialCacheSize];
+
+    static {
+
+        factorialList[0] = BigInteger.ONE;
+        factorialList[1] = BigInteger.ONE;
+
+        BigInteger product = BigInteger.ONE;
+
+        for(int i=2; i<factorialCacheSize; i++) {
+            product = product.multiply(BigInteger.valueOf(i));
+            factorialList[i] = product;
+        }
+    }
+
     private MathUtil() { }
 
     public static long nCr(long n, long r) {
@@ -30,32 +46,27 @@ public class MathUtil {
     }
 
     public static BigInteger nPrBig(int n, int r){
-        BigInteger p = BigInteger.ONE;
-        BigInteger nBig = BigInteger.valueOf(n);
-        for(int i=1; i<=r; i++){
-            p = p.multiply(nBig);
-            nBig = nBig.subtract(BigInteger.ONE);
-        }
-        return p;
+        if(r == 1) return BigInteger.valueOf(n);
+        if(r == 0) return BigInteger.ZERO;
+        return factorial(n).divide(factorial(n-r));
     }
 
-    public static BigInteger nCrBig(long n, long r) {
+    public static BigInteger nCrBig(int n, int r) {
+        if(n==r) return BigInteger.ONE;
         if(n<r) return BigInteger.ZERO;
-        long denominator = Math.min(r, n-r);
-
-        BigInteger p = BigInteger.ONE;
-        BigInteger nBig = BigInteger.valueOf(n);
-
-        for(int i=1; i<=denominator; i++) {
-            p = p.multiply(nBig).divide(BigInteger.valueOf(i));
-            nBig = nBig.subtract(BigInteger.ONE);
-        }
-        return p;
+        if(r==1 || n-r ==1) return BigInteger.valueOf(n);
+        return factorial(n).divide(factorial(r)).divide(factorial(n-r));
     }
 
     public static BigInteger factorial(int n) {
-        BigInteger product = BigInteger.ONE;
-        for(int i=2; i<= n; i++) {
+
+        if( n < factorialList.length) {
+            return factorialList[n];
+        }
+
+        BigInteger product = factorialList[factorialList.length-1];
+
+        for(int i=factorialCacheSize; i<= n; i++) {
             product = product.multiply(BigInteger.valueOf(i));
         }
         return product;

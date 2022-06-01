@@ -93,16 +93,12 @@ public class UniqueCombinationNth<T> extends AbstractGenerator<T> {
             if(!hasNext()) {
                 throw new NoSuchElementException();
             }
-
-            result = kthUniqueCombination(rank, seed.size(),r);
+            //TODO: For iterator no need to un-rank if we find the algo for next Kth combinadic
+            //TODO: DO this as fun activity with Aditya
+            result = CombinadicAlgorithms.unRank(rank, nCr, seed.size(),r);
             rank = rank.add(increment);
             return indicesToValues(result, seed);
         }
 
-        //TODO: For iterator no need to un-rank if we find the algo for next Kth combinadic
-        //TODO: DO this as fun activity with Aditya
-        private int[] kthUniqueCombination(BigInteger k, int n, int r) {
-            return CombinadicAlgorithms.unRank(k, n,r);
-        }
     }
 }

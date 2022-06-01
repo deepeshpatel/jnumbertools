@@ -20,14 +20,12 @@ public class FactoradicAlgorithms {
         long d = 1;
 
         while(!k.equals(BigInteger.ZERO)) {
-
-            BigInteger bigD = BigInteger.valueOf(d);
-            factoradic.add(k.mod(bigD).intValue());
-            k = k.divide(bigD);
+            BigInteger[] divideAndRemainder = k.divideAndRemainder(BigInteger.valueOf(d));
+            factoradic.add(divideAndRemainder[1].intValue());
+            k = divideAndRemainder[0];
             d++;
         }
 
-        //Collections.reverse(factoradic);
         return factoradic.stream().mapToInt(Integer::intValue).toArray();
     }
 
@@ -43,9 +41,9 @@ public class FactoradicAlgorithms {
         int i=knownSize-1;
 
         while(!k.equals(BigInteger.ZERO)) {
-            BigInteger bigD = BigInteger.valueOf(d);
-            factoradic[i--] = k.mod(bigD).intValue();
-            k = k.divide(bigD);
+            BigInteger[] divideAndRemainder = k.divideAndRemainder(BigInteger.valueOf(d));
+            factoradic[i--] = divideAndRemainder[1].intValue();
+            k = divideAndRemainder[0];
             d++;
         }
 

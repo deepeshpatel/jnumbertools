@@ -5,25 +5,29 @@ import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.generator.TestUtil.iteratorToList;
+import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.factorial;
 
 public class MultisetPermutationTest {
 
     @Test
     public void assertCount() {
-        List<Long> fact = factorialList();
+        //List<Long> fact = factorialList();
         for(int n=1; n<=6; n++){
             List<String> input = Collections.nCopies(n, "A");
             int[] multisetFreqArray =getRandomMultisetFreqArray(input.size());
             long count = JNumberTools.permutationsOf(input)
                     .multiset(multisetFreqArray).stream().count();
 
-            long numerator = fact.get((Arrays.stream(multisetFreqArray).reduce(0, Integer::sum)));
-            long denominator = IntStream.of(multisetFreqArray).asLongStream().reduce(1, (a, b) -> (a * fact.get((int)b)));
+            int sum = Arrays.stream(multisetFreqArray).reduce(0, Integer::sum);
+            long numerator = factorial(sum).longValue();//.get(());
+            long denominator = IntStream.of(multisetFreqArray).asLongStream().reduce(1, (a, b) -> (a * factorial((int)b).longValue()));
             long expected = numerator/denominator;
             //( ∑ ai.si)! / Π(si!)
             Assert.assertEquals(expected,count);
@@ -32,11 +36,11 @@ public class MultisetPermutationTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        Iterable<List<String>> iterable = JNumberTools.permutationsOf("A", "B", "C")
-                .multiset( 3, 2, 3);
+        MultisetPermutation<String> iterable = JNumberTools.permutationsOf("A", "B", "C")
+                .multiset(3, 2, 3);
 
-        List<List<String>> lists1 = iteratorToList(iterable.iterator());
-        List<List<String>> lists2 = iteratorToList(iterable.iterator());
+        List<List<String>> lists1 = iterable.stream().collect(Collectors.toList());
+        List<List<String>> lists2 = iterable.stream().collect(Collectors.toList());
         Assert.assertEquals(lists1, lists2);
     }
 
@@ -50,17 +54,17 @@ public class MultisetPermutationTest {
         return multisetFreqArray;
     }
 
-    private List<Long> factorialList(){
-        int n = 20;
-        long p=1;
-        List<Long> factorials = new ArrayList<>(n+1);
-        factorials.add(1L);
-        for(long i=1; i<=n; i++){
-            p *=i;
-            factorials.add(p);
-        }
-        return factorials;
-    }
+//    private List<Long> factorialList(){
+//        int n = 20;
+//        long p=1;
+//        List<Long> factorials = new ArrayList<>(n+1);
+//        factorials.add(1L);
+//        for(long i=1; i<=n; i++){
+//            p *=i;
+//            factorials.add(p);
+//        }
+//        return factorials;
+//    }
 
     @Test
     public void shouldGenerateAllUniquePermutationsOfMultiset2(){

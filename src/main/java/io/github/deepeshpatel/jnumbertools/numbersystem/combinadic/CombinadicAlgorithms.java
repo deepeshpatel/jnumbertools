@@ -19,8 +19,10 @@ public class CombinadicAlgorithms {
     }
 
     public static int[] unRank(BigInteger rank, int n, int r) {
-
-        BigInteger x = nCrBig(n, r).subtract(rank).subtract(BigInteger.ONE);
+        return unRank(rank,nCrBig(n, r), n, r);
+    }
+    public static int[] unRank(BigInteger rank, BigInteger nCr, int n, int r) {
+        BigInteger x = nCr.subtract(rank).subtract(BigInteger.ONE);
         int[] a = decimalToCombinadic(x,r);
         for(int i=0; i<a.length; i++) {
             a[i] = n-1-a[i];

@@ -12,7 +12,7 @@ public class CommonTest {
     @Test
     public void all3NthPermutationGeneratorsShouldGenerateSameOutputForSpecialCase(){
 
-        for(int size=1; size<=7; size++) {
+        for(int size=1; size<=5; size++) {
             for(int increment = 1; increment<=10; increment++) {
 
                 String uniquePermutationValues = JNumberTools.permutationsOfSize(size).
@@ -35,7 +35,7 @@ public class CommonTest {
     @Test
     public void all3NextPermutationGeneratorsShouldGenerateSameOutputForSpecialCase(){
 
-        for(int size=1; size<=7; size++) {
+        for(int size=1; size<=5; size++) {
 
                 String uniquePermutationValues = JNumberTools.permutationsOfSize(size).
                         unique().stream().collect(Collectors.toList()).toString();
@@ -55,7 +55,7 @@ public class CommonTest {
 
     @Test
     public void all6LexOrderPermutationGeneratorsShouldGenerateSameOutputForSpecialCase(){
-        for(int size=1; size<=7; size++) {
+        for(int size=1; size<=5; size++) {
             int increment = 1;
 
             String uniquePermutationNth = JNumberTools.permutationsOfSize(size).

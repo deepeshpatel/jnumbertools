@@ -9,8 +9,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static io.github.deepeshpatel.jnumbertools.generator.TestUtil.iteratorToList;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCr;
 import static org.junit.Assert.assertEquals;
 
@@ -32,11 +32,9 @@ public class UniqueCombinationNthTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        Iterable<List<String>> iterable = JNumberTools.combinationsOf("A", "B", "C")
-                .uniqueNth(2,2);
-
-        List<List<String>> lists1 = iteratorToList(iterable.iterator());
-        List<List<String>> lists2 = iteratorToList(iterable.iterator());
+        UniqueCombinationNth<String> iterable = JNumberTools.combinationsOf("A", "B", "C").uniqueNth(2, 2);
+        List<List<String>> lists1 = iterable.stream().collect(Collectors.toList());
+        List<List<String>> lists2 = iterable.stream().collect(Collectors.toList());
         Assert.assertEquals(lists1, lists2);
     }
 
@@ -92,9 +90,7 @@ public class UniqueCombinationNthTest {
     }
 
     private String getExpectedResultViaOneByOneIteration(List<String> input, int k, int increment) {
-        Iterable<List<String>> iterable = JNumberTools.combinationsOf(input)
-                .unique(k);
-
-        return TestUtil.collectEveryNthValue(iterable, increment).toString();
+        Stream<List<String>> stream = JNumberTools.combinationsOf(input).unique(k).stream();
+        return TestUtil.collectEveryNthValue(stream, increment).toString();
     }
 }

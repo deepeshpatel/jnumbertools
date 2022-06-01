@@ -8,10 +8,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.*;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.factorial;
@@ -54,9 +51,8 @@ public class MultisetPermutationNth<T>  extends AbstractGenerator<T> {
         for(int i=1; i<count.length; i++) {
             productOfFact = productOfFact.multiply(factorial(count[i]));
         }
-        return factorial(sum).divide(productOfFact);
+        return  factorial(sum).divide(productOfFact);
     }
-
 
     @Override
     public Iterator<List<T>> iterator() {
@@ -91,9 +87,10 @@ public class MultisetPermutationNth<T>  extends AbstractGenerator<T> {
             int[] currentMultisetCount = getClone(multisetFreqArray);
             long sum = initialSum;
 
+            BigInteger  totalPossible = possiblePermutations;
+
             for(int j=0; j<output.length; j++) {
                 long countTillX = 0;
-                BigInteger  totalPossible = findTotalPossiblePermutations(currentMultisetCount);
 
                 for (int i = 0; i < currentMultisetCount.length; i++) {
                     long countOfX = totalPossible.multiply(BigInteger.valueOf(currentMultisetCount[i])).divide(BigInteger.valueOf(sum)).longValue();
@@ -108,6 +105,9 @@ public class MultisetPermutationNth<T>  extends AbstractGenerator<T> {
                         break;
                     }
                 }
+
+                totalPossible = findTotalPossiblePermutations(currentMultisetCount);
+
             }
             return  output;
         }

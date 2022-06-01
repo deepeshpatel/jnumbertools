@@ -29,9 +29,9 @@ public class PermutadicAlgorithms {
 
         long j=size-degree+1L;
         for(int i=a.length-1; i>0; i--, j++) {
-            BigInteger bigJ = BigInteger.valueOf(j);
-            a[i] = decimalValue.mod(bigJ).intValue();
-            decimalValue = decimalValue.divide(bigJ);
+            BigInteger[] divideAndRemainder = decimalValue.divideAndRemainder(BigInteger.valueOf(j));
+            a[i] = divideAndRemainder[1].intValue();
+            decimalValue = divideAndRemainder[0];
         }
 
         a[0] = decimalValue.intValue();

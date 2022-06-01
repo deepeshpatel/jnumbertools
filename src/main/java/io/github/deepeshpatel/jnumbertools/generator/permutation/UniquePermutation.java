@@ -44,7 +44,7 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
  *
  * @author Deepesh Patel
  */
-public class UniquePermutation<T> extends AbstractGenerator<T> {
+public class UniquePermutation<T> extends AbstractGenerator<T> implements Iterable<List<T>>{
 
     public UniquePermutation(Collection<T> input) {
         super(input);

@@ -8,8 +8,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static io.github.deepeshpatel.jnumbertools.generator.TestUtil.iteratorToList;
+import java.util.stream.Stream;
 
 public class MultisetPermutationNthTest {
 
@@ -26,12 +25,11 @@ public class MultisetPermutationNthTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        Iterable<List<String>> iterable = JNumberTools.permutationsOf("A", "B", "C")
+        MultisetPermutationNth<String> iterable = JNumberTools
+                .permutationsOf("A", "B", "C")
                 .multisetNth(3, 3, 2, 3);
-
-        List<List<String>> lists1 = iteratorToList(iterable.iterator());
-        List<List<String>> lists2 = iteratorToList(iterable.iterator());
-
+        List<List<String>> lists1 = iterable.stream().collect(Collectors.toList());
+        List<List<String>> lists2 = iterable.stream().collect(Collectors.toList());
         Assert.assertEquals(lists1, lists2);
     }
 
@@ -55,8 +53,7 @@ public class MultisetPermutationNthTest {
     }
 
     private String getExpectedResultViaOneByOneIteration(List<String> input, int increment, int[] freqArray) {
-        Iterable<List<String>> iterable = JNumberTools.permutationsOf(input)
-                .multiset(freqArray);
-        return TestUtil.collectEveryNthValue(iterable, increment).toString();
+        Stream<List<String>> stream = JNumberTools.permutationsOf(input).multiset(freqArray).stream();
+        return TestUtil.collectEveryNthValue(stream, increment).toString();
     }
 }
