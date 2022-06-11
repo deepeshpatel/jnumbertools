@@ -64,7 +64,7 @@ public class KPermutationLexOrderNthTest {
         BigInteger increment = new BigInteger("100000000000000000000000000000");
         BigInteger n = BigInteger.ZERO;
 
-        List<List<Integer>> permutations = JNumberTools.permutationsOfSize(40)
+        List<List<Integer>> permutations = JNumberTools.permutationsOf(40)
                 .k(20)
                 .lexOrderNth(increment)
                 .stream().collect(Collectors.toList());

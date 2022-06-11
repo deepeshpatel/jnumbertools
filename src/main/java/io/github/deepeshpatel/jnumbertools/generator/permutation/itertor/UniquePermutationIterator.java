@@ -5,10 +5,10 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.itertor;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.getClone;
 
 /**
  * Used by permutation generators in this package
@@ -41,7 +41,7 @@ public class UniquePermutationIterator implements Iterator<int[]> {
 
     private int[] nextPermutation(int[] n) {
 
-        int[] c =  getClone(n);
+        int[] c = Arrays.copyOf(n,n.length);
         int highestI = -1;
 
         for (int i = c.length - 2; i >= 0; i--) {

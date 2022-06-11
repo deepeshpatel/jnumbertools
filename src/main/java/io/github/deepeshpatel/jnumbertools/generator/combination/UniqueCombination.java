@@ -11,7 +11,6 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.checkParamCombination;
-import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.getClone;
 
 /**
  *
@@ -91,7 +90,7 @@ public class UniqueCombination<T> extends AbstractGenerator<T> {
 
         private int[] nextCombination(int[]a, int n) {
 
-            int[] next = getClone(a);
+            int[] next = Arrays.copyOf(a, a.length);
             int i=next.length-1;
             int maxSupportedValueAtIndexI = n-1;
 

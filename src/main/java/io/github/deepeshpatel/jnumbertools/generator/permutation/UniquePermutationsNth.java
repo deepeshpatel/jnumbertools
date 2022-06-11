@@ -51,11 +51,15 @@ import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.factoria
 public class UniquePermutationsNth<T> extends AbstractGenerator<T> {
 
     private final BigInteger increment;
+    final BigInteger numOfPermutations;
+    private final int[] initialIndices;
 
     public UniquePermutationsNth(Collection<T> input, BigInteger increment) {
         super(input);
         this.increment = increment;
         checkParamIncrement(increment, "unique permutations");
+        numOfPermutations = factorial(seed.size());
+        initialIndices = IntStream.range(0, seed.size()).toArray();
     }
 
     @Override
@@ -65,19 +69,14 @@ public class UniquePermutationsNth<T> extends AbstractGenerator<T> {
 
     private class KthItemIterator implements  Iterator<List<T>> {
 
-        private final int[] initialIndices;
-
         BigInteger nextK = BigInteger.ZERO;
-        final BigInteger numOfPermutations;
 
         public KthItemIterator() {
-            initialIndices = IntStream.range(0, seed.size()).toArray();
-            numOfPermutations = factorial(initialIndices.length);//.longValue();
         }
 
         @Override
         public boolean hasNext() {
-            return nextK.compareTo(numOfPermutations) < 0;//numOfPermutations;
+            return nextK.compareTo(numOfPermutations) < 0;
         }
 
         @Override
@@ -94,6 +93,5 @@ public class UniquePermutationsNth<T> extends AbstractGenerator<T> {
         public int[] nextPermutation(BigInteger kth, int numberOfItems) {
             return FactoradicAlgorithms.unRank(kth, numberOfItems);
         }
-
     }
 }

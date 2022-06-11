@@ -6,9 +6,6 @@ package io.github.deepeshpatel.jnumbertools.numbersystem.combinadic;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-
-import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.getClone;
-
 /**
  * Object of this class encapsulates the Combinadic representation of a
  * positive integer for a given degree
@@ -83,6 +80,6 @@ public final class Combinadic {
      * length of array is equal to the degree of this Combinadic
      */
     public int[] value() {
-        return getClone(readOnlyValues);
+        return Arrays.copyOf(readOnlyValues, readOnlyValues.length);
     }
 }

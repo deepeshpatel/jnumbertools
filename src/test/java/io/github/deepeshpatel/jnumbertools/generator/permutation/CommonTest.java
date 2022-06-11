@@ -15,14 +15,14 @@ public class CommonTest {
         for(int size=1; size<=5; size++) {
             for(int increment = 1; increment<=10; increment++) {
 
-                String uniquePermutationValues = JNumberTools.permutationsOfSize(size).
+                String uniquePermutationValues = JNumberTools.permutationsOf(size).
                         uniqueNth(increment).stream().collect(Collectors.toList()).toString();
 
-                String multisetPermutationValues = JNumberTools.permutationsOfSize(size)
+                String multisetPermutationValues = JNumberTools.permutationsOf(size)
                         .multisetNth(increment, Collections.nCopies(size, 1))
                         .stream().collect(Collectors.toList()).toString();
 
-                String kPermutationValues = JNumberTools.permutationsOfSize(size).k(size)
+                String kPermutationValues = JNumberTools.permutationsOf(size).k(size)
                         .lexOrderNth(increment)
                         .stream().collect(Collectors.toList()).toString();
 
@@ -37,14 +37,14 @@ public class CommonTest {
 
         for(int size=1; size<=5; size++) {
 
-                String uniquePermutationValues = JNumberTools.permutationsOfSize(size).
+                String uniquePermutationValues = JNumberTools.permutationsOf(size).
                         unique().stream().collect(Collectors.toList()).toString();
 
-                String multisetPermutationValues = JNumberTools.permutationsOfSize(size)
+                String multisetPermutationValues = JNumberTools.permutationsOf(size)
                         .multiset(Collections.nCopies(size, 1))
                         .stream().collect(Collectors.toList()).toString();
 
-                String kPermutationValues = JNumberTools.permutationsOfSize(size).k(size)
+                String kPermutationValues = JNumberTools.permutationsOf(size).k(size)
                         .lexOrder()
                         .stream().collect(Collectors.toList()).toString();
 
@@ -58,25 +58,25 @@ public class CommonTest {
         for(int size=1; size<=5; size++) {
             int increment = 1;
 
-            String uniquePermutationNth = JNumberTools.permutationsOfSize(size).
+            String uniquePermutationNth = JNumberTools.permutationsOf(size).
                     uniqueNth(increment).stream().collect(Collectors.toList()).toString();
 
-            String multisetPermutationNth = JNumberTools.permutationsOfSize(size)
+            String multisetPermutationNth = JNumberTools.permutationsOf(size)
                     .multisetNth(increment, Collections.nCopies(size, 1))
                     .stream().collect(Collectors.toList()).toString();
 
-            String kPermutationNth = JNumberTools.permutationsOfSize(size).k(size)
+            String kPermutationNth = JNumberTools.permutationsOf(size).k(size)
                     .lexOrderNth(increment)
                     .stream().collect(Collectors.toList()).toString();
 
-            String uniquePermutation = JNumberTools.permutationsOfSize(size).
+            String uniquePermutation = JNumberTools.permutationsOf(size).
                     unique().stream().collect(Collectors.toList()).toString();
 
-            String multisetPermutation = JNumberTools.permutationsOfSize(size)
+            String multisetPermutation = JNumberTools.permutationsOf(size)
                     .multiset(Collections.nCopies(size, 1))
                     .stream().collect(Collectors.toList()).toString();
 
-            String kPermutation = JNumberTools.permutationsOfSize(size).k(size)
+            String kPermutation = JNumberTools.permutationsOf(size).k(size)
                     .lexOrder()
                     .stream().collect(Collectors.toList()).toString();
 

@@ -17,7 +17,7 @@ public abstract class AbstractGenerator<T> implements Iterable<List<T>> {
     protected final List<T> seed;
 
     protected AbstractGenerator(Collection<T> seed) {
-        this.seed = (seed != null) ? new ArrayList<>(seed) : Collections.EMPTY_LIST;
+        this.seed = (seed != null) ? new ArrayList<>(seed) : Collections.emptyList();
     }
 
     protected List<T> indicesToValues(int[] indices, List<T> input) {

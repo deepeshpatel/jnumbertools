@@ -7,12 +7,8 @@ package io.github.deepeshpatel.jnumbertools.generator.combination;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
-import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.getClone;
 import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.newEmptyIterator;
 
 /**
@@ -93,7 +89,7 @@ public class RepetitiveCombination <T> extends AbstractGenerator<T> {
 
         private int[] nextRepetitiveCombination(int[]a, int n) {
 
-            int[] next = getClone(a);
+            int[] next = Arrays.copyOf(a, a.length);
             int i=next.length-1;
             int maxSupportedValue = n-1;
 

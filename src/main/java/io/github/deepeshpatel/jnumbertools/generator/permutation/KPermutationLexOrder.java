@@ -91,7 +91,7 @@ public class KPermutationLexOrder<T> extends AbstractGenerator<T> {
 
         private int[] kPermutationNextLex(int[] current, LinkedList<Integer> remaining, int maxAllowed) {
 
-            int[] a = getClone(current);
+            int[] a = Arrays.copyOf(current, current.length);
 
             if(!remaining.isEmpty()) {
                 int next = remaining.removeFirst();

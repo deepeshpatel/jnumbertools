@@ -4,6 +4,7 @@ import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,8 +20,8 @@ public class UniqueCombinationTest {
         for(int n=0; n<=4; n++) {
             List<String> input = Collections.nCopies(n, "A");
             for(int r=0; r<=n; r++) {
-                int count = (int) JNumberTools.combinationsOf(input)
-                        .unique(r).stream().count();
+                int count = (int) JNumberTools.combinationsOf(input,r)
+                        .unique().stream().count();
                 Assert.assertEquals(nCr(n,r), count);
             }
         }
@@ -28,7 +29,8 @@ public class UniqueCombinationTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        UniqueCombination<String> iterable = JNumberTools.combinationsOf("A", "B", "C").unique(2);
+        List<String> input = Arrays.asList("A", "B", "C");
+        UniqueCombination<String> iterable = JNumberTools.combinationsOf(input,2).unique();
         List<List<String>> lists1 = iterable.stream().collect(Collectors.toList());
         List<List<String>> lists2 = iterable.stream().collect(Collectors.toList());
 
@@ -39,10 +41,11 @@ public class UniqueCombinationTest {
     public void  shouldGenerateCombinationsInInputOrder() {
 
         String expected = "[[Red, Green], [Red, Blue], [Green, Blue]]";
+        List<String> input = Arrays.asList("Red", "Green", "Blue");
 
         String output = JNumberTools
-                .combinationsOf("Red", "Green", "Blue")
-                .unique(2)
+                .combinationsOf(input,2)
+                .unique()
                 .stream()
                 .collect(Collectors.toList()).toString();
 
@@ -53,8 +56,8 @@ public class UniqueCombinationTest {
     public void shouldReturnEmptyListForSizeEqualsZero() {
 
         String output = JNumberTools
-                .combinationsOf("A","B")
-                .unique(0)
+                .combinationsOf(Arrays.asList("A","B"),0)
+                .unique()
                 .stream()
                 .collect(Collectors.toList()).toString();
 
@@ -64,15 +67,15 @@ public class UniqueCombinationTest {
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForSizeGreaterThanN() {
 
-        JNumberTools.combinationsOf("A","B")
-                .unique(3);
+        JNumberTools.combinationsOf(Arrays.asList("A","B"),3)
+                .unique();
     }
 
     @Test
     public void  shouldGenerateEmptyListForNullInput() {
         String output = JNumberTools
-                .combinationsOf()
-                .unique(0)
+                .combinationsOf(Collections.emptyList(),0)
+                .unique()
                 .stream()
                 .collect(Collectors.toList()).toString();
 

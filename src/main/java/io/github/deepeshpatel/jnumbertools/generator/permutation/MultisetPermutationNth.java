@@ -82,9 +82,8 @@ public class MultisetPermutationNth<T>  extends AbstractGenerator<T> {
 
         private int[] getIndicesForNthPermutation(long n, int initialSum){
 
-            //TODO: Optimize this shit. totalPossible and countOfX is same every time and can be cached
             int[] output = new int[initialSum];
-            int[] currentMultisetCount = getClone(multisetFreqArray);
+            int[] currentMultisetCount = Arrays.copyOf(multisetFreqArray, multisetFreqArray.length);
             long sum = initialSum;
 
             BigInteger  totalPossible = possiblePermutations;
@@ -93,7 +92,11 @@ public class MultisetPermutationNth<T>  extends AbstractGenerator<T> {
                 long countTillX = 0;
 
                 for (int i = 0; i < currentMultisetCount.length; i++) {
-                    long countOfX = totalPossible.multiply(BigInteger.valueOf(currentMultisetCount[i])).divide(BigInteger.valueOf(sum)).longValue();
+                    long countOfX = totalPossible
+                            .multiply(BigInteger.valueOf(currentMultisetCount[i]))
+                            .divide(BigInteger.valueOf(sum))
+                            .longValue();
+
                     long countTillPrevious = countTillX;
                     countTillX = countTillPrevious + countOfX;
 

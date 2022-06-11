@@ -21,31 +21,32 @@ public class JNumberTools {
 
     private JNumberTools() { }
 
-    public static <T> CombinationBuilder<T> combinationsOf(Collection<T> data) {
-        return new CombinationBuilder<>(data);
+    public static <T> CombinationBuilder<T> combinationsOf(Collection<T> data, int ofSize) {
+        return new CombinationBuilder<>(data, ofSize);
     }
 
     @SafeVarargs
-    public static <T> CombinationBuilder<T> combinationsOf(T... data) {
-        return combinationsOf(Arrays.asList(data));
+    @SuppressWarnings("varargs")
+    public static <T> CombinationBuilder<T> combinationsOf(int size,T... data) {
+        return combinationsOf(Arrays.asList(data),size);
     }
 
-    public static CombinationBuilder<Integer> combinationsFromInputSize(int size) {
-        List<Integer> list = IntStream.range(0, size).boxed().collect(Collectors.toList());
-        return combinationsOf(list);
-
+    public static CombinationBuilder<Integer> combinationsOfnCr(int n, int r) {
+        List<Integer> list = IntStream.range(0, n).boxed().collect(Collectors.toList());
+        return combinationsOf(list,r);
     }
 
     public static <T> PermutationBuilder<T>  permutationsOf(Collection<T> data) {
         return new PermutationBuilder<>(data);
     }
 
-
+    @SafeVarargs
+    @SuppressWarnings("varargs")
     public static <T> PermutationBuilder<T>  permutationsOf(T... data) {
         return permutationsOf(Arrays.asList(data));
     }
 
-    public static  PermutationBuilder<Integer> permutationsOfSize(int size) {
+    public static  PermutationBuilder<Integer> permutationsOf(int size) {
         List<Integer> list = IntStream.range(0, size).boxed().collect(Collectors.toList());
         return permutationsOf(list);
     }
@@ -55,8 +56,14 @@ public class JNumberTools {
     }
 
     @SafeVarargs
+    @SuppressWarnings("varargs")
     public static <T> SubsetGenerator.Builder<T> subsetsOf(T... data) {
         return subsetsOf(Arrays.asList(data));
+    }
+
+    public static SubsetGenerator.Builder<Integer> subsetsOf(int dataSize) {
+        List<Integer> list = IntStream.range(0, dataSize).boxed().collect(Collectors.toList());
+        return new SubsetGenerator.Builder<>(list);
     }
 
     public static RankOf rankOf() {

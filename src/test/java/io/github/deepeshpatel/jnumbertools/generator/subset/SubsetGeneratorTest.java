@@ -97,4 +97,14 @@ public class SubsetGeneratorTest {
         assertEquals("[[]]", output);
     }
 
+    @Test
+    public void shouldGenerateSubsetFromGivenInputSize() {
+        String output = JNumberTools
+                .subsetsOf(3)
+                .all()
+                .stream().collect(Collectors.toList()).toString();
+
+        assertEquals("[[], [0], [1], [2], [0, 1], [0, 2], [1, 2], [0, 1, 2]]", output);
+    }
+
 }

@@ -8,12 +8,8 @@ package io.github.deepeshpatel.jnumbertools.generator.combination;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
-import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.getClone;
 import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.newEmptyIterator;
 
 /**
@@ -106,7 +102,7 @@ public class RepetitiveCombinationMultiset<T> extends AbstractGenerator<T> {
 
         private int[] nextRepetitiveCombinationOfMultiset(int[]a, int[] availableCount) {
 
-            int[] next = getClone(a);
+            int[] next = Arrays.copyOf(a, a.length);
             int i=next.length-1;
             int maxSupportedValue = availableCount.length-1;
 

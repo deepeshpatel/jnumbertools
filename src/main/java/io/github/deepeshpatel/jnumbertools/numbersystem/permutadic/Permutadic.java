@@ -8,7 +8,6 @@ package io.github.deepeshpatel.jnumbertools.numbersystem.permutadic;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.getClone;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.permutadic.PermutadicAlgorithms.*;
 
 /**
@@ -64,7 +63,7 @@ public class Permutadic {
     }
 
     public int[] getValue() {
-        return getClone(value);
+        return Arrays.copyOf(value, value.length);
     }
 
     @Override

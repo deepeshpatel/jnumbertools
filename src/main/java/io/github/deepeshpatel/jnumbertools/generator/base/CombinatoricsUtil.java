@@ -10,13 +10,8 @@ import java.util.*;
 
 public class CombinatoricsUtil {
 
-    public static int[] getClone(int[] actual) {
-        int[] clone = new int[actual.length];
-        System.arraycopy(actual,0,clone,0, clone.length);
-        return clone;
-    }
-
     public static int[] initIndicesForMultisetPermutation(int... multisetFreqArray){
+
         List<Integer> a = new ArrayList<>();
         for(int i=0; i<multisetFreqArray.length;i++) {
             a.addAll(Collections.nCopies(multisetFreqArray[i], i));

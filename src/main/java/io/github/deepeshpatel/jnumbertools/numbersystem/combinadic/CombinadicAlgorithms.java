@@ -1,8 +1,8 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem.combinadic;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
-import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.getClone;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCrBig;
 
 public class CombinadicAlgorithms {
@@ -71,7 +71,7 @@ public class CombinadicAlgorithms {
     //This is faster than nextKthCombinadic. So must be used for +1 while finding next Nth Combinadic
     public static int[] nextCombinadic(int[] combinadic) {
 
-        int[] result = getClone(combinadic);
+        int[] result = Arrays.copyOf(combinadic, combinadic.length);
 
         int k=0;
         for(int i=result.length-1; i>0; i--) {

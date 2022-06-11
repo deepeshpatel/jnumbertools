@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,8 +18,9 @@ public class RepetitiveCombinationMultisetTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        RepetitiveCombinationMultiset<String> iterable = JNumberTools.combinationsOf("A", "B", "C")
-                .repetitiveMultiset(2,2,3,2);
+        RepetitiveCombinationMultiset<String> iterable = JNumberTools
+                .combinationsOf(Arrays.asList("A","B","C"),2)
+                .repetitiveMultiset(new int[]{2,3,2});
 
         List<List<String>> lists1 = iterable.stream().collect(Collectors.toList());
         List<List<String>> lists2 = iterable.stream().collect(Collectors.toList());
@@ -40,8 +42,9 @@ public class RepetitiveCombinationMultisetTest {
                 "[Green, Green, Yellow], " +
                 "[Green, Blue, Yellow]]";
 
-        String output = JNumberTools.combinationsOf("Red", "Green", "Blue","Yellow")
-                .repetitiveMultiset(3, new int[]{3,2,1,1}) //3 red ,2 green, 1 blue, 1 yellow
+        String output = JNumberTools
+                .combinationsOf(Arrays.asList("Red", "Green", "Blue","Yellow"),3)
+                .repetitiveMultiset(new int[]{3,2,1,1}) //3 red ,2 green, 1 blue, 1 yellow
                 .stream().collect(Collectors.toList()).toString();
 
         Assert.assertEquals(expected, output);
@@ -49,8 +52,8 @@ public class RepetitiveCombinationMultisetTest {
 
     @Test
     public void shouldReturnEmptyListWhenREqualsZero() {
-        String output = JNumberTools.combinationsOf("A", "B")
-                .repetitiveMultiset(0, new int[]{3,2}) //3 red ,2 green
+        String output = JNumberTools.combinationsOf(Arrays.asList("A", "B"),0)
+                .repetitiveMultiset(new int[]{3,2}) //3 red ,2 green
                 .stream().collect(Collectors.toList()).toString();
 
         Assert.assertEquals("[[]]", output);
@@ -58,8 +61,8 @@ public class RepetitiveCombinationMultisetTest {
 
     @Test
     public void shouldReturnEmptyListWhenInputListIsEmpty() {
-        String output = JNumberTools.combinationsOf()
-                .repetitiveMultiset(0)
+        String output = JNumberTools.combinationsOf(Collections.emptyList(),0)
+                .repetitiveMultiset(new int[]{})
                 .stream().collect(Collectors.toList()).toString();
 
         Assert.assertEquals("[[]]", output);
