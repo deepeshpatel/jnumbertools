@@ -1,7 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
 import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
-import io.github.deepeshpatel.jnumbertools.generator.TestUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -9,6 +8,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombinationNthTest.collectEveryNthValue;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPr;
 import static org.junit.Assert.assertEquals;
 
@@ -119,7 +119,7 @@ public class UniquePermutationNthTest {
 
     private String getExpectedResultViaOneByOneIteration(List<String> input, int increment) {
         Stream<List<String>> stream = JNumberTools.permutationsOf(input).unique().stream();
-        return TestUtil.collectEveryNthValue(stream, increment).toString();
+        return collectEveryNthValue(stream, increment).toString();
     }
 }
 

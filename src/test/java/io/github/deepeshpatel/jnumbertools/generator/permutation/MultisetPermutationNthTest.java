@@ -1,7 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
 import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
-import io.github.deepeshpatel.jnumbertools.generator.TestUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -9,6 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombinationNthTest.collectEveryNthValue;
 
 public class MultisetPermutationNthTest {
 
@@ -54,6 +55,6 @@ public class MultisetPermutationNthTest {
 
     private String getExpectedResultViaOneByOneIteration(List<String> input, int increment, int[] freqArray) {
         Stream<List<String>> stream = JNumberTools.permutationsOf(input).multiset(freqArray).stream();
-        return TestUtil.collectEveryNthValue(stream, increment).toString();
+        return collectEveryNthValue(stream, increment).toString();
     }
 }

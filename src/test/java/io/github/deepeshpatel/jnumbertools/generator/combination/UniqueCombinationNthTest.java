@@ -1,7 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination;
 
 import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
-import io.github.deepeshpatel.jnumbertools.generator.TestUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -94,6 +93,11 @@ public class UniqueCombinationNthTest {
 
     private String getExpectedResultViaOneByOneIteration(List<String> input, int r, int increment) {
         Stream<List<String>> stream = JNumberTools.combinationsOf(input,r).unique().stream();
-        return TestUtil.collectEveryNthValue(stream, increment).toString();
+        return collectEveryNthValue(stream, increment).toString();
+    }
+
+    public static <T> List<List<T>> collectEveryNthValue(Stream<List<T>> stream, int n) {
+        final int[] j = {0};
+        return stream.filter(e-> j[0]++ % n == 0).collect(Collectors.toList());
     }
 }
