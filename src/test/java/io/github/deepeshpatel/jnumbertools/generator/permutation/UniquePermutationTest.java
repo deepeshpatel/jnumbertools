@@ -71,8 +71,6 @@ public class UniquePermutationTest {
 
     @Test
     public void shouldConsiderNullAsEmpty(){
-        JNumberTools.permutationsOf().unique();
-
         String actual   = JNumberTools.permutationsOf((java.util.Collection<String>) null)
                 .unique()
                 .stream().collect(Collectors.toList()).toString();

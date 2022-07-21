@@ -6,6 +6,7 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem.factoradic;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
 /**
  * Object of this class encapsulates the Factoradic representation of a
@@ -32,7 +33,7 @@ public final class Factoradic {
      *  prints the values in reverse order for correct reading interpretation.
      */
     public int[] getValues() {
-        return values;
+        return Arrays.copyOf(values, values.length);
     }
 
     /**

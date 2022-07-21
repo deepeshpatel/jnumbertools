@@ -45,7 +45,14 @@ public class KPermutationCombinationOrderTest {
 
     @Test
     public void shouldNotThrowExceptionForZeroK() {
-        JNumberTools.permutationsOf(new ArrayList<>()).k(0);
+         String output = JNumberTools
+                 .permutationsOf(new ArrayList<>())
+                 .k(0)
+                 .combinationOrder()
+                         .stream().collect(Collectors.toList()).toString();
+
+         assertEquals("[[]]", output);
+
     }
 
     @Test

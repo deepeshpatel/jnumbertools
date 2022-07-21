@@ -23,7 +23,7 @@
 
     <groupId>io.github.deepeshpatel</groupId>
     <artifactId>jnumbertools</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
 
     <packaging>jar</packaging>
 
@@ -79,7 +79,6 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <profiles>

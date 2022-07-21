@@ -18,10 +18,10 @@ public class MultisetPermutationTest {
 
     @Test
     public void assertCount() {
-        //List<Long> fact = factorialList();
+        Random random = new Random(System.currentTimeMillis());
         for(int n=1; n<=6; n++){
             List<String> input = Collections.nCopies(n, "A");
-            int[] multisetFreqArray =getRandomMultisetFreqArray(input.size());
+            int[] multisetFreqArray =getRandomMultisetFreqArray(random, input.size());
             long count = JNumberTools.permutationsOf(input)
                     .multiset(multisetFreqArray).stream().count();
 
@@ -44,9 +44,8 @@ public class MultisetPermutationTest {
         Assert.assertEquals(lists1, lists2);
     }
 
-    private int[] getRandomMultisetFreqArray(int length) {
+    private int[] getRandomMultisetFreqArray(Random random, int length) {
         int[] multisetFreqArray = new int[length];
-        Random random = new Random(System.currentTimeMillis());
         for(int i=0; i<multisetFreqArray.length; i++) {
             int value = random.nextInt(2)+1;
             multisetFreqArray[i] = value;
