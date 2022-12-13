@@ -8,7 +8,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
 import io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil;
-import io.github.deepeshpatel.jnumbertools.numbersystem.permutadic.PermutadicAlgorithms;
+import io.github.deepeshpatel.jnumbertools.numbersystem.permutadic.Permutadic;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -103,7 +103,8 @@ public class KPermutationLexOrderNth<T> extends AbstractGenerator<T> {
         }
 
         private int[] nextNthKPermutation(BigInteger n, int degree, int size) {
-            return PermutadicAlgorithms.unRankWithoutBoundCheck(n,size,degree);
+            return Permutadic.of(n,size-degree).toNthPermutation(degree);
+            //return PermutadicAlgorithms.unRankWithoutBoundCheck(n,size,degree);
         }
     }
 }

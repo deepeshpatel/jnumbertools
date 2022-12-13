@@ -7,6 +7,8 @@ package io.github.deepeshpatel.jnumbertools.numbersystem;
 
 import java.math.BigInteger;
 
+import static java.lang.Math.min;
+
 public class MathUtil {
 
     private static final int factorialCacheSize = 40;
@@ -29,7 +31,7 @@ public class MathUtil {
 
     public static long nCr(long n, long r) {
         if(n<r) return 0;
-        long denominator = Math.min(r, n-r);
+        long denominator = min(r, n-r);
         double p = 1;
         for(int i=1; i<=denominator; i++) {
             p = p * n--/i;
@@ -70,5 +72,14 @@ public class MathUtil {
             product = product.multiply(BigInteger.valueOf(i));
         }
         return product;
+    }
+
+    public static long GCD(long a, long b) {
+        long mod = a % b;
+        return mod == 0 ? b : GCD(b, mod);
+    }
+
+    public static long LCM(long a, long b) {
+        return (a * b)/GCD(a,b);
     }
 }

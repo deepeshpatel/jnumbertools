@@ -3,7 +3,8 @@ package io.github.deepeshpatel.jnumbertools.numbersystem.factoradic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.permutadic.PermutadicAlgorithms;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.IntStream;
 
 public class FactoradicAlgorithms {
@@ -91,10 +92,9 @@ public class FactoradicAlgorithms {
         return factoradicToNthPermutation(intToFactoradicKnowSize(rank,size));
     }
 
-    //TODO: Do not use Permutadic algo for this. It is inefficient
     public static BigInteger rank(int[] nthPermutation) {
-        int[] factoradic = PermutadicAlgorithms.nthPermutationToPermutadic(nthPermutation, nthPermutation.length);
-        return  factoradicToInt(factoradic);
+        List<Integer> factoradic = PermutadicAlgorithms.nthPermutationToPermutadic(nthPermutation, 0);
+        return  PermutadicAlgorithms.toDecimal(factoradic,0);// factoradicToInt(factoradic);
     }
 
 

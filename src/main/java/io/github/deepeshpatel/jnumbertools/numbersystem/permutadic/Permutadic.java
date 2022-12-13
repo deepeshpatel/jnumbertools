@@ -6,7 +6,9 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem.permutadic;
 
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 import static io.github.deepeshpatel.jnumbertools.numbersystem.permutadic.PermutadicAlgorithms.*;
 
@@ -27,47 +29,83 @@ import static io.github.deepeshpatel.jnumbertools.numbersystem.permutadic.Permut
  *
  * @author Deepesh Patel
  */
-public class Permutadic {
+public final class Permutadic {
 
-    private final int size;
-    private final int[] value;
+    private final int degree;
+    private final List<Integer> value;
     private final BigInteger decimalValue;
 
-    private Permutadic(BigInteger decimalValue, int[] value, int size ) {
-        this.size = size;
-        this.value = value;
+    private Permutadic(BigInteger decimalValue, List<Integer> value, int degree) {
+        this.degree = degree;
+        this.value = Collections.unmodifiableList(value);
         this.decimalValue = decimalValue;
     }
 
-    public static Permutadic of(BigInteger decimalValue, int size, int degree) {
-        return new Permutadic(decimalValue, decimalToPermutadic(decimalValue,size,degree), size);
+//    public static Permutadic of(long decimalValue, int s, int k) {
+//        return of(BigInteger.valueOf(decimalValue),s-k);
+//    }
+
+    public static Permutadic of(long decimalValue, int degree) {
+        return of(BigInteger.valueOf(decimalValue),degree);
     }
 
-    public int[] toNthPermutationWithoutBoundCheck() {
-        return permutadicToNthPermutation(value,size);
+    public static Permutadic fromNthPermutation(int[] nthPerm, int degree) {
+        List<Integer> perm = nthPermutationToPermutadic(nthPerm, degree);
+        BigInteger decimal = toDecimal(perm, degree);
+        return new Permutadic(decimal, perm, degree);
     }
 
-    public int[] toNthPermutationWithBoundCheck() {
-        checkBounds(decimalValue,size,value.length);
-        return permutadicToNthPermutation(value,size);
+    public int[] toNthPermutation(int countOfSelectItems) {
+        return PermutadicAlgorithms.toNthPermutation(value,degree+countOfSelectItems ,countOfSelectItems);
     }
 
-    public static Permutadic fromNthPermutation(int[] nthPermutation, int size) {
-        int[] permutadic = nthPermutationToPermutadic(nthPermutation, size);
-        BigInteger decimalVal = permutadicToDecimal(permutadic,size);
-        return new Permutadic(decimalVal, permutadic, size);
+    public static Permutadic of(BigInteger decimalValue, int degree) {
+        List<Integer> permutadicValues = toPermutadic(decimalValue, degree);
+        return new Permutadic(decimalValue, permutadicValues, degree);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder("[");
+        for(int i=value.size()-1; i>0; i--) {
+            s.append(value.get(i)).append(",");
+        }
+        s.append(value.get(0)).append("](").append(degree).append(")");
+        return s.toString();
+    }
+
+    public int getDegree() {
+        return degree;
+    }
+
+    public List<Integer> getValue() {
+        return value;
     }
 
     public BigInteger decimalValue() {
         return decimalValue;
     }
 
-    public int[] getValue() {
-        return Arrays.copyOf(value, value.length);
+    public String toMathExpression() {
+        int s = degree;
+        int k = 0;
+        String expression = "";
+        while(k < value.size()) {
+            expression = value.get(k) + "("+ (s++) + "P" + (k++) +")" + " + " + expression;
+        }
+        return expression.substring(0, expression.length()-2);
     }
 
     @Override
-    public String toString() {
-        return Arrays.toString(value) + '[' + size + ']';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Permutadic that = (Permutadic) o;
+        return degree == that.degree && decimalValue.equals(that.decimalValue);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(degree, decimalValue);
     }
 }

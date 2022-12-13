@@ -16,7 +16,8 @@ public class UnRankOf {
     }
 
     public int[] kPermutation(BigInteger rank, int n, int k) {
-        return PermutadicAlgorithms.unRankingWithBoundCheck(rank, n, k);
+        return PermutadicAlgorithms.unRank(rank, n, k);
+//        return PermutadicAlgorithms.unRankingWithBoundCheck(rank, n, k);
     }
 
     public int[] uniqueCombination(BigInteger rank, int n, int r) {

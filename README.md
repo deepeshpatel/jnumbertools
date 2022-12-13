@@ -3,27 +3,20 @@ JNumberTools is the open source java-library of combinatorics and number-theory
 
 **Currently Available Algorithms**
 
-1. Permutations (9 different types of permutation generation)
-1. Combinations (4 different types of combination generation)
+1. Permutations (10 different types of permutation ranking and un-ranking)
+1. Combinations (4 different types of combination ranking and un-ranking)
 1. Set/subset generations
 1. Factoradic sequence generation.
 1. Combinadic sequence generation.
-1. Permutadic (A new concept for Nth K-Permutation)
+1. Permutadic (A new concept for nth k-Permutation)
 
 ***
 **Permutation Generation Examples:**
 
-| #   | Type of Permutation                     | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | API Example                                                                                                          | Example Output                                                                         | Count                                                        |
-|-----|-----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|--------------------------------------------------------------|
-| 1.  | Unique Permutations                     | All permutations of size equal to input in lex order of indices of input                                                                                                                                                                                                                                                                                                                                                                                                                                       | NumberTools<br>.permutationsOf("A","B","C")<br>.unique()<br>.forEach(System.out::println);                           | [A, B, C]<br>[A, C, B]<br>[B, A, C]<br>[B, C, A]<br>[C, A, B]<br>[C, B, A]             | **n!**                                                       |
-| 2.  | Nth Unique Permutation                  | Generate permutations with repeated values starting from 0<sup>th</sup> permutation(input) and<br> then generate every nth permutation in lexicographical order of indices of input values.<br> This is important because say, if we need to generate next 100 trillionth permutation<br>of 100 items then it will take months to compute if we go sequentially and then increment<br> to the unwanted permutations because the total # of permutations is astronomical<br> (100!= 9.3326E X 10<sup>157</sup>) | NumberTools<br>.permutationsOf("A","B","C")<br>.uniqueNth(2)<br>.forEach(System.out::println);                       | [A, B, C]<br>[B, A, C]<br>[C, A, B]                                                    | **n! / m**                                                   |
-| 3.  | K-Permutation                           | Generates all unique permutations of size k.<br>In number theory this is also know as k-permutations                                                                                                                                                                                                                                                                                                                                                                                                           | NumberTools<br>.permutationsOf("A","B","C")<br>.k(2)<br>.forEach(System.out::println);                               | [A, B]<br>[B, A]<br>[A, C]<br>[C, A]<br>[B, C]<br>[C, B]                               | **<sup>n</sup>P<sub>k</sub>**                                |
-| 4.  | Nth K-Permutation                       | Generates permutations of unique values of size k,<br> incrementing to every nth permutation in lex order.                                                                                                                                                                                                                                                                                                                                                                                                     | NumberTools<br>.permutationsOf("A","B","C")<br>.kNth(2,3)<br>.forEach(System.out::println);                          | [A, B]<br>[A, C]<br>[B, C]                                                             | **<sup>n</sup>P<sub>k</sub> / m**                            |
-| 5.  | Repetitive Permutations of given size r | This is same as generating base-n numbers of max size r-digits<br>with given n-symbols, starting from zero in lex order                                                                                                                                                                                                                                                                                                                                                                                        | NumberTools<br>.permutationsOf("A","B","C")<br>.repetitive(2)<br>.forEach(System.out::println);                      | [A, A]<br>[A, B]<br>[A, C]<br>[B, A]<br>[B, B]<br>[B, C]<br>[C, A]<br>[C, B]<br>[C, C] | **n<sup>r</sup>**                                            |
-| 6.  | Nth Repetitive Permutation<br>of size r | This is same as generating AP series of base-n numbers with given n-symbols<br>and a=0, d=m and with max-digits =r                                                                                                                                                                                                                                                                                                                                                                                             | NumberTools<br>.permutationsOf("A","B","C")<br>.repetitiveNth(2,3)//size 2 and m=3<br>.forEach(System.out::println); | [A, A]<br>[B, A]<br>[C, A]                                                             | **n<sup>r</sup>/m**                                          |
-| 7.  | Repetitive Permutations<br>of multiset  | Also known as multiset-permutation.<br>This is special case of repetitive permutation where every item say,<br> a<sub>1</sub>,a<sub>2</sub>,a<sub>3</sub> ... has an associated number s<sub>1</sub>,s<sub>2</sub>,s<sub>3</sub>... which denotes how many<br>times an item can be repeated in a permutation                                                                                                                                                                                                   | JJNumberTools.permutationsOf("A", "B")<br>..repetitiveMultiset(3,1)//a 3 times<br>.forEach(System.out::println);     | [A, A, A, B]<br>[A, A, B, A]<br>[A, B, A, A]<br>[B, A, A, A]                           | **( ∑ a<sub>i</sub> . s<sub>i</sub> )! / Π(s<sub>i</sub>!)** |
+[permutation examples](md_files/permutation_table.md)
 
-
+<iframe src="md_files/permutation.html" title="permutation examples">
+</iframe>
 
 **Combination Generation Examples:**
 
@@ -77,8 +70,5 @@ class Example {
 }
 ```
 
-**Coming Soon**
-1. Mixed Radix Number System
-1. Number Partition
-1. Cartesian Product
+
 
