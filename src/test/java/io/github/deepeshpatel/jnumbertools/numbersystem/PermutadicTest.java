@@ -1,14 +1,11 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
-import io.github.deepeshpatel.jnumbertools.numbersystem.factoradic.Factoradic;
-import io.github.deepeshpatel.jnumbertools.numbersystem.permutadic.Permutadic;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPr;
 
@@ -34,10 +31,9 @@ public class PermutadicTest {
     public void shouldBeEqualToFactoradicForSizeEqualsDegree() {
         int start = 565656565;
         for(int i=start; i<=start+10; i++) {
-            Factoradic f = new Factoradic(BigInteger.valueOf(i));
-            int size = f.getValues().length;
-            List<Integer> permutadicValue = Permutadic.of(BigInteger.valueOf(i),size-size).getValue();
-            List<Integer> factorialValues = Arrays.stream(f.getValues()).boxed().collect(Collectors.toList());
+            Factoradic f = Factoradic.of(i);
+            List<Integer> permutadicValue = Permutadic.of(BigInteger.valueOf(i), 0).permutadicValues;
+            List<Integer> factorialValues = f.factoradicValues;
             Assert.assertEquals(factorialValues.toString(), permutadicValue.toString());
         }
     }
@@ -50,12 +46,12 @@ public class PermutadicTest {
             Permutadic permutadic1 = Permutadic.of(BigInteger.valueOf(i), size-degree);
             int[] nthPermutation = permutadic1.toNthPermutation(4);
             Permutadic permutadic2 = Permutadic.fromNthPermutation(nthPermutation,size-degree);
-            Assert.assertEquals(i, permutadic2.decimalValue().intValue());
+            Assert.assertEquals(i, permutadic2.decimalValue.intValue());
         }
     }
 
     @Test
-    public void shupdResultInCorrectValueToAndFromNthPermutation(){
+    public void shouldResultInCorrectValueToAndFromNthPermutation(){
         int size = 6;
         int degree = 3;
         for(long i=0; i<nPr(size,degree); i++) {
@@ -63,6 +59,7 @@ public class PermutadicTest {
             int[] nth = p1.toNthPermutation(degree);
             Permutadic p2 = Permutadic.fromNthPermutation(nth,size-degree);
             Assert.assertEquals(p1, p2);
+            Assert.assertEquals(p1.hashCode(), p2.hashCode());
         }
     }
 
@@ -87,9 +84,19 @@ public class PermutadicTest {
         for(long i=0; i<nPr(size,degree); i++) {
             Permutadic permutadic = Permutadic.of(i,size-degree);
             int[] ithPermutation = permutadic.toNthPermutation(4);
-            BigInteger rank = Permutadic.fromNthPermutation(ithPermutation, size-degree).decimalValue();
+            BigInteger rank = Permutadic.fromNthPermutation(ithPermutation, size-degree).decimalValue;
             Assert.assertEquals(i, rank.longValue());
         }
     }
 
+    @Test
+    public void shouldGenerateCorrectMathExpression() {
+        String expected =
+                "2(²⁸P₁₄) + 17(²⁷P₁₃) + 22(²⁶P₁₂) + 20(²⁵P₁₁) + 12(²⁴P₁₀) + " +
+                "10(²³P₉) + 2(²²P₈) + 17(²¹P₇) + 12(²⁰P₆) + 15(¹⁹P₅) + " +
+                "18(¹⁸P₄) + 2(¹⁷P₃) + 0(¹⁶P₂) + 8(¹⁵P₁) + 7(¹⁴P₀)";
+
+        Permutadic permutadic = Permutadic.of(Long.MAX_VALUE, 14);
+        Assert.assertEquals(expected, permutadic.toMathExpression());
+    }
 }

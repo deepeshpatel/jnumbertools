@@ -1,8 +1,8 @@
-package io.github.deepeshpatel.jnumbertools.generator.rank;
+package io.github.deepeshpatel.jnumbertools.algos;
 
-import io.github.deepeshpatel.jnumbertools.numbersystem.combinadic.CombinadicAlgorithms;
-import io.github.deepeshpatel.jnumbertools.numbersystem.factoradic.FactoradicAlgorithms;
-import io.github.deepeshpatel.jnumbertools.numbersystem.permutadic.PermutadicAlgorithms;
+import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
+import io.github.deepeshpatel.jnumbertools.numbersystem.FactoradicAlgorithms;
+import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
 
 import java.math.BigInteger;
 

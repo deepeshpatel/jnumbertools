@@ -1,16 +1,15 @@
-package io.github.deepeshpatel.jnumbertools.generator.permutation;
+package io.github.deepeshpatel.jnumbertools.algos;
 
 import io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PermutationAlgorithms {
 
     public static List<List<Integer>> toCycleNotation(int[] permutation, boolean includeOneCycle) {
-        List<Integer> p = Arrays.stream(permutation).boxed().collect(Collectors.toList());
+        List<Integer> p = Arrays.stream(permutation).boxed().toList();
         return toCycleNotation(p, includeOneCycle);
     }
 
@@ -35,7 +34,6 @@ public class PermutationAlgorithms {
                 element = permutation.get(element);
             }
 
-
             if(cycle.size()==1 && !includeOneCycle) {
                 continue;
             }
@@ -47,8 +45,8 @@ public class PermutationAlgorithms {
     public static long orderOfPermutationWithCycleNotation(List<List<Integer>> permutationCycles) {
 
         long lcm = 1;
-        for(List cycle : permutationCycles) {
-            lcm = MathUtil.LCM(lcm,cycle.size());
+        for(var cycle : permutationCycles) {
+            lcm = MathUtil.LCM(lcm, cycle.size());
         }
         return lcm;
     }
@@ -66,7 +64,7 @@ public class PermutationAlgorithms {
         if(permutation1.size() != permutation2.size()) {
             throw new IllegalArgumentException("To compute the product, permutation1 and permutation2 must have same degree");
         }
-        List<Integer> product = new ArrayList<>(permutation1.size());
+        var product = new ArrayList<Integer>(permutation1.size());
         for(int i=0; i<permutation1.size(); i++) {
             product.add(permutation1.get(permutation2.get(i)));
         }
@@ -78,7 +76,7 @@ public class PermutationAlgorithms {
         for(int i=0; i< permutation.size(); i++) {
             inverse[permutation.get(i)] = i;
         }
-        return Arrays.asList(inverse);
+        return List.of(inverse);
     }
 
     public static long orderOfPermutation(List<Integer> permutation) {

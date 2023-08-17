@@ -8,7 +8,9 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.itertor.UniquePermutationIterator;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.initIndicesForMultisetPermutation;
 

@@ -8,9 +8,13 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.*;
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.checkParamIncrement;
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.initIndicesForMultisetPermutation;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.factorial;
 
 /**

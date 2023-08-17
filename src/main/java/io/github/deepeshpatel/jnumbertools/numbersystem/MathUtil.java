@@ -6,11 +6,14 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
 import java.math.BigInteger;
+import java.util.function.Function;
 
 import static java.lang.Math.min;
 
-public class MathUtil {
+public final class MathUtil {
 
+    //TODO: [1] setup cache for nPr and nCr also
+    //TODO: [2] Make cache dynamic.
     private static final int factorialCacheSize = 40;
     private static final BigInteger[] factorialList = new BigInteger[factorialCacheSize];
 
@@ -45,6 +48,31 @@ public class MathUtil {
             p = p*n--;
         }
         return p;
+    }
+
+    public static String nPrString(int n, int r) {
+        return  superOrSubscript("" + n, MathUtil::superscript) + "P" + superOrSubscript("" + r,  MathUtil::subscript);
+    }
+
+    private static String superOrSubscript(String s, Function<Character, Character> superOrSubscriptConverter){
+        StringBuilder sb = new StringBuilder(s.length());
+        for (char value : s.toCharArray()) {
+            sb.append(superOrSubscriptConverter.apply(value));
+        }
+        return sb.toString();
+    }
+
+    private static char superscript(char c) {
+        return switch (c) {
+            case '1' -> '¹';
+            case '2' -> '²';
+            case '3' -> '³';
+            default -> (char) (8304+c-48);
+        };
+    }
+
+    private static char subscript(char c) {
+        return (char) (8320+c-48);
     }
 
     public static BigInteger nPrBig(int n, int r){

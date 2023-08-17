@@ -7,8 +7,8 @@ package io.github.deepeshpatel.jnumbertools.generator.combination;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
+import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
 import io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil;
-import io.github.deepeshpatel.jnumbertools.numbersystem.combinadic.CombinadicAlgorithms;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -23,7 +23,7 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
  * Implements the iterable generating every n<sup>th</sup> unique combination of size k.
  * Combinations are generated in lex order of indices of input values,
  * considering value at each index as unique.
- *
+ * <p>
  * This concept is important because count of combinations can grow astronomically
  * large and to generate say, every 100 trillionth combination of 50 items out of 100 (100Choose50),
  * we do not like to wait for 100's of hours to generate all 1.008913445 X 10<sup>29</sup> combinations
@@ -31,12 +31,12 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
  *
  * <pre>
  *     Code example -
- *     new UniqueCombinationNth&lt;&gt;(Arrays.asList("A","B","C","D"),2,2)
+ *     new UniqueCombinationNth&lt;&gt;(List.of("A","B","C","D"),2,2)
  *                  .forEach(System.out::println);
  *
  *     or
  *
- *     JNumberTools.combinationsOf("A","B","C","D")
+ *     JNumberTools.of("A","B","C","D")
  *                 .uniqueNth(2,1)
  *                 .forEach(System.out::println);
  *

@@ -25,7 +25,7 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
  *
  * <pre>
  *     Code example:
- *     new UniquePermutation&lt;&gt;(Arrays.asList("A","B","C"))
+ *     new UniquePermutation&lt;&gt;(List.of("A","B","C"))
  *                 .forEach(System.out::println);
  *     or
  *

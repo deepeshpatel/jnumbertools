@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.examples;
 
-import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -27,16 +27,16 @@ class KPermutationExamples {
     }
 
     static void printKPermutationOfNumbersInLexOrder() {
-        System.out.println("\n*** 2-Permutation(selected 2 at a time) of 3 items in lex order ***");
-        JNumberTools.permutationsOf(3)
+        System.out.println("\n*** 2-Permutation(selected 2 at a time) out of 3 items in lex order ***");
+        JNumberTools.permutations().of(3)
                 .k(2)
                 .lexOrder()
                 .forEach(System.out::println);
     }
 
     static void printKPermutationOfElementsInLexOrder() {
-        System.out.println("\n*** 2-Permutation(selected 2 at a time) of 3 given elements in lex order ***");
-        JNumberTools.permutationsOf("Red", "Green", "Blue")
+        System.out.println("\n*** 2-Permutation(selected 2 at a time) out of 3 given elements in lex order ***");
+        JNumberTools.permutations().of("Red", "Green", "Blue")
                 .k(2)
                 .lexOrder()
                 .forEach(System.out::println);
@@ -44,7 +44,7 @@ class KPermutationExamples {
 
     static void printNthKPermutationOfNumbersInLexOrder() {
         System.out.println("\n*** Every 3rd 2-Permutation of 3 items in lex order ***");
-        JNumberTools.permutationsOf(3)
+        JNumberTools.permutations().of(3)
                 .k(2)
                 .lexOrderNth(3)
                 .forEach(System.out::println);
@@ -52,7 +52,7 @@ class KPermutationExamples {
 
     static void printNthKPermutationOfElementsInLexOrder() {
         System.out.println("\n*** Every 3rd 2-Permutation of 3 given elements in lex order ***");
-        JNumberTools.permutationsOf("Red", "Green", "Blue")
+        JNumberTools.permutations().of("Red", "Green", "Blue")
                 .k(2)
                 .lexOrderNth(3)
                 .forEach(System.out::println);
@@ -62,7 +62,7 @@ class KPermutationExamples {
 
         System.out.println("\n*** Print every one hundred octillion-th(10^29 th) 20-Permutation of 40 elements(20P40) *** ");
 
-        JNumberTools.permutationsOf(40)
+        JNumberTools.permutations().of(40)
                 .k(20)
                 .lexOrderNth(new BigInteger("100000000000000000000000000000"))
                 .forEach(System.out::println);
@@ -71,7 +71,7 @@ class KPermutationExamples {
     static void printKPermutationOfNumbersInCombinationOrder() {
 
         System.out.println("\n***  Print 2-permutation of 4 items in combination order  ***");
-        JNumberTools.permutationsOf(4)
+        JNumberTools.permutations().of(4)
                 .k(2)
                 .combinationOrder()
                 .forEach(System.out::println);
@@ -80,7 +80,7 @@ class KPermutationExamples {
     static void printKPermutationOfElementsInCombinationOrder() {
 
         System.out.println("\n***  Print 2-permutation of 4 given elements in combination order  ***");
-        JNumberTools.permutationsOf("Red", "Green", "Blue","Yellow")
+        JNumberTools.permutations().of("Red", "Green", "Blue","Yellow")
                 .k(2)
                 .combinationOrder()
                 .forEach(System.out::println);
@@ -89,7 +89,7 @@ class KPermutationExamples {
     static void printNthKPermutationOfNumbersInCombinationOrder() {
 
         System.out.println("\n***  Print every 3rd 2-permutation of 4 items in combination order  ***");
-        JNumberTools.permutationsOf(4)
+        JNumberTools.permutations().of(4)
                 .k(2)
                 .combinationOrderNth(3)
                 .forEach(System.out::println);
@@ -98,7 +98,7 @@ class KPermutationExamples {
     static void printNthKPermutationOfElementsInCombinationOrder() {
 
         System.out.println("\n***  Print every 3rd 2-permutation of 4 items in combination order  ***");
-        JNumberTools.permutationsOf("Red", "Green", "Blue","Yellow")
+        JNumberTools.permutations().of("Red", "Green", "Blue","Yellow")
                 .k(2)
                 .combinationOrderNth(3)
                 .forEach(System.out::println);

@@ -6,7 +6,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.numbersystem.factoradic.FactoradicAlgorithms;
+import io.github.deepeshpatel.jnumbertools.numbersystem.FactoradicAlgorithms;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -26,12 +26,12 @@ import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.factoria
  * generate next 100 trillionth permutation
  * of 100 items then it will take months to compute if we go sequentially and then increment
  * to the desired permutations, because the total # of permutations is astronomical (100!= 9.3326E X 10<sup>157</sup>)
- *
+ * <p>
  * This class will provide a mechanism to generate directly the next n<sup>th</sup>
  * lexicographical permutation.
  * <pre>
  *  Code example:
- *         new UniquePermutationsNth&lt;&gt;(Arrays.asList("A","B","C"),2)
+ *         new UniquePermutationsNth&lt;&gt;(List.of("A","B","C"),2)
  *                     .forEach(System.out::println);
  *         or
  *

@@ -1,14 +1,12 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination;
 
 
-import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCr;
 import static org.junit.Assert.assertEquals;
@@ -19,9 +17,9 @@ public class RepetitiveCombinationTest {
     public void assertCount() {
 
         for(int n=1; n<=4; n++) {
-            List<String> input = Collections.nCopies(n, "A");
+            var input = Collections.nCopies(n, "A");
             for(int r=0; r<=n; r++) {
-                int count = (int) JNumberTools.combinationsOf(input,r)
+                int count = (int) JNumberTools.combinations().of(input,r)
                         .repetitive().stream().count();
                 int expectedCount = (int) nCr(n+r-1,r);
                 Assert.assertEquals(expectedCount, count);
@@ -31,10 +29,10 @@ public class RepetitiveCombinationTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        RepetitiveCombination<String> iterable = JNumberTools
-                .combinationsOf(Arrays.asList("A", "B", "C"),2).repetitive();
-        List<List<String>> lists1 = iterable.stream().collect(Collectors.toList());
-        List<List<String>> lists2 = iterable.stream().collect(Collectors.toList());
+        var iterable = JNumberTools.combinations()
+                .of(List.of("A", "B", "C"),2).repetitive();
+        var lists1 = iterable.stream().toList();
+        var lists2 = iterable.stream().toList();
         Assert.assertEquals(lists1, lists2);
     }
 
@@ -43,11 +41,11 @@ public class RepetitiveCombinationTest {
 
         String expected = "[[Red, Red], [Red, Green], [Red, Blue], [Green, Green], [Green, Blue], [Blue, Blue]]";
 
-        String output = JNumberTools
-                .combinationsOf(Arrays.asList("Red", "Green", "Blue"),2)
+        String output = JNumberTools.combinations()
+                .of(List.of("Red", "Green", "Blue"),2)
                 .repetitive()
                 .stream()
-                .collect(Collectors.toList()).toString();
+                .toList().toString();
 
         assertEquals(expected, output);
     }
@@ -57,11 +55,11 @@ public class RepetitiveCombinationTest {
 
         String expected ="[[]]";
 
-        String output = JNumberTools
-                .combinationsOf(Arrays.asList("A","B"),0)
+        String output = JNumberTools.combinations()
+                .of(List.of("A","B"),0)
                 .repetitive()
                 .stream()
-                .collect(Collectors.toList()).toString();
+                .toList().toString();
 
         assertEquals(expected, output);
     }
@@ -71,11 +69,11 @@ public class RepetitiveCombinationTest {
 
         String expected ="[[A, A, A], [A, A, B], [A, B, B], [B, B, B]]";
 
-        String output = JNumberTools
-                .combinationsOf(Arrays.asList("A","B"),3)
+        String output = JNumberTools.combinations()
+                .of(List.of("A","B"),3)
                 .repetitive()
                 .stream()
-                .collect(Collectors.toList()).toString();
+                .toList().toString();
 
         assertEquals(expected, output);
     }

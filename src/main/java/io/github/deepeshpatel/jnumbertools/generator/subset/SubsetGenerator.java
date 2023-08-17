@@ -19,12 +19,12 @@ import java.util.List;
  *
  * <pre>
  *     Code example:
- *        new SubsetGenerator&lt;&gt;(Arrays.asList("A", "B", "C"),1,3)
+ *        new SubsetGenerator&lt;&gt;(List.of("A", "B", "C"),1,3)
  *            .forEach(System.out::println);
  *
  *   or
  *
- *        JNumberTools.subsetsOf("A", "B", "C")
+ *        JNumberTools.of("A", "B", "C")
  *             .inRange(1, 3)
  *             .forEach(System.out::println);
  *

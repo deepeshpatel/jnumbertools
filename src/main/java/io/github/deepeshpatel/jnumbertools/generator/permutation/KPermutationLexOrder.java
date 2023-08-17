@@ -8,10 +8,10 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.*;
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.checkParamKPermutation;
+import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.newEmptyIterator;
 
 /**
  *
@@ -23,7 +23,7 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
  *
  * Code example -
  *
- *  new KPermutation&lt;&gt;(Arrays.asList("A","B","C"),2)
+ *  new KPermutation&lt;&gt;(List.of("A","B","C"),2)
  *      .forEach(System.out::println);
  *
  *  or
@@ -112,7 +112,7 @@ public class KPermutationLexOrder<T> extends AbstractGenerator<T> {
                 return new int[0];
             }
 
-            remaining.addAll(IntStream.range(0,maxAllowed+1).boxed().collect(Collectors.toList()));
+            remaining.addAll(IntStream.range(0,maxAllowed+1).boxed().toList());
 
             for(int i=0; i<index; i++) {
                 remaining.remove(Integer.valueOf(a[i]));

@@ -25,7 +25,7 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
  *
  * Code example -
  *
- *  new KPermutation&lt;&gt;(Arrays.asList("A","B","C"),2)
+ *  new KPermutation&lt;&gt;(List.of("A","B","C"),2)
  *      .forEach(System.out::println);
  *
  *  or
@@ -97,5 +97,4 @@ public class KPermutationCombinationOrder<T> extends AbstractGenerator<T> {
             return currentIterator.next();
         }
     }
-
 }

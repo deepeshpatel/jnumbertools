@@ -24,7 +24,7 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
  * <pre>
  * Code example -
  *
- *  new KPermutationNth&lt;&gt;(Arrays.asList("A","B","C"),2,2) //size =2 and increment to every 2nd permutation
+ *  new KPermutationNth&lt;&gt;(List.of("A","B","C"),2,2) //size =2 and increment to every 2nd permutation
  *      .forEach(System.out::println);
  *
  *  or

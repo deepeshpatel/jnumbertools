@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.examples;
 
-import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -34,63 +34,63 @@ public class PermutationExamples {
 
     static void printUniquePermutationsOfNumbersInLexOrder() {
         System.out.println("\n*** Unique Permutations of size 3 in Lex order ***");
-        JNumberTools.permutationsOf(3)
+        JNumberTools.permutations().of(3)
                 .unique()
                 .forEach(System.out::println);
     }
 
     static void printUniquePermutationsOfElementsInLexOrder() {
         System.out.println("\n*** Unique Permutations of given 3 elements in lex order ***");
-        JNumberTools.permutationsOf("Red", "Green", "Blue")
+        JNumberTools.permutations().of("Red", "Green", "Blue")
                 .unique()
                 .forEach(System.out::println);
     }
 
     static void printNthUniquePermutationOfNumbersInLexOrder() {
         System.out.println("\n*** Every 10th unique permutation of size 4 in lex order ***");
-        JNumberTools.permutationsOf(4)
+        JNumberTools.permutations().of(4)
                 .uniqueNth(10)
                 .forEach(System.out::println);
     }
 
     static void printNthUniquePermutationOfElementsInLexOrder() {
         System.out.println("\n*** Every 10th unique permutation of given 4 elements in lex order ***");
-        JNumberTools.permutationsOf("Red", "Green", "Blue","Yellow")
+        JNumberTools.permutations().of("Red", "Green", "Blue","Yellow")
                 .uniqueNth(10)
                 .forEach(System.out::println);
     }
 
     static void printRepetitivePermutationOfNumbersInLexOrder() {
         System.out.println("\n*** Repetitive permutation of 2 items out of 3 in lex order ***");
-        JNumberTools.permutationsOf(3)
+        JNumberTools.permutations().of(3)
                 .repetitive(2)
                 .forEach(System.out::println);
     }
 
     static void printRepetitivePermutationOfElementsInLexOrder() {
         System.out.println("\n*** Repetitive permutation of 2 elements out of given 3 elements in lex order ***");
-        JNumberTools.permutationsOf("Red", "Green", "Blue")
+        JNumberTools.permutations().of("Red", "Green", "Blue")
                 .repetitive(2)
                 .forEach(System.out::println);
     }
 
     static void printNthRepetitivePermutationOfNumbersInLexOrder() {
         System.out.println("\n*** Every 4th repetitive permutation of 2 items out of 3 in lex order ***");
-        JNumberTools.permutationsOf(3)
+        JNumberTools.permutations().of(3)
                 .repetitiveNth(2,4)
                 .forEach(System.out::println);
     }
 
     static void printNthRepetitivePermutationOfElementsInLexOrder() {
         System.out.println("\n*** Every 4th repetitive permutation of 2 elements out of given 3 elements in lex order ***");
-        JNumberTools.permutationsOf("Red", "Green", "Blue")
+        JNumberTools.permutations().of("Red", "Green", "Blue")
                 .repetitiveNth(2,4)
                 .forEach(System.out::println);
     }
 
     static void printMultisetPermutationOfNumbersInLexOrder() {
         System.out.println("\n*** Multiset permutation of 3 items with count 1,2 & 2 in lex order ***");
-        JNumberTools.permutationsOf(3)
+        JNumberTools.permutations().of(3)
                 .multiset(1,2,2)
                 .forEach(System.out::println);
     }
@@ -98,14 +98,14 @@ public class PermutationExamples {
     static void printMultisetPermutationOfElementsInLexOrder() {
         System.out.println("\n*** Multiset permutation of 3 items with count 1,2 & 2 in lex order ***");
         System.out.println("count of Red=1, Green=2 and Blue=2");
-        JNumberTools.permutationsOf("Red","Green","Blue")
+        JNumberTools.permutations().of("Red","Green","Blue")
                 .multiset(1,2,2)
                 .forEach(System.out::println);
     }
 
     static void printNthMultisetPermutationOfNumbersInLexOrder() {
         System.out.println("\n*** Every 5th multiset permutation of 3 items with count 1,2 & 2 in lex order ***");
-        JNumberTools.permutationsOf(3)
+        JNumberTools.permutations().of(3)
                 .multisetNth(5,1,2,2)
                 .forEach(System.out::println);
     }
@@ -113,7 +113,7 @@ public class PermutationExamples {
     static void printNthMultisetPermutationOfElementsInLexOrder() {
         System.out.println("\n*** Every 5th multiset permutation of 3 items with count 1,2 & 2 in lex order ***");
         System.out.println("count of Red=1, Green=2 and Blue=2");
-        JNumberTools.permutationsOf("Red","Green","Blue")
+        JNumberTools.permutations().of("Red","Green","Blue")
                 .multisetNth(5,1,2,2)
                 .forEach(System.out::println);
     }

@@ -20,13 +20,13 @@ import java.util.NoSuchElementException;
  * lexicographical order of indices of input values. This is important because say, if we need to
  * generate next 1 billionth permutation of [A,B,C,D,E,F,G,H,I,J,K,L,M] then it is not
  * feasible to generate all 13^13=302875106592253 permutations and then increment to a billionth permutation.
- *
+ * <p>
  * This class will provide a mechanism to generate directly the next n<sup>th</sup>
  * lexicographical permutation.
  *
  *  <pre>
  *      Code example -
- *      new RepetitivePermutationNth&lt;&gt;(Arrays.asList("A","B"),3,2)
+ *      new RepetitivePermutationNth&lt;&gt;(List.of("A","B"),3,2)
  *                     .forEach(System.out::println);
  *
  *      or

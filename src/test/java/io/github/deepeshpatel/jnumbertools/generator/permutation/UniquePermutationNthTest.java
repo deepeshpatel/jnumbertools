@@ -1,12 +1,13 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
-import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombinationNthTest.collectEveryNthValue;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPr;
@@ -17,9 +18,9 @@ public class UniquePermutationNthTest {
     @Test
     public void assertCount(){
         for(int n=0; n<6; n++) {
-            List<String> input = Collections.nCopies(n, "A");
+            var input = Collections.nCopies(n, "A");
             for(int increment=1; increment<=4; increment++) {
-                long size = JNumberTools.permutationsOf(input).uniqueNth(increment).stream().count();
+                long size = JNumberTools.permutations().of(input).uniqueNth(increment).stream().count();
                 double expected = Math.ceil(nPr(n,n)/(double)increment);
                 Assert.assertEquals((long)expected,size );
             }
@@ -28,35 +29,35 @@ public class UniquePermutationNthTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        UniquePermutationsNth<String> iterable = JNumberTools.permutationsOf("A", "B", "C").uniqueNth(3);
-        List<List<String>> lists1 = iterable.stream().collect(Collectors.toList());
-        List<List<String>> lists2 = iterable.stream().collect(Collectors.toList());
+        UniquePermutationsNth<String> iterable = JNumberTools.permutations().of("A", "B", "C").uniqueNth(3);
+        var lists1 = iterable.stream().toList();
+        var lists2 = iterable.stream().toList();
         Assert.assertEquals(lists1, lists2);
     }
 
     @Test
     public void shouldGenerateAllUniquePermutationsOf3Values(){
         String expected = "[[1, 2, 3], [2, 1, 3], [3, 1, 2]]";
-        String actual   = JNumberTools.permutationsOf("1", "2", "3")
+        String actual   = JNumberTools.permutations().of("1", "2", "3")
                 .uniqueNth(2)
-                .stream().collect(Collectors.toList()).toString();
+                .stream().toList().toString();
 
         assertEquals(expected,actual);
     }
 
     @Test
     public void shouldGenerateEmptyListForNullInput(){
-        String actual  = JNumberTools.permutationsOf((Collection<Object>) null)
+        String actual  = JNumberTools.permutations().of((Collection<Object>) null)
                 .uniqueNth(2)
-                .stream().collect(Collectors.toList()).toString();
+                .stream().toList().toString();
         assertEquals("[[]]",actual);
     }
 
     @Test
     public void shouldGenerateEmptyListForEmptyInput(){
-        String actual   = JNumberTools.permutationsOf(new ArrayList<String>())
+        String actual = JNumberTools.permutations().of(new ArrayList<String>())
                 .uniqueNth(2)
-                .stream().collect(Collectors.toList()).toString();
+                .stream().toList().toString();
 
         assertEquals("[[]]",actual);
     }
@@ -67,10 +68,10 @@ public class UniquePermutationNthTest {
                 " [Green, Red, Blue]," +
                 " [Blue, Red, Green]]";
 
-        List<List<String>> output = JNumberTools.permutationsOf("Red", "Green", "Blue")
+        var output = JNumberTools.permutations().of("Red", "Green", "Blue")
                 .uniqueNth(2) //increment to every 2nd permutation
                 .stream()
-                .collect(Collectors.toList());
+                .toList();
 
         Assert.assertEquals(expected, output.toString());
     }
@@ -78,7 +79,7 @@ public class UniquePermutationNthTest {
     @Test
     public void shouldSupportVeryLargePermutations() {
 
-        List<String> input = Arrays.asList("0", "1","2","3","4","5","6","7","8","9","10","11","12");
+        var input = List.of("0", "1","2","3","4","5","6","7","8","9","10","11","12");
 
         String[] expected = new String[]{
                 "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]",
@@ -90,9 +91,9 @@ public class UniquePermutationNthTest {
                 "[12, 6, 3, 5, 4, 8, 1, 7, 0, 2, 9, 10, 11]"
         };
 
-        List<List<String>> actual = JNumberTools.permutationsOf(input)
+        var actual = JNumberTools.permutations().of(input)
                 .uniqueNth(1000_000_000)// jump to 1 billionth permutation
-                .stream().collect(Collectors.toList());
+                .stream().toList();
 
         for(int i=0; i<expected.length; i++) {
             assertEquals(expected[i],actual.get(i).toString());
@@ -102,7 +103,7 @@ public class UniquePermutationNthTest {
     @Test
     public void shouldGenerateNthPermutations() {
 
-        List<String> input = Arrays.asList("A","B","C","D","E","F");
+        var input = List.of("A","B","C","D","E","F");
         for(int increment=1; increment<=32;increment++) {
 
 
@@ -113,12 +114,12 @@ public class UniquePermutationNthTest {
     }
 
     private String getResultViaDirectIncrement(List<String> input, int increment) {
-        return JNumberTools.permutationsOf(input)
-                .uniqueNth(increment).stream().collect(Collectors.toList()).toString();
+        return JNumberTools.permutations().of(input)
+                .uniqueNth(increment).stream().toList().toString();
     }
 
     private String getExpectedResultViaOneByOneIteration(List<String> input, int increment) {
-        Stream<List<String>> stream = JNumberTools.permutationsOf(input).unique().stream();
+        var stream = JNumberTools.permutations().of(input).unique().stream();
         return collectEveryNthValue(stream, increment).toString();
     }
 }

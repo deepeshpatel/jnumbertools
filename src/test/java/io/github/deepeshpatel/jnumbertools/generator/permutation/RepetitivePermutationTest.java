@@ -1,14 +1,11 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
-import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
@@ -17,9 +14,9 @@ public class RepetitivePermutationTest {
     @Test
     public void assertCount(){
         for(int n=1; n<3; n++) {
-            List<String> input = Collections.nCopies(n, "A");
+            var input = Collections.nCopies(n, "A");
             for(int r=0; r<=n+1; r++) {
-                long size = JNumberTools.permutationsOf(input)
+                long size = JNumberTools.permutations().of(input)
                         .repetitive(r)
                         .stream().count();
 
@@ -30,7 +27,7 @@ public class RepetitivePermutationTest {
 
     @Test (expected = NoSuchElementException.class)
     public void shouldThrowExpIfIterateAfterLastElement(){
-        Iterator<List<String>> iterator = JNumberTools.permutationsOf("A")
+        var iterator = JNumberTools.permutations().of("A")
                 .repetitive(1).iterator();
 
             iterator.next();
@@ -38,10 +35,10 @@ public class RepetitivePermutationTest {
     }
 
     @Test
-    public void shouldReturnSameResultForDifferentIteratorObjects(){
-        RepetitivePermutation<String> iterable = JNumberTools.permutationsOf("A", "B", "C").repetitive(2);
-        List<List<String>> lists1 = iterable.stream().collect(Collectors.toList());
-        List<List<String>> lists2 =iterable.stream().collect(Collectors.toList());
+    public void shouldReturnSameResultViaDifferentIteratorObjects(){
+        RepetitivePermutation<String> iterable = JNumberTools.permutations().of("A", "B", "C").repetitive(2);
+        var lists1 = iterable.stream().toList();
+        var lists2 =iterable.stream().toList();
         Assert.assertEquals(lists1, lists2);
     }
 
@@ -50,9 +47,9 @@ public class RepetitivePermutationTest {
         String expected = "[[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1], " +
                 "[1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]]";
 
-        String actual   = JNumberTools.permutationsOf("0", "1")
+        String actual   = JNumberTools.permutations().of("0", "1")
                 .repetitive(3)
-                .stream().collect(Collectors.toList()).toString();
+                .stream().toList().toString();
 
         assertEquals(expected,actual);
     }
@@ -61,9 +58,9 @@ public class RepetitivePermutationTest {
     public void shouldGenerateRepetitivePermutations() {
         String expected = "[[A, A], [A, B], [A, C], [B, A], [B, B], [B, C], [C, A], [C, B], [C, C]]";
 
-        String output = JNumberTools.permutationsOf("A", "B", "C")
+        String output = JNumberTools.permutations().of("A", "B", "C")
                 .repetitive(2)
-                .stream().collect(Collectors.toList()).toString();
+                .stream().toList().toString();
 
         Assert.assertEquals(expected, output);
     }

@@ -7,7 +7,10 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Utility to generate all permutations of given items and size where items can be repeated.
@@ -17,7 +20,7 @@ import java.util.*;
  * Following code will generate all permutations of size 2
  * </pre>
  * <pre>
- *      new RepetitivePermutation&lt;&gt;(Arrays.asList("A","B","C"),2)
+ *      new RepetitivePermutation&lt;&gt;(List.of("A","B","C"),2)
  *           .forEach(System.out::println);
  *      or
  *

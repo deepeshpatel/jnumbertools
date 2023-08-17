@@ -14,26 +14,25 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
 /**
  *
  * Utility for generating r-combinations of input = {1, 2 . . ., n}
- *
+ * <p>
  * Generates r combinations from n=input.length items.
  * combinations are generated in Lexicographic order
  * of indices of items in a list. This class will not check for duplicate values and
  * treats all values differently based on the index
- *
+ * <p>
  * Repetitive combinations of 3 items out of 2{1, 2} are -
  * <pre>
  * 111 112 122 222
  * </pre>
- *
  * <pre>
  * Code example:
  *
- *     new RepetitiveCombination&lt;&gt;(Arrays.asList("A","B"),3)
+ *     new RepetitiveCombination&lt;&gt;(List.of("A","B"),3)
  *           .forEach(System.out::println);
  *
  *     or
  *
- *     JNumberTools.combinationsOf("A","B")
+ *     JNumberTools.of("A","B")
  *           .repetitive(3)
  *           .forEach(System.out::println);
  *

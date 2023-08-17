@@ -8,7 +8,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
 import io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil;
-import io.github.deepeshpatel.jnumbertools.numbersystem.permutadic.Permutadic;
+import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -26,7 +26,7 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
  * <pre>
  * Code example -
  *
- *  new KPermutationNth&lt;&gt;(Arrays.asList("A","B","C"),2,2) //size =2 and increment to every 2nd permutation
+ *  new KPermutationNth&lt;&gt;(List.of("A","B","C"),2,2) //size =2 and increment to every 2nd permutation
  *      .forEach(System.out::println);
  *
  *  or

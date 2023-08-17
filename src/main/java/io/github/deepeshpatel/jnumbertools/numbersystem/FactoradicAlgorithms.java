@@ -1,6 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.numbersystem.factoradic;
-
-import io.github.deepeshpatel.jnumbertools.numbersystem.permutadic.PermutadicAlgorithms;
+package io.github.deepeshpatel.jnumbertools.numbersystem;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -51,25 +49,6 @@ public class FactoradicAlgorithms {
         return factoradic;
     }
 
-    public static BigInteger factoradicToInt(int[] factoradic) {
-
-        if(factoradic.length == 1) {
-            return BigInteger.ZERO;
-        }
-
-        BigInteger result = BigInteger.ZERO;
-        BigInteger placeValue = BigInteger.ONE;
-        int multiplier = 1;
-
-        for(int i=factoradic.length-2; i>=0; i--) {
-            placeValue = placeValue.multiply(BigInteger.valueOf(multiplier++));
-            BigInteger currentDigit = BigInteger.valueOf(factoradic[i]);
-            result = result.add(placeValue.multiply(currentDigit));
-        }
-
-        return result;
-    }
-
     public static int[] factoradicToNthPermutation(int[] factoradic){
 
         int[] output = IntStream.range(0, factoradic.length).toArray();
@@ -91,11 +70,4 @@ public class FactoradicAlgorithms {
     public static int[] unRank(BigInteger rank, int size) {
         return factoradicToNthPermutation(intToFactoradicKnowSize(rank,size));
     }
-
-    public static BigInteger rank(int[] nthPermutation) {
-        List<Integer> factoradic = PermutadicAlgorithms.nthPermutationToPermutadic(nthPermutation, 0);
-        return  PermutadicAlgorithms.toDecimal(factoradic,0);// factoradicToInt(factoradic);
-    }
-
-
 }

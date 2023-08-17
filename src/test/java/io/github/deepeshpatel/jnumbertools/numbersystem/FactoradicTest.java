@@ -1,10 +1,9 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
-import io.github.deepeshpatel.jnumbertools.numbersystem.factoradic.Factoradic;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.math.BigInteger;
+import static org.junit.Assert.assertEquals;
 
 public class FactoradicTest {
 
@@ -20,16 +19,14 @@ public class FactoradicTest {
                 "[1, 0, 0, 0]"
         };
         for(int i=0; i<=6; i++) {
-            Factoradic f = new Factoradic(BigInteger.valueOf(i));
-            Assert.assertEquals(expected[i], f.toString());
+            Assert.assertEquals(expected[i], Factoradic.of(i).toString());
         }
     }
 
     @Test
     public void shouldReturnCorrectDecimalEquivalentOfFactoradic() {
         for(int i=0; i<=100; i++) {
-            Factoradic f = new Factoradic(BigInteger.valueOf(i));
-            Assert.assertEquals(i,f.decimalValue().intValue());
+            Assert.assertEquals(i,Factoradic.of(i).decimalValue.intValue());
         }
     }
 
@@ -42,10 +39,19 @@ public class FactoradicTest {
         };
 
         long decimalValue = 4611686018427387904L;
-        Factoradic f1 = new Factoradic(BigInteger.valueOf(decimalValue));
-        Factoradic f2 = new Factoradic(BigInteger.valueOf(decimalValue+1));
+        Factoradic f1 = Factoradic.of(decimalValue);
+        Factoradic f2 = Factoradic.of(decimalValue+1);
         Assert.assertEquals(expected[0],f1.toString());
         Assert.assertEquals(expected[1],f2.toString());
+    }
 
+    @Test
+    public void testEqualsAndHashCodeForCoverage() {
+        int decimal = 23456;
+        Factoradic f1 = Factoradic.of(decimal);
+        Factoradic f2 = Factoradic.of(decimal);
+        assertEquals(f1, f2);
+        assertEquals(f1.hashCode(), f2.hashCode());
+        assertEquals(f1.hashCode(), decimal);
     }
 }

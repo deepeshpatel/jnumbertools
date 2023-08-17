@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.rank;
 
-import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -26,4 +26,5 @@ public class RankTest {
         BigInteger rank = JNumberTools.rankOf().uniqueCombination(8, 1,2,3,4);
         Assert.assertEquals(35, rank.intValue() );
     }
+
 }

@@ -1,6 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.numbersystem.permutadic;
-
-import io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil;
+package io.github.deepeshpatel.jnumbertools.numbersystem;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -11,10 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class PermutadicAlgorithms {
-
-    public static List<Integer> toPermutadic(long decimalValue, int degree){
-        return toPermutadic(BigInteger.valueOf(decimalValue),degree);
-    }
 
     public static List<Integer> toPermutadic(BigInteger decimalValue, int degree) {
         List<Integer> permutadicValues = new ArrayList<>();
@@ -44,7 +38,7 @@ public class PermutadicAlgorithms {
     public static int[] toNthPermutation(List<Integer> permutadic, int s, int k) {
 
         int[] a = new int[k];
-        List<Integer> allValues = IntStream.range(0, s).boxed().collect(Collectors.toList());
+        List<Integer> mutableList = IntStream.range(0, s).boxed().collect(Collectors.toList());
 
         for(int i=a.length-1,j=0; i>=0; i--,j++) {
             int index;
@@ -53,7 +47,7 @@ public class PermutadicAlgorithms {
             } else {
                 index = permutadic.get(i);
             }
-            a[j] = allValues.remove(index);
+            a[j] = mutableList.remove(index);
         }
         return a;
     }
@@ -63,21 +57,21 @@ public class PermutadicAlgorithms {
         List<Integer> a = new ArrayList<>();
         int size = degree + nthPermutation.length;
 
-        List<Integer> allValues = IntStream.range(0, size).boxed().collect(Collectors.toList());
-        allValues.removeAll(Arrays.stream(nthPermutation).boxed().collect(Collectors.toList()));
+        List<Integer> mutableList = IntStream.range(0, size).boxed().collect(Collectors.toList());
+        mutableList.removeAll(Arrays.stream(nthPermutation).boxed().toList());
 
         for(int i=nthPermutation.length-1; i>=0; i--) {
-            int index = Collections.binarySearch(allValues,nthPermutation[i]);
+            int index = Collections.binarySearch(mutableList,nthPermutation[i]);
             index = -(index+1);
 
-            allValues.add(index,nthPermutation[i]);
+            mutableList.add(index,nthPermutation[i]);
             a.add(index);
         }
         return a;
     }
 
     //assumption: nth_kPermutation is valid permutation
-    public static BigInteger rank(int[] nth_kPermutation, int size) {
+    public static BigInteger rank(int size, int... nth_kPermutation) {
         int degree = size-nth_kPermutation.length;
         List<Integer> perm2 = nthPermutationToPermutadic(nth_kPermutation,degree);
         return  toDecimal(perm2,degree);
@@ -86,7 +80,8 @@ public class PermutadicAlgorithms {
     public static int[] unRank(BigInteger rank, int size, int k) {
         BigInteger maxPermutationCount = MathUtil.nPrBig(size,k);
         if(maxPermutationCount.compareTo(rank) <=0 ) {
-            String message = String.format("Out of range. Can't decode %d to nth permutation as it is >= Permutation(%d,%d).", rank,size,k);
+            String message = "Out of range. Can't decode %d to nth permutation as it is >= Permutation(%d,%d).";
+            message = String.format(message, rank,size,k);
             throw new ArithmeticException(message);
         }
         List<Integer> permutadic = toPermutadic(rank, size - k);

@@ -6,17 +6,20 @@
 package io.github.deepeshpatel.jnumbertools.generator.base;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 public class CombinatoricsUtil {
 
     public static int[] initIndicesForMultisetPermutation(int... multisetFreqArray){
 
-        List<Integer> a = new ArrayList<>();
+        var multisetFreqList = new ArrayList<Integer>();
         for(int i=0; i<multisetFreqArray.length;i++) {
-            a.addAll(Collections.nCopies(multisetFreqArray[i], i));
+            multisetFreqList.addAll(Collections.nCopies(multisetFreqArray[i], i));
         }
-        return a.stream().mapToInt(Integer::intValue).toArray();
+        return multisetFreqList.stream().mapToInt(Integer::intValue).toArray();
     }
 
     public static void checkParamMultisetFreqArray(int inputSize, int[] multisetFreqArray, String message) {
@@ -57,7 +60,7 @@ public class CombinatoricsUtil {
     //making it mathematically correct as set should contain null/empty set by definition.
     // for r=0, nPr = nCr = 1 and hence should contain one null(empty) value
     public static<T> Iterator<List<T>> newEmptyIterator(){
-        List<List<T>> list = new ArrayList<>();
+        var list = new ArrayList<List<T>>();
         list.add(Collections.emptyList());
         return list.iterator();
     }

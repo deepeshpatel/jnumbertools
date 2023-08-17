@@ -15,28 +15,27 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
 /**
  *
  * Utility for generating r-combinations of input = {1, 2 . . ., n}
- *
+ * <p>
  * Generates r combinations from n=input.length items.
  * combinations are generated in Lexicographic order
  * of indices of items in a list. This class will not check for duplicate values and
  * treats all values differently based on the index
- *
+ * <p></p>
  * Repetitive combinations of 3 items out of 2{1, 2} are -
  * <pre>
  * 111 112 122 222
  * </pre>
- *
  * <pre>
  * Code example:
  *
  *         int[] multisetFreqArray = new int[]{2,1,1};
- *         new RepetitiveCombinationMultiset&lt;&gt;(Arrays.asList("A","B","C"),3,multisetFreqArray)
+ *         new RepetitiveCombinationMultiset&lt;&gt;(List.of("A","B","C"),3,multisetFreqArray)
  *                 .forEach(System.out::println);
  *
  *         or
  *
  *         //here "A" can be repeated 2 times , "B" and "C" can nt be repeated(occur only once)
- *         JNumberTools.combinationsOf("A","B","C")
+ *         JNumberTools.of("A","B","C")
  *                 ..repetitiveMultiset(3, multisetFreqArray)
  *                 .forEach(System.out::println);
  *

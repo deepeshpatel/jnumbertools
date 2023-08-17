@@ -22,7 +22,7 @@ public abstract class AbstractGenerator<T> implements Iterable<List<T>> {
 
     protected List<T> indicesToValues(int[] indices, List<T> input) {
 
-        List<T> output = new ArrayList<>(indices.length);
+        var output = new ArrayList<T>(indices.length);
 
         for(int indexValue: indices) {
             output.add(input.get(indexValue));

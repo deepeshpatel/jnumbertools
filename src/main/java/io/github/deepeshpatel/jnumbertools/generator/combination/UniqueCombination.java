@@ -15,12 +15,12 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
 /**
  *
  * Utility for generating r-combinations of input = {1, 2 . . ., n}
- *
+ * <p>
  * Generates r combinations from n=input.length items.
  * combinations are generated in Lexicographic order
  * of indices of items in a list. This class will not check for duplicate values and
  * treats all values differently based on the index
- *
+ * <p>
  * Unique combinations of 4 items out of 6{1, 2, 3, 4, 5, 6} are -
  * <pre>
  * 1234 1245 1345 1456 2356
@@ -30,11 +30,11 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
  *
  * <pre>
  * Code example:
- *          new UniqueCombination&lt;&gt;(Arrays.asList("A","B","C"),2)
+ *          new UniqueCombination&lt;&gt;(List.of("A","B","C"),2)
  *                  .forEach(System.out::println);
  * or
  *
- *         JNumberTools.combinationsOf("A","B","C")
+ *         JNumberTools.of("A","B","C")
  *                 .unique(2)
  *                 .forEach(System.out::println);
  *

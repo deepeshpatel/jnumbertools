@@ -1,11 +1,15 @@
 package io.github.deepeshpatel.jnumbertools.generator.rank;
 
-import io.github.deepeshpatel.jnumbertools.generator.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class UnrankTest {
 
@@ -26,6 +30,20 @@ public class UnrankTest {
     public void shouldGenerateCorrectUniqueCombinationForGivenRank() {
         int[] combination = JNumberTools.unRankingOf().uniqueCombination(BigInteger.valueOf(35),8,4);
         Assert.assertEquals("[1, 2, 3, 4]", Arrays.toString(combination) );
+    }
+
+    @Test
+    public void shouldThrowExceptionWhileUnRankingOutOrRange() {
+        int n=4;
+        int r =2;
+        long totalPermutations = MathUtil.nPr(n,r); //from 0 to n-1
+
+        Exception exception = assertThrows(ArithmeticException.class, () -> {
+            JNumberTools.unRankingOf().kPermutation(BigInteger.valueOf(totalPermutations),n,r );
+        });
+
+        String output = String.format(">= Permutation(%d,%d)", n,r);
+        assertTrue(exception.getMessage().contains(output));
     }
 
 }
