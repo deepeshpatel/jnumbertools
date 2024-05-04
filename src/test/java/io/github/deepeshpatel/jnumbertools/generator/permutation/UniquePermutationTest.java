@@ -1,13 +1,13 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPr;
+import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
+import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
 import static org.junit.Assert.assertEquals;
 
 public class UniquePermutationTest {
@@ -16,15 +16,15 @@ public class UniquePermutationTest {
     public void assertCount(){
         for(int n=0; n<6; n++) {
             var input = Collections.nCopies(n, "A");
-            long size = JNumberTools.permutations().of(input)
+            long size = tools.permutations().of(input)
                     .unique().stream().count();
-            Assert.assertEquals(nPr(n,n), size);
+            Assert.assertEquals(calculator.nPr(n,n).longValue(), size);
         }
     }
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        UniquePermutation<String> iterable = JNumberTools.permutations().of("A", "B", "C").unique();
+        UniquePermutation<String> iterable = tools.permutations().of("A", "B", "C").unique();
 
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
@@ -34,7 +34,7 @@ public class UniquePermutationTest {
     @Test
     public void shouldGenerateAllUniquePermutationsOf3Values(){
         String expected = "[[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]";
-        String actual   = JNumberTools.permutations().of("1", "2", "3")
+        String actual   = tools.permutations().of("1", "2", "3")
                 .unique()
                 .stream().toList().toString();
 
@@ -50,7 +50,7 @@ public class UniquePermutationTest {
                 " [Blue, Red, Green]," +
                 " [Blue, Green, Red]]";
 
-        var output = JNumberTools.permutations().of("Red", "Green", "Blue")
+        var output = tools.permutations().of("Red", "Green", "Blue")
                 .unique()
                 .stream()
                 .toList();
@@ -60,7 +60,7 @@ public class UniquePermutationTest {
 
     @Test
     public void shouldGenerateEmptyListForEmptyInput(){
-        String actual   = JNumberTools.permutations().of(new ArrayList<String>())
+        String actual   = tools.permutations().of(new ArrayList<String>())
                 .unique()
                 .stream().toList().toString();
 
@@ -69,7 +69,7 @@ public class UniquePermutationTest {
 
     @Test
     public void shouldConsiderNullAsEmpty(){
-        String actual   = JNumberTools.permutations().of((java.util.Collection<String>) null)
+        String actual   = tools.permutations().of((java.util.Collection<String>) null)
                 .unique()
                 .stream().toList().toString();
 

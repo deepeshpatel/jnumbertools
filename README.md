@@ -297,7 +297,7 @@ JNumberTools
             <td>
                 Generates every n<sup>th</sup> multiset-permutation.<br>This API does not search for the
                 n<sup>th</sup> permutation in a sorted list but directly generates the next n<sup>th</sup> 
-                mutiset-permutation and hence it is very efficient.
+                multiset-permutation and hence it is very efficient.
             </td>
             <td>
                 <pre><code class="language-java">int increment = 2;

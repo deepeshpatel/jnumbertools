@@ -5,6 +5,8 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.combination;
 
+import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,10 +15,12 @@ public class CombinationBuilder<T> {
 
     private final Collection<T> data;
     private final int ofSize;
+    private final Calculator calculator;
 
-    public CombinationBuilder(Collection<T> data, int ofSize) {
+    public CombinationBuilder(Collection<T> data, int ofSize, Calculator calculator) {
         this.data = data;
         this.ofSize = ofSize;
+        this.calculator = calculator;
     }
 
     public UniqueCombination<T> unique() {
@@ -28,7 +32,7 @@ public class CombinationBuilder<T> {
     }
 
     public UniqueCombinationNth<T> uniqueNth(BigInteger increment) {
-        return new UniqueCombinationNth<>(data, ofSize, increment);
+        return new UniqueCombinationNth<>(data, ofSize, increment, calculator);
     }
 
     public RepetitiveCombination<T> repetitive() {

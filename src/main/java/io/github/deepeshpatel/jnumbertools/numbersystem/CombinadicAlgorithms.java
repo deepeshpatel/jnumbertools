@@ -1,22 +1,26 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
+import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
+
 import java.math.BigInteger;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCrBig;
-
 public class CombinadicAlgorithms {
 
-    public static BigInteger rank(int n, int[] nthCombination ) {
-        int[] combinadic = combinationToCombinadic(n, nthCombination);
-        BigInteger x = combinadicToDecimal(combinadic);
-        return  nCrBig(n,nthCombination.length).subtract(x).subtract(BigInteger.ONE);
+    private final Calculator calculator;
+
+    public CombinadicAlgorithms(Calculator calculator) {
+        this.calculator = calculator;
     }
 
-    public static int[] unRank(BigInteger rank, int n, int r) {
-        return unRank(rank,nCrBig(n, r), n, r);
+    public BigInteger rank(int n, int[] nthCombination) {
+        int[] combinadic = combinationToCombinadic(n, nthCombination);
+        BigInteger x = combinadicToDecimal(combinadic);
+        BigInteger nCr = calculator.nCr(n, nthCombination.length);
+        return  nCr.subtract(x).subtract(BigInteger.ONE);
     }
-    public static int[] unRank(BigInteger rank, BigInteger nCr, int n, int r) {
+
+    public int[] unRank(BigInteger rank, BigInteger nCr, int n, int r) {
         BigInteger x = nCr.subtract(rank).subtract(BigInteger.ONE);
         int[] a = decimalToCombinadic(x,r);
         return combinadicToCombination(a, n);
@@ -31,7 +35,7 @@ public class CombinadicAlgorithms {
     }
 
     public static int[] combinadicToCombination(int[] combinadic, int n) {
-        int a[] = new int[combinadic.length];
+        int[] a = new int[combinadic.length];
         System.arraycopy(combinadic,0, a,0, a.length);
         for(int i=0; i<a.length; i++) {
             a[i] = n-1-a[i];
@@ -39,40 +43,37 @@ public class CombinadicAlgorithms {
         return a;
     }
 
-    public static BigInteger combinadicToDecimal(int[] combinadic) {
+    public BigInteger combinadicToDecimal(int[] combinadic) {
 
         BigInteger decimalValue = BigInteger.ZERO;
-        int r= combinadic.length;
+        int r = combinadic.length;
 
         for (int j : combinadic) {
-            decimalValue = decimalValue.add(nCrBig(j, r));
+            decimalValue = decimalValue.add(calculator.nCr(j, r));
             r--;
         }
 
         return decimalValue;
     }
 
-    public static int[] decimalToCombinadic(BigInteger value, int degree) {
+    public int[] decimalToCombinadic(BigInteger value, int degree) {
 
         int[] combinadic = new int[degree];
 
         int r = degree;
         BigInteger max = value;
 
-        for(int i=0; i<combinadic.length; i++) {
+        for(int i=0; r>0; i++, r--) {
             int n=r;
-            BigInteger nCr = nCrBig(n,r);
-            BigInteger result = BigInteger.ZERO;
+            BigInteger nCr = calculator.nCr(n,r);
+            BigInteger result = nCr;
+
             while(nCr.compareTo(max) <= 0 ) {
                 result = nCr;
-                n++;
-                nCr =  nCr
-                        .multiply(BigInteger.valueOf(n))
-                        .divide(BigInteger.valueOf(n-r));
+                nCr = calculator.nCr(++n,r);
             }
             combinadic[i] = n-1;
             max = max.subtract(result);
-            r--;
         }
         return combinadic;
     }

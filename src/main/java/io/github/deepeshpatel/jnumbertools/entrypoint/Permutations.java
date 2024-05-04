@@ -8,8 +8,14 @@ import java.util.stream.IntStream;
 
 public class Permutations {
 
-        public <T> PermutationBuilder<T> of(Collection<T> data) {
-        return new PermutationBuilder<>(data);
+    private final Calculator calculator;
+
+    public Permutations(Calculator calculator) {
+        this.calculator = calculator;
+    }
+
+    public <T> PermutationBuilder<T> of(Collection<T> data) {
+        return new PermutationBuilder<>(data, calculator);
     }
 
     @SafeVarargs

@@ -7,8 +7,6 @@ import java.util.stream.IntStream;
 
 public class FactoradicAlgorithms {
 
-
-
     public static  int[] intToFactoradic(BigInteger k) {
 
         if(k.equals(BigInteger.ZERO)) {

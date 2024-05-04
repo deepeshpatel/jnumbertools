@@ -88,9 +88,12 @@ public class UniqueCombination<T> extends AbstractGenerator<T> {
             return indicesToValues(old, seed);
         }
 
-        private int[] nextCombination(int[]a, int n) {
+        private int[] nextCombination(int[]currentKCombination, int n) {
 
-            int[] next = Arrays.copyOf(a, a.length);
+            if(currentKCombination.length == 0 || currentKCombination[0] == n-currentKCombination.length) {
+                return null;
+            }
+            int[] next = Arrays.copyOf(currentKCombination, currentKCombination.length);
             int i=next.length-1;
             int maxSupportedValueAtIndexI = n-1;
 
@@ -98,16 +101,11 @@ public class UniqueCombination<T> extends AbstractGenerator<T> {
                 i--;
                 maxSupportedValueAtIndexI--;
             }
-            if(i==-1) {
-                return null;
-            }
-
             next[i] = next[i] + 1;
 
             for(int j=i+1; j<next.length; j++) {
                 next[j] = next[j-1]+1;
             }
-
             return next;
         }
     }

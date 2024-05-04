@@ -9,7 +9,7 @@
     <td>Factorial Number System</td>
     <td>io.github.deepeshpatel.jnumbertools.numbersystem.Factoradic</td>
     <td>
-        Contains API's related to factorial number system. 
+        Contains APIs related to factorial number system. 
     </td>
 </tr>
 
@@ -17,7 +17,7 @@
     <td>Combinatorial Number System</td>
     <td>io.github.deepeshpatel.jnumbertools.numbersystem.Combinadic</td>
     <td>
-        Contains API's related to combinatorial number system. 
+        Contains APIs related to combinatorial number system. 
     </td>
 </tr>
 
@@ -25,7 +25,7 @@
     <td>Permutational Number System</td>
     <td>io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic</td>
     <td>
-        Contains API's related to permutational number system. 
+        Contains APIs related to permutational number system. 
     </td>
 </tr>
 

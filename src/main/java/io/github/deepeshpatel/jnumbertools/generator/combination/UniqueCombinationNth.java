@@ -5,10 +5,10 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.combination;
 
+import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
 import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
-import io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -53,6 +53,7 @@ public class UniqueCombinationNth<T> extends AbstractGenerator<T> {
     private final int r;
     private final BigInteger increment;
     private final BigInteger nCr;
+    private final Calculator calculator;
 
     /**
      * @param input List of N items
@@ -60,13 +61,14 @@ public class UniqueCombinationNth<T> extends AbstractGenerator<T> {
      * @param increment next combination in lex order to be generated after previous combination
      *               starting from the 0th(first) combination.
      */
-    public UniqueCombinationNth(Collection<T> input, int r, BigInteger increment) {
+    public UniqueCombinationNth(Collection<T> input, int r, BigInteger increment, Calculator calculator) {
         super(input);
         this.r = r;
         this.increment = increment;
         checkParamCombination(seed.size(), r, "nth unique combination");
         CombinatoricsUtil.checkParamIncrement(increment, "Unique Combinations");
-        this.nCr = MathUtil.nCrBig(seed.size(),r);
+        this.calculator = calculator;
+        this.nCr = calculator.nCr(seed.size(),r);
     }
 
     @Override
@@ -77,6 +79,8 @@ public class UniqueCombinationNth<T> extends AbstractGenerator<T> {
     private class Itr implements Iterator<List<T>> {
 
         BigInteger rank = BigInteger.ZERO;
+        final CombinadicAlgorithms algorithms = new CombinadicAlgorithms(calculator);
+
         int[] result;
 
         private Itr(){
@@ -94,8 +98,8 @@ public class UniqueCombinationNth<T> extends AbstractGenerator<T> {
                 throw new NoSuchElementException();
             }
             //TODO: For iterator no need to un-rank if we find the algo for next Kth combinadic
-            //TODO: DO this as fun activity with Aditya
-            result = CombinadicAlgorithms.unRank(rank, nCr, seed.size(),r);
+            //TODO: Assignment for Aditya
+            result = algorithms.unRank(rank, nCr, seed.size(),r);
             rank = rank.add(increment);
             return indicesToValues(result, seed);
         }

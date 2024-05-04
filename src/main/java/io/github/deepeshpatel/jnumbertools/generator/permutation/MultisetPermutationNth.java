@@ -5,6 +5,7 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
+import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
 import java.math.BigInteger;
@@ -15,7 +16,6 @@ import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.checkParamIncrement;
 import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.initIndicesForMultisetPermutation;
-import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.factorial;
 
 /**
  * @author Deepesh Patel
@@ -26,6 +26,7 @@ public class MultisetPermutationNth<T>  extends AbstractGenerator<T> {
     private final BigInteger possiblePermutations;
     private final int initialSum;
     private final long increment;
+    private final Calculator calculator;
 
     /**
      *
@@ -38,24 +39,26 @@ public class MultisetPermutationNth<T>  extends AbstractGenerator<T> {
      *               multisetFreqArray[n] contains the count of n<sup>th</sup> element in input
      *               count of every element must be &gt;=1
      */
-    public MultisetPermutationNth(Collection<T> input, long increment, int[] multisetFreqArray) {
+    public MultisetPermutationNth(Collection<T> input, long increment, int[] multisetFreqArray, Calculator calculator) {
 
         super(input);
+        this.calculator = calculator;
         this.possiblePermutations  = findTotalPossiblePermutations(multisetFreqArray);
         this.increment = increment;
         checkParamIncrement(BigInteger.valueOf(increment), "Multiset permutations");
 
         this.multisetFreqArray = multisetFreqArray;
         this.initialSum = Arrays.stream(multisetFreqArray).sum();
+
     }
 
     private BigInteger findTotalPossiblePermutations(int[] count) {
         int sum = Arrays.stream(count).sum();
-        BigInteger productOfFact = factorial(count[0]);
+        BigInteger productOfFact = calculator.factorial(count[0]);
         for(int i=1; i<count.length; i++) {
-            productOfFact = productOfFact.multiply(factorial(count[i]));
+            productOfFact = productOfFact.multiply(calculator.factorial(count[i]));
         }
-        return  factorial(sum).divide(productOfFact);
+        return  calculator.factorial(sum).divide(productOfFact);
     }
 
     @Override

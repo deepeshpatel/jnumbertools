@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
+import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,17 +12,23 @@ import java.util.stream.IntStream;
 
 public class PermutadicAlgorithms {
 
+    private final Calculator calculator;
+
+    public PermutadicAlgorithms(Calculator calculator) {
+        this.calculator = calculator;
+    }
+
     public static List<Integer> toPermutadic(BigInteger decimalValue, int degree) {
         List<Integer> permutadicValues = new ArrayList<>();
         ++degree;
 
-        do  {
+        do {
             BigInteger deg = BigInteger.valueOf(degree);
             BigInteger[] divideAndRemainder =  decimalValue.divideAndRemainder(deg);
             permutadicValues.add(divideAndRemainder[1].intValue());
             decimalValue = divideAndRemainder[0];
             degree++;
-        }while((decimalValue.compareTo(BigInteger.ZERO) > 0));
+        } while((decimalValue.compareTo(BigInteger.ZERO) > 0));
         return permutadicValues;
     }
 
@@ -41,12 +49,7 @@ public class PermutadicAlgorithms {
         List<Integer> mutableList = IntStream.range(0, s).boxed().collect(Collectors.toList());
 
         for(int i=a.length-1,j=0; i>=0; i--,j++) {
-            int index;
-            if(i> permutadic.size()-1) {
-                index = 0;
-            } else {
-                index = permutadic.get(i);
-            }
+            int index = i >= permutadic.size() ? 0: permutadic.get(i);
             a[j] = mutableList.remove(index);
         }
         return a;
@@ -77,14 +80,19 @@ public class PermutadicAlgorithms {
         return  toDecimal(perm2,degree);
     }
 
-    public static int[] unRank(BigInteger rank, int size, int k) {
-        BigInteger maxPermutationCount = MathUtil.nPrBig(size,k);
+    public static int[] unRankWithoutBoundCheck(BigInteger rank, int size, int k) {
+        List<Integer> permutadic = toPermutadic(rank, size - k);
+        return toNthPermutation(permutadic, size,k);
+    }
+
+    public int[] unRankWithBoundCheck(BigInteger rank, int size, int k) {
+        BigInteger maxPermutationCount = calculator.nPr(size,k);
         if(maxPermutationCount.compareTo(rank) <=0 ) {
             String message = "Out of range. Can't decode %d to nth permutation as it is >= Permutation(%d,%d).";
             message = String.format(message, rank,size,k);
             throw new ArithmeticException(message);
         }
-        List<Integer> permutadic = toPermutadic(rank, size - k);
-        return toNthPermutation(permutadic, size,k);
+
+        return unRankWithoutBoundCheck(rank, size, k);
     }
 }

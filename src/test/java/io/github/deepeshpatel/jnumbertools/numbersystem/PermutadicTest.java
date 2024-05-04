@@ -7,7 +7,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPr;
+import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 
 public class PermutadicTest {
 
@@ -54,7 +54,7 @@ public class PermutadicTest {
     public void shouldResultInCorrectValueToAndFromNthPermutation(){
         int size = 6;
         int degree = 3;
-        for(long i=0; i<nPr(size,degree); i++) {
+        for(long i=0; i<calculator.nPr(size,degree).longValue(); i++) {
             Permutadic p1 = Permutadic.of(BigInteger.valueOf(i), size-degree);
             int[] nth = p1.toNthPermutation(degree);
             Permutadic p2 = Permutadic.fromNthPermutation(nth,size-degree);
@@ -81,7 +81,7 @@ public class PermutadicTest {
     public void unRankingAndRankingShouldGenerateSameValue() {
         int size = 8;
         int degree = 4;
-        for(long i=0; i<nPr(size,degree); i++) {
+        for(long i=0; i< calculator.nPr(size,degree).longValue(); i++) {
             Permutadic permutadic = Permutadic.of(i,size-degree);
             int[] ithPermutation = permutadic.toNthPermutation(4);
             BigInteger rank = Permutadic.fromNthPermutation(ithPermutation, size-degree).decimalValue;

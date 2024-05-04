@@ -1,7 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -10,7 +9,8 @@ import java.util.Collections;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.factorial;
+import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
+import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
 
 public class MultisetPermutationTest {
 
@@ -20,12 +20,12 @@ public class MultisetPermutationTest {
         for(int n=1; n<=6; n++){
             var input = Collections.nCopies(n, "A");
             int[] multisetFreqArray =getRandomMultisetFreqArray(random, input.size());
-            long count = JNumberTools.permutations().of(input)
+            long count = tools.permutations().of(input)
                     .multiset(multisetFreqArray).stream().count();
 
             int sum = Arrays.stream(multisetFreqArray).reduce(0, Integer::sum);
-            long numerator = factorial(sum).longValue();//.get(());
-            long denominator = IntStream.of(multisetFreqArray).asLongStream().reduce(1, (a, b) -> (a * factorial((int)b).longValue()));
+            long numerator = calculator.factorial(sum).longValue();//.get(());
+            long denominator = IntStream.of(multisetFreqArray).asLongStream().reduce(1, (a, b) -> (a * calculator.factorial((int)b).longValue()));
             long expected = numerator/denominator;
             //( ∑ ai.si)! / Π(si!)
             Assert.assertEquals(expected,count);
@@ -34,7 +34,7 @@ public class MultisetPermutationTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        MultisetPermutation<String> iterable = JNumberTools.permutations().of("A", "B", "C")
+        MultisetPermutation<String> iterable = tools.permutations().of("A", "B", "C")
                 .multiset(3, 2, 3);
 
         var lists1 = iterable.stream().toList();
@@ -66,7 +66,7 @@ public class MultisetPermutationTest {
                 "[Blue, Red, Green, Red], " +
                 "[Blue, Green, Red, Red]]";
 
-        String output = JNumberTools.permutations().of("Red", "Green", "Blue")
+        String output = tools.permutations().of("Red", "Green", "Blue")
                 .multiset(new int[]{2,1,1})
                 .stream()
                 .toList().toString();
@@ -80,7 +80,7 @@ public class MultisetPermutationTest {
                 "[A, B, C, A], [A, C, A, B], [A, C, B, A], [B, A, A, C], " +
                 "[B, A, C, A], [B, C, A, A], [C, A, A, B], [C, A, B, A], [C, B, A, A]]";
 
-        String output = JNumberTools.permutations().of("A", "B", "C")
+        String output = tools.permutations().of("A", "B", "C")
                 .multiset(new int[]{2,1,1})
                 .stream()
                 .toList().toString();

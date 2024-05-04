@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCr;
+import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static org.junit.Assert.assertEquals;
 
 public class SubsetGeneratorTest {
@@ -41,9 +41,9 @@ public class SubsetGeneratorTest {
     }
 
     private void assertSize(int count, int n, int from, int to) {
-        int expected = 0;
+        long expected = 0;
         for(int i=from ; i<=to; i++){
-            expected += nCr(n,i) ;
+            expected += calculator.nCr(n,i).longValue() ;
         }
         Assert.assertEquals(expected, count);
     }

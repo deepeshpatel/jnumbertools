@@ -16,7 +16,6 @@ import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.checkParamIncrement;
-import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.factorial;
 
 /**
  * Utility to generate permutations with unique values starting from
@@ -54,11 +53,11 @@ public class UniquePermutationsNth<T> extends AbstractGenerator<T> {
     final BigInteger numOfPermutations;
     private final int[] initialIndices;
 
-    public UniquePermutationsNth(Collection<T> input, BigInteger increment) {
+    public UniquePermutationsNth(Collection<T> input, BigInteger increment, BigInteger numOfPermutations) {
         super(input);
         this.increment = increment;
         checkParamIncrement(increment, "unique permutations");
-        numOfPermutations = factorial(seed.size());
+        this. numOfPermutations = numOfPermutations;//factorial(seed.size());
         initialIndices = IntStream.range(0, seed.size()).toArray();
     }
 

@@ -9,8 +9,8 @@ import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
-import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPrString;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms.*;
 
 /**
@@ -98,5 +98,30 @@ public final class Permutadic implements Serializable {
     @Override
     public int hashCode () {
         return Objects.hash(degree, decimalValue);
+    }
+
+    public static String nPrString(int n, int r) {
+        return  superOrSubscript("" + n, Permutadic::superscript) + "P" + superOrSubscript("" + r,  Permutadic::subscript);
+    }
+
+    private static String superOrSubscript(String s, Function<Character, Character> superOrSubscriptConverter){
+        StringBuilder sb = new StringBuilder(s.length());
+        for (char value : s.toCharArray()) {
+            sb.append(superOrSubscriptConverter.apply(value));
+        }
+        return sb.toString();
+    }
+
+    private static char superscript(char c) {
+        return switch (c) {
+            case '1' -> '¹';
+            case '2' -> '²';
+            case '3' -> '³';
+            default -> (char) (8304+c-48);
+        };
+    }
+
+    private static char subscript(char c) {
+        return (char) (8320+c-48);
     }
 }

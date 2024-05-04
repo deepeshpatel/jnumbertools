@@ -5,31 +5,36 @@
 
 package io.github.deepeshpatel.jnumbertools.entrypoint;
 
-import io.github.deepeshpatel.jnumbertools.algos.RankOf;
-import io.github.deepeshpatel.jnumbertools.algos.UnRankOf;
-
 public class JNumberTools {
 
-    private JNumberTools() { }
+    private final Calculator calculator;
 
-    public static Permutations permutations() {
-        return new Permutations();
+    public JNumberTools() {
+        calculator = new Calculator();
     }
 
-    public static Combinations combinations() {
-        return new Combinations();
+    public JNumberTools(Calculator calculator) {
+        this.calculator = calculator;
+    }
+
+    public Permutations permutations() {
+        return new Permutations(calculator);
+    }
+
+    public Combinations combinations() {
+        return new Combinations(calculator);
     }
 
     public static Subsets subsets() {
         return new Subsets();
     }
 
-    public static RankOf rankOf() {
-        return new RankOf();
+    public RankOf rankOf() {
+        return new RankOf(calculator);
     }
 
-    public static UnRankOf unRankingOf() {
-        return new UnRankOf();
+    public UnrankOf unRankingOf() {
+        return new UnrankOf(calculator);
     }
 
 }

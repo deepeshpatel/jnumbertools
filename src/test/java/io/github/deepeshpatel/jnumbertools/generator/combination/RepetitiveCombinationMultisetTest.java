@@ -1,11 +1,12 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
+
+import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
 
 public class RepetitiveCombinationMultisetTest {
 
@@ -16,7 +17,7 @@ public class RepetitiveCombinationMultisetTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        RepetitiveCombinationMultiset<String> iterable = JNumberTools.combinations()
+        RepetitiveCombinationMultiset<String> iterable = tools.combinations()
                 .of(List.of("A","B","C"),2)
                 .repetitiveMultiset(new int[]{2,3,2});
 
@@ -40,17 +41,17 @@ public class RepetitiveCombinationMultisetTest {
                 "[Green, Green, Yellow], " +
                 "[Green, Blue, Yellow]]";
 
-        String outputWithPrimitiveArray = JNumberTools.combinations()
+        String outputWithPrimitiveArray = tools.combinations()
                 .of(List.of("Red", "Green", "Blue","Yellow"),3)
                 .repetitiveMultiset(new int[]{3,2,1,1}) //3 red ,2 green, 1 blue, 1 yellow
                 .stream().toList().toString();
 
-        String outputWithWrapperArray = JNumberTools.combinations()
+        String outputWithWrapperArray = tools.combinations()
                 .of(List.of("Red", "Green", "Blue","Yellow"),3)
                 .repetitiveMultiset(new Integer[]{3,2,1,1}) //3 red ,2 green, 1 blue, 1 yellow
                 .stream().toList().toString();
 
-        String outputWithList = JNumberTools.combinations()
+        String outputWithList = tools.combinations()
                 .of(List.of("Red", "Green", "Blue","Yellow"),3)
                 .repetitiveMultiset(List.of(3,2,1,1)) //3 red ,2 green, 1 blue, 1 yellow
                 .stream().toList().toString();
@@ -62,7 +63,7 @@ public class RepetitiveCombinationMultisetTest {
 
     @Test
     public void shouldReturnEmptyListWhenREqualsZero() {
-        String output = JNumberTools.combinations().of(List.of("A", "B"),0)
+        String output = tools.combinations().of(List.of("A", "B"),0)
                 .repetitiveMultiset(new int[]{3,2}) //3 red ,2 green
                 .stream().toList().toString();
 
@@ -71,7 +72,7 @@ public class RepetitiveCombinationMultisetTest {
 
     @Test
     public void shouldReturnEmptyListWhenInputListIsEmpty() {
-        String output = JNumberTools.combinations().of(Collections.emptyList(),0)
+        String output = tools.combinations().of(Collections.emptyList(),0)
                 .repetitiveMultiset(new int[]{})
                 .stream().toList().toString();
 

@@ -5,11 +5,11 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
+import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
 import io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombination;
 import io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombinationNth;
-import io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -46,6 +46,7 @@ public class KPermutationCombinationOrderNth<T> extends AbstractGenerator<T> {
     final BigInteger totalPermutations;
     final long permutationsPerList;
     final BigInteger increment;
+    private final Calculator calculator;
 
     /**
      * Implements the iterable generating every n<sup>th</sup> unique permutation of size k.
@@ -59,14 +60,15 @@ public class KPermutationCombinationOrderNth<T> extends AbstractGenerator<T> {
      *                  This is important because for large k, it is impractical to generate all possible k! permutations
      *                  and then increment to the desired position
      */
-    public KPermutationCombinationOrderNth(Collection<T> input, int k, BigInteger increment) {
+    public KPermutationCombinationOrderNth(Collection<T> input, int k, BigInteger increment, Calculator calculator) {
         super(input);
         CombinatoricsUtil.checkParamIncrement(increment, "nth K-Permutation");
         CombinatoricsUtil.checkParamKPermutation(seed.size(),k,"nth K-Permutation");
         this.increment = increment;
         this.k = k;
-        this.totalPermutations = MathUtil.nPrBig(seed.size(), k);
-        this. permutationsPerList = MathUtil.factorial(k).longValue();
+        this.totalPermutations = calculator.nPr(seed.size(), k);
+        this. permutationsPerList = calculator.factorial(k).longValue();
+        this.calculator = calculator;
     }
 
     @Override
@@ -98,7 +100,7 @@ public class KPermutationCombinationOrderNth<T> extends AbstractGenerator<T> {
             if(combinationListNumber.equals(BigInteger.ZERO)) {
                 next  = new UniqueCombination<>(seed, k).iterator().next();
             } else {
-                Iterator<List<T>> combinationIterator = new UniqueCombinationNth<>(seed, k, combinationListNumber).iterator();
+                Iterator<List<T>> combinationIterator = new UniqueCombinationNth<>(seed, k, combinationListNumber, calculator).iterator();
                 combinationIterator.next();
                 next = combinationIterator.next();
             }
@@ -107,7 +109,8 @@ public class KPermutationCombinationOrderNth<T> extends AbstractGenerator<T> {
             if(permutationIncrement == 0) {
                 permutationIterator = new UniquePermutation<>(next).iterator();
             } else {
-                permutationIterator = new UniquePermutationsNth<>(next, BigInteger.valueOf(permutationIncrement)).iterator();
+                BigInteger numOfPer = calculator.factorial(next.size());
+                permutationIterator = new UniquePermutationsNth<>(next, BigInteger.valueOf(permutationIncrement), numOfPer).iterator();
                 permutationIterator.next();
             }
 

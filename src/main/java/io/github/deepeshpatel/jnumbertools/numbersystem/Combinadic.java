@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
+import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.List;
@@ -36,12 +38,12 @@ public final class Combinadic implements Serializable {
      * @param positiveNumber positive integer to be converted to Combinadic representation
      * @param degree degree of a Combinadic representation
      */
-    public static Combinadic of(long positiveNumber, int degree) {
-        return of(BigInteger.valueOf(positiveNumber), degree);
+    public static Combinadic of(long positiveNumber, int degree, Calculator calculator) {
+        return of(BigInteger.valueOf(positiveNumber), degree, calculator);
     }
 
-    public static Combinadic of(BigInteger positiveNumber, int degree) {
-        int[] values = CombinadicAlgorithms.decimalToCombinadic(positiveNumber, degree);
+    public static Combinadic of(BigInteger positiveNumber, int degree, Calculator calculator) {
+        int[] values = new CombinadicAlgorithms(calculator).decimalToCombinadic(positiveNumber, degree);
         List<Integer> combinadicValues = IntStream.of(values).boxed().toList();
         return new Combinadic(combinadicValues, positiveNumber);
     }
@@ -58,14 +60,16 @@ public final class Combinadic implements Serializable {
         return new Combinadic(IntStream.of(next).boxed().toList(), decimalValue.add(BigInteger.ONE));
     }
 
-    /**
-     * @param k positive int value.
-     * @return next kth successive Combinadic
-     */
-    public Combinadic nextKthCombinadic(long k) {
-        //TODO: Find the fast algo for this. You need to define addition operation rules for this
-        return Combinadic.of(decimalValue.add(BigInteger.valueOf(k)),combinadicValues.size());
-    }
+
+//    /**
+//     * @param k positive int value.
+//     * @return next kth successive Combinadic
+//     */
+//    public Combinadic nextKthCombinadic(long k, NumericCalculator calculator) {
+        //TODO: Find the algo for nextNthCombinadic without converting to decimal
+        // You need to define "addition operation" rules for this number system
+//        return Combinadic.of(decimalValue.add(BigInteger.valueOf(k)),combinadicValues.size(), calculator);
+//    }
 
     @Override
     public String toString() {

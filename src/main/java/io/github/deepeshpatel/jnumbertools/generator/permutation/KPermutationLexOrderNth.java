@@ -5,10 +5,10 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
+import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
-import io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil;
-import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
+import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -62,7 +62,7 @@ public class KPermutationLexOrderNth<T> extends AbstractGenerator<T> {
      *                  and then increment to the desired position
      */
 
-    public KPermutationLexOrderNth(Collection<T> input, int k, BigInteger increment) {
+    public KPermutationLexOrderNth(Collection<T> input, int k, BigInteger increment, Calculator calculator) {
         super(input);
 
         CombinatoricsUtil.checkParamIncrement(increment, "K-Permutation");
@@ -71,7 +71,7 @@ public class KPermutationLexOrderNth<T> extends AbstractGenerator<T> {
         this.k = k;
         this.increment = increment;
         this.initialValue = IntStream.range(0,k).toArray();
-        this.nPk = MathUtil.nPrBig(seed.size(),initialValue.length);
+        this.nPk = calculator.nPr(seed.size(),initialValue.length);
     }
 
     @Override
@@ -102,9 +102,8 @@ public class KPermutationLexOrderNth<T> extends AbstractGenerator<T> {
             return  indicesToValues(next, seed);
         }
 
-        private int[] nextNthKPermutation(BigInteger n, int degree, int size) {
-            return Permutadic.of(n,size-degree).toNthPermutation(degree);
-            //return PermutadicAlgorithms.unRankWithoutBoundCheck(n,size,degree);
+        private int[] nextNthKPermutation(BigInteger rank, int degree, int size) {
+            return PermutadicAlgorithms.unRankWithoutBoundCheck(rank, size, degree);
         }
     }
 }

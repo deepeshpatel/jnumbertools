@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.algos;
+package io.github.deepeshpatel.jnumbertools.entrypoint;
 
 import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
 import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
@@ -7,7 +7,10 @@ import java.math.BigInteger;
 
 public class RankOf {
 
-    public RankOf() {
+    private final Calculator calculator;
+
+    public RankOf(Calculator calculator) {
+        this.calculator = calculator;
     }
 
     public BigInteger kPermutation(int size, int... permutation) {
@@ -20,6 +23,6 @@ public class RankOf {
     }
 
     public BigInteger uniqueCombination(int n, int... combination) {
-        return CombinadicAlgorithms.rank(n, combination);
+        return new CombinadicAlgorithms(calculator).rank(n, combination);
     }
 }

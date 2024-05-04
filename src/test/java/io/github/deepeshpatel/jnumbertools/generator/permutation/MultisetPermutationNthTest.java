@@ -1,11 +1,11 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
 
+import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
 import static io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombinationNthTest.collectEveryNthValue;
 
 public class MultisetPermutationNthTest {
@@ -17,13 +17,13 @@ public class MultisetPermutationNthTest {
 
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForNegativeIncrementValues(){
-        JNumberTools.permutations().of("A","B","C")
+        tools.permutations().of("A","B","C")
                 .multisetNth(-1,3,2,3);
     }
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        var iterable = JNumberTools.permutations()
+        var iterable = tools.permutations()
                 .of("A", "B", "C")
                 .multisetNth(3, 3, 2, 3);
         var lists1 = iterable.stream().toList();
@@ -43,13 +43,13 @@ public class MultisetPermutationNthTest {
     }
 
     private String getResultViaDirectIncrement(List<String> input, int increment, int[] freqArray) {
-        return JNumberTools.permutations().of(input)
+        return tools.permutations().of(input)
                 .multisetNth(increment, freqArray)
                 .stream().toList().toString();
     }
 
     private String getExpectedResultViaOneByOneIteration(List<String> input, int increment, int[] freqArray) {
-        var stream = JNumberTools.permutations().of(input).multiset(freqArray).stream();
+        var stream = tools.permutations().of(input).multiset(freqArray).stream();
         return collectEveryNthValue(stream, increment).toString();
     }
 }

@@ -1,19 +1,20 @@
-package io.github.deepeshpatel.jnumbertools.algos;
+package io.github.deepeshpatel.jnumbertools.experiments.abstractalgebra;
 
-import io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PermutationAlgorithms {
+public final class PermutationGroup {
 
-    public static List<List<Integer>> toCycleNotation(int[] permutation, boolean includeOneCycle) {
+
+    public List<List<Integer>> toCycleNotation(int[] permutation, boolean includeOneCycle) {
         List<Integer> p = Arrays.stream(permutation).boxed().toList();
         return toCycleNotation(p, includeOneCycle);
     }
 
-    public static List<List<Integer>> toCycleNotation(List<Integer> permutation, boolean includeOneCycle) {
+    public List<List<Integer>> toCycleNotation(List<Integer> permutation, boolean includeOneCycle) {
         boolean[] visited = new boolean[permutation.size()];
         List<List<Integer>> cycles = new ArrayList<>();
 
@@ -42,16 +43,16 @@ public class PermutationAlgorithms {
         return cycles;
     }
 
-    public static long orderOfPermutationWithCycleNotation(List<List<Integer>> permutationCycles) {
+    public long orderOfPermutationWithCycleNotation(List<List<Integer>> permutationCycles) {
 
         long lcm = 1;
         for(var cycle : permutationCycles) {
-            lcm = MathUtil.LCM(lcm, cycle.size());
+            lcm = Calculator.LCM(lcm, cycle.size());
         }
         return lcm;
     }
 
-    public static boolean isIdentity(List<Integer> permutation) {
+    public boolean isIdentity(List<Integer> permutation) {
         for(int i=0; i<permutation.size(); i++) {
             if(i != permutation.get(i)) {
                 return false;
@@ -60,7 +61,7 @@ public class PermutationAlgorithms {
         return true;
     }
 
-    public static List<Integer> productMatrixForm(List<Integer> permutation1, List<Integer> permutation2) {
+    public List<Integer> productMatrixForm(List<Integer> permutation1, List<Integer> permutation2) {
         if(permutation1.size() != permutation2.size()) {
             throw new IllegalArgumentException("To compute the product, permutation1 and permutation2 must have same degree");
         }
@@ -71,7 +72,7 @@ public class PermutationAlgorithms {
         return product;
     }
 
-    public static List<Integer> inverse(List<Integer> permutation) {
+    public List<Integer> inverse(List<Integer> permutation) {
         Integer[] inverse = new Integer[permutation.size()];
         for(int i=0; i< permutation.size(); i++) {
             inverse[permutation.get(i)] = i;
@@ -79,7 +80,21 @@ public class PermutationAlgorithms {
         return List.of(inverse);
     }
 
-    public static long orderOfPermutation(List<Integer> permutation) {
+    public List<Integer> product(List<Integer> permutation1, List<Integer> permutation2) {
+        if(permutation1.size() != permutation2.size()) {
+            throw new IllegalArgumentException("size of permutation1 and permutation2 should be same.");
+        }
+
+        //product is not commutative
+        Integer[] product = new Integer[permutation1.size()];
+        for(int i=0; i<product.length; i++) {
+            product[i] = permutation1.get(permutation2.get(i));
+        }
+
+        return List.of(product);
+    }
+
+    public long orderOfPermutation(List<Integer> permutation) {
         return orderOfPermutationWithCycleNotation(toCycleNotation(permutation, true));
     }
 }

@@ -7,8 +7,15 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 public class Combinations {
+
+    private final Calculator calculator;
+
+    public Combinations(Calculator calculator) {
+        this.calculator = calculator;
+    }
+
     public <T> CombinationBuilder<T> of(Collection< T> data, int ofSize) {
-        return new CombinationBuilder<>(data, ofSize);
+        return new CombinationBuilder<>(data, ofSize, calculator);
     }
 
     @SafeVarargs
@@ -20,4 +27,5 @@ public class Combinations {
         var list = IntStream.range(0, n).boxed().toList();
         return of(list,r);
     }
+
 }

@@ -1,6 +1,5 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,8 +8,9 @@ import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
 
+import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
+import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
 import static io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombinationNthTest.collectEveryNthValue;
-import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nPr;
 
 public class KPermutationLexOrderNthTest {
 
@@ -20,12 +20,12 @@ public class KPermutationLexOrderNthTest {
         for(int n=0; n<=4; n++) {
             var input = Collections.nCopies(n,"A");
             for (int k = 0; k < n; k++) {
-                long size = JNumberTools.permutations().of(input)
+                long size = tools.permutations().of(input)
                         .k(k)
                         .lexOrderNth(increment)
                         .stream().count();
 
-                double expected = Math.ceil(nPr(n,k)/(double)increment);
+                double expected = Math.ceil(calculator.nPr(n,k).longValue()/(double)increment);
                 Assert.assertEquals((long)expected,size );
             }
         }
@@ -33,7 +33,7 @@ public class KPermutationLexOrderNthTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        var iterable = JNumberTools.permutations().of("A", "B", "C")
+        var iterable = tools.permutations().of("A", "B", "C")
                 .k(2)
                 .lexOrderNth(2);
         var lists1 = iterable.stream().toList();
@@ -61,10 +61,11 @@ public class KPermutationLexOrderNthTest {
         BigInteger increment = new BigInteger("100000000000000000000000000000");
         BigInteger n = BigInteger.ZERO;
 
-        var permutations = JNumberTools.permutations().of(40)
+        var permutations = tools.permutations().of(40)
                 .k(20)
                 .lexOrderNth(increment)
                 .stream().toList();
+        
 
         for(List<Integer> permutation: permutations) {
 
@@ -77,14 +78,14 @@ public class KPermutationLexOrderNthTest {
     }
 
     private String getResultViaDirectIncrement(List<String> input, int k, int increment) {
-        return JNumberTools.permutations().of(input)
+        return tools.permutations().of(input)
                 .k(k)
                 .lexOrderNth(increment)
                 .stream().toList().toString();
     }
 
     private String getExpectedResultViaOneByOneIteration(List<String> input, int k, int increment) {
-        var stream = JNumberTools.permutations().of(input)
+        var stream = tools.permutations().of(input)
                 .k(k)
                 .lexOrder().stream();
 

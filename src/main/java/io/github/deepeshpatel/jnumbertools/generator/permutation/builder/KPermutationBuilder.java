@@ -5,6 +5,7 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.builder;
 
+import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.KPermutationCombinationOrder;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.KPermutationCombinationOrderNth;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.KPermutationLexOrder;
@@ -17,9 +18,12 @@ public class KPermutationBuilder<T> {
     final Collection<T> seed;
     final int k;
 
-    public KPermutationBuilder(Collection<T> seed, int k) {
+    private final Calculator calculator;
+
+    public KPermutationBuilder(Collection<T> seed, int k, Calculator calculator) {
         this.seed = seed;
         this.k = k;
+        this.calculator = calculator;
     }
 
     public KPermutationCombinationOrder<T> combinationOrder(){
@@ -31,7 +35,7 @@ public class KPermutationBuilder<T> {
     }
 
     public KPermutationCombinationOrderNth<T> combinationOrderNth(BigInteger increment){
-        return new KPermutationCombinationOrderNth<>(seed, k, increment);
+        return new KPermutationCombinationOrderNth<>(seed, k, increment, calculator);
     }
 
     public KPermutationLexOrder<T> lexOrder(){
@@ -43,7 +47,7 @@ public class KPermutationBuilder<T> {
     }
 
     public KPermutationLexOrderNth<T> lexOrderNth(BigInteger increment){
-        return new KPermutationLexOrderNth<>(seed, k, increment);
+        return new KPermutationLexOrderNth<>(seed, k, increment, calculator);
     }
 
 }

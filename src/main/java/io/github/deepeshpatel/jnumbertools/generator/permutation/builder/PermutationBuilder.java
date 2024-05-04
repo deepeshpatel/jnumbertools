@@ -4,17 +4,23 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.builder;
 
+import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.*;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 public class PermutationBuilder<T> {
 
-    final Collection<T> seed;
+    private final Collection<T> seed;
+    private final Calculator calculator;
 
-    public PermutationBuilder(Collection<T> seed) {
-        this.seed = seed;
+    public PermutationBuilder(Collection<T> seed, Calculator calculator) {
+        this.seed = (seed != null) ? new ArrayList<>(seed) : Collections.emptyList();
+        //this.seed = seed;
+        this.calculator = calculator;
     }
 
     public UniquePermutation<T> unique() {
@@ -26,7 +32,7 @@ public class PermutationBuilder<T> {
     }
 
     public UniquePermutationsNth<T> uniqueNth(BigInteger increment) {
-        return new UniquePermutationsNth<>(seed, increment);
+        return new UniquePermutationsNth<>(seed, increment, calculator.factorial(seed.size()));
     }
 
     public RepetitivePermutation<T> repetitive(int size) {
@@ -47,16 +53,16 @@ public class PermutationBuilder<T> {
     }
 
     public MultisetPermutationNth<T> multisetNth(long increment, int... multisetFreqArray){
-        return new MultisetPermutationNth<>(seed, increment, multisetFreqArray);
+        return new MultisetPermutationNth<>(seed, increment, multisetFreqArray, calculator);
     }
 
     public MultisetPermutationNth<T> multisetNth(long increment, Collection<Integer> multisetFreqList){
         int[] multisetFreqArray = multisetFreqList.stream().mapToInt(i->i).toArray();
-        return new MultisetPermutationNth<>(seed, increment, multisetFreqArray);
+        return new MultisetPermutationNth<>(seed, increment, multisetFreqArray, calculator);
     }
 
 
     public KPermutationBuilder<T> k(int k) {
-        return new KPermutationBuilder<>(seed, k);
+        return new KPermutationBuilder<>(seed, k, calculator);
     }
 }

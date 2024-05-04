@@ -1,13 +1,13 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.numbersystem.MathUtil.nCr;
+import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
+import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
 import static org.junit.Assert.assertEquals;
 
 public class UniqueCombinationTest {
@@ -18,9 +18,9 @@ public class UniqueCombinationTest {
         for(int n=0; n<=4; n++) {
             List<String> input = Collections.nCopies(n, "A");
             for(int r=0; r<=n; r++) {
-                int count = (int) JNumberTools.combinations().of(input,r)
+                long count = tools.combinations().of(input,r)
                         .unique().stream().count();
-                Assert.assertEquals(nCr(n,r), count);
+                Assert.assertEquals(calculator.nCr(n,r).longValue(), count);
             }
         }
     }
@@ -28,7 +28,7 @@ public class UniqueCombinationTest {
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
         var input = List.of("A", "B", "C");
-        var iterable = JNumberTools.combinations().of(input,2).unique();
+        var iterable = tools.combinations().of(input,2).unique();
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
 
@@ -41,7 +41,7 @@ public class UniqueCombinationTest {
         String expected = "[[Red, Green], [Red, Blue], [Green, Blue]]";
         var input = List.of("Red", "Green", "Blue");
 
-        String output = JNumberTools.combinations()
+        String output = tools.combinations()
                 .of(input,2)
                 .unique()
                 .stream()
@@ -53,7 +53,7 @@ public class UniqueCombinationTest {
     @Test
     public void shouldReturnEmptyListForSizeEqualsZero() {
 
-        String output = JNumberTools.combinations()
+        String output = tools.combinations()
                 .of(List.of("A","B"),0)
                 .unique()
                 .stream()
@@ -65,13 +65,13 @@ public class UniqueCombinationTest {
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForSizeGreaterThanN() {
 
-        JNumberTools.combinations().of(List.of("A","B"),3)
+        tools.combinations().of(List.of("A","B"),3)
                 .unique();
     }
 
     @Test
     public void  shouldGenerateEmptyListForNullInput() {
-        String output = JNumberTools.combinations()
+        String output = tools.combinations()
                 .of(Collections.emptyList(),0)
                 .unique()
                 .stream()
