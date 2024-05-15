@@ -47,7 +47,7 @@ public class RepetitivePermutationTest {
         String expected = "[[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1], " +
                 "[1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]]";
 
-        String actual   = tools.permutations().of("0", "1")
+        String actual   = tools.permutations().of(0,1)
                 .repetitive(3)
                 .stream().toList().toString();
 

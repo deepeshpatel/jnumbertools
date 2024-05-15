@@ -42,7 +42,7 @@ public class UniqueCombinationNthTest {
         String expected = "[[0, 1, 2], [0, 2, 3], [1, 2, 3], [2, 3, 4]]";
 
         String output = tools.combinations()
-                .of(List.of("0","1","2","3","4"),3)
+                .of(3,0,1,2,3,4)
                 .uniqueNth(3)
                 .stream()
                 .toList().toString();

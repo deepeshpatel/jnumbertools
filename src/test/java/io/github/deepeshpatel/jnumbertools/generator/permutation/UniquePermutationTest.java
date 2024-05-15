@@ -34,7 +34,7 @@ public class UniquePermutationTest {
     @Test
     public void shouldGenerateAllUniquePermutationsOf3Values(){
         String expected = "[[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]";
-        String actual   = tools.permutations().of("1", "2", "3")
+        String actual   = tools.permutations().of(1,2,3)
                 .unique()
                 .stream().toList().toString();
 

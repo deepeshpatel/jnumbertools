@@ -40,8 +40,9 @@ public class Calculator {
     public BigInteger nCr(int n, int r) {
 
 
-        if(r == n || r == 0) return BigInteger.ONE;
-        if(n < r || r < 0) return BigInteger.ZERO;
+        if(r == n || r == 0)    return BigInteger.ONE;
+        if(n < r || r < 0)      return BigInteger.ZERO;
+        if(r==1)                return BigInteger.valueOf(n);
 
         if(n>5000 && !nCrMemoized) {
             nCrMemoized = true;

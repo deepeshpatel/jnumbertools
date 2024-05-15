@@ -55,7 +55,7 @@ public class KPermutationCombinationOrderTest {
     @Test
     public void shouldGenerateAllUniquePermutationsOf3Values(){
         String expected = "[[1, 2], [2, 1], [1, 3], [3, 1], [2, 3], [3, 2]]";
-        String actual   = tools.permutations().of("1", "2", "3")
+        String actual   = tools.permutations().of(1,2,3)
                 .k(2)
                 .combinationOrder()
                 .stream().toList().toString();

@@ -38,7 +38,7 @@ public class UniquePermutationNthTest {
     @Test
     public void shouldGenerateAllUniquePermutationsOf3Values(){
         String expected = "[[1, 2, 3], [2, 1, 3], [3, 1, 2]]";
-        String actual   = tools.permutations().of("1", "2", "3")
+        String actual   = tools.permutations().of(1,2,3)
                 .uniqueNth(2)
                 .stream().toList().toString();
 
@@ -79,7 +79,7 @@ public class UniquePermutationNthTest {
     @Test
     public void shouldSupportVeryLargePermutations() {
 
-        var input = List.of("0", "1","2","3","4","5","6","7","8","9","10","11","12");
+        var input = List.of(0,1,2,3,4,5,6,7,8,9,10,11,12);
 
         String[] expected = new String[]{
                 "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]",

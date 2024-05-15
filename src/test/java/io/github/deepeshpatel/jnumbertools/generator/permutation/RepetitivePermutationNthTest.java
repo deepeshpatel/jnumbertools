@@ -39,7 +39,7 @@ public class RepetitivePermutationNthTest {
     @Test
     public void shouldGenerateAllPermutationsOf2Values() {
         String expected = "[[0, 0, 0], [0, 1, 0], [1, 0, 0], [1, 1, 0]]";
-        String actual   = tools.permutations().of("0","1")
+        String actual   = tools.permutations().of(0,1)
                 .repetitiveNth(3,2)
                 .stream().toList().toString();
 
