@@ -47,7 +47,7 @@ public class FactoradicAlgorithms {
         return factoradic;
     }
 
-    public static int[] factoradicToNthPermutation(int[] factoradic){
+    public static int[] factoradicToMthPermutation(int[] factoradic){
 
         int[] output = IntStream.range(0, factoradic.length).toArray();
 
@@ -66,6 +66,6 @@ public class FactoradicAlgorithms {
     }
 
     public static int[] unRank(BigInteger rank, int size) {
-        return factoradicToNthPermutation(intToFactoradicKnowSize(rank,size));
+        return factoradicToMthPermutation(intToFactoradicKnowSize(rank,size));
     }
 }

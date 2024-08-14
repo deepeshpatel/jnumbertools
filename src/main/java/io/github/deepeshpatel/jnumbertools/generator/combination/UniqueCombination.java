@@ -54,10 +54,10 @@ public class UniqueCombination<T> extends AbstractGenerator<T> {
      * @param input List of N items
      * @param r number of combinations from N items. r must be &lt;= N for generating unique combinations
      */
-    public UniqueCombination(Collection<T> input, int r) {
+    public UniqueCombination(List<T> input, int r) {
         super(input);
         this.r = r;
-        checkParamCombination(seed.size(),r, "unique combinations");
+        checkParamCombination(seedElements.size(),r, "unique combinations");
     }
 
     @Override
@@ -84,8 +84,8 @@ public class UniqueCombination<T> extends AbstractGenerator<T> {
                 throw new NoSuchElementException();
             }
             int[] old = indices;
-            indices = nextCombination(indices, seed.size());
-            return indicesToValues(old, seed);
+            indices = nextCombination(indices, seedElements.size());
+            return indicesToValues(old, seedElements);
         }
 
         private int[] nextCombination(int[]currentKCombination, int n) {

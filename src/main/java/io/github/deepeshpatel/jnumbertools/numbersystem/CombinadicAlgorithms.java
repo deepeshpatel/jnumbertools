@@ -13,10 +13,10 @@ public class CombinadicAlgorithms {
         this.calculator = calculator;
     }
 
-    public BigInteger rank(int n, int[] nthCombination) {
-        int[] combinadic = combinationToCombinadic(n, nthCombination);
+    public BigInteger rank(int n, int[] mthCombination) {
+        int[] combinadic = combinationToCombinadic(n, mthCombination);
         BigInteger x = combinadicToDecimal(combinadic);
-        BigInteger nCr = calculator.nCr(n, nthCombination.length);
+        BigInteger nCr = calculator.nCr(n, mthCombination.length);
         return  nCr.subtract(x).subtract(BigInteger.ONE);
     }
 
@@ -26,10 +26,10 @@ public class CombinadicAlgorithms {
         return combinadicToCombination(a, n);
     }
 
-    public static int[] combinationToCombinadic(int n, int[] nthCombination){
-        int[] combinadic = new int[nthCombination.length];
+    public static int[] combinationToCombinadic(int n, int[] mthCombination){
+        int[] combinadic = new int[mthCombination.length];
         for(int i=0; i<combinadic.length; i++) {
-            combinadic[i] = n-1-nthCombination[i];
+            combinadic[i] = n-1-mthCombination[i];
         }
         return combinadic;
     }
@@ -78,7 +78,7 @@ public class CombinadicAlgorithms {
         return combinadic;
     }
 
-    //This is faster than nextKthCombinadic. So must be used for +1 while finding next Nth Combinadic
+    //This is faster than nextKthCombinadic. So must be used for +1 while finding next Mth Combinadic
     public static int[] nextCombinadic(List<Integer> combinadic) {
 
         int[] result = combinadic.stream().mapToInt(Integer::intValue).toArray();
@@ -97,5 +97,5 @@ public class CombinadicAlgorithms {
         return result;
     }
 
-    //TODO: Add algo for nextNthCombinadic(int[] combinadic ) without converting to decimal.
+    //TODO: Add algo for nextMthCombinadic(int[] combinadic ) without converting to decimal.
 }

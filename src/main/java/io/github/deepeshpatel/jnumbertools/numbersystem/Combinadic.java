@@ -66,7 +66,7 @@ public final class Combinadic implements Serializable {
 //     * @return next kth successive Combinadic
 //     */
 //    public Combinadic nextKthCombinadic(long k, NumericCalculator calculator) {
-        //TODO: Find the algo for nextNthCombinadic without converting to decimal
+        //TODO: Find the algo for nextMthCombinadic without converting to decimal
         // You need to define "addition operation" rules for this number system
 //        return Combinadic.of(decimalValue.add(BigInteger.valueOf(k)),combinadicValues.size(), calculator);
 //    }

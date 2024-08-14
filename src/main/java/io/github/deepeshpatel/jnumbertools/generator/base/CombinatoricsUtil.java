@@ -8,8 +8,6 @@ package io.github.deepeshpatel.jnumbertools.generator.base;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 public class CombinatoricsUtil {
 
@@ -35,7 +33,7 @@ public class CombinatoricsUtil {
 
     public static void checkParamIncrement(BigInteger increment, String message) {
         if(increment.compareTo(BigInteger.ZERO) <=0) {
-            throw new IllegalArgumentException("increment value must be >0 to generate every nth" + message );
+            throw new IllegalArgumentException("increment value must be > 0 to generate every nth" + message );
         }
     }
 
@@ -44,24 +42,7 @@ public class CombinatoricsUtil {
             throw new IllegalArgumentException("r should be <= input length to generate " + message);
         }
         if(r < 0) {
-            throw new IllegalArgumentException("r should be >=0 to generate " + message );
+            throw new IllegalArgumentException("r should be >= 0 to generate " + message );
         }
-    }
-
-    public static void checkParamKPermutation(int inputSize, int k, String message) {
-        if(k > inputSize) {
-            throw new IllegalArgumentException("k should be <= input length to generate " + message);
-        }
-        if(k < 0) {
-            throw new IllegalArgumentException("k should be >=0 to generate " + message );
-        }
-    }
-
-    //making it mathematically correct as set should contain null/empty set by definition.
-    // for r=0, nPr = nCr = 1 and hence should contain one null(empty) value
-    public static<T> Iterator<List<T>> newEmptyIterator(){
-        var list = new ArrayList<List<T>>();
-        list.add(Collections.emptyList());
-        return list.iterator();
     }
 }

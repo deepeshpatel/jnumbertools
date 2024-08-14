@@ -1,7 +1,10 @@
 package io.github.deepeshpatel.jnumbertools.entrypoint;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Calculator required for combinatorics calculation. This calculator uses memoization
@@ -15,31 +18,44 @@ public class Calculator {
     private final List<BigInteger> fList = new ArrayList<>();
 
     public Calculator() {
-        setupCache();
+        this(100,100,100);
     }
 
-    private void setupCache() {
-        fList.add(BigInteger.ONE);
-        fList.add(BigInteger.ONE);
-        fList.add(BigInteger.TWO);
-        fList.add(BigInteger.valueOf(6));
-        fList.add(BigInteger.valueOf(24));
-        fList.add(BigInteger.valueOf(120));
+    public Calculator(int nCrCacheSize, int nPrCacheSize, int factorialCacheSize) {
+        setupFactorialCache(factorialCacheSize);
+        setupCombinationCache(nCrCacheSize);
+        setupPermutationCache(nPrCacheSize);
     }
 
-    public static long GCD(long greater, long smaller) {
-        long mod = greater % smaller;
-        return mod == 0 ? smaller : GCD(smaller, mod);
+    private void setupFactorialCache(int cacheSize) {
+        fList.add( BigInteger.ONE);
+        fList.add( BigInteger.ONE);
+        fList.add( BigInteger.TWO);
+        fList.add( BigInteger.valueOf(6));
+        factorial(cacheSize);
     }
 
-    public static long LCM(long a, long b) {
-        return (a * b)/ GCD(a,b);
+    private void setupCombinationCache(int cacheSize) {
+        for (int n = 4; n <= cacheSize; n++) {
+            for (int r = 2; r <= n / 2; r++) {
+                nCr(n, 3);
+            }
+        }
+    }
+
+    private void setupPermutationCache(int cacheSize) {
+        for (int n = 3; n <= cacheSize; n++) {
+            for (int r = 2; r <= n; r++) {
+                nPr(n, 3);
+            }
+        }
     }
 
     public BigInteger nCr(int n, int r) {
-        if(r == n || r == 0)    return BigInteger.ONE;
-        if(n < r || r < 0)      return BigInteger.ZERO;
-        if(r==1 || n-r == 1)    return BigInteger.valueOf(n);
+
+        if(r == n || r == 0)    { return BigInteger.ONE; }
+        if(n < r || r < 0)      { return BigInteger.ZERO; }
+        if(r==1 || n-r == 1)    { return BigInteger.valueOf(n); }
 
         r = Math.min(r, n-r);
         BigInteger value = nCrMemo.get(n,r);
@@ -61,9 +77,9 @@ public class Calculator {
             return fList.get(n);
         }
 
-        BigInteger product = fList.get(fList.size()-1);
+        BigInteger product = fList.get(fList.size() - 1);
 
-        for(int i=fList.size(); i<= n; i++) {
+        for(int i=fList.size(); i<=n; i++) {
             product = product.multiply(BigInteger.valueOf(i));
             fList.add(product);
         }
@@ -72,7 +88,7 @@ public class Calculator {
 
     //Can be replaced by Google Guava Table. Using this because of the
     // defined constraint that JNumberTools library should not have any dependency
-    private static class TwoLevelMap<K1,K2,V> extends HashMap<K1,Map<K2,V>>{
+    public static class TwoLevelMap<K1,K2,V> extends HashMap<K1,Map<K2,V>> {
 
         public V get(K1 key1, K2 key2) {
             var map = get(key1);

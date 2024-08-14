@@ -13,3 +13,8 @@ R&D Observations:
 TODO:
 [] Factoradic.fromNthPermutation() similar to Permutadic.fromNthPermutation()
 [] Work on addition formula for combinadic (and permutadic) number system
+[] repetitive permutation Mth
+[] product (algo similar to repetitive permutation)
+[] Add API to find if permutation is even or odd
+[] Add API to find the range of base of repetitive pepmutation for a given rank and permutation
+

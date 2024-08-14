@@ -5,7 +5,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
@@ -19,8 +18,8 @@ public class RepetitiveCombinationTest {
         for(int n=1; n<=4; n++) {
             var input = Collections.nCopies(n, "A");
             for(int r=0; r<=n; r++) {
-                long count = tools.combinations().of(input,r)
-                        .repetitive().stream().count();
+                long count = tools.combinations().repetitive(r, input)
+                        .lexOrder().stream().count();
                 long expectedCount = calculator.nCr(n+r-1,r).longValue();
                 Assert.assertEquals(expectedCount, count);
             }
@@ -30,7 +29,7 @@ public class RepetitiveCombinationTest {
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
         var iterable = tools.combinations()
-                .of(List.of("A", "B", "C"),2).repetitive();
+                .repetitive(2, "A", "B", "C").lexOrder();
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
         Assert.assertEquals(lists1, lists2);
@@ -38,43 +37,27 @@ public class RepetitiveCombinationTest {
 
     @Test
     public void shouldGenerateCombinationsInInputOrder() {
-
         String expected = "[[Red, Red], [Red, Green], [Red, Blue], [Green, Green], [Green, Blue], [Blue, Blue]]";
-
-        String output = tools.combinations()
-                .of(List.of("Red", "Green", "Blue"),2)
-                .repetitive()
-                .stream()
-                .toList().toString();
-
-        assertEquals(expected, output);
+        assertEquals(expected, output(2,"Red", "Green", "Blue"));
     }
 
     @Test
     public void shouldReturnEmptyListForSizeLessThanOrEqualsZero() {
-
         String expected ="[[]]";
-
-        String output = tools.combinations()
-                .of(List.of("A","B"),0)
-                .repetitive()
-                .stream()
-                .toList().toString();
-
-        assertEquals(expected, output);
+        assertEquals(expected, output(0,"A","B"));
     }
 
     @Test
-    public void shouldAbleToGenerateRepetitivePermutationForKGreaterThanN() {
-
+    public void shouldAbleToGenerateRepetitivePermutationForSizeGreaterThanN() {
         String expected ="[[A, A, A], [A, A, B], [A, B, B], [B, B, B]]";
+        assertEquals(expected, output(3,"A","B" ));
+    }
 
-        String output = tools.combinations()
-                .of(List.of("A","B"),3)
-                .repetitive()
+    private String output(int size, String... elements) {
+        return tools.combinations()
+                .repetitive(size,elements)
+                .lexOrder()
                 .stream()
                 .toList().toString();
-
-        assertEquals(expected, output);
     }
 }

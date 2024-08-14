@@ -10,6 +10,10 @@ public class UnrankOf {
 
     private final Calculator calculator;
 
+    public UnrankOf() {
+        this(new Calculator());
+    }
+
     public UnrankOf(Calculator calculator) {
         this.calculator = calculator;
     }

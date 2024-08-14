@@ -2,7 +2,6 @@ package io.github.deepeshpatel.jnumbertools.entrypoint;
 
 import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetGenerator;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -13,7 +12,7 @@ public class Subsets {
         return of(List.of(data));
     }
 
-    public <T> SubsetGenerator.Builder<T> of(Collection<T> data) {
+    public <T> SubsetGenerator.Builder<T> of(List<T> data) {
         return new SubsetGenerator.Builder<>(data);
     }
 

@@ -17,9 +17,12 @@ public class RepetitiveCombinationMultisetTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
+        var elements = List.of("A","B","C");
+        int[] frequencies = new int[] {2,3,2};
+
         RepetitiveCombinationMultiset<String> iterable = tools.combinations()
-                .of(List.of("A","B","C"),2)
-                .repetitiveMultiset(new int[]{2,3,2});
+                .multiset(elements, frequencies, 2)
+                .lexOrder();
 
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
@@ -27,7 +30,7 @@ public class RepetitiveCombinationMultisetTest {
     }
 
     @Test
-    public void shouldGenerateCorrectCombinationsWithPrimitiveArrayAndWrapperArrayAndList() {
+    public void shouldGenerateCorrectCombinationsOfMultiset() {
 
         String expected = "[[Red, Red, Red], " +
                 "[Red, Red, Green], " +
@@ -41,65 +44,30 @@ public class RepetitiveCombinationMultisetTest {
                 "[Green, Green, Yellow], " +
                 "[Green, Blue, Yellow]]";
 
-        String outputWithPrimitiveArray = tools.combinations()
-                .of(List.of("Red", "Green", "Blue","Yellow"),3)
-                .repetitiveMultiset(new int[]{3,2,1,1}) //3 red ,2 green, 1 blue, 1 yellow
-                .stream().toList().toString();
-
-        String outputWithWrapperArray = tools.combinations()
-                .of(List.of("Red", "Green", "Blue","Yellow"),3)
-                .repetitiveMultiset(new Integer[]{3,2,1,1}) //3 red ,2 green, 1 blue, 1 yellow
-                .stream().toList().toString();
-
-        String outputWithList = tools.combinations()
-                .of(List.of("Red", "Green", "Blue","Yellow"),3)
-                .repetitiveMultiset(List.of(3,2,1,1)) //3 red ,2 green, 1 blue, 1 yellow
-                .stream().toList().toString();
-
-        Assert.assertEquals(expected, outputWithPrimitiveArray);
-        Assert.assertEquals(expected, outputWithWrapperArray);
-        Assert.assertEquals(expected, outputWithList);
+        var elements = List.of("Red", "Green", "Blue","Yellow");
+        int[] frequencies = new int[] {3,2,1,1};  //3 red ,2 green, 1 blue, 1 yellow
+        int size = 3;
+        Assert.assertEquals(expected, output(elements, frequencies, size));
     }
 
     @Test
-    public void shouldReturnEmptyListWhenREqualsZero() {
-        String output = tools.combinations().of(List.of("A", "B"),0)
-                .repetitiveMultiset(new int[]{3,2}) //3 red ,2 green
-                .stream().toList().toString();
-
-        Assert.assertEquals("[[]]", output);
+    public void shouldReturnEmptyListWhenCombinationSizeIsEqualToZero() {
+        Assert.assertEquals("[[]]", output(List.of("A"), new int[] {3}, 0));
     }
 
     @Test
     public void shouldReturnEmptyListWhenInputListIsEmpty() {
-        String output = tools.combinations().of(Collections.emptyList(),0)
-                .repetitiveMultiset(new int[]{})
-                .stream().toList().toString();
-
-        Assert.assertEquals("[[]]", output);
+        Assert.assertEquals("[[]]", output(Collections.emptyList(), new int[]{},0));
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWhenMultisetFreqArrayIsNull() {
-        var seed = List.of("A", "B");
-        new RepetitiveCombinationMultiset<>(seed, 2, null);
+        output(List.of("A", "B"), null, 2);
     }
 
-//    @Test void shouldResultSameForPrimitiveArrayAndWrapperArrayAndList() {
-//        String expected = "[[Red, Red, Red], " +
-//                "[Red, Red, Green], " +
-//                "[Red, Red, Blue], " +
-//                "[Red, Red, Yellow], " +
-//                "[Red, Green, Green], " +
-//                "[Red, Green, Blue], " +
-//                "[Red, Green, Yellow], " +
-//                "[Red, Blue, Yellow], " +
-//                "[Green, Green, Blue], " +
-//                "[Green, Green, Yellow], " +
-//                "[Green, Blue, Yellow]]";
-//
-//
-//
-//        Assert.assertEquals(expected, output);
-//    }
+    private String output(List<String> elements, int[] frequencies, int size) {
+        return tools.combinations().multiset(elements, frequencies, size)
+                .lexOrder()
+                .stream().toList().toString();
+    }
 }

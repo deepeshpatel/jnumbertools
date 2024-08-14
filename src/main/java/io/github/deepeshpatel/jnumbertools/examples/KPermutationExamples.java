@@ -12,15 +12,15 @@ class KPermutationExamples {
         printKPermutationOfNumbersInLexOrder();
         printKPermutationOfElementsInLexOrder();
 
-        printNthKPermutationOfNumbersInLexOrder();
-        printNthKPermutationOfElementsInLexOrder();
-        printNthKPermutationsOfVeryLargeListInLexOrder();
+        printMthKPermutationOfNumbersInLexOrder();
+        printMthKPermutationOfElementsInLexOrder();
+        printMthKPermutationsOfVeryLargeListInLexOrder();
 
         printKPermutationOfNumbersInCombinationOrder();
         printKPermutationOfElementsInCombinationOrder();
 
-        printNthKPermutationOfNumbersInCombinationOrder();
-        printNthKPermutationOfElementsInCombinationOrder();
+        printMthKPermutationOfNumbersInCombinationOrder();
+        printMthKPermutationOfElementsInCombinationOrder();
 
         printRankOfKPermutation();
         printKPermutationForGivenRank();
@@ -28,51 +28,45 @@ class KPermutationExamples {
 
     static void printKPermutationOfNumbersInLexOrder() {
         System.out.println("\n*** 2-Permutation(selected 2 at a time) out of 3 items in lex order ***");
-        new JNumberTools().permutations().of(3)
-                .k(2)
+        new JNumberTools().permutations().nPr(3,2)
                 .lexOrder()
                 .forEach(System.out::println);
     }
 
     static void printKPermutationOfElementsInLexOrder() {
         System.out.println("\n*** 2-Permutation(selected 2 at a time) out of 3 given elements in lex order ***");
-        new JNumberTools().permutations().of("Red", "Green", "Blue")
-                .k(2)
+        new JNumberTools().permutations().nPr(2, "Red", "Green", "Blue")
                 .lexOrder()
                 .forEach(System.out::println);
     }
 
-    static void printNthKPermutationOfNumbersInLexOrder() {
+    static void printMthKPermutationOfNumbersInLexOrder() {
         System.out.println("\n*** Every 3rd 2-Permutation of 3 items in lex order ***");
-        new JNumberTools().permutations().of(3)
-                .k(2)
-                .lexOrderNth(3)
+        new JNumberTools().permutations().nPr(3,2)
+                .lexOrderMth(3)
                 .forEach(System.out::println);
     }
 
-    static void printNthKPermutationOfElementsInLexOrder() {
+    static void printMthKPermutationOfElementsInLexOrder() {
         System.out.println("\n*** Every 3rd 2-Permutation of 3 given elements in lex order ***");
-        new JNumberTools().permutations().of("Red", "Green", "Blue")
-                .k(2)
-                .lexOrderNth(3)
+        new JNumberTools().permutations().nPr(2, "Red", "Green", "Blue")
+                .lexOrderMth(3)
                 .forEach(System.out::println);
     }
 
-    static void printNthKPermutationsOfVeryLargeListInLexOrder() {
+    static void printMthKPermutationsOfVeryLargeListInLexOrder() {
 
         System.out.println("\n*** Print every one hundred octillion-th(10^29 th) 20-Permutation of 40 elements(20P40) *** ");
 
-        new JNumberTools().permutations().of(40)
-                .k(20)
-                .lexOrderNth(new BigInteger("100000000000000000000000000000"))
+        new JNumberTools().permutations().nPr(40,20)
+                .lexOrderMth(new BigInteger("100000000000000000000000000000"))
                 .forEach(System.out::println);
     }
 
     static void printKPermutationOfNumbersInCombinationOrder() {
 
         System.out.println("\n***  Print 2-permutation of 4 items in combination order  ***");
-        new JNumberTools().permutations().of(4)
-                .k(2)
+        new JNumberTools().permutations().nPr(4,2 )
                 .combinationOrder()
                 .forEach(System.out::println);
     }
@@ -80,27 +74,24 @@ class KPermutationExamples {
     static void printKPermutationOfElementsInCombinationOrder() {
 
         System.out.println("\n***  Print 2-permutation of 4 given elements in combination order  ***");
-        new JNumberTools().permutations().of("Red", "Green", "Blue","Yellow")
-                .k(2)
+        new JNumberTools().permutations().nPr(2,"Red", "Green", "Blue","Yellow")
                 .combinationOrder()
                 .forEach(System.out::println);
     }
 
-    static void printNthKPermutationOfNumbersInCombinationOrder() {
+    static void printMthKPermutationOfNumbersInCombinationOrder() {
 
         System.out.println("\n***  Print every 3rd 2-permutation of 4 items in combination order  ***");
-        new JNumberTools().permutations().of(4)
-                .k(2)
-                .combinationOrderNth(3)
+        new JNumberTools().permutations().nPr(4,2)
+                .combinationOrderMth(3)
                 .forEach(System.out::println);
     }
 
-    static void printNthKPermutationOfElementsInCombinationOrder() {
+    static void printMthKPermutationOfElementsInCombinationOrder() {
 
         System.out.println("\n***  Print every 3rd 2-permutation of 4 items in combination order  ***");
-        new JNumberTools().permutations().of("Red", "Green", "Blue","Yellow")
-                .k(2)
-                .combinationOrderNth(3)
+        new JNumberTools().permutations().nPr(2,"Red", "Green", "Blue","Yellow")
+                .combinationOrderMth(3)
                 .forEach(System.out::println);
     }
 

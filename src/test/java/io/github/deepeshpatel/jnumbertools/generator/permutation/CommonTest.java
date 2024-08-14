@@ -3,27 +3,32 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
 
 public class CommonTest {
 
     @Test
-    public void all3NthPermutationGeneratorsShouldGenerateSameOutputForSpecialCase(){
+    public void all3MthPermutationGeneratorsShouldGenerateSameOutputForSpecialCase(){
 
         for(int size=1; size<=5; size++) {
             for(int increment = 1; increment<=10; increment++) {
 
-                String uniquePermutationValues = tools.permutations().of(size).
-                        uniqueNth(increment).stream().toList().toString();
+                var elements = IntStream.range(0, size).boxed().toList();
+                int freq[] = new int[elements.size()];
+                Arrays.fill(freq,1);
 
-                String multisetPermutationValues = tools.permutations().of(size)
-                        .multisetNth(increment, Collections.nCopies(size, 1))
+                String uniquePermutationValues = tools.permutations().unique(size).
+                        lexOrderMth(increment).stream().toList().toString();
+
+                String multisetPermutationValues = tools.permutations().multiset(elements, freq)
+                        .lexOrderMth(increment)
                         .stream().toList().toString();
 
-                String kPermutationValues = tools.permutations().of(size).k(size)
-                        .lexOrderNth(increment)
+                String kPermutationValues = tools.permutations().nPr(size,size)
+                        .lexOrderMth(increment)
                         .stream().toList().toString();
 
                 Assert.assertEquals(uniquePermutationValues, multisetPermutationValues);
@@ -37,14 +42,18 @@ public class CommonTest {
 
         for(int size=1; size<=5; size++) {
 
-                String uniquePermutationValues = tools.permutations().of(size).
-                        unique().stream().toList().toString();
+            var elements = IntStream.range(0, size).boxed().toList();
+            int freq[] = new int[elements.size()];
+            Arrays.fill(freq,1);
 
-                String multisetPermutationValues = tools.permutations().of(size)
-                        .multiset(Collections.nCopies(size, 1))
+                String uniquePermutationValues = tools.permutations().unique(size).
+                        lexOrder().stream().toList().toString();
+
+                String multisetPermutationValues = tools.permutations().multiset(elements, freq)
+                        .lexOrder()
                         .stream().toList().toString();
 
-                String kPermutationValues = tools.permutations().of(size).k(size)
+                String kPermutationValues = tools.permutations().nPr(size, size)
                         .lexOrder()
                         .stream().toList().toString();
 
@@ -58,33 +67,37 @@ public class CommonTest {
         for(int size=1; size<=5; size++) {
             int increment = 1;
 
-            String uniquePermutationNth = tools.permutations().of(size).
-                    uniqueNth(increment).stream().toList().toString();
+            var elements = IntStream.range(0, size).boxed().toList();
+            int freq[] = new int[elements.size()];
+            Arrays.fill(freq,1);
 
-            String multisetPermutationNth = tools.permutations().of(size)
-                    .multisetNth(increment, Collections.nCopies(size, 1))
+            String uniquePermutationMth = tools.permutations().unique(size).
+                    lexOrderMth(increment).stream().toList().toString();
+
+            String multisetPermutationMth = tools.permutations().multiset(elements, freq)
+                    .lexOrderMth(increment)
                     .stream().toList().toString();
 
-            String kPermutationNth = tools.permutations().of(size).k(size)
-                    .lexOrderNth(increment)
+            String kPermutationMth = tools.permutations().nPr(size, size)
+                    .lexOrderMth(increment)
                     .stream().toList().toString();
 
-            String uniquePermutation = tools.permutations().of(size).
-                    unique().stream().toList().toString();
+            String uniquePermutation = tools.permutations().unique(size).
+                    lexOrderMth(increment).stream().toList().toString();
 
-            String multisetPermutation = tools.permutations().of(size)
-                    .multiset(Collections.nCopies(size, 1))
-                    .stream().toList().toString();
-
-            String kPermutation = tools.permutations().of(size).k(size)
+            String multisetPermutation = tools.permutations().multiset(elements, freq)
                     .lexOrder()
                     .stream().toList().toString();
 
-            Assert.assertEquals(uniquePermutation, uniquePermutationNth);
+            String kPermutation = tools.permutations().nPr(size, size)
+                    .lexOrder()
+                    .stream().toList().toString();
+
+            Assert.assertEquals(uniquePermutation, uniquePermutationMth);
             Assert.assertEquals(uniquePermutation, kPermutation);
-            Assert.assertEquals(uniquePermutation, kPermutationNth);
+            Assert.assertEquals(uniquePermutation, kPermutationMth);
             Assert.assertEquals(uniquePermutation, multisetPermutation);
-            Assert.assertEquals(uniquePermutation, multisetPermutationNth);
+            Assert.assertEquals(uniquePermutation, multisetPermutationMth);
         }
     }
 }

@@ -50,14 +50,14 @@ public final class Permutadic implements Serializable {
         return new Permutadic(decimalValue, permutadicValues, degree);
     }
 
-    public static Permutadic fromNthPermutation ( int[] nthPerm, int degree){
-        List<Integer> perm = nthPermutationToPermutadic(nthPerm, degree);
+    public static Permutadic fromMthPermutation(int[] mthPerm, int degree){
+        List<Integer> perm = mthPermutationToPermutadic(mthPerm, degree);
         BigInteger decimal = toDecimal(perm, degree);
         return new Permutadic(decimal, perm, degree);
     }
 
-    public int[] toNthPermutation ( int countOfSelectItems){
-        return PermutadicAlgorithms.toNthPermutation(permutadicValues, degree + countOfSelectItems, countOfSelectItems);
+    public int[] toMthPermutation(int countOfSelectItems){
+        return PermutadicAlgorithms.toMthPermutation(permutadicValues, degree + countOfSelectItems, countOfSelectItems);
     }
 
     @Override

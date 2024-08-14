@@ -1,8 +1,9 @@
 package io.github.deepeshpatel.jnumbertools.entrypoint;
 
-import io.github.deepeshpatel.jnumbertools.generator.combination.CombinationBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.combination.MultisetCombinationBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.combination.RepetitiveCombinationBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombinationBuilder;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -10,22 +11,42 @@ public class Combinations {
 
     private final Calculator calculator;
 
+    public Combinations() {
+        this(new Calculator());
+    }
+
     public Combinations(Calculator calculator) {
         this.calculator = calculator;
     }
 
-    public <T> CombinationBuilder<T> of(Collection< T> data, int ofSize) {
-        return new CombinationBuilder<>(data, ofSize, calculator);
+    public final UniqueCombinationBuilder<Integer> unique(int n, int r) {
+        var elements = IntStream.range(0,n).boxed().toList();
+        return unique(r, elements);
     }
 
     @SafeVarargs
-    public final <T> CombinationBuilder<T> of(int size, T... data) {
-        return of(List.of(data),size);
+    public final <T> UniqueCombinationBuilder<T> unique(int size, T... elements) {
+        return unique(size, List.of(elements));
     }
 
-    public CombinationBuilder<Integer> ofnCr(int n, int r) {
-        var list = IntStream.range(0, n).boxed().toList();
-        return of(list,r);
+    public final <T> UniqueCombinationBuilder<T> unique(int size, List<T> elements) {
+        return new UniqueCombinationBuilder<>(elements, size, calculator);
     }
 
+    public final RepetitiveCombinationBuilder<Integer> repetitive(int n, int r) {
+        var elements = IntStream.range(0,n).boxed().toList();
+        return new RepetitiveCombinationBuilder<>(elements, r);
+    }
+
+    @SafeVarargs
+    public final <T> RepetitiveCombinationBuilder<T> repetitive(int size, T... elements) {
+        return new RepetitiveCombinationBuilder<>(List.of(elements), size);
+    }
+    public final <T> RepetitiveCombinationBuilder<T> repetitive(int size, List<T> elements) {
+        return new RepetitiveCombinationBuilder<>(elements, size);
+    }
+
+    public final <T> MultisetCombinationBuilder<T> multiset(List<T> elements, int[] frequencies, int size) {
+        return new MultisetCombinationBuilder<>(elements, frequencies, size);
+    }
 }

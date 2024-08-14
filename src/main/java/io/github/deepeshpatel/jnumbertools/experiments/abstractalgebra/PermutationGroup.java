@@ -1,7 +1,5 @@
 package io.github.deepeshpatel.jnumbertools.experiments.abstractalgebra;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,7 +45,7 @@ public final class PermutationGroup {
 
         long lcm = 1;
         for(var cycle : permutationCycles) {
-            lcm = Calculator.LCM(lcm, cycle.size());
+            lcm = LCM(lcm, cycle.size());
         }
         return lcm;
     }
@@ -96,5 +94,14 @@ public final class PermutationGroup {
 
     public long orderOfPermutation(List<Integer> permutation) {
         return orderOfPermutationWithCycleNotation(toCycleNotation(permutation, true));
+    }
+
+    public static long GCD(long greater, long smaller) {
+        long mod = greater % smaller;
+        return mod == 0 ? smaller : GCD(smaller, mod);
+    }
+
+    public static long LCM(long a, long b) {
+        return (a * b)/ GCD(a,b);
     }
 }

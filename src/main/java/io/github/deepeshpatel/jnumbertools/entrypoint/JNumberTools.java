@@ -5,12 +5,16 @@
 
 package io.github.deepeshpatel.jnumbertools.entrypoint;
 
+import io.github.deepeshpatel.jnumbertools.generator.product.Product;
+
+import java.util.List;
+
 public class JNumberTools {
 
     private final Calculator calculator;
 
     public JNumberTools() {
-        calculator = new Calculator();
+       this(new Calculator());
     }
 
     public JNumberTools(Calculator calculator) {
@@ -35,6 +39,10 @@ public class JNumberTools {
 
     public UnrankOf unRankingOf() {
         return new UnrankOf(calculator);
+    }
+
+    public static <T> Product<T> productOf(int n, List<T> data ) {
+            return Product.of(n, data);
     }
 
 }

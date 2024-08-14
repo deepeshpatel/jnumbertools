@@ -10,8 +10,6 @@ import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
 
 import java.util.*;
 
-import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.newEmptyIterator;
-
 /**
  *
  * Utility for generating r-combinations of input = {1, 2 . . ., n}
@@ -57,13 +55,13 @@ public class RepetitiveCombinationMultiset<T> extends AbstractGenerator<T> {
      * @param multisetFreqArray int array containing the number of times(count) element in input can be repeated.
      *               multisetFreqArray[0] contains the count for 0th element in input
      *               multisetFreqArray[1] contains the count for 1st element in input, ...
-     *               multisetFreqArray[n] contains the count of nth element in input
+     *               multisetFreqArray[n] contains the count of mth element in input
      *               count of every element must be &gt;=1
      */
-    public RepetitiveCombinationMultiset(Collection<T> input, int r, int[] multisetFreqArray) {
+    public RepetitiveCombinationMultiset(List<T> input, int r, int[] multisetFreqArray) {
         super(input);
-        CombinatoricsUtil.checkParamCombination(seed.size(), r, "Repetitive Combination");
-        CombinatoricsUtil.checkParamMultisetFreqArray(seed.size(), multisetFreqArray, "Repetitive Combination");
+        CombinatoricsUtil.checkParamCombination(seedElements.size(), r, "Repetitive Combination");
+        CombinatoricsUtil.checkParamMultisetFreqArray(seedElements.size(), multisetFreqArray, "Repetitive Combination");
 
         this.r = r;
         this.multisetFreqArray = multisetFreqArray;
@@ -71,7 +69,7 @@ public class RepetitiveCombinationMultiset<T> extends AbstractGenerator<T> {
 
     @Override
     public Iterator<List<T>> iterator() {
-        return ( r==0 || seed.isEmpty()) ? newEmptyIterator() : new Itr();
+        return ( r==0 || seedElements.isEmpty()) ? newEmptyIterator() : new Itr();
     }
 
     private class Itr implements Iterator<List<T>> {
@@ -96,7 +94,7 @@ public class RepetitiveCombinationMultiset<T> extends AbstractGenerator<T> {
             }
             int[] old = indices;
             indices = nextRepetitiveCombinationOfMultiset(indices, multisetFreqArray);
-            return indicesToValues(old, seed);
+            return indicesToValues(old, seedElements);
         }
 
         private int[] nextRepetitiveCombinationOfMultiset(int[]a, int[] availableCount) {

@@ -9,8 +9,6 @@ import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
 import java.util.*;
 
-import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.newEmptyIterator;
-
 /**
  *
  * Utility for generating r-combinations of input = {1, 2 . . ., n}
@@ -53,23 +51,19 @@ public class RepetitiveCombination <T> extends AbstractGenerator<T> {
      * @param input List of N items. N is the length of input
      * @param r number of combinations from N items.
      */
-    public RepetitiveCombination(Collection<T> input, int r) {
+    public RepetitiveCombination(List<T> input, int r) {
         super(input);
         this.r = r;
     }
 
     @Override
     public Iterator<List<T>> iterator() {
-        return (r==0 || seed.isEmpty()) ? newEmptyIterator() : new Itr();
+        return (r==0 || seedElements.isEmpty()) ? newEmptyIterator() : new Itr();
     }
 
     private class Itr implements Iterator<List<T>> {
 
-        int[] indices;
-
-        private Itr(){
-            indices = new int[r];
-        }
+        int[] indices = new int[r];
 
         @Override
         public boolean hasNext() {
@@ -82,24 +76,24 @@ public class RepetitiveCombination <T> extends AbstractGenerator<T> {
                 throw new NoSuchElementException();
             }
             int[] old = indices;
-            indices = nextRepetitiveCombination(indices, seed.size());
-            return indicesToValues(old, seed);
+            indices = nextRepetitiveCombination(indices, seedElements.size());
+            return indicesToValues(old, seedElements);
         }
 
-        private int[] nextRepetitiveCombination(int[]a, int n) {
+        private int[] nextRepetitiveCombination(int []a, int n) {
 
-            int[] next = Arrays.copyOf(a, a.length);
+            final int[] next = Arrays.copyOf(a, a.length);
+            final int maxSupportedValue = n-1;
             int i=next.length-1;
-            int maxSupportedValue = n-1;
 
-            while( i>=0 && next[i] == maxSupportedValue) {
+            while( i>=0 && a[i] == maxSupportedValue) {
                 i--;
             }
             if(i==-1) {
                 return new int[]{};
             }
 
-            int fillValue = next[i]+1;
+            int fillValue = a[i]+1;
 
             for(int k=i; k<next.length; k++) {
                 next[k] = fillValue;

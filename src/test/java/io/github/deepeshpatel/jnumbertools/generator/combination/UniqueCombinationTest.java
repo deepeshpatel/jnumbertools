@@ -18,8 +18,8 @@ public class UniqueCombinationTest {
         for(int n=0; n<=4; n++) {
             List<String> input = Collections.nCopies(n, "A");
             for(int r=0; r<=n; r++) {
-                long count = tools.combinations().of(input,r)
-                        .unique().stream().count();
+                long count = tools.combinations().unique(r, input)
+                        .lexOrder().stream().count();
                 Assert.assertEquals(calculator.nCr(n,r).longValue(), count);
             }
         }
@@ -27,56 +27,35 @@ public class UniqueCombinationTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        var input = List.of("A", "B", "C");
-        var iterable = tools.combinations().of(input,2).unique();
+        var iterable = tools.combinations().unique(2, "A", "B", "C").lexOrder();
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
-
         Assert.assertEquals(lists1, lists2);
     }
 
     @Test
     public void  shouldGenerateCombinationsInInputOrder() {
-
+        var elements = List.of("Red", "Green", "Blue");
         String expected = "[[Red, Green], [Red, Blue], [Green, Blue]]";
-        var input = List.of("Red", "Green", "Blue");
-
-        String output = tools.combinations()
-                .of(input,2)
-                .unique()
-                .stream()
-                .toList().toString();
-
-        assertEquals(expected, output);
+        assertEquals(expected, output(2, elements));
     }
 
     @Test
     public void shouldReturnEmptyListForSizeEqualsZero() {
-
-        String output = tools.combinations()
-                .of(List.of("A","B"),0)
-                .unique()
-                .stream()
-                .toList().toString();
-
-        assertEquals("[[]]", output);
+        assertEquals("[[]]", output(0, List.of("A")));
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForSizeGreaterThanN() {
-
-        tools.combinations().of(List.of("A","B"),3)
-                .unique();
+        output(3, List.of("A"));
     }
 
     @Test
     public void  shouldGenerateEmptyListForNullInput() {
-        String output = tools.combinations()
-                .of(Collections.emptyList(),0)
-                .unique()
-                .stream()
-                .toList().toString();
+        assertEquals("[[]]", output(0,Collections.emptyList()));
+    }
 
-        assertEquals("[[]]", output);
+    private String output(int size, List<String> elements) {
+        return tools.combinations().unique(size, elements).lexOrder().stream().toList().toString();
     }
 }

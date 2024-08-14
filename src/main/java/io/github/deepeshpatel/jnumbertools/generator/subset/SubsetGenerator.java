@@ -8,7 +8,6 @@ package io.github.deepeshpatel.jnumbertools.generator.subset;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombination;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -58,7 +57,7 @@ public class SubsetGenerator<T> extends AbstractGenerator<T> {
      * @param fromSize minimum-size(inclusive) of subset.
      * @param toSize max-size(inclusive) of subset. toSize must be &gt;= fromSize
      */
-    public SubsetGenerator(Collection<T> data, int fromSize, int toSize){
+    public SubsetGenerator(List<T> data, int fromSize, int toSize){
         super(data);
         this.fromSize = fromSize;
         this.toSize = toSize;
@@ -75,7 +74,7 @@ public class SubsetGenerator<T> extends AbstractGenerator<T> {
 
         public OnDemandIterator(int start) {
             this.start = start;
-            current = new UniqueCombination<>(seed,this.start).iterator();
+            current = new UniqueCombination<>(seedElements,this.start).iterator();
         }
 
         @Override
@@ -84,7 +83,7 @@ public class SubsetGenerator<T> extends AbstractGenerator<T> {
                 return true;
             }
             if(start < toSize) {
-                current = new UniqueCombination<>(seed,++start).iterator();
+                current = new UniqueCombination<>(seedElements,++start).iterator();
                 return hasNext();
             }
             return false;
@@ -98,9 +97,9 @@ public class SubsetGenerator<T> extends AbstractGenerator<T> {
 
     public static class Builder<T> {
 
-        private final Collection<T> data;
+        private final List<T> data;
 
-        public Builder(Collection<T> data) {
+        public Builder(List<T> data) {
             this.data = data;
         }
 

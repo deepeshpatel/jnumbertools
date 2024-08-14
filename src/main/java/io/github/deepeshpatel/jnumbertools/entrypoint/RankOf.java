@@ -9,6 +9,10 @@ public class RankOf {
 
     private final Calculator calculator;
 
+    public RankOf() {
+        this(new Calculator());
+    }
+
     public RankOf(Calculator calculator) {
         this.calculator = calculator;
     }
@@ -19,7 +23,18 @@ public class RankOf {
 
     public BigInteger uniquePermutation(int... permutation) {
         return PermutadicAlgorithms.rank(permutation.length, permutation);
-        //return FactoradicAlgorithms.rank(permutation);
+    }
+
+    public BigInteger repeatedPermutation(int base, Integer... permutation) {
+
+        BigInteger result = BigInteger.ZERO;
+        long power = 1;
+        for(int i=permutation.length-1; i >=0; i--) {
+            long placeValue = permutation[i] * power;
+            result = result.add(BigInteger.valueOf(placeValue));
+            power *= base;
+        }
+        return result;
     }
 
     public BigInteger uniqueCombination(int n, int... combination) {

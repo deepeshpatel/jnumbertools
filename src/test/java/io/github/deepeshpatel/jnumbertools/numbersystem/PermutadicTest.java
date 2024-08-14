@@ -44,28 +44,28 @@ public class PermutadicTest {
         int degree = 4;
         for(long i=0; i<1679; i++) {
             Permutadic permutadic1 = Permutadic.of(BigInteger.valueOf(i), size-degree);
-            int[] nthPermutation = permutadic1.toNthPermutation(4);
-            Permutadic permutadic2 = Permutadic.fromNthPermutation(nthPermutation,size-degree);
+            int[] mthPermutation = permutadic1.toMthPermutation(4);
+            Permutadic permutadic2 = Permutadic.fromMthPermutation(mthPermutation,size-degree);
             Assert.assertEquals(i, permutadic2.decimalValue.intValue());
         }
     }
 
     @Test
-    public void shouldResultInCorrectValueToAndFromNthPermutation(){
+    public void shouldResultInCorrectValueToAndFromMthPermutation(){
         int size = 6;
         int degree = 3;
         for(long i=0; i<calculator.nPr(size,degree).longValue(); i++) {
             Permutadic p1 = Permutadic.of(BigInteger.valueOf(i), size-degree);
-            int[] nth = p1.toNthPermutation(degree);
-            Permutadic p2 = Permutadic.fromNthPermutation(nth,size-degree);
+            int[] mth = p1.toMthPermutation(degree);
+            Permutadic p2 = Permutadic.fromMthPermutation(mth,size-degree);
             Assert.assertEquals(p1, p2);
             Assert.assertEquals(p1.hashCode(), p2.hashCode());
         }
     }
 
     @Test
-    public void shouldDecodeToNthPermutationForLastPossibleValue() {
-        int[] perm = Permutadic.of(BigInteger.valueOf(1679),8-4).toNthPermutation(4);
+    public void shouldDecodeToMthPermutationForLastPossibleValue() {
+        int[] perm = Permutadic.of(BigInteger.valueOf(1679),8-4).toMthPermutation(4);
         //8P4 = 1680 so 1679 should result is last possible permutation
         Assert.assertEquals("[7, 6, 5, 4]", Arrays.toString(perm));
     }
@@ -83,8 +83,8 @@ public class PermutadicTest {
         int degree = 4;
         for(long i=0; i< calculator.nPr(size,degree).longValue(); i++) {
             Permutadic permutadic = Permutadic.of(i,size-degree);
-            int[] ithPermutation = permutadic.toNthPermutation(4);
-            BigInteger rank = Permutadic.fromNthPermutation(ithPermutation, size-degree).decimalValue;
+            int[] ithPermutation = permutadic.toMthPermutation(4);
+            BigInteger rank = Permutadic.fromMthPermutation(ithPermutation, size-degree).decimalValue;
             Assert.assertEquals(i, rank.longValue());
         }
     }

@@ -4,6 +4,7 @@ import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
 
 public class CombinationExamples {
     public static void main(String[] args) {
@@ -11,8 +12,8 @@ public class CombinationExamples {
         printUniqueCombinationsOfNumbers();
         printUniqueCombinationsOfElements();
 
-        printNthUniqueCombinationOfNumbersInLexOrder();
-        printNthUniqueCombinationOfElementsInLexOrder();
+        printMthUniqueCombinationOfNumbersInLexOrder();
+        printMthUniqueCombinationOfElementsInLexOrder();
 
         printRepetitiveCombinationOfNumbersInLexOrder();
         printRepetitiveCombinationOfElementsInLexOrder();
@@ -28,44 +29,44 @@ public class CombinationExamples {
     static void printUniqueCombinationsOfNumbers() {
         System.out.println("\n*** Unique combination of 2 items out of 4 in lex order ***");
 
-        new JNumberTools().combinations().ofnCr(4,2)
-                .unique()
+        new JNumberTools().combinations().unique(4,2)
+                .lexOrder()
                 .forEach(System.out::println);
     }
 
     static void printUniqueCombinationsOfElements() {
         System.out.println("\n*** Unique combination of 2 elements out of given 4 elements in lex order ***");
 
-        new JNumberTools().combinations().of(2,"Red", "Green", "Blue","Yellow")
-                .unique()
+        new JNumberTools().combinations().unique(2,"Red", "Green", "Blue","Yellow")
+                .lexOrder()
                 .forEach(System.out::println);
     }
 
-    static void printNthUniqueCombinationOfNumbersInLexOrder() {
+    static void printMthUniqueCombinationOfNumbersInLexOrder() {
         System.out.println("\n*** Every 3rd Unique combination of 2 items out of 4 in lex order ***");
-        new JNumberTools().combinations().ofnCr(4,2)
-                .uniqueNth(3)
+        new JNumberTools().combinations().unique(4,2)
+                .lexOrderMth(3)
                 .forEach(System.out::println);
     }
 
-    static void printNthUniqueCombinationOfElementsInLexOrder() {
+    static void printMthUniqueCombinationOfElementsInLexOrder() {
         System.out.println("\n*** Every 3rd Unique combination of 2 elements out of given 4 elements in lex order ***");
-        new JNumberTools().combinations().of(2,"Red", "Green", "Blue","Yellow")
-                .uniqueNth(3)
+        new JNumberTools().combinations().unique(2,"Red", "Green", "Blue","Yellow")
+                .lexOrderMth(3)
                 .forEach(System.out::println);
     }
 
     static void printRepetitiveCombinationOfNumbersInLexOrder() {
         System.out.println("\n*** Repetitive combination of 2 items out of 3 in lex order ***");
-        new JNumberTools().combinations().ofnCr(3,2)
-                .repetitive()
+        new JNumberTools().combinations().repetitive(3,2)
+                .lexOrder()
                 .forEach(System.out::println);
     }
 
     static void printRepetitiveCombinationOfElementsInLexOrder() {
         System.out.println("\n*** Repetitive combination of 2 elements out of given 3 elements in lex order ***");
-        new JNumberTools().combinations().of(2, "Red", "Green", "Blue")
-                .repetitive()
+        new JNumberTools().combinations().repetitive(2, "Red", "Green", "Blue")
+                .lexOrder()
                 .forEach(System.out::println);
     }
 
@@ -73,9 +74,13 @@ public class CombinationExamples {
     static void printRepetitiveCombinationOfMultiset() {
         System.out.println("\n*** Repetitive combination of 3 elements from multiset of size 4 in lex order ***");
         System.out.println("count of Red=3, Green=2, Blue=1 and Yellow=1");
-        new JNumberTools().combinations().of(3,"Red", "Green", "Blue","Yellow")
+
+        var elements = List.of("Red", "Green", "Blue","Yellow");
+        int[] freq = new int[]{3,2,1,1};
+
+        new JNumberTools().combinations().multiset(elements, freq, 3)
                 //3 red ,2 green, 1 blue, 1 yellow
-                .repetitiveMultiset(new int[]{3,2,1,1})
+                .lexOrder()
                 .forEach(System.out::println);
     }
 
