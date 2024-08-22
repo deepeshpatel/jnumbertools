@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
+import static io.github.deepeshpatel.jnumbertools.TestBase.combination;
 import static org.junit.Assert.assertEquals;
 
 public class UniqueCombinationTest {
@@ -18,7 +18,7 @@ public class UniqueCombinationTest {
         for(int n=0; n<=4; n++) {
             List<String> input = Collections.nCopies(n, "A");
             for(int r=0; r<=n; r++) {
-                long count = tools.combinations().unique(r, input)
+                long count = combination.unique(r, input)
                         .lexOrder().stream().count();
                 Assert.assertEquals(calculator.nCr(n,r).longValue(), count);
             }
@@ -27,7 +27,7 @@ public class UniqueCombinationTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        var iterable = tools.combinations().unique(2, "A", "B", "C").lexOrder();
+        var iterable = combination.unique(2, "A", "B", "C").lexOrder();
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
         Assert.assertEquals(lists1, lists2);
@@ -56,6 +56,6 @@ public class UniqueCombinationTest {
     }
 
     private String output(int size, List<String> elements) {
-        return tools.combinations().unique(size, elements).lexOrder().stream().toList().toString();
+        return combination.unique(size, elements).lexOrder().stream().toList().toString();
     }
 }

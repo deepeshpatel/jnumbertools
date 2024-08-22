@@ -18,7 +18,7 @@ public class Calculator {
     private final List<BigInteger> fList = new ArrayList<>();
 
     public Calculator() {
-        this(100,100,100);
+        this(10,10,10);
     }
 
     public Calculator(int nCrCacheSize, int nPrCacheSize, int factorialCacheSize) {

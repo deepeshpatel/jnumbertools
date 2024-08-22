@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.NoSuchElementException;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
+import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
 import static org.junit.Assert.assertEquals;
 
 public class RepetitivePermutationTest {
@@ -16,7 +16,7 @@ public class RepetitivePermutationTest {
         for(int n=1; n<3; n++) {
             var input = Collections.nCopies(n, "A");
             for(int r=0; r<=n+1; r++) {
-                long size = tools.permutations().repetitive(r, input)
+                long size = permutation.repetitive(r, input)
                         .lexOrder()
                         .stream().count();
 
@@ -27,7 +27,7 @@ public class RepetitivePermutationTest {
 
     @Test (expected = NoSuchElementException.class)
     public void shouldThrowExpIfIterateAfterLastElement(){
-        var iterator = tools.permutations().repetitive(1,"A")
+        var iterator = permutation.repetitive(1,"A")
                 .lexOrder().iterator();
 
             iterator.next();
@@ -36,7 +36,7 @@ public class RepetitivePermutationTest {
 
     @Test
     public void shouldReturnSameResultViaDifferentIteratorObjects(){
-        RepetitivePermutation<String> iterable = tools.permutations()
+        RepetitivePermutation<String> iterable = permutation
                 .repetitive(2,"A", "B", "C")
                 .lexOrder();
         var lists1 = iterable.stream().toList();
@@ -49,7 +49,7 @@ public class RepetitivePermutationTest {
         String expected = "[[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1], " +
                 "[1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]]";
 
-        String actual   = tools.permutations().repetitive(3,0,1)
+        String actual   = permutation.repetitive(3,0,1)
                 .lexOrder()
                 .stream().toList().toString();
 
@@ -60,7 +60,7 @@ public class RepetitivePermutationTest {
     public void shouldGenerateRepetitivePermutations() {
         String expected = "[[A, A], [A, B], [A, C], [B, A], [B, B], [B, C], [C, A], [C, B], [C, C]]";
 
-        String output = tools.permutations().repetitive(2, "A", "B", "C")
+        String output = permutation.repetitive(2, "A", "B", "C")
                 .lexOrder()
                 .stream().toList().toString();
 

@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
+import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
 
 public class CommonTest {
 
@@ -17,17 +17,17 @@ public class CommonTest {
             for(int increment = 1; increment<=10; increment++) {
 
                 var elements = IntStream.range(0, size).boxed().toList();
-                int freq[] = new int[elements.size()];
+                int[] freq = new int[elements.size()];
                 Arrays.fill(freq,1);
 
-                String uniquePermutationValues = tools.permutations().unique(size).
+                String uniquePermutationValues = permutation.unique(size).
                         lexOrderMth(increment).stream().toList().toString();
 
-                String multisetPermutationValues = tools.permutations().multiset(elements, freq)
+                String multisetPermutationValues = permutation.multiset(elements, freq)
                         .lexOrderMth(increment)
                         .stream().toList().toString();
 
-                String kPermutationValues = tools.permutations().nPr(size,size)
+                String kPermutationValues = permutation.nPr(size,size)
                         .lexOrderMth(increment)
                         .stream().toList().toString();
 
@@ -43,17 +43,17 @@ public class CommonTest {
         for(int size=1; size<=5; size++) {
 
             var elements = IntStream.range(0, size).boxed().toList();
-            int freq[] = new int[elements.size()];
+            int[] freq = new int[elements.size()];
             Arrays.fill(freq,1);
 
-                String uniquePermutationValues = tools.permutations().unique(size).
+                String uniquePermutationValues = permutation.unique(size).
                         lexOrder().stream().toList().toString();
 
-                String multisetPermutationValues = tools.permutations().multiset(elements, freq)
+                String multisetPermutationValues = permutation.multiset(elements, freq)
                         .lexOrder()
                         .stream().toList().toString();
 
-                String kPermutationValues = tools.permutations().nPr(size, size)
+                String kPermutationValues = permutation.nPr(size, size)
                         .lexOrder()
                         .stream().toList().toString();
 
@@ -68,28 +68,28 @@ public class CommonTest {
             int increment = 1;
 
             var elements = IntStream.range(0, size).boxed().toList();
-            int freq[] = new int[elements.size()];
+            int[] freq = new int[elements.size()];
             Arrays.fill(freq,1);
 
-            String uniquePermutationMth = tools.permutations().unique(size).
+            String uniquePermutationMth = permutation.unique(size).
                     lexOrderMth(increment).stream().toList().toString();
 
-            String multisetPermutationMth = tools.permutations().multiset(elements, freq)
+            String multisetPermutationMth = permutation.multiset(elements, freq)
                     .lexOrderMth(increment)
                     .stream().toList().toString();
 
-            String kPermutationMth = tools.permutations().nPr(size, size)
+            String kPermutationMth = permutation.nPr(size, size)
                     .lexOrderMth(increment)
                     .stream().toList().toString();
 
-            String uniquePermutation = tools.permutations().unique(size).
+            String uniquePermutation = permutation.unique(size).
                     lexOrderMth(increment).stream().toList().toString();
 
-            String multisetPermutation = tools.permutations().multiset(elements, freq)
+            String multisetPermutation = permutation.multiset(elements, freq)
                     .lexOrder()
                     .stream().toList().toString();
 
-            String kPermutation = tools.permutations().nPr(size, size)
+            String kPermutation = permutation.nPr(size, size)
                     .lexOrder()
                     .stream().toList().toString();
 

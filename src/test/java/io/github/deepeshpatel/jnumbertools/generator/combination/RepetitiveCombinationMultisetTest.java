@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
+import static io.github.deepeshpatel.jnumbertools.TestBase.combination;
 
 public class RepetitiveCombinationMultisetTest {
 
@@ -20,7 +20,7 @@ public class RepetitiveCombinationMultisetTest {
         var elements = List.of("A","B","C");
         int[] frequencies = new int[] {2,3,2};
 
-        RepetitiveCombinationMultiset<String> iterable = tools.combinations()
+        RepetitiveCombinationMultiset<String> iterable = combination
                 .multiset(elements, frequencies, 2)
                 .lexOrder();
 
@@ -66,7 +66,7 @@ public class RepetitiveCombinationMultisetTest {
     }
 
     private String output(List<String> elements, int[] frequencies, int size) {
-        return tools.combinations().multiset(elements, frequencies, size)
+        return combination.multiset(elements, frequencies, size)
                 .lexOrder()
                 .stream().toList().toString();
     }

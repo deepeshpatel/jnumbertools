@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
+import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
 import static io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombinationMthTest.everyMthValue;
 import static org.junit.Assert.assertEquals;
 
@@ -19,7 +19,7 @@ public class UniquePermutationMthTest {
         for(int n=0; n<6; n++) {
             var input = Collections.nCopies(n, "A");
             for(int increment=1; increment<=4; increment++) {
-                long size = tools.permutations()
+                long size = permutation
                         .unique(input)
                         .lexOrderMth(increment)
                         .stream().count();
@@ -31,7 +31,7 @@ public class UniquePermutationMthTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        UniquePermutationsMth<String> iterable = tools.permutations().unique("A", "B", "C").lexOrderMth(3);
+        UniquePermutationsMth<String> iterable = permutation.unique("A", "B", "C").lexOrderMth(3);
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
         Assert.assertEquals(lists1, lists2);
@@ -78,7 +78,7 @@ public class UniquePermutationMthTest {
                 "[12, 6, 3, 5, 4, 8, 1, 7, 0, 2, 9, 10, 11]"
         };
 
-        var actual = tools.permutations().unique(input)
+        var actual = permutation.unique(input)
                 .lexOrderMth(1000_000_000)// jump to 1 billionth permutation
                 .stream().toList();
 
@@ -98,20 +98,20 @@ public class UniquePermutationMthTest {
     }
 
     private String getResultViaDirectIncrement(List<String> elements, int increment) {
-        return tools.permutations().unique(elements).lexOrderMth(increment).stream().toList().toString();
+        return permutation.unique(elements).lexOrderMth(increment).stream().toList().toString();
     }
 
     private String getExpectedResultViaOneByOneIteration(List<String> input, int increment) {
-        var stream = tools.permutations().unique(input).lexOrder().stream();
+        var stream = permutation.unique(input).lexOrder().stream();
         return everyMthValue(stream, increment).toString();
     }
 
     private String output(int increment, Object... elements) {
-          return tools.permutations().unique(elements).lexOrderMth(increment).stream().toList().toString();
+          return permutation.unique(elements).lexOrderMth(increment).stream().toList().toString();
     }
 
     private String output(int increment,List<?> elements) {
-        return tools.permutations().unique(elements).lexOrderMth(increment).stream().toList().toString();
+        return permutation.unique(elements).lexOrderMth(increment).stream().toList().toString();
     }
 }
 

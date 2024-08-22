@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
+import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
 
 
 public class KPermutationLexOrderTest {
@@ -18,7 +18,7 @@ public class KPermutationLexOrderTest {
         for(int n=0; n<=4; n++) {
             var input = Collections.nCopies(n,"A");
             for (int k = 0; k < n; k++) {
-                long size = tools.permutations().nPr(k,input)
+                long size = permutation.nPr(k,input)
                         .lexOrder()
                         .stream().count();
                 Assert.assertEquals(calculator.nPr(n, k).longValue(), size);
@@ -28,7 +28,7 @@ public class KPermutationLexOrderTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        var iterable = tools.permutations().nPr(2,"A", "B", "C").lexOrder();
+        var iterable = permutation.nPr(2,"A", "B", "C").lexOrder();
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
         Assert.assertEquals(lists1, lists2);
@@ -38,13 +38,13 @@ public class KPermutationLexOrderTest {
     public void shouldGeneratedOutputInLexOrder(){
         int k= 4;
         var input = List.of("A","B","C","D","E","F","G","H");
-        String output = tools.permutations().nPr(k,input)
+        String output = permutation.nPr(k,input)
                 .lexOrder()
                 .stream()
                 .toList().toString();
 
         var sorted = new ArrayList<String>();
-        tools.permutations().nPr(k, input)
+        permutation.nPr(k, input)
                 .combinationOrder()
                 .stream()
                 .forEach(e-> sorted.add(e.toString()));

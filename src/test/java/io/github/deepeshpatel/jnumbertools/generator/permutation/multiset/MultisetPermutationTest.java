@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
+import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
 
 public class MultisetPermutationTest {
 
@@ -18,7 +18,7 @@ public class MultisetPermutationTest {
         for(int n=1; n<=6; n++){
             var input = Collections.nCopies(n, "A");
             int[] multisetFreqArray =getRandomMultisetFreqArray(random, input.size());
-            long count = tools.permutations().multiset(input, multisetFreqArray)
+            long count = permutation.multiset(input, multisetFreqArray)
                     .lexOrder().stream().count();
 
             int sum = Arrays.stream(multisetFreqArray).reduce(0, Integer::sum);
@@ -37,7 +37,7 @@ public class MultisetPermutationTest {
         var elements = List.of("A", "B", "C");
         int[] frequencies = new int[]{3,2,2};
 
-        MultisetPermutation<String> iterable = tools.permutations().multiset(elements, frequencies)
+        MultisetPermutation<String> iterable = permutation.multiset(elements, frequencies)
                 .lexOrder();
 
         var lists1 = iterable.stream().toList();
@@ -71,7 +71,7 @@ public class MultisetPermutationTest {
 
         var elements = List.of("Red", "Green", "Blue");
         int[] frequencies = new int[]{2,1,1};
-        String output = tools.permutations().multiset(elements, frequencies)
+        String output = permutation.multiset(elements, frequencies)
                 .lexOrder()
                 .stream()
                 .toList().toString();
@@ -88,7 +88,7 @@ public class MultisetPermutationTest {
         var elements = List.of("A", "B", "C");
         int[] frequencies = new int[]{2,1,1};
 
-        String output = tools.permutations().multiset(elements,frequencies)
+        String output = permutation.multiset(elements,frequencies)
                 .lexOrder()
                 .stream()
                 .toList().toString();
@@ -100,7 +100,7 @@ public class MultisetPermutationTest {
     public void shouldThrowExceptionWhenMultisetFreqArrayIsNull() {
         var elements = List.of("A", "B", "C");
 
-        String output = tools.permutations().multiset(elements, null)
+        String output = permutation.multiset(elements, null)
                 .lexOrder()
                 .stream()
                 .toList().toString();

@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
+import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
 import static org.junit.Assert.assertEquals;
 
 public class UniquePermutationTest {
@@ -17,7 +17,7 @@ public class UniquePermutationTest {
     public void assertCount(){
         for(int n=0; n<6; n++) {
             var input = Collections.nCopies(n, "A");
-            long size = tools.permutations()
+            long size = permutation
                     .unique(input)
                     .lexOrder()
                     .stream().count();
@@ -27,7 +27,7 @@ public class UniquePermutationTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        UniquePermutation<String> iterable = tools.permutations().unique("A", "B", "C").lexOrder();
+        UniquePermutation<String> iterable = permutation.unique("A", "B", "C").lexOrder();
 
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
@@ -63,14 +63,14 @@ public class UniquePermutationTest {
     }
 
     private String output(List<String> elements) {
-        return tools.permutations()
+        return permutation
                 .unique(elements)
                 .lexOrder()
                 .stream().toList().toString();
     }
 
     private String output(Object... elements) {
-        return tools.permutations()
+        return permutation
                 .unique(elements)
                 .lexOrder()
                 .stream().toList().toString();

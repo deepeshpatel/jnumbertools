@@ -1,38 +1,37 @@
 package io.github.deepeshpatel.jnumbertools.generator.product;
 
+import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Combinations;
 import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Product<T> {
+public class ProductBuilder<T> {
 
-    List<List<List<T>>> allLists = new LinkedList<>();
+    private final List<List<List<T>>> allLists = new LinkedList<>();
+    private final Calculator calculator;
 
-    private Product(List<List<T>> list) {
-        allLists.add(list);
+    public ProductBuilder(int n, List<T> data, Calculator calculator) {
+        this.calculator = calculator;
+        List<List<T>> first = new Combinations(calculator).unique(n,data).lexOrder().stream().toList();
+        allLists.add(first);
     }
 
-    public static <T> Product<T> of(int n, List<T> data) {
-        var first = new JNumberTools().combinations().unique(n,data).lexOrder().stream().toList();
-        return new Product<>(first);
-    }
-
-    public Product<T> andDistinct(int n, List<T> data) {
-        var lists = new JNumberTools().combinations().unique(n, data).lexOrder().stream().toList();
+    public ProductBuilder<T> andDistinct(int n, List<T> data) {
+        var lists = new Combinations(calculator).unique(n, data).lexOrder().stream().toList();
         allLists.add(lists);
         return this;
     }
 
-    public Product<T> andMultiSelect(int n, List<T> data) {
-        var lists = new JNumberTools().combinations().repetitive(n, data).lexOrder().stream().toList();
+    public ProductBuilder<T> andMultiSelect(int n, List<T> data) {
+        var lists = new Combinations(calculator).repetitive(n, data).lexOrder().stream().toList();
         allLists.add(lists);
         return this;
     }
 
-
-    public Product<T> andInRange(int a, int b, List<T> data) {
+    public ProductBuilder<T> andInRange(int a, int b, List<T> data) {
         var lists = JNumberTools.subsets()
                 .of(data).inRange(a,b)
                 .stream().toList();

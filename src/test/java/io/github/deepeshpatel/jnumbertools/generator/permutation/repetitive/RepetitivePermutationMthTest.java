@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
+import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
 import static org.junit.Assert.assertEquals;
 
 public class RepetitivePermutationMthTest {
@@ -17,7 +17,7 @@ public class RepetitivePermutationMthTest {
         for(int n=1; n<=5; n++) {
             List<String> input = Collections.nCopies(n, "A");
             for(int size=0; size<=3; size++){
-                long count = tools.permutations().repetitive(size, input)
+                long count = permutation.repetitive(size, input)
                         .lexOrderMth(increment)
                         .stream().count();
                 double expected = Math.ceil(Math.pow(n,size)/increment);
@@ -28,7 +28,7 @@ public class RepetitivePermutationMthTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        RepetitivePermutationMth<String> iterable = tools.permutations()
+        RepetitivePermutationMth<String> iterable = permutation
                 .repetitive(2,"A", "B", "C")
                 .lexOrderMth(2);
         var lists1 = iterable.stream().toList();
@@ -39,7 +39,7 @@ public class RepetitivePermutationMthTest {
     @Test
     public void shouldGenerateAllPermutationsOf2Values() {
         String expected = "[[0, 0, 0], [0, 1, 0], [1, 0, 0], [1, 1, 0]]";
-        String actual   = tools.permutations().repetitive(3, 0,1)
+        String actual   = permutation.repetitive(3, 0,1)
                 .lexOrderMth(2)
                 .stream().toList().toString();
 
@@ -50,7 +50,7 @@ public class RepetitivePermutationMthTest {
     public void shouldGenerateRepetitiveMthPermutations() {
         String expected = "[[A, A], [A, C], [B, B], [C, A], [C, C]]";
 
-        var output = tools.permutations().repetitive(2,"A", "B", "C")
+        var output = permutation.repetitive(2,"A", "B", "C")
                 .lexOrderMth(2)
                 .stream()
                 .toList();

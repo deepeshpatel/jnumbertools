@@ -21,15 +21,15 @@ public class CombinationExamples {
         printRepetitiveCombinationOfMultiset();
 
         printRankOfUniqueCombination();
-        printUniqueCombinationForGivenRank();
 
+        printUniqueCombinationForGivenRank();
 
     }
 
     static void printUniqueCombinationsOfNumbers() {
         System.out.println("\n*** Unique combination of 2 items out of 4 in lex order ***");
 
-        new JNumberTools().combinations().unique(4,2)
+        JNumberTools.combinations().unique(4,2)
                 .lexOrder()
                 .forEach(System.out::println);
     }
@@ -37,35 +37,35 @@ public class CombinationExamples {
     static void printUniqueCombinationsOfElements() {
         System.out.println("\n*** Unique combination of 2 elements out of given 4 elements in lex order ***");
 
-        new JNumberTools().combinations().unique(2,"Red", "Green", "Blue","Yellow")
+        JNumberTools.combinations().unique(2,"Red", "Green", "Blue","Yellow")
                 .lexOrder()
                 .forEach(System.out::println);
     }
 
     static void printMthUniqueCombinationOfNumbersInLexOrder() {
         System.out.println("\n*** Every 3rd Unique combination of 2 items out of 4 in lex order ***");
-        new JNumberTools().combinations().unique(4,2)
+        JNumberTools.combinations().unique(4,2)
                 .lexOrderMth(3)
                 .forEach(System.out::println);
     }
 
     static void printMthUniqueCombinationOfElementsInLexOrder() {
         System.out.println("\n*** Every 3rd Unique combination of 2 elements out of given 4 elements in lex order ***");
-        new JNumberTools().combinations().unique(2,"Red", "Green", "Blue","Yellow")
+        JNumberTools.combinations().unique(2,"Red", "Green", "Blue","Yellow")
                 .lexOrderMth(3)
                 .forEach(System.out::println);
     }
 
     static void printRepetitiveCombinationOfNumbersInLexOrder() {
         System.out.println("\n*** Repetitive combination of 2 items out of 3 in lex order ***");
-        new JNumberTools().combinations().repetitive(3,2)
+        JNumberTools.combinations().repetitive(3,2)
                 .lexOrder()
                 .forEach(System.out::println);
     }
 
     static void printRepetitiveCombinationOfElementsInLexOrder() {
         System.out.println("\n*** Repetitive combination of 2 elements out of given 3 elements in lex order ***");
-        new JNumberTools().combinations().repetitive(2, "Red", "Green", "Blue")
+        JNumberTools.combinations().repetitive(2, "Red", "Green", "Blue")
                 .lexOrder()
                 .forEach(System.out::println);
     }
@@ -78,7 +78,7 @@ public class CombinationExamples {
         var elements = List.of("Red", "Green", "Blue","Yellow");
         int[] freq = new int[]{3,2,1,1};
 
-        new JNumberTools().combinations().multiset(elements, freq, 3)
+        JNumberTools.combinations().multiset(elements, freq, 3)
                 //3 red ,2 green, 1 blue, 1 yellow
                 .lexOrder()
                 .forEach(System.out::println);
@@ -88,7 +88,7 @@ public class CombinationExamples {
         System.out.println("\n*** Rank of given combination  ***");
         int[] combination = new int[]{0,1,4,6,8,9,10,11,13,14,17};
         int n = 20;
-        BigInteger rank = new JNumberTools().rankOf().uniqueCombination(20,combination);
+        BigInteger rank = JNumberTools.rankOf().uniqueCombination(20,combination);
         System.out.printf("Rank of " + Arrays.toString(combination) + ", selected from %d items is %d\n", n,rank);
     }
 
@@ -97,7 +97,7 @@ public class CombinationExamples {
         int n = 20;
         int r = 11;
         BigInteger rank = BigInteger.valueOf(41559);
-        int[] combination = new JNumberTools().unRankingOf().uniqueCombination(rank,n, r);
+        int[] combination = JNumberTools.unRankingOf().uniqueCombination(rank,n, r);
         System.out.printf("%dth combination of %d items selected from %d items is " + Arrays.toString(combination),rank, r,n);
     }
 }

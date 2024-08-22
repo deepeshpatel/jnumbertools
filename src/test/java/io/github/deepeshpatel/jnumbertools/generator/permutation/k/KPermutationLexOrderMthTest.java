@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
+import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
 import static io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombinationMthTest.everyMthValue;
 
 public class KPermutationLexOrderMthTest {
@@ -20,7 +20,7 @@ public class KPermutationLexOrderMthTest {
         for(int n=0; n<=4; n++) {
             var input = Collections.nCopies(n,"A");
             for (int k = 0; k < n; k++) {
-                long size = tools.permutations().nPr(k, input)
+                long size = permutation.nPr(k, input)
                         .lexOrderMth(increment)
                         .stream().count();
 
@@ -32,7 +32,7 @@ public class KPermutationLexOrderMthTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        var iterable = tools.permutations().nPr(2,"A", "B", "C")
+        var iterable = permutation.nPr(2,"A", "B", "C")
                 .lexOrderMth(2);
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
@@ -59,10 +59,10 @@ public class KPermutationLexOrderMthTest {
         BigInteger increment = new BigInteger("100000000000000000000000000000");
         BigInteger expectedRank = BigInteger.ZERO;
 
-        var permutations = tools.permutations().nPr(40,20)
+        var permutations = permutation.nPr(40,20)
                 .lexOrderMth(increment)
                 .stream().toList();
-        
+
 
         for(List<Integer> permutation: permutations) {
             int[] p = permutation.stream().mapToInt(Integer::intValue).toArray();
@@ -73,13 +73,13 @@ public class KPermutationLexOrderMthTest {
     }
 
     private String getResultViaDirectIncrement(List<String> input, int k, int increment) {
-        return tools.permutations().nPr(k, input)
+        return permutation.nPr(k, input)
                 .lexOrderMth(increment)
                 .stream().toList().toString();
     }
 
     private String getExpectedResultViaOneByOneIteration(List<String> input, int k, int increment) {
-        var stream = tools.permutations().nPr(k, input)
+        var stream = permutation.nPr(k, input)
                 .lexOrder().stream();
 
         return everyMthValue(stream, increment).toString();

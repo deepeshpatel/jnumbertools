@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.tools;
+import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
 import static io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombinationMthTest.everyMthValue;
 
 public class MultisetPermutationMthTest {
@@ -21,7 +21,7 @@ public class MultisetPermutationMthTest {
         var elements = List.of("A", "B", "C");
         int[] frequencies = new int[]{-1,3,2};
 
-        tools.permutations().multiset(elements, frequencies)
+        permutation.multiset(elements, frequencies)
                 .lexOrderMth(5);
     }
 
@@ -31,7 +31,7 @@ public class MultisetPermutationMthTest {
         var elements = List.of("A", "B", "C");
         int[] frequencies = new int[]{3,2,3};
 
-        var iterable = tools.permutations()
+        var iterable = permutation
                 .multiset(elements, frequencies)
                 .lexOrderMth(3);
         var lists1 = iterable.stream().toList();
@@ -51,13 +51,13 @@ public class MultisetPermutationMthTest {
     }
 
     private String getResultViaDirectIncrement(List<String> input, int increment, int[] freqArray) {
-        return tools.permutations().multiset(input, freqArray)
+        return permutation.multiset(input, freqArray)
                 .lexOrderMth(increment)
                 .stream().toList().toString();
     }
 
     private String getExpectedResultViaOneByOneIteration(List<String> input, int increment, int[] freqArray) {
-        var stream = tools.permutations().multiset(input, freqArray).lexOrder().stream();
+        var stream = permutation.multiset(input, freqArray).lexOrder().stream();
         return everyMthValue(stream, increment).toString();
     }
 }

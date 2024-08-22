@@ -12,6 +12,7 @@ public class ProductTest {
 
     @Test
     public void shouldGenerateCorrectNumOfCombinations() {
+
         var pizzaBase = List.of("Small ","Medium","Large");
         var sauce = List.of( "Tomato Ketchup","White Sauce","Green Chutney");
         var cheese = List.of( "Ricotta","Mozzarella","Cheddar");
@@ -33,19 +34,17 @@ public class ProductTest {
         }
 
         var list = JNumberTools
-                .productOf(numPizza, pizzaBase)
+                .product().of(numPizza, pizzaBase)
                 .andDistinct(numCheese, cheese)
                 .andMultiSelect(numSauce, sauce)
                 .andInRange(numMimToppings,numMaxToppings,toppings)
                 .build();
-
 
         int expected = nCrPizza * nCrSauce * nCrCheese * nCrToppings;
         Assert.assertEquals(expected, list.size());
 
         String lastRow= "[Large, Mozzarella, Cheddar, Green Chutney, Green Chutney, tomato, capsicum, onion, paneer, corn]";
         Assert.assertEquals(lastRow, list.get(list.size()-1).toString());
-
     }
 
 }

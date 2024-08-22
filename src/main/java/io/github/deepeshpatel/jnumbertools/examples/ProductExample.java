@@ -24,7 +24,7 @@ public class ProductExample {
         var toppings = List.of("Tomato","Capsicum");
 
         var list = JNumberTools
-                .productOf(1, pizzaBase)
+                .product().of(1, pizzaBase)
                 .andDistinct(2, cheese)
                 .andMultiSelect(2, sauce)
                 .andInRange(1,2,toppings)
