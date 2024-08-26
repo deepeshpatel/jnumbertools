@@ -19,7 +19,7 @@ public class MultisetPermutationMthTest {
     public void shouldThrowExceptionForNegativeIncrementValues(){
 
         var elements = List.of("A", "B", "C");
-        int[] frequencies = new int[]{-1,3,2};
+        int[] frequencies = {-1,3,2};
 
         permutation.multiset(elements, frequencies)
                 .lexOrderMth(5);
@@ -29,7 +29,7 @@ public class MultisetPermutationMthTest {
     public void shouldReturnSameResultForDifferentIteratorObjects() {
 
         var elements = List.of("A", "B", "C");
-        int[] frequencies = new int[]{3,2,3};
+        int[] frequencies = {3,2,3};
 
         var iterable = permutation
                 .multiset(elements, frequencies)
@@ -42,7 +42,7 @@ public class MultisetPermutationMthTest {
     @Test
     public void shouldGenerateCorrectMthMultisetPermutation() {
         List<String> input = List.of("A","B","C");
-        int[] freqArray = new int[]{3, 2, 3};
+        int[] freqArray = {3, 2, 3};
         for(int increment = 1; increment<=24; increment++) {
             String output = getResultViaDirectIncrement(input,increment, freqArray);
             String expected = getExpectedResultViaOneByOneIteration(input, increment, freqArray);

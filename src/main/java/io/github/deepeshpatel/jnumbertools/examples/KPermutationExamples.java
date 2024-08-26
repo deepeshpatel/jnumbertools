@@ -98,7 +98,7 @@ class KPermutationExamples {
     static void printRankOfKPermutation() {
         System.out.println("\n*** Print the rank of very large 20-Permutation of 40 items *** ");
 
-        int[] permutation = new int[] {23, 34, 12, 11, 10, 28, 1, 8, 18, 3, 9, 30, 24, 0, 6, 20, 26, 27, 37, 35};
+        int[] permutation = {23, 34, 12, 11, 10, 28, 1, 8, 18, 3, 9, 30, 24, 0, 6, 20, 26, 27, 37, 35};
 
         BigInteger rank = JNumberTools
                 .rankOf()

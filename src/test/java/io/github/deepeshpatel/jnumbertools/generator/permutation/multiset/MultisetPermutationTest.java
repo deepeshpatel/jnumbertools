@@ -35,7 +35,7 @@ public class MultisetPermutationTest {
     public void shouldReturnSameResultForDifferentIteratorObjects(){
 
         var elements = List.of("A", "B", "C");
-        int[] frequencies = new int[]{3,2,2};
+        int[] frequencies = {3,2,2};
 
         MultisetPermutation<String> iterable = permutation.multiset(elements, frequencies)
                 .lexOrder();
@@ -70,7 +70,7 @@ public class MultisetPermutationTest {
                 "[Blue, Green, Red, Red]]";
 
         var elements = List.of("Red", "Green", "Blue");
-        int[] frequencies = new int[]{2,1,1};
+        int[] frequencies = {2,1,1};
         String output = permutation.multiset(elements, frequencies)
                 .lexOrder()
                 .stream()
@@ -86,7 +86,7 @@ public class MultisetPermutationTest {
                 "[B, A, C, A], [B, C, A, A], [C, A, A, B], [C, A, B, A], [C, B, A, A]]";
 
         var elements = List.of("A", "B", "C");
-        int[] frequencies = new int[]{2,1,1};
+        int[] frequencies = {2,1,1};
 
         String output = permutation.multiset(elements,frequencies)
                 .lexOrder()

@@ -76,7 +76,7 @@ public class CombinationExamples {
         System.out.println("count of Red=3, Green=2, Blue=1 and Yellow=1");
 
         var elements = List.of("Red", "Green", "Blue","Yellow");
-        int[] freq = new int[]{3,2,1,1};
+        int[] freq = {3,2,1,1};
 
         JNumberTools.combinations().multiset(elements, freq, 3)
                 //3 red ,2 green, 1 blue, 1 yellow
@@ -86,7 +86,7 @@ public class CombinationExamples {
 
     static void printRankOfUniqueCombination() {
         System.out.println("\n*** Rank of given combination  ***");
-        int[] combination = new int[]{0,1,4,6,8,9,10,11,13,14,17};
+        int[] combination = {0,1,4,6,8,9,10,11,13,14,17};
         int n = 20;
         BigInteger rank = JNumberTools.rankOf().uniqueCombination(20,combination);
         System.out.printf("Rank of " + Arrays.toString(combination) + ", selected from %d items is %d\n", n,rank);

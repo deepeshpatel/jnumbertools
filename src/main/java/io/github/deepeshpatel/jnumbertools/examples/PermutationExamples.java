@@ -92,7 +92,7 @@ public class PermutationExamples {
     static void printMultisetPermutationOfNumbersInLexOrder() {
         System.out.println("\n*** Multiset permutation of 3 items with count 1,2 & 2 in lex order ***");
         var elements = List.of(1,2,3);
-        int[] frequencies = new int[] {1,2,2};
+        int[] frequencies = {1,2,2};
         JNumberTools.permutations().multiset(elements, frequencies)
                 .lexOrder()
                 .forEach(System.out::println);
@@ -103,7 +103,7 @@ public class PermutationExamples {
         System.out.println("count of Red=1, Green=2 and Blue=2");
 
         var elements = List.of("Red","Green","Blue");
-        int[] frequencies = new int[] {1,2,2};
+        int[] frequencies = {1,2,2};
         JNumberTools.permutations().multiset(elements, frequencies)
                 .lexOrder()
                 .forEach(System.out::println);
@@ -113,7 +113,7 @@ public class PermutationExamples {
         System.out.println("\n*** Every 5th multiset permutation of 3 items with count 1,2 & 2 in lex order ***");
 
         var elements = List.of(1,2,3);
-        int[] frequencies = new int[] {1,2,2};
+        int[] frequencies = {1,2,2};
 
         JNumberTools.permutations().multiset(elements, frequencies)
                 .lexOrderMth(5)
@@ -125,7 +125,7 @@ public class PermutationExamples {
         System.out.println("count of Red=1, Green=2 and Blue=2");
 
         var elements = List.of("Red","Green","Blue");
-        int[] frequencies = new int[] {1,2,2};
+        int[] frequencies = {1,2,2};
 
         JNumberTools.permutations().multiset(elements, frequencies)
                 .lexOrderMth(5)
@@ -134,7 +134,7 @@ public class PermutationExamples {
 
     static void printRankOfUniquePermutation() {
         System.out.println("\n*** Rank of given permutation *** ");
-        int[] permutation  = new int[] {7,6,5,3,4,1,2,0};
+        int[] permutation  = {7,6,5,3,4,1,2,0};
         BigInteger rank = JNumberTools.rankOf().uniquePermutation(permutation);
         System.out.println("Rank of permutation " + Arrays.toString(permutation) + " is " + rank);
     }

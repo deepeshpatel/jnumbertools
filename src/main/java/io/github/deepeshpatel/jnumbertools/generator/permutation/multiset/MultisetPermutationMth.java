@@ -19,7 +19,7 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
 /**
  * @author Deepesh Patel
  */
-public class MultisetPermutationMth<T>  extends AbstractGenerator<T> {
+public final class MultisetPermutationMth<T>  extends AbstractGenerator<T> {
 
     private final int[] multisetFreqArray;
     private final BigInteger possiblePermutations;

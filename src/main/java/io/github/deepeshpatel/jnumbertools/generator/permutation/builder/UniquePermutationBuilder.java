@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class UniquePermutationBuilder<T> {
+public final class UniquePermutationBuilder<T> {
 
     private final List<T> elements;
     private final Calculator calculator;

@@ -46,7 +46,7 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
  *
  * @author Deepesh Patel
  */
-public class UniqueCombination<T> extends AbstractGenerator<T> {
+public final class UniqueCombination<T> extends AbstractGenerator<T> {
 
     private final int r;
 

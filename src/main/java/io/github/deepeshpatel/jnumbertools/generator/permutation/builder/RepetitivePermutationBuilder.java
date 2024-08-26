@@ -5,7 +5,7 @@ import io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive.Repe
 
 import java.util.List;
 
-public class RepetitivePermutationBuilder<T> {
+public final class RepetitivePermutationBuilder<T> {
 
     private final int width;
     private final List<T> elements;

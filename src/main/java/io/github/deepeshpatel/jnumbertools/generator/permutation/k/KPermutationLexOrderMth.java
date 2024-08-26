@@ -37,7 +37,7 @@ import java.util.stream.IntStream;
  * </pre>
  * @author Deepesh Patel
  */
-public class KPermutationLexOrderMth<T> extends AbstractKPermutation<T>  {
+public final class KPermutationLexOrderMth<T> extends AbstractKPermutation<T>  {
 
     final int[] initialValue;
     final BigInteger nPk;

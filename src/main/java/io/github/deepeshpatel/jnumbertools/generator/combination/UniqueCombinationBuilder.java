@@ -5,7 +5,7 @@ import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
 import java.math.BigInteger;
 import java.util.List;
 
-public class UniqueCombinationBuilder<T> {
+public final class UniqueCombinationBuilder<T> {
 
     private final List<T> elements;
     private final int size;

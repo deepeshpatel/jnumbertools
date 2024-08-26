@@ -9,7 +9,7 @@ import io.github.deepeshpatel.jnumbertools.generator.permutation.k.KPermutationL
 import java.math.BigInteger;
 import java.util.List;
 
-public class KPermutationBuilder<T> {
+public final class KPermutationBuilder<T> {
 
     private final List<T> allElements;
     private final int r;

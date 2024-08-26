@@ -102,6 +102,5 @@ public class UniqueCombinationMth<T> extends AbstractGenerator<T> {
             rank = rank.add(increment);
             return indicesToValues(result, seedElements);
         }
-
     }
 }

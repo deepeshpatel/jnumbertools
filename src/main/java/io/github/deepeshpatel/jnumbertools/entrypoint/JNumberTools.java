@@ -5,7 +5,7 @@
 
 package io.github.deepeshpatel.jnumbertools.entrypoint;
 
-public class JNumberTools {
+public final class JNumberTools {
 
     private JNumberTools() {
     }
@@ -29,10 +29,6 @@ public class JNumberTools {
     public static UnrankOf unRankingOf() {
         return new UnrankOf(new Calculator());
     }
-
-//    public static <T> ProductBuilder<T> productOf(int n, List<T> data ) {
-//            return ProductBuilder.of(n, data, new Calculator());
-//    }
 
     public static Product product() {
         return new Product(new Calculator());

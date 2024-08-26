@@ -2,7 +2,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination;
 
 import java.util.List;
 
-public class RepetitiveCombinationBuilder<T> {
+public final class RepetitiveCombinationBuilder<T> {
 
     private final List<T> elements;
     private final int size;

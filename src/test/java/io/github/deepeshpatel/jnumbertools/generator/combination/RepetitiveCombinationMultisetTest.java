@@ -18,7 +18,7 @@ public class RepetitiveCombinationMultisetTest {
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
         var elements = List.of("A","B","C");
-        int[] frequencies = new int[] {2,3,2};
+        int[] frequencies = {2,3,2};
 
         RepetitiveCombinationMultiset<String> iterable = combination
                 .multiset(elements, frequencies, 2)
@@ -45,7 +45,7 @@ public class RepetitiveCombinationMultisetTest {
                 "[Green, Blue, Yellow]]";
 
         var elements = List.of("Red", "Green", "Blue","Yellow");
-        int[] frequencies = new int[] {3,2,1,1};  //3 red ,2 green, 1 blue, 1 yellow
+        int[] frequencies = {3,2,1,1};  //3 red ,2 green, 1 blue, 1 yellow
         int size = 3;
         Assert.assertEquals(expected, output(elements, frequencies, size));
     }

@@ -12,22 +12,22 @@ import java.util.List;
  * Used by permutation generators in this package
  * @author Deepesh Patel
  */
-public class UniquePermItrForElements<T> implements Iterator<List<T>> {
+public final class UniquePermItrForElements<T> implements Iterator<List<T>> {
 
     private final List<T> seed;
     private final IndicesToValueMapper<T> mapper;
-    private final UniquePermIttrForIndices iterator;
+    private final UniquePermItrForIndices iterator;
 
     public UniquePermItrForElements(List<T> seed, IndicesToValueMapper<T> mapper) {
         this.seed = seed;
         this.mapper = mapper;
-        iterator = new UniquePermIttrForIndices(seed.size());
+        iterator = new UniquePermItrForIndices(seed.size());
     }
 
     public UniquePermItrForElements(List<T> seed, IndicesToValueMapper<T> mapper, int[] initialStateOfIndices) {
         this.seed = seed;
         this.mapper = mapper;
-        iterator = new UniquePermIttrForIndices(initialStateOfIndices);
+        iterator = new UniquePermItrForIndices(initialStateOfIndices);
     }
 
     @Override

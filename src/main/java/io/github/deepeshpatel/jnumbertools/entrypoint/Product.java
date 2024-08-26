@@ -5,7 +5,7 @@ import io.github.deepeshpatel.jnumbertools.generator.product.ProductBuilderMth;
 
 import java.util.List;
 
-public class Product {
+public final class Product {
 
     private final Calculator calculator;
 
@@ -18,15 +18,11 @@ public class Product {
     }
 
     public <T> ProductBuilder<T> of(int quantity, List<T> data ) {
-            return new ProductBuilder(quantity, data, calculator);
+            return new ProductBuilder<>(quantity, data, calculator);
     }
 
     public <T> ProductBuilderMth<T> mthOf(long m, int quantity, List<T> data) {
-        return new ProductBuilderMth(m, quantity, data, calculator);
+        return new ProductBuilderMth<>(m, quantity, data, calculator);
     }
-
-
-
-
 
 }

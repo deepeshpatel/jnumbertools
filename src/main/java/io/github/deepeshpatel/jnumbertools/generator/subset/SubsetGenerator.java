@@ -39,7 +39,7 @@ import java.util.List;
  *
  * @author Deepesh Patel
  */
-public class SubsetGenerator<T> extends AbstractGenerator<T> {
+public final class SubsetGenerator<T> extends AbstractGenerator<T> {
 
     private final int fromSize;
     private final int toSize;

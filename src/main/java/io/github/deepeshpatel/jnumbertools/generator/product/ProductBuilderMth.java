@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ProductBuilderMth<T> {
+public final class ProductBuilderMth<T> {
 
     enum PRODUCT_TYPE  {DISTINCT, MULTISELECT, RANGE}
 

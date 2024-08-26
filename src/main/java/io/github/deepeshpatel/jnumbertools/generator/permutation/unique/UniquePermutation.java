@@ -40,7 +40,7 @@ import java.util.List;
  *
  * @author Deepesh Patel
  */
-public class UniquePermutation<T> extends AbstractGenerator<T> implements Iterable<List<T>>{
+public final class UniquePermutation<T> extends AbstractGenerator<T> implements Iterable<List<T>>{
 
     public UniquePermutation(List<T> input) {
         super(input);

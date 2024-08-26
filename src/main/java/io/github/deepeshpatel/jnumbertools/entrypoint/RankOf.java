@@ -5,7 +5,7 @@ import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
 
 import java.math.BigInteger;
 
-public class RankOf {
+public final class RankOf {
 
     private final Calculator calculator;
 

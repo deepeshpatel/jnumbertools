@@ -43,7 +43,7 @@ import java.util.*;
  *
  * @author Deepesh Patel
  */
-public class RepetitiveCombination <T> extends AbstractGenerator<T> {
+public final class RepetitiveCombination <T> extends AbstractGenerator<T> {
 
     private final int r;
 

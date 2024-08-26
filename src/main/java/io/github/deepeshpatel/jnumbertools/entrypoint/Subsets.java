@@ -5,7 +5,7 @@ import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetGenerator;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public class Subsets {
+public final class Subsets {
 
     @SafeVarargs
     public final <T> SubsetGenerator.Builder<T> of(T... data) {

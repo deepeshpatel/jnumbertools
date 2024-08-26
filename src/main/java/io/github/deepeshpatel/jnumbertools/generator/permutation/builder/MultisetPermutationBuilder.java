@@ -6,7 +6,7 @@ import io.github.deepeshpatel.jnumbertools.generator.permutation.multiset.Multis
 
 import java.util.List;
 
-public class MultisetPermutationBuilder<T> {
+public final class MultisetPermutationBuilder<T> {
 
     private final List<T>  elements;
     private final int[] frequencies;

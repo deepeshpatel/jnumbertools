@@ -101,7 +101,7 @@ public final class Permutadic implements Serializable {
     }
 
     public static String nPrString(int n, int r) {
-        return  superOrSubscript("" + n, Permutadic::superscript) + "P" + superOrSubscript("" + r,  Permutadic::subscript);
+        return "%sP%s".formatted(superOrSubscript("" + n, Permutadic::superscript), superOrSubscript("" + r, Permutadic::subscript));
     }
 
     private static String superOrSubscript(String s, Function<Character, Character> superOrSubscriptConverter){
@@ -117,7 +117,7 @@ public final class Permutadic implements Serializable {
             case '1' -> '¹';
             case '2' -> '²';
             case '3' -> '³';
-            default -> (char) (8304+c-48);
+            default -> (char) (8304+c-48); //⁴,⁵,⁶,⁷,⁸,⁹
         };
     }
 

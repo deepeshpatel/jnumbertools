@@ -9,7 +9,7 @@ public class ProductExample {
     public static void main(String[] args) {
 
         String heading = """
-                Print Combination of -
+                Print all combinations of -
                 any 1 pizza base  out of 2 and
                 any 2 distinct cheese out of 3 and
                 any 2 sauce (repeated allowed) out of 3 and
@@ -34,6 +34,5 @@ public class ProductExample {
         for(var e: list) {
             System.out.println(i++ + " " + e);
         }
-
     }
 }

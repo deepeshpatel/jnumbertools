@@ -38,7 +38,7 @@ import java.util.List;
  * </pre>
  * @author Deepesh Patel
  */
-public class KPermutationCombinationOrderMth<T> extends AbstractKPermutation<T> {
+public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutation<T> {
 
     final BigInteger totalPermutations;
     final long permutationsPerList;

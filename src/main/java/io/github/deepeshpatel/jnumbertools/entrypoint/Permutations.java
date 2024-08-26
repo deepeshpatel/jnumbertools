@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 
 import static java.util.Arrays.asList;
 
-public class Permutations {
+public final class Permutations {
 
     private final Calculator calculator;
 
@@ -22,11 +22,11 @@ public class Permutations {
         this.calculator = calculator;
     }
 
-    public final UniquePermutationBuilder<Integer> unique(int size) {
+    public UniquePermutationBuilder<Integer> unique(int size) {
         return unique(IntStream.range(0, size).boxed().toList());
     }
 
-    public final <T> UniquePermutationBuilder<T> unique(List<T> list) {
+    public <T> UniquePermutationBuilder<T> unique(List<T> list) {
         return new UniquePermutationBuilder<>(calculator, list);
     }
 
@@ -35,11 +35,11 @@ public class Permutations {
         return unique(List.of(array));
     }
 
-    public final KPermutationBuilder<Integer> nPr(int n, int r) {
+    public KPermutationBuilder<Integer> nPr(int n, int r) {
         return nPr(r, IntStream.range(0, n).boxed().toList());
     }
 
-    public final <T> KPermutationBuilder<T> nPr(int r, List<T> allElements) {
+    public <T> KPermutationBuilder<T> nPr(int r, List<T> allElements) {
         return new KPermutationBuilder<>(allElements, r, calculator);
     }
 
@@ -48,11 +48,11 @@ public class Permutations {
         return nPr(r, asList(allElements));
     }
 
-    public final <T> MultisetPermutationBuilder<T> multiset(List<T> elements, int[] frequencies) {
+    public <T> MultisetPermutationBuilder<T> multiset(List<T> elements, int[] frequencies) {
         return new MultisetPermutationBuilder<>(elements, frequencies, calculator);
     }
 
-    public final <T> RepetitivePermutationBuilder<T> repetitive(int width, List<T> elements) {
+    public  <T> RepetitivePermutationBuilder<T> repetitive(int width, List<T> elements) {
         return new RepetitivePermutationBuilder<>(width, elements);
     }
 
@@ -61,7 +61,7 @@ public class Permutations {
         return repetitive(width, List.of(elements));
     }
 
-    public final RepetitivePermutationBuilder<Integer> repetitive(int width, int base) {
+    public RepetitivePermutationBuilder<Integer> repetitive(int width, int base) {
         var symbols = IntStream.range(0, base).boxed().toList();
         return repetitive(width, symbols);
     }

@@ -15,17 +15,16 @@ import java.util.stream.IntStream;
  * Used by permutation generators in this package
  * @author Deepesh Patel
  */
-public class UniquePermIttrForIndices implements Iterator<int[]> {
+public final class UniquePermItrForIndices implements Iterator<int[]> {
 
     private int[] indices;
 
-
-    public UniquePermIttrForIndices(int size) {
+    public UniquePermItrForIndices(int size) {
         //starting permutation is zero
         this.indices = IntStream.range(0, size).toArray();
     }
 
-    public UniquePermIttrForIndices(int[] startingPermutation) {
+    public UniquePermItrForIndices(int[] startingPermutation) {
         this.indices = startingPermutation;
     }
 

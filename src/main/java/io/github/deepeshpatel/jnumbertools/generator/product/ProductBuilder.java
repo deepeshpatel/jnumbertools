@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ProductBuilder<T> {
+public final class ProductBuilder<T> {
 
     private final List<List<List<T>>> allLists = new LinkedList<>();
     private final Calculator calculator;

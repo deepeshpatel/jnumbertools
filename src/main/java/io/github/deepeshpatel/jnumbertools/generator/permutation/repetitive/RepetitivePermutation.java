@@ -39,7 +39,7 @@ import java.util.*;
  *
  * @author Deepesh Patel
  */
-public class RepetitivePermutation<T>  extends AbstractGenerator<T> {
+public final class RepetitivePermutation<T>  extends AbstractGenerator<T> {
 
     private final int size;
 

@@ -6,7 +6,7 @@ import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
 
 import java.math.BigInteger;
 
-public class UnrankOf {
+public final class UnrankOf {
 
     private final Calculator calculator;
 

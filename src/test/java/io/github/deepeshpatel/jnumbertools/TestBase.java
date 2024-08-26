@@ -10,6 +10,6 @@ public class TestBase {
     public static Permutations permutation = new Permutations(calculator);
     public static Combinations combination = new Combinations(calculator);
 
-    //public static JNumberTools tools = new JNumberTools(calculator);
+
 
 }

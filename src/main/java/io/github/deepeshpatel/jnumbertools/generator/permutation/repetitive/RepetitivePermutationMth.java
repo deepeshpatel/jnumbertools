@@ -44,7 +44,7 @@ import java.util.NoSuchElementException;
  *
  * @author Deepesh Patel
  */
-public class RepetitivePermutationMth<T>  extends AbstractGenerator<T> {
+public final class RepetitivePermutationMth<T>  extends AbstractGenerator<T> {
 
     private final int size;
     private final long increment;

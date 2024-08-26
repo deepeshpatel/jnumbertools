@@ -31,7 +31,7 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
  * </pre>
  * @author Deepesh Patel
  */
-public class MultisetPermutation<T>  extends AbstractGenerator<T> {
+public final class MultisetPermutation<T>  extends AbstractGenerator<T> {
 
     private final int[] initialIndices;
 

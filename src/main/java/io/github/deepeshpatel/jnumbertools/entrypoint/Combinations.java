@@ -7,7 +7,7 @@ import io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombinati
 import java.util.List;
 import java.util.stream.IntStream;
 
-public class Combinations {
+public final class Combinations {
 
     private final Calculator calculator;
 
@@ -19,7 +19,7 @@ public class Combinations {
         this.calculator = calculator;
     }
 
-    public final UniqueCombinationBuilder<Integer> unique(int n, int r) {
+    public UniqueCombinationBuilder<Integer> unique(int n, int r) {
         var elements = IntStream.range(0,n).boxed().toList();
         return unique(r, elements);
     }
@@ -29,11 +29,11 @@ public class Combinations {
         return unique(size, List.of(elements));
     }
 
-    public final <T> UniqueCombinationBuilder<T> unique(int size, List<T> elements) {
+    public <T> UniqueCombinationBuilder<T> unique(int size, List<T> elements) {
         return new UniqueCombinationBuilder<>(elements, size, calculator);
     }
 
-    public final RepetitiveCombinationBuilder<Integer> repetitive(int n, int r) {
+    public RepetitiveCombinationBuilder<Integer> repetitive(int n, int r) {
         var elements = IntStream.range(0,n).boxed().toList();
         return new RepetitiveCombinationBuilder<>(elements, r);
     }
@@ -42,11 +42,11 @@ public class Combinations {
     public final <T> RepetitiveCombinationBuilder<T> repetitive(int size, T... elements) {
         return new RepetitiveCombinationBuilder<>(List.of(elements), size);
     }
-    public final <T> RepetitiveCombinationBuilder<T> repetitive(int size, List<T> elements) {
+    public  <T> RepetitiveCombinationBuilder<T> repetitive(int size, List<T> elements) {
         return new RepetitiveCombinationBuilder<>(elements, size);
     }
 
-    public final <T> MultisetCombinationBuilder<T> multiset(List<T> elements, int[] frequencies, int size) {
+    public <T> MultisetCombinationBuilder<T> multiset(List<T> elements, int[] frequencies, int size) {
         return new MultisetCombinationBuilder<>(elements, frequencies, size);
     }
 }

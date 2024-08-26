@@ -11,7 +11,7 @@ import java.util.Map;
  * for nCr, nPr and factorial and hence the instance variable of this class must be set
  * to null once all calculations are done to dispose memoized values.
  */
-public class Calculator {
+public final class Calculator {
 
     private final TwoLevelMap<Integer, Integer, BigInteger> nCrMemo = new TwoLevelMap<>();
     private final TwoLevelMap<Integer, Integer, BigInteger> nPrMemo = new TwoLevelMap<>();
@@ -87,8 +87,8 @@ public class Calculator {
     }
 
     //Can be replaced by Google Guava Table. Using this because of the
-    // defined constraint that JNumberTools library should not have any dependency
-    public static class TwoLevelMap<K1,K2,V> extends HashMap<K1,Map<K2,V>> {
+    //defined constraint that JNumberTools library should not have any dependency
+    private static class TwoLevelMap<K1,K2,V> extends HashMap<K1,Map<K2,V>> {
 
         public V get(K1 key1, K2 key2) {
             var map = get(key1);

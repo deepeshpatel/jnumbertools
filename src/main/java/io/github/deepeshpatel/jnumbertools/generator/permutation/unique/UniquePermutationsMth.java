@@ -46,7 +46,7 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
  *
  * @author Deepesh Patel
  */
-public class UniquePermutationsMth<T> extends AbstractGenerator<T> {
+public final class UniquePermutationsMth<T> extends AbstractGenerator<T> {
 
     private final BigInteger increment;
     final BigInteger numOfPermutations;

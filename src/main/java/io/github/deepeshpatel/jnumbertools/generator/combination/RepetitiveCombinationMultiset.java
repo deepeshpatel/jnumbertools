@@ -44,7 +44,7 @@ import java.util.*;
  * </pre>
  * @author Deepesh Patel
  */
-public class RepetitiveCombinationMultiset<T> extends AbstractGenerator<T> {
+public final class RepetitiveCombinationMultiset<T> extends AbstractGenerator<T> {
 
     private final int[] multisetFreqArray;
     private final int r;

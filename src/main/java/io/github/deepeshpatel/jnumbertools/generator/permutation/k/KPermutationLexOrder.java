@@ -41,8 +41,7 @@ import static java.util.stream.Collectors.toCollection;
  * </pre>
  * @author Deepesh Patel
  */
-public class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
-
+public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
 
     /**
      * @param input Input of size n from which unique permutations of size k will be generated.

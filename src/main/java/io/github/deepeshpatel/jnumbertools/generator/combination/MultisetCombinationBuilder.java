@@ -2,7 +2,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination;
 
 import java.util.List;
 
-public class MultisetCombinationBuilder<T> {
+public final class MultisetCombinationBuilder<T> {
 
     private final List<T> elements;
     private final int[] frequencies;
