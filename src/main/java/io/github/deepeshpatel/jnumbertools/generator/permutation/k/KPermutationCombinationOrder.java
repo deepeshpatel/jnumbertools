@@ -45,18 +45,18 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
 
 
     /**
-     * @param input Input of size n from which unique permutations of size k will be generated.
+     * @param elements Input of size n from which unique permutations of size k will be generated.
      * @param k size of permutations. k must be &lt;=n
      */
-    public KPermutationCombinationOrder(List<T> input, int k) {
-        super(input,k);
+    KPermutationCombinationOrder(List<T> elements, int k) {
+        super(elements,k);
     }
 
     @Override
     public Iterator<List<T>> iterator() {
-        if ( k==0 || seedElements.isEmpty())    return newEmptyIterator();
+        if ( k==0 || elements.isEmpty())    return newEmptyIterator();
         /* Use the faster version */
-        if( k== seedElements.size())     return new UniquePermItrForElements<>(seedElements, this::indicesToValues);
+        if( k== elements.size())     return new UniquePermItrForElements<>(elements, this::indicesToValues);
         return new Itr();
     }
 
@@ -66,7 +66,7 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
         private Iterator<List<T>> currentIterator;
 
         public Itr() {
-            combinationIterator = new UniqueCombination<>(seedElements,k).iterator();
+            combinationIterator = new UniqueCombination<>(elements,k).iterator();
             getNextIterator();
         }
 

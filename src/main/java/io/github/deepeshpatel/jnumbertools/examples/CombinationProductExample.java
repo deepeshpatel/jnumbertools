@@ -4,7 +4,7 @@ import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 
 import java.util.List;
 
-public class ProductExample {
+public class CombinationProductExample {
 
     public static void main(String[] args) {
 
@@ -23,15 +23,15 @@ public class ProductExample {
         var cheese = List.of( "Ricotta ","Mozzarella","Cheddar");
         var toppings = List.of("Tomato","Capsicum");
 
-        var list = JNumberTools
-                .product().of(1, pizzaBase)
+        var iterable = JNumberTools
+                .cartesianProduct().complexProductOf(1, pizzaBase)
                 .andDistinct(2, cheese)
                 .andMultiSelect(2, sauce)
                 .andInRange(1,2,toppings)
-                .build();
+                .lexOrder();
 
         int i=1;
-        for(var e: list) {
+        for(var e: iterable) {
             System.out.println(i++ + " " + e);
         }
     }

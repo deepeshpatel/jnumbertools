@@ -35,15 +35,15 @@ public final class Combinations {
 
     public RepetitiveCombinationBuilder<Integer> repetitive(int n, int r) {
         var elements = IntStream.range(0,n).boxed().toList();
-        return new RepetitiveCombinationBuilder<>(elements, r);
+        return repetitive(r, elements);
     }
 
     @SafeVarargs
     public final <T> RepetitiveCombinationBuilder<T> repetitive(int size, T... elements) {
-        return new RepetitiveCombinationBuilder<>(List.of(elements), size);
+        return  repetitive(size, List.of(elements));
     }
     public  <T> RepetitiveCombinationBuilder<T> repetitive(int size, List<T> elements) {
-        return new RepetitiveCombinationBuilder<>(elements, size);
+        return new RepetitiveCombinationBuilder<>(elements, size, calculator);
     }
 
     public <T> MultisetCombinationBuilder<T> multiset(List<T> elements, int[] frequencies, int size) {

@@ -1,11 +1,11 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination;
 
+import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static io.github.deepeshpatel.jnumbertools.TestBase.combination;
@@ -20,7 +20,7 @@ public class UniqueCombinationMthTest {
             var input = Collections.nCopies(n, "A");
             for(int increment=1; increment<=4; increment++) {
                 int combinationSize=input.size()/2;
-                long size = combination.unique(combinationSize, input).lexOrderMth(increment).stream().count();
+                long size = combination.unique(combinationSize, input).lexOrderMth(increment, 0).stream().count();
                 double expected = Math.ceil(calculator.nCr(n,combinationSize).longValue()/(double)increment);
                 Assert.assertEquals((long)expected,size );
             }
@@ -30,7 +30,7 @@ public class UniqueCombinationMthTest {
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
         var input = List.of("A", "B", "C");
-        var iterable = combination.unique(2, input).lexOrderMth(2);
+        var iterable = combination.unique(2, input).lexOrderMth(2, 0);
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
         Assert.assertEquals(lists1, lists2);
@@ -70,25 +70,20 @@ public class UniqueCombinationMthTest {
 
     private String getResultViaDirectIncrement(List<String> input, int r, int increment) {
         return combination.unique(r, input)
-                .lexOrderMth(increment)
+                .lexOrderMth(increment, 0)
                 .stream().toList().toString();
     }
 
     private String getExpectedResultViaOneByOneIteration(List<String> input, int r, int increment) {
         var stream = combination.unique(r, input).lexOrder().stream();
-        return everyMthValue(stream, increment).toString();
-    }
-
-    public static <T> List<List<T>> everyMthValue(Stream<List<T>> stream, int m) {
-        final int[] j = {0};
-        return stream.filter(e-> j[0]++ % m == 0).toList();
+        return TestBase.everyMthValue(stream, increment).toString();
     }
 
     private <T> String output(List<T> elements, int size, int m) {
-        return combination.unique(size, elements).lexOrderMth(m).stream().toList().toString();
+        return combination.unique(size, elements).lexOrderMth(m, 0).stream().toList().toString();
     }
 
     private String output(int n, int r, int m) {
-        return combination.unique(n,r).lexOrderMth(m).stream().toList().toString();
+        return combination.unique(n,r).lexOrderMth(m, 0).stream().toList().toString();
     }
 }

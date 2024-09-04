@@ -14,18 +14,18 @@ import java.util.List;
  */
 public final class UniquePermItrForElements<T> implements Iterator<List<T>> {
 
-    private final List<T> seed;
+    private final List<T> elements;
     private final IndicesToValueMapper<T> mapper;
     private final UniquePermItrForIndices iterator;
 
-    public UniquePermItrForElements(List<T> seed, IndicesToValueMapper<T> mapper) {
-        this.seed = seed;
+    public UniquePermItrForElements(List<T> elements, IndicesToValueMapper<T> mapper) {
+        this.elements = elements;
         this.mapper = mapper;
-        iterator = new UniquePermItrForIndices(seed.size());
+        iterator = new UniquePermItrForIndices(elements.size());
     }
 
-    public UniquePermItrForElements(List<T> seed, IndicesToValueMapper<T> mapper, int[] initialStateOfIndices) {
-        this.seed = seed;
+    public UniquePermItrForElements(List<T> elements, IndicesToValueMapper<T> mapper, int[] initialStateOfIndices) {
+        this.elements = elements;
         this.mapper = mapper;
         iterator = new UniquePermItrForIndices(initialStateOfIndices);
     }
@@ -37,10 +37,10 @@ public final class UniquePermItrForElements<T> implements Iterator<List<T>> {
 
     @Override
     public List<T> next() {
-        return mapper.indicesToValues(iterator.next(), seed);
+        return mapper.indicesToValues(iterator.next());
     }
 
     public interface IndicesToValueMapper<T> {
-        List<T> indicesToValues(int[] indices, List<T> input);
+        List<T> indicesToValues(int[] indices);
     }
 }

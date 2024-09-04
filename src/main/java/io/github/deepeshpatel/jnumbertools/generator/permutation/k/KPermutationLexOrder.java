@@ -44,11 +44,11 @@ import static java.util.stream.Collectors.toCollection;
 public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
 
     /**
-     * @param input Input of size n from which unique permutations of size k will be generated.
+     * @param elements Input of size n from which unique permutations of size k will be generated.
      * @param k size of permutations. k must be &lt;=n
      */
-    public KPermutationLexOrder(List<T> input, int k) {
-        super(input, k);
+     KPermutationLexOrder(List<T> elements, int k) {
+        super(elements, k);
     }
 
     @Override
@@ -56,7 +56,7 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
 
         if(k==0)  return newEmptyIterator();
         /* Use the faster version */
-        if(k == seedElements.size())    return new UniquePermItrForElements<>(seedElements, this::indicesToValues);
+        if(k == elements.size())    return new UniquePermItrForElements<>(elements, this::indicesToValues);
         return new Itr();
     }
 
@@ -67,7 +67,7 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
 
         public Itr() {
             indices = IntStream.range(0, k).toArray();
-            list = IntStream.range(k, seedElements.size()).boxed()
+            list = IntStream.range(k, elements.size()).boxed()
                     .collect(toCollection(LinkedList::new));
         }
 
@@ -82,8 +82,8 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
                 throw new NoSuchElementException();
             }
             int[] old = indices;
-            indices = kPermutationNextLex(indices,list, seedElements.size()-1);
-            return  indicesToValues(old, seedElements);
+            indices = kPermutationNextLex(indices,list, elements.size()-1);
+            return  indicesToValues(old);
         }
 
         private int[] kPermutationNextLex(int[] current, LinkedList<Integer> remaining, int maxAllowed) {

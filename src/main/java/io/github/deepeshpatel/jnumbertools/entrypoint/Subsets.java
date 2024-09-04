@@ -1,23 +1,35 @@
 package io.github.deepeshpatel.jnumbertools.entrypoint;
 
-import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetBuilder;
 
 import java.util.List;
 import java.util.stream.IntStream;
 
 public final class Subsets {
 
+    private final Calculator calculator;
+
+    public Subsets() {
+        this(new Calculator());
+    }
+
+    public Subsets(Calculator calculator) {
+        this.calculator = calculator;
+    }
+
     @SafeVarargs
-    public final <T> SubsetGenerator.Builder<T> of(T... data) {
-        return of(List.of(data));
+    public final <T> SubsetBuilder<T> of(T... elements) {
+        return of(List.of(elements));
     }
 
-    public <T> SubsetGenerator.Builder<T> of(List<T> data) {
-        return new SubsetGenerator.Builder<>(data);
+    public <T> SubsetBuilder<T> of(List<T> elements) {
+        return new SubsetBuilder<>(elements, calculator);
     }
 
-    public SubsetGenerator.Builder<Integer> of(int dataSize) {
-        var list = IntStream.range(0, dataSize).boxed().toList();
-        return new SubsetGenerator.Builder<>(list);
+    public SubsetBuilder<Integer> of(int dataSize) {
+        var elements = IntStream.range(0, dataSize).boxed().toList();
+        return new SubsetBuilder<>(elements, calculator);
     }
+
+
 }

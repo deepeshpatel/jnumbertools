@@ -11,23 +11,23 @@ import java.util.Collections;
 
 public class CombinatoricsUtil {
 
-    public static int[] initIndicesForMultisetPermutation(int... multisetFreqArray){
+    public static int[] initIndicesForMultisetPermutation(int... frequencies){
 
         var multisetFreqList = new ArrayList<Integer>();
-        for(int i=0; i<multisetFreqArray.length;i++) {
-            multisetFreqList.addAll(Collections.nCopies(multisetFreqArray[i], i));
+        for(int i=0; i<frequencies.length;i++) {
+            multisetFreqList.addAll(Collections.nCopies(frequencies[i], i));
         }
         return multisetFreqList.stream().mapToInt(Integer::intValue).toArray();
     }
 
-    public static void checkParamMultisetFreqArray(int inputSize, int[] multisetFreqArray, String message) {
+    public static void checkParamMultisetFreqArray(int inputSize, int[] frequencies, String message) {
 
-        if(multisetFreqArray == null) {
-            throw new IllegalArgumentException("multisetFreqArray must be non null to generate " + message + " of multiset");
+        if(frequencies == null) {
+            throw new IllegalArgumentException("frequencies must be non null to generate " + message + " of multiset");
         }
 
-        if(multisetFreqArray.length != inputSize ) {
-            throw new IllegalArgumentException("Length of multisetFreqArray should be equal to input length to generate " + message + " of multiset");
+        if(frequencies.length != inputSize ) {
+            throw new IllegalArgumentException("Length of frequencies should be equal to input length to generate " + message + " of multiset");
         }
     }
 

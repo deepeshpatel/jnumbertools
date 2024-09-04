@@ -48,17 +48,17 @@ public final class RepetitiveCombination <T> extends AbstractGenerator<T> {
     private final int r;
 
     /**
-     * @param input List of N items. N is the length of input
+     * @param elements List of N items. N is the length of input
      * @param r number of combinations from N items.
      */
-    public RepetitiveCombination(List<T> input, int r) {
-        super(input);
+    RepetitiveCombination(List<T> elements, int r) {
+        super(elements);
         this.r = r;
     }
 
     @Override
     public Iterator<List<T>> iterator() {
-        return (r==0 || seedElements.isEmpty()) ? newEmptyIterator() : new Itr();
+        return (r==0 || elements.isEmpty()) ? newEmptyIterator() : new Itr();
     }
 
     private class Itr implements Iterator<List<T>> {
@@ -76,8 +76,8 @@ public final class RepetitiveCombination <T> extends AbstractGenerator<T> {
                 throw new NoSuchElementException();
             }
             int[] old = indices;
-            indices = nextRepetitiveCombination(indices, seedElements.size());
-            return indicesToValues(old, seedElements);
+            indices = nextRepetitiveCombination(indices, elements.size());
+            return indicesToValues(old);
         }
 
         private int[] nextRepetitiveCombination(int []a, int n) {

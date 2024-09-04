@@ -1,9 +1,9 @@
 package io.github.deepeshpatel.jnumbertools.entrypoint;
 
-import io.github.deepeshpatel.jnumbertools.generator.permutation.builder.KPermutationBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.builder.MultisetPermutationBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.builder.RepetitivePermutationBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.builder.UniquePermutationBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.k.KPermutationBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.multiset.MultisetPermutationBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive.RepetitivePermutationBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.unique.UniquePermutationBuilder;
 
 import java.util.List;
 import java.util.stream.IntStream;

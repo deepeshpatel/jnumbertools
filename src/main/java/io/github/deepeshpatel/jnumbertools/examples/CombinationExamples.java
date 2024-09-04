@@ -45,14 +45,14 @@ public class CombinationExamples {
     static void printMthUniqueCombinationOfNumbersInLexOrder() {
         System.out.println("\n*** Every 3rd Unique combination of 2 items out of 4 in lex order ***");
         JNumberTools.combinations().unique(4,2)
-                .lexOrderMth(3)
+                .lexOrderMth(3, 0)
                 .forEach(System.out::println);
     }
 
     static void printMthUniqueCombinationOfElementsInLexOrder() {
         System.out.println("\n*** Every 3rd Unique combination of 2 elements out of given 4 elements in lex order ***");
         JNumberTools.combinations().unique(2,"Red", "Green", "Blue","Yellow")
-                .lexOrderMth(3)
+                .lexOrderMth(3, 0)
                 .forEach(System.out::println);
     }
 

@@ -50,7 +50,7 @@ public final class RepetitiveCombinationMultiset<T> extends AbstractGenerator<T>
     private final int r;
 
     /**
-     * @param input List of N items
+     * @param elements List of N items
      * @param r number of items in every combination.
      * @param multisetFreqArray int array containing the number of times(count) element in input can be repeated.
      *               multisetFreqArray[0] contains the count for 0th element in input
@@ -58,10 +58,10 @@ public final class RepetitiveCombinationMultiset<T> extends AbstractGenerator<T>
      *               multisetFreqArray[n] contains the count of mth element in input
      *               count of every element must be &gt;=1
      */
-    public RepetitiveCombinationMultiset(List<T> input, int r, int[] multisetFreqArray) {
-        super(input);
-        CombinatoricsUtil.checkParamCombination(seedElements.size(), r, "Repetitive Combination");
-        CombinatoricsUtil.checkParamMultisetFreqArray(seedElements.size(), multisetFreqArray, "Repetitive Combination");
+     RepetitiveCombinationMultiset(List<T> elements, int r, int[] multisetFreqArray) {
+        super(elements);
+        CombinatoricsUtil.checkParamCombination(elements.size(), r, "Repetitive Combination");
+        CombinatoricsUtil.checkParamMultisetFreqArray(elements.size(), multisetFreqArray, "Repetitive Combination");
 
         this.r = r;
         this.multisetFreqArray = multisetFreqArray;
@@ -69,7 +69,7 @@ public final class RepetitiveCombinationMultiset<T> extends AbstractGenerator<T>
 
     @Override
     public Iterator<List<T>> iterator() {
-        return ( r==0 || seedElements.isEmpty()) ? newEmptyIterator() : new Itr();
+        return ( r==0 || elements.isEmpty()) ? newEmptyIterator() : new Itr();
     }
 
     private class Itr implements Iterator<List<T>> {
@@ -94,7 +94,7 @@ public final class RepetitiveCombinationMultiset<T> extends AbstractGenerator<T>
             }
             int[] old = indices;
             indices = nextRepetitiveCombinationOfMultiset(indices, multisetFreqArray);
-            return indicesToValues(old, seedElements);
+            return indicesToValues(old);
         }
 
         private int[] nextRepetitiveCombinationOfMultiset(int[]a, int[] availableCount) {

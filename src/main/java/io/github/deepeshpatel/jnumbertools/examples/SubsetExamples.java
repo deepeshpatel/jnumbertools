@@ -16,28 +16,28 @@ public class SubsetExamples {
     static void printAllSubsetsOfNumbersInLexOrder() {
         System.out.println("\n*** All subsets upto size 3 in lex order ***");
         JNumberTools.subsets().of(3)
-                .all()
+                .all().lexOrder()
                 .forEach(System.out::println);
     }
 
     static void printAllSubsetsOfElementsInLexOrder() {
         System.out.println("\n*** All subsets of elements upto size 3 in lex order ***");
         JNumberTools.subsets().of("Red","Green","Blue")
-                .all()
+                .all().lexOrder()
                 .forEach(System.out::println);
     }
 
     static void printSubsetsOfNumbersInGivenRangeInLexOrder() {
         System.out.println("\n*** All subsets of size 2 to 3 of 3 items in lex order ***");
         JNumberTools.subsets().of(3)
-                .inRange(2,3)
+                .inRange(2,3).lexOrder()
                 .forEach(System.out::println);
     }
 
     static void printSubsetsOfElementsInGivenRangeInLexOrder() {
         System.out.println("\n*** All subsets of size 2 to 3 of 3 given elements in lex order ***");
         JNumberTools.subsets().of("Red","Green","Blue")
-                .inRange(2,3)
+                .inRange(2,3).lexOrder()
                 .forEach(System.out::println);
     }
 

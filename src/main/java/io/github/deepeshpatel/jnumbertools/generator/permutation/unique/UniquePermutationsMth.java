@@ -5,6 +5,7 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
+import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.FactoradicAlgorithms;
 
@@ -49,19 +50,32 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
 public final class UniquePermutationsMth<T> extends AbstractGenerator<T> {
 
     private final BigInteger increment;
-    final BigInteger numOfPermutations;
+    BigInteger numOfPermutations;
     private final int[] initialIndices;
+    private final Calculator calculator;
 
-    public UniquePermutationsMth(List<T> input, BigInteger increment, BigInteger numOfPermutations) {
-        super(input);
+    UniquePermutationsMth(List<T> elements, BigInteger increment, Calculator calculator) {
+        super(elements);
         this.increment = increment;
         checkParamIncrement(increment, "unique permutations");
-        this. numOfPermutations = numOfPermutations;//factorial(seed.size());
-        initialIndices = IntStream.range(0, seedElements.size()).toArray();
+        this.calculator = calculator;
+        initialIndices = IntStream.range(0, elements.size()).toArray();
+    }
+
+    /**
+     * Use this method instead of iterator if you need only mth value and not 0th, mth, 2mth
+     * creating iterator is expensive because hasNext() implementation requires extra calculations.
+     */
+    public List<T> build() {
+        var indices = FactoradicAlgorithms.unRank(increment, initialIndices.length);
+        return indicesToValues(indices);
     }
 
     @Override
     public Iterator<List<T>> iterator() {
+        synchronized (this) {
+            numOfPermutations = numOfPermutations == null ? calculator.factorial(elements.size()) : numOfPermutations;
+        }
         return new KthItemIterator();
     }
 
@@ -82,7 +96,7 @@ public final class UniquePermutationsMth<T> extends AbstractGenerator<T> {
 
             int[] currentIndices = nextPermutation(nextK, initialIndices.length);
             nextK = nextK.add(increment);
-            return indicesToValues(currentIndices, seedElements);
+            return indicesToValues(currentIndices);
         }
 
         public int[] nextPermutation(BigInteger kth, int numberOfItems) {

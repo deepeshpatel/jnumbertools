@@ -46,7 +46,7 @@ public final class KPermutationLexOrderMth<T> extends AbstractKPermutation<T>  {
     /**
      * Implements the iterable generating every n<sup>th</sup> unique permutation of size k.
      * Permutations are generated in lex order of indices of input values, considering value at each index as unique.
-     * @param input Input of size n from which permutations of size k will be generated
+     * @param elements Input of size n from which permutations of size k will be generated
      * @param k size of permutations. k must be &lt;=n
      * @param increment position relative to first permutation which will be generated next in lexicographical order.
      *                  incrementing to every increment-1 permutation in a sequence.
@@ -56,13 +56,13 @@ public final class KPermutationLexOrderMth<T> extends AbstractKPermutation<T>  {
      *                  and then increment to the desired position
      */
 
-    public KPermutationLexOrderMth(List<T> input, int k, BigInteger increment, Calculator calculator) {
-        super(input, k);
+     KPermutationLexOrderMth(List<T> elements, int k, BigInteger increment, Calculator calculator) {
+        super(elements, k);
         CombinatoricsUtil.checkParamIncrement(increment, "K-Permutation");
 
         this.increment = increment;
         this.initialValue = IntStream.range(0,k).toArray();
-        this.nPk = calculator.nPr(seedElements.size(),initialValue.length);
+        this.nPk = calculator.nPr(elements.size(),initialValue.length);
     }
 
     @Override
@@ -88,9 +88,9 @@ public final class KPermutationLexOrderMth<T> extends AbstractKPermutation<T>  {
                 throw new NoSuchElementException();
             }
 
-            next = nextMthKPermutation(n, initialValue.length, seedElements.size() );
+            next = nextMthKPermutation(n, initialValue.length, elements.size() );
             n =  n.add(increment);
-            return  indicesToValues(next, seedElements);
+            return  indicesToValues(next);
         }
 
         private int[] nextMthKPermutation(BigInteger rank, int degree, int size) {

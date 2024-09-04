@@ -1,8 +1,6 @@
-package io.github.deepeshpatel.jnumbertools.generator.permutation.builder;
+package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.multiset.MultisetPermutation;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.multiset.MultisetPermutationMth;
 
 import java.util.List;
 
@@ -21,7 +19,7 @@ public final class MultisetPermutationBuilder<T> {
 
     private void assertArguments() {
         if(frequencies == null || frequencies.length < elements.size() || !frequenciesArePositive()) {
-            throw new IllegalArgumentException(" multisetFreqArray should be (1) Not null and (2) its length should be equal to" +
+            throw new IllegalArgumentException("frequencies should be (1) Not null and (2) its length should be equal to" +
                     " number of elements and (3) should contain +ve values");
         }
     }

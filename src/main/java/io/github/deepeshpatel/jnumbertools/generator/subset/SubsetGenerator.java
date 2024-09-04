@@ -50,15 +50,15 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
      * fromSize is &lt;=0 and toSize &gt;= will generate one empty set. This sounds
      * unintuitive but is mathematically correct.
      *
-     * @param data input set from which subsets are generated.
+     * @param elements input set from which subsets are generated.
      *             Implementation does not check for duplicates in input collection
      *             and treats every item in a collection as unique.
      *
      * @param fromSize minimum-size(inclusive) of subset.
      * @param toSize max-size(inclusive) of subset. toSize must be &gt;= fromSize
      */
-    public SubsetGenerator(List<T> data, int fromSize, int toSize){
-        super(data);
+    SubsetGenerator(List<T> elements, int fromSize, int toSize){
+        super(elements);
         this.fromSize = fromSize;
         this.toSize = toSize;
     }
@@ -74,7 +74,8 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
 
         public OnDemandIterator(int start) {
             this.start = start;
-            current = new UniqueCombination<>(seedElements,this.start).iterator();
+            current = new UniqueCombination<>(elements,this.start).iterator();
+            current = new UniqueCombination<>(elements,this.start).iterator();
         }
 
         @Override
@@ -83,7 +84,7 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
                 return true;
             }
             if(start < toSize) {
-                current = new UniqueCombination<>(seedElements,++start).iterator();
+                current = new UniqueCombination<>(elements,++start).iterator();
                 return hasNext();
             }
             return false;
@@ -92,23 +93,6 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
         @Override
         public List<T> next() {
             return current.next();
-        }
-    }
-
-    public static class Builder<T> {
-
-        private final List<T> data;
-
-        public Builder(List<T> data) {
-            this.data = data;
-        }
-
-        public SubsetGenerator<T> all(){
-            return new SubsetGenerator<>(data,0, data.size());
-        }
-
-        public SubsetGenerator<T> inRange(int from, int to) {
-            return new SubsetGenerator<>(data,from, to);
         }
     }
 }

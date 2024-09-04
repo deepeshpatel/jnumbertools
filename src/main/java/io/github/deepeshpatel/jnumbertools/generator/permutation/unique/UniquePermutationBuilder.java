@@ -1,8 +1,7 @@
-package io.github.deepeshpatel.jnumbertools.generator.permutation.builder;
+package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
 import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.unique.UniquePermutation;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.unique.UniquePermutationsMth;
+import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -25,21 +24,21 @@ public final class UniquePermutationBuilder<T> {
 
     public UniquePermutationsMth<T> lexOrderMth(BigInteger m) {
         //TODO: check if we can skip the factorial calculation
-        return new UniquePermutationsMth<>(elements, m, calculator.factorial(elements.size()));
+        return new UniquePermutationsMth<>(elements, m, calculator);
     }
 
     public UniquePermutationsMth<T> lexOrderMth(long m) {
         return lexOrderMth(BigInteger.valueOf(m));
     }
 
-//    public AbstractGenerator<T> singleSwap() {
-//        //TODO: Implement this
-//        throw new RuntimeException("method not yet implemented..");
-//    }
-//
-//    public AbstractGenerator<T> fast() {
-//        //TODO: Implement this
-//        throw new RuntimeException("method not yet implemented..");
-//    }
+    public AbstractGenerator<T> singleSwap() {
+        //TODO: Implement this
+        throw new RuntimeException("method not yet implemented..");
+    }
+
+    public AbstractGenerator<T> fast() {
+        //TODO: Implement this
+        throw new RuntimeException("method not yet implemented..");
+    }
 
 }

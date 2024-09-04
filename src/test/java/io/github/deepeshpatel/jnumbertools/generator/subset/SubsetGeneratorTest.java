@@ -1,6 +1,5 @@
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -9,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
+import static io.github.deepeshpatel.jnumbertools.TestBase.subsets;
 import static org.junit.Assert.assertEquals;
 
 public class SubsetGeneratorTest {
@@ -17,8 +17,8 @@ public class SubsetGeneratorTest {
     public void assertCountOfAllSubsets() {
         for(int n=0; n<=4; n++) {
             List<String> input = Collections.nCopies(n, "A");
-            int count = (int) JNumberTools.subsets().of(input)
-                    .all()
+            int count = (int) subsets.of(input)
+                    .all().lexOrder()
                     .stream().count();
 
             int expected = (int) (Math.pow(2,n));
@@ -32,8 +32,8 @@ public class SubsetGeneratorTest {
             List<String> input = Collections.nCopies(n, "A");
             int from=0;
             for(int range=0; range<=n; range++) {
-                int count = (int) JNumberTools.subsets().of(input)
-                        .inRange(from, range)
+                int count = (int) subsets.of(input)
+                        .inRange(from, range).lexOrder()
                         .stream().count();
                 assertSize(count,n,from,range);
             }
@@ -50,7 +50,7 @@ public class SubsetGeneratorTest {
 
     @Test(expected = NullPointerException.class)
     public void shouldNotAllowSubsetOfNullCollection() {
-        JNumberTools.subsets().of((Collection<String>)null).all();
+        subsets.of((Collection<String>)null).all();
     }
 
     @Test
@@ -58,9 +58,9 @@ public class SubsetGeneratorTest {
 
         String expected = "[[C], [B], [A], [C, B], [C, A], [B, A], [C, B, A]]";
 
-        String output = JNumberTools.subsets()
+        String output = subsets
                 .of("C", "B", "A")
-                .inRange(1, 3)
+                .inRange(1, 3).lexOrder()
                 .stream().toList().toString();
 
         assertEquals(expected, output);
@@ -71,9 +71,9 @@ public class SubsetGeneratorTest {
 
         String expected = "[[A, B], [A, C], [B, C], [A, B, C]]";
 
-        String output = JNumberTools.subsets()
+        String output = subsets
                 .of("A", "B", "C")
-                .inRange(2, 3)
+                .inRange(2, 3).lexOrder()
                 .stream().toList().toString();
 
         assertEquals(expected, output);
@@ -82,17 +82,17 @@ public class SubsetGeneratorTest {
     @Test
     public void shouldGenerateAllPossibleSubsetsWithAllMethod() {
         String expected = "[[], [A], [B], [C], [A, B], [A, C], [B, C], [A, B, C]]";
-        String output = JNumberTools.subsets().of("A", "B", "C")
-                .all().stream().toList().toString();
+        String output = subsets.of("A", "B", "C")
+                .all().lexOrder().stream().toList().toString();
 
         assertEquals(expected, output);
     }
 
     @Test
     public void shouldGenerateEmptyForRangeFromZeroToZero() {
-        String output = JNumberTools.subsets()
+        String output = subsets
                 .of("A", "B", "C")
-                .inRange(0, 0)
+                .inRange(0, 0).lexOrder()
                 .stream().toList().toString();
 
         assertEquals("[[]]", output);
@@ -100,9 +100,9 @@ public class SubsetGeneratorTest {
 
     @Test
     public void shouldGenerateSubsetFromGivenInputSize() {
-        String output = JNumberTools.subsets()
+        String output = subsets
                 .of(3)
-                .all()
+                .all().lexOrder()
                 .stream().toList().toString();
 
         assertEquals("[[], [0], [1], [2], [0, 1], [0, 2], [1, 2], [0, 1, 2]]", output);

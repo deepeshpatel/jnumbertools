@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.numbersystem;
 import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 
 public class CombinadicAlgorithms {
@@ -35,8 +36,8 @@ public class CombinadicAlgorithms {
     }
 
     public static int[] combinadicToCombination(int[] combinadic, int n) {
-        int[] a = new int[combinadic.length];
-        System.arraycopy(combinadic,0, a,0, a.length);
+        int[] a = Arrays.copyOf(combinadic, combinadic.length);// new int[combinadic.length];
+        //System.arraycopy(combinadic,0, a,0, a.length);
         for(int i=0; i<a.length; i++) {
             a[i] = n-1-a[i];
         }

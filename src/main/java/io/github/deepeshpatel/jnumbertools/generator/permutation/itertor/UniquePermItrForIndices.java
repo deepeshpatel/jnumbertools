@@ -19,7 +19,7 @@ public final class UniquePermItrForIndices implements Iterator<int[]> {
 
     private int[] indices;
 
-    public UniquePermItrForIndices(int size) {
+    UniquePermItrForIndices(int size) {
         //starting permutation is zero
         this.indices = IntStream.range(0, size).toArray();
     }

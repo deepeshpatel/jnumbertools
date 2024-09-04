@@ -61,7 +61,7 @@ public final class PermutationGroup {
 
     public List<Integer> productMatrixForm(List<Integer> permutation1, List<Integer> permutation2) {
         if(permutation1.size() != permutation2.size()) {
-            throw new IllegalArgumentException("To compute the product, permutation1 and permutation2 must have same degree");
+            throw new IllegalArgumentException("To compute the cartesianProduct, permutation1 and permutation2 must have same degree");
         }
         var product = new ArrayList<Integer>(permutation1.size());
         for(int i=0; i<permutation1.size(); i++) {
@@ -83,7 +83,7 @@ public final class PermutationGroup {
             throw new IllegalArgumentException("size of permutation1 and permutation2 should be same.");
         }
 
-        //product is not commutative
+        //cartesianProduct is not commutative
         Integer[] product = new Integer[permutation1.size()];
         for(int i=0; i<product.length; i++) {
             product[i] = permutation1.get(permutation2.get(i));

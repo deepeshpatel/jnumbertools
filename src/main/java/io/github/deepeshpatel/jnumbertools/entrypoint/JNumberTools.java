@@ -11,11 +11,11 @@ public final class JNumberTools {
     }
 
     public static Permutations permutations() {
-        return new Permutations(new Calculator());
+        return new Permutations();
     }
 
     public static Combinations combinations() {
-        return new Combinations(new Calculator());
+        return new Combinations();
     }
 
     public static Subsets subsets() {
@@ -23,15 +23,15 @@ public final class JNumberTools {
     }
 
     public static RankOf rankOf() {
-        return new RankOf(new Calculator());
+        return new RankOf();
     }
 
     public static UnrankOf unRankingOf() {
-        return new UnrankOf(new Calculator());
+        return new UnrankOf();
     }
 
-    public static Product product() {
-        return new Product(new Calculator());
+    public static CartesianProduct cartesianProduct() {
+        return new CartesianProduct(new Calculator());
     }
 
 

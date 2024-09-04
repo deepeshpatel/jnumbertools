@@ -72,7 +72,6 @@ public final class Calculator {
     }
 
     public BigInteger factorial(int n) {
-
         if( n < fList.size()) {
             return fList.get(n);
         }
@@ -86,8 +85,39 @@ public final class Calculator {
         return product;
     }
 
-    //Can be replaced by Google Guava Table. Using this because of the
-    //defined constraint that JNumberTools library should not have any dependency
+    public BigInteger pow(long base, long exponent) {
+        return pow(BigInteger.valueOf(base), BigInteger.valueOf(exponent));
+    }
+    public BigInteger pow(BigInteger base, BigInteger exponent) {
+
+        BigInteger result = BigInteger.ONE;
+        while (exponent.signum() > 0) {
+            if (exponent.testBit(0)) result = result.multiply(base);
+            base = base.multiply(base);
+            exponent = exponent.shiftRight(1);
+        }
+        return result;
+    }
+
+    public BigInteger totalSubsetsInRange(int from, int to, int noOfElements) {
+
+        if(from==0 && to==noOfElements) return pow(2, noOfElements);
+
+        BigInteger sum = BigInteger.ZERO;
+        for(int i=from ; i<=to; i++){
+            sum = sum.add(nCr(noOfElements, i));
+        }
+        return sum;
+    }
+
+    public BigInteger totalRepetitiveCombinations(int noOfElements, int r) {
+        return nCr(noOfElements+r-1, r);
+    }
+
+    //Can be replaced by Google Guava Table. Using this because of
+    // [1] defined constraint that JNumberTools library should not have any dependency
+    // [2] very small code
+    // [3] is fast
     private static class TwoLevelMap<K1,K2,V> extends HashMap<K1,Map<K2,V>> {
 
         public V get(K1 key1, K2 key2) {

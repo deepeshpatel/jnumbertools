@@ -8,7 +8,7 @@ import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
-import static io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombinationMthTest.everyMthValue;
+import static io.github.deepeshpatel.jnumbertools.TestBase.everyMthValue;
 
 public class KPermutationCombinationOrderMthTest {
 

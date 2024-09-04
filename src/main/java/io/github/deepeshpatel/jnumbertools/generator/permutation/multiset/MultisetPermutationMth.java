@@ -21,7 +21,7 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
  */
 public final class MultisetPermutationMth<T>  extends AbstractGenerator<T> {
 
-    private final int[] multisetFreqArray;
+    private final int[] frequencies;
     private final BigInteger possiblePermutations;
     private final int initialSum;
     private final long increment;
@@ -29,25 +29,25 @@ public final class MultisetPermutationMth<T>  extends AbstractGenerator<T> {
 
     /**
      *
-     * @param input input from which permutations are generated.
+     * @param elements input from which permutations are generated.
      *             Permutations are generated in lex order of indices of input values,
      *             considering value at each index as unique.
-     * @param multisetFreqArray int array containing the number of times(count) element in input can be repeated.
-     *               multisetFreqArray[0] contains the count for 0<sup>th</sup> element in input
-     *               multisetFreqArray[1] contains the count for 1<sup>st</sup> element in input, ...
-     *               multisetFreqArray[n] contains the count of n<sup>th</sup> element in input
+     * @param frequencies int array containing the number of times(count) element in input can be repeated.
+     *               frequencies[0] contains the count for 0<sup>th</sup> element in input
+     *               frequencies[1] contains the count for 1<sup>st</sup> element in input, ...
+     *               frequencies[n] contains the count of n<sup>th</sup> element in input
      *               count of every element must be &gt;=1
      */
-    public MultisetPermutationMth(List<T> input, long increment, int[] multisetFreqArray, Calculator calculator) {
+    MultisetPermutationMth(List<T> elements, long increment, int[] frequencies, Calculator calculator) {
 
-        super(input);
+        super(elements);
         this.calculator = calculator;
-        this.possiblePermutations  = findTotalPossiblePermutations(multisetFreqArray);
+        this.possiblePermutations  = findTotalPossiblePermutations(frequencies);
         this.increment = increment;
         checkParamIncrement(BigInteger.valueOf(increment), "Multiset permutations");
 
-        this.multisetFreqArray = multisetFreqArray;
-        this.initialSum = Arrays.stream(multisetFreqArray).sum();
+        this.frequencies = frequencies;
+        this.initialSum = Arrays.stream(frequencies).sum();
 
     }
 
@@ -72,7 +72,7 @@ public final class MultisetPermutationMth<T>  extends AbstractGenerator<T> {
         private int[] currentIndices;
 
         public Itr() {
-            currentIndices = initIndicesForMultisetPermutation(multisetFreqArray);
+            currentIndices = initIndicesForMultisetPermutation(frequencies);
         }
 
         @Override
@@ -84,13 +84,13 @@ public final class MultisetPermutationMth<T>  extends AbstractGenerator<T> {
         public List<T> next() {
             currentIndices = getIndicesForMthPermutation(currentN, initialSum);
             currentN = currentN + increment;
-            return indicesToValues(currentIndices, seedElements);
+            return indicesToValues(currentIndices);
         }
 
         private int[] getIndicesForMthPermutation(long n, int initialSum){
 
             int[] output = new int[initialSum];
-            int[] currentMultisetCount = Arrays.copyOf(multisetFreqArray, multisetFreqArray.length);
+            int[] currentMultisetCount = Arrays.copyOf(frequencies, frequencies.length);
             long sum = initialSum;
 
             BigInteger  totalPossible = possiblePermutations;

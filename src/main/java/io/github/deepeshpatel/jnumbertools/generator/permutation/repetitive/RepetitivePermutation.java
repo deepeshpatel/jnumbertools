@@ -46,12 +46,12 @@ public final class RepetitivePermutation<T>  extends AbstractGenerator<T> {
     /**
      * Implements the iterable of repetitive permutations.
      * Permutations are generated in lex order of indices of input values, considering value at each index as unique.
-     * @param input Input of size n from which repeated permutations of size 'size' will be generated.
+     * @param elements Input of size n from which repeated permutations of size 'size' will be generated.
      * @param size size of permutations. In contrast to KPermutation, size can even be greater than
      *             n, because repetition is allowed
      */
-    public RepetitivePermutation(List<T> input, int size) {
-        super(input);
+     RepetitivePermutation(List<T> elements, int size) {
+        super(elements);
         this.size = size;
     }
 
@@ -75,8 +75,8 @@ public final class RepetitivePermutation<T>  extends AbstractGenerator<T> {
             if(!hasNext()) {
                 throw new NoSuchElementException();
             }
-            List<T> result = indicesToValues(currentIndices, seedElements);
-            hasNext = nextRepetitivePermutation(currentIndices, seedElements.size());
+            List<T> result = indicesToValues(currentIndices);
+            hasNext = nextRepetitivePermutation(currentIndices, elements.size());
             return result;
         }
 

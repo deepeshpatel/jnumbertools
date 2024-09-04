@@ -37,7 +37,7 @@ public final class MultisetPermutation<T>  extends AbstractGenerator<T> {
 
     /**
      *
-     * @param input input from which permutations are generated.
+     * @param elements input from which permutations are generated.
      *             Permutations are generated in lex order of indices of input values,
      *             considering value at each index as unique.
      * @param multisetFreqArray int array containing the number of times(count) element in input can be repeated.
@@ -46,8 +46,8 @@ public final class MultisetPermutation<T>  extends AbstractGenerator<T> {
      *               multisetFreqArray[n] contains the count of n<sup>th</sup> element in input
      *               count of every element must be &gt;=1
      */
-    public MultisetPermutation(List<T> input, int[] multisetFreqArray) {
-        super(input);
+     MultisetPermutation(List<T> elements, int[] multisetFreqArray) {
+        super(elements);
 
         /*
          * TODO: enhancement advice - device algorithm to calculate next permutation
@@ -59,7 +59,7 @@ public final class MultisetPermutation<T>  extends AbstractGenerator<T> {
 
     @Override
     public Iterator<List<T>> iterator() {
-        return new UniquePermItrForElements<>(seedElements, this::indicesToValues, initialIndices);
+        return new UniquePermItrForElements<>(elements, this::indicesToValues, initialIndices);
     }
 
 }

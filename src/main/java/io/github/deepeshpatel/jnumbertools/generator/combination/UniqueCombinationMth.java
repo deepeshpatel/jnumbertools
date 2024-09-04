@@ -8,6 +8,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination;
 import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
+import io.github.deepeshpatel.jnumbertools.generator.base.MthElementGenerator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
 
 import java.math.BigInteger;
@@ -47,39 +48,48 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
  *
  * @author Deepesh Patel
  */
-public class UniqueCombinationMth<T> extends AbstractGenerator<T> {
+public final class UniqueCombinationMth<T> extends AbstractGenerator<T> implements MthElementGenerator<T> {
 
     private final int r;
     private final BigInteger increment;
     private final BigInteger nCr;
-    private final Calculator calculator;
+    final CombinadicAlgorithms algorithms;
+    private final BigInteger start;
 
     /**
-     * @param input List of N items
+     * @param elements List of N items
      * @param r size of combinations from N items. r must be &lt;= N for generating unique combinations
      * @param increment next combination in lex order to be generated after previous combination
      *               starting from the 0th(first) combination.
      */
-    public UniqueCombinationMth(List<T> input, int r, BigInteger increment, Calculator calculator) {
-        super(input);
+    UniqueCombinationMth(List<T> elements, int r, BigInteger start, BigInteger increment, Calculator calculator) {
+        super(elements);
         this.r = r;
+        this.start = start; //TODO: add check for start
         this.increment = increment;
-        checkParamCombination(seedElements.size(), r, "nth unique combination");
-        CombinatoricsUtil.checkParamIncrement(increment, "Unique Combinations");
-        this.calculator = calculator;
-        this.nCr = calculator.nCr(seedElements.size(),r);
+        checkParamCombination(elements.size(), r, "nth unique combination");
+
+        this.nCr = calculator.nCr(elements.size(),r);
+        this.algorithms = new CombinadicAlgorithms(calculator);
+    }
+
+    /**
+     * Use this method instead of iterator if you need only mth value and not 0th, mth, 2mth
+     */
+    public List<T> build() {
+        var result = algorithms.unRank(increment, nCr, elements.size(),r);
+        return indicesToValues(result);
     }
 
     @Override
     public  Iterator<List<T>> iterator() {
+        CombinatoricsUtil.checkParamIncrement(increment, "Unique Combinations");
         return new Itr();
     }
 
     private class Itr implements Iterator<List<T>> {
 
-        BigInteger rank = BigInteger.ZERO;
-        final CombinadicAlgorithms algorithms = new CombinadicAlgorithms(calculator);
-
+        BigInteger rank = start;
         int[] result;
 
         private Itr(){
@@ -96,11 +106,11 @@ public class UniqueCombinationMth<T> extends AbstractGenerator<T> {
             if(!hasNext()) {
                 throw new NoSuchElementException();
             }
-            //TODO: For iterator no need to un-rank if we find the algo for next Kth combinadic
-            //TODO: Assignment for Aditya
-            result = algorithms.unRank(rank, nCr, seedElements.size(),r);
+            //TODO priority low: For iterator no need to un-rank if we find the algo for next Kth combinadic
+            //TODO priority medium: Do not use combinadic. Use diredt method from experiments package
+            result = algorithms.unRank(rank, nCr, elements.size(),r);
             rank = rank.add(increment);
-            return indicesToValues(result, seedElements);
+            return indicesToValues(result);
         }
     }
 }

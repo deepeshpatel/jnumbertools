@@ -9,7 +9,7 @@ import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
-import static io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombinationMthTest.everyMthValue;
+import static io.github.deepeshpatel.jnumbertools.TestBase.everyMthValue;
 import static org.junit.Assert.assertEquals;
 
 public class UniquePermutationMthTest {
@@ -39,13 +39,13 @@ public class UniquePermutationMthTest {
 
     @Test
     public void shouldGenerateAllUniquePermutationsOf3Values(){
-        String expected = "[[1, 2, 3], [2, 1, 3], [3, 1, 2]]";
-        assertEquals(expected, output(2, 1,2,3));
+        String expected = "[[1, 2, 3], [2, 3, 1]]";
+        assertEquals(expected, output(3, 1,2,3));
     }
 
     @Test
     public void shouldGenerateEmptyListForNullInput(){
-        assertEquals("[[]]", output(2, (List<Object>) null));
+        assertEquals("[[]]", output(3, (List<Object>) null));
     }
 
     @Test

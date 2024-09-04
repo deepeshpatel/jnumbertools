@@ -1,7 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.generator.permutation.builder;
-
-import io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive.RepetitivePermutation;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive.RepetitivePermutationMth;
+package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
 import java.util.List;
 

@@ -9,34 +9,33 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public abstract class AbstractGenerator<T> implements Iterable<List<T>> {
+public abstract class AbstractGenerator<E> implements Iterable<List<E>> {
 
-    protected final List<T> seedElements;
+    protected final List<E> elements;
 
-    protected AbstractGenerator(List<T> seedElements) {
-        this.seedElements = (seedElements != null) ? seedElements : Collections.emptyList();
+    protected AbstractGenerator(List<E> elements) {
+        this.elements = (elements != null) ? elements : Collections.emptyList();
     }
 
-    protected List<T> indicesToValues(int[] indices, List<T> input) {
+    protected List<E> indicesToValues(int[] indices) {
 
-        var output = new ArrayList<T>(indices.length);
+        var output = new ArrayList<E>(indices.length);
 
         for(int index: indices) {
-            output.add(input.get(index));
+            output.add(elements.get(index));
         }
         return output;
     }
 
-    public Stream<List<T>> stream() {
+    public Stream<List<E>> stream() {
         return StreamSupport.stream(this.spliterator(), false);
     }
 
     //making it mathematically correct as set should contain null/empty set by definition.
     // for r=0, nPr = nCr = 1 and hence should contain one null(empty) value
-    public static<T> Iterator<List<T>> newEmptyIterator(){
-        var list = new ArrayList<List<T>>();
+    public static<E> Iterator<List<E>> newEmptyIterator(){
+        var list = new ArrayList<List<E>>();
         list.add(Collections.emptyList());
         return list.iterator();
     }
-
 }

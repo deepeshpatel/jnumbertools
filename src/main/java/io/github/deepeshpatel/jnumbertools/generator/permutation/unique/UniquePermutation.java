@@ -42,12 +42,12 @@ import java.util.List;
  */
 public final class UniquePermutation<T> extends AbstractGenerator<T> implements Iterable<List<T>>{
 
-    public UniquePermutation(List<T> input) {
-        super(input);
+    public UniquePermutation(List<T> elements) {
+        super(elements);
     }
 
     public Iterator<List<T>> iterator() {
-        return seedElements.isEmpty() ? newEmptyIterator() :
-                new UniquePermItrForElements<>(seedElements, this::indicesToValues);
+        return elements.isEmpty() ? newEmptyIterator() :
+                new UniquePermItrForElements<>(elements, this::indicesToValues);
     }
 }

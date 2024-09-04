@@ -8,10 +8,10 @@ public abstract class AbstractKPermutation<T> extends AbstractGenerator<T> {
 
     protected final int k;
 
-    public AbstractKPermutation(List<T> seed, int k) {
-        super(seed);
+    protected AbstractKPermutation(List<T> elements, int k) {
+        super(elements);
         this.k = k;
-        checkBoundsOfK(seed.size(), k);
+        checkBoundsOfK(elements.size(), k);
     }
 
     protected void checkBoundsOfK(int inputSize, int k) {

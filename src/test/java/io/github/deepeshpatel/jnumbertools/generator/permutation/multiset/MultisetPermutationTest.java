@@ -16,14 +16,14 @@ public class MultisetPermutationTest {
     public void assertCount() {
         Random random = new Random(System.currentTimeMillis());
         for(int n=1; n<=6; n++){
-            var input = Collections.nCopies(n, "A");
-            int[] multisetFreqArray =getRandomMultisetFreqArray(random, input.size());
-            long count = permutation.multiset(input, multisetFreqArray)
+            var input = Collections.nCopies(n, 'A');
+            int[] frequency = getRandomMultisetFreqArray(random, input.size());
+            long count = permutation.multiset(input, frequency)
                     .lexOrder().stream().count();
 
-            int sum = Arrays.stream(multisetFreqArray).reduce(0, Integer::sum);
+            int sum = Arrays.stream(frequency).reduce(0, Integer::sum);
             long numerator = calculator.factorial(sum).longValue();
-            long denominator = IntStream.of(multisetFreqArray).asLongStream()
+            long denominator = IntStream.of(frequency).asLongStream()
                     .reduce(1, (a, b) -> (a * calculator.factorial((int)b).longValue()));
             long expected = numerator/denominator;
             //( ∑ ai.si)! / Π(si!)
@@ -46,12 +46,12 @@ public class MultisetPermutationTest {
     }
 
     private int[] getRandomMultisetFreqArray(Random random, int length) {
-        int[] multisetFreqArray = new int[length];
-        for(int i=0; i<multisetFreqArray.length; i++) {
+        int[] frequencies = new int[length];
+        for(int i=0; i<frequencies.length; i++) {
             int value = random.nextInt(2)+1;
-            multisetFreqArray[i] = value;
+            frequencies[i] = value;
         }
-        return multisetFreqArray;
+        return frequencies;
     }
 
     @Test
@@ -97,7 +97,7 @@ public class MultisetPermutationTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionWhenMultisetFreqArrayIsNull() {
+    public void shouldThrowExceptionWhenFrequenciesIsNull() {
         var elements = List.of("A", "B", "C");
 
         String output = permutation.multiset(elements, null)
