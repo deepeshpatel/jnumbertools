@@ -16,8 +16,8 @@ public final class RepetitivePermutationBuilder<T> {
         return new RepetitivePermutation<>(elements, width);
     }
 
-    public RepetitivePermutationMth<T> lexOrderMth(long m) {
-        return new RepetitivePermutationMth<>(elements, width, m);
+    public RepetitivePermutationMth<T> lexOrderMth(long m, long start) {
+        return new RepetitivePermutationMth<>(elements, width, m, start);
     }
 
 }

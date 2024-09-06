@@ -1,13 +1,14 @@
 
-package io.github.deepeshpatel.jnumbertools.generator.product;
+package io.github.deepeshpatel.jnumbertools.generator.product.complex;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static io.github.deepeshpatel.jnumbertools.generator.product.SimpleProduct.createNext;
+import static io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProduct.createNext;
 
 public class ComplexProduct implements Iterable<List<?>> {
 
@@ -47,6 +48,9 @@ public class ComplexProduct implements Iterable<List<?>> {
 
         @Override
         public List<?> next() {
+            if(!hasNext) {
+                throw new NoSuchElementException();
+            }
             var result = indicesToList();
             hasNext = createNext(current, elements);
             return result;

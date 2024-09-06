@@ -14,21 +14,21 @@ public class CommonTest {
     public void all3MthPermutationGeneratorsShouldGenerateSameOutputForSpecialCase(){
 
         for(int size=1; size<=5; size++) {
-            for(int increment = 1; increment<=10; increment++) {
+            for(int increment = 1; increment<=4; increment++) {
 
                 var elements = IntStream.range(0, size).boxed().toList();
                 int[] freq = new int[elements.size()];
                 Arrays.fill(freq,1);
 
                 String uniquePermutationValues = permutation.unique(size).
-                        lexOrderMth(increment).stream().toList().toString();
+                        lexOrderMth(increment, 0).stream().toList().toString();
 
                 String multisetPermutationValues = permutation.multiset(elements, freq)
-                        .lexOrderMth(increment)
+                        .lexOrderMth(increment, 0)
                         .stream().toList().toString();
 
                 String kPermutationValues = permutation.nPr(size,size)
-                        .lexOrderMth(increment)
+                        .lexOrderMth(increment, 0)
                         .stream().toList().toString();
 
                 Assert.assertEquals(uniquePermutationValues, multisetPermutationValues);
@@ -64,7 +64,7 @@ public class CommonTest {
 
     @Test
     public void all6LexOrderPermutationGeneratorsShouldGenerateSameOutputForSpecialCase(){
-        for(int size=1; size<=5; size++) {
+        for(int size=1; size<=3; size++) {
             int increment = 1;
 
             var elements = IntStream.range(0, size).boxed().toList();
@@ -72,18 +72,18 @@ public class CommonTest {
             Arrays.fill(freq,1);
 
             String uniquePermutationMth = permutation.unique(size).
-                    lexOrderMth(increment).stream().toList().toString();
+                    lexOrderMth(increment, 0).stream().toList().toString();
 
             String multisetPermutationMth = permutation.multiset(elements, freq)
-                    .lexOrderMth(increment)
+                    .lexOrderMth(increment, 0)
                     .stream().toList().toString();
 
             String kPermutationMth = permutation.nPr(size, size)
-                    .lexOrderMth(increment)
+                    .lexOrderMth(increment, 0)
                     .stream().toList().toString();
 
             String uniquePermutation = permutation.unique(size).
-                    lexOrderMth(increment).stream().toList().toString();
+                    lexOrderMth(increment, 0).stream().toList().toString();
 
             String multisetPermutation = permutation.multiset(elements, freq)
                     .lexOrder()

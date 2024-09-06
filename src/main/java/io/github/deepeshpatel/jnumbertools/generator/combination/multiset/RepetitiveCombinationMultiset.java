@@ -3,7 +3,7 @@
  * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
-package io.github.deepeshpatel.jnumbertools.generator.combination;
+package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;

@@ -24,6 +24,7 @@ public final class MultisetPermutationMth<T>  extends AbstractGenerator<T> {
     private final int[] frequencies;
     private final BigInteger possiblePermutations;
     private final int initialSum;
+    private final long start;
     private final long increment;
     private final Calculator calculator;
 
@@ -38,11 +39,12 @@ public final class MultisetPermutationMth<T>  extends AbstractGenerator<T> {
      *               frequencies[n] contains the count of n<sup>th</sup> element in input
      *               count of every element must be &gt;=1
      */
-    MultisetPermutationMth(List<T> elements, long increment, int[] frequencies, Calculator calculator) {
+    MultisetPermutationMth(List<T> elements, long increment, long start, int[] frequencies, Calculator calculator) {
 
         super(elements);
         this.calculator = calculator;
         this.possiblePermutations  = findTotalPossiblePermutations(frequencies);
+        this.start = start;
         this.increment = increment;
         checkParamIncrement(BigInteger.valueOf(increment), "Multiset permutations");
 
@@ -68,7 +70,7 @@ public final class MultisetPermutationMth<T>  extends AbstractGenerator<T> {
 
     private class Itr implements Iterator<List<T>> {
 
-        private long currentN = 0;
+        private long currentN = start;
         private int[] currentIndices;
 
         public Itr() {

@@ -1,8 +1,8 @@
 package io.github.deepeshpatel.jnumbertools.entrypoint;
 
-import io.github.deepeshpatel.jnumbertools.generator.combination.MultisetCombinationBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.combination.RepetitiveCombinationBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombinationBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.combination.multiset.MultisetCombinationBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.combination.repetitive.RepetitiveCombinationBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.combination.unique.UniqueCombinationBuilder;
 
 import java.util.List;
 import java.util.stream.IntStream;

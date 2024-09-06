@@ -37,9 +37,9 @@ public final class MultisetPermutationBuilder<T> {
         return new MultisetPermutation<>(elements, frequencies);
     }
 
-    public MultisetPermutationMth<T> lexOrderMth(long m) {
+    public MultisetPermutationMth<T> lexOrderMth(long m, long start) {
         //TODO: also implement for BigInteger increment
-        return new MultisetPermutationMth<>(elements, m , frequencies, calculator);
+        return new MultisetPermutationMth<>(elements, m , start, frequencies, calculator);
     }
 
 

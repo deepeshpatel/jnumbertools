@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.generator.product;
+package io.github.deepeshpatel.jnumbertools.generator.product.complex;
 
 import org.junit.Assert;
 import org.junit.Test;

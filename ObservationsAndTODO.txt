@@ -4,17 +4,25 @@ R&D Observations:
     Trying to figure out pattern. One interesting thing I observed is that
     for factoradic/permutadic representation, it is exactly equal to number of zeroes
     if remaining digits are 1.
-    For example if factoradic is 1,0,0,0,1,1,0 you can safely say that number of cycle/orbits is 4
+    For example if factoradic is 1,0,0,0,1,1,0 you can safely say that number of
+    cycle/orbits is 4
 
 [] Observation about  permutation product : a x b = (a' x b)' where a' = (max rank - rank of a)
     for example for permutation or size 4  :  3 x 11 = (3' x 11)' = (20 x 11)' = 8' = 23-8 = 15
 
+TODO: Priority todo list
+[] add test cases for start parameter
+[] add check for start vs increment parameter
+[] replace 'hack' implementation of mth repetitive permutation with actual
 
 TODO:
+[] Add set theory API's so that this lib will be useful for
+    puzzles creators (color, arrow, killer, renban)
 [] Factoradic.fromNthPermutation() similar to Permutadic.fromNthPermutation()
 [] Work on addition formula for combinadic (and permutadic) number system
-[] repetitive permutation Mth
-[] product (algo similar to repetitive permutation)
 [] Add API to find if permutation is even or odd
-[] Add API to find the range of base of repetitive pepmutation for a given rank and permutation
+[] Add API to find the range of base of repetitive permutation for a
+    given rank and permutation
+
+
 

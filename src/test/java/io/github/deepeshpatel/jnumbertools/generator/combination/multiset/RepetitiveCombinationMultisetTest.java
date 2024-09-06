@@ -1,5 +1,6 @@
-package io.github.deepeshpatel.jnumbertools.generator.combination;
+package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
+import io.github.deepeshpatel.jnumbertools.generator.combination.multiset.RepetitiveCombinationMultiset;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -62,10 +63,10 @@ public class RepetitiveCombinationMultisetTest {
 
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWhenMultisetFreqArrayIsNull() {
-        output(List.of("A", "B"), null, 2);
+        output(List.of('A'), null, 2);
     }
 
-    private String output(List<String> elements, int[] frequencies, int size) {
+    private String output(List<?> elements, int[] frequencies, int size) {
         return combination.multiset(elements, frequencies, size)
                 .lexOrder()
                 .stream().toList().toString();

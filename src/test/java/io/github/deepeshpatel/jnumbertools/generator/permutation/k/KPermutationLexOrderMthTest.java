@@ -21,7 +21,7 @@ public class KPermutationLexOrderMthTest {
             var input = Collections.nCopies(n,"A");
             for (int k = 0; k < n; k++) {
                 long size = permutation.nPr(k, input)
-                        .lexOrderMth(increment)
+                        .lexOrderMth(increment, 0)
                         .stream().count();
 
                 double expected = Math.ceil(calculator.nPr(n,k).longValue()/(double)increment);
@@ -33,7 +33,7 @@ public class KPermutationLexOrderMthTest {
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
         var iterable = permutation.nPr(2,"A", "B", "C")
-                .lexOrderMth(2);
+                .lexOrderMth(2, 0);
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
         Assert.assertEquals(lists1, lists2);
@@ -60,7 +60,7 @@ public class KPermutationLexOrderMthTest {
         BigInteger expectedRank = BigInteger.ZERO;
 
         var permutations = permutation.nPr(40,20)
-                .lexOrderMth(increment)
+                .lexOrderMth(increment, BigInteger.ZERO)
                 .stream().toList();
 
 
@@ -72,9 +72,17 @@ public class KPermutationLexOrderMthTest {
         }
     }
 
+    @Test
+    public void test_start_parameter_greater_than_0() {
+        var output = permutation.nPr(3, 'a','b','c','d','e')
+                .lexOrderMth(20, 5)
+                .stream().toList().toString();
+        Assert.assertEquals("[[a, c, e], [c, a, d], [d, e, a]]", output);
+    }
+
     private String getResultViaDirectIncrement(List<String> input, int k, int increment) {
         return permutation.nPr(k, input)
-                .lexOrderMth(increment)
+                .lexOrderMth(increment, 0)
                 .stream().toList().toString();
     }
 

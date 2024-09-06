@@ -16,31 +16,31 @@ public class AllExamples {
         JNumberTools.permutations().unique("A","B","C").lexOrder().forEach(System.out::println);
 
         //every mth unique permutation
-        JNumberTools.permutations().unique("A","B","C").lexOrderMth(3).forEach(System.out::println);
+        JNumberTools.permutations().unique("A","B","C").lexOrderMth(3,0).forEach(System.out::println);
 
         //all repetitive permutations
         JNumberTools.permutations().repetitive(3,"A","B","C").lexOrder().forEach(System.out::println);
 
         //every mth repetitive permutation
-        JNumberTools.permutations().repetitive(3,"A","B","C").lexOrderMth(3).forEach(System.out::println);
+        JNumberTools.permutations().repetitive(3,"A","B","C").lexOrderMth(3, 0).forEach(System.out::println);
 
         //all k-permutation in lex order
         JNumberTools.permutations().nPr(2,"A","B","C").lexOrder().forEach(System.out::println);
 
         //every mth k-permutation in lex order
-        JNumberTools.permutations().nPr(2,"A","B","C").lexOrderMth(2).forEach(System.out::println);
+        JNumberTools.permutations().nPr(2,"A","B","C").lexOrderMth(2, 0).forEach(System.out::println);
 
         //all k-permutation in combination order
         JNumberTools.permutations().nPr(2,"A","B","C").combinationOrder().forEach(System.out::println);
 
         //every mth k-permutation in lex order
-        JNumberTools.permutations().nPr(2,"A","B","C").combinationOrderMth(3).forEach(System.out::println);
+        JNumberTools.permutations().nPr(2,"A","B","C").combinationOrderMth(3, 0).forEach(System.out::println);
 
         //all multiset permutations in lex order
         JNumberTools.permutations().multiset(List.of("A","B","C"),new int[]{1,2,1}).lexOrder().forEach(System.out::println);
 
         //every mth multiset permutation
-        JNumberTools.permutations().multiset(List.of("A","B","C"),new int[]{1,2,1}).lexOrderMth(3).forEach(System.out::println);
+        JNumberTools.permutations().multiset(List.of("A","B","C"),new int[]{1,2,1}).lexOrderMth(3, 0).forEach(System.out::println);
 
         //all unique combination in lex order
         JNumberTools.combinations().unique(2,"A","B","C").lexOrder().forEach(System.out::println);
@@ -51,7 +51,7 @@ public class AllExamples {
         //all repetitive combinations in lex order
         JNumberTools.combinations().repetitive(2,"A","B","C").lexOrder().forEach(System.out::println);
 
-        //every mth repetitive combinations in lex order //TODO: some work in progress
+        //every mth repetitive combinations in lex order //TODO: work in progress
         JNumberTools.combinations().repetitive(2,"A","B","C").lexOrderMth(2, 0).forEach(System.out::println);
 
         //all multiset combination in lex order
@@ -94,7 +94,7 @@ public class AllExamples {
                 .andDistinct(2, List.of( "Ricotta","Mozzarella","Cheddar"))
                 .andMultiSelect(2, List.of( "Tomato Ketchup","White Sauce","Green Chutney"))
                 .andInRange(2,3,List.of("tomato","capsicum","onion","paneer","corn"))
-                .lexOrderMth(1500).build();
+                .lexOrderMth(1500, 0).build();
 
 
         //rank of unique permutation

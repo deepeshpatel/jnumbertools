@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.generator.product;
+package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,7 +18,7 @@ public class SimpleProduct implements Iterable<List<?>> {
         return StreamSupport.stream(this.spliterator(), false);
     }
 
-    static boolean createNext(int[] current, List<? extends List> elements) {
+    public static boolean createNext(int[] current, List<? extends List> elements) {
         for (int i = 0, j = current.length - 1; j >= 0; j--, i++) {
             if (current[j] == elements.get(j).size() - 1) {
                 current[j] = 0;

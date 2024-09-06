@@ -1,7 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.entrypoint;
 
-import io.github.deepeshpatel.jnumbertools.generator.product.SimpleProductBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.product.ComplexProductBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.product.complex.ComplexProductBuilder;
 
 import java.util.List;
 
@@ -21,7 +21,8 @@ public final class CartesianProduct {
         return new SimpleProductBuilder(elements);
     }
 
-    public <E> SimpleProductBuilder simpleProductOf(E... elements) {
+    @SafeVarargs
+    public final <E> SimpleProductBuilder simpleProductOf(E... elements) {
         return simpleProductOf(List.of(elements));
     }
 
@@ -29,7 +30,8 @@ public final class CartesianProduct {
         return new ComplexProductBuilder(quantity, elements, calculator);
     }
 
-    public <E> ComplexProductBuilder complexProductOf(int quantity, E... elements) {
+    @SafeVarargs
+    public final <E> ComplexProductBuilder complexProductOf(int quantity, E... elements) {
         return complexProductOf(quantity, List.of(elements));
     }
 }

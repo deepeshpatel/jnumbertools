@@ -48,10 +48,12 @@ public final class RepetitivePermutationMth<T>  extends AbstractGenerator<T> {
 
     private final int size;
     private final long increment;
+    private final long start;
 
-    RepetitivePermutationMth(List<T> elements, int size, long increment) {
+    RepetitivePermutationMth(List<T> elements, int size, long increment, long start) {
         super(elements);
         this.size = size;
+        this.start = start;
         this.increment = increment;
         CombinatoricsUtil.checkParamIncrement(BigInteger.valueOf(increment), " repetitive permutations");
     }
@@ -64,7 +66,11 @@ public final class RepetitivePermutationMth<T>  extends AbstractGenerator<T> {
     private class NumberIterator implements Iterator<List<T>> {
 
         private final int[] currentIndices = new int[size];
-        private boolean hasNext = true;
+        private boolean hasNext;
+
+        public NumberIterator() {
+            hasNext = nextRepetitiveKthPermutation(currentIndices, elements.size(), start);
+        }
 
         @Override
         public boolean hasNext() {

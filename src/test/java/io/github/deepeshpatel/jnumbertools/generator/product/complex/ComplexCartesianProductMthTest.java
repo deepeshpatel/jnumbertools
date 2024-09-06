@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.generator.product;
+package io.github.deepeshpatel.jnumbertools.generator.product.complex;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -11,7 +11,7 @@ import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 public class ComplexCartesianProductMthTest {
 
     @Test
-    public void should_generate_correctly_for_differnt_m_values() {
+    public void should_generate_correctly_for_different_m_values() {
 
         var pizzaBase = List.of("Small ","Medium","Large");
         var sauce = List.of( "Tomato Ketchup","White Sauce","Green Chutney");
@@ -26,9 +26,34 @@ public class ComplexCartesianProductMthTest {
 
         for(int m=2; m<=10; m++){
             var expected = combProduct.lexOrder().stream().toList().get(m);
-            var result = combProduct.lexOrderMth(m).build();
+            var result = combProduct.lexOrderMth(m, 0).build();
             Assert.assertEquals(expected, result);
         }
+    }
+
+    @Test
+    public void should_generate_correct_mth_value() {
+
+        var pizzaBase = List.of("Small ","Medium","Large");
+        var sauce = List.of( "Tomato Ketchup","White Sauce","Green Chutney");
+        var cheese = List.of( "Ricotta","Mozzarella","Cheddar");
+        var toppings = List.of("tomato","capsicum","onion","paneer","corn");
+
+        var combProduct  = cartesianProduct
+                .complexProductOf(1, pizzaBase)
+                .andDistinct(2, cheese)
+                .andMultiSelect(2, sauce)
+                .andInRange(3, toppings.size(), toppings);
+
+        int start = 800;
+        int m = 50;
+
+        var all = combProduct.lexOrder().stream().toList();
+        var mth = combProduct.lexOrderMth(m,start).iterator();
+
+        Assert.assertEquals(all.get(start), mth.next());
+        Assert.assertEquals(all.get(start+m), mth.next());
+
     }
 
     @Test
@@ -94,26 +119,12 @@ public class ComplexCartesianProductMthTest {
         testForEveryMth(1000000000L, every10ToThePower_9thRow, productBuilder);
         testForEveryMth(10000000000L, every10ToThePower_10thRow, productBuilder);
         testForEveryMth(100000000000L, every10ToThePower_11thRow, productBuilder);
-
-//        var allValuesIterator = productBuilder.lexOrder().stream().iterator();
-//        long c = 0;
-//        System.out.println("Start..");
-//
-//        long skip = 1000000000L;
-//
-//        System.out.println(allValuesIterator.next());
-//        for (long j = skip; j < totalCombinations; j+=skip) {
-//            for(int i=1; i<skip; i++) {
-//                allValuesIterator.next();
-//            }
-//            System.out.println(j + " " + allValuesIterator.next());
-//        }
     }
 
     private void testForEveryMth(long m, String[] rows, ComplexProductBuilder builder) {
         long mm = -m;
         for (String row : rows) {
-            Assert.assertEquals(row, builder.lexOrderMth(mm += m).build().toString());
+            Assert.assertEquals(row, builder.lexOrderMth(mm += m, 0).build().toString());
         }
     }
 

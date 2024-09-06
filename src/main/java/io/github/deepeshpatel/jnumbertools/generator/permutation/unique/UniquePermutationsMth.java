@@ -49,13 +49,15 @@ import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUt
  */
 public final class UniquePermutationsMth<T> extends AbstractGenerator<T> {
 
+    private final BigInteger start;
     private final BigInteger increment;
     BigInteger numOfPermutations;
     private final int[] initialIndices;
     private final Calculator calculator;
 
-    UniquePermutationsMth(List<T> elements, BigInteger increment, Calculator calculator) {
+    UniquePermutationsMth(List<T> elements, BigInteger increment, BigInteger start, Calculator calculator) {
         super(elements);
+        this.start = start;
         this.increment = increment;
         checkParamIncrement(increment, "unique permutations");
         this.calculator = calculator;
@@ -81,7 +83,7 @@ public final class UniquePermutationsMth<T> extends AbstractGenerator<T> {
 
     private class KthItemIterator implements  Iterator<List<T>> {
 
-        BigInteger nextK = BigInteger.ZERO;
+        BigInteger nextK = start;//BigInteger.ZERO;
 
         @Override
         public boolean hasNext() {

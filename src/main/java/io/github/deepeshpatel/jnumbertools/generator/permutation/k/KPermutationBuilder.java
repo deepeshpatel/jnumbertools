@@ -25,20 +25,20 @@ public final class KPermutationBuilder<T> {
         return new KPermutationCombinationOrder<>(elements, r);
     }
 
-    public KPermutationLexOrderMth<T> lexOrderMth(long m) {
-        return lexOrderMth(BigInteger.valueOf(m));
+    public KPermutationLexOrderMth<T> lexOrderMth(long m, long start) {
+        return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
-    public KPermutationLexOrderMth<T> lexOrderMth(BigInteger m) {
-        return new KPermutationLexOrderMth<>(elements, r, m, calculator);
+    public KPermutationLexOrderMth<T> lexOrderMth(BigInteger m, BigInteger start) {
+        return new KPermutationLexOrderMth<>(elements, r, m, start, calculator);
     }
 
-    public KPermutationCombinationOrderMth<T> combinationOrderMth(long m) {
-        return combinationOrderMth(BigInteger.valueOf(m));
+    public KPermutationCombinationOrderMth<T> combinationOrderMth(long m, long start) {
+        return combinationOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
-    public KPermutationCombinationOrderMth<T> combinationOrderMth(BigInteger m) {
-        return new KPermutationCombinationOrderMth<>(elements, r, m, calculator);
+    public KPermutationCombinationOrderMth<T> combinationOrderMth(BigInteger m, BigInteger start) {
+        return new KPermutationCombinationOrderMth<>(elements, r, m, start, calculator);
     }
 
 }

@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.generator.combination;
+package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.Assert;
@@ -58,9 +58,9 @@ public class UniqueCombinationMthTest {
     @Test
     public void shouldGenerateMthCombinationIncrementingValuesInBetween() {
 
-        List<String> input = List.of("A","B","C","D","E","F","G","H","I","J");
+        var input = List.of('A','B','C','D','E','F');
         for(int k=1; k<=input.size()/2; k++) {
-            for(int increment=1; increment<=32;increment++) {
+            for(int increment=1; increment<=10;increment++) {
                 String expected = getExpectedResultViaOneByOneIteration(input, k,increment);
                 String output   = getResultViaDirectIncrement(input,k,increment);
                 Assert.assertEquals(expected,output);
@@ -68,13 +68,20 @@ public class UniqueCombinationMthTest {
         }
     }
 
-    private String getResultViaDirectIncrement(List<String> input, int r, int increment) {
+    @Test
+    public void test_start_parameter_greater_than_0() {
+        var output = combination.unique(2, 'A','B','C','D')
+                .lexOrderMth(2,3).stream().toList();
+        Assert.assertEquals("[[B, C], [C, D]]",output.toString());
+    }
+
+    private String getResultViaDirectIncrement(List<?> input, int r, int increment) {
         return combination.unique(r, input)
                 .lexOrderMth(increment, 0)
                 .stream().toList().toString();
     }
 
-    private String getExpectedResultViaOneByOneIteration(List<String> input, int r, int increment) {
+    private String getExpectedResultViaOneByOneIteration(List<?> input, int r, int increment) {
         var stream = combination.unique(r, input).lexOrder().stream();
         return TestBase.everyMthValue(stream, increment).toString();
     }

@@ -9,7 +9,7 @@ import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
 import io.github.deepeshpatel.jnumbertools.entrypoint.Combinations;
 import io.github.deepeshpatel.jnumbertools.entrypoint.Permutations;
 import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
-import io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombination;
+import io.github.deepeshpatel.jnumbertools.generator.combination.unique.UniqueCombination;
 
 import java.math.BigInteger;
 import java.util.Iterator;
@@ -42,6 +42,7 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
     final BigInteger totalPermutations;
     final long permutationsPerList;
     final BigInteger increment;
+    final BigInteger start;
     private final Calculator calculator;
 
     /**
@@ -56,9 +57,10 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
      *                  This is important because for large k, it is impractical to generate all possible k! permutations
      *                  and then increment to the desired position
      */
-     KPermutationCombinationOrderMth(List<T> elements, int k, BigInteger increment, Calculator calculator) {
+     KPermutationCombinationOrderMth(List<T> elements, int k, BigInteger increment, BigInteger start, Calculator calculator) {
         super(elements, k);
         CombinatoricsUtil.checkParamIncrement(increment, "mth K-Permutation");
+        this.start = start;
         this.increment = increment;
         this.totalPermutations = calculator.nPr(elements.size(), k);
         this. permutationsPerList = calculator.factorial(k).longValue();
@@ -72,7 +74,7 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
 
     private class Itr implements Iterator<List<T>> {
 
-        BigInteger currentIncrement = BigInteger.ZERO;
+        BigInteger currentIncrement = start;
 
         public Itr() {
         }
@@ -95,7 +97,7 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
 
             return permutationIncrement == 0 ?
                     new Permutations(calculator).unique(next).lexOrder().iterator().next() :
-                    new Permutations(calculator).unique(next).lexOrderMth(permutationIncrement).build();
+                    new Permutations(calculator).unique(next).lexOrderMth(permutationIncrement,0).build();
         }
     }
 }

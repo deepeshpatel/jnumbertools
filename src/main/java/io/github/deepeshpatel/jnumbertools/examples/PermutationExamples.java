@@ -50,14 +50,14 @@ public class PermutationExamples {
     static void printMthUniquePermutationOfNumbersInLexOrder() {
         System.out.println("\n*** Every 10th unique permutation of size 4 in lex order ***");
         JNumberTools.permutations().unique(4)
-                .lexOrderMth(10)
+                .lexOrderMth(10, 0)
                 .forEach(System.out::println);
     }
 
     static void printMthUniquePermutationOfElementsInLexOrder() {
         System.out.println("\n*** Every 10th unique permutation of given 4 elements in lex order ***");
         JNumberTools.permutations().unique("Red", "Green", "Blue","Yellow")
-                .lexOrderMth(10)
+                .lexOrderMth(10, 0)
                 .forEach(System.out::println);
     }
 
@@ -78,14 +78,14 @@ public class PermutationExamples {
     static void printMthRepetitivePermutationOfNumbersInLexOrder() {
         System.out.println("\n*** Every 4th repetitive permutation of 2 items out of 3 in lex order ***");
         JNumberTools.permutations().repetitive(2, 3)
-                .lexOrderMth(4)
+                .lexOrderMth(4, 0)
                 .forEach(System.out::println);
     }
 
     static void printMthRepetitivePermutationOfElementsInLexOrder() {
         System.out.println("\n*** Every 4th repetitive permutation of 2 elements out of given 3 elements in lex order ***");
         JNumberTools.permutations().repetitive(2,"Red", "Green", "Blue")
-                .lexOrderMth(4)
+                .lexOrderMth(4, 0)
                 .forEach(System.out::println);
     }
 
@@ -116,7 +116,7 @@ public class PermutationExamples {
         int[] frequencies = {1,2,2};
 
         JNumberTools.permutations().multiset(elements, frequencies)
-                .lexOrderMth(5)
+                .lexOrderMth(5, 0)
                 .forEach(System.out::println);
     }
 
@@ -128,7 +128,7 @@ public class PermutationExamples {
         int[] frequencies = {1,2,2};
 
         JNumberTools.permutations().multiset(elements, frequencies)
-                .lexOrderMth(5)
+                .lexOrderMth(5, 0)
                 .forEach(System.out::println);
     }
 

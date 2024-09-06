@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.generator.product;
+package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.Assert;
@@ -22,7 +22,7 @@ public class SimpleCartesianProductMthTest {
                     .lexOrderMth(m, 0).stream().toList();
 
             var expected = permutation.repetitive(3,decimalDigits)
-                    .lexOrderMth(m).stream().toList();
+                    .lexOrderMth(m, 0).stream().toList();
 
             Assert.assertEquals(expected, result);
 

@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.generator.combination;
+package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
 import java.util.List;
 

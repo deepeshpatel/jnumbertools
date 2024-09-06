@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.generator.product;
+package io.github.deepeshpatel.jnumbertools.generator.product.complex;
 
 import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
 import io.github.deepeshpatel.jnumbertools.entrypoint.Combinations;
@@ -44,8 +44,8 @@ public final class ComplexProductBuilder {
         return new ComplexProduct(all);
     }
 
-    public ComplexProductMth lexOrderMth(long m) {
-        return new ComplexProductMth(m, builders);
+    public ComplexProductMth lexOrderMth(long m, long start) {
+        return new ComplexProductMth(m, start, builders);
     }
 
 

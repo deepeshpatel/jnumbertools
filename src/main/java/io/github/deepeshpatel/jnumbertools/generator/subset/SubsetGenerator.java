@@ -6,7 +6,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombination;
+import io.github.deepeshpatel.jnumbertools.generator.combination.unique.UniqueCombination;
 
 import java.util.Iterator;
 import java.util.List;

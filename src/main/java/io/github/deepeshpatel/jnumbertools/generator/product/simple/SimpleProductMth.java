@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.generator.product;
+package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,7 +32,7 @@ public class SimpleProductMth implements Iterable<List<?>> {
     private class Itr implements Iterator<List<?>> {
 
         private final int[] indices = new int[elements.size()];
-        private boolean hasNext = true;
+        private boolean hasNext;
 
         public Itr() {
             this.hasNext = nextMthCartesian(indices, start);
@@ -54,7 +54,7 @@ public class SimpleProductMth implements Iterable<List<?>> {
         }
 
         protected List<List<?>> indicesToList(List<List<?>> elements, int[] indices) {
-            var list = new ArrayList(elements.size());
+            ArrayList list = new ArrayList(elements.size());
             for (int i = 0; i < elements.size(); i++) {
                 list.add(elements.get(i).get(indices[i]));
             }

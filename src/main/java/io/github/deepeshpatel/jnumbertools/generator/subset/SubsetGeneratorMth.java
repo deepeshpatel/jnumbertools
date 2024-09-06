@@ -20,8 +20,6 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> implements
     private final int from;
     private final int to;
 
-    //TODO: use start instead of zero
-
     public SubsetGeneratorMth(int from ,int to, BigInteger m, BigInteger start, List<T> elements, Calculator calculator) {
         super(elements);
         this.from = from;
@@ -29,7 +27,7 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> implements
         this.increment = m;
         this.calculator = calculator;
         combinations = new Combinations(calculator);
-        initialM = increment.add(totalSubsetsBeforeRange());
+        initialM = start.add(increment).add(totalSubsetsBeforeRange());
     }
 
     /**
@@ -66,12 +64,10 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> implements
     }
 
     @Override
-    public Iterator<List<T>> iterator() {
+    public synchronized Iterator<List<T>> iterator() {
 
-        synchronized (this) {
-            if (limit == null) {
-                limit = calculator.totalSubsetsInRange(0, to, elements.size());
-            }
+        if (limit == null) {
+            limit = calculator.totalSubsetsInRange(0, to, elements.size());
         }
         return new Itr();
     }

@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.generator.combination;
+package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.MthElementGenerator;
@@ -26,7 +26,7 @@ public class RepetitiveCombinationMth <T> extends AbstractGenerator<T> implement
     }
 
     public List<T> build() {
-        return new RepetitiveCombination<>(elements, r).stream().toList().get((int)increment);
+        return new RepetitiveCombination<>(elements, r).stream().toList().get((int)(increment+ start));
     }
 
     @Override

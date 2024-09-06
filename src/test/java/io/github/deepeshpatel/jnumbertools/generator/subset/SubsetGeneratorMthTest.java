@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.subsets;
 
@@ -21,10 +22,10 @@ public class SubsetGeneratorMthTest {
     }
 
     @Test
-    public void should_generate_all_subsets_for_10elements_and_different_m_for_range_3_6() {
-        var elements = List.of('0','1','2','3','4','5','6','7','8','9');
+    public void should_generate_all_subsets_for_5elements_and_different_m_for_range_3_6() {
+        var elements = List.of('0','1','2','3','4','5');
 
-        for(int from=1; from<elements.size()/2; from++) {
+        for(int from=1; from<elements.size(); from++) {
             for(int to=from; to<elements.size(); to++) {
                 for(int m=1; m<6; m++) {
                     var allValues = subsets.of(elements).inRange(from, to).lexOrder().stream();
@@ -45,5 +46,18 @@ public class SubsetGeneratorMthTest {
             var  result =  subsets.of(elements).all().lexOrderMth(m, 0).stream().toList();
             Assert.assertEquals(expected, result);
         }
+    }
+
+    @Test
+    public void test_start_parameter_greater_than_0() {
+        var builder = subsets.of('A','B','C','D');
+
+        var listOfAll = builder.all()
+                .lexOrderMth(5, 3).stream().collect(Collectors.toList());
+        Assert.assertEquals("[[C], [B, C], [A, C, D]]", listOfAll.toString());
+
+        var listOfRange = builder.inRange(2,3)
+                .lexOrderMth(5,3).stream().collect(Collectors.toList());
+        Assert.assertEquals("[[B, C], [A, C, D]]", listOfRange.toString());
     }
 }

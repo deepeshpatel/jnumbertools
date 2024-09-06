@@ -26,7 +26,7 @@ public class FactoradicAlgorithms {
         return factoradic.stream().mapToInt(Integer::intValue).toArray();
     }
 
-    public static  int[] intToFactoradicKnowSize(BigInteger k, int knownSize) {
+    public static  int[] intToFactoradicKnownSize(BigInteger k, int knownSize) {
 
         int[] factoradic = new int[knownSize];
 
@@ -66,6 +66,6 @@ public class FactoradicAlgorithms {
     }
 
     public static int[] unRank(BigInteger rank, int size) {
-        return factoradicToMthPermutation(intToFactoradicKnowSize(rank,size));
+        return factoradicToMthPermutation(intToFactoradicKnownSize(rank,size));
     }
 }

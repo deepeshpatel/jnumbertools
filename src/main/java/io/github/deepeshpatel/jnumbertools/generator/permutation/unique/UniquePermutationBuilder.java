@@ -22,13 +22,13 @@ public final class UniquePermutationBuilder<T> {
         return new UniquePermutation<>(elements);
     }
 
-    public UniquePermutationsMth<T> lexOrderMth(BigInteger m) {
+    public UniquePermutationsMth<T> lexOrderMth(BigInteger m,  BigInteger start) {
         //TODO: check if we can skip the factorial calculation
-        return new UniquePermutationsMth<>(elements, m, calculator);
+        return new UniquePermutationsMth<>(elements, m,start, calculator);
     }
 
-    public UniquePermutationsMth<T> lexOrderMth(long m) {
-        return lexOrderMth(BigInteger.valueOf(m));
+    public UniquePermutationsMth<T> lexOrderMth(long m, long start) {
+        return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
     public AbstractGenerator<T> singleSwap() {

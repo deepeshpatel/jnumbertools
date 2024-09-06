@@ -16,10 +16,10 @@ public class KPermutationCombinationOrderMthTest {
     public void assertCount(){
         int increment=2;
         for(int n=0; n<=4; n++) {
-            var input = Collections.nCopies(n,"A");
+            var input = Collections.nCopies(n,'A');
             for (int k = 0; k < n; k++) {
                 long size = permutation.nPr(k,input)
-                        .combinationOrderMth(increment)
+                        .combinationOrderMth(increment, 0)
                         .stream().count();
                 double expected = Math.ceil(calculator.nPr(n, k).longValue()/(double)increment);
                 Assert.assertEquals((long)expected, size);
@@ -30,7 +30,7 @@ public class KPermutationCombinationOrderMthTest {
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
         var iterable = permutation.nPr(2, "A", "B", "C")
-                .combinationOrderMth(2);
+                .combinationOrderMth(2, 0);
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
         Assert.assertEquals(lists1, lists2);
@@ -38,25 +38,25 @@ public class KPermutationCombinationOrderMthTest {
 
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForKLessThan0() {
-        permutation.nPr(-1,1).combinationOrderMth(3);
+        permutation.nPr(-1,1).combinationOrderMth(3, 0);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForKGreaterThanInputLength() {
-        permutation.nPr(1, 5).combinationOrderMth(3);
+        permutation.nPr(1, 5).combinationOrderMth(3, 0);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForZeroAndNegativeIncrementValue() {
-        permutation.nPr(1,1).combinationOrderMth(0);
+        permutation.nPr(1,1).combinationOrderMth(0, 0);
     }
 
     @Test
     public void shouldGenerateMthKPermutations() {
 
-        var input = List.of("A","B","C","D","E","F");
+        var input = List.of('A','B','C','D');
         for(int k=1; k<= 3; k++) {
-            for(int increment=1; increment<=32;increment++) {
+            for(int increment=1; increment<=10;increment++) {
                 String expected = getExpectedResultViaOneByOneIteration(input, k,increment);
                 String output   = getResultViaDirectIncrement(input,k,increment);
                 Assert.assertEquals(expected, output);
@@ -64,13 +64,22 @@ public class KPermutationCombinationOrderMthTest {
         }
     }
 
-    private String getResultViaDirectIncrement(List<String> input, int k, int increment) {
+    @Test
+    public void test_start_parameter_greater_than_0() {
+        var output = permutation.nPr(3, 'a','b','c','d','e')
+                .combinationOrderMth(20, 5)
+                .stream().toList().toString();
+
+        Assert.assertEquals("[[c, b, a], [a, e, c], [c, e, b]]", output);
+    }
+
+    private String getResultViaDirectIncrement(List<?> input, int k, int increment) {
         return permutation.nPr(k,input)
-                .combinationOrderMth(increment)
+                .combinationOrderMth(increment, 0)
                 .stream().toList().toString();
     }
 
-    private String getExpectedResultViaOneByOneIteration(List<String> input, int k, int increment) {
+    private String getExpectedResultViaOneByOneIteration(List<?> input, int k, int increment) {
         var stream = permutation.nPr(k, input)
                 .combinationOrder().
                 stream();

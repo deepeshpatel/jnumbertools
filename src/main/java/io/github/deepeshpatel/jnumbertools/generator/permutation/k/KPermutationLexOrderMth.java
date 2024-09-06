@@ -42,6 +42,7 @@ public final class KPermutationLexOrderMth<T> extends AbstractKPermutation<T>  {
     final int[] initialValue;
     final BigInteger nPk;
     final BigInteger increment;
+    final BigInteger start;
 
     /**
      * Implements the iterable generating every n<sup>th</sup> unique permutation of size k.
@@ -56,10 +57,11 @@ public final class KPermutationLexOrderMth<T> extends AbstractKPermutation<T>  {
      *                  and then increment to the desired position
      */
 
-     KPermutationLexOrderMth(List<T> elements, int k, BigInteger increment, Calculator calculator) {
+     KPermutationLexOrderMth(List<T> elements, int k, BigInteger increment, BigInteger start, Calculator calculator) {
         super(elements, k);
         CombinatoricsUtil.checkParamIncrement(increment, "K-Permutation");
 
+        this.start = start;
         this.increment = increment;
         this.initialValue = IntStream.range(0,k).toArray();
         this.nPk = calculator.nPr(elements.size(),initialValue.length);
@@ -73,7 +75,7 @@ public final class KPermutationLexOrderMth<T> extends AbstractKPermutation<T>  {
     private class Itr implements Iterator<List<T>> {
 
         int[] next = initialValue;
-        BigInteger  n = BigInteger.ZERO;
+        BigInteger  n = start;
 
         public Itr() {}
 

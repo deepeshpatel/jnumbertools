@@ -43,14 +43,14 @@ class KPermutationExamples {
     static void printMthKPermutationOfNumbersInLexOrder() {
         System.out.println("\n*** Every 3rd 2-Permutation of 3 items in lex order ***");
         JNumberTools.permutations().nPr(3,2)
-                .lexOrderMth(3)
+                .lexOrderMth(3, 0)
                 .forEach(System.out::println);
     }
 
     static void printMthKPermutationOfElementsInLexOrder() {
         System.out.println("\n*** Every 3rd 2-Permutation of 3 given elements in lex order ***");
         JNumberTools.permutations().nPr(2, "Red", "Green", "Blue")
-                .lexOrderMth(3)
+                .lexOrderMth(3, 0)
                 .forEach(System.out::println);
     }
 
@@ -59,7 +59,7 @@ class KPermutationExamples {
         System.out.println("\n*** Print every one hundred octillion-th(10^29 th) 20-Permutation of 40 elements(20P40) *** ");
 
         JNumberTools.permutations().nPr(40,20)
-                .lexOrderMth(new BigInteger("100000000000000000000000000000"))
+                .lexOrderMth(new BigInteger("100000000000000000000000000000"), BigInteger.ZERO)
                 .forEach(System.out::println);
     }
 
@@ -83,7 +83,7 @@ class KPermutationExamples {
 
         System.out.println("\n***  Print every 3rd 2-permutation of 4 items in combination order  ***");
         JNumberTools.permutations().nPr(4,2)
-                .combinationOrderMth(3)
+                .combinationOrderMth(3, 0)
                 .forEach(System.out::println);
     }
 
@@ -91,7 +91,7 @@ class KPermutationExamples {
 
         System.out.println("\n***  Print every 3rd 2-permutation of 4 items in combination order  ***");
         JNumberTools.permutations().nPr(2,"Red", "Green", "Blue","Yellow")
-                .combinationOrderMth(3)
+                .combinationOrderMth(3, 0)
                 .forEach(System.out::println);
     }
 

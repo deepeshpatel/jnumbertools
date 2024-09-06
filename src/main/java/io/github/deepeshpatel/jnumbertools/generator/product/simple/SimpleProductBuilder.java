@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.generator.product;
+package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,8 @@ public final class SimpleProductBuilder {
         return this;
     }
 
-    public <E> SimpleProductBuilder and(E... elements) {
+    @SafeVarargs
+    public final <E> SimpleProductBuilder and(E... elements) {
         return and(List.of(elements));
     }
 

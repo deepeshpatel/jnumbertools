@@ -5,7 +5,7 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
-import io.github.deepeshpatel.jnumbertools.generator.combination.UniqueCombination;
+import io.github.deepeshpatel.jnumbertools.generator.combination.unique.UniqueCombination;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.itertor.UniquePermItrForElements;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.unique.UniquePermutation;
 
