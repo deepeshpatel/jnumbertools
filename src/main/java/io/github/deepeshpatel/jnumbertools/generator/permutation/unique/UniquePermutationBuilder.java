@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
 import java.math.BigInteger;
@@ -23,7 +23,6 @@ public final class UniquePermutationBuilder<T> {
     }
 
     public UniquePermutationsMth<T> lexOrderMth(BigInteger m,  BigInteger start) {
-        //TODO: check if we can skip the factorial calculation
         return new UniquePermutationsMth<>(elements, m,start, calculator);
     }
 
@@ -32,8 +31,7 @@ public final class UniquePermutationBuilder<T> {
     }
 
     public AbstractGenerator<T> singleSwap() {
-        //TODO: Implement this
-        throw new RuntimeException("method not yet implemented..");
+        return new UniquePermutationSingleSwap<>(elements);
     }
 
     public AbstractGenerator<T> fast() {

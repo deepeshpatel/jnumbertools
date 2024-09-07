@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 
 import java.util.List;
@@ -23,13 +23,13 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
     }
 
     public RepetitiveCombinationMth<T> lexOrderMth(long m, long start) {
-        return new RepetitiveCombinationMth<>(elements, size, m, start);
+        return new RepetitiveCombinationMth<>(elements, size, m, start, calculator);
     }
 
     public synchronized long count() {
 
         if (count == -1) {
-            count = calculator.totalRepetitiveCombinations(elements.size(), size).longValue();
+            count = calculator.nCrRepetitive(elements.size(), size).longValue();
         }
         return count;
     }

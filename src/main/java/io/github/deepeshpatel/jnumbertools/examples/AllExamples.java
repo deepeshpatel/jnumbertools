@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.examples;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -109,7 +109,7 @@ public class AllExamples {
         //rank of unique combination
         JNumberTools.rankOf().uniqueCombination(8, 1,2,3,4);
 
-        //un-ranking: same as finding mth
+        //un-ranking: same as finding mth. Remove it
         JNumberTools.unRankingOf().uniquePermutation(BigInteger.valueOf(23),4);
         JNumberTools.unRankingOf().kPermutation(BigInteger.valueOf(1000), 8,4);
         JNumberTools.unRankingOf().uniqueCombination(BigInteger.valueOf(35),8,4);

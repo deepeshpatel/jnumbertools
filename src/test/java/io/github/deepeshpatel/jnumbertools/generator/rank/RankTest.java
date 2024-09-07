@@ -1,7 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.rank;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
-import io.github.deepeshpatel.jnumbertools.entrypoint.Permutations;
+import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.Permutations;
 import org.junit.Assert;
 import org.junit.Test;
 

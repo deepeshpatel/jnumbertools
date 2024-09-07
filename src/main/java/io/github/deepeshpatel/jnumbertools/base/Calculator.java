@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.entrypoint;
+package io.github.deepeshpatel.jnumbertools.base;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -21,6 +21,11 @@ public final class Calculator {
         this(10,10,10);
     }
 
+    /**
+     * @param nCrCacheSize pre cache nCr values till n = nCrCacheSize
+     * @param nPrCacheSize  pre cache nPr values till n = nPrCacheSize
+     * @param factorialCacheSize pre cache factorial values till factorialCacheSize
+     */
     public Calculator(int nCrCacheSize, int nPrCacheSize, int factorialCacheSize) {
         setupFactorialCache(factorialCacheSize);
         setupCombinationCache(nCrCacheSize);
@@ -51,6 +56,20 @@ public final class Calculator {
         }
     }
 
+    /**
+     * @return binomial coefficient with repetition allowed or
+     * The number of ways to choose a sample of r elements from a set of n
+     * distinct object where order does not matter and replacements are allowed.
+     */
+    public BigInteger nCrRepetitive(int n, int r) {
+        return nCr(n+r-1, r);
+    }
+
+    /**
+     * @return binomial coefficient when repetition is not allowed or
+     * The number of ways to choose a sample of r elements from a set of n distinct
+     * objects where order does not matter and replacements are not allowed.
+     */
     public BigInteger nCr(int n, int r) {
 
         if(r == n || r == 0)    { return BigInteger.ONE; }
@@ -62,6 +81,10 @@ public final class Calculator {
         return value != null ? value : nCrMemo.put(n,r, nCr(n-1,r-1).add(nCr(n-1,r)));
     }
 
+    /**
+     * @return The number of ways to choose a sample of r elements from a set of n
+     * distinct objects where order does matter and replacements are not allowed.
+     */
     public BigInteger  nPr(int n, int r) {
 
         if(r == 0) return BigInteger.ONE;
@@ -71,6 +94,9 @@ public final class Calculator {
         return value != null ? value : nPrMemo.put(n,r, nPr(n-1, r-1).multiply(BigInteger.valueOf(n)));
     }
 
+    /**
+     * @return number of ways of arranging n distinct objects into an ordered sequence
+     */
     public BigInteger factorial(int n) {
         if( n < fList.size()) {
             return fList.get(n);
@@ -85,6 +111,9 @@ public final class Calculator {
         return product;
     }
 
+    /**
+     * @return base^exponent
+     */
     public BigInteger pow(long base, long exponent) {
         return pow(BigInteger.valueOf(base), BigInteger.valueOf(exponent));
     }
@@ -99,6 +128,13 @@ public final class Calculator {
         return result;
     }
 
+    /**
+     *
+     * @param from
+     * @param to
+     * @param noOfElements
+     * @return total number of possible subsets of size in a range [from,to] for a given noOfElements
+     */
     public BigInteger totalSubsetsInRange(int from, int to, int noOfElements) {
 
         if(from==0 && to==noOfElements) return pow(2, noOfElements);
@@ -108,10 +144,6 @@ public final class Calculator {
             sum = sum.add(nCr(noOfElements, i));
         }
         return sum;
-    }
-
-    public BigInteger totalRepetitiveCombinations(int noOfElements, int r) {
-        return nCr(noOfElements+r-1, r);
     }
 
     //Can be replaced by Google Guava Table. Using this because of

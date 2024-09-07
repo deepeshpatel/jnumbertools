@@ -17,13 +17,12 @@
                 All unique permutations of input elements in lex order.
             </td>
             <td>
-                <pre><code class="language-java">JNumberTools
-    .permutationsOf(size)
-    .unique()
+                <pre><code class="language-java">JNumberTools.permutations()
+    .unique(3).lexOrder()
     .forEach(System.out::println);
 &nbsp;
-JNumberTools.permutationsOf("A","B","C")
-    .unique()
+JNumberTools.permutations()
+    .unique("A","B","C").lexOrder()
     .forEach(System.out::println);</code></pre>
             </td>
             <td>
@@ -34,54 +33,71 @@ JNumberTools.permutationsOf("A","B","C")
                 [C,A,B]&nbsp;<br>
                 [C,B,A]
             </td>
-            <td>m!</td>
+            <td>n!</td>
         </tr>
         <tr>
             <td>2</td>
-            <td>N<sup>th</sup> unique permutation in lex order</td>
+            <td>M<sup>th</sup> unique permutation in lex order</td>
             <td>
-                Generate permutations with repeated values starting from 0<sup>th</sup> 
-                permutation(input) and then generate every n<sup>th</sup> permutation in 
-                lexicographical order of indices of input values.<br><br>
+                Generate every m<sup>th</sup> permutation in 
+                lexicographical order of indices of input values  starting from given start index 
+                <br><br>
                 This is important because say, if we need to generate next 100 trillionth permutation
                 of 100 items then it will take months to compute if we go sequentially and then 
                 increment to the desired permutation because the total # of permutations is 
                 astronomical &nbsp;(100!= 9.3326 x 10<sup>157</sup>)
             </td>
             <td>
-                <pre><code class="language-java">JNumberTools
-    .permutationsOf(size)
-    .uniqueNth(increment)
+                <pre><code class="language-java">JNumberTools.permutations()
+    .unique(3).lexOrderMth(increment,start)
     .forEach(System.out::println);
 &nbsp;
-JNumberTools
-    .permutationsOf("A","B","C")
-    .uniqueNth(increment)
+JNumberTools.permutations()
+    .unique("A","B","C").lexOrderMth(increment,start)
     .forEach(System.out::println);</code></pre>
             </td>
             <td>
                     [A,B,C]<br>
-                    [B,A,C]<br>
-                    [C,A,B]
+                    [B, C, A]
             </td>
-            <td>m!/n</td>
+            <td>n!/m</td>
         </tr>
         <tr>
             <td>3</td>
+            <td>Uniques Permutation in single swap order</td>
+            <td>Generates stream of permutation in single swap order as per Heap's algorithm.
+                This is faster than lex-order generation</td>
+            <td>
+            <pre><code class="language-java">JNumberTools
+    .permutations().unique('a','b','c')
+    .singleSwap().stream().toList();
+            </code></pre>
+            </td>
+            <td></td>
+            <td>n!</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>Unique permutation parallel generation</td>
+            <td>Generates all permutations rapidly in parallel. order is not maintained </td>
+            <td>API under development</td>
+            <td>NA</td>
+            <td>n!</td>
+        </tr>
+        <tr>
+            <td>5</td>
             <td>Repetitive Permutation in lex order</td>
             <td>
                 This is same as generating base-n numbers of max size r-digits with given n symbols, 
                 starting from zero in lex order.
             </td>
             <td>
-                <pre><code class="language-java">JNumberTools
-    .permutationsOf(size)
-    .repetitive(repetitionSize)
+                <pre><code class="language-java">JNumberTools.permutations()
+    .repetitive(width, base).lexOrder()
     .forEach(System.out::println);
     &nbsp;
-JNumberTools
-    .permutationsOf("A","B","C")
-    .repetitive(repetitionSize)
+JNumberTools.permutations()
+    .repetitive(width, "A","B","C").lexOrder()
     .forEach(System.out::println);</code></pre>
             </td>
             <td>
@@ -95,24 +111,22 @@ JNumberTools
                 [C, B]&nbsp;<br>
                 [C, C]
             </td>
-            <td>m<sup>r</sup></td>
+            <td>n<sup>r</sup></td>
         </tr>
         <tr>
-            <td>4</td>
-            <td>N<sup>th</sup> Repetitive Permutation in lex order</td>
+            <td>6</td>
+            <td>M<sup>th</sup> Repetitive Permutation in lex order</td>
             <td>
                 This is same as generating AP series of base-n numbers with given 
-                <i>n</i>-symbols and <i>a</i>=0, <i>d=m</i> and with max-digits = <i>r</i>
+                <i>n</i>-symbols and <i>a</i>=start, <i>d=m</i> and max-digits = <i>r</i>
             </td>
             <td>
-                <pre><code class="language-java">JNumberTools
-    .permutationsOf(size)
-    .repetitiveNth(repetitionSize, increment)
+                <pre><code class="language-java">JNumberTools.permutations()
+    .repetitive(width, base).lexOrderMth(increment, start)
     .forEach(System.out::println);
     &nbsp;
-JNumberTools
-    .permutationsOf("A","B","C")
-    .repetitiveNth(repetitionSize, increment)
+JNumberTools.permutations()
+    .repetitive(width, "A","B","C").lexOrderMth(increment, start)
     .forEach(System.out::println);</code></pre>
             </td>
             <td>
@@ -120,28 +134,24 @@ JNumberTools
                 [B, A]<br>
                 [C, A]
             </td>
-            <td>m<sup>r</sup>/n</td>
+            <td>n<sup>r</sup>/m</td>
         </tr>
         <tr>
-            <td>5</td>
+            <td>7</td>
             <td><i>k</i>-permutation</td>
             <td>
-                For a given <i>m </i>elements, it generates all unique permutations of size
-                <i>k</i> where 0 ≤ <i>k</i> ≤ <i>m</i>
+                Generates all unique permutations of size
+                <i>k</i> where 0 ≤ <i>k</i> ≤ <i>n</i> and n is the number of input elements.
                 <br>
                 In number theory, this is also known as <i>k</i>-permutation.
             </td>
             <td>
-                <pre><code class="language-java">JNumberTools
-    .permutationsOf(size)
-    .k(k)
-    .lexOrder()
+                <pre><code class="language-java">JNumberTools.permutations()
+    .nPr(n,k).lexOrder()
     .forEach(System.out::println);
     &nbsp;
-JNumberTools
-    .permutationsOf("A","B","C")
-    .k(k)
-    .lexOrder()
+JNumberTools.permutations()
+    .nPr(k, "A","B","C").lexOrder()
     .forEach(System.out::println);</code></pre>
             </td>
             <td>
@@ -152,14 +162,14 @@ JNumberTools
                 [C, A]<br>
                 [C, B]
             </td>
-            <td> <sup>m</sup>P<sub>k</sub> </td>
+            <td> <sup>n</sup>P<sub>k</sub> </td>
         </tr>
         <tr>
-            <td>6</td>
-            <td>N<sup>th</sup> <i>k</i>-permutation</td>
+            <td>8</td>
+            <td>M<sup>th</sup> <i>k</i>-permutation</td>
             <td>
-                Generates every n<sup>th</sup> k-permutation in lex order without explicitly 
-                computing all the permutations preceding it.<br>
+                Generates every m<sup>th</sup> k-permutation in lex order without 
+                computing permutations preceding it.<br>
                 This concept is important because the total number of permutations can grow astronomically
                 large. For instance, the number of permutations of 100 elements selected 50 at a time is 
                 <sup>100</sup>P<sub>50</sub> = 3.068518756 x 10<sup>93</sup>, which is way beyond the practical limit to be generated 
@@ -171,40 +181,33 @@ JNumberTools
                 Permutational Number System</strong></a>
             </td>
             <td>
-                <pre><code class="language-java">JNumberTools
-    .permutationsOf(size)
-    .k(k)
-    .lexOrderNth(increment)
+                <pre><code class="language-java">JNumberTools.permutations()
+    .nPr(n,k).lexOrderMth(increment,start)
     .forEach(System.out::println);
 &nbsp;
-JNumberTools
-    .permutationsOf("A","B","C")
-    .k(k)
-    .lexOrderNth(increment)
+JNumberTools.permutations()
+    .nPr(k, "A","B","C").lexOrderMth(increment,start)
     .forEach(System.out::println);</code></pre>
             </td>
             <td> [A, B]<br> [B, A]<br> [C, A] </td>
-            <td> <sup>m</sup>P<sub>k</sub>/n </td>
+            <td> <sup>n</sup>P<sub>k</sub>/m </td>
         </tr>
         <tr>
-            <td>7</td>
+            <td>9</td>
             <td> <i>k</i>-permutation combination order </td>
             <td>
                 Generates all k-permutations in the lexicographical order of combination. 
                 For example, [C,A] comes before [B,C] because combination-wise [C,A] = [A,C] 
-                which comes before [B,C]<BR>Note that the API does not sort the output to achieve 
+                <BR>Note that the API does not sort the output to achieve 
                 this, but it generates the permutation in said order, so it is very efficient.
             </td>
             <td>
-                <pre><code class="language-java">JNumberTools
-    .permutationsOf(size)
-    .k(k)
-    .combinationOrder()
+                <pre><code class="language-java">JNumberTools.permutations()
+    .nPr(n,k).combinationOrder()
     .forEach(System.out::println);
     &nbsp;
-JNumberTools
-    .permutationsOf("A","B","C")
-    .k(k).combinationOrder()
+JNumberTools.permutations()
+    .nPr(k, "A","B","C").combinationOrder()
     .forEach(System.out::println);</code></pre>
             </td>
             <td>
@@ -215,26 +218,23 @@ JNumberTools
                 [B, C]<br>
                 [C, B]
             </td>
-            <td> <sup>m</sup>P<sub>k</sub> </td>
+            <td> <sup>n</sup>P<sub>k</sub> </td>
         </tr>
         <tr>
-            <td>8</td>
-            <td> N<sup>th</sup> <i>k</i>-permutation combination order N<sup>th</sup></td>
+            <td>10</td>
+            <td> M<sup>th</sup> <i>k</i>-permutation in combination order</td>
             <td>
-                Generates every n<sup>th</sup> k-permutation in the lexicographical order of combination.<br>
+                Generates every m<sup>th</sup> k-permutation in the lexicographical order of combination.<br>
                 This API does not sort or search to achieve this but generates the desired permutation
-                directly, so it is very efficient.
+                on the fly, so it is very efficient.
             </td>
             <td>
-                <pre><code class="language-java">JNumberTools
-    .permutationsOf(size)
-    .k(k)
-    .combinationOrderNth(increment)
+                <pre><code class="language-java">JNumberTools.permutations()
+    .nPr(n,k).combinationOrderMth(increment, start)
     .forEach(System.out::println);
     &nbsp;
-JNumberTools
-    .permutationsOf("A","B","C")
-    .k(k).combinationOrderNth(increment)
+JNumberTools.permutations()
+    .nPr(k, "A","B","C").combinationOrderMth(increment, start)
     .forEach(System.out::println);</code></pre>
             </td>
             <td>
@@ -242,10 +242,10 @@ JNumberTools
                 [A, C]<br>
                 [B, C]
             </td>
-            <td> <sup>m</sup>P<sub>k</sub>/n </td>
+            <td> <sup>n</sup>P<sub>k</sub>/m </td>
         </tr>
         <tr>
-            <td>9</td>
+            <td>11</td>
             <td> Multi-set permutation in lex order </td>
             <td>
                 Permutation, where every item has an associated frequency that denotes how many
@@ -253,16 +253,11 @@ JNumberTools
                 3 apples and 2 oranges.
             </td>
             <td>
-                <pre><code class="language-java">int[] multisetFreqArray = new int[]{1,2};
-JNumberTools
-    .permutationsOf(size)
-    .multiset(multisetFreqArray)
-    .forEach(System.out::println);
-&nbsp;
-JNumberTools
-.permutationsOf("A","B")
-.multiset(multisetFreqArray)
-.forEach(System.out::println);</code></pre>
+                <pre><code class="language-java">var elements = List.of("A","B");
+int[] frequencies = new int[]{1,2};
+JNumberTools.permutations().multiset(elements, frequencies)
+    .lexOrder()
+    .forEach(System.out::println);</code></pre>
             </td>
             <td>
                 [A,B,B]<br>
@@ -272,37 +267,35 @@ JNumberTools
             <td> ( ∑ ai . si )! / Π(si!) </td>
         </tr>
         <tr>
-            <td> 10 </td>
-            <td> N<sup>th</sup> multi-set permutation in lex order </td>
+            <td>12</td>
+            <td> M<sup>th</sup> multi-set permutation in lex order </td>
             <td>
-                Generates every n<sup>th</sup> multiset-permutation.<br>This API does not search for the
-                n<sup>th</sup> permutation in a sorted list but directly generates the next n<sup>th</sup> 
-                multiset-permutation and hence it is very efficient.
+                Generates every m<sup>th</sup> multiset-permutation from a given start index.<br>This API does not search for the
+                m<sup>th</sup> permutation in a sorted list but directly generates the desired permutation
+                 and hence it is very efficient.
             </td>
             <td>
-                <pre><code class="language-java">int increment = 2;
-int[] multisetFreqArray = new int[]{1,2};	
+                <pre><code class="language-java">long start = 0;
+long increment = 2;
+var elements = List.of("A","B");
+int[] frequencies = new int[]{1,2};
 &nbsp;
 JNumberTools
-    .permutationsOf(size)
-    .multisetNth(increment,multisetFreqArray)
+    .permutations().multiset(elements, frequencies)
+    .lexOrderMth(increment, start)
     .forEach(System.out::println);
-&nbsp;
-JNumberTools
-    .permutationsOf("A","B")
-    .multisetNth(increment,multisetFreqArray)
-    .forEach(System.out::println);</code></pre>
+</code></pre>
             </td>
             <td>
                 [A,B,B]<br> [B,B,A]
             </td>
-            <td> ( ∑ ai . si )! / (n*Π(si!)) </td>
+            <td> ( ∑ ai . si )! / (m*Π(si!)) </td>
         </tr>
         <tr>
-            <td> 11 </td>
+            <td>13</td>
             <td> Rank of unique permutation </td>
             <td>
-                Finds the rank of a given unique permutation. For example, [2,1,0] is the 5th permutation 
+                Finds the rank of a given unique permutation on the fly. For example, [2,1,0] is the 5th permutation 
                 of 3 elements starting from 0, hence its rank is 5.
             </td>
             <td>
@@ -316,41 +309,44 @@ int rank = JNumberTools
             <td> NA </td>
         </tr>
         <tr>
-            <td> 12 </td>
+            <td>14</td>
             <td> Rank of <i>k</i>-permutation </td>
-            <td> Finds the rank of a given <i>k</i>-permutation </td>
+            <td> Finds the rank of a given <i>k</i>-permutation on the fly </td>
             <td>
-                <pre><code class="language-java">int[] permutation = new int[]{1,3,0};
-int size=3;
-int rank = JNumberTools.rankOf()
-    .kPermutation(size, permutation).intValue();
+                <pre><code class="language-java">//size = 8 implies elements are 0,1,2,3,4,5,6 and 7
+var rank = JNumberTools.rankOf().kPermutation(8,4,6,2,0);
+System.out.println(rank); //prints 1000
+//4,6,2,0 is the 1000th permutation of 4-elements from [0,7] 
                 </code></pre>
             </td>
-            <td>4</td>
+            <td>1000</td>
             <td>
-                &nbsp;
+               NA
             </td>
         </tr>
         <tr>
-            <td>13</td>
+            <td>15</td>
             <td>
                 Rank of repetitive permutation
             </td>
             <td>
-                TODO: This can be easily achieved. It’s just a base conversion from a given number system to a decimal (base 10) number system.
+                Finds the rank of a given repetitive permutation
+            </td>
+            <td><pre><code class="language-java">//find the rank of given repetitive permutation of 4 elements selected out of 5 elements.
+var rank = JNumberTools.rankOf()
+    .repeatedPermutation(5, new Integer[]{1,3,1,3});
+    System.out.println(rank);// prints 208 
+                </code></pre>
             </td>
             <td>
-                &nbsp;
+                208
             </td>
             <td>
-                &nbsp;
-            </td>
-            <td>
-                &nbsp;
+                NA
             </td>
         </tr>
         <tr>
-            <td>14</td>
+            <td>16</td>
             <td>
                 Rank of multiset permutation
             </td>

@@ -3,13 +3,30 @@
  * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
-package io.github.deepeshpatel.jnumbertools.entrypoint;
+package io.github.deepeshpatel.jnumbertools.base;
 
 public final class JNumberTools {
 
     private JNumberTools() {
     }
 
+    /**
+     * utility method to generate permutations.
+     * Examples:
+     * <pre>
+     *     all unique permutations in lex order
+     *     JNumberTools.permutations().unique("A","B","C").lexOrder().forEach(System.out::println);
+     *
+     *     every mth unique permutation
+     *     JNumberTools.permutations().unique("A","B","C").lexOrderMth(3,0).forEach(System.out::println);
+     *
+     *     all repetitive permutations
+     *
+     *
+     * </pre>
+     * @return Permutations A helper class to generate various types of permutations.
+     *
+     */
     public static Permutations permutations() {
         return new Permutations();
     }

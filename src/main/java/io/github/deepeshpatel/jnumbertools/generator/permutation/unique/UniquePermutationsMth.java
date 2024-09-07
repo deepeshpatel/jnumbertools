@@ -5,7 +5,7 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.FactoradicAlgorithms;
 
@@ -83,7 +83,7 @@ public final class UniquePermutationsMth<T> extends AbstractGenerator<T> {
 
     private class KthItemIterator implements  Iterator<List<T>> {
 
-        BigInteger nextK = start;//BigInteger.ZERO;
+        BigInteger nextK = start;
 
         @Override
         public boolean hasNext() {

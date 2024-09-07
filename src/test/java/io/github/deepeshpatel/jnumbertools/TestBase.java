@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.*;
+import io.github.deepeshpatel.jnumbertools.base.*;
 
 import java.util.List;
 import java.util.stream.Stream;

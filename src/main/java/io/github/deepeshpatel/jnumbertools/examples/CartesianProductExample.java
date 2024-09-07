@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.examples;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
 

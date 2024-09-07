@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.entrypoint;
+package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.generator.permutation.k.KPermutationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.multiset.MultisetPermutationBuilder;
@@ -10,6 +10,26 @@ import java.util.stream.IntStream;
 
 import static java.util.Arrays.asList;
 
+
+/**
+ * Utility class to generate 12 different types of permutations
+ *
+ * Examples -
+ *
+ * Generate all unique permutations in lex order
+ * <pre>JNumberTools.permutations().unique("A","B","C").lexOrder()</pre>
+ *
+ * Generate very mth unique permutation staring from given index
+ * <pre>JNumberTools.permutations().unique("A","B","C").lexOrderMth(3,0)</pre>
+ *
+ * Generate all repetitive permutations in lex order
+ * <pre>JNumberTools.permutations().repetitive(3,"A","B","C").lexOrder()</pre>
+ *
+ * Generate every mth repetitive permutation staring from given index
+ * <pre>JNumberTools.permutations().repetitive(3,"A","B","C").lexOrderMth(3, 0)</pre>
+ *
+ *
+ */
 public final class Permutations {
 
     private final Calculator calculator;

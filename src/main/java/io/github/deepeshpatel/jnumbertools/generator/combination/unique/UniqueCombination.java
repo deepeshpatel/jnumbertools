@@ -7,7 +7,10 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.checkParamCombination;
@@ -54,7 +57,7 @@ public final class UniqueCombination<T> extends AbstractGenerator<T> {
      * @param elements List of N items
      * @param r number of combinations from N items. r must be &lt;= N for generating unique combinations
      */
-    public UniqueCombination(List<T> elements, int r) {
+    UniqueCombination(List<T> elements, int r) {
         super(elements);
         this.r = r;
         checkParamCombination(elements.size(),r, "unique combinations");

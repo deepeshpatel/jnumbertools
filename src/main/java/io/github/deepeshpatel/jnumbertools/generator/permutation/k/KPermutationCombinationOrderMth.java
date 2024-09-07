@@ -5,11 +5,10 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
-import io.github.deepeshpatel.jnumbertools.entrypoint.Combinations;
-import io.github.deepeshpatel.jnumbertools.entrypoint.Permutations;
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.Combinations;
+import io.github.deepeshpatel.jnumbertools.base.Permutations;
 import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
-import io.github.deepeshpatel.jnumbertools.generator.combination.unique.UniqueCombination;
 
 import java.math.BigInteger;
 import java.util.Iterator;
@@ -92,7 +91,7 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
             currentIncrement = currentIncrement.add(increment);
 
             List<T> next = combinationListNumber.equals(BigInteger.ZERO) ?
-                    new UniqueCombination<>(elements, k).iterator().next() :
+                    new Combinations(calculator).unique(k,elements).lexOrder().iterator().next() :
                     new Combinations(calculator).unique(k, elements).lexOrderMth(combinationListNumber, BigInteger.ZERO).build();
 
             return permutationIncrement == 0 ?

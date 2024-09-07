@@ -42,7 +42,7 @@ import java.util.List;
  */
 public final class UniquePermutation<T> extends AbstractGenerator<T> implements Iterable<List<T>>{
 
-    public UniquePermutation(List<T> elements) {
+    UniquePermutation(List<T> elements) {
         super(elements);
     }
 

@@ -1,8 +1,8 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.complex;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
-import io.github.deepeshpatel.jnumbertools.entrypoint.Combinations;
-import io.github.deepeshpatel.jnumbertools.entrypoint.Subsets;
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.Combinations;
+import io.github.deepeshpatel.jnumbertools.base.Subsets;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 
 import java.util.ArrayList;

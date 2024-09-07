@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.entrypoint;
+package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
 import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;

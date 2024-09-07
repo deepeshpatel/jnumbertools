@@ -5,8 +5,8 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
+import io.github.deepeshpatel.jnumbertools.base.Combinations;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.generator.combination.unique.UniqueCombination;
 
 import java.util.Iterator;
 import java.util.List;
@@ -74,8 +74,7 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
 
         public OnDemandIterator(int start) {
             this.start = start;
-            current = new UniqueCombination<>(elements,this.start).iterator();
-            current = new UniqueCombination<>(elements,this.start).iterator();
+            current  = new Combinations(null).unique(start, elements).lexOrder().iterator();
         }
 
         @Override
@@ -84,7 +83,7 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
                 return true;
             }
             if(start < toSize) {
-                current = new UniqueCombination<>(elements,++start).iterator();
+                current = new Combinations(null).unique(++start, elements).lexOrder().iterator();
                 return hasNext();
             }
             return false;

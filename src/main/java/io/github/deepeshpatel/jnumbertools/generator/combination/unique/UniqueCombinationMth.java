@@ -5,7 +5,7 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
 import io.github.deepeshpatel.jnumbertools.generator.base.MthElementGenerator;
@@ -75,6 +75,7 @@ public final class UniqueCombinationMth<T> extends AbstractGenerator<T> implemen
 
     /**
      * Use this method instead of iterator if you need only mth value and not 0th, mth, 2mth
+     * creating iterator is expensive because hasNext() implementation requires expensive calculations.
      */
     public List<T> build() {
         var result = algorithms.unRank(increment, nCr, elements.size(),r);
@@ -107,7 +108,7 @@ public final class UniqueCombinationMth<T> extends AbstractGenerator<T> implemen
                 throw new NoSuchElementException();
             }
             //TODO priority low: For iterator no need to un-rank if we find the algo for next Kth combinadic
-            //TODO priority medium: Do not use combinadic. Use diredt method from experiments package
+            //TODO priority medium: Do not use combinadic. Use optimized method from experiments package
             result = algorithms.unRank(rank, nCr, elements.size(),r);
             rank = rank.add(increment);
             return indicesToValues(result);

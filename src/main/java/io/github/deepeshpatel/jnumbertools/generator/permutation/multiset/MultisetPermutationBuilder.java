@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
 
 import java.util.List;
 
@@ -38,7 +38,6 @@ public final class MultisetPermutationBuilder<T> {
     }
 
     public MultisetPermutationMth<T> lexOrderMth(long m, long start) {
-        //TODO: also implement for BigInteger increment
         return new MultisetPermutationMth<>(elements, m , start, frequencies, calculator);
     }
 

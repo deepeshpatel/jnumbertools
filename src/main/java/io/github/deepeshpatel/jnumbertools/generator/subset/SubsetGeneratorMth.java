@@ -1,7 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
-import io.github.deepeshpatel.jnumbertools.entrypoint.Combinations;
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.Combinations;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.MthElementGenerator;
 
@@ -20,7 +20,7 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> implements
     private final int from;
     private final int to;
 
-    public SubsetGeneratorMth(int from ,int to, BigInteger m, BigInteger start, List<T> elements, Calculator calculator) {
+    SubsetGeneratorMth(int from ,int to, BigInteger m, BigInteger start, List<T> elements, Calculator calculator) {
         super(elements);
         this.from = from;
         this.to = to;
@@ -32,7 +32,7 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> implements
 
     /**
      * Use this method instead of iterator if you need only mth value and not 0th, mth, 2mth
-     * creating iterator is expensive because hasNext() implementation requires big calculations.
+     * creating iterator is expensive because hasNext() implementation requires expensive calculations.
      */
     public List<T> build() {
         var mthIndices =  mth(initialM);

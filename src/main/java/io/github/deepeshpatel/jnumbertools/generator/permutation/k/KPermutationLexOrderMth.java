@@ -5,7 +5,7 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
 import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
 

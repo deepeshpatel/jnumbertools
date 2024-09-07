@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.rank;
 
-import io.github.deepeshpatel.jnumbertools.entrypoint.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.Assert;
 import org.junit.Test;
 

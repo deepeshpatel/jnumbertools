@@ -20,7 +20,7 @@ public class RepetitiveCombinationTest {
             for(int r=0; r<=n; r++) {
                 long count = combination.repetitive(r, input)
                         .lexOrder().stream().count();
-                long expectedCount = calculator.nCr(n+r-1,r).longValue();
+                long expectedCount = calculator.nCrRepetitive(n,r).longValue();
                 Assert.assertEquals(expectedCount, count);
             }
         }
