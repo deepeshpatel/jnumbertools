@@ -12,7 +12,7 @@
  * <LI><a href="#rpls">Repetitive permutation of multiset</a>: Repetitive permutations of given size with constraint on repetition count</LI>
  *
  * <hr>
- * <Strong><p id="up">Generating unique permutations</p></Strong>
+ * <Strong><p id="up">Generating unique permutations</Strong>
  * <pre>
  *     JNumberTools.permutationsOf("A","B","C")
  *                 .unique()
@@ -27,7 +27,7 @@
  * [C, B, A]
  * </pre>
  * <hr>
- * <Strong><p id="nup">Generating Mth unique permutations</p></Strong>
+ * <Strong><p id="nup">Generating Mth unique permutations</Strong>
  * <pre>
  *         JNumberTools.permutationsOf("A","B","C")
  *                 .uniqueMth(2)
@@ -41,7 +41,7 @@
 
  * </pre>
  * <hr>
- * <Strong><p id="kp">Generating K-permutations</p></Strong>
+ * <Strong><p id="kp">Generating K-permutations</Strong>
  *  <pre>
  *  JNumberTools.permutationsOf("A","B","C")
  *      .k(2)
@@ -56,7 +56,7 @@
  * [C, B]
  *  </pre>
  * <hr>
- * <Strong><p id="nkp">Generating N<sup>th</sup> K permutation</p></Strong>
+ * <Strong><p id="nkp">Generating N<sup>th</sup> K permutation</Strong>
  * <pre>
  *  JNumberTools.permutationsOf("A","B","C")
  *      .kMth(2,2) //size =2 and increment to every 2<sup>nd</sup> permutation starting from 0<sup>th</sup>
@@ -69,7 +69,7 @@
  * </pre>
  *
  * <hr>
- * <Strong><p id="rp">Generating repetitive permutations</p></Strong>
+ * <Strong><p id="rp">Generating repetitive permutations</Strong>
  * <pre>
  *      JNumberTools.permutationsOf("A","B","C")
  *            .repetitive(2)
@@ -88,7 +88,7 @@
  * </pre>
  *
  * <hr>
- * <Strong><p id="nrp">Generating N<sup>th</sup> repetitive permutation</p></Strong>
+ * <Strong><p id="nrp">Generating N<sup>th</sup> repetitive permutation</Strong>
  * <pre>
  *      JNumberTools.permutationsOf("A","B")
  *                 .repetitiveMth(3,2)
@@ -103,7 +103,7 @@
  * </pre>
  *
  * <hr>
- * <Strong><p id="rpls">Generating repetitive permutations of multiset</p></Strong>
+ * <Strong><p id="rpls">Generating repetitive permutations of multiset</Strong>
  * <pre>
  *     //here A can be repeated max 2 times and B can not be repeated(1 time)
  *     JNumberTools.permutationsOf("A","B")

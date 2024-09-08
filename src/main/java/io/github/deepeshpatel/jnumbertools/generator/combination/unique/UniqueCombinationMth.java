@@ -7,7 +7,6 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
 import io.github.deepeshpatel.jnumbertools.generator.base.MthElementGenerator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
 
@@ -16,8 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
-
-import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.checkParamCombination;
 
 /**
  * Implements the iterable generating every n<sup>th</sup> unique combination of size k.
@@ -84,7 +81,7 @@ public final class UniqueCombinationMth<T> extends AbstractGenerator<T> implemen
 
     @Override
     public  Iterator<List<T>> iterator() {
-        CombinatoricsUtil.checkParamIncrement(increment, "Unique Combinations");
+        AbstractGenerator.checkParamIncrement(increment, "Unique Combinations");
         return new Itr();
     }
 

@@ -12,9 +12,10 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Implements the Iterable to generate all subsets of set in a given size range.
- * Implementation does not check for duplicates in input collection and treats every item
- * in a collection as unique
+ * Generates all subsets of a set within a specified size range.
+ * <p>
+ * This class implements {@link Iterable} to provide subsets of the input set with sizes ranging from {@code fromSize} to {@code toSize}.
+ * It treats each item in the collection as unique and does not check for duplicates in the input collection.
  *
  * <pre>
  *     Code example:
@@ -27,7 +28,7 @@ import java.util.List;
  *             .inRange(1, 3)
  *             .forEach(System.out::println);
  *
- * will generate following output
+ * will generate the following output:
  * [A]
  * [B]
  * [C]
@@ -37,6 +38,8 @@ import java.util.List;
  * [A, B, C]
  * </pre>
  *
+ * @param <T> the type of elements in the subsets
+ * @since 1.0.3
  * @author Deepesh Patel
  */
 public final class SubsetGenerator<T> extends AbstractGenerator<T> {
@@ -45,19 +48,18 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
     private final int toSize;
 
     /**
+     * Constructs a {@link SubsetGenerator} to generate subsets within the specified size range.
+     * <p>
+     * When both {@code fromSize} and {@code toSize} are negative, no output will be generated.
+     * If {@code fromSize} is less than or equal to zero and {@code toSize} is greater than or equal
+     * to zero, one empty set will be generated. This behavior is mathematically correct, though it
+     * may seem unintuitive.
      *
-     * When fromSize and toSize both are -ve, will not generate any output but when
-     * fromSize is &lt;=0 and toSize &gt;= will generate one empty set. This sounds
-     * unintuitive but is mathematically correct.
-     *
-     * @param elements input set from which subsets are generated.
-     *             Implementation does not check for duplicates in input collection
-     *             and treats every item in a collection as unique.
-     *
-     * @param fromSize minimum-size(inclusive) of subset.
-     * @param toSize max-size(inclusive) of subset. toSize must be &gt;= fromSize
+     * @param elements the list of elements from which subsets are generated. Each item in the collection is treated as unique.
+     * @param fromSize the minimum size (inclusive) of the subsets to generate.
+     * @param toSize the maximum size (inclusive) of the subsets to generate. Must be greater than or equal to {@code fromSize}.
      */
-    SubsetGenerator(List<T> elements, int fromSize, int toSize){
+    SubsetGenerator(List<T> elements, int fromSize, int toSize) {
         super(elements);
         this.fromSize = fromSize;
         this.toSize = toSize;
@@ -68,21 +70,29 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
         return new OnDemandIterator(fromSize);
     }
 
+    /**
+     * Iterator class for generating subsets on demand.
+     */
     class OnDemandIterator implements Iterator<List<T>> {
         int start;
         Iterator<List<T>> current;
 
+        /**
+         * Constructs an {@link OnDemandIterator} starting from the specified subset size.
+         *
+         * @param start the starting size for generating subsets
+         */
         public OnDemandIterator(int start) {
             this.start = start;
-            current  = new Combinations(null).unique(start, elements).lexOrder().iterator();
+            current = new Combinations(null).unique(start, elements).lexOrder().iterator();
         }
 
         @Override
         public boolean hasNext() {
-            if(current.hasNext()) {
+            if (current.hasNext()) {
                 return true;
             }
-            if(start < toSize) {
+            if (start < toSize) {
                 current = new Combinations(null).unique(++start, elements).lexOrder().iterator();
                 return hasNext();
             }

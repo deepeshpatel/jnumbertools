@@ -26,7 +26,7 @@ public class CombinationProductExample {
         var pizzaBase = List.of("Small ","Medium", "Large");
         var sauce = List.of( "Tomato Ketchup","White Sauce","Green Chutney");
         var cheese = List.of( "Ricotta ","Mozzarella","Cheddar");
-        var toppings = List.of("tomato","capsicum","onion","paneer","corn");
+        var toppings = List.of(1,2,3,4);
 
         var mthList = JNumberTools
                 .cartesianProduct().complexProductOf(1, pizzaBase)

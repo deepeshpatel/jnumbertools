@@ -79,4 +79,10 @@ public class KPermutationCombinationOrderTest {
                 .toList();
         Assert.assertEquals("[[]]", output.toString());
     }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void shouldGenerateEmptyListForKGreaterThanInputSize() {
+        permutation.nPr(4, 'A', 'B', 'C')
+                .combinationOrder();
+    }
 }

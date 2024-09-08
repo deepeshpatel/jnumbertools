@@ -6,42 +6,47 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
- *
- * Utility for generating r-combinations of input = {1, 2 . . ., n}
+ * Utility for generating r-combinations of input = {1, 2 . . ., n}.
  * <p>
- * Generates r combinations from n=input.length items.
- * combinations are generated in Lexicographic order
- * of indices of items in a list. This class will not check for duplicate values and
- * treats all values differently based on the index
- * <p></p>
- * Repetitive combinations of 3 items out of 2{1, 2} are -
+ * This class generates r combinations from n=input.length items, where combinations are generated
+ * in lexicographic order of indices of items in a list. This class does not check for duplicate
+ * values and treats all values differently based on the index.
+ * <p>
+ * Repetitive combinations of 3 items out of 2 {1, 2} are:
  * <pre>
- * 111 112 122 222
+ * 111, 112, 122, 222
  * </pre>
+ * <p>
+ * Example usage:
  * <pre>
- * Code example:
- *
- *         int[] multisetFreqArray = new int[]{2,1,1};
- *         new RepetitiveCombinationMultiset&lt;&gt;(List.of("A","B","C"),3,multisetFreqArray)
- *                 .forEach(System.out::println);
- *
- *         or
- *
- *         //here "A" can be repeated 2 times , "B" and "C" can nt be repeated(occur only once)
- *         JNumberTools.of("A","B","C")
- *                 ..repetitiveMultiset(3, multisetFreqArray)
- *                 .forEach(System.out::println);
- *
- * will generate following combinations of size 3 -
+ * int[] multisetFreqArray = new int[]{2, 1, 1};
+ * new RepetitiveCombinationMultiset&lt;&gt;(List.of("A", "B", "C"), 3, multisetFreqArray)
+ *     .forEach(System.out::println);
+ * </pre>
+ * <p>
+ * Or using the JNumberTools:
+ * <pre>
+ * // Here "A" can be repeated 2 times, "B" and "C" can be repeated only once
+ * JNumberTools.of("A", "B", "C")
+ *     .repetitiveMultiset(3, multisetFreqArray)
+ *     .forEach(System.out::println);
+ * </pre>
+ * <p>
+ * This will generate the following combinations of size 3:
+ * <pre>
  * [A, A, B]
  * [A, A, C]
  * [A, B, C]
  * </pre>
+ *
+ * @param <T> the type of elements in the combinations
  * @author Deepesh Patel
  */
 public final class RepetitiveCombinationMultiset<T> extends AbstractGenerator<T> {
@@ -50,46 +55,63 @@ public final class RepetitiveCombinationMultiset<T> extends AbstractGenerator<T>
     private final int r;
 
     /**
-     * @param elements List of N items
-     * @param r number of items in every combination.
-     * @param multisetFreqArray int array containing the number of times(count) element in input can be repeated.
-     *               multisetFreqArray[0] contains the count for 0th element in input
-     *               multisetFreqArray[1] contains the count for 1st element in input, ...
-     *               multisetFreqArray[n] contains the count of mth element in input
-     *               count of every element must be &gt;=1
+     * Constructs a {@code RepetitiveCombinationMultiset} with the specified elements, size of combinations, and frequency array.
+     *
+     * @param elements the list of N items
+     * @param r the number of items in each combination
+     * @param multisetFreqArray an array containing the number of times each element in the input can be repeated.
+     *                          {@code multisetFreqArray[0]} contains the count for the 0th element in the input,
+     *                          {@code multisetFreqArray[1]} contains the count for the 1st element in the input, and so on.
+     *                          The count of every element must be &gt;= 1.
      */
-     RepetitiveCombinationMultiset(List<T> elements, int r, int[] multisetFreqArray) {
+    public RepetitiveCombinationMultiset(List<T> elements, int r, int[] multisetFreqArray) {
         super(elements);
-        CombinatoricsUtil.checkParamCombination(elements.size(), r, "Repetitive Combination");
-        CombinatoricsUtil.checkParamMultisetFreqArray(elements.size(), multisetFreqArray, "Repetitive Combination");
+        AbstractGenerator.checkParamCombination(elements.size(), r, "Repetitive Combination");
+        AbstractGenerator.checkParamMultisetFreqArray(elements.size(), multisetFreqArray, "Repetitive Combination");
 
         this.r = r;
         this.multisetFreqArray = multisetFreqArray;
     }
 
+    /**
+     * Returns an iterator over combinations of elements in lexicographical order.
+     *
+     * @return an iterator over the combinations
+     */
     @Override
     public Iterator<List<T>> iterator() {
-        return ( r==0 || elements.isEmpty()) ? newEmptyIterator() : new Itr();
+        return (r == 0 || elements.isEmpty()) ? newEmptyIterator() : new Itr();
     }
 
     private class Itr implements Iterator<List<T>> {
 
         int[] indices;
 
-        private Itr(){
+        private Itr() {
             indices = new int[r];
-            indices[0]  = -1;
+            indices[0] = -1;
             indices = nextRepetitiveCombinationOfMultiset(indices, multisetFreqArray);
         }
 
+        /**
+         * Checks if there are more combinations to generate.
+         *
+         * @return {@code true} if there are more combinations, {@code false} otherwise
+         */
         @Override
         public boolean hasNext() {
             return indices.length != 0;
         }
 
+        /**
+         * Returns the next combination.
+         *
+         * @return the next combination
+         * @throws NoSuchElementException if there are no more combinations
+         */
         @Override
         public List<T> next() {
-            if(!hasNext()) {
+            if (!hasNext()) {
                 throw new NoSuchElementException();
             }
             int[] old = indices;
@@ -97,41 +119,38 @@ public final class RepetitiveCombinationMultiset<T> extends AbstractGenerator<T>
             return indicesToValues(old);
         }
 
-        private int[] nextRepetitiveCombinationOfMultiset(int[]a, int[] availableCount) {
+        private int[] nextRepetitiveCombinationOfMultiset(int[] a, int[] availableCount) {
 
             int[] next = Arrays.copyOf(a, a.length);
-            int i=next.length-1;
-            int maxSupportedValue = availableCount.length-1;
+            int i = next.length - 1;
+            int maxSupportedValue = availableCount.length - 1;
 
-            while( i>=0 && next[i] == maxSupportedValue) {
+            while (i >= 0 && next[i] == maxSupportedValue) {
                 i--;
             }
 
-            if(i==-1) {
+            if (i == -1) {
                 return new int[]{};
             }
 
-            i = next[0] ==-1 ? 0 : i; //hack to indicate first combination
+            i = next[0] == -1 ? 0 : i; // Hack to indicate the first combination
             int fillValue = next[i] + 1;
-            int k=i;
+            int k = i;
 
-            while(k<next.length && fillValue <availableCount.length) {
-                int availableFillValueCount  = availableCount[fillValue];
+            while (k < next.length && fillValue < availableCount.length) {
+                int availableFillValueCount = availableCount[fillValue];
                 while (availableFillValueCount > 0 && k < next.length) {
                     next[k] = fillValue;
                     availableFillValueCount--;
                     k++;
                 }
 
-                fillValue = fillValue+1;
+                fillValue = fillValue + 1;
             }
 
-            if(k<next.length){
-                //TODO: This can be optimized by checking if
-                // [1] the count of maxSupportedValue is reached and
-                // [2] previousValue is maxSupportedValue-1;
-                // example: in 56777, count of 7 reached the availableCount(3)
-                // and previous number is 6
+            if (k < next.length) {
+                // Optimization potential: Check if the count of maxSupportedValue is reached
+                // and previousValue is maxSupportedValue - 1.
                 return nextRepetitiveCombinationOfMultiset(next, availableCount);
             }
             return next;

@@ -38,17 +38,17 @@ public class UniquePermutationMthTest {
     @Test
     public void shouldGenerateAllUniquePermutationsOf3Values(){
         String expected = "[[1, 2, 3], [2, 3, 1]]";
-        assertEquals(expected, output(3, 1,2,3));
+        assertEquals(expected, output(3, 0,1,2,3));
     }
 
     @Test
     public void shouldGenerateEmptyListForNullInput(){
-        assertEquals("[[]]", output(3, (List<Object>) null));
+        assertEquals("[[]]", output(3, 0,(List<Object>) null));
     }
 
     @Test
     public void shouldGenerateEmptyListForEmptyInput(){
-        assertEquals("[[]]", output(2, new ArrayList<>()));
+        assertEquals("[[]]", output(2,0, new ArrayList<>()));
     }
 
     @Test
@@ -58,7 +58,7 @@ public class UniquePermutationMthTest {
                 " [Green, Red, Blue]," +
                 " [Blue, Red, Green]]" ;
 
-        Assert.assertEquals(expected, output(2, "Red", "Green", "Blue"));
+        Assert.assertEquals(expected, output(2, 0,"Red", "Green", "Blue"));
     }
 
     @Test
@@ -104,12 +104,30 @@ public class UniquePermutationMthTest {
         return everyMthValue(stream, increment).toString();
     }
 
-    private String output(int increment, Object... elements) {
-          return permutation.unique(elements).lexOrderMth(increment, 0).stream().toList().toString();
+    @Test
+    public void shouldHandleSingleElement() {
+        assertEquals("[[A]]", output(1, 0,"A"));
     }
 
-    private String output(int increment,List<?> elements) {
-        return permutation.unique(elements).lexOrderMth(increment, 0).stream().toList().toString();
+    @Test
+    public void shouldHandleIncrementLargerThanPermutations() {
+        var input = List.of("A", "B");
+        String expected = "[]";
+        // 5 > 2 (number of permutations)
+        assertEquals(expected, output(5, 5,  input));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionForNegativeIncrement() {
+        output(-1, 0,"A", "B", "C");
+    }
+
+    private String output(int increment, int start,  Object... elements) {
+          return permutation.unique(elements).lexOrderMth(increment, start).stream().toList().toString();
+    }
+
+    private String output(int increment, int start, List<?> elements) {
+        return permutation.unique(elements).lexOrderMth(increment, start).stream().toList().toString();
     }
 }
 

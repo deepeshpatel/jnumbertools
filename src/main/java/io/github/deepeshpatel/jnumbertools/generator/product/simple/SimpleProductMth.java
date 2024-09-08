@@ -7,29 +7,43 @@ import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class SimpleProductMth implements Iterable<List<?>> {
+/**
+ * A class for generating simple product combinations.
+ * @param <T> The type of elements in the lists.
+ */
+public class SimpleProductMth<T> implements Iterable<List<T>> {
 
     private final long m;
-    private final  List<List<?>> elements;
+    private final List<List<T>> elements;
     private final long start;
 
-    public SimpleProductMth(long m, long start, List<List<?>> elements) {
+    /**
+     * Constructor to initialize the simple product method.
+     * @param m The step size for iteration.
+     * @param start The starting position.
+     * @param elements A list of lists containing elements of type T.
+     */
+    public SimpleProductMth(long m, long start, List<List<T>> elements) {
         this.elements = elements;
         this.m = m;
         this.start = start;
-        //TODO: implement starting index
+        // TODO: implement starting index
     }
 
-    public Stream<List<?>> stream() {
+    /**
+     * Returns a stream of lists of type T.
+     * @return A stream of lists.
+     */
+    public Stream<List<T>> stream() {
         return StreamSupport.stream(this.spliterator(), false);
     }
 
     @Override
-    public Iterator<List<?>> iterator() {
+    public Iterator<List<T>> iterator() {
         return new Itr();
     }
 
-    private class Itr implements Iterator<List<?>> {
+    private class Itr implements Iterator<List<T>> {
 
         private final int[] indices = new int[elements.size()];
         private boolean hasNext;
@@ -44,28 +58,39 @@ public class SimpleProductMth implements Iterable<List<?>> {
         }
 
         @Override
-        public List<List<?>> next() {
-            if(!hasNext()) {
+        public List<T> next() {
+            if (!hasNext) {
                 throw new NoSuchElementException();
             }
-            var result = indicesToList(elements, indices);
+            List<T> result = indicesToList(elements, indices);
             hasNext = nextMthCartesian(indices, m);
             return result;
         }
 
-        protected List<List<?>> indicesToList(List<List<?>> elements, int[] indices) {
-            ArrayList list = new ArrayList(elements.size());
+        /**
+         * Converts the current indices to a list of elements.
+         * @param elements The list of lists containing elements.
+         * @param indices The current indices.
+         * @return A list of elements corresponding to the indices.
+         */
+        protected List<T> indicesToList(List<List<T>> elements, int[] indices) {
+            List<T> list = new ArrayList<>(elements.size());
             for (int i = 0; i < elements.size(); i++) {
                 list.add(elements.get(i).get(indices[i]));
             }
             return list;
         }
 
+        /**
+         * Computes the next Cartesian product combination.
+         * @param indices The current indices array.
+         * @param k The step size for iteration.
+         * @return True if there are no more combinations, false otherwise.
+         */
         private boolean nextMthCartesian(int[] indices, long k) {
-
             long nextK = k;
 
-            for (int i = indices.length-1; i >= 0; i--) {
+            for (int i = indices.length - 1; i >= 0; i--) {
                 int base = elements.get(i).size();
                 long v = (indices[i] + nextK) % base;
                 nextK = (indices[i] + nextK) / base;

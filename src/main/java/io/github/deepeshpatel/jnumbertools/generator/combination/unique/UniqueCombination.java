@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.checkParamCombination;
-
 /**
  *
  * Utility for generating r-combinations of input = {1, 2 . . ., n}

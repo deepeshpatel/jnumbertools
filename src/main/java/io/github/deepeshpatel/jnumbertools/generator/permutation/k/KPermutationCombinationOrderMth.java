@@ -8,7 +8,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.base.Combinations;
 import io.github.deepeshpatel.jnumbertools.base.Permutations;
-import io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil;
+import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
 import java.math.BigInteger;
 import java.util.Iterator;
@@ -58,7 +58,7 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
      */
      KPermutationCombinationOrderMth(List<T> elements, int k, BigInteger increment, BigInteger start, Calculator calculator) {
         super(elements, k);
-        CombinatoricsUtil.checkParamIncrement(increment, "mth K-Permutation");
+         AbstractGenerator.checkParamIncrement(increment, "mth K-Permutation");
         this.start = start;
         this.increment = increment;
         this.totalPermutations = calculator.nPr(elements.size(), k);

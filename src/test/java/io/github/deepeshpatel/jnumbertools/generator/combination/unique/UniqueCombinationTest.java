@@ -5,6 +5,8 @@ import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static io.github.deepeshpatel.jnumbertools.TestBase.combination;
@@ -55,7 +57,24 @@ public class UniqueCombinationTest {
         assertEquals("[[]]", output(0,Collections.emptyList()));
     }
 
-    private String output(int size, List<String> elements) {
+    public void shouldReturnEmptyListForEmptyInputListWithNonZeroSize() {
+        assertEquals("[]", output(3, Collections.emptyList()));
+    }
+
+    @Test
+    public void shouldHandleLargeCombinations() {
+        List<Integer> largeInput = Stream.iterate(1, i -> i + 1).limit(20).collect(Collectors.toList());
+        assertEquals(calculator.nCr(20, 10).longValue(), combination.unique(10, largeInput).lexOrder().stream().count());
+    }
+
+    @Test
+    public void shouldWorkWithDifferentTypes() {
+        List<Integer> input = List.of(1, 2, 3, 4);
+        String expected = "[[1, 2], [1, 3], [1, 4], [2, 3], [2, 4], [3, 4]]";
+        assertEquals(expected, output(2, input));
+    }
+
+    private String output(int size, List<?> elements) {
         return combination.unique(size, elements).lexOrder().stream().toList().toString();
     }
 }

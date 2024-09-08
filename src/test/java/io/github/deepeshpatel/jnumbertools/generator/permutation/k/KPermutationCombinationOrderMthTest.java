@@ -73,6 +73,44 @@ public class KPermutationCombinationOrderMthTest {
         Assert.assertEquals("[[c, b, a], [a, e, c], [c, e, b]]", output);
     }
 
+    @Test
+    public void shouldHandleEmptyInput() {
+        var output = permutation.nPr(0, Collections.emptyList())
+                .combinationOrderMth(1, 0).stream().toList();
+        Assert.assertEquals("[[]]", output.toString());
+    }
+
+    @Test
+    public void shouldHandleLargeIncrementValues() {
+        var input = List.of('A', 'B', 'C', 'D');
+        var output = permutation.nPr(2, input)
+                .combinationOrderMth(1, 12)
+                .stream().toList();
+
+        Assert.assertTrue(output.isEmpty() );
+    }
+
+    @Test
+    public void shouldGenerateAllPermutationsWhenKEqualsInputSize() {
+        var input = List.of('A', 'B', 'C');
+        var output = permutation.nPr(3, input)
+                .combinationOrderMth(1, 0)
+                .stream().toList();
+
+        Assert.assertEquals("[[A, B, C], [A, C, B], [B, A, C], [B, C, A], [C, A, B], [C, B, A]]",
+                output.toString());
+    }
+
+    @Test
+    public void shouldHandleLargeInputSize() {
+        var input = List.of('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J');
+        var output = permutation.nPr(5, input)
+                .combinationOrderMth(1, 0)
+                .stream().toList();
+
+        Assert.assertEquals(30240, output.size() );
+    }
+
     private String getResultViaDirectIncrement(List<?> input, int k, int increment) {
         return permutation.nPr(k,input)
                 .combinationOrderMth(increment, 0)

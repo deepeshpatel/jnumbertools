@@ -60,4 +60,9 @@ public class RepetitiveCombinationTest {
                 .stream()
                 .toList().toString();
     }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void should_throw_exception_for_negative_r_value() {
+        combination.repetitive(3, -2).lexOrder();
+    }
 }

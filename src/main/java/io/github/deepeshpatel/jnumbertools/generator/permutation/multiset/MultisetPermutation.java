@@ -11,8 +11,6 @@ import io.github.deepeshpatel.jnumbertools.generator.permutation.itertor.UniqueP
 import java.util.Iterator;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.generator.base.CombinatoricsUtil.initIndicesForMultisetPermutation;
-
 /**
  * Implements the iterable of repetitive permutations where every element in input has associated count
  * which denotes home many times that element can be repeated.

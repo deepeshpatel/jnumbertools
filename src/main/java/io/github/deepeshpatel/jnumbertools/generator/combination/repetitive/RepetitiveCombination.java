@@ -10,37 +10,37 @@ import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import java.util.*;
 
 /**
- *
- * Utility for generating r-combinations of input = {1, 2 . . ., n}
+ * Utility for generating r-combinations of input = {1, 2, ..., n} with repetition allowed.
  * <p>
- * Generates r combinations from n=input.length items.
- * combinations are generated in Lexicographic order
- * of indices of items in a list. This class will not check for duplicate values and
- * treats all values differently based on the index
+ * This class generates r-combinations from n = input.length items, with combinations generated
+ * in lexicographical order based on the indices of items in a list. The class does not check for duplicate
+ * values and treats all values differently based on their index.
  * <p>
- * Repetitive combinations of 3 items out of 2{1, 2} are -
+ * Example of repetitive combinations of 3 items out of 2 {1, 2}:
  * <pre>
  * 111 112 122 222
  * </pre>
+ * <p>
+ * Example usage:
  * <pre>
- * Code example:
+ * new RepetitiveCombination&lt;&gt;(List.of("A", "B"), 3)
+ *       .forEach(System.out::println);
  *
- *     new RepetitiveCombination&lt;&gt;(List.of("A","B"),3)
- *           .forEach(System.out::println);
+ * or
  *
- *     or
- *
- *     JNumberTools.of("A","B")
- *           .repetitive(3)
- *           .forEach(System.out::println);
- *
- * will generate following -
+ * JNumberTools.of("A", "B")
+ *       .repetitive(3)
+ *       .forEach(System.out::println);
+ * </pre>
+ * The output will be:
+ * <pre>
  * [A, A, A]
  * [A, A, B]
  * [A, B, B]
  * [B, B, B]
  * </pre>
  *
+ * @param <T> The type of elements in the combination.
  * @author Deepesh Patel
  */
 public final class RepetitiveCombination <T> extends AbstractGenerator<T> {
@@ -48,14 +48,21 @@ public final class RepetitiveCombination <T> extends AbstractGenerator<T> {
     private final int r;
 
     /**
-     * @param elements List of N items. N is the length of input
-     * @param r number of combinations from N items.
+     * Constructs a new {@code RepetitiveCombination} generator.
+     *
+     * @param elements List of N items from which combinations will be generated. N is the length of the input list.
+     * @param r The number of items in each combination.
      */
     RepetitiveCombination(List<T> elements, int r) {
         super(elements);
         this.r = r;
     }
 
+    /**
+     * Returns an iterator over the repetitive combinations.
+     *
+     * @return an {@code Iterator} over lists of combinations.
+     */
     @Override
     public Iterator<List<T>> iterator() {
         return (r==0 || elements.isEmpty()) ? newEmptyIterator() : new Itr();
@@ -65,11 +72,22 @@ public final class RepetitiveCombination <T> extends AbstractGenerator<T> {
 
         int[] indices = new int[r];
 
+        /**
+         * Checks if there are more combinations to generate.
+         *
+         * @return {@code true} if there are more combinations, {@code false} otherwise.
+         */
         @Override
         public boolean hasNext() {
             return indices.length != 0;
         }
 
+        /**
+         * Generates the next combination in lexicographical order.
+         *
+         * @return the next combination as a list of elements.
+         * @throws NoSuchElementException if no more combinations are available.
+         */
         @Override
         public List<T> next() {
             if(!hasNext()) {
@@ -80,6 +98,13 @@ public final class RepetitiveCombination <T> extends AbstractGenerator<T> {
             return indicesToValues(old);
         }
 
+        /**
+         * Generates the next combination of indices.
+         *
+         * @param a the current combination of indices.
+         * @param n the number of elements in the input list.
+         * @return the next combination of indices, or an empty array if no further combinations exist.
+         */
         private int[] nextRepetitiveCombination(int []a, int n) {
 
             final int[] next = Arrays.copyOf(a, a.length);

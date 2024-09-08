@@ -1,3 +1,8 @@
+/*
+ * JNumberTools Library v1.0.3
+ * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
+ */
+
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
@@ -7,32 +12,44 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 /**
- * Generates a sequence of permutations using Heap's algorithm.
- * (not to be confused with the heap data structure)
- * @param <T>
+ * Generates a sequence of unique permutations using Heap's algorithm.
+ * <p>
+ * Heap's algorithm is used to generate all possible permutations of n elements.
+ * This implementation generates permutations by performing a single swap at a time.
+ * </p>
+ * <p>
+ * Note: This algorithm is not related to the heap data structure but is named after B. R. Heap.
+ * </p>
+ *
+ * @param <T> the type of elements to permute
  */
-public final class UniquePermutationSingleSwap<T> extends AbstractGenerator<T> implements Iterable<List<T>>{
+public final class UniquePermutationSingleSwap<T> extends AbstractGenerator<T> implements Iterable<List<T>> {
 
+    /**
+     * Constructs a UniquePermutationSingleSwap with the specified list of elements.
+     *
+     * @param elements the list of elements to generate permutations from
+     */
     UniquePermutationSingleSwap(List<T> elements) {
         super(elements);
     }
 
     @Override
     public Iterator<List<T>> iterator() {
-        return elements.isEmpty() ? newEmptyIterator() :
-                new Itr();
+        return elements.isEmpty() ? newEmptyIterator() : new Itr();
     }
 
+    private class Itr implements Iterator<List<T>> {
 
-    private class Itr implements Iterator<List<T>>{
-
-        int i=1;
-        int[] indices = IntStream.range(0,elements.size()).toArray();
+        int i = 1;
+        int[] indices = IntStream.range(0, elements.size()).toArray();
         int[] c = new int[indices.length];
 
-        // Single swap permutations using Heap's algorithm.
+        /**
+         * Generates the next permutation using Heap's algorithm.
+         * This method performs the permutation generation logic by swapping elements.
+         */
         public void generate() {
-
             while (i < indices.length) {
                 if (c[i] < i) {
                     if (i % 2 == 0) {
@@ -65,10 +82,12 @@ public final class UniquePermutationSingleSwap<T> extends AbstractGenerator<T> i
 
         @Override
         public List<T> next() {
+            if (!hasNext()) {
+                throw new java.util.NoSuchElementException();
+            }
             var result = indicesToValues(indices);
             generate();
             return result;
         }
     }
-
 }

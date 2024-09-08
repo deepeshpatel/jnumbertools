@@ -69,6 +69,32 @@ public class UniquePermutationTest {
                 .stream().toList().toString();
     }
 
+    @Test
+    public void shouldHandleMixedTypes() {
+        String expected = "[[1, A], [A, 1]]";
+        assertEquals(expected, output(1, "A"));
+    }
+
+    @Test
+    public void shouldReturnSingleElement() {
+        String expected = "[[A]]";
+        assertEquals(expected, output("A"));
+    }
+
+    @Test
+    public void shouldGeneratePermutationsForNonStringElements() {
+        String expected = "[[1, 2], [2, 1]]";
+        assertEquals(expected, output(1, 2));
+    }
+
+    @Test
+    public void shouldGeneratePermutationsForImmutableList() {
+        List<String> input = List.of("A", "B");
+        String expected = "[[A, B], [B, A]]";
+        assertEquals(expected, output(input));
+    }
+
+
     private String output(Object... elements) {
         return permutation
                 .unique(elements)
