@@ -23,7 +23,7 @@
 
     <groupId>io.github.deepeshpatel</groupId>
     <artifactId>jnumbertools</artifactId>
-    <version>2.0.0</version>
+    <version>3.0.0</version>
 
     <packaging>jar</packaging>
 
