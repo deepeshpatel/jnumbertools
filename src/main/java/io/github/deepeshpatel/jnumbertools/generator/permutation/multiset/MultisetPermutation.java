@@ -6,27 +6,17 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.itertor.UniquePermItrForElements;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermItrForElements;
 
 import java.util.Iterator;
 import java.util.List;
 
 /**
  * Implements the iterable of repetitive permutations where every element in input has associated count
- * which denotes home many times that element can be repeated.
+ * which denotes how many times that element can be repeated.
  * Permutations are generated in lex order of indices of input values, considering value at each index as unique.
- * <pre>
- *     Code example-
- *     //here A can be repeated max 2 times and B can not be repeated(1 time)
- *     JNumberTools.permutationsOf("A","B")
- *                 ..repetitiveMultiset(2,1)
- *                 .forEach(System.out::println);
+ * Instance of this class is intended to be created via builder and hence do not have any public constructor.
  *
- * will generate following -
- * [A, A, B]
- * [A, B, A]
- * [B, A, A]
- * </pre>
  * @author Deepesh Patel
  */
 public final class MultisetPermutation<T>  extends AbstractGenerator<T> {
@@ -45,10 +35,10 @@ public final class MultisetPermutation<T>  extends AbstractGenerator<T> {
      *               count of every element must be &gt;=1
      */
      MultisetPermutation(List<T> elements, int[] multisetFreqArray) {
-        super(elements);
-
-        /*
-         * TODO: enhancement advice - device algorithm to calculate next permutation
+         super(elements);
+         checkParamMultisetFreqArray(elements.size(), multisetFreqArray, "permutation");
+         /*
+         *TODO: enhancement advice - device algorithm to calculate next permutation
          * without flattening of frequencies. Current implementation will not work for
          * very large frequencies for e.g. 10^99.
          */

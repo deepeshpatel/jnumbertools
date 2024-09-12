@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 
 /**
  * Utility to generate permutations with unique values starting from
- * 0<sup>th</sup> permutation (input) and then generate every n<sup>th</sup> permutation in
+ * ginve permutation number and then generate every n<sup>th</sup> permutation in
  * lexicographical order of indices of input values where each value is considered unique.
  * <p>
  * Generating the n<sup>th</sup> permutation directly is crucial for efficiently handling cases where
@@ -26,23 +26,10 @@ import java.util.stream.IntStream;
  * <p>
  * This class provides a mechanism to generate directly the next n<sup>th</sup> lexicographical
  * permutation.
- * <p>
- * Example:
- * <pre>
- *     new UniquePermutationsMth&lt;&gt;(List.of("A","B","C"), BigInteger.valueOf(2), BigInteger.ZERO, new Calculator())
- *             .forEach(System.out::println);
- *     or
- *     JNumberTools.permutationsOf("A","B","C")
- *             .uniqueMth(2)
- *             .forEach(System.out::println);
- * </pre>
- * This will generate the 0th, 2nd, and 4th unique permutations of "A", "B", and "C":
- * <pre>
- * [A, B, C]
- * [B, A, C]
- * [C, A, B]
- * </pre>
  *
+ * Instance of this class is intended to be created via builder and hence do not have any public constructor.
+ *
+ * @author Deepesh Patel
  * @param <T> the type of elements to permute
  */
 public final class UniquePermutationsMth<T> extends AbstractGenerator<T> {

@@ -28,7 +28,7 @@ public class SubsetBuilder<T> implements Builder<T> {
     private final Calculator calculator;
     private int from = -1;
     private int to = -1;
-    private long count = -1;
+    private BigInteger count = BigInteger.valueOf(-1);
 
     /**
      * Constructs a SubsetBuilder with the specified elements and calculator.
@@ -112,10 +112,20 @@ public class SubsetBuilder<T> implements Builder<T> {
      *
      * @return the count of subsets
      */
-    public synchronized long count() {
-        if (count == -1) {
-            count = calculator.totalSubsetsInRange(from, to, elements.size()).longValue();
+    public synchronized BigInteger count() {
+        if (count.intValue() == -1) {
+            count = calculator.totalSubsetsInRange(from, to, elements.size());
         }
         return count;
+    }
+
+    @Override
+    public String toString() {
+        return "SubsetBuilder{" +
+               "elements=" + elements +
+               ", from=" + from +
+               ", to=" + to +
+               ", count=" + count +
+               '}';
     }
 }

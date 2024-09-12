@@ -133,6 +133,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <excludePackageNames>io.github.deepeshpatel.jnumbertools.examples</excludePackageNames>
+                    <excludePackageNames>io.github.deepeshpatel.jnumbertools.generator.permutation.unique</excludePackageNames>
+                    <excludePackageNames>io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive</excludePackageNames>
+                    <excludePackageNames>io.github.deepeshpatel.jnumbertools.generator.permutation.multiset</excludePackageNames>
+                    <excludePackageNames>io.github.deepeshpatel.jnumbertools.generator.permutation.k</excludePackageNames>
+                    <excludePackageNames>io.github.deepeshpatel.jnumbertools.generator.permutation.iterator</excludePackageNames>
+                </configuration>
                 <version>3.4.0</version>
 
                 <executions>

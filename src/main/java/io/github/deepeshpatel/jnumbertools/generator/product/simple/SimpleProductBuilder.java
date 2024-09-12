@@ -8,6 +8,7 @@ import java.util.List;
  * Allows adding lists of elements and generating permutations.
  *
  * @param <E> the type of elements in the lists
+ * @author Deepesh Patel
  */
 public final class SimpleProductBuilder<E> {
 

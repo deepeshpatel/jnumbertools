@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * A builder class for generating k-permutations of a given list of elements.
- *
+ * @author Deepesh Patel
  * @param <T> the type of elements in the list.
  */
 public final class KPermutationBuilder<T> {

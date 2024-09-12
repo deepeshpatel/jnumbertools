@@ -10,6 +10,7 @@ import io.github.deepeshpatel.jnumbertools.base.Combinations;
 import io.github.deepeshpatel.jnumbertools.base.Subsets;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -108,6 +109,10 @@ public final class ComplexProductBuilder {
      * @return a ComplexProductMth containing the generated combinations and subsets at specific intervals
      */
     public ComplexProductMth lexOrderMth(long m, long start) {
+        return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
+    }
+
+    public ComplexProductMth lexOrderMth(BigInteger m, BigInteger start) {
         return new ComplexProductMth(m, start, builders);
     }
 }

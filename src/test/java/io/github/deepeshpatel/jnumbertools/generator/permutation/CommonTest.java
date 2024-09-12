@@ -27,7 +27,7 @@ public class CommonTest {
                         .lexOrderMth(increment, 0)
                         .stream().toList().toString();
 
-                String kPermutationValues = permutation.nPr(size,size)
+                String kPermutationValues = permutation.nPk(size,size)
                         .lexOrderMth(increment, 0)
                         .stream().toList().toString();
 
@@ -53,7 +53,7 @@ public class CommonTest {
                         .lexOrder()
                         .stream().toList().toString();
 
-                String kPermutationValues = permutation.nPr(size, size)
+                String kPermutationValues = permutation.nPk(size, size)
                         .lexOrder()
                         .stream().toList().toString();
 
@@ -78,7 +78,7 @@ public class CommonTest {
                     .lexOrderMth(increment, 0)
                     .stream().toList().toString();
 
-            String kPermutationMth = permutation.nPr(size, size)
+            String kPermutationMth = permutation.nPk(size, size)
                     .lexOrderMth(increment, 0)
                     .stream().toList().toString();
 
@@ -89,7 +89,7 @@ public class CommonTest {
                     .lexOrder()
                     .stream().toList().toString();
 
-            String kPermutation = permutation.nPr(size, size)
+            String kPermutation = permutation.nPk(size, size)
                     .lexOrder()
                     .stream().toList().toString();
 

@@ -5,7 +5,7 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
-import io.github.deepeshpatel.jnumbertools.generator.permutation.itertor.UniquePermItrForElements;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermItrForElements;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -23,28 +23,7 @@ import static java.util.stream.Collectors.toCollection;
  * [1, 2], [2, 1], [1, 3], [3, 1], [2, 3], and [3, 2]
  * </pre>
  * <p>
- * Example usage:
- * <pre>
- * new KPermutation&lt;&gt;(List.of("A", "B", "C"), 2)
- *     .forEach(System.out::println);
- * </pre>
- * <p>
- * Or using the JNumberTools utility class:
- * <pre>
- * JNumberTools.permutationsOf("A", "B", "C")
- *     .k(2)
- *     .forEach(System.out::println);
- * </pre>
- * <p>
- * This will generate the following output:
- * <pre>
- * [A, B]
- * [B, A]
- * [A, C]
- * [C, A]
- * [B, C]
- * [C, B]
- * </pre>
+ *     Instance of this class is intended to be created via builder and hence do not have any public constructor.
  *
  * @param <T> the type of elements in the input list
  * @since 1.0.3

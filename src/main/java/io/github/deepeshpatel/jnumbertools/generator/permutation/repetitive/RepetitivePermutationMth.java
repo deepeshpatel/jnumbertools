@@ -18,30 +18,11 @@ import java.util.NoSuchElementException;
  * lexicographical order of indices of input values. This is particularly useful when dealing
  * with large numbers of permutations, where directly computing all permutations and incrementing
  * to a specific permutation is impractical.
+ * Instance of this class is intended to be created via builder and hence do not have any public constructor.
+ *
  * <p>
  * This class allows you to directly generate the next n<sup>th</sup> lexicographical permutation.
- * </p>
- *
  * <p>
- * Code example:
- * </p>
- * <pre>
- *      new RepetitivePermutationMth&lt;&gt;(List.of("A","B"),3,2)
- *                     .forEach(System.out::println);
- *
- *      or
- *
- *      JNumberTools.permutationsOf("A","B")
- *                 .repetitiveMth(3,2)
- *                 .forEach(System.out::println);
- *
- * will generate the following (0th, 2nd, 4th, and 6th) repetitive permutations of "A" and "B" of size 3:
- *
- * [A, A, A]
- * [A, B, A]
- * [B, A, A]
- * [B, B, A]
- * </pre>
  *
  * @param <T> the type of elements to permute
  * @author Deepesh Patel
@@ -49,8 +30,8 @@ import java.util.NoSuchElementException;
 public final class RepetitivePermutationMth<T>  extends AbstractGenerator<T> {
 
     private final int size;
-    private final long increment;
-    private final long start;
+    private final BigInteger increment;
+    private final BigInteger start;
 
     /**
      * Constructs a RepetitivePermutationMth instance.
@@ -60,12 +41,12 @@ public final class RepetitivePermutationMth<T>  extends AbstractGenerator<T> {
      * @param increment the step size for generating permutations
      * @param start the starting index for generating permutations
      */
-    RepetitivePermutationMth(List<T> elements, int size, long increment, long start) {
+    RepetitivePermutationMth(List<T> elements, int size, BigInteger increment, BigInteger start) {
         super(elements);
         this.size = size;
         this.start = start;
         this.increment = increment;
-        AbstractGenerator.checkParamIncrement(BigInteger.valueOf(increment), "repetitive permutations");
+        AbstractGenerator.checkParamIncrement(increment, "repetitive permutations");
     }
 
     @Override
@@ -109,15 +90,17 @@ public final class RepetitivePermutationMth<T>  extends AbstractGenerator<T> {
          * @param k the step size for generating permutations
          * @return true if there are more permutations, false otherwise
          */
-        private boolean nextRepetitiveKthPermutation(int[] indices, int base, long k) {
-            long nextK = k;
+        private boolean nextRepetitiveKthPermutation(int[] indices, int base, BigInteger k) {
+            BigInteger nextK = k;
 
             for (int i = indices.length - 1; i >= 0; i--) {
-                long v = (indices[i] + nextK) % base;
-                nextK = (indices[i] + nextK) / base;
-                indices[i] = (int) v;
+
+                BigInteger sum = nextK.add(BigInteger.valueOf(indices[i]));
+                BigInteger[] division = sum.divideAndRemainder(BigInteger.valueOf(base));
+                nextK = division[0];
+                indices[i] = division[1].intValue();
             }
-            return nextK == 0;
+            return  BigInteger.ZERO.equals(nextK);
         }
     }
 }

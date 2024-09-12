@@ -7,6 +7,7 @@ import java.util.List;
  * This class helps in constructing a {@link RepetitiveCombinationMultiset} with the provided elements,
  * frequencies, and size.
  *
+ * @author Deepesh Patel
  * @param <T> The type of elements in the multiset.
  */
 public final class MultisetCombinationBuilder<T> {

@@ -12,15 +12,15 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 /**
- * Generates a sequence of unique permutations using Heap's algorithm.
+ * Generates a sequence of unique permutations using Heap's algorithm named after B. R. Heap.
  * <p>
  * Heap's algorithm is used to generate all possible permutations of n elements.
  * This implementation generates permutations by performing a single swap at a time.
  * </p>
  * <p>
- * Note: This algorithm is not related to the heap data structure but is named after B. R. Heap.
+ * Instance of this class is intended to be created via builder and hence do not have any public constructor.
  * </p>
- *
+ * @author Deepesh Patel
  * @param <T> the type of elements to permute
  */
 public final class UniquePermutationSingleSwap<T> extends AbstractGenerator<T> implements Iterable<List<T>> {

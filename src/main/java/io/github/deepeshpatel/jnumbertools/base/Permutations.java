@@ -12,22 +12,30 @@ import static java.util.Arrays.asList;
 
 
 /**
- * Provides methods for generating various types of permutations.
- * This class includes functionality to compute permutations with and without repetition,
- * as well as permutations of distinct objects.
+ * Builder class to generating various types of permutations.
  *
  * <p>
- * The class supports:
+ * Supports following permutations -
  * <ul>
- *     <li><strong>Permutations without Repetition:</strong> The number of ways to arrange a set of distinct objects where each object is used exactly once.</li>
- *     <li><strong>Permutations with Repetition:</strong> The number of ways to arrange a set of objects where repetitions are allowed.</li>
- *     <li><strong>Lexicographical Permutations:</strong> Generating permutations in a lexicographical order, which is useful for ordered sets.</li>
+ *     <li><strong>Unique permutation generation in lex order:</strong> </li>
+ *     <li><strong>Unique permutation generation with single swap order</strong> as as per Heap's algorithm</li>
+ *     <li><strong>Mth unique permutation generation in lex order</strong> </li>
+ *     <li><strong>Repetitive permutation generation in lex order</strong> </li>
+ *     <li><strong>Mth Repetitive permutation generation in lex order</strong> </li>
+ *     <li><strong>Multiset permutation generation in lex order</strong> </li>
+ *     <li><strong>Mth multiset permutation generation in lex order</strong> </li>
+ *     <li><strong>k-permutation generation in lex order</strong> </li>
+ *     <li><strong>Mth k-permutation generation in lex order</strong> </li>
+ *     <li><strong>k-permutation generation in combination order</strong> </li>
+ *     <li><strong>Mth k-permutation generation in combination order</strong> </li>
  * </ul>
  *
  * Example usage:
  * <pre>
+ * <code>
  * Permutations perm = new Permutations();
- * List&lt;List&lt;Integer&gt;&gt; result = perm.getPermutationsWithoutRepetition(Arrays.asList(1, 2, 3));
+ * List&lt;List&lt;Integer&gt;&gt; result = perm.nPr(3,2).lexOrder().stream().toList();
+ * </code>
  * </pre>
  *
  * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
@@ -93,36 +101,36 @@ public final class Permutations {
      * Creates a builder for permutations of r elements from a set of n elements.
      *
      * @param n The total number of elements.
-     * @param r The number of elements to permute.
+     * @param k The number of elements to permute.
      * @return A builder for permutations.
      */
-    public KPermutationBuilder<Integer> nPr(int n, int r) {
-        return nPr(r, IntStream.range(0, n).boxed().toList());
+    public KPermutationBuilder<Integer> nPk(int n, int k) {
+        return nPk(k, IntStream.range(0, n).boxed().toList());
     }
 
     /**
      * Creates a builder for permutations of r elements from a list of elements.
      *
-     * @param r The number of elements to permute.
+     * @param k The number of elements to permute.
      * @param allElements The list of all elements.
      * @param <T> The type of elements.
      * @return A builder for permutations.
      */
-    public <T> KPermutationBuilder<T> nPr(int r, List<T> allElements) {
-        return new KPermutationBuilder<>(allElements, r, calculator);
+    public <T> KPermutationBuilder<T> nPk(int k, List<T> allElements) {
+        return new KPermutationBuilder<>(allElements, k, calculator);
     }
 
     /**
      * Creates a builder for permutations of r elements from a varargs list of elements.
      *
-     * @param r The number of elements to permute.
+     * @param k The number of elements to permute.
      * @param allElements The varargs list of elements.
      * @param <T> The type of elements.
      * @return A builder for permutations.
      */
     @SafeVarargs
-    public final <T> KPermutationBuilder<T> nPr(int r, T... allElements) {
-        return nPr(r, asList(allElements));
+    public final <T> KPermutationBuilder<T> nPk(int k, T... allElements) {
+        return nPk(k, asList(allElements));
     }
 
     /**
@@ -166,11 +174,14 @@ public final class Permutations {
      * Creates a builder for repetitive permutations of integers with specified width and base.
      *
      * @param width The width of the permutations.
-     * @param base The base of the permutations.
+     * @param numberOfElements The max number symbols/elements int the permutations.
      * @return A builder for repetitive permutations.
      */
-    public RepetitivePermutationBuilder<Integer> repetitive(int width, int base) {
-        var symbols = IntStream.range(0, base).boxed().toList();
+    public RepetitivePermutationBuilder<Integer> repetitive(int width, int numberOfElements) {
+        if(numberOfElements <=0) {
+            throw new IllegalArgumentException("Repetitive permutation generation required at least 1 element/symbol");
+        }
+        var symbols = IntStream.range(0, numberOfElements).boxed().toList();
         return repetitive(width, symbols);
     }
 }

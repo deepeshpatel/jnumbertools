@@ -26,23 +26,7 @@ import java.util.stream.IntStream;
  * we do not like to wait for 100's of hours to generate all 1.008913445 X 10<sup>29</sup> combinations
  * sequentially and then selecting the required one.
  *
- * <pre>
- *     Code example -
- *     new UniqueCombinationMth&lt;&gt;(List.of("A","B","C","D"),2,2)
- *                  .forEach(System.out::println);
- *
- *     or
- *
- *     JNumberTools.of("A","B","C","D")
- *                 .uniqueMth(2,1)
- *                 .forEach(System.out::println);
- *
- * will generate following(0th, 2nd and 4th) unique combinations of all 6 possible combinations:
- * [A, B]
- * [A, D]
- * [B, D]
- * </pre>
- *
+ * Instance of this class is intended to be created via builder and hence do not have any public constructor.
  * @author Deepesh Patel
  */
 public final class UniqueCombinationMth<T> extends AbstractGenerator<T> implements MthElementGenerator<T> {

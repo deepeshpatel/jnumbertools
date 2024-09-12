@@ -13,38 +13,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Utility for generating r-combinations of input = {1, 2 . . ., n}.
- * <p>
- * This class generates r combinations from n=input.length items, where combinations are generated
- * in lexicographic order of indices of items in a list. This class does not check for duplicate
- * values and treats all values differently based on the index.
- * <p>
- * Repetitive combinations of 3 items out of 2 {1, 2} are:
- * <pre>
- * 111, 112, 122, 222
- * </pre>
- * <p>
- * Example usage:
- * <pre>
- * int[] multisetFreqArray = new int[]{2, 1, 1};
- * new RepetitiveCombinationMultiset&lt;&gt;(List.of("A", "B", "C"), 3, multisetFreqArray)
- *     .forEach(System.out::println);
- * </pre>
- * <p>
- * Or using the JNumberTools:
- * <pre>
- * // Here "A" can be repeated 2 times, "B" and "C" can be repeated only once
- * JNumberTools.of("A", "B", "C")
- *     .repetitiveMultiset(3, multisetFreqArray)
- *     .forEach(System.out::println);
- * </pre>
- * <p>
- * This will generate the following combinations of size 3:
- * <pre>
- * [A, A, B]
- * [A, A, C]
- * [A, B, C]
- * </pre>
+ * Utility for generating combinations of multiset
+ * Instance of this class is intended to be created via builder and hence do not have any public constructor.
  *
  * @param <T> the type of elements in the combinations
  * @author Deepesh Patel
@@ -66,8 +36,8 @@ public final class RepetitiveCombinationMultiset<T> extends AbstractGenerator<T>
      */
     public RepetitiveCombinationMultiset(List<T> elements, int r, int[] multisetFreqArray) {
         super(elements);
-        AbstractGenerator.checkParamCombination(elements.size(), r, "Repetitive Combination");
-        AbstractGenerator.checkParamMultisetFreqArray(elements.size(), multisetFreqArray, "Repetitive Combination");
+        checkParamCombination(elements.size(), r, "multiset combination");
+        checkParamMultisetFreqArray(elements.size(), multisetFreqArray, "combination");
 
         this.r = r;
         this.multisetFreqArray = multisetFreqArray;

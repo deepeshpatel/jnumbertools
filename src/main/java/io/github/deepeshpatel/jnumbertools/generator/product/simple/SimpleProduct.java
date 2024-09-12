@@ -9,7 +9,9 @@ import java.util.stream.StreamSupport;
 
 /**
  * A class for generating Cartesian product combinations of elements from multiple lists.
+ *  Instance of this class is intended to be created via builder and hence do not have any public constructor.
  * @param <T> The type of elements in the lists.
+ * @author Deepesh Patel
  */
 public class SimpleProduct<T> implements Iterable<List<T>> {
 
@@ -19,7 +21,7 @@ public class SimpleProduct<T> implements Iterable<List<T>> {
      * Constructor to initialize the simple product method.
      * @param elements A list of lists containing elements of type T.
      */
-    public SimpleProduct(List<List<T>> elements) {
+    SimpleProduct(List<List<T>> elements) {
         this.elements = elements;
     }
 

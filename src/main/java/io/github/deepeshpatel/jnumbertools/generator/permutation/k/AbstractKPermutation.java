@@ -12,7 +12,7 @@ import java.util.List;
  * <p>This class ensures that the subset size <code>k</code> is within valid bounds,
  * where <code>k</code> must be greater than or equal to 0 and less than or equal to the
  * size of the input list.
- *
+ * @author Deepesh Patel
  * @param <T> the type of elements in the permutation
  */
 public abstract class AbstractKPermutation<T> extends AbstractGenerator<T> {

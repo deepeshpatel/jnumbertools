@@ -11,32 +11,11 @@ import java.util.*;
 
 /**
  * Utility to generate all permutations of given items and size where items can be repeated.
- * <p>
  * Permutations are generated in lexicographical order of indices of input values, considering value at each index as unique.
- * </p>
  * <p>
- * Example:
- * <pre>
- *     new RepetitivePermutation&lt;&gt;(List.of("A","B","C"), 2)
- *         .forEach(System.out::println);
- *     or
- *     JNumberTools.permutationsOf("A","B","C")
- *         .repetitive(2)
- *         .forEach(System.out::println);
- * </pre>
- * This will generate the following permutations:
- * <pre>
- * [A, A]
- * [A, B]
- * [A, C]
- * [B, A]
- * [B, B]
- * [B, C]
- * [C, A]
- * [C, B]
- * [C, C]
- * </pre>
- *
+ * Instance of this class is intended to be created via builder and hence do not have any public constructor.
+ * @author Deepesh Patel
+ * <p>
  * @param <T> the type of elements to permute
  */
 public final class RepetitivePermutation<T> extends AbstractGenerator<T> {

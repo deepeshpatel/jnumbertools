@@ -21,24 +21,7 @@ import java.util.*;
  * 111 112 122 222
  * </pre>
  * <p>
- * Example usage:
- * <pre>
- * new RepetitiveCombination&lt;&gt;(List.of("A", "B"), 3)
- *       .forEach(System.out::println);
- *
- * or
- *
- * JNumberTools.of("A", "B")
- *       .repetitive(3)
- *       .forEach(System.out::println);
- * </pre>
- * The output will be:
- * <pre>
- * [A, A, A]
- * [A, A, B]
- * [A, B, B]
- * [B, B, B]
- * </pre>
+ * Instance of this class is intended to be created via builder and hence do not have any public constructor.
  *
  * @param <T> The type of elements in the combination.
  * @author Deepesh Patel

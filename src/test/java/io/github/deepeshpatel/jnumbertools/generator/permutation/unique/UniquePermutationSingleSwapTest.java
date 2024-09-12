@@ -6,6 +6,9 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static io.github.deepeshpatel.jnumbertools.TestBase.*;
+import static org.junit.Assert.assertEquals;
+
 public class UniquePermutationSingleSwapTest {
 
     @Test
@@ -13,7 +16,7 @@ public class UniquePermutationSingleSwapTest {
         var list = JNumberTools.permutations().unique('a','b','c','d','e').singleSwap().stream().toList();
         Assert.assertEquals(120, list.size());
         for(int i=1; i<list.size(); i++) {
-            int difCount = diffCount(list.get(i-1), list.get(i));
+            int difCount = numOfElementsSwapped(list.get(i-1), list.get(i));
             Assert.assertEquals(2, difCount);
         }
     }
@@ -43,7 +46,7 @@ public class UniquePermutationSingleSwapTest {
         Assert.assertEquals(5040, list.size());
         // Perform a quick check to ensure swaps are correct
         for(int i=1; i<list.size(); i++) {
-            Assert.assertEquals(2, diffCount(list.get(i-1), list.get(i)));
+            Assert.assertEquals(2, numOfElementsSwapped(list.get(i-1), list.get(i)));
         }
     }
 
@@ -60,7 +63,16 @@ public class UniquePermutationSingleSwapTest {
         Assert.assertTrue(list.contains(List.of(1, 'a', 'a', 1)));
     }
 
-    private <T> int diffCount(List<T> first, List<T> second) {
+    @Test
+    public void stressTesting() {
+        assumeStressTesting();
+        for(int n=0; n<=10; n++) {
+            long count = permutation.unique(n).singleSwap().stream().count();
+            assertEquals(calculator.factorial(n).longValue(), count);
+        }
+    }
+
+    private <T> int numOfElementsSwapped(List<T> first, List<T> second) {
         int sum = 0;
         for(int i=0; i< first.size(); i++) {
             if(!first.get(i).equals(second.get(i))) {

@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.NoSuchElementException;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
+import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.Assert.assertEquals;
 
 public class RepetitivePermutationTest {
@@ -65,5 +65,16 @@ public class RepetitivePermutationTest {
                 .stream().toList().toString();
 
         Assert.assertEquals(expected, output);
+    }
+
+    @Test
+    public void stressTesting() {
+        assumeStressTesting();
+        for(int n=20; n<=25; n++) {
+            for(int width = 0; width<=5; width++) {
+                long count = permutation.repetitive(width, n).lexOrder().stream().count();
+                assertEquals(calculator.pow(n, width).longValue(), count);
+            }
+        }
     }
 }

@@ -17,23 +17,7 @@ import java.util.List;
 /**
  * Implements the iterable generating every n<sup>th</sup> unique permutation of size k.
  * Permutations are generated in lex order of combinations of indices of input values, considering value at each index as unique.
- * <pre>
- * Code example -
- *
- *  new KPermutationMth&lt;&gt;(List.of("A","B","C"),2,2) //size =2 and increment to every 2nd permutation
- *      .forEach(System.out::println);
- *
- *  or
- *
- *  JNumberTools.permutationsOf("A","B","C")
- *      .kMth(2,2) //size =2 and increment to every 2nd permutation starting from 0
- *      .forEach(System.out::println);
- *
- * will generate -
- * [A, B]
- * [A, C]
- * [B, C]
- * </pre>
+ * Instance of this class is intended to be created via builder and hence do not have any public constructor.
  * @author Deepesh Patel
  */
 public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutation<T> {

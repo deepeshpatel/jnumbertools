@@ -19,17 +19,8 @@ import java.util.stream.StreamSupport;
  * <p>
  * This class provides an iterator for generating the Cartesian product of the lists contained within the complex product.
  * It also provides a stream for functional-style operations on the product.
- * </p>
  * <p>
- * Example usage:
- * <pre>
- * ComplexProduct complexProduct = new ComplexProduct(List.of(
- *     List.of(List.of("A", "B"), List.of("C", "D")),
- *     List.of(List.of("E", "F"), List.of("G", "H"))
- * ));
- * complexProduct.stream().forEach(System.out::println);
- * </pre>
- * This example creates a complex product of Cartesian products and prints each combination.
+ * Instance of this class is intended to be created via builder and hence do not have any public constructor.
  *
  * @since 1.0.3
  * @author Deepesh Patel
@@ -43,7 +34,7 @@ public class ComplexProduct implements Iterable<List<?>> {
      *
      * @param elements a list of lists where each inner list contains lists of elements
      */
-    public ComplexProduct(List<List<List<?>>> elements) {
+     ComplexProduct(List<List<List<?>>> elements) {
         this.elements = elements;
     }
 

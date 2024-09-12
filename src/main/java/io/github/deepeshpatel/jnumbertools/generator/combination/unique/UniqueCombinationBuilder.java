@@ -74,10 +74,19 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
      *
      * @return the total number of unique combinations.
      */
-    public synchronized long count() {
+    public synchronized BigInteger count() {
         if (count == -1) {
             count = calculator.nCr(elements.size(), size).longValue();
         }
-        return count;
+        return BigInteger.valueOf(count);
+    }
+
+    @Override
+    public String toString() {
+        return "UniqueCombinationBuilder{" +
+               "elements=" + elements +
+               ", size=" + size +
+               ", count=" + count +
+               '}';
     }
 }

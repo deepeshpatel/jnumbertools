@@ -19,6 +19,7 @@ import java.util.List;
  * It uses a specified starting point and an increment to generate permutations in a lexicographical order.
  * This is particularly useful when dealing with large datasets where generating all previous permutations
  * is inefficient.
+ * Instance of this class is intended to be created via builder and hence do not have any public constructor.
  *
  * @param <T> the type of elements in the multiset
  *
@@ -53,12 +54,12 @@ public final class MultisetPermutationMth<T> extends AbstractGenerator<T> {
      */
     MultisetPermutationMth(List<T> elements, long increment, long start, int[] frequencies, Calculator calculator) {
         super(elements);
+        checkParamMultisetFreqArray(elements.size(), frequencies, "mth permutation");
+        checkParamIncrement(BigInteger.valueOf(increment), "Multiset permutations");
         this.calculator = calculator;
         this.possiblePermutations = findTotalPossiblePermutations(frequencies);
         this.start = start;
         this.increment = increment;
-        checkParamIncrement(BigInteger.valueOf(increment), "Multiset permutations");
-
         this.frequencies = frequencies;
         this.initialSum = Arrays.stream(frequencies).sum();
     }

@@ -25,16 +25,16 @@ public class AllExamples {
         JNumberTools.permutations().repetitive(3,"A","B","C").lexOrderMth(3, 0).forEach(System.out::println);
 
         //all k-permutation in lex order
-        JNumberTools.permutations().nPr(2,"A","B","C").lexOrder().forEach(System.out::println);
+        JNumberTools.permutations().nPk(2,"A","B","C").lexOrder().forEach(System.out::println);
 
         //every mth k-permutation in lex order
-        JNumberTools.permutations().nPr(2,"A","B","C").lexOrderMth(2, 0).forEach(System.out::println);
+        JNumberTools.permutations().nPk(2,"A","B","C").lexOrderMth(2, 0).forEach(System.out::println);
 
         //all k-permutation in combination order
-        JNumberTools.permutations().nPr(2,"A","B","C").combinationOrder().forEach(System.out::println);
+        JNumberTools.permutations().nPk(2,"A","B","C").combinationOrder().forEach(System.out::println);
 
         //every mth k-permutation in lex order
-        JNumberTools.permutations().nPr(2,"A","B","C").combinationOrderMth(3, 0).forEach(System.out::println);
+        JNumberTools.permutations().nPk(2,"A","B","C").combinationOrderMth(3, 0).forEach(System.out::println);
 
         //all multiset permutations in lex order
         JNumberTools.permutations().multiset(List.of("A","B","C"),new int[]{1,2,1}).lexOrder().forEach(System.out::println);

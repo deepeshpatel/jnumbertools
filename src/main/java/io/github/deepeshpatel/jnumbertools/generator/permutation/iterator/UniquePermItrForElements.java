@@ -3,7 +3,7 @@
  * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
-package io.github.deepeshpatel.jnumbertools.generator.permutation.itertor;
+package io.github.deepeshpatel.jnumbertools.generator.permutation.iterator;
 
 import java.util.Iterator;
 import java.util.List;

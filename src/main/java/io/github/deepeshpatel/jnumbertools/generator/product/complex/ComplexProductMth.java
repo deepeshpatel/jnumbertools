@@ -7,6 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.product.complex;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -17,17 +18,8 @@ import java.util.stream.StreamSupport;
  * This class generates combinations by iterating through the Cartesian product of the lists provided,
  * but only at every m<sup>th</sup> position starting from the specified position.
  * It implements the {@link Iterable} interface to support iteration and provides a stream for functional-style operations.
- * </p>
- * <p>
- * Example usage:
- * <pre>
- * ComplexProductMth&lt;String&gt; complexProductMth = new ComplexProductMth&lt;&gt;(2, 0, List.of(
- *     new Combinations(calculator).unique(2, List.of("A", "B", "C")),
- *     new Combinations(calculator).repetitive(2, List.of("D", "E"))
- * ));
- * complexProductMth.stream().forEach(System.out::println);
- * </pre>
  * This example creates a complex product of combinations and prints every 2<sup>nd</sup> combination.
+ * Instance of this class is intended to be created via builder and hence do not have any public constructor.
  *
  * @param <T> the type of elements in the combinations
  * @since 1.0.3
@@ -35,10 +27,11 @@ import java.util.stream.StreamSupport;
  */
 public final class ComplexProductMth<T> implements Iterable<List<T>> {
 
-    private final long m;
-    private final long start;
+    private final BigInteger m;
+    private final BigInteger start;
     private final List<Builder<T>> builders;
-    private long maxCount;
+    private BigInteger maxCount = BigInteger.ZERO;
+
 
     /**
      * Constructs a ComplexProductMth with the specified parameters.
@@ -47,7 +40,7 @@ public final class ComplexProductMth<T> implements Iterable<List<T>> {
      * @param start the starting position for combinations
      * @param builders a list of builders used to generate combinations
      */
-    public ComplexProductMth(long m, long start, List<Builder<T>> builders) {
+    ComplexProductMth(BigInteger m, BigInteger start, List<Builder<T>> builders) {
         this.m = m;
         this.start = start;
         this.builders = builders;
@@ -71,25 +64,28 @@ public final class ComplexProductMth<T> implements Iterable<List<T>> {
         return getMth(m);
     }
 
-    private synchronized long maxCount() {
-        if (maxCount != 0) {
+    private synchronized BigInteger maxCount() {
+        if (!BigInteger.ZERO.equals(maxCount)) {
             return maxCount;
         }
-        maxCount = 1;
+        maxCount = BigInteger.ONE;
         for (Builder<T> builder : builders) {
-            maxCount *= builder.count();
+            maxCount = maxCount.multiply(builder.count());
         }
         return maxCount;
     }
 
-    private List<T> getMth(long m) {
+    //TODO: Priority:low,   Type:New API Idea
+    // Add ComplexProductMth-Quick along with  ComplexProductMth-lexOrder
+    // algorithm will be same but we can ignore collections.reverse
+    private List<T> getMth(BigInteger m) {
         List<T> output = new ArrayList<>();
-        long remaining = m;
+        BigInteger remaining = m;
         for (int i = builders.size() - 1; i >= 0; i--) {
             Builder<T> e = builders.get(i);
-            long index = remaining % e.count();
-            remaining = remaining / e.count();
-            List<T> values = e.lexOrderMth(index, 0).build();
+            BigInteger[] division = remaining.divideAndRemainder(e.count());
+            remaining = division[0];
+            List<T> values = e.lexOrderMth( division[1], BigInteger.ZERO).build();
             Collections.reverse(values);
             output.addAll(values);
         }
@@ -102,10 +98,19 @@ public final class ComplexProductMth<T> implements Iterable<List<T>> {
         return new Itr();
     }
 
+    @Override
+    public String toString() {
+        return "ComplexProductMth{" +
+               "m=" + m +
+               ", start=" + start +
+               ", maxCount=" + maxCount +
+               '}';
+    }
+
     private class Itr implements Iterator<List<T>> {
 
-        private long position = start;
-        private final long memoizedMaxCount;
+        private BigInteger position = start;
+        private final BigInteger memoizedMaxCount;
 
         public Itr() {
             memoizedMaxCount = maxCount();
@@ -113,7 +118,7 @@ public final class ComplexProductMth<T> implements Iterable<List<T>> {
 
         @Override
         public boolean hasNext() {
-            return position < memoizedMaxCount;
+            return position.compareTo(memoizedMaxCount) < 0;
         }
 
         @Override
@@ -122,7 +127,7 @@ public final class ComplexProductMth<T> implements Iterable<List<T>> {
                 throw new NoSuchElementException();
             }
             List<T> result = getMth(position);
-            position += m;
+            position = position.add(m);
             return result;
         }
     }

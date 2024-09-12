@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -120,6 +121,17 @@ public class UniquePermutationMthTest {
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForNegativeIncrement() {
         output(-1, 0,"A", "B", "C");
+    }
+
+    @Test
+    public void stressTesting() {
+        assumeStressTesting();
+        int n = 10;
+        for(int x = 1000; x<5000; x+=100) {
+            BigInteger nthOfFactorialX = calculator.factorial(x).divide(BigInteger.valueOf(n));
+            long count = permutation.unique(x).lexOrderMth(nthOfFactorialX, BigInteger.ZERO).stream().count();
+            Assert.assertEquals(n, count);
+        }
     }
 
     private String output(int increment, int start,  Object... elements) {

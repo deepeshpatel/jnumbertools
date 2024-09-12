@@ -6,7 +6,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.itertor.UniquePermItrForElements;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermItrForElements;
 
 import java.util.Iterator;
 import java.util.List;
@@ -24,17 +24,14 @@ import java.util.List;
  * </p>
  *
  * <p>
- * Example usage:
- * <pre>
- * new UniquePermutation&lt;&gt;(List.of("A", "B", "C"))
- *         .forEach(System.out::println);
- *
- * // or
- *
- * JNumberTools.permutationsOf("A", "B", "C")
- *         .unique()
- *         .forEach(System.out::println);
- * </pre>
+ * Instance of this class is intended to be created via builder and hence do not have any public constructor.
+ * Example:
+ *         <pre><code class="language-java">
+ * int size=3;
+ * new Permutations().unique(size)
+ *         .lexOrder()
+ *         .stream().toList();
+ *             </code></pre>
  * This will generate the following output (all possible permutations of "A", "B", and "C" in lexicographic order):
  * <pre>
  * [A, B, C]
@@ -49,7 +46,7 @@ import java.util.List;
  * @see <a href="https://en.wikipedia.org/wiki/Permutation">Wikipedia Permutation</a>
  * @author Deepesh Patel
  */
-public final class UniquePermutation<T> extends AbstractGenerator<T> implements Iterable<List<T>>{
+public final class UniquePermutation<T> extends AbstractGenerator<T> {
 
     /**
      * Constructs a UniquePermutation generator for the specified list of elements.
@@ -69,4 +66,5 @@ public final class UniquePermutation<T> extends AbstractGenerator<T> implements 
         return elements.isEmpty() ? newEmptyIterator() :
                 new UniquePermItrForElements<>(elements, this::indicesToValues);
     }
+
 }

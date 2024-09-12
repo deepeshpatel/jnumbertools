@@ -3,7 +3,7 @@
  * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
-package io.github.deepeshpatel.jnumbertools.generator.permutation.itertor;
+package io.github.deepeshpatel.jnumbertools.generator.permutation.iterator;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -47,7 +47,7 @@ public final class UniquePermItrForIndices implements Iterator<int[]> {
      * @param size the number of indices to permute
      */
     UniquePermItrForIndices(int size) {
-        // Starting permutation is zero
+        // Starting permutation index is zero
         this.indices = IntStream.range(0, size).toArray();
     }
 
@@ -121,13 +121,6 @@ public final class UniquePermItrForIndices implements Iterator<int[]> {
         return c;
     }
 
-    /**
-     * Swaps two elements in an array.
-     *
-     * @param a the array in which to swap elements
-     * @param i the index of the first element
-     * @param j the index of the second element
-     */
     private static void swap(int[] a, int i, int j) {
         int t = a[i];
         a[i] = a[j];

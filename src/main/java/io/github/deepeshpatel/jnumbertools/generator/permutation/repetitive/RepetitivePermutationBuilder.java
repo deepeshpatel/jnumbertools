@@ -5,6 +5,7 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ import java.util.List;
  * This class provides methods to generate permutations with repetition allowed. It allows
  * you to generate all permutations of a given size or a specific m<sup>th</sup> permutation directly.
  * </p>
- *
+ * @author Deepesh Patel
  * @param <T> the type of elements to permute
  */
 public final class RepetitivePermutationBuilder<T> {
@@ -50,6 +51,10 @@ public final class RepetitivePermutationBuilder<T> {
      * @return a {@link RepetitivePermutationMth} instance
      */
     public RepetitivePermutationMth<T> lexOrderMth(long m, long start) {
+        return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
+    }
+
+    public RepetitivePermutationMth<T> lexOrderMth(BigInteger m, BigInteger start) {
         return new RepetitivePermutationMth<>(elements, width, m, start);
     }
 

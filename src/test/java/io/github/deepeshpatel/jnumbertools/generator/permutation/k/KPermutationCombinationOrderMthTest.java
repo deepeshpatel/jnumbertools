@@ -18,7 +18,7 @@ public class KPermutationCombinationOrderMthTest {
         for(int n=0; n<=4; n++) {
             var input = Collections.nCopies(n,'A');
             for (int k = 0; k < n; k++) {
-                long size = permutation.nPr(k,input)
+                long size = permutation.nPk(k,input)
                         .combinationOrderMth(increment, 0)
                         .stream().count();
                 double expected = Math.ceil(calculator.nPr(n, k).longValue()/(double)increment);
@@ -29,7 +29,7 @@ public class KPermutationCombinationOrderMthTest {
 
     @Test
     public void shouldReturnSameResultForDifferentIteratorObjects(){
-        var iterable = permutation.nPr(2, "A", "B", "C")
+        var iterable = permutation.nPk(2, "A", "B", "C")
                 .combinationOrderMth(2, 0);
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
@@ -38,17 +38,17 @@ public class KPermutationCombinationOrderMthTest {
 
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForKLessThan0() {
-        permutation.nPr(-1,1).combinationOrderMth(3, 0);
+        permutation.nPk(-1,1).combinationOrderMth(3, 0);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForKGreaterThanInputLength() {
-        permutation.nPr(1, 5).combinationOrderMth(3, 0);
+        permutation.nPk(1, 5).combinationOrderMth(3, 0);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForZeroAndNegativeIncrementValue() {
-        permutation.nPr(1,1).combinationOrderMth(0, 0);
+        permutation.nPk(1,1).combinationOrderMth(0, 0);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class KPermutationCombinationOrderMthTest {
 
     @Test
     public void test_start_parameter_greater_than_0() {
-        var output = permutation.nPr(3, 'a','b','c','d','e')
+        var output = permutation.nPk(3, 'a','b','c','d','e')
                 .combinationOrderMth(20, 5)
                 .stream().toList().toString();
 
@@ -75,7 +75,7 @@ public class KPermutationCombinationOrderMthTest {
 
     @Test
     public void shouldHandleEmptyInput() {
-        var output = permutation.nPr(0, Collections.emptyList())
+        var output = permutation.nPk(0, Collections.emptyList())
                 .combinationOrderMth(1, 0).stream().toList();
         Assert.assertEquals("[[]]", output.toString());
     }
@@ -83,7 +83,7 @@ public class KPermutationCombinationOrderMthTest {
     @Test
     public void shouldHandleLargeIncrementValues() {
         var input = List.of('A', 'B', 'C', 'D');
-        var output = permutation.nPr(2, input)
+        var output = permutation.nPk(2, input)
                 .combinationOrderMth(1, 12)
                 .stream().toList();
 
@@ -93,7 +93,7 @@ public class KPermutationCombinationOrderMthTest {
     @Test
     public void shouldGenerateAllPermutationsWhenKEqualsInputSize() {
         var input = List.of('A', 'B', 'C');
-        var output = permutation.nPr(3, input)
+        var output = permutation.nPk(3, input)
                 .combinationOrderMth(1, 0)
                 .stream().toList();
 
@@ -104,7 +104,7 @@ public class KPermutationCombinationOrderMthTest {
     @Test
     public void shouldHandleLargeInputSize() {
         var input = List.of('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J');
-        var output = permutation.nPr(5, input)
+        var output = permutation.nPk(5, input)
                 .combinationOrderMth(1, 0)
                 .stream().toList();
 
@@ -112,13 +112,13 @@ public class KPermutationCombinationOrderMthTest {
     }
 
     private String getResultViaDirectIncrement(List<?> input, int k, int increment) {
-        return permutation.nPr(k,input)
+        return permutation.nPk(k,input)
                 .combinationOrderMth(increment, 0)
                 .stream().toList().toString();
     }
 
     private String getExpectedResultViaOneByOneIteration(List<?> input, int k, int increment) {
-        var stream = permutation.nPr(k, input)
+        var stream = permutation.nPk(k, input)
                 .combinationOrder().
                 stream();
         return everyMthValue(stream, increment).toString();

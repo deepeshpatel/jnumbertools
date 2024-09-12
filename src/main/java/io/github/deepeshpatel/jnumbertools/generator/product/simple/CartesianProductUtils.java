@@ -3,7 +3,8 @@ package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 import java.util.List;
 
 /**
- * Utility class for Cartesian product operations.
+ * Utility class for Cartesian product operations. Intended for internal usage
+ * @author Deepesh Patel
  */
 public final class CartesianProductUtils {
 

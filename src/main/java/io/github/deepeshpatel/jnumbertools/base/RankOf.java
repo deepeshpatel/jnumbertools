@@ -99,4 +99,25 @@ public final class RankOf {
     public BigInteger uniqueCombination(int n, int... combination) {
         return new CombinadicAlgorithms(calculator).rank(n, combination);
     }
+
+//not working for large values
+//    public BigInteger repeatedCombination(int[] combination, int n, int r) {
+//
+//        BigInteger rank = BigInteger.ZERO;
+//        int currentValue = 0;
+//
+//        for (int i = 0; i < r; i++) {
+//            int element = combination[i];
+//
+//            for (int j = currentValue; j < element; j++) {
+//                rank = rank.add(calculator.nCrRepetitive(n - j, r - i - 1));
+//            }
+//
+//            currentValue = element;
+//        }
+//
+//        return rank;
+//    }
+
+
 }

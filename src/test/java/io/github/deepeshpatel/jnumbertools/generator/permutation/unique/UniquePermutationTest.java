@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
+import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.Assert.assertEquals;
 
 public class UniquePermutationTest {
@@ -92,6 +91,15 @@ public class UniquePermutationTest {
         List<String> input = List.of("A", "B");
         String expected = "[[A, B], [B, A]]";
         assertEquals(expected, output(input));
+    }
+
+    @Test
+    public void stressTesting() {
+        assumeStressTesting();
+        for(int n=0; n<=10; n++) {
+            long count = permutation.unique(n).lexOrder().stream().count();
+            assertEquals(calculator.factorial(n).longValue(), count);
+        }
     }
 
 

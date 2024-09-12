@@ -23,23 +23,7 @@ import java.util.stream.IntStream;
  * of permutations by skipping directly to every {@code n}<sup>th</sup> permutation rather than
  * generating all possible permutations.
  * <p>
- * Example usage:
- * <pre>
- * new KPermutationLexOrderMth&lt;&gt;(List.of("A", "B", "C"), 2, BigInteger.valueOf(2), BigInteger.ZERO, calculator)
- *     .forEach(System.out::println);
- *
- * or
- *
- * JNumberTools.permutationsOf("A", "B", "C")
- *     .kMth(2, BigInteger.valueOf(2)) // size = 2, increment to every 2nd permutation starting from 0
- *     .forEach(System.out::println);
- * </pre>
- * This will generate:
- * <pre>
- * [A, B]
- * [A, C]
- * [B, C]
- * </pre>
+ *  Instance of this class is intended to be created via builder and hence do not have any public constructor.
  *
  * @param <T> the type of elements in the input list
  * @since 1.0.3

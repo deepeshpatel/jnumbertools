@@ -8,22 +8,27 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 /**
- * Provides methods for generating combinations of elements.
- * This class includes functionality to compute combinations with and without repetition,
- * as well as combinations of distinct objects.
+ * Builder class to create various types of combinations of elements.
  *
  * <p>
- * The class supports:
+ * Supports creation of following 6 types of combinations -
  * <ul>
- *     <li><strong>Combinations without Repetition:</strong> The number of ways to choose a subset of elements from a larger set where each element is used exactly once.</li>
- *     <li><strong>Combinations with Repetition:</strong> The number of ways to choose a subset of elements from a larger set where elements can be repeated.</li>
+ *     <li><strong>Unique combination lex order:</strong> </li>A selection of r elements out of n without repetition
+ *     <li><strong>Mth unique combination lex order:</strong> </li>generating mth combination directly
+ *     <li><strong>Repetitive combination lex order:</strong> </li>A selection of r elements out of n with repetition
+ *     <li><strong>Mth repetitive combination lex order:</strong> </li>generating mth combination directly
+ *     <li><strong>Multiset combination lex order:</strong> </li>combination with given quantity of each element
+ *     <li><strong>Mth multiset combination lex order:</strong> </li>generating mth combination directly
  * </ul>
  *
- * <p>
  * Example usage:
  * <pre>
- * Combinations&lt;Integer&gt; comb = new Combinations&lt;&gt;();
- * List&lt;List&lt;Integer&gt;&gt; result = comb.getCombinationsWithoutRepetition(Arrays.asList(1, 2, 3), 2);
+ * <code>
+ * Combinations combinations = new Combinations();
+ *
+ * //selecting 3 out of 5 without repetition
+ * List&lt;List&lt;Integer&gt;&gt; result = combinations.unique(5,3).lexOrder().stream().toList();
+ * </code>
  * </pre>
  *
  * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
@@ -93,7 +98,7 @@ public final class Combinations {
      * @param n The range of elements.
      * @param r The size of combinations.
      * @return A builder for repetitive combinations.
-     * @throws IllegalArgumentException if r<0
+     * @throws IllegalArgumentException if r &lt;  0
      */
     public RepetitiveCombinationBuilder<Integer> repetitive(int n, int r) {
         if(r < 0 ) {

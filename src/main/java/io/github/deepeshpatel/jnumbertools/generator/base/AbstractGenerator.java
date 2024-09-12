@@ -100,7 +100,7 @@ public abstract class AbstractGenerator<E> implements Iterable<List<E>> {
      */
     protected static void checkParamMultisetFreqArray(int inputSize, int[] frequencies, String message) {
         if (frequencies == null) {
-            throw new IllegalArgumentException("frequencies must be non-null to generate " + message + " of multiset");
+            throw new IllegalArgumentException("frequencies must be non-null to generate multiset " + message);
         }
 
         if (frequencies.length != inputSize) {

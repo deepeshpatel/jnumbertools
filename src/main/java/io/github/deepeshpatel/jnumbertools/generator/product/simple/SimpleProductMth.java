@@ -9,7 +9,9 @@ import java.util.stream.StreamSupport;
 
 /**
  * A class for generating simple product combinations.
+ * Instance of this class is intended to be created via builder and hence do not have any public constructor.
  * @param <T> The type of elements in the lists.
+ * @author Deepesh Patel
  */
 public class SimpleProductMth<T> implements Iterable<List<T>> {
 
@@ -23,7 +25,7 @@ public class SimpleProductMth<T> implements Iterable<List<T>> {
      * @param start The starting position.
      * @param elements A list of lists containing elements of type T.
      */
-    public SimpleProductMth(long m, long start, List<List<T>> elements) {
+    SimpleProductMth(long m, long start, List<List<T>> elements) {
         this.elements = elements;
         this.m = m;
         this.start = start;

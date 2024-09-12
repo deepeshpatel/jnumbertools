@@ -29,21 +29,7 @@ import java.util.stream.IntStream;
  * 1236 1256 1356 2346 3456
  * </pre>
  *
- * <pre>
- * Code example:
- *          new UniqueCombination&lt;&gt;(List.of("A","B","C"),2)
- *                  .forEach(System.out::println);
- * or
- *
- *         JNumberTools.of("A","B","C")
- *                 .unique(2)
- *                 .forEach(System.out::println);
- *
- * will generate following (all unique combinations of size 2 of A and B)
- * [A, B]
- * [A, C]
- * [B, C]
- * </pre>
+ * Instance of this class is intended to be created via builder and hence do not have any public constructor.
  *
  * @author Deepesh Patel
  */

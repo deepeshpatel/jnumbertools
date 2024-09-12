@@ -3,9 +3,10 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.Collections;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
+import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.Assert.assertEquals;
 
 public class RepetitivePermutationMthTest {
@@ -57,5 +58,17 @@ public class RepetitivePermutationMthTest {
                 .lexOrderMth(2, 3).stream().toList().toString();
         Assert.assertEquals("[[B, A], [B, C], [C, B]]", output);
 
+    }
+
+    @Test
+    public void stressTesting() {
+        assumeStressTesting();
+        int n=4;
+        int width = 1000;
+        for(int x = 2000; x<=2010; x++) {
+            BigInteger totalRepetitivePerm = calculator.pow(x,width).divide(BigInteger.valueOf(n));
+            long count = permutation.repetitive(width, x).lexOrderMth(totalRepetitivePerm, BigInteger.ZERO).stream().count();
+            Assert.assertEquals(n, count, 1);
+        }
     }
 }

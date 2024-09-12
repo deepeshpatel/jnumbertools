@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -56,17 +57,28 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
     }
 
     /**
+     * Retrieves the mth lexicographic repetitive combination, starting from a specified index.
+     *
+     * @param m     the mth combination to retrieve (0-based index)
+     * @param start the starting index for generating combinations
+     * @return a {@code RepetitiveCombinationMth} instance for generating the mth combination
+     */
+    public RepetitiveCombinationMth<T> lexOrderMth(BigInteger m, BigInteger start) {
+        return new RepetitiveCombinationMth<>(elements, size, m.longValue(), start.longValue(), calculator);
+    }
+
+    /**
      * Returns the total number of possible repetitive combinations.
      * <p>
      * The result is cached for efficiency.
      *
      * @return the total number of combinations
      */
-    public synchronized long count() {
+    public synchronized BigInteger count() {
 
         if (count == -1) {
             count = calculator.nCrRepetitive(elements.size(), size).longValue();
         }
-        return count;
+        return BigInteger.valueOf(count);
     }
 }
