@@ -529,7 +529,7 @@ BigInteger rank = JNumberTools.rankOf().kPermutation(8,4,6,2,0);
 Calculates the rank of repetitive permutation of 
 
 ```java
-//1,0,0,1 is the 9th repeated permutation 0f two digits 0 and 1  
+//1,0,0,1 is the 9th repeated permutation of two digits 0 and 1  
 int elementCount = 2;
 BigInteger result = JNumberTools.rankOf()
     .repeatedPermutation(elementCount, new Integer[]{1,0,0,1});
