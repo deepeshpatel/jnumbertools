@@ -8,7 +8,7 @@ Optimized for performance, JNumberTools allows you to tackle challenging combina
 **Key Features:**
 
 1. Versatile and efficient APIs for various combinatorics and number-theory operations.
-2. Ideal for educational, research, and real-world problem-solving in fields such as cryptography, computer science, and optimization.
+2. Ideal for educational, research, and real-world problem-solving in fields such as cryptography, computer science, puzzle-creation and optimization.
 3. Optimized for both small-scale and large-scale problems, delivering high performance.
 
 
