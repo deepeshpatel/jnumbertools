@@ -29,38 +29,38 @@ Add the following section into your `pom.xml` file.
 
 1. [Permutations: 10 different types of permutations](#1-permutations)
    1. [Unique permutation in lex order](#11-unique-permutation)
-   2. [Every m<sup>th</sup> unique permutation in lex order](#12-m-sup-th-sup-unique-permutation)
+   2. [Every m<sup>th</sup> unique permutation in lex order](#12-m--th-unique-permutation)
    3. [Repetitive permutation in lex order](#13-repetitive-permutation)
-   4. [Every m<sup>th</sup> repetitive permutation in lex order](#14-m-sup-th-sup-repetitive-permutation)
+   4. [Every m<sup>th</sup> repetitive permutation in lex order](#14-m--th-repetitive-permutation)
    5. [k-permutation in lex order](#15-k--permutation)
-   6. [Every m<sup>th</sup> k-permutation in lex order](#16-m-sup-th-sup-k--permutation)
+   6. [Every m<sup>th</sup> k-permutation in lex order](#16-m--th-k--permutation)
    7. [k-permutation in combination order](#17-k--permutation-in-combination-order)
-   8. [Every m<sup>th</sup> permutation in combination order](#18-m-sup-th-sup-k--permutation-in-combination-order)
+   8. [Every m<sup>th</sup> permutation in combination order](#18-m--th-k--permutation-in-combination-order)
    9. [Multiset permutation in lex order](#19-multiset-permutation-in-lex-order)
-   10. [Every m<sup>th</sup> multiset permutation in lex order](#110-m-sup-th-sup-multiset-permutation-in-lex-order)
+   10. [Every m<sup>th</sup> multiset permutation in lex order](#110-m--th-multiset-permutation-in-lex-order)
 
 
 2. [Combinations: 5 different types of combinations](#2-combinations)
    1. [Uniques combination in lex order](#21-unique-combination-in-lex-order)
-   2. [Every m<sup>th</sup> unique combination in lex order](#22-m-sup-th-sup-unique-combination-in-lex-order)
+   2. [Every m<sup>th</sup> unique combination in lex order](#22-m--th-unique-combination-in-lex-order)
    3. [Repetitive combination in lex order](#23-repetitive-combination-in-lex-order)
-   4. [Every m<sup>th</sup> repetitive combination in lex order](#24-m-sup-th-sup-repetitive-combination-in-lex-order)
+   4. [Every m<sup>th</sup> repetitive combination in lex order](#24-m--th-repetitive-combination-in-lex-order)
    5. [Multiset combination in lex order](#25-multiset-combination-in-lex-order)
    6. Every m<sup>th</sup> multiset combination in lex order: Coming soon
 
 
 3. [Set/subset generations: 4 different types available](#3-subsets)
    1. [All subsets of a given set in lex order](#31-all-subsets-in-lex-order)
-   2. [Every m<sup>th</sup> of all subsets in lex order](#32-mm-sup-th-sup-subsets-in-lex-order)
+   2. [Every m<sup>th</sup> of all subsets in lex order](#32-m--th-subsets-in-lex-order)
    3. [All subsets in a given size range in lex order](#33-all-subsets-of-given-size-range-in-lex-order)
-   4. [Every m<sup>th</sup> of subsets in a given size range in lex order](#34-m-sup-th-sup-subsets-in-range-in-lex-order)
+   4. [Every m<sup>th</sup> of subsets in a given size range in lex order](#34-m--th-subsets-in-range-in-lex-order)
 
 
 4. [Cartesian Product: 4 different types of product](#4-cartesian-product)
    1. [Simple Cartesian product in lex order](#41-simple-cartesian-product)
-   2. [Every m<sup>th</sup> cartesian product in lex order](#42-m-sup-th-sup-simple-cartesian-product)
+   2. [Every m<sup>th</sup> cartesian product in lex order](#42-m--th-simple-cartesian-product)
    3. [Complex Cartesian product in lex order](#43-complex-cartesian-product)
-   4. [Every m<sup>th</sup> complex cartesian product in lex order](#44-m-sup-th-sup-complex-cartesian-product)
+   4. [Every m<sup>th</sup> complex cartesian product in lex order](#44-m--th-complex-cartesian-product)
 
 
 5. [Ranking of permutations & combinations](#5-ranking-of-permutations--combinations)
@@ -98,7 +98,7 @@ JNumberTools.permutations()
 
 ```
 
-#### 1.2 M<sup>th</sup> Unique permutation
+#### 1.2 m-_th_ Unique permutation
 
 Generate every m<sup>th</sup> permutation in lexicographical order of indices of input
 values starting from given start index
@@ -143,7 +143,7 @@ JNumberTools.permutations()
     .stream().toList();
 ```
 
-#### 1.4 M<sup>th</sup> Repetitive permutation
+#### 1.4 m-_th_ Repetitive permutation
 This is same as generating AP series of base-n numbers with given n-symbols and 
 a=start, d=m and max-digits = r. There are total n<sup>r</sup>/m such permutations
 
@@ -184,7 +184,7 @@ JNumberTools.permutations()
      .stream().toList();
 ```
 
-#### 1.6 m<sup>th</sup> _k_-permutation
+#### 1.6 m-_th_ _k_-permutation
 Generates every  m<sup>th</sup> _k_-permutation in lex order without computing permutations
 preceding it. This concept is important because the total number of permutations can grow
 astronomically large. For instance, the number of permutations of 100 elements selected 50
@@ -229,7 +229,7 @@ JNumberTools.permutations()
         .stream().toList();
 ```
 
-#### 1.8 m<sup>th</sup> _k_-permutation in combination order
+#### 1.8 m-_th_ _k_-permutation in combination order
 Generates every m<sup>th</sup> k-permutation in the lexicographical order of combination.
 This API does not sort or search to achieve this but generates the desired permutation on the fly,
 so it is very efficient.
@@ -262,7 +262,7 @@ JNumberTools.permutations().multiset(elements, frequencies)
    .lexOrder().stream().toList();
 ```
 
-#### 1.10 m<sup>th</sup> multiset permutation in lex order
+#### 1.10 m-_th_ multiset permutation in lex order
 Generates every m<sup>th</sup> multiset-permutation from a given start index.
 This API does not search for the m<sup>th</sup> permutation in a sorted list but
 directly generates the desired permutation and hence it is very efficient.
@@ -293,7 +293,7 @@ JNumberTools.combinations()
    .lexOrder().stream().toList();
 ```
 
-#### 2.2 M<sup>th</sup> unique combination in lex order
+#### 2.2 m-_th_ unique combination in lex order
 Same as n-Choose-r but generates every m<sup>th</sup> combination in lex order starting from given index.  This concept is important because the count of combinations can grow astronomically large. For example, to generate, say, the next 1 billionth combination of 34-Choose-17,  we need to wait for days to generate the desired billionth combination if we generate all combinations sequentially and then select the billionth combination.
 
 ```java
@@ -322,7 +322,7 @@ JNumberTools.combinations()
    .repetitive(3,"A","B","C","D","E")
    .lexOrder().stream().toList();
 ```
-#### 2.4 M<sup>th</sup> repetitive combination in lex order
+#### 2.4 m-_th_ repetitive combination in lex order
 Generates every m<sup>th</sup> combination with repeated elements in lex order
 
 ```java
@@ -368,7 +368,7 @@ JNumberTools.subsets()
   .stream().toList();
 ```
 
-#### 3.2 MM<sup>th</sup> subsets in lex order
+#### 3.2 m-_th_ subsets in lex order
 Generates every m<sup>th</sup> subset of a given set in lex order. Starting from given index.
 This API does not search for the m<sup>th</sup> subset in a sorted list but
 directly generates the desired subset and hence it is very efficient.
@@ -399,7 +399,7 @@ JNumberTools.subsets()
    .stream().toList();
 ```
 
-#### 3.4 M<sup>th</sup> subsets in range in lex order
+#### 3.4 m-_th_ subsets in range in lex order
 Generates every m<sup>th</sup> subset in a given size range in lex order. Starting from given index.
 This API does not search for the m<sup>th</sup> subset in a sorted list but
 directly generates the desired subset and hence it is very efficient.
@@ -435,7 +435,7 @@ JNumberTools.cartesianProduct()
    .lexOrder().stream().toList();
 ```
 
-#### 4.2 M<sup>th</sup> Simple Cartesian product
+#### 4.2 m-_th_ simple cartesian product
 Generates every m<sup>th</sup> cartesian product starting from any starting index of choice.
 This API does not search for the m<sup>th</sup> product in a sorted list but
 directly generates the desired product and hence it is very efficient.
@@ -454,7 +454,7 @@ JNumberTools.cartesianProduct()
    .lexOrderMth(5,10).stream().toList();
 ```
 
-#### 4.3 Complex Cartesian product
+#### 4.3 Complex cartesian product
 Same as simple cartesian product but instead of having only one item from each list
 we can select multiple, select repetitive elements and select in a given range.
 ```java
@@ -477,7 +477,7 @@ JNumberTools
    .lexOrder().stream().toList();
 ```
 
-#### 4.4 M<sup>th</sup> Complex Cartesian product
+#### 4.4 m-_th_ complex cartesian product
 Generates m<sup>th</sup> complex cartesian product directly without calculating the values
 preceding it.
 For example below code prints every 10<sup>18</sup> th lexicographical combination
