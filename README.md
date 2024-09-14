@@ -13,7 +13,7 @@ Optimized for performance, JNumberTools allows you to tackle challenging combina
 
 
 ## latest version
-The latest release of the library is [v3.0.0](https://github.com/deepeshpatel/jnumbertools/releases/tag/V3.0.0).
+The latest release of the library is [v3.0.0](https://github.com/deepeshpatel/jnumbertools/releases/tag/v3.0.0).
 It is available through The Maven Central Repository [here](https://central.sonatype.com/search?q=jnumbertools&smo=true).
 Add the following section into your `pom.xml` file.
 
