@@ -341,7 +341,7 @@ JNumberTools.combinations()
 Special case of repetitive combination where every element has an associated frequency that denotes how many times an element can be repeated in a combination. For example, combinations of 3 apples and 2 oranges.
 
 ```java
-//combinations of any 2 fruits out of 2 apple, 1 banana and 3 guava in lex order
+//combinations of any 2 fruits out of 2 apples, 1 banana and 3 guavas in lex order
 var elements = List.of("Apple", "Banana", "Guava");
 int[] frequencies = {2,1,3};
 
