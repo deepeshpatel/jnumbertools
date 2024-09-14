@@ -53,7 +53,7 @@ Add the following section into your `pom.xml` file.
    1. [All subsets of a given set in lex order](#31-all-subsets-in-lex-order)
    2. [Every m<sup>th</sup> of all subsets in lex order](#32-mm-sup-th-sup-subsets-in-lex-order)
    3. [All subsets in a given size range in lex order](#33-all-subsets-of-given-size-range-in-lex-order)
-   4. [Every m<sup>th</sup> of subsets in a given size range in lex order](#34-mm-sup-th-sup-subsets-in-range-in-lex-order)
+   4. [Every m<sup>th</sup> of subsets in a given size range in lex order](#34-m-sup-th-sup-subsets-in-range-in-lex-order)
 
 
 4. [Cartesian Product: 4 different types of product](#4-cartesian-product)
@@ -481,7 +481,7 @@ JNumberTools
 Generates m<sup>th</sup> complex cartesian product directly without calculating the values
 preceding it.
 For example below code prints every 10<sup>18</sup> th lexicographical combination
-which is not feasible to calculate via one by one iteration. API supports BigInteger
+which is not feasible to calculate via one by one iteration. API supports BigInteger,
 so it is even possible to execute it for very large value of m. 
 Say every 10<sup>100</sup> th combination.
 ```java

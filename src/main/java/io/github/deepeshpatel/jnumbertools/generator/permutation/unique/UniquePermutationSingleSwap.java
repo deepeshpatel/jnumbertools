@@ -43,7 +43,7 @@ public final class UniquePermutationSingleSwap<T> extends AbstractGenerator<T> i
 
         int i = 1;
         int[] indices = IntStream.range(0, elements.size()).toArray();
-        int[] c = new int[indices.length];
+        final int[] c = new int[indices.length];
 
         /**
          * Generates the next permutation using Heap's algorithm.
