@@ -60,7 +60,7 @@ Add the following section into your `pom.xml` file.
    1. [Simple Cartesian product in lex order](#41-simple-cartesian-product)
    2. [Every m<sup>th</sup> cartesian product in lex order](#42-m-sup-th-sup-simple-cartesian-product)
    3. [Complex Cartesian product in lex order](#43-complex-cartesian-product)
-   4. Every m<sup>th</sup> complex cartesian product in lex order
+   4. [Every m<sup>th</sup> complex cartesian product in lex order](#44-m-sup-th-sup-complex-cartesian-product)
 
 
 5. [Ranking of permutations & combinations](#5-ranking-of-permutations--combinations)
