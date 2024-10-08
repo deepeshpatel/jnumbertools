@@ -1,4 +1,4 @@
-![JNumberTools](resources/JNumberTools_broad.webp)
+![JNumberTools](resources/JNumberTools_1280x640.png)
 
 # JNumberTools
 **JNumberTools** is an open-source Java library designed to provide powerful tools for solving complex problems in combinatorics and number theory. Whether you're a researcher, developer, or student, this library offers a comprehensive set of APIs to efficiently handle a wide range of mathematical tasks, from basic functions to advanced combinatorial computations.

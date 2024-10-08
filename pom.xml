@@ -31,7 +31,7 @@
     <url>https://github.com/deepeshpatel/jnumbertools</url>
     <description>
         JNumberTools is the combinatorics and number-theory library which provides
-        useful APIS related to said topics
+        simple APIS to generate combinations, permutations, subsets, cartesian-product and number-system
     </description>
 
     <licenses>
@@ -44,8 +44,13 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>18</maven.compiler.source>
+        <maven.compiler.target>18</maven.compiler.target>
+
+<!--        <jdk.version>18</jdk.version>-->
+<!--        <javac.src.version>17</javac.src.version>-->
+<!--        <javac.target.version>17</javac.target.version>-->
+
     </properties>
 
     <developers>
