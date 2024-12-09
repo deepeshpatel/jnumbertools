@@ -20,7 +20,7 @@ public class TestBase {
     }
 
     private static boolean stressTesting() {
-        return false;
+        return true;
     }
 
     public static <T> void assumeStressTesting() {

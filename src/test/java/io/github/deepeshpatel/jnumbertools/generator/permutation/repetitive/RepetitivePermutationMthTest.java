@@ -66,7 +66,7 @@ public class RepetitivePermutationMthTest {
         int n=4;
         int width = 1000;
         for(int x = 2000; x<=2010; x++) {
-            BigInteger totalRepetitivePerm = calculator.pow(x,width).divide(BigInteger.valueOf(n));
+            BigInteger totalRepetitivePerm = calculator.power(x,width).divide(BigInteger.valueOf(n));
             long count = permutation.repetitive(width, x).lexOrderMth(totalRepetitivePerm, BigInteger.ZERO).stream().count();
             Assert.assertEquals(n, count, 1);
         }

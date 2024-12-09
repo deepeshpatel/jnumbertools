@@ -1,10 +1,8 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Calculator required for combinatorics calculation. This calculator uses memoization
@@ -15,7 +13,7 @@ public final class Calculator {
 
     private final TwoLevelMap<Integer, Integer, BigInteger> nCrMemo = new TwoLevelMap<>();
     private final TwoLevelMap<Integer, Integer, BigInteger> nPrMemo = new TwoLevelMap<>();
-    private final List<BigInteger> fList = new ArrayList<>();
+    private final ConcurrentHashMap<Integer, BigInteger> factorialCache = new ConcurrentHashMap<>();
 
     /**
      * Constructs a new {@code Calculator} instance with default cache sizes.
@@ -38,11 +36,9 @@ public final class Calculator {
     }
 
     private void setupFactorialCache(int cacheSize) {
-        fList.add(BigInteger.ONE);
-        fList.add(BigInteger.ONE);
-        fList.add(BigInteger.TWO);
-        fList.add(BigInteger.valueOf(6));
+        factorialCache.put(0, BigInteger.ONE);
         factorial(cacheSize);
+        //factorial(0);
     }
 
     private void setupCombinationCache(int cacheSize) {
@@ -126,23 +122,27 @@ public final class Calculator {
      * @throws IllegalArgumentException If n is negative.
      */
     public BigInteger factorial(int n) {
-
         if (n < 0) {
             throw new IllegalArgumentException("Negative input is not allowed.");
         }
 
-        if (n < fList.size()) {
-            return fList.get(n);
+        BigInteger cachedValue = factorialCache.get(n);
+        if(cachedValue != null) {
+            return cachedValue;
         }
+        return computeAndCacheFactorial(n);
+    }
 
-        BigInteger product = fList.get(fList.size() - 1);
-
-        for (int i = fList.size(); i <= n; i++) {
+    private BigInteger computeAndCacheFactorial(int n) {
+        int size = factorialCache.size();
+        BigInteger product = factorialCache.get(size-1);
+        for(int i=size; i<=n; i++) {
             product = product.multiply(BigInteger.valueOf(i));
-            fList.add(product);
+            factorialCache.put(i, product);
         }
         return product;
     }
+
 
     /**
      * Calculates the power of a base raised to an exponent.
@@ -151,8 +151,8 @@ public final class Calculator {
      * @param exponent The exponent to raise the base to.
      * @return The result of base^exponent.
      */
-    public BigInteger pow(long base, long exponent) {
-        return pow(BigInteger.valueOf(base), BigInteger.valueOf(exponent));
+    public BigInteger power(long base, long exponent) {
+        return power(BigInteger.valueOf(base), BigInteger.valueOf(exponent));
     }
 
     /**
@@ -163,7 +163,7 @@ public final class Calculator {
      * @return The result of base^exponent.
      * @throws IllegalArgumentException If exponent is negative.
      */
-    public BigInteger pow(BigInteger base, BigInteger exponent) {
+    public BigInteger power(BigInteger base, BigInteger exponent) {
         if (exponent.signum() < 0) {
             throw new IllegalArgumentException("Exponent must be non-negative.");
         }
@@ -186,7 +186,7 @@ public final class Calculator {
      */
     public BigInteger totalSubsetsInRange(int from, int to, int noOfElements) {
 
-        if (from == 0 && to == noOfElements) return pow(2, noOfElements);
+        if (from == 0 && to == noOfElements) return power(2, noOfElements);
 
         BigInteger sum = BigInteger.ZERO;
         for (int i = from; i <= to; i++) {
@@ -195,11 +195,7 @@ public final class Calculator {
         return sum;
     }
 
-    // Can be replaced by Google Guava Table. Using this because of
-    // [1] defined constraint that JNumberTools library should not have any dependency
-    // [2] very small code
-    // [3] is fast
-    private static class TwoLevelMap<K1, K2, V> extends HashMap<K1, Map<K2, V>> {
+    private static class TwoLevelMap<K1, K2, V> extends ConcurrentHashMap<K1, Map<K2, V>> {
 
         public V get(K1 key1, K2 key2) {
             var map = get(key1);
@@ -207,7 +203,7 @@ public final class Calculator {
         }
 
         public V put(K1 key1, K2 key2, V value) {
-            computeIfAbsent(key1, (e) -> new HashMap<>()).put(key2, value);
+            computeIfAbsent(key1, (e) -> new ConcurrentHashMap<>()).put(key2, value);
             return value;
         }
     }

@@ -21,7 +21,6 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
     private final List<T> elements;
     private final int size;
     private final Calculator calculator;
-    private long count = -1;
 
     /**
      * Constructs a new UniqueCombinationBuilder with the given elements, size, and calculator.
@@ -74,11 +73,9 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
      *
      * @return the total number of unique combinations.
      */
-    public synchronized BigInteger count() {
-        if (count == -1) {
-            count = calculator.nCr(elements.size(), size).longValue();
-        }
-        return BigInteger.valueOf(count);
+    public BigInteger count() {
+        //no need to cache the count as nCr values are cached in calculator
+        return calculator.nCr(elements.size(), size);
     }
 
     @Override
@@ -86,7 +83,7 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
         return "UniqueCombinationBuilder{" +
                "elements=" + elements +
                ", size=" + size +
-               ", count=" + count +
+               ", count=" + count() +
                '}';
     }
 }

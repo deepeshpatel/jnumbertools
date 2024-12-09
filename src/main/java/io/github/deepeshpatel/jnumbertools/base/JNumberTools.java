@@ -82,4 +82,8 @@ public final class JNumberTools {
     public static CartesianProduct cartesianProduct() {
         return new CartesianProduct(new Calculator());
     }
+
+    public static NumberSystem numberSystem() {
+        return new NumberSystem(new Calculator());
+    }
 }

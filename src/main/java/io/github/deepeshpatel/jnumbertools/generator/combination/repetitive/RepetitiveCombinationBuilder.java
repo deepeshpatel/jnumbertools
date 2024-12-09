@@ -21,7 +21,6 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
     private final List<T> elements;
     private final int size;
     private final Calculator calculator;
-    private long count = -1;
 
     /**
      * Constructs a {@code RepetitiveCombinationBuilder} with the specified elements, size, and calculator.
@@ -74,11 +73,17 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
      *
      * @return the total number of combinations
      */
-    public synchronized BigInteger count() {
+    public BigInteger count() {
+        //no need to cache the count as nCr values are cached in calculator
+        return calculator.nCrRepetitive(elements.size(), size);
+    }
 
-        if (count == -1) {
-            count = calculator.nCrRepetitive(elements.size(), size).longValue();
-        }
-        return BigInteger.valueOf(count);
+    @Override
+    public String toString() {
+        return "RepetitiveCombinationBuilder{" +
+                "elements=" + elements +
+                ", size=" + size +
+                ", count=" + count() +
+                '}';
     }
 }
