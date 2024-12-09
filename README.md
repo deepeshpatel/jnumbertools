@@ -1,21 +1,21 @@
 ![JNumberTools](resources/JNumberTools_1280x640.png)
 
 # JNumberTools
-**JNumberTools** is an open-source Java library designed to provide powerful tools for solving complex problems in combinatorics and number theory. Whether you're a researcher, developer, or student, this library offers a comprehensive set of APIs to efficiently handle a wide range of mathematical tasks, from basic functions to advanced combinatorial computations.
+**JNumberTools** is an open-source Java library designed to provide powerful tools for solving complex problems in combinatorics and number theory.
 
-Optimized for performance, JNumberTools allows you to tackle challenging combinatorics problems—such as permutations, combinations, conditional-cartesian-products, ranking, partitions, and more—without the need to develop custom algorithms. Seamlessly integrate these capabilities into your projects to streamline both academic and practical applications in fields like mathematics, cryptography, data analysis, and algorithm design.
+JNumberTools allows you to tackle challenging combinatorics problems—such as permutations, combinations, conditional-cartesian-products, ranking, partitions, etc. for both academic and practical applications in fields like mathematics, cryptography, data analysis, number theory, and algorithm design.
 
 **Key Features:**
 
 1. Versatile and efficient APIs for various combinatorics and number-theory operations.
-2. Ideal for educational, research, and real-world problem-solving in fields such as cryptography, computer science, puzzle-creation and optimization.
+2. Ideal for educational, research, and real-world problem-solving in cryptography, computer science, puzzle-creation, and optimization.
 3. Optimized for both small-scale and large-scale problems, delivering high performance.
 
 
 ## latest version
 The latest release of the library is [v3.0.0](https://github.com/deepeshpatel/jnumbertools/releases/tag/v3.0.0).
 It is available through The Maven Central Repository [here](https://central.sonatype.com/search?q=jnumbertools&smo=true).
-Add the following section into your `pom.xml` file.
+Add the following section to your `pom.xml` file.
 
 ```xml
 <dependency>
