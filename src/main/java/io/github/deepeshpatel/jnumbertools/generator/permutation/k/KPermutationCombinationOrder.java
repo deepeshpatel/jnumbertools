@@ -53,7 +53,7 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
 
         /* Use the faster version when k equals the size of elements */
         if (k == elements.size()) {
-            return new UniquePermItrForElements<>(elements, this::indicesToValues);
+            return new UniquePermItrForElements<>(elements.size(), this::indicesToValues);
         }
 
         return new Itr();

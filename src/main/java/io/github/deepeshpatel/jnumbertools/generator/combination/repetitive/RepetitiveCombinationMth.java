@@ -13,7 +13,6 @@ import java.util.List;
  * <p>
  * This class can also generate subsequent combinations at intervals of a specified increment. The main use case is to
  * generate a specific combination directly without generating all previous combinations.
- *
  * Instance of this class is intended to be created via builder and hence do not have any public constructor.
  *
  * @param <T> the type of elements in the combinations

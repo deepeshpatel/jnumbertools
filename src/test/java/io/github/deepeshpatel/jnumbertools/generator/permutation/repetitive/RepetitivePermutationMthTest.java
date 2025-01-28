@@ -1,74 +1,98 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.math.BigInteger;
 import java.util.Collections;
+import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.*;
-import static org.junit.Assert.assertEquals;
+import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
+import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
+import static java.util.List.of;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 public class RepetitivePermutationMthTest {
 
     @Test
-    public void assertCount(){
-        int increment=4;
-        for(int n=1; n<=5; n++) {
+    void assertCount() {
+        int increment = 4;
+        for (int n = 1; n <= 5; n++) {
             var input = Collections.nCopies(n, 'A');
-            for(int size=0; size<=3; size++){
+            for (int size = 0; size <= 3; size++) {
                 long count = permutation.repetitive(size, input)
                         .lexOrderMth(increment, 0)
                         .stream().count();
-                double expected = Math.ceil(Math.pow(n,size)/increment);
-                Assert.assertEquals((long)expected, count);
+                double expected = Math.ceil(Math.pow(n, size) / increment);
+                assertEquals((long) expected, count);
             }
         }
     }
 
     @Test
-    public void shouldReturnSameResultForDifferentIteratorObjects(){
+    void shouldReturnSameResultForDifferentIteratorObjects() {
         var iterable = permutation
-                .repetitive(2,'A', 'B','C')
+                .repetitive(2, 'A', 'B', 'C')
                 .lexOrderMth(2, 0);
 
-        Assert.assertEquals(iterable.stream().toList(), iterable.stream().toList());
+        assertIterableEquals(iterable.stream().toList(), iterable.stream().toList());
     }
 
     @Test
-    public void shouldGenerateAllPermutationsOf2Values() {
-        String actual   = permutation.repetitive(3, 0,1)
+    void shouldGenerateAllPermutationsOf2Values() {
+        var expected = List.of(
+                of(0, 0, 0),
+                of(0, 1, 0),
+                of(1, 0, 0),
+                of(1, 1, 0)
+        );
+
+        var output = permutation.repetitive(3, 0, 1)
                 .lexOrderMth(2, 0)
-                .stream().toList().toString();
+                .stream().toList();
 
-        assertEquals("[[0, 0, 0], [0, 1, 0], [1, 0, 0], [1, 1, 0]]", actual);
+        assertIterableEquals(expected, output);
     }
 
     @Test
-    public void shouldGenerateRepetitiveMthPermutations() {
-        var output = permutation.repetitive(2,"A", "B", "C")
+    void shouldGenerateRepetitiveMthPermutations() {
+        var expected = List.of(
+                of("A", "A"),
+                of("A", "C"),
+                of("B", "B"),
+                of("C", "A"),
+                of("C", "C")
+        );
+        var output = permutation.repetitive(2, "A", "B", "C")
                 .lexOrderMth(2, 0).stream().toList();
 
-        Assert.assertEquals("[[A, A], [A, C], [B, B], [C, A], [C, C]]", output.toString());
+        assertIterableEquals(expected, output);
     }
 
     @Test
-    public void test_start_parameter_greater_than_0() {
-        var output = permutation.repetitive(2,"A", "B", "C")
-                .lexOrderMth(2, 3).stream().toList().toString();
-        Assert.assertEquals("[[B, A], [B, C], [C, B]]", output);
-
+    void test_start_parameter_greater_than_0() {
+        var expected = List.of(
+                of("B", "A"),
+                of("B", "C"),
+                of("C", "B")
+        );
+        var output = permutation.repetitive(2, "A", "B", "C")
+                .lexOrderMth(2, 3).stream().toList();
+        assertIterableEquals(expected, output);
     }
 
+    @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
     @Test
-    public void stressTesting() {
-        assumeStressTesting();
-        int n=4;
+    void stressTesting() {
+        int n = 4;
         int width = 1000;
-        for(int x = 2000; x<=2010; x++) {
-            BigInteger totalRepetitivePerm = calculator.power(x,width).divide(BigInteger.valueOf(n));
-            long count = permutation.repetitive(width, x).lexOrderMth(totalRepetitivePerm, BigInteger.ZERO).stream().count();
-            Assert.assertEquals(n, count, 1);
+        for (int x = 2000; x <= 2010; x++) {
+            BigInteger totalRepetitivePerm = calculator.power(x, width).divide(BigInteger.valueOf(n));
+            long count = permutation.repetitive(width, x)
+                    .lexOrderMth(totalRepetitivePerm, BigInteger.ZERO)
+                    .stream().count();
+            assertEquals(n, count, 1);
         }
     }
 }

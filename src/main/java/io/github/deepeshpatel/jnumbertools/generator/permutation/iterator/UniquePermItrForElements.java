@@ -21,31 +21,27 @@ import java.util.List;
  */
 public final class UniquePermItrForElements<T> implements Iterator<List<T>> {
 
-    private final List<T> elements;
     private final IndicesToValueMapper<T> mapper;
     private final UniquePermItrForIndices iterator;
 
     /**
      * Constructs a new {@code UniquePermItrForElements} with the specified elements and mapper.
      *
-     * @param elements The list of elements to generate permutations of.
+     * @param size The size of list of elements to generate permutations of.
      * @param mapper The mapper that converts indices to values.
      */
-    public UniquePermItrForElements(List<T> elements, IndicesToValueMapper<T> mapper) {
-        this.elements = elements;
+    public UniquePermItrForElements(int size, IndicesToValueMapper<T> mapper) {
         this.mapper = mapper;
-        iterator = new UniquePermItrForIndices(elements.size());
+        iterator = new UniquePermItrForIndices(size);
     }
 
     /**
      * Constructs a new {@code UniquePermItrForElements} with the specified elements, mapper, and initial state of indices.
      *
-     * @param elements The list of elements to generate permutations of.
      * @param mapper The mapper that converts indices to values.
      * @param initialStateOfIndices The initial state of indices for the iterator.
      */
-    public UniquePermItrForElements(List<T> elements, IndicesToValueMapper<T> mapper, int[] initialStateOfIndices) {
-        this.elements = elements;
+    public UniquePermItrForElements(IndicesToValueMapper<T> mapper, int[] initialStateOfIndices) {
         this.mapper = mapper;
         iterator = new UniquePermItrForIndices(initialStateOfIndices);
     }

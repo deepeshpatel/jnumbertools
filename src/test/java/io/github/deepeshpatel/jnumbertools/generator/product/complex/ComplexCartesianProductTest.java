@@ -1,30 +1,29 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.complex;
 
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.util.List;
+import org.junit.jupiter.api.Test;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
+import static java.util.List.of;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ComplexCartesianProductTest {
 
     @Test
-    public void shouldGenerateCorrectNumOfCombinations() {
+    void shouldGenerateCorrectNumOfCombinations() {
 
-        var pizzaBase = List.of("Small ","Medium","Large");
-        var sauce = List.of( "Tomato Ketchup","White Sauce","Green Chutney");
-        var cheese = List.of( "Ricotta","Mozzarella","Cheddar");
-        var toppings = List.of("tomato","capsicum","onion","paneer","corn");
+        var pizzaBase = of("Small ","Medium","Large");
+        var sauce = of( "Tomato Ketchup","White Sauce","Green Chutney");
+        var cheese = of( "Ricotta","Mozzarella","Cheddar");
+        var toppings = of("tomato","capsicum","onion","paneer","corn");
 
-       var product =  cartesianProduct.complexProductOf(1, pizzaBase)
+        var product = cartesianProduct.complexProductOf(1, pizzaBase)
                 .andDistinct(2, cheese)
                 .andMultiSelect(2, sauce)
-                .andInRange(1,5,toppings).lexOrder();
+                .andInRange(1, 5, toppings).lexOrder();
 
         var list = product.stream().toList();
 
-        Assert.assertEquals(product.count(), list.size());
+        assertEquals(product.count(), list.size());
 
         String row_0 = "[Small , Ricotta, Mozzarella, Tomato Ketchup, Tomato Ketchup, tomato]";
         String row_80 = "[Small , Ricotta, Mozzarella, Tomato Ketchup, Green Chutney, tomato, onion, paneer]";
@@ -34,13 +33,12 @@ public class ComplexCartesianProductTest {
         String row_991 = "[Medium, Mozzarella, Cheddar, Tomato Ketchup, White Sauce, tomato, capsicum, onion, paneer, corn]";
         String lastRow = "[Large, Mozzarella, Cheddar, Green Chutney, Green Chutney, tomato, capsicum, onion, paneer, corn]";
 
-        Assert.assertEquals(row_0, list.get(0).toString());
-        Assert.assertEquals(row_80, list.get(80).toString());
-        Assert.assertEquals(row_354, list.get(354).toString());
-        Assert.assertEquals(row_599, list.get(599).toString());
-        Assert.assertEquals(row_779, list.get(779).toString());
-        Assert.assertEquals(row_991, list.get(991).toString());
-        Assert.assertEquals(lastRow, list.get(list.size()-1).toString());
+        assertEquals(row_0, list.get(0).toString());
+        assertEquals(row_80, list.get(80).toString());
+        assertEquals(row_354, list.get(354).toString());
+        assertEquals(row_599, list.get(599).toString());
+        assertEquals(row_779, list.get(779).toString());
+        assertEquals(row_991, list.get(991).toString());
+        assertEquals(lastRow, list.get(list.size() - 1).toString());
     }
-
 }

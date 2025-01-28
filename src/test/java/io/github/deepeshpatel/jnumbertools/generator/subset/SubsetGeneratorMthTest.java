@@ -1,63 +1,59 @@
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static io.github.deepeshpatel.jnumbertools.TestBase.subsets;
+import static io.github.deepeshpatel.jnumbertools.TestBase.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SubsetGeneratorMthTest {
 
     @Test
-    public void shouldGenerate_AllSubsets_For_4Elements_and_M_Equals1() {
-        var elements = List.of('A','B','C','D');
-        var iter_expected = subsets.of(elements).all().lexOrder().iterator();
-        var iter_testResult = subsets.of(elements).all().lexOrderMth(1, 0).iterator();
-        while(iter_expected.hasNext()) {
-            Assert.assertEquals(iter_expected.next(), iter_testResult.next());
+    void shouldGenerate_AllSubsets_For_4Elements_and_M_Equals1() {
+
+        var iter_expected = subsets.of(A_B_C_D).all().lexOrder().iterator();
+        var iter_testResult = subsets.of(A_B_C_D).all().lexOrderMth(1, 0).iterator();
+        while (iter_expected.hasNext()) {
+            assertEquals(iter_expected.next(), iter_testResult.next());
         }
     }
 
     @Test
-    public void should_generate_all_subsets_for_5elements_and_different_m_for_range_3_6() {
-        var elements = List.of('0','1','2','3','4','5');
+    void should_generate_all_subsets_for_6elements_and_different_m_for_range_3_6() {
 
-        for(int from=1; from<elements.size(); from++) {
-            for(int to=from; to<elements.size(); to++) {
-                for(int m=1; m<6; m++) {
-                    var allValues = subsets.of(elements).inRange(from, to).lexOrder().stream();
+
+        for (int from = 1; from < num_0_to_5.size(); from++) {
+            for (int to = from; to < num_0_to_5.size(); to++) {
+                for (int m = 1; m < 6; m++) {
+                    var allValues = subsets.of(num_0_to_5).inRange(from, to).lexOrder().stream();
                     var expected = TestBase.everyMthValue(allValues, m);
-                    var  result =  subsets.of(elements).inRange(from, to).lexOrderMth(m, 0).stream().toList();
-                    Assert.assertEquals(expected, result);
+                    var result = subsets.of(num_0_to_5).inRange(from, to).lexOrderMth(m, 0).stream().toList();
+                    assertEquals(expected, result);
                 }
             }
         }
     }
 
     @Test
-    public void should_generate_all_subsets_for_4elements_and_different_m() {
-        var elements = List.of('A','B','C','D');
-        for(int m=1; m<=15; m++) {
-            var allValues = subsets.of(elements).all().lexOrder().stream();
+    void should_generate_all_subsets_for_4elements_and_different_m() {
+        for (int m = 1; m <= 15; m++) {
+            var allValues = subsets.of(A_B_C_D).all().lexOrder().stream();
             var expected = TestBase.everyMthValue(allValues, m);
-            var  result =  subsets.of(elements).all().lexOrderMth(m, 0).stream().toList();
-            Assert.assertEquals(expected, result);
+            var result = subsets.of(A_B_C_D).all().lexOrderMth(m, 0).stream().toList();
+            assertEquals(expected, result);
         }
     }
 
     @Test
-    public void test_start_parameter_greater_than_0() {
-        var builder = subsets.of('A','B','C','D');
+    void test_start_parameter_greater_than_0() {
+        var builder = subsets.of(A_B_C_D);
 
         var listOfAll = builder.all()
-                .lexOrderMth(5, 3).stream().collect(Collectors.toList());
-        Assert.assertEquals("[[C], [B, C], [A, C, D]]", listOfAll.toString());
+                .lexOrderMth(5, 3).stream().toList();
+        assertEquals("[[C], [B, C], [A, C, D]]", listOfAll.toString());
 
-        var listOfRange = builder.inRange(2,3)
-                .lexOrderMth(5,3).stream().collect(Collectors.toList());
-        Assert.assertEquals("[[B, C], [A, C, D]]", listOfRange.toString());
+        var listOfRange = builder.inRange(2, 3)
+                .lexOrderMth(5, 3).stream().toList();
+        assertEquals("[[B, C], [A, C, D]]", listOfRange.toString());
     }
 }

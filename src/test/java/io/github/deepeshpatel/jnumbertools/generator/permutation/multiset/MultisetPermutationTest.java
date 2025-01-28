@@ -1,21 +1,23 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
+import org.junit.jupiter.api.Test;
 
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
+import static io.github.deepeshpatel.jnumbertools.TestBase.*;
+import static java.util.List.of;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MultisetPermutationTest {
 
     @Test
-    public void assertCount() {
+    void assertCount() {
         Random random = new Random(System.currentTimeMillis());
-        for(int n=1; n<=6; n++){
+        for (int n = 1; n <= 6; n++) {
             var input = Collections.nCopies(n, 'A');
             int[] frequency = getRandomMultisetFreqArray(random, input.size());
             long count = permutation.multiset(input, frequency)
@@ -24,85 +26,87 @@ public class MultisetPermutationTest {
             int sum = Arrays.stream(frequency).reduce(0, Integer::sum);
             long numerator = calculator.factorial(sum).longValue();
             long denominator = IntStream.of(frequency).asLongStream()
-                    .reduce(1, (a, b) -> (a * calculator.factorial((int)b).longValue()));
-            long expected = numerator/denominator;
+                    .reduce(1, (a, b) -> (a * calculator.factorial((int) b).longValue()));
+            long expected = numerator / denominator;
             //( ∑ ai.si)! / Π(si!)
-            Assert.assertEquals(expected,count);
+            assertEquals(expected, count);
         }
     }
 
     @Test
-    public void shouldReturnSameResultForDifferentIteratorObjects(){
+    void shouldReturnSameResultForDifferentIteratorObjects() {
 
-        var elements = List.of("A", "B", "C");
-        int[] frequencies = {3,2,2};
+        var elements = of("A", "B", "C");
+        int[] frequencies = {3, 2, 2};
 
-        MultisetPermutation<String> iterable = permutation.multiset(elements, frequencies)
-                .lexOrder();
+        var iterable = permutation.multiset(elements, frequencies).lexOrder();
 
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
-        Assert.assertEquals(lists1, lists2);
-    }
-
-    private int[] getRandomMultisetFreqArray(Random random, int length) {
-        int[] frequencies = new int[length];
-        for(int i=0; i<frequencies.length; i++) {
-            int value = random.nextInt(2)+1;
-            frequencies[i] = value;
-        }
-        return frequencies;
+        assertIterableEquals(lists1, lists2);
     }
 
     @Test
-    public void shouldGenerateAllUniquePermutationsOfMultiset2(){
-        String expected = "[[Red, Red, Green, Blue], " +
-                "[Red, Red, Blue, Green], " +
-                "[Red, Green, Red, Blue], " +
-                "[Red, Green, Blue, Red], " +
-                "[Red, Blue, Red, Green], " +
-                "[Red, Blue, Green, Red], " +
-                "[Green, Red, Red, Blue], " +
-                "[Green, Red, Blue, Red], " +
-                "[Green, Blue, Red, Red], " +
-                "[Blue, Red, Red, Green], " +
-                "[Blue, Red, Green, Red], " +
-                "[Blue, Green, Red, Red]]";
+    void shouldGenerateAllUniquePermutationsOfMultiset2() {
+        var expected = of(
+                of("Red", "Red", "Green", "Blue"),
+                of("Red", "Red", "Blue", "Green"),
+                of("Red", "Green", "Red", "Blue"),
+                of("Red", "Green", "Blue", "Red"),
+                of("Red", "Blue", "Red", "Green"),
+                of("Red", "Blue", "Green", "Red"),
+                of("Green", "Red", "Red", "Blue"),
+                of("Green", "Red", "Blue", "Red"),
+                of("Green", "Blue", "Red", "Red"),
+                of("Blue", "Red", "Red", "Green"),
+                of("Blue", "Red", "Green", "Red"),
+                of("Blue", "Green", "Red", "Red")
+        );
 
-        var elements = List.of("Red", "Green", "Blue");
-        int[] frequencies = {2,1,1};
-        String output = permutation.multiset(elements, frequencies)
+        var elements = of("Red", "Green", "Blue");
+        int[] frequencies = {2, 1, 1};
+        var output = permutation.multiset(elements, frequencies)
                 .lexOrder()
                 .stream()
-                .toList().toString();
+                .toList();
 
-        Assert.assertEquals(expected,output);
+        assertIterableEquals(expected, output);
     }
 
     @Test
-    public void shouldGenerateAllUniquePermutationsOfMultiset(){
-        String expected = "[[A, A, B, C], [A, A, C, B], [A, B, A, C], " +
-                "[A, B, C, A], [A, C, A, B], [A, C, B, A], [B, A, A, C], " +
-                "[B, A, C, A], [B, C, A, A], [C, A, A, B], [C, A, B, A], [C, B, A, A]]";
+    void shouldGenerateAllUniquePermutationsOfMultiset() {
+        var expected = List.of(
+                of("A", "A", "B", "C"),
+                of("A", "A", "C", "B"),
+                of("A", "B", "A", "C"),
+                of("A", "B", "C", "A"),
+                of("A", "C", "A", "B"),
+                of("A", "C", "B", "A"),
+                of("B", "A", "A", "C"),
+                of("B", "A", "C", "A"),
+                of("B", "C", "A", "A"),
+                of("C", "A", "A", "B"),
+                of("C", "A", "B", "A"),
+                of("C", "B", "A", "A")
+        );
 
-        var elements = List.of("A", "B", "C");
-        int[] frequencies = {2,1,1};
+        var elements = of("A", "B", "C");
+        int[] frequencies = {2, 1, 1};
 
-        String output = permutation.multiset(elements,frequencies)
+        var output = permutation.multiset(elements, frequencies)
                 .lexOrder()
                 .stream()
-                .toList().toString();
+                .toList();
 
-        Assert.assertEquals(expected,output);
+        assertIterableEquals(expected, output);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionWhenFrequenciesIsNull() {
-        var elements = List.of("A", "B", "C");
+    @Test
+    void shouldThrowExceptionWhenFrequenciesIsNull() {
+        var elements = of("A", "B", "C");
 
-        String output = permutation.multiset(elements, null)
-                .lexOrder()
-                .stream()
-                .toList().toString();
+        assertThrows(IllegalArgumentException.class, () ->
+                permutation.multiset(elements, null).lexOrder());
     }
+
 }

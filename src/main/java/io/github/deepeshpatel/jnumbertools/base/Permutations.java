@@ -83,7 +83,6 @@ public final class Permutations {
 
     /**
      * Creates a builder for unique permutations of a specified array.
-     *
      * Caution is required while using this method for single element as it may result in
      * accidental invocation of method unique(int size) for single length char array.
      * For example unique('a') will result in unique(97) because ASCII value of 'a' is 97

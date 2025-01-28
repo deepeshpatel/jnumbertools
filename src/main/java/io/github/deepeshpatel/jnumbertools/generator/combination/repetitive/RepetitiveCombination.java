@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * Utility for generating r-combinations of input = {1, 2, ..., n} with repetition allowed.
  * <p>
- * This class generates r-combinations from n = input.length items, with combinations generated
+ * This class generates r-combinations from n = input. length items, with combinations generated
  * in lexicographical order based on the indices of items in a list. The class does not check for duplicate
  * values and treats all values differently based on their index.
  * <p>

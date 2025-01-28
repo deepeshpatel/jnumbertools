@@ -53,7 +53,7 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
     @Override
     public Iterator<List<T>> iterator() {
         if (k == 0) return newEmptyIterator();
-        if (k == elements.size()) return new UniquePermItrForElements<>(elements, this::indicesToValues);
+        if (k == elements.size()) return new UniquePermItrForElements<>(elements.size(), this::indicesToValues);
         return new Itr();
     }
 

@@ -1,68 +1,78 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 
-
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.combination;
-import static org.junit.Assert.assertEquals;
+import static io.github.deepeshpatel.jnumbertools.TestBase.*;
+import static java.util.List.of;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RepetitiveCombinationTest {
 
     @Test
-    public void assertCount() {
-
-        for(int n=1; n<=4; n++) {
+    void assertCount() {
+        for (int n = 1; n <= 4; n++) {
             var input = Collections.nCopies(n, "A");
-            for(int r=0; r<=n; r++) {
+            for (int r = 0; r <= n; r++) {
                 long count = combination.repetitive(r, input)
                         .lexOrder().stream().count();
-                long expectedCount = calculator.nCrRepetitive(n,r).longValue();
-                Assert.assertEquals(expectedCount, count);
+                long expectedCount = calculator.nCrRepetitive(n, r).longValue();
+                assertEquals(expectedCount, count);
             }
         }
     }
 
     @Test
-    public void shouldReturnSameResultForDifferentIteratorObjects(){
+    void shouldReturnSameResultForDifferentIteratorObjects() {
         var iterable = combination
-                .repetitive(2, "A", "B", "C").lexOrder();
+                .repetitive(2, A_B_C).lexOrder();
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
-        Assert.assertEquals(lists1, lists2);
+        assertIterableEquals(lists1, lists2);
     }
 
     @Test
-    public void shouldGenerateCombinationsInInputOrder() {
-        String expected = "[[Red, Red], [Red, Green], [Red, Blue], [Green, Green], [Green, Blue], [Blue, Blue]]";
-        assertEquals(expected, output(2,"Red", "Green", "Blue"));
+    void shouldGenerateCombinationsInInputOrder() {
+        var expected = List.of(
+                of("Red", "Red"),
+                of("Red", "Green"),
+                of("Red", "Blue"),
+                of("Green", "Green"),
+                of("Green", "Blue"),
+                of("Blue", "Blue")
+        );
+        assertIterableEquals(expected, output(2, "Red", "Green", "Blue"));
     }
 
     @Test
-    public void shouldReturnEmptyListForSizeLessThanOrEqualsZero() {
-        String expected ="[[]]";
-        assertEquals(expected, output(0,"A","B"));
+    void shouldReturnEmptyListForSizeLessThanOrEqualsZero() {
+        assertEquals(listOfEmptyList, output(0, "A", "B"));
     }
 
     @Test
-    public void shouldAbleToGenerateRepetitivePermutationForSizeGreaterThanN() {
-        String expected ="[[A, A, A], [A, A, B], [A, B, B], [B, B, B]]";
-        assertEquals(expected, output(3,"A","B" ));
+    void shouldAbleToGenerateRepetitivePermutationForSizeGreaterThanN() {
+        var expected = List.of(
+                of("A", "A", "A"),
+                of("A", "A", "B"),
+                of("A", "B", "B"),
+                of("B", "B", "B")
+        );
+
+        assertEquals(expected, output(3, "A", "B"));
     }
 
-    private String output(int size, String... elements) {
+    private List<?> output(int size, String... elements) {
         return combination
-                .repetitive(size,elements)
+                .repetitive(size, elements)
                 .lexOrder()
                 .stream()
-                .toList().toString();
+                .toList();
     }
 
-    @Test (expected = IllegalArgumentException.class)
-    public void should_throw_exception_for_negative_r_value() {
-        combination.repetitive(3, -2).lexOrder();
+    @Test
+    void shouldThrowExceptionForNegativeRValue() {
+        assertThrows(IllegalArgumentException.class, () -> combination.repetitive(3, -2).lexOrder());
     }
 }

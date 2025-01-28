@@ -25,7 +25,6 @@ import java.util.stream.IntStream;
  * large and to generate say, every 100 trillionth combination of 50 items out of 100 (100Choose50),
  * we do not like to wait for 100's of hours to generate all 1.008913445 X 10<sup>29</sup> combinations
  * sequentially and then selecting the required one.
- *
  * Instance of this class is intended to be created via builder and hence do not have any public constructor.
  * @author Deepesh Patel
  */

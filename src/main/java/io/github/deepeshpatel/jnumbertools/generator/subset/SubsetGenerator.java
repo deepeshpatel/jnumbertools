@@ -16,7 +16,6 @@ import java.util.List;
  * <p>
  * This class implements {@link Iterable} to provide subsets of the input set with sizes ranging from {@code fromSize} to {@code toSize}.
  * It treats each item in the collection as unique and does not check for duplicates in the input collection.
- *
  * Instance of this class is intended to be created via builder and hence do not have any public constructor.
  *
  * @param <T> the type of elements in the subsets

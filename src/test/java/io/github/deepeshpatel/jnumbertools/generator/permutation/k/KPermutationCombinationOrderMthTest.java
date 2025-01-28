@@ -1,126 +1,131 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import java.util.Collections;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
-import static io.github.deepeshpatel.jnumbertools.TestBase.everyMthValue;
+import static io.github.deepeshpatel.jnumbertools.TestBase.*;
+import static java.util.List.of;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class KPermutationCombinationOrderMthTest {
 
     @Test
-    public void assertCount(){
-        int increment=2;
-        for(int n=0; n<=4; n++) {
-            var input = Collections.nCopies(n,'A');
+    void assertCount() {
+        int increment = 2;
+        for (int n = 0; n <= 4; n++) {
+            var input = Collections.nCopies(n, 'A');
             for (int k = 0; k < n; k++) {
-                long size = permutation.nPk(k,input)
+                long size = permutation.nPk(k, input)
                         .combinationOrderMth(increment, 0)
                         .stream().count();
-                double expected = Math.ceil(calculator.nPr(n, k).longValue()/(double)increment);
-                Assert.assertEquals((long)expected, size);
+                double expected = Math.ceil(calculator.nPr(n, k).longValue() / (double) increment);
+                Assertions.assertEquals((long) expected, size);
             }
         }
     }
 
     @Test
-    public void shouldReturnSameResultForDifferentIteratorObjects(){
-        var iterable = permutation.nPk(2, "A", "B", "C")
+    void shouldReturnSameResultForDifferentIteratorObjects() {
+        var iterable = permutation.nPk(2, A_B_C)
                 .combinationOrderMth(2, 0);
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
-        Assert.assertEquals(lists1, lists2);
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionForKLessThan0() {
-        permutation.nPk(-1,1).combinationOrderMth(3, 0);
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionForKGreaterThanInputLength() {
-        permutation.nPk(1, 5).combinationOrderMth(3, 0);
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionForZeroAndNegativeIncrementValue() {
-        permutation.nPk(1,1).combinationOrderMth(0, 0);
+        assertIterableEquals(lists1, lists2);
     }
 
     @Test
-    public void shouldGenerateMthKPermutations() {
+    void shouldThrowExceptionForKLessThan0() {
+        assertThrows(IllegalArgumentException.class, () ->
+                permutation.nPk(-1, 1).combinationOrderMth(3, 0));
+    }
 
-        var input = List.of('A','B','C','D');
-        for(int k=1; k<= 3; k++) {
-            for(int increment=1; increment<=10;increment++) {
-                String expected = getExpectedResultViaOneByOneIteration(input, k,increment);
-                String output   = getResultViaDirectIncrement(input,k,increment);
-                Assert.assertEquals(expected, output);
+    @Test
+    void shouldThrowExceptionForKGreaterThanInputLength() {
+        assertThrows(IllegalArgumentException.class, () ->
+                permutation.nPk(1, 5).combinationOrderMth(3, 0));
+    }
+
+    @Test
+    void shouldThrowExceptionForZeroAndNegativeIncrementValue() {
+        assertThrows(IllegalArgumentException.class, () ->
+                permutation.nPk(1, 1).combinationOrderMth(0, 0));
+    }
+
+    @Test
+    void shouldGenerateMthKPermutations() {
+        for (int k = 1; k <= 3; k++) {
+            for (int increment = 1; increment <= 10; increment++) {
+                var expected = getExpectedResultViaOneByOneIteration(A_B_C_D, k, increment);
+                var output = getResultViaDirectIncrement(A_B_C_D, k, increment);
+                assertIterableEquals(expected, output);
             }
         }
     }
 
     @Test
-    public void test_start_parameter_greater_than_0() {
-        var output = permutation.nPk(3, 'a','b','c','d','e')
+    void test_start_parameter_greater_than_0() {
+        var expected = List.of(
+                of('c', 'b', 'a'),
+                of('a', 'e', 'c'),
+                of('c', 'e', 'b')
+        );
+        var output = permutation.nPk(3, 'a', 'b', 'c', 'd', 'e')
                 .combinationOrderMth(20, 5)
-                .stream().toList().toString();
+                .stream().toList();
 
-        Assert.assertEquals("[[c, b, a], [a, e, c], [c, e, b]]", output);
+        assertIterableEquals(expected, output);
     }
 
     @Test
-    public void shouldHandleEmptyInput() {
+    void shouldHandleEmptyInput() {
         var output = permutation.nPk(0, Collections.emptyList())
                 .combinationOrderMth(1, 0).stream().toList();
-        Assert.assertEquals("[[]]", output.toString());
+        assertIterableEquals(listOfEmptyList, output);
     }
 
     @Test
-    public void shouldHandleLargeIncrementValues() {
-        var input = List.of('A', 'B', 'C', 'D');
+    void shouldHandleLargeIncrementValues() {
+        var input = of('A', 'B', 'C', 'D');
         var output = permutation.nPk(2, input)
                 .combinationOrderMth(1, 12)
                 .stream().toList();
-
-        Assert.assertTrue(output.isEmpty() );
+        Assertions.assertTrue(output.isEmpty());
     }
 
     @Test
-    public void shouldGenerateAllPermutationsWhenKEqualsInputSize() {
-        var input = List.of('A', 'B', 'C');
-        var output = permutation.nPk(3, input)
+    void shouldGenerateAllPermutationsWhenKEqualsInputSize() {
+        var output = permutation.nPk(3, A_B_C)
                 .combinationOrderMth(1, 0)
                 .stream().toList();
 
-        Assert.assertEquals("[[A, B, C], [A, C, B], [B, A, C], [B, C, A], [C, A, B], [C, B, A]]",
+        Assertions.assertEquals("[[A, B, C], [A, C, B], [B, A, C], [B, C, A], [C, A, B], [C, B, A]]",
                 output.toString());
     }
 
     @Test
-    public void shouldHandleLargeInputSize() {
-        var input = List.of('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J');
+    void shouldHandleLargeInputSize() {
+        var input = of('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J');
         var output = permutation.nPk(5, input)
                 .combinationOrderMth(1, 0)
                 .stream().toList();
 
-        Assert.assertEquals(30240, output.size() );
+        Assertions.assertEquals(30240, output.size());
     }
 
-    private String getResultViaDirectIncrement(List<?> input, int k, int increment) {
-        return permutation.nPk(k,input)
+    private List<?> getResultViaDirectIncrement(List<?> input, int k, int increment) {
+        return permutation.nPk(k, input)
                 .combinationOrderMth(increment, 0)
-                .stream().toList().toString();
+                .stream().toList();
     }
 
-    private String getExpectedResultViaOneByOneIteration(List<?> input, int k, int increment) {
+    private List<?> getExpectedResultViaOneByOneIteration(List<?> input, int k, int increment) {
         var stream = permutation.nPk(k, input)
-                .combinationOrder().
-                stream();
-        return everyMthValue(stream, increment).toString();
+                .combinationOrder()
+                .stream();
+        return everyMthValue(stream, increment);
     }
 }

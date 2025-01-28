@@ -47,7 +47,7 @@ public final class MultisetPermutation<T>  extends AbstractGenerator<T> {
 
     @Override
     public Iterator<List<T>> iterator() {
-        return new UniquePermItrForElements<>(elements, this::indicesToValues, initialIndices);
+        return new UniquePermItrForElements<>(this::indicesToValues, initialIndices);
     }
 
 }

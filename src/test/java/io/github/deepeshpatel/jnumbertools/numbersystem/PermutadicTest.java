@@ -1,19 +1,20 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+
 
 public class PermutadicTest {
 
     @Test
-    public void shouldGenerateCorrectPermutadicForFirst7Values() {
-        String[] expected = new String[] {
+    void shouldGenerateCorrectPermutadicForFirst7Values() {
+        String[] expected = {
                 "[0](3)",
                 "[1](3)",
                 "[2](3)",
@@ -23,80 +24,81 @@ public class PermutadicTest {
                 "[1,2](3)" };
 
         for(int i=0; i<=6; i++) {
-            Assert.assertEquals(expected[i], Permutadic.of(BigInteger.valueOf(i),8-5).toString());
+            Assertions.assertEquals(expected[i], Permutadic.of(BigInteger.valueOf(i),8-5).toString());
         }
     }
 
     @Test
-    public void shouldBeEqualToFactoradicForSizeEqualsDegree() {
+    void shouldBeEqualToFactoradicForSizeEqualsDegree() {
         int start = 565656565;
         for(int i=start; i<=start+10; i++) {
             Factoradic f = Factoradic.of(i);
             List<Integer> permutadicValue = Permutadic.of(BigInteger.valueOf(i), 0).permutadicValues;
             List<Integer> factorialValues = f.factoradicValues;
-            Assert.assertEquals(factorialValues.toString(), permutadicValue.toString());
+            Assertions.assertEquals(factorialValues.toString(), permutadicValue.toString());
         }
     }
 
     @Test
-    public void shouldEncodeAndDecodeToCorrectDecimalValue() {
+    void shouldEncodeAndDecodeToCorrectDecimalValue() {
         int size = 8;
         int degree = 4;
         for(long i=0; i<1679; i++) {
             Permutadic permutadic1 = Permutadic.of(BigInteger.valueOf(i), size-degree);
             int[] mthPermutation = permutadic1.toMthPermutation(4);
             Permutadic permutadic2 = Permutadic.fromMthPermutation(mthPermutation,size-degree);
-            Assert.assertEquals(i, permutadic2.decimalValue.intValue());
+            Assertions.assertEquals(i, permutadic2.decimalValue.intValue());
         }
     }
 
     @Test
-    public void shouldResultInCorrectValueToAndFromMthPermutation(){
+    void shouldResultInCorrectValueToAndFromMthPermutation(){
         int size = 6;
         int degree = 3;
         for(long i=0; i<calculator.nPr(size,degree).longValue(); i++) {
             Permutadic p1 = Permutadic.of(BigInteger.valueOf(i), size-degree);
             int[] mth = p1.toMthPermutation(degree);
             Permutadic p2 = Permutadic.fromMthPermutation(mth,size-degree);
-            Assert.assertEquals(p1, p2);
-            Assert.assertEquals(p1.hashCode(), p2.hashCode());
+            Assertions.assertEquals(p1, p2);
+            Assertions.assertEquals(p1.hashCode(), p2.hashCode());
         }
     }
 
     @Test
-    public void shouldDecodeToMthPermutationForLastPossibleValue() {
-        int[] perm = Permutadic.of(BigInteger.valueOf(1679),8-4).toMthPermutation(4);
+    void shouldDecodeToMthPermutationForLastPossibleValue() {
+        int[] expected = {7, 6, 5, 4};
+        int[] permutation = Permutadic.of(BigInteger.valueOf(1679),8-4).toMthPermutation(4);
         //8P4 = 1680 so 1679 should result is last possible permutation
-        Assert.assertEquals("[7, 6, 5, 4]", Arrays.toString(perm));
+        assertArrayEquals(expected, permutation);
     }
 
 
     @Test
-    public void shouldGenerateCorrectPermutadicForOutOofPermutationRange() {
+    void shouldGenerateCorrectPermutadicForOutOofPermutationRange() {
         String output = Permutadic.of(BigInteger.valueOf(1680),8-4).toString();
-        Assert.assertEquals("[1,0,0,0,0](4)", output);
+        Assertions.assertEquals("[1,0,0,0,0](4)", output);
     }
 
     @Test
-    public void unRankingAndRankingShouldGenerateSameValue() {
+    void unRankingAndRankingShouldGenerateSameValue() {
         int size = 8;
         int degree = 4;
         for(long i=0; i< calculator.nPr(size,degree).longValue(); i++) {
             Permutadic permutadic = Permutadic.of(i,size-degree);
             int[] ithPermutation = permutadic.toMthPermutation(4);
             BigInteger rank = Permutadic.fromMthPermutation(ithPermutation, size-degree).decimalValue;
-            Assert.assertEquals(i, rank.longValue());
+            Assertions.assertEquals(i, rank.longValue());
         }
     }
 
     @Test
-    public void shouldGenerateCorrectMathExpression() {
+    void shouldGenerateCorrectMathExpression() {
         String expected =
                 "2(²⁸P₁₄) + 17(²⁷P₁₃) + 22(²⁶P₁₂) + 20(²⁵P₁₁) + 12(²⁴P₁₀) + " +
                 "10(²³P₉) + 2(²²P₈) + 17(²¹P₇) + 12(²⁰P₆) + 15(¹⁹P₅) + " +
                 "18(¹⁸P₄) + 2(¹⁷P₃) + 0(¹⁶P₂) + 8(¹⁵P₁) + 7(¹⁴P₀)";
 
         Permutadic permutadic = Permutadic.of(Long.MAX_VALUE, 14);
-        Assert.assertEquals(expected, permutadic.toMathExpression());
+        Assertions.assertEquals(expected, permutadic.toMathExpression());
     }
 }

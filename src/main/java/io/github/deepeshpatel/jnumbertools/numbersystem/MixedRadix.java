@@ -25,7 +25,4 @@ public class MixedRadix {
         }
         return decimal;
     }
-
-    public static void main(String[] args) {
-    }
 }

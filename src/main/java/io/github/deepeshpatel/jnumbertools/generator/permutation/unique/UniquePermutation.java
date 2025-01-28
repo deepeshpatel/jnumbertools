@@ -64,7 +64,7 @@ public final class UniquePermutation<T> extends AbstractGenerator<T> {
      */
     public Iterator<List<T>> iterator() {
         return elements.isEmpty() ? newEmptyIterator() :
-                new UniquePermItrForElements<>(elements, this::indicesToValues);
+                new UniquePermItrForElements<>(elements.size(), this::indicesToValues);
     }
 
 }

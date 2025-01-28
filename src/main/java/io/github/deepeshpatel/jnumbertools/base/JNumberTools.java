@@ -66,7 +66,7 @@ public final class JNumberTools {
     }
 
     /**
-     * Returns a {@code UnrankOf} instance for operations related to unranking.
+     * Returns a {@code UnrankOf} instance for operations related to unRanking.
      *
      * @return A helper class to determine unranked operations.
      */

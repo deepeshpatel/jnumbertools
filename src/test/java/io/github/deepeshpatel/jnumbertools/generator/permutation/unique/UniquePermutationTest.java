@@ -1,112 +1,129 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
-import static org.junit.Assert.assertEquals;
+import static java.util.List.of;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 public class UniquePermutationTest {
 
     @Test
-    public void assertCount(){
-        for(int n=0; n<6; n++) {
+    void assertCount() {
+        for (int n = 0; n < 6; n++) {
             var input = Collections.nCopies(n, "A");
             long size = permutation
                     .unique(input)
                     .lexOrder()
                     .stream().count();
-            Assert.assertEquals(calculator.nPr(n,n).longValue(), size);
+            assertEquals(calculator.nPr(n, n).longValue(), size);
         }
     }
 
     @Test
-    public void shouldReturnSameResultForDifferentIteratorObjects(){
+    void shouldReturnSameResultForDifferentIteratorObjects() {
         UniquePermutation<String> iterable = permutation.unique("A", "B", "C").lexOrder();
 
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
-        Assert.assertEquals(lists1, lists2);
+        assertEquals(lists1, lists2);
     }
 
     @Test
-    public void shouldGenerateAllUniquePermutationsOf3Values(){
-        String expected = "[[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]";
-        assertEquals(expected, output(1,2,3));
+    void shouldGenerateAllUniquePermutationsOf3Values() {
+        var expected = List.of(
+                of(1, 2, 3),
+                of(1, 3, 2),
+                of(2, 1, 3),
+                of(2, 3, 1),
+                of(3, 1, 2),
+                of(3, 2, 1)
+        );
+
+        assertIterableEquals(expected, permutationsOf(1, 2, 3));
     }
 
     @Test
-    public void shouldGenerateUniquePermutations() {
-        String expected = "[[Red, Green, Blue]," +
-                " [Red, Blue, Green]," +
-                " [Green, Red, Blue]," +
-                " [Green, Blue, Red]," +
-                " [Blue, Red, Green]," +
-                " [Blue, Green, Red]]";
+    void shouldGenerateUniquePermutations() {
+        var expected = List.of(
+                of("Red", "Green", "Blue"),
+                of("Red", "Blue", "Green"),
+                of("Green", "Red", "Blue"),
+                of("Green", "Blue", "Red"),
+                of("Blue", "Red", "Green"),
+                of("Blue", "Green", "Red")
+        );
 
-        Assert.assertEquals(expected, output("Red", "Green", "Blue"));
+        assertIterableEquals(expected, permutationsOf("Red", "Green", "Blue"));
     }
 
     @Test
-    public void shouldGenerateEmptyListForEmptyInput(){
-        assertEquals("[[]]", output(new ArrayList<>()));
+    void shouldGenerateEmptyListForEmptyInput() {
+        assertIterableEquals(listOfEmptyList, permutationsOf(new ArrayList<>()));
     }
 
     @Test
-    public void shouldConsiderNullAsEmpty(){
-        assertEquals("[[]]", output((List<String>) null));
-    }
-
-    private String output(List<String> elements) {
-        return permutation
-                .unique(elements)
-                .lexOrder()
-                .stream().toList().toString();
+    void shouldConsiderNullAsEmpty() {
+        assertIterableEquals(listOfEmptyList, permutationsOf((List<String>) null));
     }
 
     @Test
-    public void shouldHandleMixedTypes() {
-        String expected = "[[1, A], [A, 1]]";
-        assertEquals(expected, output(1, "A"));
+    void shouldHandleMixedTypes() {
+        var expected = List.of(
+                of(1,"A"),
+                of("A", 1)
+        );
+        assertIterableEquals(expected, permutationsOf(1, "A"));
     }
 
     @Test
-    public void shouldReturnSingleElement() {
-        String expected = "[[A]]";
-        assertEquals(expected, output("A"));
+    void shouldReturnSingleElement() {
+        var expected = List.of(of("A"));
+        assertIterableEquals(expected, permutationsOf("A"));
     }
 
     @Test
-    public void shouldGeneratePermutationsForNonStringElements() {
-        String expected = "[[1, 2], [2, 1]]";
-        assertEquals(expected, output(1, 2));
+    void shouldGeneratePermutationsForNonStringElements() {
+        var expected = List.of(of(1, 2), of(2, 1));
+        assertIterableEquals(expected, permutationsOf(1, 2));
     }
 
     @Test
-    public void shouldGeneratePermutationsForImmutableList() {
-        List<String> input = List.of("A", "B");
-        String expected = "[[A, B], [B, A]]";
-        assertEquals(expected, output(input));
+    void shouldGeneratePermutationsForImmutableList() {
+        var input = of("A", "B");
+        var expected = List.of(
+                of("A", "B"),
+                of("B", "A")
+        );
+        assertIterableEquals(expected, permutationsOf(input));
     }
 
+    @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
     @Test
-    public void stressTesting() {
-        assumeStressTesting();
-        for(int n=0; n<=10; n++) {
+    void stressTesting() {
+        for (int n = 0; n <= 10; n++) {
             long count = permutation.unique(n).lexOrder().stream().count();
             assertEquals(calculator.factorial(n).longValue(), count);
         }
     }
 
-
-    private String output(Object... elements) {
+    private List<List<Object>> permutationsOf(Object... elements) {
         return permutation
                 .unique(elements)
                 .lexOrder()
-                .stream().toList().toString();
+                .stream().toList();
+    }
+
+    private List<?> permutationsOf(List<?> elements) {
+        return permutation
+                .unique(elements)
+                .lexOrder()
+                .stream().toList();
     }
 }

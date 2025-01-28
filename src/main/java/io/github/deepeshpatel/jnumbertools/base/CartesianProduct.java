@@ -9,7 +9,6 @@ import java.util.List;
  * Provides methods for generating Cartesian products of elements.
  * This class includes functionality to compute Cartesian products with different configurations,
  * including simple and complex products.
- *
  * The class supports:
  * <ul>
  *     <li><strong>Simple Product:</strong> Computes the Cartesian product of a list of elements, where each element can appear in any position.</li>

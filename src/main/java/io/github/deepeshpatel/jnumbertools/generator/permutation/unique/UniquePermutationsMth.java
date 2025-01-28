@@ -26,7 +26,6 @@ import java.util.stream.IntStream;
  * <p>
  * This class provides a mechanism to generate directly the next n<sup>th</sup> lexicographical
  * permutation.
- *
  * Instance of this class is intended to be created via builder and hence do not have any public constructor.
  *
  * @author Deepesh Patel

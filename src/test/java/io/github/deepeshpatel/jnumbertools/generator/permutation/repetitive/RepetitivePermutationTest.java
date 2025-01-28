@@ -1,18 +1,20 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
-import static org.junit.Assert.assertEquals;
+import static java.util.List.of;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RepetitivePermutationTest {
 
     @Test
-    public void assertCount(){
+    void assertCount(){
         for(int n=1; n<3; n++) {
             var input = Collections.nCopies(n, "A");
             for(int r=0; r<=n+1; r++) {
@@ -20,56 +22,74 @@ public class RepetitivePermutationTest {
                         .lexOrder()
                         .stream().count();
 
-                Assert.assertEquals((int)Math.pow(n,r), size);
+                assertEquals((int)Math.pow(n,r), size);
             }
         }
     }
 
-    @Test (expected = NoSuchElementException.class)
-    public void shouldThrowExpIfIterateAfterLastElement(){
+    @Test
+    void shouldThrowExpIfIterateAfterLastElement(){
         var iterator = permutation.repetitive(1,"A")
                 .lexOrder().iterator();
 
-            iterator.next();
-            iterator.next();
+        iterator.next();
+        assertThrows(NoSuchElementException.class, iterator::next);
     }
 
     @Test
-    public void shouldReturnSameResultViaDifferentIteratorObjects(){
+    void shouldReturnSameResultViaDifferentIteratorObjects(){
         RepetitivePermutation<String> iterable = permutation
                 .repetitive(2,"A", "B", "C")
                 .lexOrder();
         var lists1 = iterable.stream().toList();
-        var lists2 =iterable.stream().toList();
-        Assert.assertEquals(lists1, lists2);
+        var lists2 = iterable.stream().toList();
+        assertEquals(lists1, lists2);
     }
 
     @Test
-    public void shouldGenerateAllPermutationsOf2Values() {
-        String expected = "[[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1], " +
-                "[1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]]";
+    void shouldGenerateAllPermutationsOf2Values() {
+        var expected = List.of(
+                of(0, 0, 0),
+                of(0, 0, 1),
+                of(0, 1, 0),
+                of(0, 1, 1),
+                of(1, 0, 0),
+                of(1, 0, 1),
+                of(1, 1, 0),
+                of(1, 1, 1)
+        );
 
-        String actual   = permutation.repetitive(3,0,1)
+        var output = permutation.repetitive(3,0,1)
                 .lexOrder()
-                .stream().toList().toString();
+                .stream().toList();
 
-        assertEquals(expected,actual);
+        assertIterableEquals(expected, output);
     }
 
     @Test
-    public void shouldGenerateRepetitivePermutations() {
-        String expected = "[[A, A], [A, B], [A, C], [B, A], [B, B], [B, C], [C, A], [C, B], [C, C]]";
+    void shouldGenerateRepetitivePermutations() {
+        var expected = List.of(
+                of('A', 'A'),
+                of('A', 'B'),
+                of('A', 'C'),
+                of('B', 'A'),
+                of('B', 'B'),
+                of('B', 'C'),
+                of('C', 'A'),
+                of('C', 'B'),
+                of('C', 'C')
+        );
 
-        String output = permutation.repetitive(2, "A", "B", "C")
+        var output = permutation.repetitive(2, A_B_C)
                 .lexOrder()
-                .stream().toList().toString();
+                .stream().toList();
 
-        Assert.assertEquals(expected, output);
+        assertIterableEquals(expected, output);
     }
 
+    @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
     @Test
-    public void stressTesting() {
-        assumeStressTesting();
+    void stressTesting() {
         for(int n=20; n<=25; n++) {
             for(int width = 0; width<=5; width++) {
                 long count = permutation.repetitive(width, n).lexOrder().stream().count();

@@ -5,6 +5,8 @@ import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import java.math.BigInteger;
 import java.util.List;
 
+import static java.lang.System.out;
+
 public class AllExamples {
     public static void main(String[] args) {
 
@@ -13,81 +15,81 @@ public class AllExamples {
         //TODO:JNumberTools.permutations().unique("A","B","C").parallel().forEach(System.out::println);
 
         //all unique permutations in lex order
-        JNumberTools.permutations().unique("A","B","C").lexOrder().forEach(System.out::println);
+        JNumberTools.permutations().unique("A","B","C").lexOrder().forEach(out::println);
 
         //every mth unique permutation
-        JNumberTools.permutations().unique("A","B","C").lexOrderMth(3,0).forEach(System.out::println);
+        JNumberTools.permutations().unique("A","B","C").lexOrderMth(3,0).forEach(out::println);
 
         //all repetitive permutations
-        JNumberTools.permutations().repetitive(3,"A","B","C").lexOrder().forEach(System.out::println);
+        JNumberTools.permutations().repetitive(3,"A","B","C").lexOrder().forEach(out::println);
 
         //every mth repetitive permutation
-        JNumberTools.permutations().repetitive(3,"A","B","C").lexOrderMth(3, 0).forEach(System.out::println);
+        JNumberTools.permutations().repetitive(3,"A","B","C").lexOrderMth(3, 0).forEach(out::println);
 
         //all k-permutation in lex order
-        JNumberTools.permutations().nPk(2,"A","B","C").lexOrder().forEach(System.out::println);
+        JNumberTools.permutations().nPk(2,"A","B","C").lexOrder().forEach(out::println);
 
         //every mth k-permutation in lex order
-        JNumberTools.permutations().nPk(2,"A","B","C").lexOrderMth(2, 0).forEach(System.out::println);
+        JNumberTools.permutations().nPk(2,"A","B","C").lexOrderMth(2, 0).forEach(out::println);
 
         //all k-permutation in combination order
-        JNumberTools.permutations().nPk(2,"A","B","C").combinationOrder().forEach(System.out::println);
+        JNumberTools.permutations().nPk(2,"A","B","C").combinationOrder().forEach(out::println);
 
         //every mth k-permutation in lex order
-        JNumberTools.permutations().nPk(2,"A","B","C").combinationOrderMth(3, 0).forEach(System.out::println);
+        JNumberTools.permutations().nPk(2,"A","B","C").combinationOrderMth(3, 0).forEach(out::println);
 
         //all multiset permutations in lex order
-        JNumberTools.permutations().multiset(List.of("A","B","C"),new int[]{1,2,1}).lexOrder().forEach(System.out::println);
+        JNumberTools.permutations().multiset(List.of("A","B","C"),new int[]{1,2,1}).lexOrder().forEach(out::println);
 
         //every mth multiset permutation
-        JNumberTools.permutations().multiset(List.of("A","B","C"),new int[]{1,2,1}).lexOrderMth(3, 0).forEach(System.out::println);
+        JNumberTools.permutations().multiset(List.of("A","B","C"),new int[]{1,2,1}).lexOrderMth(3, 0).forEach(out::println);
 
         //all unique combination in lex order
-        JNumberTools.combinations().unique(2,"A","B","C").lexOrder().forEach(System.out::println);
+        JNumberTools.combinations().unique(2,"A","B","C").lexOrder().forEach(out::println);
 
         //every mth unique combination
-        JNumberTools.combinations().unique(2,"A","B","C").lexOrderMth(3,0).forEach(System.out::println);
+        JNumberTools.combinations().unique(2,"A","B","C").lexOrderMth(3,0).forEach(out::println);
 
         //all repetitive combinations in lex order
-        JNumberTools.combinations().repetitive(2,"A","B","C").lexOrder().forEach(System.out::println);
+        JNumberTools.combinations().repetitive(2,"A","B","C").lexOrder().forEach(out::println);
 
         //every mth repetitive combinations in lex order //TODO: work in progress
-        JNumberTools.combinations().repetitive(2,"A","B","C").lexOrderMth(2, 0).forEach(System.out::println);
+        JNumberTools.combinations().repetitive(2,"A","B","C").lexOrderMth(2, 0).forEach(out::println);
 
         //all multiset combination in lex order
-        JNumberTools.combinations().multiset(List.of("A","B","C"), new int[]{1,2,1}, 2).lexOrder().forEach(System.out::println);
+        JNumberTools.combinations().multiset(List.of("A","B","C"), new int[]{1,2,1}, 2).lexOrder().forEach(out::println);
         //TODO:JNumberTools.combinations().multiset(List.of("A","B","C"), new int[]{1,2,1}, 2).lexOrderMth(5, 0).forEach(System.out::println);
 
         //all 2^n subsets of elements in lex order
-        JNumberTools.subsets().of("A","B","C").all().lexOrder().forEach(System.out::println);
+        JNumberTools.subsets().of("A","B","C").all().lexOrder().forEach(out::println);
 
         //every mth subset of elements
-        JNumberTools.subsets().of("A","B","C").all().lexOrderMth(5,0).forEach(System.out::println);
+        JNumberTools.subsets().of("A","B","C").all().lexOrderMth(5,0).forEach(out::println);
 
         //all subsets of elements in a given range in lex order
-        JNumberTools.subsets().of("A","B","C","D").inRange(2,4).lexOrder().forEach(System.out::println);
+        JNumberTools.subsets().of("A","B","C","D").inRange(2,4).lexOrder().forEach(out::println);
 
         //every mth subset of elements in a given range
-        JNumberTools.subsets().of("A","B","C","D").inRange(2,4).lexOrderMth(5,0).forEach(System.out::println);
+        JNumberTools.subsets().of("A","B","C","D").inRange(2,4).lexOrderMth(5,0).forEach(out::println);
 
         //all values of simpleProductOf cartesian cartesianProduct in lex order
         JNumberTools.cartesianProduct().simpleProductOf(List.of("Small ","Medium","Large"))
                 .and(List.of( "Ricotta","Mozzarella","Cheddar"))
                 .and(List.of( "Ricotta","Mozzarella","Cheddar"))
-                .lexOrder().forEach(System.out::println);
+                .lexOrder().forEach(out::println);
 
         //every mth values of cartesian cartesianProduct in lex order
         JNumberTools.cartesianProduct().simpleProductOf(List.of("Small ","Medium","Large"))
                 .and(List.of( "Ricotta","Mozzarella","Cheddar"))
                 .and(List.of( "Ricotta","Mozzarella","Cheddar"))
-                .lexOrderMth(1500, 0).forEach(System.out::println);
+                .lexOrderMth(1500, 0).forEach(out::println);
 
         //all values of complexProductOf cartesian cartesianProduct in lex order
         JNumberTools.cartesianProduct().complexProductOf(1, List.of("Small ","Medium","Large"))
                 .andDistinct(2, List.of( "Ricotta","Mozzarella","Cheddar"))
                 .andMultiSelect(2, List.of( "Tomato Ketchup","White Sauce","Green Chutney"))
                 .andInRange(2,3,List.of("tomato","capsicum","onion","paneer","corn"))
-                .lexOrder().stream().forEach(System.out::println);
+                .lexOrder().stream().forEach(out::println);
 
         //every mth values of complexProductOf cartesian cartesianProduct in lex order
         JNumberTools.cartesianProduct().complexProductOf(1, List.of("Small ","Medium","Large"))
@@ -98,21 +100,21 @@ public class AllExamples {
 
 
         //rank of unique permutation
-        JNumberTools.rankOf().uniquePermutation(1,0,2).longValue();
+        out.println(JNumberTools.rankOf().uniquePermutation(1,0,2).longValue());
 
         //rank of repeated permutation
-        JNumberTools.rankOf().repeatedPermutation(3,1,2,1).longValue();
+        out.println(JNumberTools.rankOf().repeatedPermutation(3,1,2,1).longValue());
 
         //rank of k-permutation
-        JNumberTools.rankOf().kPermutation(8, 4,6,2,0).longValue();
+        out.println(JNumberTools.rankOf().kPermutation(8, 4,6,2,0).longValue());
 
         //rank of unique combination
-        JNumberTools.rankOf().uniqueCombination(8, 1,2,3,4);
+        out.println(JNumberTools.rankOf().uniqueCombination(8, 1,2,3,4));
 
         //un-ranking: same as finding mth. Remove it
-        JNumberTools.unRankingOf().uniquePermutation(BigInteger.valueOf(23),4);
-        JNumberTools.unRankingOf().kPermutation(BigInteger.valueOf(1000), 8,4);
-        JNumberTools.unRankingOf().uniqueCombination(BigInteger.valueOf(35),8,4);
+        out.println(JNumberTools.unRankingOf().uniquePermutation(BigInteger.valueOf(23),4));
+        out.println(JNumberTools.unRankingOf().kPermutation(BigInteger.valueOf(1000), 8,4));
+        out.println(JNumberTools.unRankingOf().uniqueCombination(BigInteger.valueOf(35),8,4));
         //TODO JNumberTools.unRankingOf().repeatedPermutation(3,1,2,1).longValue();
     }
 }
