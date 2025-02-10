@@ -116,7 +116,7 @@ public abstract class AbstractGenerator<E> implements Iterable<List<E>> {
      * @throws IllegalArgumentException If the increment value is less than or equal to zero.
      */
     protected static void checkParamIncrement(BigInteger increment, String message) {
-        if (increment.compareTo(BigInteger.ZERO) <= 0) {
+        if (increment.signum() <= 0) {
             throw new IllegalArgumentException("Increment value must be > 0 to generate every nth " + message);
         }
     }

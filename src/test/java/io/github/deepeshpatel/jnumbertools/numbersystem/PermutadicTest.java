@@ -2,6 +2,7 @@ package io.github.deepeshpatel.jnumbertools.numbersystem;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -53,12 +54,12 @@ public class PermutadicTest {
 
     @Test
     void shouldResultInCorrectValueToAndFromMthPermutation(){
-        int size = 6;
-        int degree = 3;
-        for(long i=0; i<calculator.nPr(size,degree).longValue(); i++) {
-            Permutadic p1 = Permutadic.of(BigInteger.valueOf(i), size-degree);
-            int[] mth = p1.toMthPermutation(degree);
-            Permutadic p2 = Permutadic.fromMthPermutation(mth,size-degree);
+        int size = 7;
+        int k = 3;
+        for(long i=0; i<calculator.nPr(size,k).longValue(); i++) {
+            Permutadic p1 = Permutadic.of(BigInteger.valueOf(i), size-k);
+            int[] mth = p1.toMthPermutation(k);
+            Permutadic p2 = Permutadic.fromMthPermutation(mth,size-k);
             Assertions.assertEquals(p1, p2);
             Assertions.assertEquals(p1.hashCode(), p2.hashCode());
         }
@@ -101,4 +102,21 @@ public class PermutadicTest {
         Permutadic permutadic = Permutadic.of(Long.MAX_VALUE, 14);
         Assertions.assertEquals(expected, permutadic.toMathExpression());
     }
+
+    @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
+    @Test
+    void stressTesting() {
+        int n = 200;
+        int k = 100;
+        var rank = calculator.nPr(n, k).divide(BigInteger.TWO);
+        var trillion = new BigInteger("1000000000000");
+        for(int i=0; i<=1000; i++ ) {
+            var array = PermutadicAlgorithms.unRankWithoutBoundCheck(rank, n, k);
+            var calculatedRank = PermutadicAlgorithms.rank(n,array);
+            Assertions.assertEquals(rank, calculatedRank);
+            rank = rank.add(trillion);
+        }
+    }
+
+
 }

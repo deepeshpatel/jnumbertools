@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,24 @@ import java.util.stream.IntStream;
 public class FactoradicAlgorithms {
 
     private FactoradicAlgorithms() {
+    }
+
+
+    public static int factoradicToInt(int[] factoradic) {
+
+        //TODO: remove calculator from here and make the method non static
+        Calculator calculator =  new Calculator();
+        int value = 0;
+
+        for (int i = 0; i < factoradic.length; i++) {
+            value += factoradic[i] * calculator.factorial(i).intValue();
+        }
+
+        return value;
+    }
+
+    public static int[] intToFactoradic(long k) {
+        return intToFactoradic(BigInteger.valueOf(k));
     }
 
     /**
@@ -48,19 +68,19 @@ public class FactoradicAlgorithms {
      * Converts a positive integer to its Factoradic representation with a known size.
      *
      * @param k the positive integer to be converted.
-     * @param knownSize the size of the Factoradic representation array.
+     * @param sizeOfFactoradic the size of the Factoradic representation array.
      * @return an array representing the Factoradic representation of the given integer.
      */
-    public static int[] intToFactoradicKnownSize(BigInteger k, int knownSize) {
+    public static int[] intToFactoradicKnownSize(BigInteger k, int sizeOfFactoradic) {
 
-        int[] factoradic = new int[knownSize];
+        int[] factoradic = new int[sizeOfFactoradic];
 
         if (k.equals(BigInteger.ZERO)) {
             return factoradic;
         }
 
         long d = 1;
-        int i = knownSize - 1;
+        int i = sizeOfFactoradic - 1;
 
         while (!k.equals(BigInteger.ZERO)) {
             BigInteger[] divideAndRemainder = k.divideAndRemainder(BigInteger.valueOf(d));

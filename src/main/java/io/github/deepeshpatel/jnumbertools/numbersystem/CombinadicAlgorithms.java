@@ -116,15 +116,9 @@ public class CombinadicAlgorithms {
         int r = degree;
         BigInteger max = value;
         for (int i = 0; r > 0; i++, r--) {
-            int n = r;
-            BigInteger nCr = calculator.nCr(n, r);
-            BigInteger result = nCr;
-            while (nCr.compareTo(max) <= 0) {
-                result = nCr;
-                nCr = calculator.nCr(++n, r);
-            }
+            int n = calculator.nCrUpperBound(r, max);
             combinadic[i] = n - 1;
-            max = max.subtract(result);
+            max = max.subtract(calculator.nCr(n-1, r));
         }
         return combinadic;
     }

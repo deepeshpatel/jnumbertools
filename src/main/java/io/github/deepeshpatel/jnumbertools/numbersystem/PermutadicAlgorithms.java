@@ -3,13 +3,11 @@ package io.github.deepeshpatel.jnumbertools.numbersystem;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toCollection;
 
 /**
  * Provides algorithms for operations related to the Permutadic number system, which is a mixed radix system based on permutations.
@@ -60,7 +58,7 @@ public class PermutadicAlgorithms {
             permutadicValues.add(divideAndRemainder[1].intValue());
             decimalValue = divideAndRemainder[0];
             degree++;
-        } while (decimalValue.compareTo(BigInteger.ZERO) > 0);
+        } while (decimalValue.signum() > 0);
 
         return permutadicValues;
     }
@@ -94,7 +92,9 @@ public class PermutadicAlgorithms {
      */
     public static int[] toMthPermutation(List<Integer> permutadic, int s, int k) {
         int[] a = new int[k];
-        List<Integer> mutableList = IntStream.range(0, s).boxed().collect(toList());
+        LinkedList<Integer> mutableList = IntStream.range(0, s)
+                .boxed()
+                .collect(toCollection(LinkedList::new));
 
         for (int i = a.length - 1, j = 0; i >= 0; i--, j++) {
             int index = i >= permutadic.size() ? 0 : permutadic.get(i);
@@ -112,21 +112,25 @@ public class PermutadicAlgorithms {
      * @return a list of integers representing the Permutadic value.
      */
     public static List<Integer> mthPermutationToPermutadic(int[] mthPermutation, int degree) {
-        List<Integer> a = new ArrayList<>();
+        List<Integer> result = new ArrayList<>();
         int size = degree + mthPermutation.length;
 
-        List<Integer> mutableList = IntStream.range(0, size).boxed().collect(toList());
-        mutableList.removeAll(Arrays.stream(mthPermutation).boxed().toList());
+        Set<Integer> mthPermutationSet = Arrays.stream(mthPermutation).boxed().collect(Collectors.toSet());
+
+        List<Integer> mutableList = IntStream.range(0, size)
+                .filter(i -> !mthPermutationSet.contains(i))
+                .boxed()
+                .collect(Collectors.toCollection(LinkedList::new));
 
         for (int i = mthPermutation.length - 1; i >= 0; i--) {
             int index = Collections.binarySearch(mutableList, mthPermutation[i]);
             index = -(index + 1);
 
             mutableList.add(index, mthPermutation[i]);
-            a.add(index);
+            result.add(index);
         }
 
-        return a;
+        return result;
     }
 
     /**

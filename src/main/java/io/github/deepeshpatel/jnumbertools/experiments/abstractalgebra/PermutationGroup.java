@@ -7,12 +7,12 @@ import java.util.List;
 public final class PermutationGroup {
 
 
-    public List<List<Integer>> toCycleNotation(int[] permutation, boolean includeOneCycle) {
+    public static List<List<Integer>> toCycleNotation(int[] permutation, boolean includeOneCycle) {
         List<Integer> p = Arrays.stream(permutation).boxed().toList();
         return toCycleNotation(p, includeOneCycle);
     }
 
-    public List<List<Integer>> toCycleNotation(List<Integer> permutation, boolean includeOneCycle) {
+    public static List<List<Integer>> toCycleNotation(List<Integer> permutation, boolean includeOneCycle) {
         boolean[] visited = new boolean[permutation.size()];
         List<List<Integer>> cycles = new ArrayList<>();
 
@@ -41,7 +41,7 @@ public final class PermutationGroup {
         return cycles;
     }
 
-    public long orderOfPermutationWithCycleNotation(List<List<Integer>> permutationCycles) {
+    public static long orderOfPermutationWithCycleNotation(List<List<Integer>> permutationCycles) {
 
         long lcm = 1;
         for(var cycle : permutationCycles) {
@@ -50,7 +50,7 @@ public final class PermutationGroup {
         return lcm;
     }
 
-    public boolean isIdentity(List<Integer> permutation) {
+    public static boolean isIdentity(List<Integer> permutation) {
         for(int i=0; i<permutation.size(); i++) {
             if(i != permutation.get(i)) {
                 return false;
@@ -59,7 +59,7 @@ public final class PermutationGroup {
         return true;
     }
 
-    public List<Integer> productMatrixForm(List<Integer> permutation1, List<Integer> permutation2) {
+    public static List<Integer> productMatrixForm(List<Integer> permutation1, List<Integer> permutation2) {
         if(permutation1.size() != permutation2.size()) {
             throw new IllegalArgumentException("To compute the cartesianProduct, permutation1 and permutation2 must have same degree");
         }
@@ -70,7 +70,7 @@ public final class PermutationGroup {
         return product;
     }
 
-    public List<Integer> inverse(List<Integer> permutation) {
+    public static List<Integer> inverse(List<Integer> permutation) {
         Integer[] inverse = new Integer[permutation.size()];
         for(int i=0; i< permutation.size(); i++) {
             inverse[permutation.get(i)] = i;
@@ -78,7 +78,7 @@ public final class PermutationGroup {
         return List.of(inverse);
     }
 
-    public List<Integer> product(List<Integer> permutation1, List<Integer> permutation2) {
+    public static List<Integer> product(List<Integer> permutation1, List<Integer> permutation2) {
         if(permutation1.size() != permutation2.size()) {
             throw new IllegalArgumentException("size of permutation1 and permutation2 should be same.");
         }
@@ -90,6 +90,15 @@ public final class PermutationGroup {
         }
 
         return List.of(product);
+    }
+
+    public static boolean isDerangement(List<Integer> permutation) {
+        for(int i=0; i<permutation.size(); i++) {
+            if(permutation.get(i) == i) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public long orderOfPermutation(List<Integer> permutation) {

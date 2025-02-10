@@ -58,6 +58,11 @@ public final class UnrankOf {
         return FactoradicAlgorithms.unRank(rank, size);
     }
 
+    public int[] uniquePermutationMinimumSize(BigInteger rank) {
+        int size = calculator.factorialUpperBound(rank);
+        return FactoradicAlgorithms.unRank(rank, size);
+    }
+
     /**
      * Determines the k-permutation corresponding to a given rank.
      *

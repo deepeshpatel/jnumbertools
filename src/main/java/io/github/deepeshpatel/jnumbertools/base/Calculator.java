@@ -38,7 +38,6 @@ public final class Calculator {
     private void setupFactorialCache(int cacheSize) {
         factorialCache.put(0, BigInteger.ONE);
         factorial(cacheSize);
-        //factorial(0);
     }
 
     private void setupCombinationCache(int cacheSize) {
@@ -93,6 +92,25 @@ public final class Calculator {
     }
 
     /**
+     * Finds the smallest n such that nCr(n, r) > max.
+     *
+     * @param r the number of elements to choose.
+     * @param max the maximum value to exceed.
+     * @return the smallest n such that nCr(n, r) > max.
+     */
+    public int nCrUpperBound(int r, BigInteger max) {
+        int n = r;
+        BigInteger nCr = nCr(n, r);
+
+        while (nCr.compareTo(max) <= 0) {
+            n++;
+            nCr = nCr(n, r);
+        }
+
+        return n;
+    }
+
+    /**
      * Calculates the number of ways to arrange r elements from a set of n distinct objects where order matters.
      *
      * @param n The total number of distinct objects.
@@ -112,6 +130,16 @@ public final class Calculator {
 
         BigInteger value = nPrMemo.get(n, r);
         return value != null ? value : nPrMemo.put(n, r, nPr(n - 1, r - 1).multiply(BigInteger.valueOf(n)));
+    }
+
+    public int factorialUpperBound(BigInteger nonNegativeInt){
+        int i=1;
+        while(true) {
+            if(factorial(i).compareTo(nonNegativeInt) > 0) {
+                return i;
+            }
+            i++;
+        }
     }
 
     /**
