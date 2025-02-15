@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v1.0.3
- * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
@@ -13,37 +13,53 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Implements an iterable for generating unique permutations of a subset of size <code>k</code>
- * from a list of elements. The permutations are generated in lexicographical order of combinations
- * of indices of the input values, treating the value at each index as unique.
- *
- * <p>For example, all permutations of size 2 for the list [1, 2, 3] are:
+ * An iterable for generating unique k‑permutations from a given list of elements.
+ * <p>
+ * This class generates all unique permutations of a subset of size {@code k} from the input list.
+ * Permutations are produced in lexicographical order based on the lexicographical order of the
+ * corresponding combinations of indices (treating each element as unique by its position, e.g. elements₀, elements₁, …, elementsₙ₋₁).
+ * </p>
+ * <p>
+ * For example, for the list [1, 2, 3] and {@code k = 2}, the unique permutations are:
  * <pre>
  * [1, 2], [2, 1], [1, 3], [3, 1], [2, 3], [3, 2]
  * </pre>
- * Instance of this class is intended to be created via builder and hence do not have any public constructor.
+ * </p>
+ * <p>
+ * Instances of this class are intended to be created via a builder.
+ * </p>
  *
  * @param <T> the type of elements in the permutation
  *
  * @author Deepesh Patel
+ * @version 3.0.1
  */
 public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<T> {
 
     /**
      * Constructs an instance of {@code KPermutationCombinationOrder} for generating
-     * unique permutations of size <code>k</code> from the specified list of elements.
+     * unique k‑permutations from the specified list of elements.
      *
-     * @param elements the list of elements to generate permutations from
-     * @param k the size of the permutations; must be less than or equal to the size of the list
+     * @param elements the list of elements from which permutations are generated
+     * @param k the size of the permutations; must be ≤ the size of the list
      */
     KPermutationCombinationOrder(List<T> elements, int k) {
         super(elements, k);
     }
 
     /**
-     * Returns an iterator over the unique permutations of the subset of size <code>k</code>.
+     * Returns an iterator over the unique k‑permutations of the input list.
+     * <p>
+     * If {@code k} is 0 or the input list is empty, an empty iterator is returned.
+     * <br>
+     * If {@code k} equals the size of the input list, a faster iterator is used that directly generates
+     * permutations of the entire list.
+     * Otherwise, an iterator is created that first generates all unique combinations of indices of size
+     * {@code k} (in lexicographical order) and then, for each combination, generates the corresponding
+     * permutations.
+     * </p>
      *
-     * @return an {@code Iterator} over the permutations
+     * @return an {@code Iterator} over lists representing the unique k‑permutations
      */
     @Override
     public Iterator<List<T>> iterator() {
@@ -51,7 +67,7 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
             return newEmptyIterator();
         }
 
-        /* Use the faster version when k equals the size of elements */
+        // Use a faster iterator when k equals the size of the elements list.
         if (k == elements.size()) {
             return new UniquePermItrForElements<>(elements.size(), this::indicesToValues);
         }
@@ -60,7 +76,7 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
     }
 
     /**
-     * Iterator implementation for generating permutations based on combinations of elements.
+     * Iterator implementation for generating k‑permutations based on combinations of indices.
      */
     private class Itr implements Iterator<List<T>> {
 
@@ -69,6 +85,10 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
 
         /**
          * Constructs the iterator and initializes the combination iterator.
+         * <p>
+         * The combination iterator generates all unique combinations (of indices) of size {@code k} in lexicographical order.
+         * For each combination, the corresponding permutations are generated using a permutation iterator.
+         * </p>
          */
         public Itr() {
             combinationIterator = new Combinations(null).unique(k, elements).lexOrder().iterator();
@@ -76,20 +96,18 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
         }
 
         /**
-         * Checks if there are more permutations available.
+         * Checks if there are more k‑permutations available.
          *
-         * @return {@code true} if there are more permutations; {@code false} otherwise
+         * @return {@code true} if additional permutations exist; {@code false} otherwise
          */
         @Override
         public boolean hasNext() {
             if (currentIterator.hasNext()) {
                 return true;
             }
-
             if (!combinationIterator.hasNext()) {
                 return false;
             }
-
             return getNextIterator().hasNext();
         }
 
@@ -99,14 +117,17 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
          * @return the iterator for the next set of permutations
          */
         private Iterator<List<T>> getNextIterator() {
-            currentIterator = new Permutations(null).unique(combinationIterator.next()).lexOrder().iterator();
+            currentIterator = new Permutations(null)
+                    .unique(combinationIterator.next())
+                    .lexOrder()
+                    .iterator();
             return currentIterator;
         }
 
         /**
-         * Returns the next permutation in the iteration.
+         * Returns the next k‑permutation.
          *
-         * @return the next permutation as a list
+         * @return the next permutation as a list of elements
          */
         @Override
         public List<T> next() {

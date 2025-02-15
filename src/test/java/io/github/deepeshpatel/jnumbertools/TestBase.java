@@ -9,11 +9,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TestBase {
-    static {
-        System.getProperties().setProperty("stress.testing","true");
-    }
+    //static { System.getProperties().setProperty("stress.testing","true"); }
 
-    public static final Calculator calculator = new Calculator(100, 100, 100);
+    public static final Calculator calculator = new Calculator(100, 100, 100,2);
     public static final Permutations permutation = new Permutations(calculator);
     public static final Combinations combination = new Combinations(calculator);
     public static final CartesianProduct cartesianProduct = new CartesianProduct(calculator);

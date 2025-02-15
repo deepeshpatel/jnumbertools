@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v1.0.3
- * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;

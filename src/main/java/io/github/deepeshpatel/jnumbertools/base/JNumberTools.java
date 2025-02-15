@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v1.0.3
- * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.base;
@@ -22,6 +22,7 @@ package io.github.deepeshpatel.jnumbertools.base;
  *     // All repetitive permutations
  *     // (example usage not provided in the original comment)
  * </pre>
+ * @author Deepesh Patel
  */
 public final class JNumberTools {
 

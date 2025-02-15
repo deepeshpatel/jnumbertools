@@ -13,13 +13,19 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * Represents a complex product of multiple sets with the ability to generate every m<sup>th</sup> combination.
+ * Represents a complex product of multiple sets with the ability to generate every mᵗʰ combination.
  * <p>
  * This class generates combinations by iterating through the Cartesian product of the lists provided,
- * but only at every m<sup>th</sup> position starting from the specified position.
- * It implements the {@link Iterable} interface to support iteration and provides a stream for functional-style operations.
- * This example creates a complex product of combinations and prints every 2<sup>nd</sup> combination.
- * Instance of this class is intended to be created via builder and hence do not have any public constructor.
+ * but only at every mᵗʰ position starting from the specified position. It implements the {@code Iterable}
+ * interface to support iteration and provides a stream for functional-style operations.
+ * </p>
+ * <p>
+ * Example: This class can be used (via its builder) to create a complex product of combinations and print
+ * every 2ⁿᵈ combination.
+ * </p>
+ * <p>
+ * <strong>Note:</strong> This class is intended to be constructed via a builder and does not have a public constructor.
+ * </p>
  *
  * @param <T> the type of elements in the combinations
  * @since 1.0.3
@@ -30,67 +36,67 @@ public final class ComplexProductMth<T> implements Iterable<List<T>> {
     private final BigInteger m;
     private final BigInteger start;
     private final List<Builder<T>> builders;
-    private BigInteger maxCount = BigInteger.ZERO;
-
+    private final BigInteger maxCount;
 
     /**
-     * Constructs a ComplexProductMth with the specified parameters.
+     * Constructs a {@code ComplexProductMth} with the specified parameters.
      *
-     * @param m the interval for selecting combinations (every m<sup>th</sup> combination)
-     * @param start the starting position for combinations
+     * @param m        the interval for selecting combinations (every mᵗʰ combination)
+     * @param start    the starting position for combinations
      * @param builders a list of builders used to generate combinations
      */
     ComplexProductMth(BigInteger m, BigInteger start, List<Builder<T>> builders) {
         this.m = m;
         this.start = start;
         this.builders = builders;
+        this.maxCount = maxCount();
     }
 
     /**
-     * Returns a stream of the every m<sup>th</sup> combinations.
+     * Returns a stream of every mᵗʰ combination.
      *
      * @return a stream of combinations
      */
     public Stream<List<T>> stream() {
-        return StreamSupport.stream(this.spliterator(), false);
+        return StreamSupport.stream(spliterator(), false);
     }
 
     /**
-     * Builds and returns the m<sup>th</sup> combination.
+     * Builds and returns the mᵗʰ combination.
+     * <p>
+     * Use this method if you need only a specific mᵗʰ combination rather than iterating through the entire sequence.
+     * </p>
      *
-     * @return the m<sup>th</sup> combination
+     * @return the mᵗʰ combination as a list of elements
      */
     public List<T> build() {
         return getMth(m);
     }
 
-    private synchronized BigInteger maxCount() {
-        if (!BigInteger.ZERO.equals(maxCount)) {
-            return maxCount;
-        }
-        maxCount = BigInteger.ONE;
-        for (Builder<T> builder : builders) {
-            maxCount = maxCount.multiply(builder.count());
-        }
-        return maxCount;
+    private BigInteger maxCount() {
+        return builders.stream()
+                .map(Builder::count)
+                .reduce(BigInteger.ONE, BigInteger::multiply);
     }
 
-    //TODO: Priority:low,   Type:New API Idea
-    // Add ComplexProductMth-Quick along with  ComplexProductMth-lexOrder
-    // algorithm will be same but we can ignore collections.reverse
-    private List<T> getMth(BigInteger m) {
-        List<T> output = new ArrayList<>();
+    private List<T> getMth(final BigInteger m) {
+        Deque<T> output = new ArrayDeque<>();
         BigInteger remaining = m;
+
         for (int i = builders.size() - 1; i >= 0; i--) {
             Builder<T> e = builders.get(i);
             BigInteger[] division = remaining.divideAndRemainder(e.count());
             remaining = division[0];
-            List<T> values = e.lexOrderMth( division[1], BigInteger.ZERO).build();
-            Collections.reverse(values);
-            output.addAll(values);
+
+            List<T> values = e.lexOrderMth(division[1], BigInteger.ZERO).build();
+
+            // Add elements to the front in reverse order
+            for (int j = values.size() - 1; j >= 0; j--) {
+                output.addFirst(values.get(j));
+            }
         }
-        Collections.reverse(output);
-        return output;
+
+        return new ArrayList<>(output);  // Convert deque to list
     }
 
     @Override
@@ -100,25 +106,17 @@ public final class ComplexProductMth<T> implements Iterable<List<T>> {
 
     @Override
     public String toString() {
-        return "ComplexProductMth{" +
-               "m=" + m +
-               ", start=" + start +
-               ", maxCount=" + maxCount +
-               '}';
+        return String.format("ComplexProductMth{m=%s, start=%s, maxCount=%s, buildersCount=%d}",
+                m, start, maxCount, builders.size());
     }
 
     private class Itr implements Iterator<List<T>> {
 
         private BigInteger position = start;
-        private final BigInteger memoizedMaxCount;
-
-        public Itr() {
-            memoizedMaxCount = maxCount();
-        }
 
         @Override
         public boolean hasNext() {
-            return position.compareTo(memoizedMaxCount) < 0;
+            return position.compareTo(maxCount) < 0;
         }
 
         @Override

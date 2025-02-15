@@ -1,3 +1,8 @@
+/*
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ */
+
 package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
@@ -26,6 +31,7 @@ import java.math.BigInteger;
  * int[] kPerm = unrankOf.kPermutation(BigInteger.valueOf(5), 10, 3);
  * int[] uniqueComb = unrankOf.uniqueCombination(BigInteger.valueOf(15), 5, 3);
  * </pre>
+ * @author Deepesh Patel
  */
 public final class UnrankOf {
 

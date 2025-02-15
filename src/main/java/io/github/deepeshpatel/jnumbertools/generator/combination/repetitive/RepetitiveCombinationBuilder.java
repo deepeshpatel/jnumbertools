@@ -1,3 +1,8 @@
+/*
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ */
+
 package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
@@ -9,12 +14,18 @@ import java.util.List;
 /**
  * A builder class for generating repetitive combinations of a specified size from a list of elements.
  * <p>
- * This class provides methods to generate all repetitive combinations in lexicographic order, retrieve the mth
- * lexicographic combination, and count the total number of possible combinations.
+ * Given an input list of elements (e.g., elements₀, elements₁, …, elementsₙ₋₁), this class provides methods to:
+ * <ul>
+ *   <li>Generate all repetitive combinations in lexicographic order.</li>
+ *   <li>Retrieve the mᵗʰ lexicographic repetitive combination (with m being 0-based).</li>
+ *   <li>Count the total number of possible repetitive combinations.</li>
+ * </ul>
+ * </p>
  *
  * @param <T> the type of elements in the combinations
  *
  * @author Deepesh Patel
+ * @version 3.0.1
  */
 public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
 
@@ -23,10 +34,10 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
     private final Calculator calculator;
 
     /**
-     * Constructs a {@code RepetitiveCombinationBuilder} with the specified elements, size, and calculator.
+     * Constructs a {@code RepetitiveCombinationBuilder} with the specified elements, combination size, and calculator.
      *
-     * @param elements   the list of elements to generate combinations from
-     * @param size       the size of the combinations to generate
+     * @param elements   the list of elements (e.g., elements₀, elements₁, …, elementsₙ₋₁) from which combinations will be generated
+     * @param size       the size (r) of the combinations to generate
      * @param calculator the calculator to use for computing combinatorial values
      */
     public RepetitiveCombinationBuilder(List<T> elements, int size, Calculator calculator) {
@@ -45,22 +56,22 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Retrieves the mth lexicographic repetitive combination, starting from a specified index.
+     * Retrieves the mᵗʰ lexicographic repetitive combination, starting from a specified index.
      *
-     * @param m     the mth combination to retrieve (0-based index)
+     * @param m     the mᵗʰ combination to retrieve (0-based index)
      * @param start the starting index for generating combinations
-     * @return a {@code RepetitiveCombinationMth} instance for generating the mth combination
+     * @return a {@code RepetitiveCombinationMth} instance for generating the mᵗʰ combination
      */
     public RepetitiveCombinationMth<T> lexOrderMth(long m, long start) {
         return new RepetitiveCombinationMth<>(elements, size, m, start, calculator);
     }
 
     /**
-     * Retrieves the mth lexicographic repetitive combination, starting from a specified index.
+     * Retrieves the mᵗʰ lexicographic repetitive combination, starting from a specified index.
      *
-     * @param m     the mth combination to retrieve (0-based index)
+     * @param m     the mᵗʰ combination to retrieve (0-based index)
      * @param start the starting index for generating combinations
-     * @return a {@code RepetitiveCombinationMth} instance for generating the mth combination
+     * @return a {@code RepetitiveCombinationMth} instance for generating the mᵗʰ combination
      */
     public RepetitiveCombinationMth<T> lexOrderMth(BigInteger m, BigInteger start) {
         return new RepetitiveCombinationMth<>(elements, size, m.longValue(), start.longValue(), calculator);
@@ -69,12 +80,15 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
     /**
      * Returns the total number of possible repetitive combinations.
      * <p>
-     * The result is cached for efficiency.
+     * The total is computed using the repetitive combination formula (multichoose), where n is the number
+     * of elements in the input list and r is the size of each combination. The result is cached in the
+     * calculator for efficiency.
+     * </p>
      *
-     * @return the total number of combinations
+     * @return the total number of combinations as a {@link BigInteger}
      */
     public BigInteger count() {
-        //no need to cache the count as nCr values are cached in calculator
+        // No need to cache the count here as nCr values are cached in the calculator.
         return calculator.nCrRepetitive(elements.size(), size);
     }
 

@@ -1,3 +1,8 @@
+/*
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ */
+
 package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.generator.permutation.k.KPermutationBuilder;
@@ -39,6 +44,7 @@ import static java.util.Arrays.asList;
  * </pre>
  *
  * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
+ * @author Deepesh Patel
  */
 public final class Permutations {
 

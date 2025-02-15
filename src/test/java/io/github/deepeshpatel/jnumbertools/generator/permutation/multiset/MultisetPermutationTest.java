@@ -2,11 +2,9 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
@@ -17,19 +15,11 @@ public class MultisetPermutationTest {
     @Test
     void assertCount() {
         Random random = new Random(System.currentTimeMillis());
-        for (int n = 1; n <= 6; n++) {
+        for (int n = 1; n <= 7; n++) {
             var input = Collections.nCopies(n, 'A');
             int[] frequency = getRandomMultisetFreqArray(random, input.size());
-            long count = permutation.multiset(input, frequency)
-                    .lexOrder().stream().count();
-
-            int sum = Arrays.stream(frequency).reduce(0, Integer::sum);
-            long numerator = calculator.factorial(sum).longValue();
-            long denominator = IntStream.of(frequency).asLongStream()
-                    .reduce(1, (a, b) -> (a * calculator.factorial((int) b).longValue()));
-            long expected = numerator / denominator;
-            //( ∑ ai.si)! / Π(si!)
-            assertEquals(expected, count);
+            long count = permutation.multiset(input, frequency).lexOrder().stream().count();
+            assertEquals(calculator.multinomial(frequency).intValue(), count);
         }
     }
 

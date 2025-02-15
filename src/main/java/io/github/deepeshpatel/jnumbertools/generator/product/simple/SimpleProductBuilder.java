@@ -4,18 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A builder for creating instances of SimpleProduct and SimpleProductMth.
- * Allows adding lists of elements and generating permutations.
+ * Builder for creating instances of {@link SimpleProduct} and {@link SimpleProductMth}.
+ * <p>
+ * This builder allows you to add multiple lists of elements and then generate the Cartesian product.
+ * You can either generate the complete product in lexicographical order using {@link #lexOrder()},
+ * or directly obtain every mᵗʰ product starting from a given index using {@link #lexOrderMth(long, long)}.
+ * </p>
  *
  * @param <E> the type of elements in the lists
+ *
  * @author Deepesh Patel
+ * @version 3.0.1
  */
 public final class SimpleProductBuilder<E> {
 
     private final List<List<E>> allLists = new ArrayList<>();
 
     /**
-     * Initializes the builder with a list of elements.
+     * Initializes the builder with an initial list of elements.
      *
      * @param elements the initial list of elements
      */
@@ -46,20 +52,26 @@ public final class SimpleProductBuilder<E> {
     }
 
     /**
-     * Creates a SimpleProduct with the lists of elements.
+     * Creates a {@link SimpleProduct} instance with the lists of elements added to the builder.
+     * <p>
+     * The resulting product contains all combinations in lexicographical order.
+     * </p>
      *
-     * @return a new SimpleProduct instance
+     * @return a new {@link SimpleProduct} instance
      */
     public SimpleProduct<E> lexOrder() {
         return new SimpleProduct<>(allLists);
     }
 
     /**
-     * Creates a SimpleProductMth with the lists of elements.
+     * Creates a {@link SimpleProductMth} instance with the lists of elements added to the builder.
+     * <p>
+     * The generated product will start from the specified starting index and produce every mᵗʰ product in lexicographical order.
+     * </p>
      *
-     * @param m     the mth element to start from
-     * @param start the starting index
-     * @return a new SimpleProductMth instance
+     * @param m     the mᵗʰ product to start from (0-based)
+     * @param start the starting index for generating the product
+     * @return a new {@link SimpleProductMth} instance
      */
     public SimpleProductMth<?> lexOrderMth(long m, long start) {
         return new SimpleProductMth<>(m, start, allLists);

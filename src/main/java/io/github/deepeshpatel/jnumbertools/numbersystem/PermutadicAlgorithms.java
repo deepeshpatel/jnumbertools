@@ -1,3 +1,8 @@
+/*
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ */
+
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
@@ -28,7 +33,7 @@ import static java.util.stream.Collectors.toCollection;
  *
  * @author Deepesh Patel
  */
-public class PermutadicAlgorithms {
+public final class PermutadicAlgorithms {
 
     private final Calculator calculator;
 

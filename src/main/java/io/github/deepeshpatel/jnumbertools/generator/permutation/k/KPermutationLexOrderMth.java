@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v1.0.3
- * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
@@ -16,18 +16,21 @@ import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
 /**
- * Generates an iterable of every {@code n}<sup>th</sup> unique permutation of size {@code k}.
+ * Generates an iterable of every nᵗʰ unique permutation of size {@code k}.
  * <p>
- * The permutations are generated in lexicographical order of combinations of indices of input values,
- * with each value at a specific index considered unique. This class allows for efficient generation
- * of permutations by skipping directly to every {@code n}<sup>th</sup> permutation rather than
+ * The permutations are generated in lexicographical order based on combinations of indices from the input values,
+ * with each value at a specific index (e.g. elements₀, elements₁, …, elementsₙ₋₁) treated as unique. This class
+ * allows for efficient generation of permutations by skipping directly to every nᵗʰ permutation rather than
  * generating all possible permutations.
+ * </p>
  * <p>
- *  Instance of this class is intended to be created via builder and hence do not have any public constructor.
+ * Instances of this class are intended to be created via a builder and therefore do not have a public constructor.
+ * </p>
  *
  * @param <T> the type of elements in the input list
  * @since 1.0.3
  * @author Deepesh Patel
+ * @version 3.0.1
  */
 public final class KPermutationLexOrderMth<T> extends AbstractKPermutation<T> {
 
@@ -39,25 +42,24 @@ public final class KPermutationLexOrderMth<T> extends AbstractKPermutation<T> {
     /**
      * Constructs a new {@code KPermutationLexOrderMth} instance.
      * <p>
-     * This constructor sets up an iterable that generates every {@code n}<sup>th</sup> unique permutation
-     * of size {@code k}, starting from the specified {@code start} permutation and incrementing by the
-     * specified {@code increment} value.
+     * This constructor sets up an iterable that generates every nᵗʰ unique permutation of size {@code k},
+     * starting from the specified {@code start} permutation and incrementing by the specified {@code increment}.
+     * </p>
      *
-     * @param elements the list of elements from which permutations of size {@code k} will be generated
-     * @param k the size of the permutations; must be {@code &lt;= elements.size()}
-     * @param increment the increment value specifying the position relative to the first permutation
-     *                  which will be generated next in lexicographical order. For example, if increment
-     *                  is set to 2, the output will generate 0<sup>th</sup>, 2<sup>nd</sup>, 4<sup>th</sup>, etc.
-     *                  permutations. This allows for efficient skipping of permutations, which is important
-     *                  for large {@code k} values where generating all permutations would be impractical.
-     * @param start the starting permutation index to begin generating permutations from
+     * @param elements   the list of elements from which permutations of size {@code k} will be generated
+     *                   (e.g. elements₀, elements₁, …, elementsₙ₋₁)
+     * @param k          the size of the permutations; must be ≤ {@code elements.size()}
+     * @param increment  the increment value specifying the position relative to the first permutation
+     *                   which will be generated next in lexicographical order. For example, if increment
+     *                   is set to 2, the output will generate the 0ᵗʰ, 2ⁿᵈ, 4ᵗʰ, etc., permutations.
+     *                   This allows for efficient skipping of permutations, which is important for large {@code k} values.
+     * @param start      the starting permutation index from which permutation generation begins
      * @param calculator a {@link Calculator} instance for computing permutations
      * @throws IllegalArgumentException if {@code increment} is less than or equal to zero
      */
     KPermutationLexOrderMth(List<T> elements, int k, BigInteger increment, BigInteger start, Calculator calculator) {
         super(elements, k);
         AbstractGenerator.checkParamIncrement(increment, "K-Permutation");
-
         this.start = start;
         this.increment = increment;
         this.initialValue = IntStream.range(0, k).toArray();
@@ -65,12 +67,13 @@ public final class KPermutationLexOrderMth<T> extends AbstractKPermutation<T> {
     }
 
     /**
-     * Returns an iterator over elements of type {@code List&lt;T&gt;}.
+     * Returns an iterator over every nᵗʰ unique permutation of size {@code k}.
      * <p>
-     * If {@code k == 0}, an empty iterator is returned. Otherwise, an iterator that generates every
-     * {@code n}<sup>th</sup> permutation in lexicographical order is returned.
+     * If {@code k == 0}, an empty iterator is returned. Otherwise, the returned iterator generates
+     * permutations by computing the nᵗʰ permutation (using a combinadic unranking algorithm) at each step.
+     * </p>
      *
-     * @return an iterator for generating every {@code n}<sup>th</sup> permutation of size {@code k}
+     * @return an iterator for generating every nᵗʰ permutation of size {@code k}
      */
     @Override
     public Iterator<List<T>> iterator() {
@@ -78,8 +81,7 @@ public final class KPermutationLexOrderMth<T> extends AbstractKPermutation<T> {
     }
 
     /**
-     * Inner class implementing the {@code Iterator&lt;List&lt;T&gt;&gt;} interface
-     * to generate every {@code n}<sup>th</sup> permutation in lexicographical order.
+     * Inner class implementing the {@code Iterator<List<T>>} interface to generate every nᵗʰ permutation.
      */
     private class Itr implements Iterator<List<T>> {
 
@@ -87,14 +89,14 @@ public final class KPermutationLexOrderMth<T> extends AbstractKPermutation<T> {
         BigInteger n = start;
 
         /**
-         * Constructs a new {@code Itr} instance to start generating permutations.
+         * Constructs a new {@code Itr} instance for permutation generation.
          */
         public Itr() {}
 
         /**
          * Returns {@code true} if there are more permutations to generate.
          *
-         * @return {@code true} if there are more permutations; {@code false} otherwise
+         * @return {@code true} if the current rank is less than the total number of permutations; {@code false} otherwise
          */
         @Override
         public boolean hasNext() {
@@ -102,29 +104,33 @@ public final class KPermutationLexOrderMth<T> extends AbstractKPermutation<T> {
         }
 
         /**
-         * Returns the next permutation in the iteration.
+         * Returns the next nᵗʰ permutation in the iteration.
+         * <p>
+         * The overall rank {@code n} is used to compute the corresponding permutation by applying a combinadic
+         * unranking algorithm. After generating the permutation, the rank is incremented by the specified {@code increment}.
+         * </p>
          *
-         * @return the next permutation as a {@code List&lt;T&gt;}
-         * @throws NoSuchElementException if the iteration has no more elements
+         * @return the next permutation as a {@code List<T>}
+         * @throws NoSuchElementException if no further permutations are available
          */
         @Override
         public List<T> next() {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-
             next = nextMthKPermutation(n, initialValue.length, elements.size());
             n = n.add(increment);
             return indicesToValues(next);
         }
 
         /**
-         * Computes the {@code rank}-th permutation of size {@code degree} from {@code size} elements.
+         * Computes the permutation corresponding to the given {@code rank} (i.e., the rankᵗʰ permutation)
+         * for permutations of a given {@code degree} from {@code size} elements.
          *
-         * @param rank the rank of the permutation to compute
+         * @param rank   the rank of the permutation to compute
          * @param degree the size of the permutation
-         * @param size the total number of elements
-         * @return the {@code rank}-th permutation as an array of indices
+         * @param size   the total number of elements in the input list
+         * @return the rankᵗʰ permutation as an array of indices
          */
         private int[] nextMthKPermutation(BigInteger rank, int degree, int size) {
             return PermutadicAlgorithms.unRankWithoutBoundCheck(rank, size, degree);

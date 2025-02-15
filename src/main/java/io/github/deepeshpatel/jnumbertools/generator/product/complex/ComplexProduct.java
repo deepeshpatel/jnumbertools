@@ -17,31 +17,34 @@ import java.util.stream.StreamSupport;
 /**
  * Represents a complex product of multiple sets of combinations or subsets.
  * <p>
- * This class provides an iterator for generating the Cartesian product of the lists contained within the complex product.
- * It also provides a stream for functional-style operations on the product.
+ * This class provides an iterator that generates the Cartesian product of the lists contained
+ * within the complex product. Each element of the product is obtained by combining one element from each
+ * inner list, with the combinations generated in lexicographical order of the indices.
+ * </p>
  * <p>
- * Instance of this class is intended to be created via builder and hence do not have any public constructor.
+ * <strong>Note:</strong> Instances of this class are intended to be created via a builder and therefore do not have a public constructor.
+ * </p>
  *
  * @since 1.0.3
  * @author Deepesh Patel
  */
-public class ComplexProduct implements Iterable<List<?>> {
+public final class ComplexProduct implements Iterable<List<?>> {
 
     private final List<List<List<?>>> elements;
 
     /**
-     * Constructs a ComplexProduct with the specified list of combinations or subsets.
+     * Constructs a {@code ComplexProduct} with the specified list of combinations or subsets.
      *
-     * @param elements a list of lists where each inner list contains lists of elements
+     * @param elements a list of lists where each inner list contains lists of elements; each inner list represents a dimension of the product.
      */
-     ComplexProduct(List<List<List<?>>> elements) {
+    ComplexProduct(List<List<List<?>>> elements) {
         this.elements = elements;
     }
 
     /**
      * Computes the total number of possible combinations in the complex product.
      *
-     * @return the total number of possible combinations
+     * @return the total number of possible combinations, computed as the product of the sizes of the inner lists.
      */
     public long count() {
         long count = 1;
@@ -57,14 +60,17 @@ public class ComplexProduct implements Iterable<List<?>> {
     }
 
     /**
-     * Returns a stream of the Cartesian product combinations.
+     * Returns a sequential {@code Stream} with this complex product as its source.
      *
-     * @return a stream of combinations
+     * @return a stream of combinations from the Cartesian product
      */
     public Stream<List<?>> stream() {
         return StreamSupport.stream(this.spliterator(), false);
     }
 
+    /**
+     * Iterator implementation for generating the Cartesian product combinations.
+     */
     private class Itr implements Iterator<List<?>> {
 
         final int[] current = new int[elements.size()];
@@ -85,6 +91,11 @@ public class ComplexProduct implements Iterable<List<?>> {
             return result;
         }
 
+        /**
+         * Converts the current indices into a list of elements by taking the corresponding element from each inner list.
+         *
+         * @return a list representing one combination from the Cartesian product
+         */
         private List<Object> indicesToList() {
             List<Object> list = new ArrayList<>();
             for (int i = 0; i < elements.size(); i++) {

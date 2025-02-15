@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v1.0.3
- * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
@@ -24,14 +24,14 @@ import java.util.List;
  * </p>
  *
  * <p>
- * Instance of this class is intended to be created via builder and hence do not have any public constructor.
+ * Instance of this class is intended to be created via a builder and hence does not have a public constructor.
  * Example:
  *         <pre><code class="language-java">
- * int size=3;
+ * int size = 3;
  * new Permutations().unique(size)
  *         .lexOrder()
  *         .stream().toList();
- *             </code></pre>
+ *         </code></pre>
  * This will generate the following output (all possible permutations of "A", "B", and "C" in lexicographic order):
  * <pre>
  * [A, B, C]
@@ -41,10 +41,12 @@ import java.util.List;
  * [C, A, B]
  * [C, B, A]
  * </pre>
+ * </p>
  *
  * @param <T> the type of elements in the permutation
  * @see <a href="https://en.wikipedia.org/wiki/Permutation">Wikipedia Permutation</a>
  * @author Deepesh Patel
+ * @version 3.0.1
  */
 public final class UniquePermutation<T> extends AbstractGenerator<T> {
 
@@ -60,7 +62,7 @@ public final class UniquePermutation<T> extends AbstractGenerator<T> {
     /**
      * Returns an iterator over the unique permutations of the elements.
      *
-     * @return an Iterator of lists, each representing a unique permutation
+     * @return an iterator of lists, each representing a unique permutation
      */
     public Iterator<List<T>> iterator() {
         return elements.isEmpty() ? newEmptyIterator() :

@@ -1,3 +1,8 @@
+/*
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ */
+
 package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder;
@@ -24,6 +29,7 @@ import java.util.List;
  *
  * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
  * @see <a href="overview.html">Overview</a> for more detailed examples and usage scenarios.
+ * @author Deepesh Patel
  */
 public final class CartesianProduct {
 

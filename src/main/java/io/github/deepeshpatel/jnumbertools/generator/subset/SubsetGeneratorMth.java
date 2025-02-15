@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v1.0.3
- * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.subset;
@@ -16,15 +16,15 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Generates subsets of a set within a specified size range, but only produces every {@code m}-th subset
- * starting from a specified initial position. This class implements {@link MthElementGenerator} to provide
- * the {@code m}-th element efficiently.
+ * Generates subsets of a set within a specified size range, producing only every mᵗʰ subset
+ * (starting from a specified initial position) in lexicographical order.
  * <p>
- * This generator uses a more efficient approach to directly access the {@code m}-th subset without generating
- * all preceding subsets, which can be useful when dealing with large sets and ranges.
+ * This generator uses an efficient approach to directly access the mᵗʰ subset without generating
+ * all preceding subsets, which can be beneficial when handling large sets and ranges.
  * </p>
- *
- * Instance of this class is intended to be created via builder and hence do not have any public constructor.
+ * <p>
+ * <strong>Note:</strong> This class is intended to be constructed via a builder and does not have a public constructor.
+ * </p>
  *
  * @param <T> the type of elements in the subsets
  * @since 1.0.3
@@ -41,15 +41,15 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> implements
     private final int to;
 
     /**
-     * Constructs a {@link SubsetGeneratorMth} to generate every {@code m}-th subset within the specified size range,
+     * Constructs a {@code SubsetGeneratorMth} to generate every mᵗʰ subset within the specified size range,
      * starting from the specified initial position.
      *
-     * @param from the minimum subset size (inclusive).
-     * @param to the maximum subset size (inclusive).
-     * @param m the increment to every m-th subset to be generated.
-     * @param start the initial position for generating subsets.
-     * @param elements the list of elements from which subsets are generated. Each item in the collection is treated as unique.
-     * @param calculator the calculator used for combinatorial calculations.
+     * @param from       the minimum subset size (inclusive)
+     * @param to         the maximum subset size (inclusive)
+     * @param m          the increment for selecting subsets (i.e. every mᵗʰ subset will be generated)
+     * @param start      the initial position for generating subsets
+     * @param elements   the list of elements from which subsets are generated (each item is treated as unique)
+     * @param calculator the calculator used for combinatorial calculations
      */
     SubsetGeneratorMth(int from, int to, BigInteger m, BigInteger start, List<T> elements, Calculator calculator) {
         super(elements);
@@ -62,13 +62,13 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> implements
     }
 
     /**
-     * Returns the {@code m}-th subset as a list of elements.
+     * Returns the mᵗʰ subset as a list of elements.
      * <p>
-     * Use this method instead of the iterator if only a specific {@code m}-th value is needed rather than a sequence.
-     * Creating an iterator is expensive because the {@code hasNext()} implementation requires expensive calculations.
+     * Use this method instead of the iterator if only a specific mᵗʰ subset is needed, rather than a full sequence.
+     * This is useful because creating an iterator may involve expensive computations in {@code hasNext()}.
      * </p>
      *
-     * @return the {@code m}-th subset as a list of elements.
+     * @return the mᵗʰ subset as a list of elements
      */
     public List<T> build() {
         var mthIndices = mth(initialM);

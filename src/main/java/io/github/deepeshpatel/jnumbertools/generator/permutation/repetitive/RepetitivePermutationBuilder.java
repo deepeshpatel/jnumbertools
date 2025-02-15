@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v1.0.3
- * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
@@ -11,11 +11,15 @@ import java.util.List;
 /**
  * Builder for creating instances of {@link RepetitivePermutation} and {@link RepetitivePermutationMth}.
  * <p>
- * This class provides methods to generate permutations with repetition allowed. It allows
- * you to generate all permutations of a given size or a specific m<sup>th</sup> permutation directly.
+ * This class provides methods to generate permutations with repetition allowed. It allows you to generate
+ * all permutations of a given size in lexicographical order or to directly retrieve the mᵗʰ permutation
+ * (and every subsequent permutation with a given increment) starting from a specific index.
  * </p>
- * @author Deepesh Patel
+ *
  * @param <T> the type of elements to permute
+ *
+ * @author Deepesh Patel
+ * @version 3.0.1
  */
 public final class RepetitivePermutationBuilder<T> {
 
@@ -23,9 +27,9 @@ public final class RepetitivePermutationBuilder<T> {
     private final List<T> elements;
 
     /**
-     * Constructs a RepetitivePermutationBuilder with the specified width and elements.
+     * Constructs a new RepetitivePermutationBuilder with the specified width and elements.
      *
-     * @param width the size of each permutation. This can be greater than the number of elements due to repetition.
+     * @param width    the size (length) of each permutation. This value can be greater than the number of elements due to repetition.
      * @param elements the list of elements to permute
      */
     public RepetitivePermutationBuilder(int width, List<T> elements) {
@@ -34,28 +38,35 @@ public final class RepetitivePermutationBuilder<T> {
     }
 
     /**
-     * Creates a {@link RepetitivePermutation} that generates permutations in lexicographical order.
+     * Creates a {@link RepetitivePermutation} instance that generates permutations in lexicographical order.
      *
-     * @return a {@link RepetitivePermutation} instance
+     * @return a {@link RepetitivePermutation} instance for generating all permutations of the given width
      */
     public RepetitivePermutation<T> lexOrder() {
         return new RepetitivePermutation<>(elements, width);
     }
 
     /**
-     * Creates a {@link RepetitivePermutationMth} that generates the m<sup>th</sup> permutation and every subsequent
-     * permutation with a given increment, starting from a specific index.
+     * Creates a {@link RepetitivePermutationMth} instance that generates the mᵗʰ permutation and every subsequent
+     * permutation with a given increment, starting from a specified index.
      *
-     * @param m the index of the first permutation to generate
-     * @param start the index to start generating permutations from
-     * @return a {@link RepetitivePermutationMth} instance
+     * @param m     the index of the first permutation to generate (0‑based)
+     * @param start the starting index for generating permutations
+     * @return a {@link RepetitivePermutationMth} instance for generating permutations with repetition in lexicographical order
      */
     public RepetitivePermutationMth<T> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
+    /**
+     * Creates a {@link RepetitivePermutationMth} instance that generates the mᵗʰ permutation and every subsequent
+     * permutation with a given increment, starting from a specified index.
+     *
+     * @param m     the index of the first permutation to generate (0‑based) as a {@link BigInteger}
+     * @param start the starting index for generating permutations as a {@link BigInteger}
+     * @return a {@link RepetitivePermutationMth} instance for generating permutations with repetition in lexicographical order
+     */
     public RepetitivePermutationMth<T> lexOrderMth(BigInteger m, BigInteger start) {
         return new RepetitivePermutationMth<>(elements, width, m, start);
     }
-
 }

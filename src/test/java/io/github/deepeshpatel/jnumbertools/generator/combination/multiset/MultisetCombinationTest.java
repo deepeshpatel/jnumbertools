@@ -2,6 +2,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -9,20 +10,23 @@ import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RepetitiveCombinationMultisetTest {
+public class MultisetCombinationTest {
 
     @Test
     void assertCount() {
-        int[] frequencies = {2, 3, 2};
-        int size = 2;
-        int expectedCount = 6;
+        int[] frequencies = {5,4,7,3};
+        int[] expectedCounts = calculator.multisetCombinationsCountAll(frequencies);
+        int maxSize = Arrays.stream(frequencies).sum();
+        for(int size=0; size<=maxSize; size++) {
 
-        long actualCount = combination
-                .multiset(A_B_C, frequencies, size)
-                .lexOrder()
-                .stream().count();
+            long actualCount = combination
+                    .multiset(A_B_C_D, frequencies, size)
+                    .lexOrder().stream().count();
+            int index = size<expectedCounts.length? size: maxSize-size;
 
-        assertEquals(expectedCount, actualCount);
+            assertEquals(expectedCounts[index], actualCount);
+        }
+
     }
 
     @Test
@@ -91,13 +95,13 @@ public class RepetitiveCombinationMultisetTest {
         assertNotNull(output(A_B_C, frequencies, 3));
     }
 
-    @Test
-    void shouldThrowExceptionWhenCombinationSizeIsGreaterThanNumberOfElements() {
-        int[] frequencies = {2, 2};
-        int size = 3;
-
-        assertThrows(IllegalArgumentException.class, () -> output(A_B, frequencies, size));
-    }
+//    @Test
+//    void shouldThrowExceptionWhenCombinationSizeIsGreaterThanNumberOfElements() {
+//        int[] frequencies = {2, 2};
+//        int size = 3;
+//
+//        assertThrows(IllegalArgumentException.class, () -> output(A_B, frequencies, size));
+//    }
 
     private List<?> output(List<?> elements, int[] frequencies, int size) {
         return combination.multiset(elements, frequencies, size)

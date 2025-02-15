@@ -1,3 +1,8 @@
+/*
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ */
+
 package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
@@ -9,17 +14,19 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A generator class for computing the mth lexicographical combination with repetition, starting from a specified index.
+ * A generator class for computing the mᵗʰ lexicographical combination with repetition, starting from a specified index.
  * <p>
- * This class can also generate subsequent combinations at intervals of a specified increment. The main use case is to
- * generate a specific combination directly without generating all previous combinations.
- * Instance of this class is intended to be created via builder and hence do not have any public constructor.
+ * This class can also generate subsequent combinations at intervals of a specified increment. Its primary use is to
+ * compute a specific combination directly (without generating all previous combinations) from an input list of elements
+ * (e.g., elements₀, elements₁, …, elementsₙ₋₁). Instances of this class are intended to be created via a builder.
+ * </p>
  *
  * @param <T> the type of elements in the combinations
  *
  * @author Deepesh Patel
+ * @version 3.0.1
  */
-public class RepetitiveCombinationMth<T> extends AbstractGenerator<T> implements MthElementGenerator<T> {
+public final class RepetitiveCombinationMth<T> extends AbstractGenerator<T> implements MthElementGenerator<T> {
 
     private final int r;
     private final long start;
@@ -30,8 +37,8 @@ public class RepetitiveCombinationMth<T> extends AbstractGenerator<T> implements
      * Constructs a {@code RepetitiveCombinationMth} with the specified elements, combination size, increment, start index,
      * and calculator.
      *
-     * @param elements   the list of elements to generate combinations from
-     * @param r          the size of the combinations
+     * @param elements   the list of elements (e.g., elements₀, elements₁, …, elementsₙ₋₁) from which combinations will be generated
+     * @param r          the size of each combination (r)
      * @param increment  the increment for generating combinations at intervals
      * @param start      the starting index for generating combinations
      * @param calculator the calculator to use for computing combinatorial values
@@ -45,11 +52,12 @@ public class RepetitiveCombinationMth<T> extends AbstractGenerator<T> implements
     }
 
     /**
-     * Generates the mth lexicographical combination with repetition, directly from the specified start index.
+     * Generates the mᵗʰ lexicographical combination with repetition directly from the specified start index.
      * <p>
-     * Use this method when you need only the mth combination rather than generating multiple combinations.
+     * Use this method when you need only the mᵗʰ combination rather than generating a series of combinations.
+     * </p>
      *
-     * @return the mth combination as a list of elements
+     * @return the mᵗʰ combination as a list of elements
      */
     public List<T> build() {
         int[] idx = mthCombinationWithRepetition(increment);
@@ -60,6 +68,7 @@ public class RepetitiveCombinationMth<T> extends AbstractGenerator<T> implements
      * Returns an iterator over the repetitive combinations, starting from the specified start index.
      * <p>
      * The iterator generates combinations at intervals of the specified increment.
+     * </p>
      *
      * @return an iterator over combinations
      */
@@ -69,12 +78,13 @@ public class RepetitiveCombinationMth<T> extends AbstractGenerator<T> implements
     }
 
     /**
-     * Computes the mth lexicographical combination with repetition.
+     * Computes the mᵗʰ lexicographical combination with repetition.
      * <p>
-     * This method converts the mth combination's index to an array of element indices.
+     * This method converts the mᵗʰ combination's index to an array of element indices.
+     * </p>
      *
      * @param m the index of the combination to compute
-     * @return an array of indices representing the mth combination
+     * @return an array of indices representing the mᵗʰ combination
      */
     private int[] mthCombinationWithRepetition(long m) {
         int n = elements.size();
@@ -115,7 +125,7 @@ public class RepetitiveCombinationMth<T> extends AbstractGenerator<T> implements
         /**
          * Checks if there are more combinations to generate.
          *
-         * @return {@code true} if there are more combinations, {@code false} otherwise
+         * @return {@code true} if more combinations exist; {@code false} otherwise
          */
         @Override
         public boolean hasNext() {

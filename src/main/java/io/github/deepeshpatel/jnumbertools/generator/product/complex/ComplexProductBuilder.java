@@ -18,33 +18,37 @@ import java.util.List;
  * A builder class for constructing complex products of combinations and subsets.
  * <p>
  * This class allows the creation of complex products by combining different types of combinations and subsets.
- * The products can be generated in lexicographical order or at specific positions.
+ * You can add distinct combinations, multi-select (repetitive) combinations, or subsets (of a given range)
+ * from various input lists. The final complex product can be generated either in lexicographical order
+ * (via {@link #lexOrder()}) or at specific intervals (via {@link #lexOrderMth(long, long)}).
+ * </p>
  * <p>
- * Example usage:
- * <pre>
+ * <strong>Example usage:</strong>
+ * <pre><code class="language-java">
  * ComplexProductBuilder builder = new ComplexProductBuilder(2, List.of("A", "B", "C"), calculator);
  * builder.andDistinct(3, List.of("X", "Y"))
  *        .andMultiSelect(2, List.of("P", "Q"))
  *        .lexOrder();
- * </pre>
+ * </code></pre>
  * This example creates a complex product consisting of combinations of size 2 from the first list,
  * distinct combinations of size 3 from the second list, and multi-select combinations of size 2 from the third list.
+ * </p>
  *
  * @since 1.0.3
  * @author Deepesh Patel
+ * @version 1.0.3
  */
 public final class ComplexProductBuilder {
 
     private final List<Builder> builders = new ArrayList<>();
-
     private final Calculator calculator;
 
     /**
      * Constructs a ComplexProductBuilder with an initial combination of size {@code n}.
      *
-     * @param n the size of the initial combinations
-     * @param elements the list of elements to create combinations from
-     * @param calculator the calculator used for computations
+     * @param n          the size of the initial combinations
+     * @param elements   the list of elements to create combinations from
+     * @param calculator the calculator used for combinatorial computations
      */
     public ComplexProductBuilder(int n, List<?> elements, Calculator calculator) {
         this.calculator = calculator;
@@ -64,7 +68,7 @@ public final class ComplexProductBuilder {
     }
 
     /**
-     * Adds a multi-select combination of the specified quantity to the builder.
+     * Adds a multi-select (repetitive) combination of the specified quantity to the builder.
      *
      * @param quantity the size of the multi-select combinations
      * @param elements the list of elements to create combinations from
@@ -76,10 +80,10 @@ public final class ComplexProductBuilder {
     }
 
     /**
-     * Adds a subset of elements within a specified range to the builder.
+     * Adds a subset of elements within a specified size range to the builder.
      *
-     * @param from the minimum size of the subsets
-     * @param to the maximum size of the subsets
+     * @param from     the minimum size of the subsets
+     * @param to       the maximum size of the subsets
      * @param elements the list of elements to create subsets from
      * @return the current instance of ComplexProductBuilder for method chaining
      */
@@ -102,16 +106,23 @@ public final class ComplexProductBuilder {
     }
 
     /**
-     * Builds and returns a ComplexProductMth with all added combinations and subsets, generating every m<sup>th</sup> product.
+     * Builds and returns a ComplexProductMth with all added combinations and subsets, generating every mᵗʰ product.
      *
-     * @param m the interval to select every m<sup>th</sup> permutation
+     * @param m     the interval to select every mᵗʰ permutation (0‑based)
      * @param start the starting position
-     * @return a ComplexProductMth containing the generated combinations and subsets at specific intervals
+     * @return a ComplexProductMth containing the generated combinations and subsets at the specified intervals
      */
     public ComplexProductMth lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
+    /**
+     * Builds and returns a ComplexProductMth with all added combinations and subsets, generating every mᵗʰ product.
+     *
+     * @param m     the interval to select every mᵗʰ permutation as a {@link BigInteger}
+     * @param start the starting position as a {@link BigInteger}
+     * @return a ComplexProductMth containing the generated combinations and subsets at the specified intervals
+     */
     public ComplexProductMth lexOrderMth(BigInteger m, BigInteger start) {
         return new ComplexProductMth(m, start, builders);
     }

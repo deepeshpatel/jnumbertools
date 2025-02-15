@@ -1,3 +1,8 @@
+/*
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ */
+
 package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
@@ -28,6 +33,7 @@ import java.math.BigInteger;
  * BigInteger repeatedPermRank = rankOf.repeatedPermutation(4, 2, 1, 0);
  * BigInteger uniqueCombRank = rankOf.uniqueCombination(5, 2, 1, 0);
  * </pre>
+ * @author Deepesh Patel
  */
 public final class RankOf {
 

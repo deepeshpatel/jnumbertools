@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v1.0.3
- * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.numbersystem;
@@ -12,19 +12,27 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 /**
- * Encapsulates the Factoradic representation of a positive integer value.
+ * Encapsulates the Factoradic representation of a positive integer.
  * <p>
- * Factoradic is a numeral system where the weight of each digit is the factorial of its position index.
- * This class provides methods to create a Factoradic representation from an integer,
- * and to obtain the decimal equivalent of a Factoradic representation.
+ * The Factoradic numeral system expresses an integer as a sum of factorials weighted by digits.
+ * In this system, the digit at position <em>i</em> has a weight of <em>i!</em>. This class provides methods
+ * to convert a positive integer into its Factoradic representation and to retrieve the original decimal value.
+ * </p>
+ * <p>
+ * The {@code factoradicValues} list stores the digits in order from the least significant digit (index 0)
+ * to the most significant digit.
+ * </p>
  *
  * @author Deepesh Patel
+ * @version 3.0.1
  */
 public final class Factoradic implements Serializable {
 
     /**
-     * The Factoradic representation of the integer, where each value represents a digit in the Factoradic numeral system.
-     * The list is ordered from the least significant digit to the most significant.
+     * The Factoradic representation of the integer, where each element is a digit in the Factoradic numeral system.
+     * <p>
+     * The list is ordered from the least significant digit (index 0) to the most significant.
+     * </p>
      */
     public transient final List<Integer> factoradicValues;
 
@@ -62,14 +70,12 @@ public final class Factoradic implements Serializable {
 
     @Override
     public String toString() {
-        // Print in reverse for readability.
+        // Print the Factoradic digits in reverse order for readability.
         StringBuilder sb = new StringBuilder("[");
         for (int i = factoradicValues.size() - 1; i > 0; i--) {
-            sb.append(factoradicValues.get(i));
-            sb.append(", ");
+            sb.append(factoradicValues.get(i)).append(", ");
         }
-        sb.append(factoradicValues.get(0));
-        sb.append("]");
+        sb.append(factoradicValues.get(0)).append("]");
         return sb.toString();
     }
 

@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v1.0.3
- * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
@@ -16,20 +16,21 @@ import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
 /**
- * Utility to generate permutations with unique values starting from
- * ginve permutation number and then generate every n<sup>th</sup> permutation in
- * lexicographical order of indices of input values where each value is considered unique.
+ * Utility to generate permutations with unique values starting from a given permutation number,
+ * and then to generate every nᵗʰ permutation in lexicographical order of the input indices,
+ * where each value at a specific index (e.g. elements₀, elements₁, …, elementsₙ₋₁) is treated as unique.
  * <p>
- * Generating the n<sup>th</sup> permutation directly is crucial for efficiently handling cases where
- * generating permutations sequentially would be infeasible due to the enormous number of possible
- * permutations (e.g., 100! permutations for 100 items).
+ * Directly generating the nᵗʰ permutation is crucial for efficiently handling cases where generating
+ * permutations sequentially is infeasible due to the enormous number of possibilities (e.g., 100! for 100 items).
+ * </p>
  * <p>
- * This class provides a mechanism to generate directly the next n<sup>th</sup> lexicographical
- * permutation.
- * Instance of this class is intended to be created via builder and hence do not have any public constructor.
+ * <strong>Note:</strong> This class is intended to be constructed via a builder and does not have a public constructor.
+ * </p>
  *
- * @author Deepesh Patel
  * @param <T> the type of elements to permute
+ * @since 1.0.3
+ * @author Deepesh Patel
+ * @version 3.0.1
  */
 public final class UniquePermutationsMth<T> extends AbstractGenerator<T> {
 
@@ -40,12 +41,13 @@ public final class UniquePermutationsMth<T> extends AbstractGenerator<T> {
     private final Calculator calculator;
 
     /**
-     * Constructs a UniquePermutationsMth with the specified parameters.
+     * Constructs a new {@code UniquePermutationsMth} instance with the specified parameters.
      *
-     * @param elements the list of elements to permute
-     * @param increment the increment to generate the next n<sup>th</sup> permutation
-     * @param start the starting index for permutation generation
-     * @param calculator a calculator instance for computing factorials
+     * @param elements   the list of elements to permute
+     * @param increment  the increment to generate the next nᵗʰ permutation (i.e. the step size)
+     * @param start      the starting index for permutation generation
+     * @param calculator a calculator instance for computing factorials and related values
+     * @throws IllegalArgumentException if {@code increment} is less than or equal to zero
      */
     UniquePermutationsMth(List<T> elements, BigInteger increment, BigInteger start, Calculator calculator) {
         super(elements);
@@ -57,12 +59,12 @@ public final class UniquePermutationsMth<T> extends AbstractGenerator<T> {
     }
 
     /**
-     * Builds and returns the m<sup>th</sup> permutation directly.
+     * Builds and returns the mᵗʰ permutation directly.
      * <p>
-     * Use this method instead of the iterator if you need only a specific m<sup>th</sup> permutation
-     * and not a sequence of permutations.
+     * Use this method if you need only a specific mᵗʰ permutation rather than an iterator over a sequence.
+     * </p>
      *
-     * @return the m<sup>th</sup> permutation as a List of elements
+     * @return the mᵗʰ permutation as a {@code List<T>}
      */
     public List<T> build() {
         var indices = FactoradicAlgorithms.unRank(increment, initialIndices.length);
@@ -91,18 +93,17 @@ public final class UniquePermutationsMth<T> extends AbstractGenerator<T> {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-
             int[] currentIndices = nextPermutation(nextK, initialIndices.length);
             nextK = nextK.add(increment);
             return indicesToValues(currentIndices);
         }
 
         /**
-         * Calculates the k<sup>th</sup> permutation given its rank.
+         * Calculates the kᵗʰ permutation given its rank.
          *
-         * @param kth the rank of the permutation
+         * @param kth           the rank of the permutation to compute
          * @param numberOfItems the total number of items
-         * @return the indices representing the n<sup>th</sup> permutation
+         * @return an array of indices representing the nᵗʰ permutation
          */
         public int[] nextPermutation(BigInteger kth, int numberOfItems) {
             return FactoradicAlgorithms.unRank(kth, numberOfItems);

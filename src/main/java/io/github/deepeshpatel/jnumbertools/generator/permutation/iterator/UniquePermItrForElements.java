@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v1.0.3
- * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.iterator;
@@ -10,14 +10,15 @@ import java.util.List;
 
 /**
  * An iterator for generating unique permutations of a list of elements.
- *
  * <p>
- * This iterator converts permutations represented by indices into permutations of actual elements.
- * It is useful for generating permutations of elements without having to manually handle the indices.
+ * This iterator converts permutations represented by indices into permutations of the actual elements.
+ * It is especially useful when you want to generate permutations without manually handling index arrays.
  * </p>
  *
- * @param <T> The type of elements to be permuted.
+ * @param <T> the type of elements to be permuted
  * @see UniquePermItrForIndices
+ * @author Deepesh Patel
+ * @version 3.0.1
  */
 public final class UniquePermItrForElements<T> implements Iterator<List<T>> {
 
@@ -25,31 +26,31 @@ public final class UniquePermItrForElements<T> implements Iterator<List<T>> {
     private final UniquePermItrForIndices iterator;
 
     /**
-     * Constructs a new {@code UniquePermItrForElements} with the specified elements and mapper.
+     * Constructs a new {@code UniquePermItrForElements} instance with the specified number of elements and a mapper.
      *
-     * @param size The size of list of elements to generate permutations of.
-     * @param mapper The mapper that converts indices to values.
+     * @param size   the number of elements in the list for which permutations are to be generated
+     * @param mapper the mapper that converts an array of indices to a list of corresponding element values
      */
     public UniquePermItrForElements(int size, IndicesToValueMapper<T> mapper) {
         this.mapper = mapper;
-        iterator = new UniquePermItrForIndices(size);
+        this.iterator = new UniquePermItrForIndices(size);
     }
 
     /**
-     * Constructs a new {@code UniquePermItrForElements} with the specified elements, mapper, and initial state of indices.
+     * Constructs a new {@code UniquePermItrForElements} instance with the specified mapper and initial state of indices.
      *
-     * @param mapper The mapper that converts indices to values.
-     * @param initialStateOfIndices The initial state of indices for the iterator.
+     * @param mapper                the mapper that converts an array of indices to a list of corresponding element values
+     * @param initialStateOfIndices the initial state of indices to begin permutation generation
      */
     public UniquePermItrForElements(IndicesToValueMapper<T> mapper, int[] initialStateOfIndices) {
         this.mapper = mapper;
-        iterator = new UniquePermItrForIndices(initialStateOfIndices);
+        this.iterator = new UniquePermItrForIndices(initialStateOfIndices);
     }
 
     /**
-     * Returns {@code true} if the iteration has more elements.
+     * Returns {@code true} if there are more permutations to generate.
      *
-     * @return {@code true} if the iteration has more elements; {@code false} otherwise.
+     * @return {@code true} if the iteration has more elements; {@code false} otherwise
      */
     @Override
     public boolean hasNext() {
@@ -57,9 +58,9 @@ public final class UniquePermItrForElements<T> implements Iterator<List<T>> {
     }
 
     /**
-     * Returns the next permutation of elements.
+     * Returns the next unique permutation of elements.
      *
-     * @return The next permutation as a list of elements.
+     * @return the next permutation as a list of elements
      */
     @Override
     public List<T> next() {
@@ -67,16 +68,16 @@ public final class UniquePermItrForElements<T> implements Iterator<List<T>> {
     }
 
     /**
-     * A functional interface for mapping indices to a list of values.
+     * A functional interface for mapping an array of indices to a list of values.
      *
-     * @param <T> The type of elements to be mapped.
+     * @param <T> the type of elements to be mapped
      */
     public interface IndicesToValueMapper<T> {
         /**
          * Converts an array of indices to their corresponding values.
          *
-         * @param indices The array of indices to convert.
-         * @return A list of values corresponding to the given indices.
+         * @param indices the array of indices to convert
+         * @return a list of values corresponding to the given indices
          */
         List<T> indicesToValues(int[] indices);
     }

@@ -1,7 +1,8 @@
 /*
- * JNumberTools Library v1.0.3
- * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
+
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
@@ -12,26 +13,28 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 /**
- * Represents a combinadic number system for a given degree. This class encapsulates
- * the Combinadic representation of a positive integer and provides methods to convert
- * between decimal and combinadic formats, as well as generate successive combinadic values.
+ * Represents a combinadic number system for a given degree.
  * <p>
- * The Combinadic representation is a unique way to represent numbers where each position
- * in the representation is determined by combinatorial numbers, providing a way to
- * enumerate combinations with repetitions.
+ * A combinadic representation uniquely maps a nonnegative integer (in decimal) to a combination
+ * of a fixed size (degree) from a set of items. This class encapsulates such a representation,
+ * providing methods to convert a decimal number into its combinadic format and to generate successive
+ * combinadic values. The combinadic number system is particularly useful for directly computing the
+ * nth combination in lexicographical order without enumerating all previous combinations.
+ * </p>
  *
  * @author Deepesh Patel
+ * @version 3.0.1
  */
 public final class Combinadic implements Serializable {
 
     /**
-     * List of integers representing the Combinadic values. The length of the list is equal
-     * to the degree of this Combinadic representation.
+     * The combinadic values represented as a list of integers.
+     * The length of this list equals the degree of the combinadic representation.
      */
     public final transient List<Integer> combinadicValues;
 
     /**
-     * Decimal number equivalent of this Combinadic representation.
+     * The decimal equivalent of this combinadic representation.
      */
     public final BigInteger decimalValue;
 
@@ -41,10 +44,11 @@ public final class Combinadic implements Serializable {
     }
 
     /**
-     * Creates a {@link Combinadic} object for the specified positive integer and degree.
+     * Creates a {@link Combinadic} object for the specified positive integer (as a {@code long})
+     * and degree.
      *
-     * @param positiveNumber the positive integer to be converted to Combinadic representation.
-     * @param degree the degree of the Combinadic representation.
+     * @param positiveNumber the positive integer to convert to combinadic representation.
+     * @param degree the degree (length) of the combinadic representation.
      * @param calculator the calculator used for combinatorial calculations.
      * @return a {@link Combinadic} object representing the given positive integer.
      */
@@ -53,10 +57,11 @@ public final class Combinadic implements Serializable {
     }
 
     /**
-     * Creates a {@link Combinadic} object for the specified positive integer (in BigInteger format) and degree.
+     * Creates a {@link Combinadic} object for the specified positive integer (as a {@code BigInteger})
+     * and degree.
      *
-     * @param positiveNumber the positive integer to be converted to Combinadic representation.
-     * @param degree the degree of the Combinadic representation.
+     * @param positiveNumber the positive integer to convert to combinadic representation.
+     * @param degree the degree (length) of the combinadic representation.
      * @param calculator the calculator used for combinatorial calculations.
      * @return a {@link Combinadic} object representing the given positive integer.
      */
@@ -67,24 +72,30 @@ public final class Combinadic implements Serializable {
     }
 
     /**
-     * Returns the degree of this Combinadic representation, which is the length of the combinadicValues list.
+     * Returns the degree of this combinadic representation.
+     * <p>
+     * This is the length of the {@code combinadicValues} list.
+     * </p>
      *
-     * @return the degree of this Combinadic representation.
+     * @return the degree of this combinadic representation.
      */
     public int degree() {
         return combinadicValues.size();
     }
 
     /**
-     * Returns the next successive Combinadic value by incrementing the current decimal value by 1.
+     * Returns the next successive combinadic value.
+     * <p>
+     * This method increments the current decimal value by one and computes the corresponding
+     * combinadic representation.
+     * </p>
      *
-     * @return a new {@link Combinadic} object representing the next successive Combinadic value.
+     * @return a new {@link Combinadic} object representing the next combinadic value.
      */
     public Combinadic next() {
         int[] next = CombinadicAlgorithms.nextCombinadic(combinadicValues);
         return new Combinadic(IntStream.of(next).boxed().toList(), decimalValue.add(BigInteger.ONE));
     }
-
 
 //    public Combinadic nextKthCombinadic(long k, NumericCalculator calculator) {
 //        //TODO: Find the algorithm for nextKthCombinadic without converting to decimal

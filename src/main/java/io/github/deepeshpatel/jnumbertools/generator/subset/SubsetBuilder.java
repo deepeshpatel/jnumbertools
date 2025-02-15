@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v1.0.3
- * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
 package io.github.deepeshpatel.jnumbertools.generator.subset;
@@ -14,8 +14,13 @@ import java.util.List;
 /**
  * A builder for creating subsets from a list of elements.
  * <p>
- * The {@link SubsetBuilder} class provides methods to define a range of subset sizes and generate subsets in lexicographical order.
- * It supports creating subsets of all sizes or subsets within a specific range, and it can generate every m<sup>th</sup> subset starting from a given position.
+ * The {@code SubsetBuilder} class provides methods to define a range of subset sizes and to generate subsets
+ * in lexicographical order. It supports creating all subsets or subsets within a specified size range, and it
+ * can generate every mᵗʰ subset starting from a given position.
+ * </p>
+ * <p>
+ * <strong>Note:</strong> This builder is intended to be used to construct subset generators, and its associated
+ * generator classes (which extend {@code AbstractGenerator}) should be obtained via this builder.
  * </p>
  *
  * @param <T> the type of elements in the subsets
@@ -31,9 +36,9 @@ public class SubsetBuilder<T> implements Builder<T> {
     private BigInteger count = BigInteger.valueOf(-1);
 
     /**
-     * Constructs a SubsetBuilder with the specified elements and calculator.
+     * Constructs a {@code SubsetBuilder} with the specified elements and calculator.
      *
-     * @param elements the list of elements to generate subsets from
+     * @param elements   the list of elements from which subsets will be generated
      * @param calculator a calculator used for computing subset counts
      */
     public SubsetBuilder(List<T> elements, Calculator calculator) {
@@ -53,10 +58,10 @@ public class SubsetBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Configures the builder to generate subsets within a specified range.
+     * Configures the builder to generate subsets within a specified size range.
      *
      * @param from the minimum size of subsets to generate (inclusive)
-     * @param to the maximum size of subsets to generate (inclusive)
+     * @param to   the maximum size of subsets to generate (inclusive)
      * @return this builder instance
      * @throws IllegalArgumentException if {@code to} is less than {@code from}
      */
@@ -72,8 +77,8 @@ public class SubsetBuilder<T> implements Builder<T> {
     /**
      * Creates a {@link SubsetGenerator} that generates subsets in lexicographical order within the specified range.
      *
-     * @return a SubsetGenerator instance
-     * @throws IllegalArgumentException if range is not specified using {@link #inRange(int, int)} or {@link #all()}
+     * @return a {@code SubsetGenerator} instance
+     * @throws IllegalArgumentException if the range is not specified using {@link #inRange(int, int)} or {@link #all()}
      */
     public SubsetGenerator<T> lexOrder() {
         if (from < 0 || to < 0) {
@@ -83,22 +88,22 @@ public class SubsetBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Creates a {@link SubsetGeneratorMth} that generates every m<sup>th</sup> subset in lexicographical order, starting from the specified position.
+     * Creates a {@link SubsetGeneratorMth} that generates every mᵗʰ subset in lexicographical order, starting from the specified position.
      *
-     * @param m the interval for selecting subsets (every m<sup>th</sup> subset)
+     * @param m     the interval for selecting subsets (every mᵗʰ subset)
      * @param start the starting position for subsets
-     * @return a SubsetGeneratorMth instance
+     * @return a {@code SubsetGeneratorMth} instance
      */
     public SubsetGeneratorMth<T> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
     /**
-     * Creates a {@link SubsetGeneratorMth} that generates every m<sup>th</sup> subset in lexicographical order, starting from the specified position.
+     * Creates a {@link SubsetGeneratorMth} that generates every mᵗʰ subset in lexicographical order, starting from the specified position.
      *
-     * @param m the interval for selecting subsets (every m<sup>th</sup> subset)
-     * @param start the starting position for subsets
-     * @return a SubsetGeneratorMth instance
+     * @param m     the interval for selecting subsets (every mᵗʰ subset) as a {@link BigInteger}
+     * @param start the starting position for subsets as a {@link BigInteger}
+     * @return a {@code SubsetGeneratorMth} instance
      */
     public SubsetGeneratorMth<T> lexOrderMth(BigInteger m, BigInteger start) {
         return new SubsetGeneratorMth<>(from, to, m, start, elements, calculator);
@@ -107,7 +112,8 @@ public class SubsetBuilder<T> implements Builder<T> {
     /**
      * Returns the total number of subsets in the specified range.
      * <p>
-     * This method calculates the total number of subsets based on the range defined by {@link #inRange(int, int)} or {@link #all()}.
+     * This method calculates the total number of subsets based on the range defined by {@link #inRange(int, int)}
+     * or {@link #all()}.
      * </p>
      *
      * @return the count of subsets
@@ -122,10 +128,10 @@ public class SubsetBuilder<T> implements Builder<T> {
     @Override
     public String toString() {
         return "SubsetBuilder{" +
-               "elements=" + elements +
-               ", from=" + from +
-               ", to=" + to +
-               ", count=" + count +
-               '}';
+                "elements=" + elements +
+                ", from=" + from +
+                ", to=" + to +
+                ", count=" + count +
+                '}';
     }
 }
