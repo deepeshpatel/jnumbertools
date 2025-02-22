@@ -6,6 +6,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermItrForElements;
 
 import java.util.Iterator;
@@ -65,7 +66,7 @@ public final class UniquePermutation<T> extends AbstractGenerator<T> {
      * @return an iterator of lists, each representing a unique permutation
      */
     public Iterator<List<T>> iterator() {
-        return elements.isEmpty() ? newEmptyIterator() :
+        return elements.isEmpty() ? Util.emptyListIterator() :
                 new UniquePermItrForElements<>(elements.size(), this::indicesToValues);
     }
 

@@ -381,11 +381,11 @@ public final class Calculator {
      *
      * @param k the exact number of items to select from the multiset.
      * @param counts an array of non-negative integers representing the counts of each item type.
-     * @return the total number of ways to select exactly k items from the multiset as an int.
+     * @return the total number of ways to select exactly k items from the multiset as a BigInteger.
      * @throws IllegalArgumentException if k is negative or any count is negative.
      */
-    public static int multisetCombinationsCount(int k, int... counts) {
-       return multisetCombinationsCountStartingFromIndex(k, 0, counts);
+    public static BigInteger multisetCombinationsCount(int k, int... counts) {
+        return multisetCombinationsCountStartingFromIndex(k, 0, counts);
     }
 
     /**
@@ -399,10 +399,10 @@ public final class Calculator {
      * @param k      the exact number of items to select from the multiset.
      * @param index  the starting index from which to consider item types.
      * @param counts an array of non-negative integers representing the counts of each item type.
-     * @return the total number of ways to select exactly k items from the multiset from index onward.
+     * @return the total number of ways to select exactly k items from the multiset from index onward as a BigInteger.
      * @throws IllegalArgumentException if k is negative, if index is out of range, or if any count is negative.
      */
-    public static int multisetCombinationsCountStartingFromIndex(int k, int index, int... counts) {
+    public static BigInteger multisetCombinationsCountStartingFromIndex(int k, int index, int... counts) {
         if (k < 0) {
             throw new IllegalArgumentException("k must be non-negative.");
         }
@@ -423,30 +423,29 @@ public final class Calculator {
         for (int i = n - 1; i >= 0; i--) {
             suffixSum[i] = suffixSum[i + 1] + counts[i];
         }
-        TwoLevelMap<Integer, Integer, Integer> memo = new TwoLevelMap<>();
+        TwoLevelMap<Integer, Integer, BigInteger> memo = new TwoLevelMap<>();
         return multisetCombinationsHelper(counts, index, k, memo, suffixSum);
     }
-
-    private static int multisetCombinationsHelper(int[] counts, int index, int k,
-                                           TwoLevelMap<Integer, Integer, Integer> memo, int[] suffixSum) {
+    private static BigInteger multisetCombinationsHelper(int[] counts, int index, int k,
+                                                         TwoLevelMap<Integer, Integer, BigInteger> memo, int[] suffixSum) {
         if (k == 0) {
-            return 1;
+            return BigInteger.ONE;
         }
         if (index == counts.length || k > suffixSum[index]) {
-            return 0;
+            return BigInteger.ZERO;
         }
 
         if (k == suffixSum[index]) {
-            return 1;
+            return BigInteger.ONE;
         }
-        Integer cached = memo.get(index, k);
+        BigInteger cached = memo.get(index, k);
         if (cached != null) {
             return cached;
         }
-        int total = 0;
+        BigInteger total = BigInteger.ZERO;
         int max = Math.min(counts[index], k);
         for (int i = 0; i <= max; i++) {
-            total += multisetCombinationsHelper(counts, index + 1, k - i, memo, suffixSum);
+            total = total.add(multisetCombinationsHelper(counts, index + 1, k - i, memo, suffixSum));
         }
         memo.put(index, k, total);
         return total;

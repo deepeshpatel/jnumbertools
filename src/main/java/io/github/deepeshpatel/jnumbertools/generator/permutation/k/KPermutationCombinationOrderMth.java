@@ -9,6 +9,7 @@ import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.base.Combinations;
 import io.github.deepeshpatel.jnumbertools.base.Permutations;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
 import java.math.BigInteger;
 import java.util.Iterator;
@@ -81,7 +82,7 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
      */
     @Override
     public Iterator<List<T>> iterator() {
-        return (k == 0 || elements.isEmpty()) ? newEmptyIterator() : new Itr();
+        return (k == 0 || elements.isEmpty()) ? Util.emptyListIterator() : new Itr();
     }
 
     /**

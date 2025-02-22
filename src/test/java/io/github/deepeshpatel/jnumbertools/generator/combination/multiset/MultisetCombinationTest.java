@@ -1,13 +1,12 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
-import static java.util.List.of;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MultisetCombinationTest {
@@ -15,26 +14,31 @@ public class MultisetCombinationTest {
     @Test
     void assertCount() {
         int[] frequencies = {5,4,7,3};
-        int[] expectedCounts = calculator.multisetCombinationsCountAll(frequencies);
+        int[] expectedCounts = Calculator.multisetCombinationsCountAll(frequencies);
         int maxSize = Arrays.stream(frequencies).sum();
+
+        Map<Character, Integer> map = new HashMap<>();
+        for (int i = 0; i < frequencies.length; i++) {
+            map.put(A_B_C_D.get(i), frequencies[i]);
+        }
+
         for(int size=0; size<=maxSize; size++) {
 
             long actualCount = combination
-                    .multiset(A_B_C_D, frequencies, size)
+                    .multiset(map, size)
                     .lexOrder().stream().count();
             int index = size<expectedCounts.length? size: maxSize-size;
 
             assertEquals(expectedCounts[index], actualCount);
         }
-
     }
 
     @Test
     void shouldReturnSameResultForDifferentIteratorObjects() {
-        int[] frequencies = {2, 3, 2};
 
+        var options = Map.of('A', 2, 'B',3, 'C',2);
         var iterable = combination
-                .multiset(A_B_C, frequencies, 2)
+                .multiset(options, 2)
                 .lexOrder();
 
         var lists1 = iterable.stream().toList();
@@ -44,68 +48,45 @@ public class MultisetCombinationTest {
 
     @Test
     void shouldGenerateCorrectCombinationsOfMultiset() {
-        var expected = List.of(
-            of("Red", "Red", "Red"),
-            of("Red", "Red", "Green"),
-            of("Red", "Red", "Blue"),
-            of("Red", "Red", "Yellow"),
-            of("Red", "Green", "Green"),
-            of("Red", "Green", "Blue"),
-            of("Red", "Green", "Yellow"),
-            of("Red", "Blue", "Yellow"),
-            of("Green", "Green", "Blue"),
-            of("Green", "Green", "Yellow"),
-            of("Green", "Blue", "Yellow")
-        );
+        var expected = "[{A=1, B=2}," +
+                " {A=1, B=1, C=1}," +
+                " {A=1, B=1, D=1}," +
+                " {A=1, C=2}," +
+                " {A=1, C=1, D=1}," +
+                " {B=2, C=1}," +
+                " {B=2, D=1}," +
+                " {B=1, C=2}," +
+                " {B=1, C=1, D=1}," +
+                " {C=3}, {C=2, D=1}]";
 
-        var elements = of("Red", "Green", "Blue", "Yellow");
-        int[] frequencies = {3, 2, 1, 1};  // 3 red, 2 green, 1 blue, 1 yellow
+        var options = Map.of("C", 3,"B",2, "A", 1,"D",1);
         int size = 3;
-        assertIterableEquals(expected, output(elements, frequencies, size));
+
+        var out = combination.multiset(options, size).lexOrder().stream().toList().toString();
+        assertEquals(expected, out);
     }
 
     @Test
     void shouldReturnEmptyListWhenCombinationSizeIsEqualToZero() {
-        assertIterableEquals(listOfEmptyList, output(of("A"), new int[]{3}, 0));
+        var out = combination.multiset(Map.of("A",2), 0).lexOrder().stream().toList();
+        assertIterableEquals(listOfEmptyMap, out);
     }
 
     @Test
     void shouldReturnEmptyListWhenInputListIsEmpty() {
-        assertIterableEquals(listOfEmptyList, output(Collections.emptyList(), new int[]{}, 0));
-    }
-
-    @Test
-    void shouldThrowExceptionWhenMultisetFreqArrayIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> output(of('A'), null, 2));
-    }
-
-    @Test
-    void shouldThrowExceptionWhenFrequenciesDoNotMatch() {
-        assertThrows(IllegalArgumentException.class, () -> output(of("A", "B"), new int[]{3}, 2));
+        var out = combination.multiset(new HashMap<String, Integer>(), 0).lexOrder().stream().toList();
+        assertIterableEquals(listOfEmptyMap, out);
     }
 
     @Test
     void shouldThrowExceptionWhenNegativeFrequency() {
-        assertThrows(IllegalArgumentException.class, () -> output(of("A", "B"), new int[]{-1, 2}, 2));
+        var options = Map.of("A",2, "B",-1);
+        assertThrows(IllegalArgumentException.class, () -> combination.multiset(options, 2).lexOrder());
     }
 
     @Test
     void shouldHandleLargeFrequencies() {
-        int[] frequencies = {100, 100, 100};
-        assertNotNull(output(A_B_C, frequencies, 3));
-    }
-
-//    @Test
-//    void shouldThrowExceptionWhenCombinationSizeIsGreaterThanNumberOfElements() {
-//        int[] frequencies = {2, 2};
-//        int size = 3;
-//
-//        assertThrows(IllegalArgumentException.class, () -> output(A_B, frequencies, size));
-//    }
-
-    private List<?> output(List<?> elements, int[] frequencies, int size) {
-        return combination.multiset(elements, frequencies, size)
-                .lexOrder()
-                .stream().toList();
+        var options = Map.of('A',100,'B',100,'C',100);
+        assertNotNull(combination.multiset(options, 3));
     }
 }

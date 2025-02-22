@@ -5,6 +5,7 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermItrForElements;
 
 import java.util.*;
@@ -56,7 +57,7 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
      */
     @Override
     public Iterator<List<T>> iterator() {
-        if (k == 0) return newEmptyIterator();
+        if (k == 0) return Util.emptyListIterator();
         if (k == elements.size()) return new UniquePermItrForElements<>(elements.size(), this::indicesToValues);
         return new Itr();
     }

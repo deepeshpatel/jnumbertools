@@ -6,6 +6,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
 import java.util.*;
 
@@ -53,7 +54,7 @@ public final class RepetitiveCombination<T> extends AbstractGenerator<T> {
      */
     @Override
     public Iterator<List<T>> iterator() {
-        return (r == 0 || elements.isEmpty()) ? newEmptyIterator() : new Itr();
+        return (r == 0 || elements.isEmpty()) ? Util.emptyListIterator() : new Itr();
     }
 
     private class Itr implements Iterator<List<T>> {

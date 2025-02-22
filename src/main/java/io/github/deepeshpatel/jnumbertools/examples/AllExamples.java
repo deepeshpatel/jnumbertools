@@ -4,6 +4,7 @@ import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.System.out;
 
@@ -57,9 +58,10 @@ public class AllExamples {
         JNumberTools.combinations().repetitive(2,"A","B","C").lexOrderMth(2, 0).forEach(out::println);
 
         //all multiset combination in lex order
-        JNumberTools.combinations().multiset(List.of("A","B","C"), new int[]{1,2,1}, 2).lexOrder().forEach(out::println);
-        //TODO:JNumberTools.combinations().multiset(List.of("A","B","C"), new int[]{1,2,1}, 2).lexOrderMth(5, 0).forEach(System.out::println);
+        JNumberTools.combinations().multiset(Map.of("A", 1, "B", 2, "C", 1), 2).lexOrder().forEach(out::println);
 
+        //every mth repetitive combinations in lex order
+        JNumberTools.combinations().multiset(Map.of("A", 1, "B", 2, "C", 1), 2).lexOrderMth(5, 0).forEach(System.out::println);
         //all 2^n subsets of elements in lex order
         JNumberTools.subsets().of("A","B","C").all().lexOrder().forEach(out::println);
 

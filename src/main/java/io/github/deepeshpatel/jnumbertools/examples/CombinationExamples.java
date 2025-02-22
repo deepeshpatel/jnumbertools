@@ -5,6 +5,7 @@ import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class CombinationExamples {
     public static void main(String[] args) {
@@ -18,7 +19,7 @@ public class CombinationExamples {
         printRepetitiveCombinationOfNumbersInLexOrder();
         printRepetitiveCombinationOfElementsInLexOrder();
 
-        printRepetitiveCombinationOfMultiset();
+        printCombinationOfMultiset();
 
         printRankOfUniqueCombination();
 
@@ -71,14 +72,13 @@ public class CombinationExamples {
     }
 
 
-    static void printRepetitiveCombinationOfMultiset() {
-        System.out.println("\n*** Repetitive combination of 3 elements from multiset of size 4 in lex order ***");
-        System.out.println("count of Red=3, Green=2, Blue=1 and Yellow=1");
+    static void printCombinationOfMultiset() {
+        System.out.println("\n*** Multiset combination of 3 colors out of  ***");
+        System.out.println("3 Red, 2 Green,  1 Blue,and 1 Yellow");
 
-        var elements = List.of("Red", "Green", "Blue","Yellow");
-        int[] freq = {3,2,1,1};
+        var options = Map.of("Red", 3, "Green", 2, "Blue", 1, "Yellow", 1);
 
-        JNumberTools.combinations().multiset(elements, freq, 3)
+        JNumberTools.combinations().multiset(options, 3)
                 //3 red ,2 green, 1 blue, 1 yellow
                 .lexOrder()
                 .forEach(System.out::println);

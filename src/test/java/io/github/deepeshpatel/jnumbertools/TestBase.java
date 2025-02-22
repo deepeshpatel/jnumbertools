@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TestBase {
-    //static { System.getProperties().setProperty("stress.testing","true"); }
+    static { System.getProperties().setProperty("stress.testing","true"); }
 
     public static final Calculator calculator = new Calculator(100, 100, 100,2);
     public static final Permutations permutation = new Permutations(calculator);
@@ -19,6 +19,7 @@ public class TestBase {
     public static final NumberSystem numberSystem = new NumberSystem(calculator);
 
     public static final List<?> listOfEmptyList = List.of(Collections.emptyList());
+    public static final List<?> listOfEmptyMap = List.of(Collections.emptyMap());
 
     public static final List<Character>  A_B = List.of('A', 'B');
     public static final List<Character> A_B_C = List.of('A', 'B', 'C');

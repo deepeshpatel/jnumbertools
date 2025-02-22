@@ -5,7 +5,7 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * A builder class for generating combinations from a multiset, where elements may be repeated.
@@ -18,22 +18,19 @@ import java.util.List;
  * @author Deepesh Patel
  * @version 3.0.1
  */
-public final class MultisetCombinationBuilder<T> {
+public final class MultisetCombinationBuilder<T extends Comparable<T>> {
 
-    private final List<T> elements;
-    private final int[] frequencies;
+    private final Map<T, Integer> options;
     private final int size;
 
     /**
-     * Constructs a new {@code MultisetCombinationBuilder} with the specified elements, frequencies, and combination size.
+     * Constructs a new {@code MultisetCombinationBuilder} with the specified options and combination size.
      *
-     * @param elements    the list of elements from which combinations will be generated
-     * @param frequencies an array of integers representing the frequency of each element in the multiset
-     * @param size        the size of each combination to be generated
+     * @param options A map where keys are the elements from which combinations will be generated and values are their frequencies in the multiset
+     * @param size    the size of each combination to be generated
      */
-    public MultisetCombinationBuilder(List<T> elements, int[] frequencies, int size) {
-        this.elements = elements;
-        this.frequencies = frequencies;
+    public MultisetCombinationBuilder(Map<T, Integer> options, int size) {
+        this.options = options;
         this.size = size;
     }
 
@@ -45,7 +42,7 @@ public final class MultisetCombinationBuilder<T> {
      */
     public MultisetCombination<T> lexOrder() {
         //TODO: change the signature and name.
-        return new MultisetCombination<>(elements, size, frequencies);
+        return new MultisetCombination<>(options, size);
     }
 
     /**
@@ -60,7 +57,6 @@ public final class MultisetCombinationBuilder<T> {
      * @return a {@code MultisetCombinationMth} instance for generating every mᵗʰ combination in lexicographical order
      */
     public MultisetCombinationMth<T> lexOrderMth(long increment, long start) {
-        //List<T> elements, int r, long start, long increment, int[] frequencies
-        return new MultisetCombinationMth<>(elements, size, start, increment, frequencies);
+        return new MultisetCombinationMth<>(options, size, start, increment);
     }
 }

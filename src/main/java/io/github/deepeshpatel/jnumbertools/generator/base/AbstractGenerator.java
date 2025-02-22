@@ -8,7 +8,6 @@ package io.github.deepeshpatel.jnumbertools.generator.base;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -75,26 +74,10 @@ public abstract class AbstractGenerator<E> implements Iterable<List<E>> {
      *
      * @return a {@link Stream} of lists representing the generated collections.
      */
-    public final Stream<List<E>> stream() {
+    public Stream<List<E>> stream() {
         return StreamSupport.stream(this.spliterator(), false);
     }
 
-    /**
-     * Returns an iterator over a collection that contains a single element: an empty list.
-     * <p>
-     * This iterator is designed to mimic the null-set (φ) by returning a collection with
-     * a size of one (a single empty list), which is necessary for correct count assertions.
-     * </p>
-     *
-     * @param <E> the type of elements contained in the empty list.
-     * @return an iterator over a collection with a single empty list.
-     */
-    protected static <E> Iterator<List<E>> newEmptyIterator() {
-        // Note: Do not replace this with Collections.emptyIterator().
-        // This iterator returns a list containing an empty list (size is 1),
-        // which is required to mimic the null-set (φ) for correct count assertions.
-        return Collections.singletonList(Collections.<E>emptyList()).iterator();
-    }
 
     /**
      * Initializes an array of indices for generating multiset permutations based on given frequencies.

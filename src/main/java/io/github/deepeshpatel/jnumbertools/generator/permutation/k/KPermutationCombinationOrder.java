@@ -7,6 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
 import io.github.deepeshpatel.jnumbertools.base.Combinations;
 import io.github.deepeshpatel.jnumbertools.base.Permutations;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermItrForElements;
 
 import java.util.Iterator;
@@ -64,7 +65,7 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
     @Override
     public Iterator<List<T>> iterator() {
         if (k == 0 || elements.isEmpty()) {
-            return newEmptyIterator();
+            return Util.emptyListIterator();
         }
 
         // Use a faster iterator when k equals the size of the elements list.

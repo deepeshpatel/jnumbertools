@@ -7,6 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
 
 import java.math.BigInteger;
@@ -77,7 +78,7 @@ public final class KPermutationLexOrderMth<T> extends AbstractKPermutation<T> {
      */
     @Override
     public Iterator<List<T>> iterator() {
-        return k == 0 ? newEmptyIterator() : new Itr();
+        return k == 0 ? Util.emptyListIterator() : new Itr();
     }
 
     /**

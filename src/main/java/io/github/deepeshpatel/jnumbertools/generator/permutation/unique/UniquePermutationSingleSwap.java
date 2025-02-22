@@ -6,6 +6,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
 import java.util.Iterator;
 import java.util.List;
@@ -40,7 +41,7 @@ public final class UniquePermutationSingleSwap<T> extends AbstractGenerator<T> i
 
     @Override
     public Iterator<List<T>> iterator() {
-        return elements.isEmpty() ? newEmptyIterator() : new Itr();
+        return elements.isEmpty() ? Util.emptyListIterator() : new Itr();
     }
 
     /**

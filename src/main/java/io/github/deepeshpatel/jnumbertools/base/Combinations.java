@@ -10,6 +10,7 @@ import io.github.deepeshpatel.jnumbertools.generator.combination.repetitive.Repe
 import io.github.deepeshpatel.jnumbertools.generator.combination.unique.UniqueCombinationBuilder;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 /**
@@ -142,21 +143,12 @@ public final class Combinations {
     /**
      * Creates a builder for multiset combinations of elements with specified frequencies and size.
      *
-     * @param elements The list of elements.
-     * @param frequencies The frequencies of elements.
+     * @param options A map where keys are the elements and values are their corresponding frequencies.
      * @param size The size of combinations.
      * @param <T> The type of elements.
      * @return A builder for multiset combinations.
      */
-    public <T> MultisetCombinationBuilder<T> multiset(List<T> elements, int[] frequencies, int size) {
-        if(frequencies == null) {
-            throw new IllegalArgumentException("frequencies must be not null");
-        }
-        for(int f: frequencies) {
-            if(f<0) {
-                throw new IllegalArgumentException("frequencies must be >=0");
-            }
-        }
-        return new MultisetCombinationBuilder<>(elements, frequencies, size);
+    public <T extends Comparable<T>> MultisetCombinationBuilder<T> multiset(Map<T, Integer> options, int size) {
+        return new MultisetCombinationBuilder<>(options, size);
     }
 }
