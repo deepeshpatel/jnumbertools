@@ -7,7 +7,6 @@ package io.github.deepeshpatel.jnumbertools.base;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  /**
@@ -403,6 +402,7 @@ public final class Calculator {
      * @throws IllegalArgumentException if k is negative, if index is out of range, or if any count is negative.
      */
     public static BigInteger multisetCombinationsCountStartingFromIndex(int k, int index, int... counts) {
+
         if (k < 0) {
             throw new IllegalArgumentException("k must be non-negative.");
         }
@@ -424,7 +424,7 @@ public final class Calculator {
             suffixSum[i] = suffixSum[i + 1] + counts[i];
         }
         TwoLevelMap<Integer, Integer, BigInteger> memo = new TwoLevelMap<>();
-        return multisetCombinationsHelper(counts, index, k, memo, suffixSum);
+        return  multisetCombinationsHelper(counts, index, k, memo, suffixSum);
     }
     private static BigInteger multisetCombinationsHelper(int[] counts, int index, int k,
                                                          TwoLevelMap<Integer, Integer, BigInteger> memo, int[] suffixSum) {
@@ -489,23 +489,4 @@ public final class Calculator {
         }
     }
 
-    /**
-     * A simple two-level map for memoization.
-     *
-     * @param <K1> the type of the first key.
-     * @param <K2> the type of the second key.
-     * @param <V>  the type of the value.
-     */
-    private static class TwoLevelMap<K1, K2, V> extends ConcurrentHashMap<K1, Map<K2, V>> {
-
-        public V get(K1 key1, K2 key2) {
-            var map = get(key1);
-            return map == null ? null : map.get(key2);
-        }
-
-        public V put(K1 key1, K2 key2, V value) {
-            computeIfAbsent(key1, (e) -> new ConcurrentHashMap<>()).put(key2, value);
-            return value;
-        }
-    }
 }

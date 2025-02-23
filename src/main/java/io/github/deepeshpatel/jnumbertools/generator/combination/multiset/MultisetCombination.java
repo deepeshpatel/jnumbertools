@@ -2,94 +2,36 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
 import java.util.*;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
-import static io.github.deepeshpatel.jnumbertools.generator.base.Util.emptyMapIterator;
+public final class MultisetCombination<T extends Comparable<T>> extends AbstractMultisetCombination<T> {
 
-/**
- * Utility for generating combinations from a multiset in lex order of keys.
- * <p>
- * An instance of this class is intended to be created via a builder; therefore, although the constructor is public,
- * it is recommended to use the provided builder for instantiation.
- * </p>
- *
- * @param <T> the type of elements in the combinations
- * @author Deepesh Patel
- * @version 3.0.1
- */
-public final class MultisetCombination<T extends Comparable<T>> implements Iterable<Map<T, Integer>> {
+    private static final int CROSSOVER_THRESHOLD = 1000;
 
-    private final Map.Entry<T, Integer>[]  options;
-    private final int r;
-
-    /**
-     * Constructs a {@code MultisetCombination} with the specified options map and combination size.
-     * MultisetCombination is used to generate an iterator for multiset combination in lex order of items
-     * <p>
-     * If the provided combination size {@code r} is greater than the total available
-     * count (i.e., the sum of all frequencies),
-     * it is reset to 0, resulting in an iterator that produces an empty combination.
-     * All frequencies in the options map must be positive.
-     * </p>
-     *
-     * @param options a map of elements to their frequency counts, where each frequency must be greater than 0
-     * @param r the number of items in each combination
-     * @throws IllegalArgumentException if the options map is null, empty, or contains non-positive frequencies
-     */
-    public MultisetCombination(Map<T,Integer> options, int r) {
-        checkParameters(options, r);
-
-        this.options = Util.toLexOrderedMap(options);
-        this.r = r;
+    public MultisetCombination(Map<T, Integer> options, int r, Order order) {
+        super(options, r, order);
     }
 
-    private void checkParameters(Map<T,Integer> options, int r) {
-        if(r<0) {
-            throw new IllegalArgumentException("parameter r (no. of items in each combination) should be>=0 ");
-        }
-
-        if (options == null) {
-            throw new IllegalArgumentException("Options map cannot be null");
-        }
-
-        // Check for positive frequencies
-        for (Map.Entry<T, Integer> entry : options.entrySet()) {
-            Integer freq = entry.getValue();
-            if (freq == null || freq <= 0) {
-                throw new IllegalArgumentException("All frequencies must be positive: found "
-                        + freq + " for element " + entry.getKey());
-            }
-        }
+    public MultisetCombination(Map<T, Integer> options, int r) {
+        super(options, r, Order.LEX);
     }
 
-    public Stream<Map<T, Integer>> stream() {
-        return StreamSupport.stream(this.spliterator(), false);
-    }
-
-    /**
-     * Returns an iterator over combinations of elements in lexicographical order of keys
-     * @return an iterator over the combinations
-     */
     @Override
-    public Iterator<Map<T,Integer>> iterator() {
-        return (r == 0 || options.length==0) ? emptyMapIterator() : new Itr();
+    public Iterator<Map<T, Integer>> iterator() {
+        if (r == 0 || options.length == 0) return Util.emptyMapIterator();
+        return (r < CROSSOVER_THRESHOLD) ? new ArrayIterator() : new FreqVectorIterator();
     }
 
-    private class Itr implements Iterator<Map<T,Integer>> {
+    public class ArrayIterator implements Iterator<Map<T, Integer>> {
+        private int[] indices;
 
-        int[] indices;
-
-        private Itr() {
+        public ArrayIterator() {
             indices = new int[r];
             indices[0] = -1;
-            // Initialize indices to the first valid combination.
             indices = nextMultisetCombination(indices);
         }
 
@@ -98,89 +40,155 @@ public final class MultisetCombination<T extends Comparable<T>> implements Itera
             return indices.length != 0;
         }
 
-        /**
-         * Returns the next combination.
-         *
-         * @return the next combination as a {@link List} of elements
-         * @throws NoSuchElementException if there are no more combinations
-         */
         @Override
-        public Map<T,Integer> next() {
-            if (!hasNext()) {
-                throw new NoSuchElementException();
-            }
+        public Map<T, Integer> next() {
+            if (!hasNext()) throw new NoSuchElementException();
             int[] old = indices;
             indices = nextMultisetCombination(indices);
-            return Util.createFrequencyMap(options, old);
+            return createFrequencyMap(old);
         }
 
-        /**
-         * Computes the next multiset combination for the current indices.
-         * <p>
-         * This method uses the instance's {@code availableCount} to determine the available frequencies for each element.
-         * </p>
-         *
-         * @param a the current combination represented as an array of indices
-         * @return the next combination as an array of indices, or an empty array if no further combination exists
-         */
         private int[] nextMultisetCombination(int[] a) {
             int[] next = Arrays.copyOf(a, a.length);
             int maxSupportedValue = options.length - 1;
 
-            // Step 1: Find the rightmost position to increment
             int i = next.length - 1;
-            while (i >= 0 && next[i] == maxSupportedValue) {
-                i--;
-            }
+            while (i >= 0 && next[i] == maxSupportedValue) i--;
+            if (i == -1) return new int[]{};
 
-            // If no position can be incremented, we're done
-            if (i == -1) {
-                return new int[]{};
-            }
+            if (next[0] == -1) i = 0;
 
-            // Handle the first combination case (initially -1)
-            if (next[0] == -1) {
-                i = 0;
-            }
-
-            // Step 2: Increment the value at position i and fill the rest
             int fillValue = next[i] + 1;
             int k = i;
 
-            // Step 3: Iteratively fill remaining positions
             while (k < next.length) {
-                // If we've run out of valid fill values, reset and try again
                 if (fillValue >= options.length) {
-                    if (i == 0) {
-                        return new int[]{}; // No more combinations possible
-                    }
-                    // Backtrack: Move i left and increment again
+                    if (i == 0) return new int[]{};
                     i--;
-                    while (i >= 0 && next[i] == maxSupportedValue) {
-                        i--;
-                    }
-                    if (i < 0) {
-                        return new int[]{};
-                    }
+                    while (i >= 0 && next[i] == maxSupportedValue) i--;
+                    if (i < 0) return new int[]{};
                     fillValue = next[i] + 1;
                     k = i;
                 }
 
-                // Fill slots with the current fillValue up to its frequency limit
                 int availableFillValueCount = options[fillValue].getValue();
                 while (availableFillValueCount > 0 && k < next.length) {
                     next[k] = fillValue;
                     availableFillValueCount--;
                     k++;
                 }
-
-                // Move to the next value if we’ve used up the current one
-                if (k < next.length && availableFillValueCount == 0) {
-                    fillValue++;
-                }
+                if (k < next.length && availableFillValueCount == 0) fillValue++;
             }
 
             return next;
+        }
+
+        public Map<T, Integer> createFrequencyMap(int[] sortedArray) {
+            // Creates a frequency map from indices in sortedArray, preserving order of options
+            var freqMap = new LinkedHashMap<T, Integer>();
+
+            if (sortedArray.length == 0) {
+                return freqMap;
+            }
+
+            // Count frequencies in one pass through sorted intArray
+            int currentNum = sortedArray[0];
+            int currentCount = 1;
+
+            for (int i = 1; i < sortedArray.length; i++) {
+                if (sortedArray[i] == currentNum) {
+                    currentCount++;
+                } else {
+                    freqMap.put(options[currentNum].getKey(), currentCount); // Use List.get() instead of array access
+                    currentNum = sortedArray[i];
+                    currentCount = 1;
+                }
+            }
+
+            // Handle the last group
+            freqMap.put(options[currentNum].getKey(), currentCount); // Use List.get() for last group
+
+            return freqMap;
+        }
+    }
+
+    public class FreqVectorIterator implements Iterator<Map<T, Integer>> {
+        private FreqVector indices;
+        private final Map<T, Integer> outputMap = new LinkedHashMap<>();
+
+        public FreqVectorIterator() {
+            indices = nextMultisetCombination(new FreqVector(r, options.length));
+        }
+
+        @Override
+        public boolean hasNext() {
+            return indices != null;
+        }
+
+        @Override
+        public Map<T, Integer> next() {
+            if (!hasNext()) throw new NoSuchElementException();
+            FreqVector previous = new FreqVector(indices);
+            indices = nextMultisetCombination(indices);
+            return mapListToMap(previous);
+        }
+
+        private Map<T, Integer> mapListToMap(FreqVector freqVector) {
+            outputMap.clear();
+            for (int i = 0; i < options.length; i++) {
+                if (freqVector.frequencies[i] != 0) {
+                    outputMap.put(options[i].getKey(), freqVector.frequencies[i]);
+                }
+            }
+            return Map.copyOf(outputMap);
+        }
+
+        private FreqVector nextMultisetCombination(FreqVector current) {
+            int maxSupportedValue = options.length - 1;
+
+            int i = current.size() - 1;
+            while (i >= 0 && current.findValueAtIndex(i) == maxSupportedValue) i--;
+            if (i < 0) return null;
+
+            int initialValue = current.findValueAtIndex(0);
+            if (initialValue == -1) {
+                int k = 0;
+                int fillValue = 0;
+                while (k < current.size() && fillValue < options.length) {
+                    int availableFillValueCount = options[fillValue].getValue();
+                    while (availableFillValueCount > 0 && k < current.size()) {
+                        current.set(k, fillValue);
+                        availableFillValueCount--;
+                        k++;
+                    }
+                    fillValue++;
+                }
+                return k == current.size() ? current : null;
+            }
+
+            int fillValue = current.findValueAtIndex(i) + 1;
+            int k = i;
+
+            while (k < current.size()) {
+                if (fillValue >= options.length) {
+                    if (i == 0) return null;
+                    i--;
+                    while (i >= 0 && current.findValueAtIndex(i) == maxSupportedValue) i--;
+                    if (i < 0) return null;
+                    fillValue = current.findValueAtIndex(i) + 1;
+                    k = i;
+                }
+
+                int availableFillValueCount = options[fillValue].getValue();
+                while (availableFillValueCount > 0 && k < current.size()) {
+                    current.set(k, fillValue);
+                    availableFillValueCount--;
+                    k++;
+                }
+                if (k < current.size() && availableFillValueCount == 0) fillValue++;
+            }
+
+            return current;
         }
     }
 }
