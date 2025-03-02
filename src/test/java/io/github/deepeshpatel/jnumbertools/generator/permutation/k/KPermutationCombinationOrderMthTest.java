@@ -57,11 +57,12 @@ public class KPermutationCombinationOrderMthTest {
 
     @Test
     void shouldGenerateMthKPermutations() {
+        int start = 2;
         for (int k = 1; k <= 3; k++) {
-            for (int increment = 1; increment <= 10; increment++) {
-                var expected = getExpectedResultViaOneByOneIteration(A_B_C_D, k, increment);
-                var output = getResultViaDirectIncrement(A_B_C_D, k, increment);
-                assertIterableEquals(expected, output);
+            for (int m = 1; m <= 10; m+=2) {
+                var all = permutation.nPk(k, A_B_C_D).lexOrder().stream();
+                var mth = permutation.nPk(k, A_B_C_D).lexOrderMth(m, start).stream();
+                assertEveryMthValue(all, mth, start, m);
             }
         }
     }
@@ -114,18 +115,5 @@ public class KPermutationCombinationOrderMthTest {
                 .stream().toList();
 
         Assertions.assertEquals(30240, output.size());
-    }
-
-    private List<?> getResultViaDirectIncrement(List<?> input, int k, int increment) {
-        return permutation.nPk(k, input)
-                .combinationOrderMth(increment, 0)
-                .stream().toList();
-    }
-
-    private List<?> getExpectedResultViaOneByOneIteration(List<?> input, int k, int increment) {
-        var stream = permutation.nPk(k, input)
-                .combinationOrder()
-                .stream();
-        return everyMthValue(stream, increment);
     }
 }

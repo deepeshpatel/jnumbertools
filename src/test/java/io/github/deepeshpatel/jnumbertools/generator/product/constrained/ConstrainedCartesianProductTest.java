@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.generator.product.complex;
+package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
 import org.junit.jupiter.api.Test;
 
@@ -6,7 +6,7 @@ import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ComplexCartesianProductTest {
+public class ConstrainedCartesianProductTest {
 
     @Test
     void shouldGenerateCorrectNumOfCombinations() {
@@ -16,7 +16,7 @@ public class ComplexCartesianProductTest {
         var cheese = of( "Ricotta","Mozzarella","Cheddar");
         var toppings = of("tomato","capsicum","onion","paneer","corn");
 
-        var product = cartesianProduct.complexProductOf(1, pizzaBase)
+        var product = cartesianProduct.constrainedProductOf(1, pizzaBase)
                 .andDistinct(2, cheese)
                 .andMultiSelect(2, sauce)
                 .andInRange(1, 5, toppings).lexOrder();

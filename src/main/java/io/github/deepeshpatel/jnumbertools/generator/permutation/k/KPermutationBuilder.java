@@ -6,19 +6,23 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
+import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
+import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
+import io.github.deepeshpatel.jnumbertools.generator.numbers.NumberToBigIntegerAdapter;
 
 import java.math.BigInteger;
 import java.util.List;
 
 /**
- * A builder class for generating k‑permutations of a given list of elements.
+ * Builder for generating k-permutations of a list of elements.
  * <p>
- * This builder provides methods to generate k‑permutations in both lexicographical and combination order,
- * as well as methods to retrieve a specific mᵗʰ permutation in either order.
+ * This builder provides methods to generate k-permutations in lexicographical or combination order,
+ * as well as to retrieve specific mᵗʰ permutations in either order. For example, for elements [A, B, C]
+ * and k=2, permutations might include [A, B], [B, A], [A, C], etc., depending on the order.
  * </p>
  *
- * @param <T> the type of elements in the list
- *
+ * @param <T> the type of elements in the permutations
  * @author Deepesh Patel
  * @version 3.0.1
  */
@@ -29,11 +33,11 @@ public final class KPermutationBuilder<T> {
     private final Calculator calculator;
 
     /**
-     * Constructs a builder for generating k‑permutations.
+     * Constructs a builder for k-permutations.
      *
-     * @param elements   the list of elements from which permutations are generated (e.g., elements₀, elements₁, …, elementsₙ₋₁)
-     * @param r          the length of the permutation (i.e. the subset size to permute)
-     * @param calculator a utility for performing mathematical operations related to combinatorics
+     * @param elements   the list of elements to permute (e.g., [A, B, C])
+     * @param r          the size of each permutation (k); must be non-negative and ≤ elements.size()
+     * @param calculator utility for combinatorial calculations
      */
     public KPermutationBuilder(List<T> elements, int r, Calculator calculator) {
         this.elements = elements;
@@ -42,62 +46,85 @@ public final class KPermutationBuilder<T> {
     }
 
     /**
-     * Generates all k‑permutations in lexicographical order.
+     * Generates all k-permutations in lexicographical order.
      *
-     * @return an instance of {@link KPermutationLexOrder} for iterating over k‑permutations in lex order
+     * @return a {@link KPermutationLexOrder} instance for lexicographical iteration
      */
     public KPermutationLexOrder<T> lexOrder() {
         return new KPermutationLexOrder<>(elements, r);
     }
 
+    public KPermutationForSequence<T> choice(int sampleSize) {
+        BigInteger max = calculator.nPr(elements.size(), r);
+        var choice = new BigIntegerChoice(max, sampleSize);
+        return new KPermutationForSequence<>(elements, r, choice, calculator);
+    }
+
+    public KPermutationForSequence<T> sample(int sampleSize) {
+        BigInteger max = calculator.nPr(elements.size(), r);
+        var sample = new BigIntegerSample(max, sampleSize);
+        return new KPermutationForSequence<>(elements, r, sample, calculator);
+    }
+
+    public KPermutationForSequence<T>  fromSequence(Iterable<? extends Number> iterable) {
+        NumberToBigIntegerAdapter adapter = new NumberToBigIntegerAdapter(iterable);
+        return new KPermutationForSequence<>(elements ,r ,adapter, calculator);
+    }
+
     /**
-     * Generates all k‑permutations in combination order.
+     * Generates all k-permutations in combination order.
      *
-     * @return an instance of {@link KPermutationCombinationOrder} for iterating over k‑permutations in combination order
+     * @return a {@link KPermutationCombinationOrder} instance for combination-order iteration
      */
     public KPermutationCombinationOrder<T> combinationOrder() {
         return new KPermutationCombinationOrder<>(elements, r);
     }
 
     /**
-     * Generates the mᵗʰ k‑permutation in lexicographical order.
+     * Generates every mᵗʰ k-permutation in lexicographical order, using long values.
      *
-     * @param m     the index of the permutation to generate (0‑based)
-     * @param start the starting index for permutation generation
-     * @return an instance of {@link KPermutationLexOrderMth} representing the mᵗʰ k‑permutation in lex order
+     * @param m     the increment between permutations (e.g., m=2 for every 2nd permutation); must be positive
+     * @param start the starting rank (0-based); must be non-negative
+     * @return a {@link KPermutationForSequence} instance for mᵗʰ permutations in lex order
+     * @throws IllegalArgumentException if m or start is invalid
      */
-    public KPermutationLexOrderMth<T> lexOrderMth(long m, long start) {
+    public KPermutationForSequence<T> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
     /**
-     * Generates the mᵗʰ k‑permutation in lexicographical order.
+     * Generates every mᵗʰ k-permutation in lexicographical order.
      *
-     * @param m     the index of the permutation to generate (0‑based)
-     * @param start the starting index for permutation generation
-     * @return an instance of {@link KPermutationLexOrderMth} representing the mᵗʰ k‑permutation in lex order
+     * @param m     the increment between permutations; must be positive
+     * @param start the starting rank (0-based); must be non-negative
+     * @return a {@link KPermutationForSequence} instance for mᵗʰ permutations in lex order
+     * @throws IllegalArgumentException if m or start is invalid
      */
-    public KPermutationLexOrderMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        return new KPermutationLexOrderMth<>(elements, r, m, start, calculator);
+    public KPermutationForSequence<T> lexOrderMth(BigInteger m, BigInteger start) {
+        EveryMthIterable iterator = new EveryMthIterable(start, m, calculator.nPr(elements.size(), r));
+        return new KPermutationForSequence<>(elements, r, iterator, calculator);
+        //return new KPermutationLexOrderMth<>(elements, r, m, start, calculator);
     }
 
     /**
-     * Generates the mᵗʰ k‑permutation in combination order.
+     * Generates every mᵗʰ k-permutation in combination order, using long values.
      *
-     * @param m     the index of the permutation to generate (0‑based)
-     * @param start the starting index for permutation generation
-     * @return an instance of {@link KPermutationCombinationOrderMth} representing the mᵗʰ k‑permutation in combination order
+     * @param m     the increment between permutations; must be positive
+     * @param start the starting rank (0-based); must be non-negative
+     * @return a {@link KPermutationCombinationOrderMth} instance for mᵗʰ permutations in combination order
+     * @throws IllegalArgumentException if m or start is invalid
      */
     public KPermutationCombinationOrderMth<T> combinationOrderMth(long m, long start) {
         return combinationOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
     /**
-     * Generates the mᵗʰ k‑permutation in combination order.
+     * Generates every mᵗʰ k-permutation in combination order.
      *
-     * @param m     the index of the permutation to generate (0‑based)
-     * @param start the starting index for permutation generation
-     * @return an instance of {@link KPermutationCombinationOrderMth} representing the mᵗʰ k‑permutation in combination order
+     * @param m     the increment between permutations; must be positive
+     * @param start the starting rank (0-based); must be non-negative
+     * @return a {@link KPermutationCombinationOrderMth} instance for mᵗʰ permutations in combination order
+     * @throws IllegalArgumentException if m or start is invalid
      */
     public KPermutationCombinationOrderMth<T> combinationOrderMth(BigInteger m, BigInteger start) {
         return new KPermutationCombinationOrderMth<>(elements, r, m, start, calculator);

@@ -47,6 +47,7 @@ public class SimpleCartesianProductMthTest {
 
 
         int max = A_B_C.size() * num_1_2_3.size() * num_1_to_4.size();
+        int start=3;
 
         for (int m = 2; m <= max / 2; m++) {
             var builder = cartesianProduct
@@ -54,9 +55,9 @@ public class SimpleCartesianProductMthTest {
                     .and(num_1_2_3)
                     .and(num_1_to_4);
 
-            var result = builder.lexOrderMth(m, 0).stream().toList();
-            var expected = TestBase.everyMthValue(builder.lexOrder().stream(), m);
-            assertIterableEquals(expected, result);
+            var all = builder.lexOrder().stream();
+            var mth = builder.lexOrderMth(m, start).stream();
+            assertEveryMthValue(all,mth, start, m);
         }
     }
 

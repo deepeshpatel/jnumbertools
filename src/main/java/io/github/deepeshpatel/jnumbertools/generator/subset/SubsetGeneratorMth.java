@@ -91,7 +91,8 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> implements
         }
 
         m = m.subtract(prev);
-        return new Combinations(calculator).unique(size, r - 1).lexOrderMth(m, BigInteger.ZERO).build();
+        return new Combinations(calculator).unique(size, r - 1)
+                .lexOrderMth(m, m).iterator().next();
     }
 
     private BigInteger totalSubsetsBeforeRange() {

@@ -10,6 +10,7 @@ import io.github.deepeshpatel.jnumbertools.generator.permutation.multiset.Multis
 import io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive.RepetitivePermutationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.unique.UniquePermutationBuilder;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -138,16 +139,16 @@ public final class Permutations {
         return nPk(k, asList(allElements));
     }
 
-    /**
-     * Creates a builder for multiset permutations of elements with specified frequencies.
-     *
-     * @param elements The list of elements.
-     * @param frequencies The frequencies of elements.
-     * @param <T> The type of elements.
-     * @return A builder for multiset permutations.
-     */
-    public <T> MultisetPermutationBuilder<T> multiset(List<T> elements, int[] frequencies) {
-        return new MultisetPermutationBuilder<>(elements, frequencies, calculator);
+//    /**
+//     * Creates a builder for multiset permutations of elements with specified frequencies.
+//     *
+//     * @param elements The list of elements.
+//     * @param frequencies The frequencies of elements.
+//     * @param <T> The type of elements.
+//     * @return A builder for multiset permutations.
+//     */
+    public <T> MultisetPermutationBuilder<T> multiset(LinkedHashMap<T, Integer> options) {
+        return new MultisetPermutationBuilder<>(options, calculator);
     }
 
     /**
@@ -159,7 +160,7 @@ public final class Permutations {
      * @return A builder for repetitive permutations.
      */
     public  <T> RepetitivePermutationBuilder<T> repetitive(int width, List<T> elements) {
-        return new RepetitivePermutationBuilder<>(width, elements);
+        return new RepetitivePermutationBuilder<>(width, elements, calculator);
     }
 
     /**

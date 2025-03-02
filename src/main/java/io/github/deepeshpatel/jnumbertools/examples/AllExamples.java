@@ -2,7 +2,10 @@ package io.github.deepeshpatel.jnumbertools.examples;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
+
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +18,7 @@ public class AllExamples {
         //TODO:JNumberTools.permutations().unique("A","B","C").singleSwap().forEach(System.out::println);
         //TODO:JNumberTools.permutations().unique("A","B","C").parallel().forEach(System.out::println);
 
+        LinkedHashMap<String, Integer> options;
         //all unique permutations in lex order
         JNumberTools.permutations().unique("A","B","C").lexOrder().forEach(out::println);
 
@@ -40,16 +44,17 @@ public class AllExamples {
         JNumberTools.permutations().nPk(2,"A","B","C").combinationOrderMth(3, 0).forEach(out::println);
 
         //all multiset permutations in lex order
-        JNumberTools.permutations().multiset(List.of("A","B","C"),new int[]{1,2,1}).lexOrder().forEach(out::println);
+        options = new LinkedHashMap<>(Map.of("A", 1, "B", 2, "C", 1));
+        JNumberTools.permutations().multiset(options).lexOrder().forEach(out::println);
 
         //every mth multiset permutation
-        JNumberTools.permutations().multiset(List.of("A","B","C"),new int[]{1,2,1}).lexOrderMth(3, 0).forEach(out::println);
+        JNumberTools.permutations().multiset(options).lexOrderMth(3, 0).forEach(out::println);
 
         //all unique combination in lex order
         JNumberTools.combinations().unique(2,"A","B","C").lexOrder().forEach(out::println);
 
         //every mth unique combination
-        JNumberTools.combinations().unique(2,"A","B","C").lexOrderMth(3,0).forEach(out::println);
+        //JNumberTools.combinations().unique(2,"A","B","C").lexOrderMth(3,0).forEach(out::println);
 
         //all repetitive combinations in lex order
         JNumberTools.combinations().repetitive(2,"A","B","C").lexOrder().forEach(out::println);
@@ -58,10 +63,12 @@ public class AllExamples {
         JNumberTools.combinations().repetitive(2,"A","B","C").lexOrderMth(2, 0).forEach(out::println);
 
         //all multiset combination in lex order
-        JNumberTools.combinations().multiset(Map.of("A", 1, "B", 2, "C", 1), 2).lexOrder().forEach(out::println);
+        options = new LinkedHashMap<>(Map.of("A", 1, "B", 2, "C", 1));
+        JNumberTools.combinations().multiset(options, 2).lexOrder().forEach(out::println);
 
         //every mth repetitive combinations in lex order
-        JNumberTools.combinations().multiset(Map.of("A", 1, "B", 2, "C", 1), 2).lexOrderMth(5, 0).forEach(System.out::println);
+        options = new LinkedHashMap<>(Map.of("A", 1, "B", 2, "C", 1));
+        JNumberTools.combinations().multiset(options, 2).lexOrderMth(5, 0).forEach(System.out::println);
         //all 2^n subsets of elements in lex order
         JNumberTools.subsets().of("A","B","C").all().lexOrder().forEach(out::println);
 
@@ -87,14 +94,14 @@ public class AllExamples {
                 .lexOrderMth(1500, 0).forEach(out::println);
 
         //all values of complexProductOf cartesian cartesianProduct in lex order
-        JNumberTools.cartesianProduct().complexProductOf(1, List.of("Small ","Medium","Large"))
+        JNumberTools.cartesianProduct().constrainedProductOf(1, List.of("Small ","Medium","Large"))
                 .andDistinct(2, List.of( "Ricotta","Mozzarella","Cheddar"))
                 .andMultiSelect(2, List.of( "Tomato Ketchup","White Sauce","Green Chutney"))
                 .andInRange(2,3,List.of("tomato","capsicum","onion","paneer","corn"))
                 .lexOrder().stream().forEach(out::println);
 
         //every mth values of complexProductOf cartesian cartesianProduct in lex order
-        JNumberTools.cartesianProduct().complexProductOf(1, List.of("Small ","Medium","Large"))
+        JNumberTools.cartesianProduct().constrainedProductOf(1, List.of("Small ","Medium","Large"))
                 .andDistinct(2, List.of( "Ricotta","Mozzarella","Cheddar"))
                 .andMultiSelect(2, List.of( "Tomato Ketchup","White Sauce","Green Chutney"))
                 .andInRange(2,3,List.of("tomato","capsicum","onion","paneer","corn"))
@@ -114,9 +121,9 @@ public class AllExamples {
         out.println(JNumberTools.rankOf().uniqueCombination(8, 1,2,3,4));
 
         //un-ranking: same as finding mth. Remove it
-        out.println(JNumberTools.unRankingOf().uniquePermutation(BigInteger.valueOf(23),4));
-        out.println(JNumberTools.unRankingOf().kPermutation(BigInteger.valueOf(1000), 8,4));
-        out.println(JNumberTools.unRankingOf().uniqueCombination(BigInteger.valueOf(35),8,4));
+        out.println(Arrays.toString(JNumberTools.unRankingOf().uniquePermutation(BigInteger.valueOf(23), 4)));
+        out.println(Arrays.toString(JNumberTools.unRankingOf().kPermutation(BigInteger.valueOf(1000), 8, 4)));
+        out.println(Arrays.toString(JNumberTools.unRankingOf().uniqueCombination(BigInteger.valueOf(35), 8, 4)));
         //TODO JNumberTools.unRankingOf().repeatedPermutation(3,1,2,1).longValue();
     }
 }

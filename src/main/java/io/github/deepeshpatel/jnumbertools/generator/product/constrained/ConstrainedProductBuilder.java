@@ -3,7 +3,7 @@
  * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
-package io.github.deepeshpatel.jnumbertools.generator.product.complex;
+package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.base.Combinations;
@@ -25,7 +25,7 @@ import java.util.List;
  * <p>
  * <strong>Example usage:</strong>
  * <pre><code class="language-java">
- * ComplexProductBuilder builder = new ComplexProductBuilder(2, List.of("A", "B", "C"), calculator);
+ * ConstrainedProductBuilder builder = new ConstrainedProductBuilder(2, List.of("A", "B", "C"), calculator);
  * builder.andDistinct(3, List.of("X", "Y"))
  *        .andMultiSelect(2, List.of("P", "Q"))
  *        .lexOrder();
@@ -38,19 +38,19 @@ import java.util.List;
  * @author Deepesh Patel
  * @version 1.0.3
  */
-public final class ComplexProductBuilder {
+public final class ConstrainedProductBuilder {
 
     private final List<Builder> builders = new ArrayList<>();
     private final Calculator calculator;
 
     /**
-     * Constructs a ComplexProductBuilder with an initial combination of size {@code n}.
+     * Constructs a ConstrainedProductBuilder with an initial combination of size {@code n}.
      *
      * @param n          the size of the initial combinations
      * @param elements   the list of elements to create combinations from
      * @param calculator the calculator used for combinatorial computations
      */
-    public ComplexProductBuilder(int n, List<?> elements, Calculator calculator) {
+    public ConstrainedProductBuilder(int n, List<?> elements, Calculator calculator) {
         this.calculator = calculator;
         builders.add(new Combinations(calculator).unique(n, elements));
     }
@@ -60,9 +60,9 @@ public final class ComplexProductBuilder {
      *
      * @param quantity the size of the distinct combinations
      * @param elements the list of elements to create combinations from
-     * @return the current instance of ComplexProductBuilder for method chaining
+     * @return the current instance of ConstrainedProductBuilder for method chaining
      */
-    public ComplexProductBuilder andDistinct(int quantity, List<?> elements) {
+    public ConstrainedProductBuilder andDistinct(int quantity, List<?> elements) {
         builders.add(new Combinations(calculator).unique(quantity, elements));
         return this;
     }
@@ -72,9 +72,9 @@ public final class ComplexProductBuilder {
      *
      * @param quantity the size of the multi-select combinations
      * @param elements the list of elements to create combinations from
-     * @return the current instance of ComplexProductBuilder for method chaining
+     * @return the current instance of ConstrainedProductBuilder for method chaining
      */
-    public ComplexProductBuilder andMultiSelect(int quantity, List<?> elements) {
+    public ConstrainedProductBuilder andMultiSelect(int quantity, List<?> elements) {
         builders.add(new Combinations(calculator).repetitive(quantity, elements));
         return this;
     }
@@ -85,24 +85,24 @@ public final class ComplexProductBuilder {
      * @param from     the minimum size of the subsets
      * @param to       the maximum size of the subsets
      * @param elements the list of elements to create subsets from
-     * @return the current instance of ComplexProductBuilder for method chaining
+     * @return the current instance of ConstrainedProductBuilder for method chaining
      */
-    public ComplexProductBuilder andInRange(int from, int to, List<?> elements) {
+    public ConstrainedProductBuilder andInRange(int from, int to, List<?> elements) {
         builders.add(new Subsets(calculator).of(elements).inRange(from, to));
         return this;
     }
 
     /**
-     * Builds and returns a ComplexProduct with all added combinations and subsets in lexicographical order.
+     * Builds and returns a ConstrainedProduct with all added combinations and subsets in lexicographical order.
      *
-     * @return a ComplexProduct containing all the generated combinations and subsets
+     * @return a ConstrainedProduct containing all the generated combinations and subsets
      */
-    public ComplexProduct lexOrder() {
+    public ConstrainedProduct lexOrder() {
         List<List<List<?>>> all = new ArrayList<>();
         for (var e : builders) {
             all.add(e.lexOrder().stream().toList());
         }
-        return new ComplexProduct(all);
+        return new ConstrainedProduct(all);
     }
 
     /**

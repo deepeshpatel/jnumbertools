@@ -27,30 +27,13 @@ Add the following section to your `pom.xml` file.
 
 **Currently Available Algorithms**
 
-1. [Permutations: 10 different types of permutations](docs/permutations/README.md)
+1. [Permutations: 23 different types of permutations](docs/permutations/README.md)
 
-2. [Combinations: 5 different types of combinations](#2-combinations)
-    1. [Uniques combination in lex order](#21-unique-combination-in-lex-order)
-    2. [Every m<sup>th</sup> unique combination in lex order](#22-m-th-unique-combination-in-lex-order)
-    3. [Repetitive combination in lex order](#23-repetitive-combination-in-lex-order)
-    4. [Every m<sup>th</sup> repetitive combination in lex order](#24-m-th-repetitive-combination-in-lex-order)
-    5. [Multiset combination in lex order](#25-multiset-combination-in-lex-order)
-    6. Every m<sup>th</sup> multiset combination in lex order: Coming soon
+2. [Combinations: 15 different types of combinations](docs/combinations/README.md)
 
+3. [Set/subset generations: 4 different types available](docs/sets/sets.md)
 
-3. [Set/subset generations: 4 different types available](#3-subsets)
-    1. [All subsets of a given set in lex order](#31-all-subsets-in-lex-order)
-    2. [Every m<sup>th</sup> of all subsets in lex order](#32-m-th-subsets-in-lex-order)
-    3. [All subsets in a given size range in lex order](#33-all-subsets-of-given-size-range-in-lex-order)
-    4. [Every m<sup>th</sup> of subsets in a given size range in lex order](#34-m-th-subsets-in-range-in-lex-order)
-
-
-4. [Cartesian Product: 4 different types of product](#4-cartesian-product)
-    1. [Simple Cartesian product in lex order](#41-simple-cartesian-product)
-    2. [Every m<sup>th</sup> cartesian product in lex order](#42-m-th-simple-cartesian-product)
-    3. [Complex Cartesian product in lex order](#43-complex-cartesian-product)
-    4. [Every m<sup>th</sup> complex cartesian product in lex order](#44-m-th-complex-cartesian-product)
-
+4. [Cartesian Product: 4 different types of product](docs/products/README.md)
 
 5. [Ranking of permutations & combinations](#5-ranking-of-permutations--combinations)
     1. [Ranking of unique permutation](#51-ranking-of-unique-permutation)
@@ -67,234 +50,7 @@ Add the following section to your `pom.xml` file.
     2. Permutation Number System aka Permutadic
     3. Combinatorial Number System aka Combinadic
 
-***
 
-### 2. Combinations
-
-#### 2.1 Unique combination in lex order
-Selection of r distinct items out of n elements. In mathematics, this is also known as n-Choose-r. Generates all combinations in lex order.
-
-```java
-//all possible combination of 3 numbers in range [0,5) in lex order 
-JNumberTools.combinations()
-  .unique(5,3)
-  .lexOrder().stream().toList();
-
-JNumberTools.combinations()
-   .unique(3,"A","B","C","D","E")
-   .lexOrder().stream().toList();
-```
-
-#### 2.2 m-th unique combination in lex order
-Same as n-Choose-r but generates every m<sup>th</sup> combination in lex order starting from given index.  This concept is important because the count of combinations can grow astronomically large. For example, to generate, say, the next 1 billionth combination of 34-Choose-17,  we need to wait for days to generate the desired billionth combination if we generate all combinations sequentially and then select the billionth combination.
-
-```java
-//5th, 7th , 9th.. combination of 3 numbers in range [0,5) in lex order 
-JNumberTools.combinations()
- .unique(5,3)
- .lexOrderMth(5,2).stream().toList();
-
-JNumberTools.combinations()
-   .unique(3,"A","B","C","D","E")
-   .lexOrderMth(5,2).stream().toList();
-```
-
-#### 2.3 Repetitive combination in lex order
-Generates combinations with repeated elements allowed in lexicographical order.
-There are total <sup>(n+r-1)</sup>C<sub>r</sub> combinations with repetition.
-
-```java
-// all combination of 3 numbers with 
-// repetition allowed in range [0,5) in lex order 
-JNumberTools.combinations()
-   .repetitive(5,3)
-   .lexOrder().stream().toList();
-
-JNumberTools.combinations()
-   .repetitive(3,"A","B","C","D","E")
-   .lexOrder().stream().toList();
-```
-#### 2.4 m-th repetitive combination in lex order
-Generates every m<sup>th</sup> combination with repeated elements in lex order
-
-```java
-// 5th, 7th , 9th.. combination of 3 numbers with 
-// repetition allowed in range [0,5) in lex order 
-JNumberTools.combinations()
-   .repetitive(5,3)
-   .lexOrderMth(5,2).stream().toList();
-
-JNumberTools.combinations()
-   .repetitive(3,"A","B","C","D","E")
-   .lexOrderMth(5,2).stream().toList();
-```
-
-#### 2.5 Multiset combination in lex order
-Special case of repetitive combination where every element has an associated frequency that denotes how many times an element can be repeated in a combination. For example, combinations of 3 apples and 2 oranges.
-
-```java
-//combinations of any 2 fruits out of 2 apples, 1 banana and 3 guavas in lex order
-var elements = List.of("Apple", "Banana", "Guava");
-int[] frequencies = {2,1,3};
-
-JNumberTools.combinations()
-    .multiset(elements,frequencies, 3)
-    .lexOrder().stream().toList();
-```
-
-### 3. Subsets
-
-#### 3.1 All subsets in lex order
-Generates all subset of a given set in lex order.
-For example for all subsets of "A", "B", "C"
-it will result
-
-[ ],[A], [B], [C],[A, B], [A, C], [B, C], [A, B, C]
-
-The first empty set represents φ set
-```java
-//all subsets of "Apple", "Banana", "Guava" in lex order
-JNumberTools.subsets()
-  .of("Apple", "Banana", "Guava")
-  .all().lexOrder()
-  .stream().toList();
-```
-
-#### 3.2 m-th subsets in lex order
-Generates every m<sup>th</sup> subset of a given set in lex order. Starting from given index.
-This API does not search for the m<sup>th</sup> subset in a sorted list but
-directly generates the desired subset and hence it is very efficient.
-
-```java
-//every 1 billion-th subsets of numbers in range [0,40)
-//starting from 0th index
-JNumberTools.subsets()
-  .of(40)
-  .all().lexOrderMth(1000000000,0)
-  .stream().toList();
-```
-
-#### 3.3 All subsets of given size range in lex order
-Generates all subset of a given size range in lex order.
-For example for all subsets of "A", "B", "C" of size range [2,3]
-will result
-
-[A, B], [A, C], [B, C], [A, B, C]
-
-The first empty set represents φ set
-```java
-//all subsets of "Apple", "Banana", "Guava" in size range [2,3] in lex order
-JNumberTools.subsets()
-   .of("Apple", "Banana", "Guava")
-   .inRange(2,3)
-   .lexOrder()
-   .stream().toList();
-```
-
-#### 3.4 m-th subsets in range in lex order
-Generates every m<sup>th</sup> subset in a given size range in lex order. Starting from given index.
-This API does not search for the m<sup>th</sup> subset in a sorted list but
-directly generates the desired subset and hence it is very efficient.
-
-```java
-//every 1 billion-th subsets of numbers in range [0,40) with size range [10,39]
-//starting from 0th index
-JNumberTools.subsets()
-   .of(40)
-   .inRange(10,39).lexOrderMth(1000000000,0)
-   .stream().toList();
-```
-
-### 4. Cartesian Product
-
-#### 4.1 Simple Cartesian product
-A Cartesian Product of two sets A and B, denoted by A × B is the set of all
-ordered pairs (a, b) where a ∈ A and b ∈ B.
-
-This API supports the cartesian product of n different sets. That is for sets A, B, C, D...
-you can find A × B × C × D X ... directly in single API call
-
-```java
-//every combination of 1 pizza-base, 1 pizza-crust and 1 cheese
-var pizzaSize   =  List.of("Small", "Medium", "Large");
-var pizzaCrust  =  List.of("Flatbread", "Neapolitan", "Thin Crust");
-var cheese      =  List.of( "Ricotta ","Mozzarella","Cheddar");
-
-JNumberTools.cartesianProduct()
-   .simpleProductOf(pizzaSize)
-   .and(pizzaCrust)
-   .and(cheese)
-   .lexOrder().stream().toList();
-```
-
-#### 4.2 m-th simple cartesian product
-Generates every m<sup>th</sup> cartesian product starting from any starting index of choice.
-This API does not search for the m<sup>th</sup> product in a sorted list but
-directly generates the desired product and hence it is very efficient.
-
-```java
-//every 10th combination of 1 pizza-base, 1-pizza crust and 1 cheese
-//starting form 5th index in lex order. That is 5th, 10th,15th and 20th
-var pizzaSize   =  List.of("Small", "Medium", "Large");
-var pizzaCrust  =  List.of("Flatbread", "Neapolitan", "Thin Crust");
-var cheese      =  List.of( "Ricotta ","Mozzarella","Cheddar");
-
-JNumberTools.cartesianProduct()
-   .simpleProductOf(pizzaSize)
-   .and(pizzaCrust)
-   .and(cheese)
-   .lexOrderMth(5,10).stream().toList();
-```
-
-#### 4.3 Complex cartesian product
-Same as simple cartesian product but instead of having only one item from each list
-we can select multiple, select repetitive elements and select in a given range.
-```java
-//Print all combination of -
-// any 1 pizza base and
-// any 2 distinct cheese
-// and any 2 sauce (repeated allowed)
-// and any toppings in range 1 to 5";
-
-var pizzaBase = List.of("Small ","Medium", "Large");
-var cheese = List.of( "Ricotta ","Mozzarella","Cheddar");
-var sauce = List.of( "Tomato Ketchup","White Sauce","Green Chutney");
-var toppings = List.of("Tomato","Capsicum", "Onion", "Corn", "Mushroom");
-
-JNumberTools
-   .cartesianProduct().complexProductOf(1, pizzaBase)
-   .andDistinct(2, cheese)
-   .andMultiSelect(2, sauce)
-   .andInRange(1,5,toppings)
-   .lexOrder().stream().toList();
-```
-
-#### 4.4 m-th complex cartesian product
-Generates m<sup>th</sup> complex cartesian product directly without calculating the values
-preceding it.
-For example below code prints every 10<sup>18</sup> th lexicographical combination
-which is not feasible to calculate via one by one iteration. API supports BigInteger,
-so it is even possible to execute it for very large value of m.
-Say every 10<sup>100</sup> th combination.
-```java
-//Every 10^18 th lexicographical combinations of -
-// any 10 distinct small alphabets and
-// any 12 distinct capital alphabets and
-// any 3 symbols with repetition allowed and 
-// all subsets in size range [10,20] of a set of numbers in [0,20)
-
-var smallAlphabets = IntStream.rangeClosed('a', 'z').mapToObj(c -> (char) c).toList();
-var capitalAlphabets = IntStream.rangeClosed('A', 'Z').mapToObj(c -> (char) c).toList();
-var symbols = List.of('~','!','@','#','$','%','^','&','*','(',')');
-var numbers = IntStream.rangeClosed(0, 20).boxed().toList();
-
-JNumberTools.cartesianProduct()
-   .complexProductOf(10, smallAlphabets) //distinct
-   .andDistinct(12, capitalAlphabets) //distinct
-   .andMultiSelect(3, symbols) // repetition allowed
-   .andInRange(10, 20, numbers) // all subsets in size range
-   .lexOrderMth(1000_000_000_000_000_000L, 0).stream().toList();
-```
 
 ### 5. Ranking of permutations & combinations
 
@@ -304,7 +60,7 @@ For example, there are total 4!=24 permutations of [0,1,2,3]
 where the first permutation [0,1,2,3] has rank 0 and the last permutation
 [3,2,1,0] has the rank of 23
 
-```java
+```
 BigInteger rank = JNumberTools.rankOf().uniquePermutation(3,2,1,0);
 ```
 

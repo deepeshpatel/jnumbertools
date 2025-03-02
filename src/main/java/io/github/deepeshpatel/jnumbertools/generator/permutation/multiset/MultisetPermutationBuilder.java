@@ -6,89 +6,111 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
+import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
+import io.github.deepeshpatel.jnumbertools.generator.numbers.NumberToBigIntegerAdapter;
 
-import java.util.List;
+import java.math.BigInteger;
+import java.util.LinkedHashMap;
 
 /**
  * Builder class for generating permutations of a multiset.
  * <p>
- * This class allows you to generate permutations of a multiset where elements may repeat according to specified frequencies.
- * It provides methods to generate permutations in lexicographical order or to directly retrieve the mᵗʰ permutation
- * without generating all preceding permutations.
+ * This class facilitates the generation of permutations for a multiset, where elements may repeat based on specified frequencies.
+ * It supports generating all permutations in lexicographical order or retrieving a specific mᵗʰ permutation directly without
+ * computing all preceding ones.
  * </p>
  *
- * @param <T> the type of elements in the multiset
- *
+ * @param <T> the type of elements in the multiset, must implement {@link Comparable}
  * @author Deepesh Patel
  * @version 3.0.1
  */
 public final class MultisetPermutationBuilder<T> {
 
-    private final List<T> elements;
-    private final int[] frequencies;
+    private final LinkedHashMap<T, Integer> options;
     private final Calculator calculator;
 
     /**
-     * Constructs a new builder for generating multiset permutations.
+     * Constructs a builder for generating multiset permutations.
      *
-     * @param elements    the elements in the multiset
-     * @param frequencies an array representing the frequency of each element in the multiset.
-     *                    For example, frequencies[0] is the count for the 0ᵗʰ element, frequencies[1] for the 1ˢᵗ element, etc.
-     * @param calculator  an instance of {@link Calculator} used for internal combinatorial calculations
-     * @throws IllegalArgumentException if frequencies is null, its length is less than the size of elements,
-     *                                  or if any frequency is not a positive integer
+     * @param options    a {@link LinkedHashMap} containing elements as keys and their frequencies as values
+     * @param calculator an instance of {@link Calculator} for performing combinatorial computations
+     * @throws IllegalArgumentException if {@code options} is null, empty, or contains non-positive frequencies
      */
-    public MultisetPermutationBuilder(List<T> elements, int[] frequencies, Calculator calculator) {
-        this.elements = elements;
-        this.frequencies = frequencies;
+    public MultisetPermutationBuilder(LinkedHashMap<T, Integer> options, Calculator calculator) {
+        if (options == null || options.isEmpty() || options.values().stream().anyMatch(f -> f <= 0)) {
+            throw new IllegalArgumentException("Options must be non-null, non-empty, and contain positive frequencies");
+        }
+        this.options = options;
         this.calculator = calculator;
-        assertArguments();
     }
 
     /**
-     * Ensures that the arguments provided to the constructor are valid.
-     *
-     * @throws IllegalArgumentException if frequencies is null, its length is less than the size of elements,
-     *                                  or if any frequency is not a positive integer
-     */
-    private void assertArguments() {
-        if (frequencies == null || frequencies.length < elements.size() || !frequenciesArePositive()) {
-            throw new IllegalArgumentException("frequencies must be non-null, have a length equal to the number of elements, and contain positive values");
-        }
-    }
-
-    /**
-     * Checks whether all frequencies are positive integers.
-     *
-     * @return {@code true} if all frequencies are positive; {@code false} otherwise
-     */
-    private boolean frequenciesArePositive() {
-        for (int e : frequencies) {
-            if (e < 1) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Returns an instance of {@link MultisetPermutation} to generate permutations in lexicographical order.
-     *
-     * @return an instance of {@link MultisetPermutation}
+     * Creates an instance of {@link MultisetPermutation} to generate all permutations based on
+     * the lex order of options.keySet()
+     * @return a new {@link MultisetPermutation} instance for generating permutations
      */
     public MultisetPermutation<T> lexOrder() {
-        return new MultisetPermutation<>(elements, frequencies);
+        return new MultisetPermutation<>(options, calculator);
     }
 
     /**
-     * Returns an instance of {@link MultisetPermutationMth} to generate the mᵗʰ permutation
-     * in lexicographical order, starting from a specified index.
+     * Creates an instance of {@link MultisetPermutationMth} to generate the mᵗʰ permutation directly.
+     * <p>
+     * This method retrieves a specific permutation without generating all prior permutations.
+     * The order of the permutation is lex order of options.keySet()
+
+     * The {@code m} parameter specifies the 0-based index of the desired permutation, relative to the {@code start} index.
+     * </p>
      *
-     * @param m     the mᵗʰ permutation to generate (0‑based index)
-     * @param start the starting index for generating permutations
-     * @return an instance of {@link MultisetPermutationMth}
+     * @param m     the index of the desired permutation (0-based)
+     * @param start the starting index for permutation generation
+     * @return a new {@link MultisetPermutationMth} instance for generating the mᵗʰ permutation
+     * @throws IllegalArgumentException if {@code m} or {@code start} is negative
      */
+    public MultisetPermutationMth<T> lexOrderMth(BigInteger m, BigInteger start) {
+        if (m.compareTo(BigInteger.ZERO) < 0 || start.compareTo(BigInteger.ZERO) < 0) {
+            throw new IllegalArgumentException("Index 'm' and 'start' must be non-negative");
+        }
+        return new MultisetPermutationMth<>(options, m, start, calculator);
+    }
+
     public MultisetPermutationMth<T> lexOrderMth(long m, long start) {
-        return new MultisetPermutationMth<>(elements, m, start, frequencies, calculator);
+        return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
+    }
+
+    /**
+     * Creates an instance that samples multiset permutations randomly without replacement.
+     *
+     * @param sampleSize the number of permutations to generate; must be positive and ≤ total permutations
+     * @return a new {@link MultisetPermutationForSequence} instance for random sampling
+     * @throws IllegalArgumentException if {@code sampleSize} is not positive or exceeds total permutations
+     */
+    public MultisetPermutationForSequence<T> sample(int sampleSize) {
+        BigInteger total = calculator.multinomial(options.values().stream().mapToInt(Integer::intValue).toArray());
+        if (sampleSize <= 0 || BigInteger.valueOf(sampleSize).compareTo(total) > 0) {
+            throw new IllegalArgumentException("Sample size must be positive and not exceed total permutations");
+        }
+        return new MultisetPermutationForSequence<>(options, new BigIntegerSample(total, sampleSize), calculator);
+    }
+
+    /**
+     * Creates an instance that samples multiset permutations randomly with replacement.
+     *
+     * @param sampleSize the number of permutations to generate; must be positive
+     * @return a new {@link MultisetPermutationForSequence} instance for random sampling with replacement
+     * @throws IllegalArgumentException if {@code sampleSize} is not positive
+     */
+    public MultisetPermutationForSequence<T> choice(int sampleSize) {
+        if (sampleSize <= 0) {
+            throw new IllegalArgumentException("Sample size must be positive");
+        }
+        BigInteger total = calculator.multinomial(options.values().stream().mapToInt(Integer::intValue).toArray());
+        return new MultisetPermutationForSequence<>(options, new BigIntegerChoice(total, sampleSize), calculator);
+    }
+
+    public MultisetPermutationForSequence<T> fromSequence(Iterable<? extends Number> iterable) {
+        var adapter = new NumberToBigIntegerAdapter(iterable);
+        return new MultisetPermutationForSequence<>(options, adapter, calculator);
     }
 }

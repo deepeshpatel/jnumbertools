@@ -85,7 +85,7 @@ public abstract class AbstractGenerator<E> implements Iterable<List<E>> {
      * @param frequencies an array of frequencies for the multiset permutation.
      * @return an array of indices corresponding to the provided frequencies.
      */
-    protected static int[] initIndicesForMultisetPermutation(int... frequencies) {
+    public static int[] initIndicesForMultisetPermutation(int... frequencies) {
         return IntStream.range(0, frequencies.length)
                 .flatMap(i -> IntStream.generate(() -> i).limit(frequencies[i]))
                 .toArray();

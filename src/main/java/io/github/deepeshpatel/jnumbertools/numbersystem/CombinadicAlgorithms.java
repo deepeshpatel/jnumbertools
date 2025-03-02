@@ -15,7 +15,7 @@ import java.util.List;
  * Provides algorithms for converting between Combinadic and decimal representations,
  * and for computing ranks and un-ranks of combinations using the Combinadic number system.
  * <p>
- * The combinadic representation is a unique method to represent nonnegative integers as combinations,
+ * The combinadic representation is a unique method to represent non-negative integers as combinations,
  * enabling direct computation of the nth combination in lexicographical order without enumeration of
  * all preceding combinations. This class includes methods to convert a given combination to its combinadic
  * representation, to convert a combinadic representation back to a combination, and to convert between

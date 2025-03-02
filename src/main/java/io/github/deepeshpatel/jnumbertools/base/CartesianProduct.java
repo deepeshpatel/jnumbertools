@@ -5,8 +5,8 @@
 
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.product.complex.ComplexProductBuilder;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ import java.util.List;
  * <pre>
  * CartesianProduct cartesianProduct = new CartesianProduct();
  * SimpleProductBuilder builder1 = cartesianProduct.simpleProductOf(Arrays.asList("A", "B", "C"));
- * ComplexProductBuilder builder2 = cartesianProduct.complexProductOf(2, "A", "B", "C");
+ * ConstrainedProductBuilder builder2 = cartesianProduct.complexProductOf(2, "A", "B", "C");
  * </pre>
  *
  * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
@@ -80,8 +80,8 @@ public final class CartesianProduct {
      * @param elements The list of elements to compute the Cartesian product for.
      * @return A builder for complex Cartesian products.
      */
-    public ComplexProductBuilder complexProductOf(int quantity, List<?> elements) {
-        return new ComplexProductBuilder(quantity, elements, calculator);
+    public ConstrainedProductBuilder constrainedProductOf(int quantity, List<?> elements) {
+        return new ConstrainedProductBuilder(quantity, elements, calculator);
     }
 
     /**
@@ -93,7 +93,7 @@ public final class CartesianProduct {
      * @return A builder for complex Cartesian products.
      */
     @SafeVarargs
-    public final <E> ComplexProductBuilder complexProductOf(int quantity, E... elements) {
-        return complexProductOf(quantity, List.of(elements));
+    public final <E> ConstrainedProductBuilder constrainedProductOf(int quantity, E... elements) {
+        return constrainedProductOf(quantity, List.of(elements));
     }
 }

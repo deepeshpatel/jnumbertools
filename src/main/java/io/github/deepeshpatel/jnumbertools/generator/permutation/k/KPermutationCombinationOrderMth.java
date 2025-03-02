@@ -17,28 +17,21 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * An iterable that generates every mᵗʰ unique permutation of size k.
+ * Generates every mᵗʰ unique k-permutation in combination order.
  * <p>
- * This class generates unique permutations of a subset of size {@code k} from an input list (e.g. elements₀, elements₁, …, elementsₙ₋₁)
- * at regular intervals specified by the {@code increment} parameter. The overall rank of the permutation to be generated is
- * decomposed into two parts:
- * <ol>
- *   <li>
- *     <strong>Combination rank:</strong> obtained by dividing the overall rank by k! (the number of permutations per combination).
- *     This rank is used to select the specific combination (in lexicographical order) from the list.
- *   </li>
- *   <li>
- *     <strong>Permutation rank:</strong> the remainder from the division, which determines the specific permutation
- *     within the chosen combination.
- *   </li>
- * </ol>
- * For example, if the {@code increment} is set to 2, the iterator will generate the 0ᵗʰ, 2ⁿᵈ, 4ᵗʰ, … permutations.
- * <br>
- * Instances of this class are intended to be created via a builder and therefore do not have a public constructor.
+ * This class produces permutations of a subset of size {@code k} from an input list (e.g., [A, B, C]),
+ * skipping to every mᵗʰ permutation based on the specified {@code increment}. Permutations are ordered
+ * by combinations in lexicographical order, then by permutations within each combination. The rank of
+ * each permutation is decomposed into:
+ * <ul>
+ *   <li><strong>Combination rank</strong>: rank ÷ k!, selecting the combination.</li>
+ *   <li><strong>Permutation rank</strong>: rank mod k!, selecting the permutation within the combination.</li>
+ * </ul>
+ * For example, for [A, B, C], k=2, increment=2, start=0, it might generate [A, B], [A, C], [B, C], skipping
+ * every other permutation (e.g., omitting [B, A], [C, A], [C, B]).
  * </p>
  *
- * @param <T> the type of elements in the permutation
- *
+ * @param <T> the type of elements in the permutations
  * @author Deepesh Patel
  * @version 3.0.1
  */
@@ -51,19 +44,14 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
     private final Calculator calculator;
 
     /**
-     * Constructs a new KPermutationCombinationOrderMth instance that generates every mᵗʰ unique permutation of size k.
-     * <p>
-     * Permutations are generated in lexicographical order based on combinations of indices of the input values,
-     * treating each element as unique by its index.
-     * </p>
+     * Constructs an instance for generating every mᵗʰ k-permutation in combination order.
      *
-     * @param elements  the input list of n elements (e.g. elements₀, elements₁, …, elementsₙ₋₁) from which permutations of size k are generated
-     * @param k         the size of the permutations; k must be ≤ n
-     * @param increment the step size relative to the first permutation; for example, if increment is 2, the iterator generates the 0ᵗʰ, 2ⁿᵈ, 4ᵗʰ, … permutations
-     *                  in lexicographical order. This parameter is critical when k is large, as generating all k! permutations is impractical.
-     * @param start     the starting rank (position) from which permutation generation begins
-     * @param calculator a Calculator used for combinatorial computations (e.g. computing nPr and factorial values)
-     * @throws IllegalArgumentException if the increment is not valid (checked via {@link AbstractGenerator#checkParamIncrement})
+     * @param elements   the input list of elements (e.g., [A, B, C]) to permute
+     * @param k          the size of each permutation; must be between 0 and elements.size()
+     * @param increment  the step size between permutations (e.g., 2 for every 2nd); must be positive
+     * @param start      the starting rank (0-based); must be non-negative
+     * @param calculator utility for combinatorial calculations
+     * @throws IllegalArgumentException if increment is non-positive or k/start bounds are invalid
      */
     KPermutationCombinationOrderMth(List<T> elements, int k, BigInteger increment, BigInteger start, Calculator calculator) {
         super(elements, k);
@@ -76,29 +64,32 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
     }
 
     /**
-     * Returns an iterator over unique k‑permutations generated at intervals specified by the increment.
+     * Returns an iterator over every mᵗʰ k-permutation in combination order.
+     * <p>
+     * If k=0 or the input list is empty, returns an empty iterator. Otherwise, iterates through
+     * permutations at the specified increment.
+     * </p>
      *
-     * @return an {@code Iterator} over lists representing the unique k‑permutations, or an empty iterator if k is 0 or the input is empty
+     * @return an iterator over lists representing k-permutations
      */
     @Override
     public Iterator<List<T>> iterator() {
         return (k == 0 || elements.isEmpty()) ? Util.emptyListIterator() : new Itr();
     }
 
-    /**
-     * Iterator implementation for generating every mᵗʰ unique permutation of size k.
-     */
     private class Itr implements Iterator<List<T>> {
+        private BigInteger currentIncrement = start;
 
-        BigInteger currentIncrement = start;
-
+        /**
+         * Constructs an iterator starting at the specified rank.
+         */
         public Itr() {
         }
 
         /**
          * Checks if there are more permutations to generate.
          *
-         * @return {@code true} if the current rank is less than the total number of permutations; {@code false} otherwise
+         * @return {@code true} if the current rank is less than the total permutations; {@code false} otherwise
          */
         @Override
         public boolean hasNext() {
@@ -106,21 +97,21 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
         }
 
         /**
-         * Returns the next unique permutation.
+         * Returns the next mᵗʰ k-permutation.
          * <p>
-         * The overall rank ({@code currentIncrement}) is divided by the number of permutations per combination (k!):
-         * <ul>
-         *   <li>The quotient determines the combination rank, used to select the specific combination (via lexicographical order).</li>
-         *   <li>The remainder determines the permutation rank within that combination.</li>
-         * </ul>
-         * After computing the next permutation, the current rank is incremented by {@code increment}.
+         * Decomposes the current rank into a combination rank (quotient of rank ÷ k!) and permutation rank
+         * (remainder), retrieves the corresponding combination, and applies the permutation rank within it.
+         * Advances the rank by {@code increment} for the next iteration.
          * </p>
          *
          * @return the next permutation as a list of elements
-         * @throws NoSuchElementException if there are no further permutations available
+         * @throws NoSuchElementException if no further permutations are available
          */
         @Override
         public List<T> next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException("No more permutations available");
+            }
             BigInteger[] divideAndRemainder = currentIncrement.divideAndRemainder(BigInteger.valueOf(permutationsPerList));
             BigInteger combinationListNumber = divideAndRemainder[0];
             long permutationIncrement = divideAndRemainder[1].longValue();
@@ -128,11 +119,13 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
 
             List<T> nextCombination = combinationListNumber.equals(BigInteger.ZERO)
                     ? new Combinations(calculator).unique(k, elements).lexOrder().iterator().next()
-                    : new Combinations(calculator).unique(k, elements).lexOrderMth(combinationListNumber, BigInteger.ZERO).build();
+                    : new Combinations(calculator).unique(k, elements)
+                    .lexOrderMth(combinationListNumber, combinationListNumber).iterator().next();
 
             return permutationIncrement == 0
                     ? new Permutations(calculator).unique(nextCombination).lexOrder().iterator().next()
-                    : new Permutations(calculator).unique(nextCombination).lexOrderMth(permutationIncrement, 0).build();
+                    : new Permutations(calculator).unique(nextCombination)
+                    .lexOrderMth(permutationIncrement, permutationIncrement).iterator().next();
         }
     }
 }

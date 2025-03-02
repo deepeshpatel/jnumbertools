@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.generator.product.complex;
+package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
 import org.junit.jupiter.api.Test;
 
@@ -9,7 +9,7 @@ import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
-public class ComplexCartesianProductMthTest {
+public class ConstrainedCartesianProductMthTest {
 
     @Test
     void should_generate_correctly_for_different_m_values() {
@@ -20,7 +20,7 @@ public class ComplexCartesianProductMthTest {
         var toppings = of("tomato","capsicum","onion","paneer","corn");
 
         var combProduct  = cartesianProduct
-                .complexProductOf(1, pizzaBase)
+                .constrainedProductOf(1, pizzaBase)
                 .andDistinct(2, cheese)
                 .andMultiSelect(2, sauce)
                 .andInRange(3, toppings.size(), toppings);
@@ -30,7 +30,7 @@ public class ComplexCartesianProductMthTest {
             var result = combProduct.lexOrderMth(m, 0).build();
             assertIterableEquals(expected, result);
         }
-    }
+     }
 
     @Test
     void should_generate_correct_mth_value() {
@@ -41,7 +41,7 @@ public class ComplexCartesianProductMthTest {
         var toppings = of("tomato","capsicum","onion","paneer","corn");
 
         var combProduct  = cartesianProduct
-                .complexProductOf(1, pizzaBase)
+                .constrainedProductOf(1, pizzaBase)
                 .andDistinct(2, cheese)
                 .andMultiSelect(2, sauce)
                 .andInRange(3, toppings.size(), toppings);
@@ -63,8 +63,8 @@ public class ComplexCartesianProductMthTest {
         var largeAlphabets = IntStream.rangeClosed('A', 'Z').mapToObj(c -> (char) c).toList();
         var numbers = IntStream.rangeClosed(0, 20).boxed().toList();
 
-        ComplexProductBuilder productBuilder = cartesianProduct
-                .complexProductOf(13, smallAlphabets)
+        ConstrainedProductBuilder productBuilder = cartesianProduct
+                .constrainedProductOf(13, smallAlphabets)
                 .andDistinct(13, largeAlphabets)
                 .andInRange(0, 21, numbers);
 
@@ -84,7 +84,7 @@ public class ComplexCartesianProductMthTest {
         testForEveryMth(100000000L, every10ToThePower_8thRow, productBuilder);
     }
 
-    private void testForEveryMth(long m, String[] rows, ComplexProductBuilder builder) {
+    private void testForEveryMth(long m, String[] rows, ConstrainedProductBuilder builder) {
         long mm = -m;
         for (String row : rows) {
             assertEquals(row, builder.lexOrderMth(mm += m, 0).build().toString());

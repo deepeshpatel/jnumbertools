@@ -3,7 +3,7 @@
  * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
-package io.github.deepeshpatel.jnumbertools.generator.product.complex;
+package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 
@@ -88,7 +88,7 @@ public final class ComplexProductMth<T> implements Iterable<List<T>> {
             BigInteger[] division = remaining.divideAndRemainder(e.count());
             remaining = division[0];
 
-            List<T> values = e.lexOrderMth(division[1], BigInteger.ZERO).build();
+            List<T> values = e.lexOrderMth(division[1], division[1]).iterator().next();//.build();
 
             // Add elements to the front in reverse order
             for (int j = values.size() - 1; j >= 0; j--) {

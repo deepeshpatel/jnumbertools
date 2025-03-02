@@ -6,82 +6,84 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermItrForElements;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermutationLexElementIterator;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toCollection;
 
 /**
- * An iterable that generates unique permutations of size {@code k} from a given list of elements
- * in lexicographical order.
+ * Generates unique permutations of size {@code k} from a list of elements in lexicographical order.
  * <p>
- * This class generates permutations by treating each element at a specific index (e.g. elements₀, elements₁, …)
- * in the input list as distinct and then forming all possible orderings of a subset of size {@code k}.
- * For example, for the input list [1, 2, 3] and {@code k = 2}, the unique permutations are:
+ * This class produces all permutations of a subset of size {@code k} from the input list, treating each
+ * element as distinct by its position (e.g., elements₀, elements₁, ...). Permutations are generated in
+ * lexicographical order based on the indices of the selected subset. For example, for [1, 2, 3] and k=2,
+ * it generates:
  * <pre>
  * [1, 2], [2, 1], [1, 3], [3, 1], [2, 3], [3, 2]
  * </pre>
- * <p>
- * Instances of this class are intended to be created via a builder; therefore, it does not have a public constructor.
+ * Instances are typically created via a builder.
  * </p>
  *
  * @param <T> the type of elements in the input list
- * @since 1.0.3
  * @author Deepesh Patel
  * @version 3.0.1
+ * @since 1.0.3
  */
 public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
 
     /**
-     * Constructs a new {@code KPermutationLexOrder} instance.
+     * Constructs an instance for generating k-permutations in lexicographical order.
      *
-     * @param elements the list of elements from which unique permutations of size {@code k} will be generated
-     * @param k the size of the permutations; must be ≤ {@code elements.size()}
+     * @param elements the list of elements to permute
+     * @param k        the size of each permutation; must be between 0 and elements.size()
+     * @throws IllegalArgumentException if k is negative or exceeds the input list size
      */
     KPermutationLexOrder(List<T> elements, int k) {
         super(elements, k);
     }
 
     /**
-     * Returns an iterator over unique permutations of size {@code k}.
+     * Returns an iterator over unique k-permutations in lexicographical order.
      * <p>
-     * If {@code k == 0}, an empty iterator is returned.
-     * If {@code k} equals the size of the input list, a faster iterator is used which directly generates the
-     * permutations of the full list. Otherwise, a custom iterator is used that generates permutations in
-     * lexicographical order.
+     * If k=0, returns an empty iterator. If k equals the list size, uses a direct permutation iterator
+     * for efficiency. Otherwise, employs a custom iterator to generate permutations incrementally.
      * </p>
      *
-     * @return an iterator for generating permutations of size {@code k}
+     * @return an iterator over lists representing k-permutations
      */
     @Override
     public Iterator<List<T>> iterator() {
         if (k == 0) return Util.emptyListIterator();
-        if (k == elements.size()) return new UniquePermItrForElements<>(elements.size(), this::indicesToValues);
+        if (k == elements.size()) return new UniquePermutationLexElementIterator<>(elements.size(), this::indicesToValues);
         return new Itr();
     }
 
     /**
-     * Inner iterator class that generates permutations in lexicographical order.
+     * Inner iterator for generating k-permutations in lexicographical order.
      */
     private class Itr implements Iterator<List<T>> {
 
         /**
          * The current permutation of indices.
          */
-        int[] indices;
+        private int[] indices;
 
         /**
          * A list of remaining indices available for constructing the next permutation.
          */
-        final LinkedList<Integer> list;
+        private final LinkedList<Integer> list;
 
         /**
-         * Constructs a new {@code Itr} instance to generate permutations.
+         * Constructs an iterator starting with the first k indices.
          * <p>
-         * The initial permutation is the identity permutation on the first {@code k} indices.
-         * The {@code list} holds the remaining indices from {@code k} up to {@code elements.size() - 1}.
+         * Initializes with the identity permutation [0, 1, ..., k-1] and populates the remaining
+         * indices from k to elements.size()-1 in a {@code LinkedList} for dynamic selection.
          * </p>
          */
         public Itr() {
@@ -91,9 +93,9 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
         }
 
         /**
-         * Returns {@code true} if there are more permutations to generate.
+         * Checks if there are more permutations to generate.
          *
-         * @return {@code true} if a subsequent permutation exists; {@code false} otherwise
+         * @return {@code true} if additional permutations exist; {@code false} otherwise
          */
         @Override
         public boolean hasNext() {
@@ -101,15 +103,15 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
         }
 
         /**
-         * Returns the next permutation in lexicographical order.
+         * Returns the next k-permutation in lexicographical order.
          *
-         * @return the next permutation as a {@code List<T>}
-         * @throws NoSuchElementException if there are no more permutations
+         * @return the next permutation as a list of elements
+         * @throws NoSuchElementException if no more permutations are available
          */
         @Override
         public List<T> next() {
             if (!hasNext()) {
-                throw new NoSuchElementException();
+                throw new NoSuchElementException("No more permutations available");
             }
             int[] old = indices;
             indices = kPermutationNextLex(indices, list, elements.size() - 1);
@@ -117,24 +119,27 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
         }
 
         /**
-         * Computes the next permutation of indices in lexicographical order.
+         * Computes the next k-permutation of indices in lexicographical order.
+         * <p>
+         * If remaining indices exist, appends the next available index. Otherwise, finds the rightmost
+         * index that can be incremented, updates it with the next available value, and rebuilds the
+         * remaining positions with the smallest available indices.
+         * </p>
          *
-         * @param current the current permutation of indices
-         * @param remaining a list of remaining indices available for use
-         * @param maxAllowed the maximum allowed index (typically {@code elements.size() - 1})
+         * @param current    the current permutation of indices
+         * @param remaining  a list of remaining indices available for use
+         * @param maxAllowed the maximum allowed index (typically elements.size() - 1)
          * @return the next permutation as an array of indices, or an empty array if the last permutation has been reached
          */
         private int[] kPermutationNextLex(int[] current, LinkedList<Integer> remaining, int maxAllowed) {
             int[] a = Arrays.copyOf(current, current.length);
 
-            // If there are remaining indices, assign the first remaining index to the last position.
             if (!remaining.isEmpty()) {
                 int next = remaining.removeFirst();
                 a[a.length - 1] = next;
                 return a;
             }
 
-            // Find the rightmost index that can be incremented.
             int index = -1;
             for (int i = a.length - 1; i > 0; i--) {
                 if (a[i - 1] < a[i]) {
@@ -143,15 +148,11 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
                 }
             }
 
-            // If no such index exists, we've reached the last permutation.
             if (index == -1) {
                 return new int[0];
             }
 
-            // Reinitialize remaining with all indices from 0 to maxAllowed.
             remaining.addAll(IntStream.rangeClosed(0, maxAllowed).boxed().toList());
-
-            // Remove the indices that are already in use up to the current index.
             for (int i = 0; i < index; i++) {
                 remaining.remove(Integer.valueOf(a[i]));
             }
@@ -162,7 +163,6 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
             a[index] = valueForCurrentIndex;
             remaining.remove(Integer.valueOf(valueForCurrentIndex));
 
-            // Rebuild the remainder of the permutation using the smallest available indices.
             for (int i = index + 1; i < a.length; i++) {
                 a[i] = remaining.removeFirst();
             }

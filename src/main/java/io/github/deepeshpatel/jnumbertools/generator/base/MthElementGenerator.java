@@ -5,8 +5,6 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.base;
 
-import java.util.List;
-
 /**
  * Interface for generating the mᵗʰ element in a sequence of permutations or combinations.
  *
@@ -16,14 +14,4 @@ import java.util.List;
  */
 public interface MthElementGenerator<E> {
 
-    /**
-     * Generates the mᵗʰ element in the sequence of permutations or combinations.
-     * <p>
-     * Use this method if you need only the mᵗʰ value and do not require the 0ᵗʰ, mᵗʰ, 2mᵗʰ, etc.
-     * Creating an iterator can be expensive because the {@code hasNext()} implementation involves costly calculations.
-     * </p>
-     *
-     * @return a {@link List} containing the mᵗʰ element in the sequence.
-     */
-    List<E> build();
 }

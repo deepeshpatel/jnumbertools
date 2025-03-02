@@ -1,12 +1,15 @@
-package io.github.deepeshpatel.jnumbertools.experiments.abstractalgebra;
-
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
-
-import java.util.*;
-import java.util.regex.*;
-import java.util.stream.Collectors;
-
-public class JNumberQueryParser {
+//package io.github.deepeshpatel.jnumbertools.experiments.abstractalgebra;
+//
+//import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+//
+//import java.util.ArrayList;
+//import java.util.Arrays;
+//import java.util.List;
+//import java.util.regex.Matcher;
+//import java.util.regex.Pattern;
+//import java.util.stream.Collectors;
+//
+//public class JNumberQueryParser {
 //    public static void executeQuery(String query) {
 //        // Convert to uppercase for case-insensitive parsing
 //        query = query.toUpperCase().trim();
@@ -175,4 +178,4 @@ public class JNumberQueryParser {
 //        System.out.println("\nExecuting: " + query3);
 //        executeQuery(query3);
 //    }
-}
+//}

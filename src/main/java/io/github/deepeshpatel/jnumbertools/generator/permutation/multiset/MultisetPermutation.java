@@ -5,78 +5,68 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
-import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermItrForElements;
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermutationLexElementIterator;
 
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 
+import static io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator.initIndicesForMultisetPermutation;
+
 /**
- * An iterable that generates multiset (repetitive) permutations of a list of elements.
+ * An iterable that generates multiset permutations from a {@code LinkedHashMap} of elements to their frequencies.
  * <p>
- * In this context, each element in the input list is associated with a frequency count that indicates
- * how many times that element can be repeated. Permutations are generated in lexicographical order based on
- * the indices of input values, with each value at a specific index (e.g. elements₀, elements₁, …, elementsₙ₋₁)
- * considered unique.
+ * This class generates permutations in lexicographical order based on the insertion order of elements
+ * in the provided {@code LinkedHashMap}, where each element is repeated according to its frequency count
+ * (e.g., {A=2, B=1} → [A,A,B], [A,B,A], [B,A,A]). Extends {@link AbstractMultisetPermutation} to leverage
+ * its sorting and multiset management capabilities, ensuring consistent ordering via {@code Comparable}.
  * </p>
  * <p>
- * For example, if the input list is [A, B, C] and the frequency array is [2, 1, 3], then A can appear up to 2 times,
- * B up to 1 time, and C up to 3 times in the generated permutations.
+ * <strong>Note:</strong> The current implementation flattens frequency counts into an initial index array using
+ * {@code initIndicesForMultisetPermutation}. For extremely large frequency values (e.g., 10^99), this may be inefficient.
+ * Future enhancements should compute the next permutation without full flattening.
  * </p>
  * <p>
- * <strong>Note:</strong> The current implementation "flattens" the frequency counts into an initial index array
- * using {@code initIndicesForMultisetPermutation(multisetFreqArray)}. For extremely large frequency values
- * (e.g. 10^99), this approach may not be efficient. Future enhancements should consider computing the next
- * permutation without fully flattening the frequency counts.
- * </p>
- * <p>
- * Instances of this class are intended to be created via a builder; therefore, the constructor is package‑private.
+ * Instances are intended to be created via a builder; thus, the constructor is package-private.
  * </p>
  *
- * @param <T> the type of elements in the input list
- *
+ * @param <T> the type of elements, must implement {@code Comparable} for lexicographical ordering
  * @author Deepesh Patel
  * @version 3.0.1
  */
-public final class MultisetPermutation<T> extends AbstractGenerator<T> {
+public final class MultisetPermutation<T> extends AbstractMultisetPermutation<T> {
 
     private final int[] initialIndices;
 
     /**
      * Constructs a new {@code MultisetPermutation} instance for generating multiset permutations.
-     * <p>
-     * Permutations are generated in lexicographical order based on the indices of input values.
-     * The {@code multisetFreqArray} parameter specifies the repetition count for each corresponding element in the input list.
-     * For example, {@code multisetFreqArray[0]} holds the count for the 0ᵗʰ element, {@code multisetFreqArray[1]} for the 1ˢᵗ element,
-     * and so on. Each count must be ≥ 1.
-     * </p>
      *
-     * @param elements the input list from which permutations are generated
-     * @param multisetFreqArray an array of integers representing the repetition count for each element.
-     *                          For example, {@code multisetFreqArray[0]} is the count for the 0ᵗʰ element, {@code multisetFreqArray[1]} for the 1ˢᵗ element, etc.
-     * @throws IllegalArgumentException if the frequency array is null or its length does not match the size of the input list
+     * @param multiset   the {@code LinkedHashMap} mapping elements to their frequency counts; must not be null or empty
+     * @param calculator utility for computing permutations and factorials
+     * @throws IllegalArgumentException if multiset is null/empty, frequencies are negative, or sum is zero
      */
-    MultisetPermutation(List<T> elements, int[] multisetFreqArray) {
-        super(elements);
-        checkParamMultisetFreqArray(elements.size(), multisetFreqArray, "permutation");
+    MultisetPermutation(LinkedHashMap<T, Integer> multiset, Calculator calculator) {
+        super(multiset, calculator);
         /*
          * TODO: Enhancement advice – Develop an algorithm to calculate the next permutation
          * without flattening the frequency counts. The current implementation may not work efficiently
          * for very large frequency values (e.g., 10^99).
          */
-        initialIndices = initIndicesForMultisetPermutation(multisetFreqArray);
+        this.initialIndices = initIndicesForMultisetPermutation(frequencies);
     }
 
-    /**
-     * Returns an iterator over the multiset permutations.
-     * <p>
-     * The iterator converts permutations represented by index arrays into permutations of actual elements.
-     * </p>
-     *
-     * @return an iterator for generating multiset permutations as lists of elements
-     */
+        /**
+         * Returns an iterator over the multiset permutations.
+         * <p>
+         * The iterator uses {@code UniquePermutationLexElementIterator} to generate permutations in lexicographical
+         * order based on the sorted indices, converting them to lists of actual elements.
+         * </p>
+         *
+         * @return an iterator for generating multiset permutations as lists of elements
+         */
     @Override
     public Iterator<List<T>> iterator() {
-        return new UniquePermItrForElements<>(this::indicesToValues, initialIndices);
+        return new UniquePermutationLexElementIterator<>(this::indicesToValues, initialIndices);
     }
 }

@@ -1,7 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**

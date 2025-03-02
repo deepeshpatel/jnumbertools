@@ -1,11 +1,12 @@
 package io.github.deepeshpatel.jnumbertools;
 
 import io.github.deepeshpatel.jnumbertools.base.*;
+import org.junit.jupiter.api.Assertions;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TestBase {
@@ -29,9 +30,18 @@ public class TestBase {
     public static final List<Integer> num_1_to_4 = List.of(1, 2, 3, 4);
     public static final List<Integer> num_0_to_5 = List.of(0, 1, 2, 3, 4, 5);
 
-    public static List<?> everyMthValue(Stream<?> stream, int m) {
+    private static List<?> everyMthValue(Stream<?> stream, int start, long m) {
         final int[] j = {0};
-        return stream.filter(e -> j[0]++ % m == 0).collect(Collectors.toList());
+        return stream.filter(e -> {
+            int index = j[0]++;
+            return index >= start && (index - start) % m == 0;
+        }).toList();
+    }
+
+    public static void  assertEveryMthValue(Stream<?> completeStream, Stream<?> mthStream, int start, long m) {
+        var main = everyMthValue(completeStream, start, m);
+        var mth = mthStream.toList();
+        Assertions.assertIterableEquals(main, mth);
     }
 
     public static int[] getRandomMultisetFreqArray(Random random, int length) {
@@ -41,5 +51,14 @@ public class TestBase {
             frequencies[i] = value;
         }
         return frequencies;
+    }
+
+    //TODO: temp method remove this
+    public static <K, Integer> LinkedHashMap createMap(List<K> list, int[] freq) {
+        var options = new LinkedHashMap<>();
+        for(int i=0; i<freq.length; i++) {
+            options.put(list.get(i), freq[i]);
+        }
+        return options;
     }
 }

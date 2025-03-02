@@ -13,50 +13,41 @@ import java.util.stream.IntStream;
 /**
  * An iterator that generates unique permutations of integer indices in lexicographical order.
  * <p>
- * This iterator is designed to work with permutation generators by producing permutations of indices,
- * which can later be mapped to actual elements. For example, when instantiated with a size of 3, the
- * iterator produces the following sequence:
+ * This iterator produces permutations of indices (e.g., [0, 1, 2], [0, 2, 1], etc.), which can be mapped
+ * to actual elements by higher-level classes. For example, with size 3, it generates:
  * <pre>
- * [0, 1, 2]
- * [0, 2, 1]
- * [1, 0, 2]
- * [1, 2, 0]
- * [2, 0, 1]
- * [2, 1, 0]
+ * [0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]
  * </pre>
- * </p>
- * <p>
- * The iterator maintains the current permutation state in an array. When no further permutation exists,
- * the iterator’s {@code next()} method will throw a {@link NoSuchElementException}.
+ * When no further permutations exist, the iterator signals completion by returning an empty array,
+ * and subsequent calls to {@code next()} throw a {@link NoSuchElementException}.
  * </p>
  *
- * @since 1.0.3
  * @author Deepesh Patel
  * @version 3.0.1
+ * @since 1.0.3
  */
-public final class UniquePermItrForIndices implements Iterator<int[]> {
+public final class UniquePermutationLexIndicesIterator implements Iterator<int[]> {
 
     private int[] indices;
 
     /**
-     * Constructs an iterator that generates permutations of indices of the specified size.
+     * Constructs an iterator for permutations of indices of the specified size.
      * <p>
-     * The initial permutation is the identity permutation: [0, 1, 2, ..., size - 1].
+     * Initializes with the identity permutation: [0, 1, 2, ..., size-1].
      * </p>
      *
-     * @param size the number of indices to permute
+     * @param size the number of indices to permute; must be non-negative
      */
-    UniquePermItrForIndices(int size) {
-        // Starting permutation: identity sequence [0, 1, 2, ..., size - 1]
+    UniquePermutationLexIndicesIterator(int size) {
         this.indices = IntStream.range(0, size).toArray();
     }
 
     /**
-     * Constructs an iterator with the specified starting permutation.
+     * Constructs an iterator with a specified starting permutation.
      *
-     * @param startingPermutation the initial permutation of indices
+     * @param startingPermutation the initial permutation of indices; must be a valid permutation
      */
-    public UniquePermItrForIndices(int[] startingPermutation) {
+    public UniquePermutationLexIndicesIterator(int[] startingPermutation) {
         this.indices = startingPermutation;
     }
 
@@ -74,7 +65,7 @@ public final class UniquePermItrForIndices implements Iterator<int[]> {
      * Returns the next permutation of indices.
      *
      * @return the next permutation as an array of integers
-     * @throws NoSuchElementException if there are no more permutations
+     * @throws NoSuchElementException if no more permutations are available
      */
     @Override
     public int[] next() {
@@ -89,13 +80,12 @@ public final class UniquePermItrForIndices implements Iterator<int[]> {
     /**
      * Computes the next permutation in lexicographical order.
      * <p>
-     * The method follows these steps:
+     * The algorithm:
      * <ol>
-     *   <li>Find the highest index <em>i</em> such that {@code c[i] < c[i+1]}.</li>
-     *   <li>If no such index exists, the current permutation is the last permutation and an empty array is returned.</li>
-     *   <li>Otherwise, find the highest index <em>j</em> such that {@code c[j] > c[i]}.</li>
-     *   <li>Swap the values at indices <em>i</em> and <em>j</em>.</li>
-     *   <li>Reverse the subarray from <em>i+1</em> to the end of the array.</li>
+     *   <li>Finds the rightmost index {@code i} where {@code c[i] < c[i+1]}.</li>
+     *   <li>If no such index exists, returns an empty array (indicating the last permutation).</li>
+     *   <li>Finds the rightmost index {@code j} where {@code c[j] > c[i]} and swaps {@code c[i]} and {@code c[j]}.</li>
+     *   <li>Reverses the subarray from {@code i+1} to the end.</li>
      * </ol>
      * </p>
      *
@@ -106,7 +96,6 @@ public final class UniquePermItrForIndices implements Iterator<int[]> {
         int[] c = Arrays.copyOf(n, n.length);
         int highestI = -1;
 
-        // Find the rightmost index 'i' such that c[i] < c[i+1]
         for (int i = c.length - 2; i >= 0; i--) {
             if (c[i] < c[i + 1]) {
                 highestI = i;
@@ -114,12 +103,10 @@ public final class UniquePermItrForIndices implements Iterator<int[]> {
             }
         }
 
-        // If no such index exists, this is the last permutation.
         if (highestI == -1) {
             return new int[]{};
         }
 
-        // Find the rightmost index 'j' such that c[j] > c[highestI] and swap them.
         for (int j = c.length - 1; j > highestI; j--) {
             if (c[j] > c[highestI]) {
                 swap(c, j, highestI);
@@ -127,7 +114,6 @@ public final class UniquePermItrForIndices implements Iterator<int[]> {
             }
         }
 
-        // Reverse the subarray from highestI + 1 to the end.
         for (int i = highestI + 1, j = c.length - 1; i < j; i++, j--) {
             swap(c, i, j);
         }
@@ -135,13 +121,6 @@ public final class UniquePermItrForIndices implements Iterator<int[]> {
         return c;
     }
 
-    /**
-     * Swaps the elements at the specified indices in the array.
-     *
-     * @param a the array in which to swap elements
-     * @param i the first index
-     * @param j the second index
-     */
     private static void swap(int[] a, int i, int j) {
         int t = a[i];
         a[i] = a[j];

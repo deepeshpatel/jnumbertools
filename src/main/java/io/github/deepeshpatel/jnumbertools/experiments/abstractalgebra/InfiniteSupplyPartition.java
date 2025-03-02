@@ -1,6 +1,9 @@
 package io.github.deepeshpatel.jnumbertools.experiments.abstractalgebra;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Generates number partitions of a given total `r` using an infinite supply of elements.
@@ -19,14 +22,14 @@ public class InfiniteSupplyPartition implements Iterable<Map<String, Integer>> {
 
     @Override
     public Iterator<Map<String, Integer>> iterator() {
-        return new PartitionIterator(r, elements);
-        //return reverse ? new ReversePartitionIterator(r, elements) : new PartitionIterator(r, elements);
+        //return new PartitionIterator(r, elements);
+        return reverse ? new PartitionIterator(r, elements) : new PartitionIterator(r, elements);
     }
 
     private static class PartitionIterator implements Iterator<Map<String, Integer>> {
         protected final int r;
         protected final String[] elements;
-        protected int[] partition;
+        protected final int[] partition;
         protected int length;
 
         public PartitionIterator(int r, String[] elements) {

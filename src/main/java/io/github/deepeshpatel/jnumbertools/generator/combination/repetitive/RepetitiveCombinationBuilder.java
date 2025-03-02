@@ -7,6 +7,9 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
+import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
+import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
+import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -55,26 +58,28 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
         return new RepetitiveCombination<>(elements, size);
     }
 
-    /**
-     * Retrieves the mᵗʰ lexicographic repetitive combination, starting from a specified index.
-     *
-     * @param m     the mᵗʰ combination to retrieve (0-based index)
-     * @param start the starting index for generating combinations
-     * @return a {@code RepetitiveCombinationMth} instance for generating the mᵗʰ combination
-     */
-    public RepetitiveCombinationMth<T> lexOrderMth(long m, long start) {
-        return new RepetitiveCombinationMth<>(elements, size, m, start, calculator);
+    public RepetitiveCombinationForSequence<T> sample(int sampleSize) {
+        BigInteger nCrRepetitive = calculator.nCrRepetitive(elements.size(), size);
+        return new RepetitiveCombinationForSequence<>(elements, size, new BigIntegerSample(nCrRepetitive, sampleSize), calculator);
     }
 
-    /**
-     * Retrieves the mᵗʰ lexicographic repetitive combination, starting from a specified index.
-     *
-     * @param m     the mᵗʰ combination to retrieve (0-based index)
-     * @param start the starting index for generating combinations
-     * @return a {@code RepetitiveCombinationMth} instance for generating the mᵗʰ combination
-     */
-    public RepetitiveCombinationMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        return new RepetitiveCombinationMth<>(elements, size, m.longValue(), start.longValue(), calculator);
+    public RepetitiveCombinationForSequence<T> choice(int sampleSize) {
+        BigInteger nCrRepetitive = calculator.nCrRepetitive(elements.size(), size);
+        return new RepetitiveCombinationForSequence<>(elements, size, new BigIntegerChoice(nCrRepetitive, sampleSize), calculator);
+    }
+
+    public RepetitiveCombinationForSequence<T> lexOrderMth(long m, long start) {
+        return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
+    }
+
+    public RepetitiveCombinationForSequence<T> lexOrderMth(BigInteger m, BigInteger start) {
+        BigInteger nCrRepetitive = calculator.nCrRepetitive(elements.size(), size);
+        Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, nCrRepetitive);
+        return new RepetitiveCombinationForSequence<>(elements, size, mthIterable, calculator);
+    }
+
+    public RepetitiveCombinationForSequence<T> withSequence(Iterable<BigInteger> ranks) {
+        return new RepetitiveCombinationForSequence<>(elements, size, ranks, calculator);
     }
 
     /**

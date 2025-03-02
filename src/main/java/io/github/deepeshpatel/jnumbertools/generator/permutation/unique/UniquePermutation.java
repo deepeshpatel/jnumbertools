@@ -7,67 +7,51 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermItrForElements;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermutationLexElementIterator;
 
 import java.util.Iterator;
 import java.util.List;
 
 /**
- * Utility to generate all n! unique permutations (with no repeated values).
+ * Generates all n! unique permutations of a list of elements in lexicographical order.
  * <p>
- * Permutations are generated in lexicographic order of indices of input values,
- * treating the value at each index as unique.
- * </p>
- *
- * <p>
- * For more information on permutations, see
- * <a href="https://en.wikipedia.org/wiki/Permutation">Wikipedia Permutation</a>.
- * </p>
- *
- * <p>
- * Instance of this class is intended to be created via a builder and hence does not have a public constructor.
- * Example:
- *         <pre><code class="language-java">
- * int size = 3;
- * new Permutations().unique(size)
- *         .lexOrder()
- *         .stream().toList();
- *         </code></pre>
- * This will generate the following output (all possible permutations of "A", "B", and "C" in lexicographic order):
+ * Permutations are produced based on the indices of the input values (e.g., elements₀, elements₁, ...),
+ * treating each element as distinct by its position. For example, for [A, B, C], it generates:
  * <pre>
- * [A, B, C]
- * [A, C, B]
- * [B, A, C]
- * [B, C, A]
- * [C, A, B]
- * [C, B, A]
+ * [A, B, C], [A, C, B], [B, A, C], [B, C, A], [C, A, B], [C, B, A]
  * </pre>
+ * Instances should be created via a builder (e.g., {@code new Permutations().unique(size).lexOrder()}).
  * </p>
  *
- * @param <T> the type of elements in the permutation
- * @see <a href="https://en.wikipedia.org/wiki/Permutation">Wikipedia Permutation</a>
+ * @param <T> the type of elements in the permutations
  * @author Deepesh Patel
  * @version 3.0.1
+ * @see <a href="https://en.wikipedia.org/wiki/Permutation">Wikipedia: Permutation</a>
  */
 public final class UniquePermutation<T> extends AbstractGenerator<T> {
 
     /**
-     * Constructs a UniquePermutation generator for the specified list of elements.
+     * Constructs a generator for unique permutations of the specified elements.
      *
-     * @param elements the list of elements to generate permutations from
+     * @param elements the list of elements to permute; may be empty
      */
     UniquePermutation(List<T> elements) {
         super(elements);
     }
 
     /**
-     * Returns an iterator over the unique permutations of the elements.
+     * Returns an iterator over all unique permutations in lexicographical order.
+     * <p>
+     * If the input list is empty, returns an empty iterator. Otherwise, uses an efficient index-based
+     * iterator to generate all n! permutations.
+     * </p>
      *
-     * @return an iterator of lists, each representing a unique permutation
+     * @return an iterator over lists representing unique permutations
      */
+    @Override
     public Iterator<List<T>> iterator() {
         return elements.isEmpty() ? Util.emptyListIterator() :
-                new UniquePermItrForElements<>(elements.size(), this::indicesToValues);
+                new UniquePermutationLexElementIterator<>(elements.size(), this::indicesToValues);
     }
 
 }

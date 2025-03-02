@@ -7,7 +7,9 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Utility for generating all permutations of a given set of items with repetition allowed.

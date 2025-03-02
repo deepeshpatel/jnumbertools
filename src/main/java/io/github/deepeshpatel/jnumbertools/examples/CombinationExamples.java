@@ -2,10 +2,10 @@ package io.github.deepeshpatel.jnumbertools.examples;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
+
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class CombinationExamples {
     public static void main(String[] args) {
@@ -76,7 +76,12 @@ public class CombinationExamples {
         System.out.println("\n*** Multiset combination of 3 colors out of  ***");
         System.out.println("3 Red, 2 Green,  1 Blue,and 1 Yellow");
 
-        var options = Map.of("Red", 3, "Green", 2, "Blue", 1, "Yellow", 1);
+        //var options = Map.of("Red", 3, "Green", 2, "Blue", 1, "Yellow", 1);
+        var options = new LinkedHashMap<String, Integer>();
+        options.put("Red", 3);
+        options.put("Green", 2);
+        options.put("Blue", 1);
+        options.put("Yellow", 1);
 
         JNumberTools.combinations().multiset(options, 3)
                 //3 red ,2 green, 1 blue, 1 yellow

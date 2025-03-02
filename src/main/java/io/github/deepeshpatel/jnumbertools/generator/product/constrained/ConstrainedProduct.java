@@ -3,7 +3,7 @@
  * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
 
-package io.github.deepeshpatel.jnumbertools.generator.product.complex;
+package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
 import io.github.deepeshpatel.jnumbertools.generator.product.simple.CartesianProductUtils;
 
@@ -28,16 +28,16 @@ import java.util.stream.StreamSupport;
  * @since 1.0.3
  * @author Deepesh Patel
  */
-public final class ComplexProduct implements Iterable<List<?>> {
+public final class ConstrainedProduct implements Iterable<List<?>> {
 
     private final List<List<List<?>>> elements;
 
     /**
-     * Constructs a {@code ComplexProduct} with the specified list of combinations or subsets.
+     * Constructs a {@code ConstrainedProduct} with the specified list of combinations or subsets.
      *
      * @param elements a list of lists where each inner list contains lists of elements; each inner list represents a dimension of the product.
      */
-    ComplexProduct(List<List<List<?>>> elements) {
+    ConstrainedProduct(List<List<List<?>>> elements) {
         this.elements = elements;
     }
 

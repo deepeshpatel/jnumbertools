@@ -2,9 +2,11 @@ package io.github.deepeshpatel.jnumbertools.examples;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
+
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class PermutationExamples {
 
@@ -91,9 +93,9 @@ public class PermutationExamples {
 
     static void printMultisetPermutationOfNumbersInLexOrder() {
         System.out.println("\n*** Multiset permutation of 3 items with count 1,2 & 2 in lex order ***");
-        var elements = List.of(1,2,3);
-        int[] frequencies = {1,2,2};
-        JNumberTools.permutations().multiset(elements, frequencies)
+        var temp = Map.of(1,1,2,2,3,2);
+        var map = new LinkedHashMap<>(temp);
+        JNumberTools.permutations().multiset(map )
                 .lexOrder()
                 .forEach(System.out::println);
     }
@@ -102,9 +104,11 @@ public class PermutationExamples {
         System.out.println("\n*** Multiset permutation of 3 items with count 1,2 & 2 in lex order ***");
         System.out.println("count of Red=1, Green=2 and Blue=2");
 
-        var elements = List.of("Red","Green","Blue");
-        int[] frequencies = {1,2,2};
-        JNumberTools.permutations().multiset(elements, frequencies)
+
+        var temp = Map.of("Red",1,"Green",2,"Blue",2);
+        var map = new LinkedHashMap<>(temp);
+
+        JNumberTools.permutations().multiset(map )
                 .lexOrder()
                 .forEach(System.out::println);
     }
@@ -112,10 +116,10 @@ public class PermutationExamples {
     static void printMthMultisetPermutationOfNumbersInLexOrder() {
         System.out.println("\n*** Every 5th multiset permutation of 3 items with count 1,2 & 2 in lex order ***");
 
-        var elements = List.of(1,2,3);
-        int[] frequencies = {1,2,2};
+        var temp = Map.of(1,1,2,2,3,2);
+        var map = new LinkedHashMap<>(temp);
 
-        JNumberTools.permutations().multiset(elements, frequencies)
+        JNumberTools.permutations().multiset(map)
                 .lexOrderMth(5, 0)
                 .forEach(System.out::println);
     }
@@ -124,10 +128,10 @@ public class PermutationExamples {
         System.out.println("\n*** Every 5th multiset permutation of 3 items with count 1,2 & 2 in lex order ***");
         System.out.println("count of Red=1, Green=2 and Blue=2");
 
-        var elements = List.of("Red","Green","Blue");
-        int[] frequencies = {1,2,2};
+        var temp = Map.of("Red",1,"Green",2,"Blue",2);
+        var map = new LinkedHashMap<>(temp);
 
-        JNumberTools.permutations().multiset(elements, frequencies)
+        JNumberTools.permutations().multiset(map)
                 .lexOrderMth(5, 0)
                 .forEach(System.out::println);
     }

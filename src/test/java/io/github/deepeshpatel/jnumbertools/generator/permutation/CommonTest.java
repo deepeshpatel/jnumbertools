@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 
@@ -7,6 +8,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static io.github.deepeshpatel.jnumbertools.TestBase.createMap;
 import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
 
 public class CommonTest {
@@ -23,7 +25,7 @@ public class CommonTest {
                 String uniquePermutationValues = permutation.unique(size)
                         .lexOrderMth(increment, 0).stream().toList().toString();
 
-                String multisetPermutationValues = permutation.multiset(elements, freq)
+                String multisetPermutationValues = permutation.multiset(createMap(elements, freq))
                         .lexOrderMth(increment, 0)
                         .stream().toList().toString();
 
@@ -48,7 +50,7 @@ public class CommonTest {
             String uniquePermutationValues = permutation.unique(size)
                     .lexOrder().stream().toList().toString();
 
-            String multisetPermutationValues = permutation.multiset(elements, freq)
+            String multisetPermutationValues = permutation.multiset(createMap(elements, freq))
                     .lexOrder()
                     .stream().toList().toString();
 
@@ -73,7 +75,7 @@ public class CommonTest {
             String uniquePermutationMth = permutation.unique(size)
                     .lexOrderMth(increment, 0).stream().toList().toString();
 
-            String multisetPermutationMth = permutation.multiset(elements, freq)
+            String multisetPermutationMth = permutation.multiset(createMap(elements, freq))
                     .lexOrderMth(increment, 0)
                     .stream().toList().toString();
 
@@ -84,7 +86,7 @@ public class CommonTest {
             String uniquePermutation = permutation.unique(size)
                     .lexOrderMth(increment, 0).stream().toList().toString();
 
-            String multisetPermutation = permutation.multiset(elements, freq)
+            String multisetPermutation = permutation.multiset(createMap(elements, freq))
                     .lexOrder()
                     .stream().toList().toString();
 

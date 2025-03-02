@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -254,6 +255,82 @@ public class CalculatorTest {
         assertThrows(IllegalArgumentException.class, () -> calculator.multisetCombinationsCount(-1, 2, 3, 2));
         // Negative frequency should throw an exception.
         assertThrows(IllegalArgumentException.class, () -> calculator.multisetCombinationsCount(2, -1, 3, 2));
+    }
+
+    @Nested
+    class LCMTest {
+
+        @Test
+        void testSingleElement() {
+            assertEquals(BigInteger.valueOf(42), Calculator.lcm(BigInteger.valueOf(42)));
+        }
+
+        @Test
+        void testTwoElements() {
+            assertEquals(BigInteger.valueOf(36), Calculator.lcm(BigInteger.valueOf(12), BigInteger.valueOf(18)));
+        }
+
+        @Test
+        void testMultipleElements() {
+            assertEquals(BigInteger.valueOf(2520), Calculator.lcm(
+                    BigInteger.valueOf(5), BigInteger.valueOf(7),
+                    BigInteger.valueOf(8), BigInteger.valueOf(9)));
+        }
+
+        @Test
+        void testWithZero() {
+            assertEquals(BigInteger.ZERO, Calculator.lcm(BigInteger.valueOf(12), BigInteger.ZERO, BigInteger.valueOf(18)));
+        }
+
+        @Test
+        void testWithOne() {
+            assertEquals(BigInteger.valueOf(18), Calculator.lcm(BigInteger.ONE, BigInteger.valueOf(18)));
+        }
+
+        @Test
+        void testLargeNumbers() {
+            BigInteger a = new BigInteger("12345678901234567890");
+            BigInteger b = new BigInteger("98765432109876543210");
+            BigInteger expected = a.multiply(b).divide(a.gcd(b));
+            assertEquals(expected, Calculator.lcm(a, b));
+        }
+
+        @Test
+        void testLargeArray() {
+            BigInteger[] array = new BigInteger[100];
+            for (int i = 0; i < array.length; i++) {
+                array[i] = BigInteger.valueOf(i + 1);
+            }
+            BigInteger expected = BigInteger.valueOf(1);
+            for (int i = 2; i <= 100; i++) {
+                expected = expected.multiply(BigInteger.valueOf(i)).divide(expected.gcd(BigInteger.valueOf(i)));
+            }
+            assertEquals(expected, Calculator.lcm(array));
+        }
+
+        @Test
+        void testNegativeNumbers() {
+            assertEquals(BigInteger.valueOf(36), Calculator.lcm(BigInteger.valueOf(-12), BigInteger.valueOf(18)));
+        }
+
+        @Test
+        void testAllOnes() {
+            assertEquals(BigInteger.ONE, Calculator.lcm(BigInteger.ONE, BigInteger.ONE, BigInteger.ONE));
+        }
+
+        @Test
+        void testInvalidInputEmptyArray() {
+            Calculator.lcm(); //should not throw exception
+        }
+
+        @Test
+        void testPerformance() {
+            BigInteger[] largeArray = new BigInteger[5000];
+            for (int i = 0; i < largeArray.length; i++) {
+                largeArray[i] = BigInteger.valueOf(i + 1);
+            }
+            assertDoesNotThrow(() -> Calculator.lcm(largeArray));
+        }
     }
 
 }

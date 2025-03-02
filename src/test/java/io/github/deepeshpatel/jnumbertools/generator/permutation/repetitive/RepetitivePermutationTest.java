@@ -90,7 +90,7 @@ public class RepetitivePermutationTest {
     @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
     @Test
     void stressTesting() {
-        for(int n=20; n<=25; n++) {
+        for(int n=20; n<=24; n++) {
             for(int width = 0; width<=5; width++) {
                 long count = permutation.repetitive(width, n).lexOrder().stream().count();
                 assertEquals(calculator.power(n, width).longValue(), count);

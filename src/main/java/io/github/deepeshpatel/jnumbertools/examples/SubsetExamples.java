@@ -14,14 +14,14 @@ public class SubsetExamples {
 
     }
     static void printAllSubsetsOfNumbersInLexOrder() {
-        System.out.println("\n*** All subsets upto size 3 in lex order ***");
+        System.out.println("\n*** All subsets up to size 3 in lex order ***");
         JNumberTools.subsets().of(3)
                 .all().lexOrder()
                 .forEach(System.out::println);
     }
 
     static void printAllSubsetsOfElementsInLexOrder() {
-        System.out.println("\n*** All subsets of elements upto size 3 in lex order ***");
+        System.out.println("\n*** All subsets of elements up to size 3 in lex order ***");
         JNumberTools.subsets().of("Red","Green","Blue")
                 .all().lexOrder()
                 .forEach(System.out::println);

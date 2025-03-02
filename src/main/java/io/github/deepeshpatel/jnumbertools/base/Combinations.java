@@ -9,8 +9,8 @@ import io.github.deepeshpatel.jnumbertools.generator.combination.multiset.Multis
 import io.github.deepeshpatel.jnumbertools.generator.combination.repetitive.RepetitiveCombinationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.combination.unique.UniqueCombinationBuilder;
 
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.IntStream;
 
 /**
@@ -148,7 +148,7 @@ public final class Combinations {
      * @param <T> The type of elements.
      * @return A builder for multiset combinations.
      */
-    public <T extends Comparable<T>> MultisetCombinationBuilder<T> multiset(Map<T, Integer> options, int size) {
+    public <T> MultisetCombinationBuilder<T> multiset(LinkedHashMap<T, Integer> options, int size) {
         return new MultisetCombinationBuilder<>(options, size);
     }
 }

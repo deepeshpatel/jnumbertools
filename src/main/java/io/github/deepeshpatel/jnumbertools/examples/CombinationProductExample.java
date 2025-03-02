@@ -29,7 +29,7 @@ public class CombinationProductExample {
         var toppings = List.of(1,2,3,4);
 
         var mthList = JNumberTools
-                .cartesianProduct().complexProductOf(1, pizzaBase)
+                .cartesianProduct().constrainedProductOf(1, pizzaBase)
                 .andDistinct(2, cheese)
                 .andMultiSelect(2, sauce)
                 .andInRange(1,5,toppings)
@@ -55,7 +55,7 @@ public class CombinationProductExample {
         var toppings = List.of("tomato","capsicum","onion","paneer","corn");
 
         var iterable = JNumberTools
-                .cartesianProduct().complexProductOf(1, pizzaBase)
+                .cartesianProduct().constrainedProductOf(1, pizzaBase)
                 .andDistinct(2, cheese)
                 .andMultiSelect(2, sauce)
                 .andInRange(1,5,toppings)

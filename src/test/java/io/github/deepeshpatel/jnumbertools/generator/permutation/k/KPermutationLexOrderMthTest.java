@@ -42,11 +42,12 @@ public class KPermutationLexOrderMthTest {
     void shouldGenerateMthKPermutations() {
 
         var input = of("A", "B", "C", "D", "E", "F", "G");
+        int start = 3;
         for (int k = 1; k <= input.size() / 2; k++) {
             for (int increment = 1; increment <= 5; increment++) {
-                var expected = getExpectedResultViaOneByOneIteration(input, k, increment);
-                var output = getResultViaDirectIncrement(input, k, increment);
-                assertIterableEquals(expected, output);
+                var all = permutation.nPk(k, input).lexOrder();
+                var mth = permutation.nPk(k, input).lexOrderMth(increment, start);
+                assertEveryMthValue(all.stream(), mth.stream(), start, increment);
             }
         }
     }
@@ -79,18 +80,5 @@ public class KPermutationLexOrderMthTest {
                 .lexOrderMth(20, 5)
                 .stream().toList();
         assertIterableEquals(expected, output);
-    }
-
-    private List<?> getResultViaDirectIncrement(List<?> input, int k, int increment) {
-        return permutation.nPk(k, input)
-                .lexOrderMth(increment, 0)
-                .stream().toList();
-    }
-
-    private List<?> getExpectedResultViaOneByOneIteration(List<?> input, int k, int increment) {
-        var stream = permutation.nPk(k, input)
-                .lexOrder().stream();
-
-        return everyMthValue(stream, increment);
     }
 }

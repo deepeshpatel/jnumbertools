@@ -8,16 +8,12 @@ import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
 import java.util.*;
 
-public final class MultisetCombination<T extends Comparable<T>> extends AbstractMultisetCombination<T> {
+public final class MultisetCombination<T> extends AbstractMultisetCombination<T> {
 
     private static final int CROSSOVER_THRESHOLD = 1000;
 
-    public MultisetCombination(Map<T, Integer> options, int r, Order order) {
-        super(options, r, order);
-    }
-
-    public MultisetCombination(Map<T, Integer> options, int r) {
-        super(options, r, Order.LEX);
+    MultisetCombination(LinkedHashMap<T, Integer> options, int r) {
+        super(options, r);
     }
 
     @Override

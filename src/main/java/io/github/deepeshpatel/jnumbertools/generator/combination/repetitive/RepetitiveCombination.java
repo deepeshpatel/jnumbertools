@@ -8,7 +8,10 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Utility for generating r-combinations of an input set with repetition allowed.

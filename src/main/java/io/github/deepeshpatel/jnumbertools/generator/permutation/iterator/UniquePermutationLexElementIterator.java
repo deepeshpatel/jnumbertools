@@ -16,35 +16,35 @@ import java.util.List;
  * </p>
  *
  * @param <T> the type of elements to be permuted
- * @see UniquePermItrForIndices
+ * @see UniquePermutationLexIndicesIterator
  * @author Deepesh Patel
  * @version 3.0.1
  */
-public final class UniquePermItrForElements<T> implements Iterator<List<T>> {
+public final class UniquePermutationLexElementIterator<T> implements Iterator<List<T>> {
 
     private final IndicesToValueMapper<T> mapper;
-    private final UniquePermItrForIndices iterator;
+    private final UniquePermutationLexIndicesIterator iterator;
 
     /**
-     * Constructs a new {@code UniquePermItrForElements} instance with the specified number of elements and a mapper.
+     * Constructs a new {@code UniquePermutationLexElementIterator} instance with the specified number of elements and a mapper.
      *
      * @param size   the number of elements in the list for which permutations are to be generated
      * @param mapper the mapper that converts an array of indices to a list of corresponding element values
      */
-    public UniquePermItrForElements(int size, IndicesToValueMapper<T> mapper) {
+    public UniquePermutationLexElementIterator(int size, IndicesToValueMapper<T> mapper) {
         this.mapper = mapper;
-        this.iterator = new UniquePermItrForIndices(size);
+        this.iterator = new UniquePermutationLexIndicesIterator(size);
     }
 
     /**
-     * Constructs a new {@code UniquePermItrForElements} instance with the specified mapper and initial state of indices.
+     * Constructs a new {@code UniquePermutationLexElementIterator} instance with the specified mapper and initial state of indices.
      *
      * @param mapper                the mapper that converts an array of indices to a list of corresponding element values
      * @param initialStateOfIndices the initial state of indices to begin permutation generation
      */
-    public UniquePermItrForElements(IndicesToValueMapper<T> mapper, int[] initialStateOfIndices) {
+    public UniquePermutationLexElementIterator(IndicesToValueMapper<T> mapper, int[] initialStateOfIndices) {
         this.mapper = mapper;
-        this.iterator = new UniquePermItrForIndices(initialStateOfIndices);
+        this.iterator = new UniquePermutationLexIndicesIterator(initialStateOfIndices);
     }
 
     /**

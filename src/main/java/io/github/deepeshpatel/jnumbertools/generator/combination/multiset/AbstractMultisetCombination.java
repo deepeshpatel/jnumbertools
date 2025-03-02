@@ -2,33 +2,49 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
+
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
-import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public abstract class AbstractMultisetCombination<T extends Comparable<T>> implements Iterable<Map<T, Integer>> {
+/**
+ * Abstract base class for generating multiset combinations as frequency maps.
+ * <p>
+ * This class provides common functionality for multiset combination generators, including ordering
+ * options (LEX, REVERSE_LEX, INSERTION) and frequency extraction from a provided map. Subclasses
+ * implement specific iteration strategies.
+ * </p>
+ *
+ * @param <T> the type of elements in the combinations; must be comparable for ordering
+ * @author Deepesh Patel
+ * @version 3.0.1
+ */
+public abstract class AbstractMultisetCombination<T> implements Iterable<Map<T, Integer>> {
 
     protected final Map.Entry<T, Integer>[] options;
     protected final int[] frequencies;
     protected final int r;
 
-    public enum Order {
-        LEX, REVERSE_LEX, INPUT
-    }
-
-    protected AbstractMultisetCombination(Map<T, Integer> options, int r, Order order) {
+    /**
+     * Constructs a new AbstractMultisetCombination instance.
+     *
+     * @param options the map of distinct elements and their frequencies defining the multiset
+     * @param r       the size of each combination (r); must be non-negative
+     * @throws IllegalArgumentException if r is negative, options is null, or frequencies are invalid
+     */
+    protected AbstractMultisetCombination(LinkedHashMap<T, Integer> options, int r) {
         checkParameters(options, r);
-        this.options = orderOptions(options, order != null ? order : Order.LEX);
+        this.options = orderOptions(options);
         this.frequencies = extractFrequencies(this.options);
         this.r = r;
     }
 
     private void checkParameters(Map<T, Integer> options, int r) {
-        if (r < 0) throw new IllegalArgumentException("parameter r (no. of items in each combination) should be>=0 ");
+        if (r < 0) throw new IllegalArgumentException("Parameter r (number of items in each combination) must be >= 0");
         if (options == null) throw new IllegalArgumentException("Options map cannot be null");
         for (Map.Entry<T, Integer> entry : options.entrySet()) {
             Integer freq = entry.getValue();
@@ -37,16 +53,8 @@ public abstract class AbstractMultisetCombination<T extends Comparable<T>> imple
     }
 
     @SuppressWarnings("unchecked")
-    private Map.Entry<T, Integer>[] orderOptions(Map<T, Integer> options, Order order) {
-        Comparator<Map.Entry<T, Integer>> comparator;
-        switch (order) {
-            case LEX: comparator = Map.Entry.comparingByKey(); break;
-            case REVERSE_LEX: comparator = Map.Entry.<T, Integer>comparingByKey().reversed(); break;
-            case INPUT: comparator = (e1, e2) -> 0; break;
-            default: throw new IllegalArgumentException("Unknown order: " + order);
-        }
+    private Map.Entry<T, Integer>[] orderOptions(Map<T, Integer> options) {
         return options.entrySet().stream()
-                .sorted(comparator)
                 .toArray(Map.Entry[]::new);
     }
 
@@ -58,10 +66,20 @@ public abstract class AbstractMultisetCombination<T extends Comparable<T>> imple
         return frequencies;
     }
 
+    /**
+     * Returns a stream of multiset combinations.
+     *
+     * @return a stream of immutable frequency maps representing combinations
+     */
     public Stream<Map<T, Integer>> stream() {
         return StreamSupport.stream(this.spliterator(), false);
     }
 
+    /**
+     * Returns an iterator over multiset combinations.
+     *
+     * @return an iterator of immutable frequency maps
+     */
     @Override
     public abstract Iterator<Map<T, Integer>> iterator();
 }

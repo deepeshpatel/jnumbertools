@@ -11,7 +11,7 @@ import java.util.*;
 /**
  /**
  * Calculator required for combinatorics calculation. This calculator uses memoization
- * for nCr, nPr, factorial, and subfactorial values. All internal caches are implemented
+ * for nCr, nPr, factorial, and subFactorial values. All internal caches are implemented
  * using thread-safe collections and are properly synchronized.
  * <p>
  * Thread Safety: This class is thread safe. Instances of this class can be safely shared
@@ -47,7 +47,7 @@ public final class Calculator {
      */
     public Calculator(int nCrCacheSize, int nPrCacheSize, int factorialCacheSize, int subFactorialCacheSize) {
         setupFactorialCache(factorialCacheSize);
-        setupSubfactorialCache(subFactorialCacheSize);
+        setupSubFactorialCache(subFactorialCacheSize);
         setupCombinationCache(nCrCacheSize);
         setupPermutationCache(nPrCacheSize);
     }
@@ -57,7 +57,7 @@ public final class Calculator {
         factorial(cacheSize);
     }
 
-    private void setupSubfactorialCache(int cacheSize) {
+    private void setupSubFactorialCache(int cacheSize) {
         subFactorialCache.add(BigInteger.ONE); // !0 = 1
         subFactorialCache.add(BigInteger.ZERO);  // !1 = 0
         subFactorial(cacheSize);
@@ -197,10 +197,10 @@ public final class Calculator {
     }
 
     /**
-     * Computes the subfactorial (!n) using recursion with memoization.
+     * Computes the subFactorial (!n) using recursion with memoization.
      *
-     * @param n The number for which to compute the subfactorial.
-     * @return The subfactorial of n as a BigInteger.
+     * @param n The number for which to compute the subFactorial.
+     * @return The subFactorial of n as a BigInteger.
      */
     public BigInteger subFactorial(int n) {
         if (n < 0) {
@@ -274,7 +274,7 @@ public final class Calculator {
      * Given counts {n₁, n₂, ..., nₖ} where n = n₁ + n₂ + ... + nₖ, the multinomial
      * coefficient is given by:
      * <pre>
-     *     multinomial = n! / (n₁! * n₂! * ... * nₖ!)
+     *     multinomial = n! / Π(nₖ!)
      * </pre>
      * This value represents the number of distinct permutations of a multiset
      * with the specified counts.
@@ -296,6 +296,15 @@ public final class Calculator {
         }
         return factorial(total).divide(denominator);
     }
+
+    public BigInteger totalMthMultinomial(long start, long m, int... counts) {
+        return multinomial(counts)
+                .subtract(BigInteger.ONE)
+                .subtract(BigInteger.valueOf(start))
+                .divide(BigInteger.valueOf(m))
+                .add(BigInteger.ONE);
+    }
+
 
     /**
      * Computes the number of ways to select exactly s items from a multiset for all s in the range
@@ -467,6 +476,71 @@ public final class Calculator {
     }
 
     /**
+     * Calculates the Greatest Common Divisor (GCD) of multiple BigInteger numbers.
+     * <p>
+     * Uses the binary GCD algorithm iteratively to compute the GCD of all inputs.
+     * Returns 0 if all inputs are 0, the absolute value of the single input if only one is provided,
+     * and throws an exception if the input array is empty or null.
+     * </p>
+     *
+     * @param a Variable number of BigInteger inputs.
+     * @return The GCD of all inputs as a BigInteger.
+     * @throws IllegalArgumentException If the input array is null or empty.
+     */
+    public static BigInteger gcd(BigInteger... a) {
+        BigInteger result = a[0] == null ? BigInteger.ZERO : a[0].abs();
+        for (int i = 1; i < a.length; i++) {
+            if (a[i] != null) {
+                result = result.gcd(a[i].abs());
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Calculates the Least Common Multiple (LCM) of multiple BigInteger numbers.
+     * <p>
+     * Computes LCM iteratively using the formula LCM(a, b) = |a * b| / GCD(a, b).
+     * Returns 0 if any input is 0, the absolute value of the single input if only one is provided,
+     * and throws an exception if the input array is empty or null.
+     * </p>
+     *
+     * @param a Variable number of BigInteger inputs.
+     * @return The LCM of all inputs as a BigInteger.
+     * @throws IllegalArgumentException If the input array is null or empty.
+     */
+
+    public static BigInteger lcm(BigInteger... a) {
+        return lcmTree(a, 0, a.length - 1);
+    }
+
+    private static BigInteger lcmTree(BigInteger[] arr, int start, int end) {
+        if (end - start + 1 <= 10) { //THRESHOLD to switch to iterative
+            return iterativeLCM(arr, start, end);
+        }
+
+        int mid = (start + end) / 2;
+        BigInteger left = lcmTree(arr, start, mid);
+        BigInteger right = lcmTree(arr, mid + 1, end);
+        return lcmPair(left, right);
+    }
+
+    private static BigInteger iterativeLCM(BigInteger[] arr, int start, int end) {
+        BigInteger result = BigInteger.ONE;
+        for (int i = start; i <= end; i++) {
+            result = lcmPair(result, arr[i]);
+        }
+        return result;
+    }
+
+    /**
+     * Helper method to compute LCM of two BigInteger numbers.
+     */
+    private static BigInteger lcmPair(BigInteger a, BigInteger b) {
+        return a.abs().multiply(b.abs()).divide(a.gcd(b));
+    }
+
+    /**
      * Clears all memoization caches used by this Calculator.
      * <p>
      * This method clears the caches for nCr, nPr, factorial, and subfactorial values.
@@ -485,7 +559,7 @@ public final class Calculator {
             factorialCache.clear();
             subFactorialCache.clear();
             setupFactorialCache(3);
-            setupSubfactorialCache(3);
+            setupSubFactorialCache(3);
         }
     }
 

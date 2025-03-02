@@ -1,11 +1,10 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
+
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.math.BigInteger;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
@@ -19,20 +18,18 @@ public class MultisetPermutationMthTest {
     void assertCount() {
         Random random = new Random(System.currentTimeMillis());
         int increment = 4;
+        int start = 0;
+
         for (int n = 4; n <= 6; n++) {
-            var input = Collections.nCopies(n, 'A');
+            var input = IntStream.range(0,n).boxed().toList();
             int[] frequency = getRandomMultisetFreqArray(random, input.size());
-            long count = permutation.multiset(input, frequency)
-                    .lexOrderMth(increment, 0).stream().count();
+            var options = createMap(input, frequency);
 
-            int sum = Arrays.stream(frequency).reduce(0, Integer::sum);
-            double numerator = calculator.factorial(sum).longValue();
-            long denominator = increment * IntStream.of(frequency).asLongStream()
-                    .reduce(1, (a, b) -> (a * calculator.factorial((int) b).longValue()));
+            long count = permutation.multiset(options)
+                    .lexOrderMth(increment, start).stream().count();
 
-            double expected = Math.ceil(numerator / denominator);
-            //( ∑ ai.si)! / Π(si!) * m
-            assertEquals((long)expected, count);
+            double expected = calculator.totalMthMultinomial(start, increment, frequency).longValue();
+            assertEquals(expected, count);
         }
     }
 
@@ -40,18 +37,19 @@ public class MultisetPermutationMthTest {
     void shouldThrowExceptionForNegativeIncrementValues() {
         var elements = of("A", "B", "C");
         int[] frequencies = {-1, 3, 2};
-
+        LinkedHashMap<String, Integer> options = createMap(elements, frequencies);
         assertThrows(IllegalArgumentException.class, () ->
-                permutation.multiset(elements, frequencies).lexOrderMth(5, 0));
+                permutation.multiset(options).lexOrderMth(5, 0));
     }
 
     @Test
     void shouldReturnSameResultForDifferentIteratorObjects() {
         var elements = of("A", "B", "C");
         int[] frequencies = {3, 2, 3};
+        LinkedHashMap<String, Integer> options = createMap(elements, frequencies);
 
         var iterable = permutation
-                .multiset(elements, frequencies)
+                .multiset(options)
                 .lexOrderMth(3, 0);
 
         var lists1 = iterable.stream().toList();
@@ -63,10 +61,12 @@ public class MultisetPermutationMthTest {
     void shouldGenerateCorrectMthMultisetPermutation() {
         var input = of('A', 'B', 'C');
         int[] freqArray = {3, 2, 3};
-        for (int increment = 1; increment <= 24; increment++) {
-            var output = getResultViaDirectIncrement(input, increment, freqArray);
-            var expected = getExpectedResultViaOneByOneIteration(input, increment, freqArray);
-            assertIterableEquals(expected, output);
+        LinkedHashMap<Character, Integer> options = createMap(input, freqArray);
+        int start= 2;
+        for (int increment = 1; increment <= 24; increment+=2) {
+            var all = permutation.multiset(options).lexOrder().stream();
+            var mth = permutation.multiset(options).lexOrderMth(increment, start).stream();
+            assertEveryMthValue(all, mth, start, increment);
         }
     }
 
@@ -77,20 +77,12 @@ public class MultisetPermutationMthTest {
                 of('b', 'c', 'c', 'a', 'c', 'b'),
                 of('c', 'b', 'c', 'b', 'c', 'a')
         );
-        var output = permutation.multiset(of('a', 'b', 'c'), new int[]{1, 2, 3})
+
+        LinkedHashMap<Character, Integer> options = createMap(of('a', 'b', 'c'), new int[]{1, 2, 3});
+
+        var output = permutation.multiset(options)
                 .lexOrderMth(20, 5)
                 .stream().toList();
         assertIterableEquals(expected, output);
-    }
-
-    private List<?> getResultViaDirectIncrement(List<?> input, int increment, int[] freqArray) {
-        return permutation.multiset(input, freqArray)
-                .lexOrderMth(increment, 0)
-                .stream().toList();
-    }
-
-    private List<?> getExpectedResultViaOneByOneIteration(List<?> input, int increment, int[] freqArray) {
-        var stream = permutation.multiset(input, freqArray).lexOrder().stream();
-        return everyMthValue(stream, increment);
     }
 }

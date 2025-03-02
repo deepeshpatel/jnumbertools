@@ -1,10 +1,10 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
+
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
@@ -15,11 +15,12 @@ public class MultisetPermutationTest {
     @Test
     void assertCount() {
         Random random = new Random(System.currentTimeMillis());
-        for (int n = 1; n <= 7; n++) {
-            var input = Collections.nCopies(n, 'A');
+        for (int n = 2; n <= 7; n++) {
+            var input = IntStream.range(0,n).boxed().toList();
             int[] frequency = getRandomMultisetFreqArray(random, input.size());
-            long count = permutation.multiset(input, frequency).lexOrder().stream().count();
-            assertEquals(calculator.multinomial(frequency).intValue(), count);
+            LinkedHashMap<Character, Integer> options = createMap(input, frequency);
+            long count = permutation.multiset(options).lexOrder().stream().count();
+            assertEquals(calculator.multinomial(frequency).longValue(), count);
         }
     }
 
@@ -28,8 +29,9 @@ public class MultisetPermutationTest {
 
         var elements = of("A", "B", "C");
         int[] frequencies = {3, 2, 2};
+        LinkedHashMap<Character, Integer> options = createMap(elements, frequencies);
 
-        var iterable = permutation.multiset(elements, frequencies).lexOrder();
+        var iterable = permutation.multiset(options).lexOrder();
 
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
@@ -55,7 +57,14 @@ public class MultisetPermutationTest {
 
         var elements = of("Red", "Green", "Blue");
         int[] frequencies = {2, 1, 1};
-        var output = permutation.multiset(elements, frequencies)
+
+        LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
+
+        options.put("Red",2);
+        options.put("Green",1);
+        options.put("Blue",1);
+
+        var output = permutation.multiset(options)
                 .lexOrder()
                 .stream()
                 .toList();
@@ -83,20 +92,14 @@ public class MultisetPermutationTest {
         var elements = of("A", "B", "C");
         int[] frequencies = {2, 1, 1};
 
-        var output = permutation.multiset(elements, frequencies)
+        LinkedHashMap<Character, Integer> options = createMap(elements, frequencies);
+
+        var output = permutation.multiset(options)
                 .lexOrder()
                 .stream()
                 .toList();
 
         assertIterableEquals(expected, output);
-    }
-
-    @Test
-    void shouldThrowExceptionWhenFrequenciesIsNull() {
-        var elements = of("A", "B", "C");
-
-        assertThrows(IllegalArgumentException.class, () ->
-                permutation.multiset(elements, null).lexOrder());
     }
 
 }
