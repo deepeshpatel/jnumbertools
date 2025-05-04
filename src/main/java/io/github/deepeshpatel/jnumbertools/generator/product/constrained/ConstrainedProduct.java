@@ -15,10 +15,10 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * Represents a complex product of multiple sets of combinations or subsets.
+ * Represents a constrained product of multiple sets of combinations or subsets.
  * <p>
  * This class provides an iterator that generates the Cartesian product of the lists contained
- * within the complex product. Each element of the product is obtained by combining one element from each
+ * within the constrained product. Each element of the product is obtained by combining one element from each
  * inner list, with the combinations generated in lexicographical order of the indices.
  * </p>
  * <p>
@@ -27,22 +27,26 @@ import java.util.stream.StreamSupport;
  *
  * @since 1.0.3
  * @author Deepesh Patel
- */
-public final class ConstrainedProduct implements Iterable<List<?>> {
 
-    private final List<List<List<?>>> elements;
+ */
+
+@SuppressWarnings({"rawtypes"})
+
+public final class ConstrainedProduct implements Iterable<List> {
+
+    private final List<List<List>> elements;
 
     /**
      * Constructs a {@code ConstrainedProduct} with the specified list of combinations or subsets.
      *
      * @param elements a list of lists where each inner list contains lists of elements; each inner list represents a dimension of the product.
      */
-    ConstrainedProduct(List<List<List<?>>> elements) {
+    ConstrainedProduct(List<List<List>> elements) {
         this.elements = elements;
     }
 
     /**
-     * Computes the total number of possible combinations in the complex product.
+     * Computes the total number of possible combinations in the constrained product.
      *
      * @return the total number of possible combinations, computed as the product of the sizes of the inner lists.
      */
@@ -55,23 +59,23 @@ public final class ConstrainedProduct implements Iterable<List<?>> {
     }
 
     @Override
-    public Iterator<List<?>> iterator() {
+    public Iterator<List> iterator() {
         return new Itr();
     }
 
     /**
-     * Returns a sequential {@code Stream} with this complex product as its source.
+     * Returns a sequential {@code Stream} with this constrained product as its source.
      *
      * @return a stream of combinations from the Cartesian product
      */
-    public Stream<List<?>> stream() {
+    public Stream<List> stream() {
         return StreamSupport.stream(this.spliterator(), false);
     }
 
     /**
      * Iterator implementation for generating the Cartesian product combinations.
      */
-    private class Itr implements Iterator<List<?>> {
+    private class Itr implements Iterator<List> {
 
         final int[] current = new int[elements.size()];
         boolean hasNext = true;
@@ -82,7 +86,7 @@ public final class ConstrainedProduct implements Iterable<List<?>> {
         }
 
         @Override
-        public List<?> next() {
+        public List next() {
             if (!hasNext) {
                 throw new NoSuchElementException();
             }

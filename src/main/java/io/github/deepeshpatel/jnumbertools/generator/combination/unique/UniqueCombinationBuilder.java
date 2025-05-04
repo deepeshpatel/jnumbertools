@@ -10,7 +10,6 @@ import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
-import io.github.deepeshpatel.jnumbertools.generator.numbers.NumberToBigIntegerAdapter;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -86,9 +85,8 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
         return new UniqueCombinationForSequence<>(elements, size, new BigIntegerChoice(nCr, sampleSize), calculator);
     }
 
-    public UniqueCombinationForSequence<T> fromSequence(Iterable<? extends Number> iterable) {
-        var adapter = new NumberToBigIntegerAdapter(iterable);
-        return new UniqueCombinationForSequence<>(elements, size , adapter, calculator);
+    public UniqueCombinationForSequence<T> fromSequence(Iterable<BigInteger> iterable) {
+        return new UniqueCombinationForSequence<>(elements, size , iterable, calculator);
     }
 
     /**

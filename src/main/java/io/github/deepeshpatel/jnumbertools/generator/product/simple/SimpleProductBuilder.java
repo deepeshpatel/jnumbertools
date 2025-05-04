@@ -11,21 +11,24 @@ import java.util.List;
  * or directly obtain every mᵗʰ product starting from a given index using {@link #lexOrderMth(long, long)}.
  * </p>
  *
- * @param <E> the type of elements in the lists
  *
  * @author Deepesh Patel
  * @version 3.0.1
  */
-public final class SimpleProductBuilder<E> {
 
-    private final List<List<E>> allLists = new ArrayList<>();
+@SuppressWarnings({"rawtypes"})
+
+
+public final class SimpleProductBuilder {
+
+    private final List<List> allLists = new ArrayList<>();
 
     /**
      * Initializes the builder with an initial list of elements.
      *
      * @param elements the initial list of elements
      */
-    public SimpleProductBuilder(List<E> elements) {
+    public SimpleProductBuilder(List elements) {
         allLists.add(elements);
     }
 
@@ -35,7 +38,7 @@ public final class SimpleProductBuilder<E> {
      * @param elements the list of elements to add
      * @return this builder instance for chaining
      */
-    public SimpleProductBuilder<E> and(List<E> elements) {
+    public SimpleProductBuilder and(List elements) {
         allLists.add(elements);
         return this;
     }
@@ -46,8 +49,8 @@ public final class SimpleProductBuilder<E> {
      * @param elements the elements to add
      * @return this builder instance for chaining
      */
-    @SafeVarargs
-    public final SimpleProductBuilder<E> and(E... elements) {
+
+    public SimpleProductBuilder and(Object... elements) {
         return and(List.of(elements));
     }
 
@@ -59,8 +62,8 @@ public final class SimpleProductBuilder<E> {
      *
      * @return a new {@link SimpleProduct} instance
      */
-    public SimpleProduct<E> lexOrder() {
-        return new SimpleProduct<>(allLists);
+    public SimpleProduct lexOrder() {
+        return new SimpleProduct(allLists);
     }
 
     /**
@@ -73,7 +76,7 @@ public final class SimpleProductBuilder<E> {
      * @param start the starting index for generating the product
      * @return a new {@link SimpleProductMth} instance
      */
-    public SimpleProductMth<?> lexOrderMth(long m, long start) {
-        return new SimpleProductMth<>(m, start, allLists);
+    public SimpleProductMth lexOrderMth(long m, long start) {
+        return new SimpleProductMth(m, start, allLists);
     }
 }

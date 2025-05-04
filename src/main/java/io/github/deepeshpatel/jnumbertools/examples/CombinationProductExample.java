@@ -7,11 +7,11 @@ import java.util.List;
 public class CombinationProductExample {
 
     public static void main(String[] args) {
-        complexCombination();
-        complexCombinationMth();
+        constrainedCombination();
+        constrainedCombinationMth();
     }
 
-    public static void complexCombinationMth() {
+    public static void constrainedCombinationMth() {
 
         String heading = """
                 Print 1000th combination of -
@@ -38,7 +38,7 @@ public class CombinationProductExample {
         System.out.println(mthList);
     }
 
-    private static void complexCombination() {
+    private static void constrainedCombination() {
         String heading = """
                 Print all combinations of -
                 any 1 pizza base  out of 3 and

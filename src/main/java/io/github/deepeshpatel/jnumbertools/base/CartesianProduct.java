@@ -13,18 +13,18 @@ import java.util.List;
 /**
  * Provides methods for generating Cartesian products of elements.
  * This class includes functionality to compute Cartesian products with different configurations,
- * including simple and complex products.
+ * including simple and constrained products.
  * The class supports:
  * <ul>
  *     <li><strong>Simple Product:</strong> Computes the Cartesian product of a list of elements, where each element can appear in any position.</li>
- *     <li><strong>Complex Product:</strong> Computes the Cartesian product with a specified quantity of elements, allowing more flexible product configurations.</li>
+ *     <li><strong>Constrained Product:</strong> Computes the Cartesian product with a specified quantity of elements, allowing more flexible product configurations.</li>
  * </ul>
  *
  * Example usage:
  * <pre>
  * CartesianProduct cartesianProduct = new CartesianProduct();
  * SimpleProductBuilder builder1 = cartesianProduct.simpleProductOf(Arrays.asList("A", "B", "C"));
- * ConstrainedProductBuilder builder2 = cartesianProduct.complexProductOf(2, "A", "B", "C");
+ * ConstrainedProductBuilder builder2 = cartesianProduct.constrainedProductOf(2, "A", "B", "C");
  * </pre>
  *
  * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
@@ -74,23 +74,23 @@ public final class CartesianProduct {
     }
 
     /**
-     * Creates a builder for complex Cartesian products of a specified quantity from a list of elements.
+     * Creates a builder for constrained Cartesian products of a specified quantity from a list of elements.
      *
      * @param quantity The quantity of elements for the Cartesian product.
      * @param elements The list of elements to compute the Cartesian product for.
-     * @return A builder for complex Cartesian products.
+     * @return A builder for constrained Cartesian products.
      */
     public ConstrainedProductBuilder constrainedProductOf(int quantity, List<?> elements) {
         return new ConstrainedProductBuilder(quantity, elements, calculator);
     }
 
     /**
-     * Creates a builder for complex Cartesian products of a specified quantity from a varargs list of elements.
+     * Creates a builder for constrained Cartesian products of a specified quantity from a varargs list of elements.
      *
      * @param quantity The quantity of elements for the Cartesian product.
      * @param elements The varargs list of elements to compute the Cartesian product for.
      * @param <E> The type of elements.
-     * @return A builder for complex Cartesian products.
+     * @return A builder for constrained Cartesian products.
      */
     @SafeVarargs
     public final <E> ConstrainedProductBuilder constrainedProductOf(int quantity, E... elements) {

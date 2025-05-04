@@ -58,10 +58,10 @@ public final class RepetitivePermutationMth<T> extends AbstractGenerator<T> {
         if (elements.isEmpty()) {
             throw new IllegalArgumentException("Elements list cannot be empty for repetitive permutations");
         }
-        if (increment.compareTo(BigInteger.ZERO) <= 0) {
+        if (increment.signum() <= 0) {
             throw new IllegalArgumentException("Increment must be positive: " + increment);
         }
-        if (start.compareTo(BigInteger.ZERO) < 0) {
+        if (start.signum() < 0) {
             throw new IllegalArgumentException("Start rank must be non-negative: " + start);
         }
         this.width = width;

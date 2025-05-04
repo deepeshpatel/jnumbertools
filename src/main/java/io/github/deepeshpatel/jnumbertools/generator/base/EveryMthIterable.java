@@ -10,7 +10,7 @@ public class EveryMthIterable implements Iterable<BigInteger> {
     private final BigInteger upperBound;
 
     public EveryMthIterable(BigInteger start, BigInteger increment, BigInteger upperBound) {
-        if(BigInteger.ZERO.compareTo(increment) > 0) {
+        if (increment.signum() < 0) {
             throw new IllegalArgumentException("increment value should be > 0");
         }
         this.start = start;

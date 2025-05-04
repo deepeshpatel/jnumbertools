@@ -14,14 +14,17 @@ import java.util.stream.StreamSupport;
  * It is intended to be created via a builder and therefore does not have a public constructor.
  * </p>
  *
- * @param <T> the type of elements in the lists.
  * @author Deepesh Patel
  * @version 3.0.1
  */
-public final class SimpleProductMth<T> implements Iterable<List<T>> {
+
+@SuppressWarnings({"unchecked", "rawtypes"})
+
+
+public final class SimpleProductMth implements Iterable<List> {
 
     private final long m;
-    private final List<List<T>> elements;
+    private final List<List> elements;
     private final long start;
 
     /**
@@ -31,7 +34,7 @@ public final class SimpleProductMth<T> implements Iterable<List<T>> {
      * @param start    the starting position
      * @param elements a list of lists containing elements of type T
      */
-    SimpleProductMth(long m, long start, List<List<T>> elements) {
+    SimpleProductMth(long m, long start, List<List> elements) {
         this.elements = elements;
         this.m = m;
         this.start = start;
@@ -43,19 +46,19 @@ public final class SimpleProductMth<T> implements Iterable<List<T>> {
      *
      * @return a stream of lists of type T.
      */
-    public Stream<List<T>> stream() {
+    public Stream<List> stream() {
         return StreamSupport.stream(spliterator(), false);
     }
 
     @Override
-    public Iterator<List<T>> iterator() {
+    public Iterator<List> iterator() {
         return new Itr();
     }
 
     /**
      * Iterator that generates every mᵗʰ Cartesian product combination.
      */
-    private class Itr implements Iterator<List<T>> {
+    private class Itr implements Iterator<List> {
 
         private final int[] indices = new int[elements.size()];
         private boolean hasNext;
@@ -71,11 +74,11 @@ public final class SimpleProductMth<T> implements Iterable<List<T>> {
         }
 
         @Override
-        public List<T> next() {
+        public List next() {
             if (!hasNext) {
                 throw new NoSuchElementException();
             }
-            List<T> result = indicesToList(elements, indices);
+            List result = indicesToList(elements, indices);
             // Advance the indices by the step size m.
             hasNext = nextMthCartesian(indices, m);
             return result;
@@ -89,8 +92,8 @@ public final class SimpleProductMth<T> implements Iterable<List<T>> {
          * @param indices  the current indices
          * @return a list of elements corresponding to the indices.
          */
-        protected final List<T> indicesToList(List<List<T>> elements, int[] indices) {
-            List<T> list = new ArrayList<>(elements.size());
+        protected final List indicesToList(List<List> elements, int[] indices) {
+            List list = new ArrayList<>(elements.size());
             for (int i = 0; i < elements.size(); i++) {
                 list.add(elements.get(i).get(indices[i]));
             }

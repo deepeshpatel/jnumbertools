@@ -15,11 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A builder class for constructing complex products of combinations and subsets.
+ * A builder class for constructing constrained products of combinations and subsets.
  * <p>
- * This class allows the creation of complex products by combining different types of combinations and subsets.
+ * This class allows the creation of constrained products by combining different types of combinations and subsets.
  * You can add distinct combinations, multi-select (repetitive) combinations, or subsets (of a given range)
- * from various input lists. The final complex product can be generated either in lexicographical order
+ * from various input lists. The final constrained product can be generated either in lexicographical order
  * (via {@link #lexOrder()}) or at specific intervals (via {@link #lexOrderMth(long, long)}).
  * </p>
  * <p>
@@ -30,7 +30,7 @@ import java.util.List;
  *        .andMultiSelect(2, List.of("P", "Q"))
  *        .lexOrder();
  * </code></pre>
- * This example creates a complex product consisting of combinations of size 2 from the first list,
+ * This example creates a constrained product consisting of combinations of size 2 from the first list,
  * distinct combinations of size 3 from the second list, and multi-select combinations of size 2 from the third list.
  * </p>
  *
@@ -38,6 +38,10 @@ import java.util.List;
  * @author Deepesh Patel
  * @version 1.0.3
  */
+
+@SuppressWarnings({"unchecked", "rawtypes"})
+
+
 public final class ConstrainedProductBuilder {
 
     private final List<Builder> builders = new ArrayList<>();
@@ -98,7 +102,7 @@ public final class ConstrainedProductBuilder {
      * @return a ConstrainedProduct containing all the generated combinations and subsets
      */
     public ConstrainedProduct lexOrder() {
-        List<List<List<?>>> all = new ArrayList<>();
+        List<List<List>> all = new ArrayList<>();
         for (var e : builders) {
             all.add(e.lexOrder().stream().toList());
         }
@@ -106,24 +110,24 @@ public final class ConstrainedProductBuilder {
     }
 
     /**
-     * Builds and returns a ComplexProductMth with all added combinations and subsets, generating every mᵗʰ product.
+     * Builds and returns a ConstrainedProductMth with all added combinations and subsets, generating every mᵗʰ product.
      *
      * @param m     the interval to select every mᵗʰ permutation (0‑based)
      * @param start the starting position
-     * @return a ComplexProductMth containing the generated combinations and subsets at the specified intervals
+     * @return a ConstrainedProductMth containing the generated combinations and subsets at the specified intervals
      */
-    public ComplexProductMth lexOrderMth(long m, long start) {
+    public ConstrainedProductMth lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
     /**
-     * Builds and returns a ComplexProductMth with all added combinations and subsets, generating every mᵗʰ product.
+     * Builds and returns a ConstrainedProductMth with all added combinations and subsets, generating every mᵗʰ product.
      *
      * @param m     the interval to select every mᵗʰ permutation as a {@link BigInteger}
      * @param start the starting position as a {@link BigInteger}
-     * @return a ComplexProductMth containing the generated combinations and subsets at the specified intervals
+     * @return a ConstrainedProductMth containing the generated combinations and subsets at the specified intervals
      */
-    public ComplexProductMth lexOrderMth(BigInteger m, BigInteger start) {
-        return new ComplexProductMth(m, start, builders);
+    public ConstrainedProductMth lexOrderMth(BigInteger m, BigInteger start) {
+        return new ConstrainedProductMth(m, start, builders);
     }
 }

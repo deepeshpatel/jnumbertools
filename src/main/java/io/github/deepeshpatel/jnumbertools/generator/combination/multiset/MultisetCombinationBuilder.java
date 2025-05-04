@@ -119,10 +119,10 @@ public class MultisetCombinationBuilder<T> {
      * @throws IllegalArgumentException if {@code m} is not positive or {@code start} is negative
      */
     public MultisetCombinationForSequence<T> lexOrderMth(BigInteger m, BigInteger start) {
-        if (m.compareTo(BigInteger.ZERO) <= 0) {
+        if (m.signum() <= 0) {
             throw new IllegalArgumentException("Increment 'm' must be positive");
         }
-        if (start.compareTo(BigInteger.ZERO) < 0) {
+        if (start.signum() < 0) {
             throw new IllegalArgumentException("Start rank must be non-negative");
         }
         BigInteger total = Calculator.multisetCombinationsCount(size, options.values().stream().mapToInt(Integer::intValue).toArray());

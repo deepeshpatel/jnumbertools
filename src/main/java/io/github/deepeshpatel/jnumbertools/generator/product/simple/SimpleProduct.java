@@ -18,20 +18,23 @@ import java.util.stream.StreamSupport;
  * <strong>Note:</strong> Instances of this class are intended to be created via a builder and hence do not have a public constructor.
  * </p>
  *
- * @param <T> the type of elements in the lists.
  * @author Deepesh Patel
  * @version 3.0.1
  */
-public final class SimpleProduct<T> implements Iterable<List<T>> {
 
-    private final List<List<T>> elements;
+@SuppressWarnings({"unchecked", "rawtypes"})
+
+
+public final class SimpleProduct implements Iterable<List> {
+
+    private final List<List> elements;
 
     /**
      * Constructs a new {@code SimpleProduct} instance with the specified list of lists.
      *
      * @param elements a list of lists containing elements of type {@code T}. Each inner list represents the set of values for one dimension.
      */
-    SimpleProduct(List<List<T>> elements) {
+    SimpleProduct(List<List> elements) {
         this.elements = elements;
     }
 
@@ -40,19 +43,19 @@ public final class SimpleProduct<T> implements Iterable<List<T>> {
      *
      * @return a stream of lists representing the Cartesian product combinations.
      */
-    public Stream<List<T>> stream() {
+    public Stream<List> stream() {
         return StreamSupport.stream(this.spliterator(), false);
     }
 
     @Override
-    public Iterator<List<T>> iterator() {
+    public Iterator<List> iterator() {
         return new Itr();
     }
 
     /**
      * An iterator that generates Cartesian product combinations on demand.
      */
-    private class Itr implements Iterator<List<T>> {
+    private class Itr implements Iterator<List> {
 
         /**
          * An array of indices representing the current tuple in the Cartesian product.
@@ -70,11 +73,11 @@ public final class SimpleProduct<T> implements Iterable<List<T>> {
         }
 
         @Override
-        public List<T> next() {
+        public List next() {
             if (!hasNext) {
                 throw new NoSuchElementException();
             }
-            List<T> result = indicesToList(elements, current);
+            List result = indicesToList(elements, current);
             // Update the current indices to the next combination using CartesianProductUtils.
             hasNext = CartesianProductUtils.createNext(current, elements);
             return result;
@@ -87,8 +90,8 @@ public final class SimpleProduct<T> implements Iterable<List<T>> {
          * @param indices  the current indices for each list.
          * @return a list of elements corresponding to the current combination of indices.
          */
-        protected List<T> indicesToList(List<List<T>> elements, int[] indices) {
-            List<T> list = new ArrayList<>(elements.size());
+        protected List indicesToList(List<List> elements, int[] indices) {
+            List list = new ArrayList<>(elements.size());
             for (int i = 0; i < elements.size(); i++) {
                 list.add(elements.get(i).get(indices[i]));
             }

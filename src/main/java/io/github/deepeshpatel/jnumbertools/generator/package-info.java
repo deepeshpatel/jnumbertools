@@ -8,7 +8,7 @@
  *     <li><strong>Different types of combinations</li>
  *     <li><strong>Different types of subsets</li>
  *     <li><strong>Different types of simple cartesian product</li>
- *     <li><strong>Different types of complex cartesian product</li>
+ *     <li><strong>Different types of constrained cartesian product</li>
  *     <li><strong>Ranking of permutations and combinations</li>
  * </ul>
  *

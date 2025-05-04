@@ -93,14 +93,14 @@ public class AllExamples {
                 .and(List.of( "Ricotta","Mozzarella","Cheddar"))
                 .lexOrderMth(1500, 0).forEach(out::println);
 
-        //all values of complexProductOf cartesian cartesianProduct in lex order
+        //all values of constrainedProductOf cartesian cartesianProduct in lex order
         JNumberTools.cartesianProduct().constrainedProductOf(1, List.of("Small ","Medium","Large"))
                 .andDistinct(2, List.of( "Ricotta","Mozzarella","Cheddar"))
                 .andMultiSelect(2, List.of( "Tomato Ketchup","White Sauce","Green Chutney"))
                 .andInRange(2,3,List.of("tomato","capsicum","onion","paneer","corn"))
                 .lexOrder().stream().forEach(out::println);
 
-        //every mth values of complexProductOf cartesian cartesianProduct in lex order
+        //every mth values of constrainedProductOf cartesian cartesianProduct in lex order
         JNumberTools.cartesianProduct().constrainedProductOf(1, List.of("Small ","Medium","Large"))
                 .andDistinct(2, List.of( "Ricotta","Mozzarella","Cheddar"))
                 .andMultiSelect(2, List.of( "Tomato Ketchup","White Sauce","Green Chutney"))

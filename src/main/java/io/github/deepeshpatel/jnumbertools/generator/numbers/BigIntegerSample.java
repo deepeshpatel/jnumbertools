@@ -33,7 +33,7 @@ public class BigIntegerSample implements Iterable<BigInteger> {
      * @throws IllegalArgumentException if max is not positive, sampleSize is not positive, or sampleSize > max
      */
     public BigIntegerSample(BigInteger max, int sampleSize) {
-        if (max.compareTo(BigInteger.ZERO) <= 0) {
+        if (max.signum() <= 0) {
             throw new IllegalArgumentException("Max must be positive");
         }
         if (sampleSize <= 0) {
@@ -137,7 +137,7 @@ class RetryBasedIterator implements Iterator<BigInteger> {
         }
 
         BigInteger remaining = max.subtract(BigInteger.valueOf(usedValues.size()));
-        if (remaining.compareTo(BigInteger.ZERO) <= 0) {
+        if (remaining.signum() <= 0) {
             throw new NoSuchElementException("Cannot generate more unique values; range exhausted");
         }
 

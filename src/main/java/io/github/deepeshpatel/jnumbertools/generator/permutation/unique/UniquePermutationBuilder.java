@@ -9,7 +9,6 @@ import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
-import io.github.deepeshpatel.jnumbertools.generator.numbers.NumberToBigIntegerAdapter;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -103,9 +102,8 @@ public final class UniquePermutationBuilder<T> {
         return new UniquePermutationForSequence<>(elements, new BigIntegerChoice(total, sampleSize), calculator);
     }
 
-    public UniquePermutationForSequence<T> fromSequence(Iterable<? extends Number> iterable) {
-        Iterable<BigInteger> adapter = new NumberToBigIntegerAdapter(iterable);
-        return new UniquePermutationForSequence<>(elements, adapter, calculator);
+    public UniquePermutationForSequence<T> fromSequence(Iterable<BigInteger> iterable) {
+        return new UniquePermutationForSequence<>(elements, iterable, calculator);
     }
 
     /**

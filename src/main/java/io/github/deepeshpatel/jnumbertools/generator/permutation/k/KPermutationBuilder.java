@@ -9,7 +9,6 @@ import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
-import io.github.deepeshpatel.jnumbertools.generator.numbers.NumberToBigIntegerAdapter;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -66,9 +65,8 @@ public final class KPermutationBuilder<T> {
         return new KPermutationForSequence<>(elements, r, sample, calculator);
     }
 
-    public KPermutationForSequence<T>  fromSequence(Iterable<? extends Number> iterable) {
-        NumberToBigIntegerAdapter adapter = new NumberToBigIntegerAdapter(iterable);
-        return new KPermutationForSequence<>(elements ,r ,adapter, calculator);
+    public KPermutationForSequence<T>  fromSequence(Iterable<BigInteger> iterable) {
+        return new KPermutationForSequence<>(elements ,r ,iterable, calculator);
     }
 
     /**

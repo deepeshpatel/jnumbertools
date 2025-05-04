@@ -8,7 +8,6 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
-import io.github.deepeshpatel.jnumbertools.generator.numbers.NumberToBigIntegerAdapter;
 
 import java.math.BigInteger;
 import java.util.LinkedHashMap;
@@ -69,7 +68,7 @@ public final class MultisetPermutationBuilder<T> {
      * @throws IllegalArgumentException if {@code m} or {@code start} is negative
      */
     public MultisetPermutationMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        if (m.compareTo(BigInteger.ZERO) < 0 || start.compareTo(BigInteger.ZERO) < 0) {
+        if (m.signum() < 0 || start.signum() < 0) {
             throw new IllegalArgumentException("Index 'm' and 'start' must be non-negative");
         }
         return new MultisetPermutationMth<>(options, m, start, calculator);
@@ -109,8 +108,7 @@ public final class MultisetPermutationBuilder<T> {
         return new MultisetPermutationForSequence<>(options, new BigIntegerChoice(total, sampleSize), calculator);
     }
 
-    public MultisetPermutationForSequence<T> fromSequence(Iterable<? extends Number> iterable) {
-        var adapter = new NumberToBigIntegerAdapter(iterable);
-        return new MultisetPermutationForSequence<>(options, adapter, calculator);
+    public MultisetPermutationForSequence<T> fromSequence(Iterable<BigInteger> iterable) {
+        return new MultisetPermutationForSequence<>(options, iterable, calculator);
     }
 }

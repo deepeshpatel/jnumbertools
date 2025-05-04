@@ -23,7 +23,7 @@ public final class MultisetPermutationMth<T> extends AbstractMultisetPermutation
 
     MultisetPermutationMth(LinkedHashMap<T, Integer> multiset, BigInteger increment, BigInteger start,  Calculator calculator) {
         super(multiset, calculator);
-        if (start.compareTo(BigInteger.ZERO) < 0) {
+        if (start.signum() < 0) {
             throw new IllegalArgumentException("Start must be non-negative: " + start);
         }
         this.possiblePermutations = getTotalPermutations();

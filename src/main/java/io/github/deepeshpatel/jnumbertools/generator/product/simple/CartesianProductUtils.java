@@ -12,6 +12,10 @@ import java.util.List;
  * @author Deepesh Patel
  * @version 3.0.1
  */
+
+@SuppressWarnings({"rawtypes"})
+
+
 public final class CartesianProductUtils {
 
     private CartesianProductUtils() {
@@ -29,12 +33,12 @@ public final class CartesianProductUtils {
      *
      * @param current  the current indices representing the current combination in the Cartesian product; this array is updated in place.
      * @param elements a list of lists, where each inner list represents the set of possible values for one dimension of the product.
-     * @param <T>      the type of elements contained in the inner lists.
      * @return {@code true} if the indices were successfully updated to a valid next combination; {@code false} if the last combination has been reached.
      */
-    public static <T> boolean createNext(int[] current, List<List<T>> elements) {
+    public static boolean createNext(int[] current, List elements) {
         for (int i = 0, j = current.length - 1; j >= 0; j--, i++) {
-            if (current[j] == elements.get(j).size() - 1) {
+            List innerList = (List) elements.get(j);
+            if (current[j] == innerList.size() - 1) {
                 current[j] = 0;
             } else {
                 current[j]++;

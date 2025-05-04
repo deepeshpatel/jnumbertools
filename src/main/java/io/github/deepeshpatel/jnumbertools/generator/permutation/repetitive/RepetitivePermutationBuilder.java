@@ -8,7 +8,6 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
-import io.github.deepeshpatel.jnumbertools.generator.numbers.NumberToBigIntegerAdapter;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -108,9 +107,7 @@ public final class RepetitivePermutationBuilder<T> {
         return new RepetitivePermutationForSequence<>(elements, width, new BigIntegerChoice(total, sampleSize), calculator);
     }
 
-    public RepetitivePermutationForSequence fromSequence(Iterable<? extends Number> sequence) {
-        var adapter = new NumberToBigIntegerAdapter(sequence);
-        return new RepetitivePermutationForSequence<>(elements,width, adapter, calculator);
+    public RepetitivePermutationForSequence<T> fromSequence(Iterable<BigInteger> sequence) {
+        return new RepetitivePermutationForSequence<>(elements,width, sequence, calculator);
     }
-
 }

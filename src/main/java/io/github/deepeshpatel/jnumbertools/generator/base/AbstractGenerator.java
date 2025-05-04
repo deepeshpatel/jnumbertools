@@ -5,7 +5,6 @@
 
 package io.github.deepeshpatel.jnumbertools.generator.base;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -89,39 +88,6 @@ public abstract class AbstractGenerator<E> implements Iterable<List<E>> {
         return IntStream.range(0, frequencies.length)
                 .flatMap(i -> IntStream.generate(() -> i).limit(frequencies[i]))
                 .toArray();
-    }
-
-    /**
-     * Validates the frequencies array for generating a multiset.
-     *
-     * @param inputSize   the size of the input list.
-     * @param frequencies the frequencies array.
-     * @param message     a descriptive message for the error context.
-     * @throws IllegalArgumentException if the frequencies array is {@code null} or its length
-     *                                  does not match the input size.
-     */
-    protected static void checkParamMultisetFreqArray(int inputSize, int[] frequencies, String message) {
-        if (frequencies == null) {
-            throw new IllegalArgumentException("Frequencies must be non-null to generate multiset " + message);
-        }
-
-        if (frequencies.length != inputSize) {
-            throw new IllegalArgumentException("Length of frequencies should be equal to input length to generate "
-                    + message + " of multiset");
-        }
-    }
-
-    /**
-     * Validates the increment value for generating every nth element.
-     *
-     * @param increment the increment value.
-     * @param message   a descriptive message for the error context.
-     * @throws IllegalArgumentException if the increment value is less than or equal to zero.
-     */
-    protected static void checkParamIncrement(BigInteger increment, String message) {
-        if (increment.signum() <= 0) {
-            throw new IllegalArgumentException("Increment value must be > 0 to generate every nth " + message);
-        }
     }
 
     /**

@@ -13,14 +13,14 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * Represents a complex product of multiple sets with the ability to generate every mᵗʰ combination.
+ * Represents a constrained product of multiple sets with the ability to generate every mᵗʰ combination.
  * <p>
  * This class generates combinations by iterating through the Cartesian product of the lists provided,
  * but only at every mᵗʰ position starting from the specified position. It implements the {@code Iterable}
  * interface to support iteration and provides a stream for functional-style operations.
  * </p>
  * <p>
- * Example: This class can be used (via its builder) to create a complex product of combinations and print
+ * Example: This class can be used (via its builder) to create a constrained product of combinations and print
  * every 2ⁿᵈ combination.
  * </p>
  * <p>
@@ -31,7 +31,7 @@ import java.util.stream.StreamSupport;
  * @since 1.0.3
  * @author Deepesh Patel
  */
-public final class ComplexProductMth<T> implements Iterable<List<T>> {
+public final class ConstrainedProductMth<T> implements Iterable<List<T>> {
 
     private final BigInteger m;
     private final BigInteger start;
@@ -39,13 +39,13 @@ public final class ComplexProductMth<T> implements Iterable<List<T>> {
     private final BigInteger maxCount;
 
     /**
-     * Constructs a {@code ComplexProductMth} with the specified parameters.
+     * Constructs a {@code ConstrainedProductMth} with the specified parameters.
      *
      * @param m        the interval for selecting combinations (every mᵗʰ combination)
      * @param start    the starting position for combinations
      * @param builders a list of builders used to generate combinations
      */
-    ComplexProductMth(BigInteger m, BigInteger start, List<Builder<T>> builders) {
+    ConstrainedProductMth(BigInteger m, BigInteger start, List<Builder<T>> builders) {
         this.m = m;
         this.start = start;
         this.builders = builders;
@@ -106,7 +106,7 @@ public final class ComplexProductMth<T> implements Iterable<List<T>> {
 
     @Override
     public String toString() {
-        return String.format("ComplexProductMth{m=%s, start=%s, maxCount=%s, buildersCount=%d}",
+        return String.format("ConstrainedProductMth{m=%s, start=%s, maxCount=%s, buildersCount=%d}",
                 m, start, maxCount, builders.size());
     }
 
