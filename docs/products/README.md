@@ -1,132 +1,119 @@
-[Home](../../README.md)
-&emsp;&emsp;&emsp; | &emsp;&emsp;&emsp;
-[Permutation Generators](../permutations/README.md)
-&emsp;&emsp;&emsp; | &emsp;&emsp;&emsp;
-[Combination Generators](../combinations/README.md)
-&emsp;&emsp;&emsp; | &emsp;&emsp;&emsp;
-[Set/subset Generators](../sets/sets.md)
-&emsp;&emsp;&emsp; | &emsp;&emsp;&emsp;
-[Cartesian Product Generators](../products/README.md)
-
-
+[Home](../../README.md)    |    [Permutation Generators](../permutations/README.md)    |    
+[Combination Generators](../combinations/README.md)    |    [Set/subset Generators](../sets/sets.md)    |    [Cartesian Product Generators](../products/README.md)
 
 # Cartesian Product Generators
 
-JNumberTools provides following 4 generators for cartesian product
+JNumberTools provides the following 4 generators for Cartesian products. All m<sup>th</sup> generators are BigInteger compatible, enabling rapid generation of Cartesian products at very large indices, such as 10<sup>100</sup>.
 
-1. Simple Cartesian Product
-   1. Simple Cartesian product in lex order
-   2. Every mth cartesian product in lex order
+**Currently Available Algorithms**
 
+1. [Simple Cartesian Product](#1-simple-cartesian-product)
+   1. [Simple Cartesian product in lex order](#11-simple-cartesian-product-in-lex-order)
+   2. [Every m<sup>th</sup> simple Cartesian product in lex order](#12-m-th-simple-cartesian-product)
 
-2. Constrained cartesian product
-   1. Constrained cartesian product in lex order
-   2. Every mth constrained cartesian product in lex order
+2. [Constrained Cartesian Product](#2-constrained-cartesian-product)
+   1. [Constrained Cartesian product in lex order](#21-constrained-cartesian-product-in-lex-order)
+   2. [Every m<sup>th</sup> constrained Cartesian product in lex order](#22-m-th-constrained-cartesian-product)
 
+---
 
 ### 1. Simple Cartesian Product
 
 #### 1.1 Simple Cartesian product in lex order
 
-A Cartesian Product of two sets A and B, denoted by A × B is the set of all
-ordered pairs (a, b) where a ∈ A and b ∈ B.
-
-This API supports the cartesian product of n different sets. That is for sets A, B, C, D...
-you can find A × B × C × D X ... directly in single API call
+A Cartesian Product of two sets A and B, denoted by A × B, is the set of all ordered pairs (a, b) where a ∈ A and b ∈ B. This API supports the Cartesian product of n different sets, allowing direct computation of A × B × C × D × ... in a single API call.
 
 ```java
-//every combination of 1 pizza-base, 1 pizza-crust and 1 cheese
-var pizzaSize   =  List.of("Small", "Medium", "Large");
-var pizzaCrust  =  List.of("Flatbread", "Neapolitan", "Thin Crust");
-var cheese      =  List.of( "Ricotta ","Mozzarella","Cheddar");
+// Every combination of 1 pizza base, 1 pizza crust, and 1 cheese
+var pizzaSize = List.of("Small", "Medium", "Large");
+var pizzaCrust = List.of("Flatbread", "Neapolitan", "Thin Crust");
+var cheese = List.of("Ricotta", "Mozzarella", "Cheddar");
 
 JNumberTools.cartesianProduct()
    .simpleProductOf(pizzaSize)
    .and(pizzaCrust)
    .and(cheese)
-   .lexOrder().stream().toList();
+   .lexOrder()
+   .stream().toList();
 ```
 
-#### 1.2 m-th simple cartesian product
-Generates every m<sup>th</sup> cartesian product starting from any starting index of choice.
-This API does not search for the m<sup>th</sup> product in a sorted list but
-directly generates the desired product and hence it is very efficient.
+#### 1.2 m-th simple Cartesian product
+
+Generates every m<sup>th</sup> Cartesian product starting from any chosen index in lexicographical order. This API directly generates the desired product without iterating through preceding values, making it highly efficient.
 
 ```java
-//every 10th combination of 1 pizza-base, 1-pizza crust and 1 cheese
-//starting form 5th index in lex order. That is 5th, 10th,15th and 20th
-var pizzaSize   =  List.of("Small", "Medium", "Large");
-var pizzaCrust  =  List.of("Flatbread", "Neapolitan", "Thin Crust");
-var cheese      =  List.of( "Ricotta ","Mozzarella","Cheddar");
+// Every 10th combination of 1 pizza base, 1 pizza crust, and 1 cheese
+// starting from the 5th index in lex order (i.e., 5th, 15th, 25th, etc.)
+var pizzaSize = List.of("Small", "Medium", "Large");
+var pizzaCrust = List.of("Flatbread", "Neapolitan", "Thin Crust");
+var cheese = List.of("Ricotta", "Mozzarella", "Cheddar");
 
 JNumberTools.cartesianProduct()
    .simpleProductOf(pizzaSize)
    .and(pizzaCrust)
    .and(cheese)
-   .lexOrderMth(5,10).stream().toList();
+   .lexOrderMth(10, 5)
+   .stream().toList();
 ```
 
 ### 2. Constrained Cartesian Product
-Generates a cartesian product with custom constraints, allowing selection of multiple items, distinct or repeated elements, and subsets within a specified range from each input set, in lexicographical order.
 
-#### 2.1 Constrained cartesian product in lex order
-Same as simple cartesian product but instead of having only one item from each list
-we can select multiple, select repetitive elements and select in a given range.
+Generates a Cartesian product with custom constraints, allowing selection of multiple items, distinct or repeated elements, and subsets within a specified range from each input set, in lexicographical order.
+
+#### 2.1 Constrained Cartesian product in lex order
+
+Similar to the simple Cartesian product but allows selecting multiple items, repetitive elements, or items within a specified range from each set.
+
 ```java
-//Print all combination of -
-// any 1 pizza base and
-// any 2 distinct cheese
-// and any 2 sauce (repeated allowed)
-// and any toppings in range 1 to 5";
+// All combinations of:
+// - any 1 pizza base
+// - any 2 distinct cheeses
+// - any 2 sauces (repetition allowed)
+// - any toppings in range 1 to 5
+var pizzaBase = List.of("Small", "Medium", "Large");
+var cheese = List.of("Ricotta", "Mozzarella", "Cheddar");
+var sauce = List.of("Tomato Ketchup", "White Sauce", "Green Chutney");
+var toppings = List.of("Tomato", "Capsicum", "Onion", "Corn", "Mushroom");
 
-var pizzaBase = List.of("Small ","Medium", "Large");
-var cheese = List.of( "Ricotta ","Mozzarella","Cheddar");
-var sauce = List.of( "Tomato Ketchup","White Sauce","Green Chutney");
-var toppings = List.of("Tomato","Capsicum", "Onion", "Corn", "Mushroom");
-
-JNumberTools
-   .cartesianProduct().constrainedProductOf(1, pizzaBase)
+JNumberTools.cartesianProduct()
+   .constrainedProductOf(1, pizzaBase)
    .andDistinct(2, cheese)
    .andMultiSelect(2, sauce)
-   .andInRange(1,5,toppings)
-   .lexOrder().stream().toList();
+   .andInRange(1, 5, toppings)
+   .lexOrder()
+   .stream().toList();
 ```
 
-#### 2.2 m-th constrained cartesian product
-Generates m<sup>th</sup> constrained cartesian product directly without calculating the values
-preceding it.
-For example below code prints every 10<sup>18</sup> th lexicographical combination
-which is not feasible to calculate via one by one iteration. API supports BigInteger,
-so it is even possible to execute it for very large value of m.
-Say every 10<sup>100</sup> th combination.
-```java
-//Every 10^18 th lexicographical combinations of -
-// any 10 distinct small alphabets and
-// any 12 distinct capital alphabets and
-// any 3 symbols with repetition allowed and 
-// all subsets in size range [10,20] of a set of numbers in [0,20)
+#### 2.2 m-th constrained Cartesian product
 
+Generates every m<sup>th</sup> constrained Cartesian product directly without calculating preceding values. This API supports BigInteger, enabling efficient generation of products at extremely large indices, such as every 10<sup>18</sup>th or 10<sup>100</sup>th combination.
+
+```java
+// Every 10^18th lexicographical combination of:
+// - any 10 distinct small alphabets
+// - any 12 distinct capital alphabets
+// - any 3 symbols (repetition allowed)
+// - all subsets in size range [10, 20] of numbers in [0, 20)
 var smallAlphabets = IntStream.rangeClosed('a', 'z').mapToObj(c -> (char) c).toList();
 var capitalAlphabets = IntStream.rangeClosed('A', 'Z').mapToObj(c -> (char) c).toList();
-var symbols = List.of('~','!','@','#','$','%','^','&','*','(',')');
+var symbols = List.of('~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')');
 var numbers = IntStream.rangeClosed(0, 20).boxed().toList();
 
 JNumberTools.cartesianProduct()
-   .constrainedProductOf(10, smallAlphabets) //distinct
-   .andDistinct(12, capitalAlphabets) //distinct
+   .constrainedProductOf(10, smallAlphabets) // distinct
+   .andDistinct(12, capitalAlphabets) // distinct
    .andMultiSelect(3, symbols) // repetition allowed
    .andInRange(10, 20, numbers) // all subsets in size range
-   .lexOrderMth(1000_000_000_000_000_000L, 0).stream().toList();
+   .lexOrderMth(1_000_000_000_000_000_000L, 0)
+   .stream().toList();
 ```
 
-[Home](../../README.md)
-&emsp;&emsp;&emsp; | &emsp;&emsp;&emsp;
-[Permutation Generators](../permutations/README.md)
-&emsp;&emsp;&emsp; | &emsp;&emsp;&emsp;
-[Combination Generators](../combinations/README.md)
-&emsp;&emsp;&emsp; | &emsp;&emsp;&emsp;
-[Set/subset Generators](../sets/sets.md)
-&emsp;&emsp;&emsp; | &emsp;&emsp;&emsp;
+[Home](../../README.md)  
+    |    
+[Permutation Generators](../permutations/README.md)  
+    |    
+[Combination Generators](../combinations/README.md)  
+    |    
+[Set/subset Generators](../sets/sets.md)  
+    |    
 [Cartesian Product Generators](../products/README.md)
-
-

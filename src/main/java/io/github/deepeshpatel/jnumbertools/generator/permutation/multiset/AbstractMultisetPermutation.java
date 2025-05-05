@@ -100,7 +100,7 @@ public abstract class AbstractMultisetPermutation<T> implements Iterable<List<T>
         for (int index : indices) {
             result.add(elements.get(index));
         }
-        return result;
+        return List.copyOf(result);
     }
 
     /**

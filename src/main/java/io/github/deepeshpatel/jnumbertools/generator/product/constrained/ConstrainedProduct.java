@@ -105,7 +105,7 @@ public final class ConstrainedProduct implements Iterable<List> {
             for (int i = 0; i < elements.size(); i++) {
                 list.addAll(elements.get(i).get(current[i]));
             }
-            return list;
+            return List.copyOf(list);
         }
     }
 }

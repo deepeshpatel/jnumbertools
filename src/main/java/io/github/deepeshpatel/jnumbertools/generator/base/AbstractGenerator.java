@@ -65,7 +65,7 @@ public abstract class AbstractGenerator<E> implements Iterable<List<E>> {
         for (int index : indices) {
             output.add(elements.get(index));
         }
-        return output;
+        return List.copyOf(output);
     }
 
     /**

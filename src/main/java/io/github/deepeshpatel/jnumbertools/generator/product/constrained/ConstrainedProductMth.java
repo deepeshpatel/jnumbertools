@@ -95,8 +95,7 @@ public final class ConstrainedProductMth<T> implements Iterable<List<T>> {
                 output.addFirst(values.get(j));
             }
         }
-
-        return new ArrayList<>(output);  // Convert deque to list
+        return List.copyOf(output); // Convert deque to list
     }
 
     @Override

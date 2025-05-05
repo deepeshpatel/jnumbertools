@@ -65,7 +65,7 @@ public final class PermutadicAlgorithms {
             degree++;
         } while (decimalValue.signum() > 0);
 
-        return permutadicValues;
+        return List.copyOf(permutadicValues);
     }
 
     /**
@@ -135,7 +135,7 @@ public final class PermutadicAlgorithms {
             result.add(index);
         }
 
-        return result;
+        return List.copyOf(result);
     }
 
     /**

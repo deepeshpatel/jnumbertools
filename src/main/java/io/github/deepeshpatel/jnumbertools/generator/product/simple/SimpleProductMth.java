@@ -97,7 +97,7 @@ public final class SimpleProductMth implements Iterable<List> {
             for (int i = 0; i < elements.size(); i++) {
                 list.add(elements.get(i).get(indices[i]));
             }
-            return list;
+            return List.copyOf(list);
         }
 
         /**

@@ -95,7 +95,7 @@ public final class SimpleProduct implements Iterable<List> {
             for (int i = 0; i < elements.size(); i++) {
                 list.add(elements.get(i).get(indices[i]));
             }
-            return list;
+            return List.copyOf(list);
         }
     }
 }
