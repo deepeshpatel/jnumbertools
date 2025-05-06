@@ -33,7 +33,7 @@ public class CombinationProductExample {
                 .andDistinct(2, cheese)
                 .andMultiSelect(2, sauce)
                 .andInRange(1,5,toppings)
-                .lexOrderMth(1000, 0).build();
+                .lexOrderMth(1000, 1000).stream().limit(1);
 
         System.out.println(mthList);
     }

@@ -152,11 +152,11 @@ class UniquePermutationForSequenceTest {
         @Test
         void shouldGenerateExactSampleSize() {
             int sampleSize = 4;
-            var combinations = permutation.unique("A", "B", "C")
+            var permutations = permutation.unique("A", "B", "C")
                     .choice(sampleSize)
                     .stream()
                     .toList();
-            assertEquals(sampleSize, combinations.size(), "Should generate exactly sampleSize permutations");
+            assertEquals(sampleSize, permutations.size(), "Should generate exactly sampleSize permutations");
         }
 
         @Test

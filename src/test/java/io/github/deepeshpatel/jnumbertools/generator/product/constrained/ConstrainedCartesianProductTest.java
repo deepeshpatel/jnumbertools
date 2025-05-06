@@ -16,7 +16,7 @@ public class ConstrainedCartesianProductTest {
         var cheese = of( "Ricotta","Mozzarella","Cheddar");
         var toppings = of("tomato","capsicum","onion","paneer","corn");
 
-        var product = cartesianProduct.constrainedProductOf(1, pizzaBase)
+        ConstrainedProduct product = cartesianProduct.constrainedProductOf(1, pizzaBase)
                 .andDistinct(2, cheese)
                 .andMultiSelect(2, sauce)
                 .andInRange(1, 5, toppings).lexOrder();

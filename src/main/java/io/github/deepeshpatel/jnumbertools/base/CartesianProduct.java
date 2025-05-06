@@ -58,7 +58,7 @@ public final class CartesianProduct {
      * @return A builder for simple Cartesian products.
      */
     public SimpleProductBuilder simpleProductOf(List<?> elements) {
-        return new SimpleProductBuilder(elements);
+        return new SimpleProductBuilder(elements, calculator);
     }
 
     /**

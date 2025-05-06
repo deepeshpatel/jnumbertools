@@ -2,16 +2,20 @@
  * JNumberTools Library v1.0.3
  * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
  */
-
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.base.Combinations;
 import io.github.deepeshpatel.jnumbertools.base.Subsets;
+import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
+import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
+import io.github.deepeshpatel.jnumbertools.generator.product.ProductForSequence;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -19,8 +23,9 @@ import java.util.List;
  * <p>
  * This class allows the creation of constrained products by combining different types of combinations and subsets.
  * You can add distinct combinations, multi-select (repetitive) combinations, or subsets (of a given range)
- * from various input lists. The final constrained product can be generated either in lexicographical order
- * (via {@link #lexOrder()}) or at specific intervals (via {@link #lexOrderMth(long, long)}).
+ * from various input lists. The final constrained product can be generated in lexicographical order
+ * (via {@link #lexOrder()}), at specific intervals (via {@link #lexOrderMth(long, long)}), or based on a custom
+ * sequence of ranks (via {@link #fromSequence(Iterable)}).
  * </p>
  * <p>
  * <strong>Example usage:</strong>
@@ -38,10 +43,11 @@ import java.util.List;
  * @author Deepesh Patel
  * @version 1.0.3
  */
-
 @SuppressWarnings({"unchecked", "rawtypes"})
-
-
+//TODO: [1] Implement Builder interface hera and in SimpleProductBuildr to be in sync with other builders
+// [2] and add choice and sample methods
+// and modify test class accordingly
+// and remove mth as sequence is available
 public final class ConstrainedProductBuilder {
 
     private final List<Builder> builders = new ArrayList<>();
@@ -51,23 +57,25 @@ public final class ConstrainedProductBuilder {
      * Constructs a ConstrainedProductBuilder with an initial combination of size {@code n}.
      *
      * @param n          the size of the initial combinations
-     * @param elements   the list of elements to create combinations from
+     * @param elements   the list of elements to create combinations from (may be null or empty)
      * @param calculator the calculator used for combinatorial computations
      */
     public ConstrainedProductBuilder(int n, List<?> elements, Calculator calculator) {
         this.calculator = calculator;
-        builders.add(new Combinations(calculator).unique(n, elements));
+        elements = elements == null ? Collections.emptyList() : elements;
+        builders.add(elements.isEmpty() && n > 0 ? new EmptyBuilder() : new Combinations(calculator).unique(n, elements));
     }
 
     /**
      * Adds a distinct combination of the specified quantity to the builder.
      *
      * @param quantity the size of the distinct combinations
-     * @param elements the list of elements to create combinations from
+     * @param elements the list of elements to create combinations from (may be null or empty)
      * @return the current instance of ConstrainedProductBuilder for method chaining
      */
     public ConstrainedProductBuilder andDistinct(int quantity, List<?> elements) {
-        builders.add(new Combinations(calculator).unique(quantity, elements));
+        elements = elements == null ? Collections.emptyList() : elements;
+        builders.add(elements.isEmpty() && quantity > 0 ? new EmptyBuilder() : new Combinations(calculator).unique(quantity, elements));
         return this;
     }
 
@@ -75,11 +83,12 @@ public final class ConstrainedProductBuilder {
      * Adds a multi-select (repetitive) combination of the specified quantity to the builder.
      *
      * @param quantity the size of the multi-select combinations
-     * @param elements the list of elements to create combinations from
+     * @param elements the list of elements to create combinations from (may be null or empty)
      * @return the current instance of ConstrainedProductBuilder for method chaining
      */
     public ConstrainedProductBuilder andMultiSelect(int quantity, List<?> elements) {
-        builders.add(new Combinations(calculator).repetitive(quantity, elements));
+        elements = elements == null ? Collections.emptyList() : elements;
+        builders.add(elements.isEmpty() && quantity > 0 ? new EmptyBuilder() : new Combinations(calculator).repetitive(quantity, elements));
         return this;
     }
 
@@ -88,10 +97,11 @@ public final class ConstrainedProductBuilder {
      *
      * @param from     the minimum size of the subsets
      * @param to       the maximum size of the subsets
-     * @param elements the list of elements to create subsets from
+     * @param elements the list of elements to create subsets from (may be null or empty)
      * @return the current instance of ConstrainedProductBuilder for method chaining
      */
     public ConstrainedProductBuilder andInRange(int from, int to, List<?> elements) {
+        elements = elements == null ? Collections.emptyList() : elements;
         builders.add(new Subsets(calculator).of(elements).inRange(from, to));
         return this;
     }
@@ -110,24 +120,65 @@ public final class ConstrainedProductBuilder {
     }
 
     /**
-     * Builds and returns a ConstrainedProductMth with all added combinations and subsets, generating every mᵗʰ product.
+     * Builds and returns a ProductForSequence with all added combinations and subsets, generating every mᵗʰ product.
      *
      * @param m     the interval to select every mᵗʰ permutation (0‑based)
      * @param start the starting position
-     * @return a ConstrainedProductMth containing the generated combinations and subsets at the specified intervals
+     * @return a ProductForSequence containing the generated combinations and subsets at the specified intervals
      */
-    public ConstrainedProductMth lexOrderMth(long m, long start) {
+    public ProductForSequence lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
     /**
-     * Builds and returns a ConstrainedProductMth with all added combinations and subsets, generating every mᵗʰ product.
+     * Builds and returns a ProductForSequence with all added combinations and subsets, generating every mᵗʰ product.
      *
      * @param m     the interval to select every mᵗʰ permutation as a {@link BigInteger}
      * @param start the starting position as a {@link BigInteger}
-     * @return a ConstrainedProductMth containing the generated combinations and subsets at the specified intervals
+     * @return a ProductForSequence containing the generated combinations and subsets at the specified intervals
      */
-    public ConstrainedProductMth lexOrderMth(BigInteger m, BigInteger start) {
-        return new ConstrainedProductMth(m, start, builders);
+    public ProductForSequence lexOrderMth(BigInteger m, BigInteger start) {
+        BigInteger maxCount = builders.isEmpty() || builders.stream().allMatch(b -> b.count().equals(BigInteger.ZERO))
+                ? BigInteger.ONE
+                : builders.stream()
+                .map(Builder::count)
+                .reduce(BigInteger.ONE, BigInteger::multiply);
+        return new ProductForSequence(builders, new EveryMthIterable(start, m, maxCount));
+    }
+
+    /**
+     * Builds and returns a ProductForSequence with all added combinations and subsets, generating products
+     * based on a custom sequence of ranks.
+     *
+     * @param ranks the iterable providing the sequence of ranks
+     * @return a ProductForSequence containing the generated products for the specified ranks
+     */
+    public ProductForSequence fromSequence(Iterable<BigInteger> ranks) {
+        return new ProductForSequence(builders, ranks);
+    }
+
+    /**
+     * A special builder for empty inputs, producing one empty combination.
+     */
+    private static class EmptyBuilder implements Builder<Object> {
+        @Override
+        public BigInteger count() {
+            return BigInteger.ONE;
+        }
+
+        @Override
+        public AbstractGenerator<Object> lexOrder() {
+            return new AbstractGenerator<Object>(Collections.emptyList()) {
+                @Override
+                public Iterator<List<Object>> iterator() {
+                    return (Iterator<List<Object>>) Collections.emptyList();
+                }
+            };
+        }
+
+        @Override
+        public Iterable<List<Object>> lexOrderMth(BigInteger m, BigInteger start) {
+            return m.equals(BigInteger.ZERO) ? Collections.singletonList(Collections.emptyList()) : Collections.emptyList();
+        }
     }
 }

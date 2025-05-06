@@ -105,7 +105,7 @@ public class AllExamples {
                 .andDistinct(2, List.of( "Ricotta","Mozzarella","Cheddar"))
                 .andMultiSelect(2, List.of( "Tomato Ketchup","White Sauce","Green Chutney"))
                 .andInRange(2,3,List.of("tomato","capsicum","onion","paneer","corn"))
-                .lexOrderMth(1500, 0).build();
+                .lexOrderMth(1500, 0).stream().toList();
 
 
         //rank of unique permutation

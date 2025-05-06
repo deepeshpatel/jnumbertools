@@ -2,6 +2,7 @@ package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
@@ -26,8 +27,8 @@ public class ConstrainedCartesianProductMthTest {
                 .andInRange(3, toppings.size(), toppings);
 
         for(int m = 2; m <= 10; m++){
-            var expected = combProduct.lexOrder().stream().toList().get(m);
-            var result = combProduct.lexOrderMth(m, 0).build();
+            List expected = combProduct.lexOrder().stream().toList().get(m);
+            List result = (List) combProduct.lexOrderMth(m, m).stream().toList().get(0);
             assertIterableEquals(expected, result);
         }
      }
@@ -87,7 +88,9 @@ public class ConstrainedCartesianProductMthTest {
     private void testForEveryMth(long m, String[] rows, ConstrainedProductBuilder builder) {
         long mm = -m;
         for (String row : rows) {
-            assertEquals(row, builder.lexOrderMth(mm += m, 0).build().toString());
+            mm += m;
+            assertEquals(row, builder.lexOrderMth(mm, mm).iterator().next().toString());
+            //assertEquals(row, builder.lexOrderMth(mm += m, 0).build().toString());
         }
     }
 }
