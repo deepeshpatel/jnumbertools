@@ -1,5 +1,11 @@
-[Home](../../README.md)    |    [Permutation Generators](../permutations/README.md)    |    
-[Combination Generators](../combinations/README.md)    |    [Set/subset Generators](../sets/sets.md)    |    [Cartesian Product Generators](../products/README.md)
+[Home](../../README.md)
+</br>[Permutation Generators](../permutations/README.md)
+</br>[Combination Generators](../combinations/README.md)
+</br>[Set/Subset Generators](../sets/sets.md)
+</br>[Cartesian Product Generators](../products/README.md)
+</br>[Math Functions](../calculator/README.md)
+</br>[Ranking Algorithms](../ranking/README.md)
+</br>[Number System Algorithms](../numbersystem/README.md)
 
 # Cartesian Product Generators
 
@@ -107,13 +113,11 @@ JNumberTools.cartesianProduct()
    .lexOrderMth(1_000_000_000_000_000_000L, 0)
    .stream().toList();
 ```
-
-[Home](../../README.md)  
-    |    
-[Permutation Generators](../permutations/README.md)  
-    |    
-[Combination Generators](../combinations/README.md)  
-    |    
-[Set/subset Generators](../sets/sets.md)  
-    |    
-[Cartesian Product Generators](../products/README.md)
+[Home](../../README.md)
+</br>[Permutation Generators](../permutations/README.md)
+</br>[Combination Generators](../combinations/README.md)
+</br>[Set/Subset Generators](../sets/sets.md)
+</br>[Cartesian Product Generators](../products/README.md)
+</br>[Math Functions](../calculator/README.md)
+</br>[Ranking Algorithms](../ranking/README.md)
+</br>[Number System Algorithms](../numbersystem/README.md)

@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v1.0.3
- * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
@@ -10,6 +10,8 @@ import io.github.deepeshpatel.jnumbertools.base.Subsets;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
+import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
+import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 import io.github.deepeshpatel.jnumbertools.generator.product.ProductForSequence;
 
 import java.math.BigInteger;
@@ -19,38 +21,27 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A builder class for constructing constrained products of combinations and subsets.
+ * A builder for constructing constrained products of combinations and subsets.
  * <p>
  * This class allows the creation of constrained products by combining different types of combinations and subsets.
  * You can add distinct combinations, multi-select (repetitive) combinations, or subsets (of a given range)
  * from various input lists. The final constrained product can be generated in lexicographical order
- * (via {@link #lexOrder()}), at specific intervals (via {@link #lexOrderMth(long, long)}), or based on a custom
- * sequence of ranks (via {@link #fromSequence(Iterable)}).
+ * (via {@link #lexOrder()}), at specific intervals (via {@link #lexOrderMth(BigInteger, BigInteger)}),
+ * based on a custom sequence of ranks (via {@link #fromSequence(Iterable)}), or sampled randomly with
+ * or without replacement (via {@link #choice(int)} and {@link #sample(int)}).
  * </p>
  * <p>
- * <strong>Example usage:</strong>
- * <pre><code class="language-java">
- * ConstrainedProductBuilder builder = new ConstrainedProductBuilder(2, List.of("A", "B", "C"), calculator);
- * builder.andDistinct(3, List.of("X", "Y"))
- *        .andMultiSelect(2, List.of("P", "Q"))
- *        .lexOrder();
- * </code></pre>
- * This example creates a constrained product consisting of combinations of size 2 from the first list,
- * distinct combinations of size 3 from the second list, and multi-select combinations of size 2 from the third list.
+ * Implements {@link Builder} to support future composition in complex combinatorial structures,
+ * such as nested products or filtered generators. Uses {@code Object} to handle mixed element types.
  * </p>
  *
- * @since 1.0.3
  * @author Deepesh Patel
- * @version 1.0.3
+ * @version 3.0.1
  */
-@SuppressWarnings({"unchecked", "rawtypes"})
-//TODO: [1] Implement Builder interface hera and in SimpleProductBuildr to be in sync with other builders
-// [2] and add choice and sample methods
-// and modify test class accordingly
-// and remove mth as sequence is available
-public final class ConstrainedProductBuilder {
+@SuppressWarnings({"unchecked"})
+public final class ConstrainedProductBuilder implements Builder<Object> {
 
-    private final List<Builder> builders = new ArrayList<>();
+    private final List<Builder<?>> builders = new ArrayList<>();
     private final Calculator calculator;
 
     /**
@@ -107,54 +98,108 @@ public final class ConstrainedProductBuilder {
     }
 
     /**
-     * Builds and returns a ConstrainedProduct with all added combinations and subsets in lexicographical order.
+     * Returns the total number of possible products.
      *
-     * @return a ConstrainedProduct containing all the generated combinations and subsets
+     * @return the count of products as a BigInteger
      */
-    public ConstrainedProduct lexOrder() {
-        List<List<List>> all = new ArrayList<>();
-        for (var e : builders) {
-            all.add(e.lexOrder().stream().toList());
+    @Override
+    public BigInteger count() {
+        if (builders.isEmpty() || builders.stream().allMatch(b -> b.count().equals(BigInteger.ZERO))) {
+            return BigInteger.ONE;
         }
-        return new ConstrainedProduct(all);
+        return builders.stream()
+                .map(Builder::count)
+                .reduce(BigInteger.ONE, BigInteger::multiply);
     }
 
     /**
-     * Builds and returns a ProductForSequence with all added combinations and subsets, generating every mᵗʰ product.
+     * Builds and returns a generator for all products in lexicographical order.
      *
-     * @param m     the interval to select every mᵗʰ permutation (0‑based)
-     * @param start the starting position
-     * @return a ProductForSequence containing the generated combinations and subsets at the specified intervals
+     * @return an AbstractGenerator containing all the generated products
      */
-    public ProductForSequence lexOrderMth(long m, long start) {
+    @Override
+    public AbstractGenerator<Object> lexOrder() {
+        return new ConstrainedProductGenerator();
+    }
+
+    /**
+     * Builds and returns a ProductForSequence for every mᵗʰ product.
+     *
+     * @param m     the interval to select every mᵗʰ product
+     * @param start the starting position
+     * @return a ProductForSequence for the specified intervals
+     */
+    @Override
+    //Iterable<List<T>>
+    public ProductForSequence<Object> lexOrderMth(BigInteger m, BigInteger start) {
+        BigInteger maxCount = count();
+        return new ProductForSequence((List<Builder<Object>>) (List) builders, new EveryMthIterable(start, m, maxCount));
+    }
+
+    public ProductForSequence<Object>lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
+
+
     /**
-     * Builds and returns a ProductForSequence with all added combinations and subsets, generating every mᵗʰ product.
+     * Builds and returns a ProductForSequence for products based on a custom sequence of ranks.
      *
-     * @param m     the interval to select every mᵗʰ permutation as a {@link BigInteger}
-     * @param start the starting position as a {@link BigInteger}
-     * @return a ProductForSequence containing the generated combinations and subsets at the specified intervals
+     * @param ranks the iterable providing the sequence of ranks
+     * @return a ProductForSequence for the specified ranks
      */
-    public ProductForSequence lexOrderMth(BigInteger m, BigInteger start) {
-        BigInteger maxCount = builders.isEmpty() || builders.stream().allMatch(b -> b.count().equals(BigInteger.ZERO))
-                ? BigInteger.ONE
-                : builders.stream()
-                .map(Builder::count)
-                .reduce(BigInteger.ONE, BigInteger::multiply);
-        return new ProductForSequence(builders, new EveryMthIterable(start, m, maxCount));
+    public ProductForSequence fromSequence(Iterable<BigInteger> ranks) {
+        return new ProductForSequence((List<Builder<Object>>) (List) builders, ranks);
     }
 
     /**
-     * Builds and returns a ProductForSequence with all added combinations and subsets, generating products
-     * based on a custom sequence of ranks.
+     * Generates a random sample of products with replacement.
      *
-     * @param ranks the iterable providing the sequence of ranks
-     * @return a ProductForSequence containing the generated products for the specified ranks
+     * @param sampleSize the number of products to generate
+     * @return a ProductForSequence for the sampled products
+     * @throws IllegalArgumentException if sampleSize is negative
      */
-    public ProductForSequence fromSequence(Iterable<BigInteger> ranks) {
-        return new ProductForSequence(builders, ranks);
+    public ProductForSequence choice(int sampleSize) {
+        if (sampleSize < 0) {
+            throw new IllegalArgumentException("Sample size cannot be negative");
+        }
+        BigInteger maxCount = count();
+        return new ProductForSequence((List<Builder<Object>>) (List) builders, new BigIntegerChoice(maxCount, sampleSize));
+    }
+
+    /**
+     * Generates a random sample of unique products.
+     *
+     * @param sampleSize the number of unique products to generate
+     * @return a ProductForSequence for the sampled products
+     * @throws IllegalArgumentException if sampleSize is negative or exceeds total products
+     */
+    public ProductForSequence sample(int sampleSize) {
+        if (sampleSize < 0) {
+            throw new IllegalArgumentException("Sample size cannot be negative");
+        }
+        BigInteger maxCount = count();
+        return new ProductForSequence((List<Builder<Object>>) (List) builders, new BigIntegerSample(maxCount, sampleSize));
+    }
+
+    /**
+     * A generator for constrained products, extending AbstractGenerator.
+     */
+    private class ConstrainedProductGenerator extends AbstractGenerator<Object> {
+        ConstrainedProductGenerator() {
+            super(Collections.emptyList());
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public Iterator<List<Object>> iterator() {
+            List<List<List<Object>>> all = new ArrayList<>();
+            for (var e : builders) {
+                List<List<Object>> generated = (List<List<Object>>) (List) e.lexOrder().stream().toList();
+                all.add(generated);
+            }
+            return new ConstrainedProduct(all).iterator();
+        }
     }
 
     /**
@@ -171,7 +216,7 @@ public final class ConstrainedProductBuilder {
             return new AbstractGenerator<Object>(Collections.emptyList()) {
                 @Override
                 public Iterator<List<Object>> iterator() {
-                    return (Iterator<List<Object>>) Collections.emptyList();
+                    return Collections.singletonList(Collections.emptyList()).iterator();
                 }
             };
         }

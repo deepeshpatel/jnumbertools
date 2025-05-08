@@ -1,84 +1,58 @@
 /*
- * JNumberTools Library v1.0.3
- * Copyright (c) 2022 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
-
-import io.github.deepeshpatel.jnumbertools.generator.product.simple.CartesianProductUtils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
- * Represents a constrained product of multiple sets of combinations or subsets.
+ * A class that generates the Cartesian product of a list of lists of lists.
  * <p>
- * This class provides an iterator that generates the Cartesian product of the lists contained
- * within the constrained product. Each element of the product is obtained by combining one element from each
- * inner list, with the combinations generated in lexicographical order of the indices.
- * </p>
- * <p>
- * <strong>Note:</strong> Instances of this class are intended to be created via a builder and therefore do not have a public constructor.
+ * This class takes a list of lists of lists, where each inner list represents a set of elements
+ * (e.g., combinations or subsets), and generates the Cartesian product of these sets in lexicographical order.
  * </p>
  *
- * @since 1.0.3
  * @author Deepesh Patel
-
+ * @version 3.0.1
  */
+public class ConstrainedProduct implements Iterable<List<Object>> {
 
-@SuppressWarnings({"rawtypes"})
-
-public final class ConstrainedProduct implements Iterable<List> {
-
-    private final List<List<List>> elements;
+    private final List<List<List<Object>>> all;
 
     /**
-     * Constructs a {@code ConstrainedProduct} with the specified list of combinations or subsets.
+     * Constructs a ConstrainedProduct with the given list of lists of lists.
      *
-     * @param elements a list of lists where each inner list contains lists of elements; each inner list represents a dimension of the product.
+     * @param all the list of lists of lists to generate the Cartesian product from
      */
-    ConstrainedProduct(List<List<List>> elements) {
-        this.elements = elements;
-    }
-
-    /**
-     * Computes the total number of possible combinations in the constrained product.
-     *
-     * @return the total number of possible combinations, computed as the product of the sizes of the inner lists.
-     */
-    public long count() {
-        long count = 1;
-        for (var e : elements) {
-            count *= e.size();
-        }
-        return count;
+    public ConstrainedProduct(List<List<List<Object>>> all) {
+        this.all = all;
     }
 
     @Override
-    public Iterator<List> iterator() {
-        return new Itr();
+    public Iterator<List<Object>> iterator() {
+        return new ConstrainedProductIterator();
     }
 
-    /**
-     * Returns a sequential {@code Stream} with this constrained product as its source.
-     *
-     * @return a stream of combinations from the Cartesian product
-     */
-    public Stream<List> stream() {
-        return StreamSupport.stream(this.spliterator(), false);
-    }
+    private class ConstrainedProductIterator implements Iterator<List<Object>> {
+        private final int[] indices;
+        private final int[] maxIndices;
+        private boolean hasNext;
 
-    /**
-     * Iterator implementation for generating the Cartesian product combinations.
-     */
-    private class Itr implements Iterator<List> {
-
-        final int[] current = new int[elements.size()];
-        boolean hasNext = true;
+        ConstrainedProductIterator() {
+            indices = new int[all.size()];
+            maxIndices = new int[all.size()];
+            for (int i = 0; i < all.size(); i++) {
+                maxIndices[i] = all.get(i).size();
+            }
+            hasNext = !all.isEmpty() && all.stream().noneMatch(List::isEmpty);
+            if (!hasNext && !all.isEmpty()) {
+                hasNext = true; // Handle empty input case
+            }
+        }
 
         @Override
         public boolean hasNext() {
@@ -86,26 +60,32 @@ public final class ConstrainedProduct implements Iterable<List> {
         }
 
         @Override
-        public List next() {
+        public List<Object> next() {
             if (!hasNext) {
                 throw new NoSuchElementException();
             }
-            var result = indicesToList();
-            hasNext = CartesianProductUtils.createNext(current, elements);
+
+            List<Object> result = new ArrayList<>();
+            for (int i = 0; i < indices.length; i++) {
+                if (!all.get(i).isEmpty()) {
+                    result.addAll(all.get(i).get(indices[i]));
+                }
+            }
+
+            hasNext = createNext(indices, maxIndices);
             return result;
         }
 
-        /**
-         * Converts the current indices into a list of elements by taking the corresponding element from each inner list.
-         *
-         * @return a list representing one combination from the Cartesian product
-         */
-        private List<Object> indicesToList() {
-            List<Object> list = new ArrayList<>();
-            for (int i = 0; i < elements.size(); i++) {
-                list.addAll(elements.get(i).get(current[i]));
+        private boolean createNext(int[] current, int[] maxIndices) {
+            for (int i = 0, j = current.length - 1; j >= 0; j--, i++) {
+                if (current[j] == maxIndices[j] - 1) {
+                    current[j] = 0;
+                } else {
+                    current[j]++;
+                    return true;
+                }
             }
-            return List.copyOf(list);
+            return false;
         }
     }
 }

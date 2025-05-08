@@ -31,19 +31,3 @@ Add the following section to your `pom.xml` file.
 4. [Cartesian Product: 4 different types of products](docs/products/README.md)
 5. [Ranking of permutations & combinations: 7 different types of rankings](docs/ranking/README.md)
 6. [Number system algorithms: 3 different types for combinatorics](docs/numbersystem/README.md)
-
-[Home](../../README.md)  
-    |    
-[Permutation Generators](../permutations/README.md)  
-    |    
-[Combination Generators](../combinations/README.md)  
-    |    
-[Set/Subset Generators](../sets/sets.md)  
-    |    
-[Cartesian Product Generators](../products/README.md)  
-    |    
-[Math Functions](../calculator/README.md)  
-    |    
-[Ranking Algorithms](../ranking/README.md)  
-    |    
-[Number System Algorithms](../numbersystem/README.md)

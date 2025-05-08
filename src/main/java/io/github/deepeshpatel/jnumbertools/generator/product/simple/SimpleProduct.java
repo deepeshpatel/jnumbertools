@@ -1,71 +1,53 @@
+/*
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ */
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
- * A class for generating Cartesian product combinations from multiple lists.
+ * A class that generates the Cartesian product of a list of lists.
  * <p>
- * This class produces all possible tuples (combinations) where each tuple contains one element from each list.
- * The Cartesian product is generated in lexicographical order based on the indices of the input lists.
- * Each inner list supplies the values for one dimension of the product.
- * </p>
- * <p>
- * <strong>Note:</strong> Instances of this class are intended to be created via a builder and hence do not have a public constructor.
+ * This class takes a list of lists, where each inner list represents a set of elements,
+ * and generates the Cartesian product of these sets in lexicographical order.
  * </p>
  *
  * @author Deepesh Patel
  * @version 3.0.1
  */
+public class SimpleProduct implements Iterable<List<Object>> {
 
-@SuppressWarnings({"unchecked", "rawtypes"})
-
-
-public final class SimpleProduct implements Iterable<List> {
-
-    private final List<List> elements;
+    private final List<List<Object>> allLists;
 
     /**
-     * Constructs a new {@code SimpleProduct} instance with the specified list of lists.
+     * Constructs a SimpleProduct with the given list of lists.
      *
-     * @param elements a list of lists containing elements of type {@code T}. Each inner list represents the set of values for one dimension.
+     * @param allLists the list of lists to generate the Cartesian product from
      */
-    SimpleProduct(List<List> elements) {
-        this.elements = elements;
-    }
-
-    /**
-     * Returns a sequential {@code Stream} with this Cartesian product as its source.
-     *
-     * @return a stream of lists representing the Cartesian product combinations.
-     */
-    public Stream<List> stream() {
-        return StreamSupport.stream(this.spliterator(), false);
+    public SimpleProduct(List<List<Object>> allLists) {
+        this.allLists = allLists;
     }
 
     @Override
-    public Iterator<List> iterator() {
-        return new Itr();
+    public Iterator<List<Object>> iterator() {
+        return new SimpleProductIterator();
     }
 
-    /**
-     * An iterator that generates Cartesian product combinations on demand.
-     */
-    private class Itr implements Iterator<List> {
+    private class SimpleProductIterator implements Iterator<List<Object>> {
+        private final int[] indices;
+        private boolean hasNext;
 
-        /**
-         * An array of indices representing the current tuple in the Cartesian product.
-         */
-        final int[] current = new int[elements.size()];
-
-        /**
-         * Flag indicating whether there are more tuples to generate.
-         */
-        boolean hasNext = true;
+        SimpleProductIterator() {
+            indices = new int[allLists.size()];
+            hasNext = !allLists.isEmpty() && allLists.stream().noneMatch(List::isEmpty);
+            if (!hasNext && !allLists.isEmpty()) {
+                hasNext = true; // Handle empty input case
+            }
+        }
 
         @Override
         public boolean hasNext() {
@@ -73,29 +55,32 @@ public final class SimpleProduct implements Iterable<List> {
         }
 
         @Override
-        public List next() {
+        public List<Object> next() {
             if (!hasNext) {
                 throw new NoSuchElementException();
             }
-            List result = indicesToList(elements, current);
-            // Update the current indices to the next combination using CartesianProductUtils.
-            hasNext = CartesianProductUtils.createNext(current, elements);
+
+            List<Object> result = new ArrayList<>();
+            for (int i = 0; i < indices.length; i++) {
+                if (!allLists.get(i).isEmpty()) {
+                    result.add(allLists.get(i).get(indices[i]));
+                }
+            }
+
+            hasNext = createNext(indices, allLists);
             return result;
         }
 
-        /**
-         * Converts the current indices into a list of elements by selecting the element at each index from its corresponding list.
-         *
-         * @param elements the list of lists containing the possible elements for each dimension.
-         * @param indices  the current indices for each list.
-         * @return a list of elements corresponding to the current combination of indices.
-         */
-        protected List indicesToList(List<List> elements, int[] indices) {
-            List list = new ArrayList<>(elements.size());
-            for (int i = 0; i < elements.size(); i++) {
-                list.add(elements.get(i).get(indices[i]));
+        private boolean createNext(int[] current, List<List<Object>> elements) {
+            for (int i = 0, j = current.length - 1; j >= 0; j--, i++) {
+                if (current[j] == elements.get(j).size() - 1) {
+                    current[j] = 0;
+                } else {
+                    current[j]++;
+                    return true;
+                }
             }
-            return List.copyOf(list);
+            return false;
         }
     }
 }
