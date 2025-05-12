@@ -2,7 +2,6 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
@@ -28,7 +27,7 @@ import java.util.NoSuchElementException;
  * @author Deepesh Patel
  * @version 3.0.1
  */
-public final class RepetitivePermutationForSequence<T> extends AbstractGenerator<T> {
+public final class RepetitivePermutationOfRanks<T> extends AbstractGenerator<T> {
 
     private final int width;
     private final BigInteger totalPermutations;
@@ -44,7 +43,7 @@ public final class RepetitivePermutationForSequence<T> extends AbstractGenerator
      * @param calculator utility for computing powers and permutations
      * @throws IllegalArgumentException if width is negative, elements is null/empty, or ranks are invalid
      */
-    public RepetitivePermutationForSequence(List<T> elements, int width, Iterable<BigInteger> ranks, Calculator calculator) {
+    public RepetitivePermutationOfRanks(List<T> elements, int width, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements);
         if (width < 0) {
             throw new IllegalArgumentException("Width must be non-negative: " + width);

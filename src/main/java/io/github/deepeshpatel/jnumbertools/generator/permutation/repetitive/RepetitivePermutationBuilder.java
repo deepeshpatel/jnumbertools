@@ -2,7 +2,6 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
@@ -17,7 +16,7 @@ import java.util.List;
 /**
  * Builder for generating repetitive permutations of a specified width from a list of elements.
  * <p>
- * This builder creates {@link RepetitivePermutationForSequence} instances for lexicographical order (all or mᵗʰ),
+ * This builder creates {@link RepetitivePermutationOfRanks} instances for lexicographical order (all or mᵗʰ),
  * sampling with/without replacement, and custom rank sequences. For example:
  * <pre>
  * List<String> elements = Arrays.asList("A", "B");
@@ -64,7 +63,7 @@ public final class RepetitivePermutationBuilder<T> {
      *
      * @param m     the increment between permutations; must be positive
      * @param start the starting rank (0-based); must be non-negative
-     * @return a {@link RepetitivePermutationForSequence} instance for mᵗʰ permutations
+     * @return a {@link RepetitivePermutationOfRanks} instance for mᵗʰ permutations
      * @throws IllegalArgumentException if m or start is invalid
      */
     public RepetitivePermutationMth<T> lexOrderMth(long m, long start) {
@@ -76,7 +75,7 @@ public final class RepetitivePermutationBuilder<T> {
      *
      * @param m     the increment between permutations; must be positive
      * @param start the starting rank (0-based); must be non-negative
-     * @return a {@link RepetitivePermutationForSequence} instance for mᵗʰ permutations
+     * @return a {@link RepetitivePermutationOfRanks} instance for mᵗʰ permutations
      * @throws IllegalArgumentException if m or start is invalid
      */
     public RepetitivePermutationMth<T> lexOrderMth(BigInteger m, BigInteger start) {
@@ -87,27 +86,54 @@ public final class RepetitivePermutationBuilder<T> {
      * Generates a sample of repetitive permutations without replacement.
      *
      * @param sampleSize the number of permutations to sample; must be positive and ≤ n^width
-     * @return a {@link RepetitivePermutationForSequence} instance for sampled permutations
+     * @return a {@link RepetitivePermutationOfRanks} instance for sampled permutations
      * @throws IllegalArgumentException if sampleSize is invalid
      */
-    public RepetitivePermutationForSequence<T> sample(int sampleSize) {
+    public RepetitivePermutationOfRanks<T> sample(int sampleSize) {
         BigInteger total = calculator.power(elements.size(), width);
-        return new RepetitivePermutationForSequence<>(elements, width, new BigIntegerSample(total, sampleSize), calculator);
+        return new RepetitivePermutationOfRanks<>(elements, width, new BigIntegerSample(total, sampleSize), calculator);
     }
 
     /**
      * Generates a sample of repetitive permutations with replacement.
      *
      * @param sampleSize the number of permutations to sample; must be positive
-     * @return a {@link RepetitivePermutationForSequence} instance for sampled permutations
+     * @return a {@link RepetitivePermutationOfRanks} instance for sampled permutations
      * @throws IllegalArgumentException if sampleSize is invalid
      */
-    public RepetitivePermutationForSequence<T> choice(int sampleSize) {
+    public RepetitivePermutationOfRanks<T> choice(int sampleSize) {
         BigInteger total = calculator.power(elements.size(), width);
-        return new RepetitivePermutationForSequence<>(elements, width, new BigIntegerChoice(total, sampleSize), calculator);
+        return new RepetitivePermutationOfRanks<>(elements, width, new BigIntegerChoice(total, sampleSize), calculator);
     }
 
-    public RepetitivePermutationForSequence<T> fromSequence(Iterable<BigInteger> sequence) {
-        return new RepetitivePermutationForSequence<>(elements,width, sequence, calculator);
+    /**
+     * Generates permutations with repetition at specified rank positions.
+     * <p>
+     * Each rank corresponds to a unique base-n number representation where
+     * n is the input size and k is the permutation length.
+     * <p>
+     * <b>Example for [A, B], k=3:</b>
+     * <pre>
+     * Rank | Base-2 | Permutation
+     * -----|--------|------------
+     * 0    | 000    | [A, A, A]
+     * 1    | 001    | [A, A, B]
+     * 2    | 010    | [A, B, A]
+     * 3    | 011    | [A, B, B]
+     * 4    | 100    | [B, A, A]
+     * 5    | 101    | [B, A, B]
+     * 6    | 110    | [B, B, A]
+     * 7    | 111    | [B, B, B]
+     *
+     * atRanks([0, 7]) → [A, A, A], [B, B, B]
+     * </pre>
+     *
+     * @param ranks Iterable of 0-based rank numbers (0 ≤ rank < n^k)
+     * @return Permutation generator for specified ranks
+     * @throws IllegalArgumentException if any rank ≥ n^k
+     * @throws IllegalStateException if length k was not configured
+     */
+    public RepetitivePermutationOfRanks<T> ofRanks(Iterable<BigInteger> ranks) {
+        return new RepetitivePermutationOfRanks<>(elements,width, ranks, calculator);
     }
 }

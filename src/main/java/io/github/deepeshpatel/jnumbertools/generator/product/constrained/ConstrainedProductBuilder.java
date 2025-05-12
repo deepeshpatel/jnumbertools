@@ -12,7 +12,7 @@ import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
-import io.github.deepeshpatel.jnumbertools.generator.product.ProductForSequence;
+import io.github.deepeshpatel.jnumbertools.generator.product.ProductOfRanks;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import java.util.List;
  * You can add distinct combinations, multi-select (repetitive) combinations, or subsets (of a given range)
  * from various input lists. The final constrained product can be generated in lexicographical order
  * (via {@link #lexOrder()}), at specific intervals (via {@link #lexOrderMth(BigInteger, BigInteger)}),
- * based on a custom sequence of ranks (via {@link #fromSequence(Iterable)}), or sampled randomly with
+ * based on a custom sequence of ranks (via {@link #ofRank(Iterable)}), or sampled randomly with
  * or without replacement (via {@link #choice(int)} and {@link #sample(int)}).
  * </p>
  * <p>
@@ -123,63 +123,78 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
     }
 
     /**
-     * Builds and returns a ProductForSequence for every mᵗʰ product.
+     * Builds and returns a ProductOfRanks for every mᵗʰ product.
      *
      * @param m     the interval to select every mᵗʰ product
      * @param start the starting position
-     * @return a ProductForSequence for the specified intervals
+     * @return a ProductOfRanks for the specified intervals
      */
     @Override
     //Iterable<List<T>>
-    public ProductForSequence<Object> lexOrderMth(BigInteger m, BigInteger start) {
+    public ProductOfRanks<Object> lexOrderMth(BigInteger m, BigInteger start) {
         BigInteger maxCount = count();
-        return new ProductForSequence((List<Builder<Object>>) (List) builders, new EveryMthIterable(start, m, maxCount));
+        return new ProductOfRanks((List<Builder<Object>>) (List) builders, new EveryMthIterable(start, m, maxCount));
     }
 
-    public ProductForSequence<Object>lexOrderMth(long m, long start) {
+    public ProductOfRanks<Object> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
 
 
     /**
-     * Builds and returns a ProductForSequence for products based on a custom sequence of ranks.
+     * Generates constrained Cartesian product tuples at specified rank positions, where
+     * each rank corresponds to a valid tuple in the constrained product space.
+     * <p>
+     * The rank ordering follows the lexicographical enumeration of <em>valid</em> tuples
+     * after applying all constraints. For example with constraints A != X:
+     * <pre>
+     * Input sets: [A, B] × [X, Y]
+     * Valid tuples: [A,Y], [B,X], [B,Y] (total 3)
      *
-     * @param ranks the iterable providing the sequence of ranks
-     * @return a ProductForSequence for the specified ranks
+     * ofRank(0) → [A, Y]
+     * ofRank(2) → [B, Y]
+     * </pre>
+     *
+     * @param ranks The 0-based position in the constrained product enumeration
+     * @return The tuple at the specified rank
+     * @throws IllegalArgumentException if {@code rank < 0} or {@code rank >= totalValidTuples()}
+     * @throws IllegalStateException if no constraints were configured
+     * @implNote Time complexity is O(k) where k is the number of dimensions,
+     *           as this performs a mixed-radix decomposition of the rank value
      */
-    public ProductForSequence fromSequence(Iterable<BigInteger> ranks) {
-        return new ProductForSequence((List<Builder<Object>>) (List) builders, ranks);
+    public ProductOfRanks ofRank(Iterable<BigInteger> ranks) {
+        return new ProductOfRanks((List<Builder<Object>>) (List) builders, ranks);
     }
 
     /**
      * Generates a random sample of products with replacement.
      *
      * @param sampleSize the number of products to generate
-     * @return a ProductForSequence for the sampled products
+     * @return a ProductOfRanks for the sampled products
      * @throws IllegalArgumentException if sampleSize is negative
      */
-    public ProductForSequence choice(int sampleSize) {
+    public ProductOfRanks choice(int sampleSize) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
         BigInteger maxCount = count();
-        return new ProductForSequence((List<Builder<Object>>) (List) builders, new BigIntegerChoice(maxCount, sampleSize));
+        return new ProductOfRanks((List<Builder<Object>>) (List) builders, new BigIntegerChoice(maxCount, sampleSize));
     }
 
     /**
      * Generates a random sample of unique products.
      *
      * @param sampleSize the number of unique products to generate
-     * @return a ProductForSequence for the sampled products
+     * @return a ProductOfRanks for the sampled products
      * @throws IllegalArgumentException if sampleSize is negative or exceeds total products
      */
-    public ProductForSequence sample(int sampleSize) {
+    public ProductOfRanks sample(int sampleSize) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
         BigInteger maxCount = count();
-        return new ProductForSequence((List<Builder<Object>>) (List) builders, new BigIntegerSample(maxCount, sampleSize));
+        return new ProductOfRanks((List<Builder<Object>>) (List) builders, new BigIntegerSample(maxCount, sampleSize));
     }
 
     /**

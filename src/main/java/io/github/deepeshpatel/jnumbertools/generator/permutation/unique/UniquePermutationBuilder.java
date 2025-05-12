@@ -2,7 +2,6 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
@@ -57,10 +56,10 @@ public final class UniquePermutationBuilder<T> {
      *
      * @param m     the increment between permutations; must be positive
      * @param start the starting rank (0-based); must be non-negative
-     * @return a {@link UniquePermutationForSequence} instance for mᵗʰ permutations
+     * @return a {@link UniquePermutationOfRanks} instance for mᵗʰ permutations
      * @throws IllegalArgumentException if m or start is invalid
      */
-    public UniquePermutationForSequence<T> lexOrderMth(long m, long start) {
+    public UniquePermutationOfRanks<T> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
@@ -69,12 +68,12 @@ public final class UniquePermutationBuilder<T> {
      *
      * @param m     the increment between permutations; must be positive
      * @param start the starting rank (0-based); must be non-negative
-     * @return a {@link UniquePermutationForSequence} instance for mᵗʰ permutations
+     * @return a {@link UniquePermutationOfRanks} instance for mᵗʰ permutations
      * @throws IllegalArgumentException if m or start is invalid
      */
-    public UniquePermutationForSequence<T> lexOrderMth(BigInteger m, BigInteger start) {
+    public UniquePermutationOfRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
         BigInteger total = calculator.factorial(elements.size());
-        return new UniquePermutationForSequence<>(elements, new EveryMthIterable(start, m, total), calculator);
+        return new UniquePermutationOfRanks<>(elements, new EveryMthIterable(start, m, total), calculator);
     }
 
 
@@ -82,28 +81,50 @@ public final class UniquePermutationBuilder<T> {
      * Generates a sample of unique permutations without replacement.
      *
      * @param sampleSize the number of permutations to sample; must be positive and ≤ n!
-     * @return a {@link UniquePermutationForSequence} instance for sampled permutations
+     * @return a {@link UniquePermutationOfRanks} instance for sampled permutations
      * @throws IllegalArgumentException if sampleSize is invalid
      */
-    public UniquePermutationForSequence<T> sample(int sampleSize) {
+    public UniquePermutationOfRanks<T> sample(int sampleSize) {
         BigInteger total = calculator.factorial(elements.size());
-        return new UniquePermutationForSequence<>(elements, new BigIntegerSample(total, sampleSize), calculator);
+        return new UniquePermutationOfRanks<>(elements, new BigIntegerSample(total, sampleSize), calculator);
     }
 
     /**
      * Generates a sample of unique permutations with replacement.
      *
      * @param sampleSize the number of permutations to sample; must be positive
-     * @return a {@link UniquePermutationForSequence} instance for sampled permutations
+     * @return a {@link UniquePermutationOfRanks} instance for sampled permutations
      * @throws IllegalArgumentException if sampleSize is invalid
      */
-    public UniquePermutationForSequence<T> choice(int sampleSize) {
+    public UniquePermutationOfRanks<T> choice(int sampleSize) {
         BigInteger total = calculator.factorial(elements.size());
-        return new UniquePermutationForSequence<>(elements, new BigIntegerChoice(total, sampleSize), calculator);
+        return new UniquePermutationOfRanks<>(elements, new BigIntegerChoice(total, sampleSize), calculator);
     }
 
-    public UniquePermutationForSequence<T> fromSequence(Iterable<BigInteger> iterable) {
-        return new UniquePermutationForSequence<>(elements, iterable, calculator);
+    /**
+     * Generates permutations at specified lexicographical rank positions.
+     * <p>
+     * <b>Example for 3 elements:</b>
+     * <pre>
+     * Rank | Permutation
+     * -----|------------
+     * 0    | [A, B, C]
+     * 1    | [A, C, B]
+     * 2    | [B, A, C]
+     * 3    | [B, C, A]
+     * 4    | [C, A, B]
+     * 5    | [C, B, A]
+     *
+     * atRanks([0, 2, 4]) → [A, B, C], [B, A, C], [C, A, B]
+     * </pre>
+     *
+     * @param ranks Iterable of 0-based rank numbers (0 ≤ rank < n!)
+     * @return Permutation generator for specified ranks
+     * @throws IllegalArgumentException if any rank ≥ n!
+     * @throws IllegalStateException if no generation strategy was selected
+     */
+    public UniquePermutationOfRanks<T> ofRanks(Iterable<BigInteger> ranks) {
+        return new UniquePermutationOfRanks<>(elements, ranks, calculator);
     }
 
     /**

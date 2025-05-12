@@ -9,11 +9,11 @@ import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import java.math.BigInteger;
 import java.util.*;
 
-public final class MultisetPermutationForSequence<T> extends AbstractMultisetPermutation<T> {
+public final class MultisetPermutationOFRanks<T> extends AbstractMultisetPermutation<T> {
 
     private final Iterable<BigInteger> ranks;
 
-    public MultisetPermutationForSequence(LinkedHashMap<T, Integer> multiset, Iterable<BigInteger> ranks, Calculator calculator) {
+    public MultisetPermutationOFRanks(LinkedHashMap<T, Integer> multiset, Iterable<BigInteger> ranks, Calculator calculator) {
         super(multiset, calculator);
         this.ranks = ranks;
     }

@@ -1,7 +1,7 @@
 [Home](../../README.md)
 </br>[Permutation Generators](../permutations/README.md)
 </br>[Combination Generators](../combinations/README.md)
-</br>[Set/Subset Generators](../sets/sets.md)
+</br>[Set/Subset Generators](../sets/README.md)
 </br>[Cartesian Product Generators](../products/README.md)
 </br>[Math Functions](../calculator/README.md)
 </br>[Ranking Algorithms](../ranking/README.md)
@@ -19,14 +19,14 @@ JNumberTools provides the following 23 permutation generation APIs. All m<sup>th
    3. [Unique permutation with minimum change](#13-unique-permutation-with-minimum-change)
    4. [Unique permutation random choice](#14-unique-permutation-random-choice)
    5. [Unique permutation random sample](#15-unique-permutation-random-sample)
-   6. [Unique permutation from sequence](#16-unique-permutation-from-sequence)
+   6. [Unique permutation of ranks](#16-unique-permutation-of-ranks)
 
 2. [Multiset Permutations: 5 types of multiset permutations](#2-multiset-permutation-generators)
    1. [Multiset permutation in lex order](#21-multiset-permutation-in-lex-order)
    2. [Every m-th multiset permutation](#22-every-m-th-multiset-permutation)
    3. [Multiset permutation random choice](#23-multiset-permutation-random-choice)
    4. [Multiset permutation random sample](#24-multiset-permutation-random-sample)
-   5. [Multiset permutation from sequence](#25-multiset-permutation-from-sequence)
+   5. [Multiset permutation of ranks](#25-multiset-permutation-of-ranks)
 
 3. [k-Permutations: 7 different variations of k-permutations](#3-k-permutation-generators)
    1. [k-Permutation in lex order](#31-k-permutation-in-lex-order)
@@ -35,14 +35,14 @@ JNumberTools provides the following 23 permutation generation APIs. All m<sup>th
    4. [Every m-th k-permutation in combination order](#34-every-m-th-k-permutation-in-combination-order)
    5. [k-Permutation random choice](#35-k-permutation-random-choice)
    6. [k-Permutation random sample](#36-k-permutation-random-sample)
-   7. [k-Permutation from sequence](#37-k-permutation-from-sequence)
+   7. [k-Permutation of ranks](#37-k-permutation-of-ranks)
 
 4. [Repetitive Permutations: 5 different variations of repetitive permutations](#4-repetitive-permutation-generators)
    1. [Repetitive permutation in lex order](#41-repetitive-permutation)
    2. [Every m-th repetitive permutation](#42-every-m-th-repetitive-permutation)
    3. [Repetitive permutation random choice](#43-repetitive-permutation-random-choice)
    4. [Repetitive permutation random sample](#44-repetitive-permutation-random-sample)
-   5. [Repetitive permutation from sequence](#45-repetitive-permutation-from-sequence)
+   5. [Repetitive permutation of ranks](#45-repetitive-permutation-of-ranks)
 
 ---
 
@@ -136,7 +136,7 @@ JNumberTools.permutations()
     .stream().toList();
 ```
 
-#### 1.6 Unique permutation from sequence
+#### 1.6 Unique permutation of ranks
 Generates all permutations at indices specified by a custom sequence.
 
 ```java
@@ -144,7 +144,7 @@ Generates all permutations at indices specified by a custom sequence.
 var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
 JNumberTools.permutations()
     .unique(100)
-    .fromSequence(iterable)
+    .ofRanks(iterable)
     .stream().toList();
 ```
 
@@ -183,7 +183,7 @@ Generates random permutations of a multiset with duplicates allowed.
 // Generates exactly 10 permutations of multiset which may contain duplicates
 var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1, "Guava", 3));
 JNumberTools.permutations()
-    .(multiset(elements)
+    .multiset(elements)
     .choice(10)
     .stream().toList();
 ```
@@ -200,7 +200,7 @@ JNumberTools.permutations()
     .stream().toList();
 ```
 
-#### 2.5 Multiset permutation from sequence
+#### 2.5 Multiset permutation of ranks
 Generates all permutations at indices specified by a custom sequence.
 
 ```java
@@ -209,7 +209,7 @@ var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("10000000000000000
 var elements = new LinkedHashMap<>(Map.of("Apple", 50, "Banana", 200, "Guava", 50));
 JNumberTools.permutations()
     .multiset(elements)
-    .fromSequence(iterable)
+    .ofRanks(iterable)
     .stream().forEach(System.out::println);
 ```
 
@@ -307,7 +307,7 @@ JNumberTools.permutations()
     .stream().forEach(System.out::println);
 ```
 
-#### 3.7 k-Permutation from sequence
+#### 3.7 k-Permutation of ranks
 Generates all k-permutations at indices specified by a custom sequence.
 
 ```java
@@ -316,7 +316,7 @@ var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("10000000000000000
 var elements = new LinkedHashMap<>(Map.of("Apple", 50, "Banana", 200, "Guava", 50));
 JNumberTools.permutations()
     .nPk(200, 100)
-    .fromSequence(iterable)
+    .ofRanks(iterable)
     .stream().forEach(System.out::println);
 ```
 
@@ -380,7 +380,7 @@ JNumberTools.permutations()
     .stream().toList();
 ```
 
-#### 4.5 Repetitive permutation from sequence
+#### 4.5 Repetitive permutation of ranks
 Generates all repetitive permutations at indices specified by a custom sequence.
 
 ```java
@@ -388,14 +388,14 @@ Generates all repetitive permutations at indices specified by a custom sequence.
 var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
 JNumberTools.permutations()
     .repetitive(300, 500)
-    .fromSequence(iterable)
+    .ofRanks(iterable)
     .stream().toList();
 ```
 
 [Home](../../README.md)
 </br>[Permutation Generators](../permutations/README.md)
 </br>[Combination Generators](../combinations/README.md)
-</br>[Set/Subset Generators](../sets/sets.md)
+</br>[Set/Subset Generators](../sets/README.md)
 </br>[Cartesian Product Generators](../products/README.md)
 </br>[Math Functions](../calculator/README.md)
 </br>[Ranking Algorithms](../ranking/README.md)

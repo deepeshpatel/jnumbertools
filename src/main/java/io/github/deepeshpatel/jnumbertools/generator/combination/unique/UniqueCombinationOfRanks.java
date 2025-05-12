@@ -2,7 +2,6 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-
 package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
@@ -25,7 +24,7 @@ import java.util.List;
  * @author Deepesh Patel
  * @version 3.0.1
  */
-public class UniqueCombinationForSequence<T> extends AbstractGenerator<T> {
+public class UniqueCombinationOfRanks<T> extends AbstractGenerator<T> {
 
     private final int r;
     private final BigInteger nCr;
@@ -33,7 +32,7 @@ public class UniqueCombinationForSequence<T> extends AbstractGenerator<T> {
     private final Iterable<BigInteger> ranks;
 
     /**
-     * Constructs a new UniqueCombinationForSequence instance.
+     * Constructs a new UniqueCombinationOfRanks instance.
      *
      * @param elements   the list of N items from which combinations are generated
      * @param r          the size of each combination (r); must be ≤ N
@@ -41,7 +40,7 @@ public class UniqueCombinationForSequence<T> extends AbstractGenerator<T> {
      * @param calculator the Calculator used for computing combination counts
      * @throws IllegalArgumentException if parameters are invalid
      */
-    public UniqueCombinationForSequence(List<T> elements, int r, Iterable<BigInteger> ranks, Calculator calculator) {
+    public UniqueCombinationOfRanks(List<T> elements, int r, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements);
         this.r = r;
         this.ranks = ranks;

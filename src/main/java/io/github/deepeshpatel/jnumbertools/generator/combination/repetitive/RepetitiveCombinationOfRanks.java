@@ -2,7 +2,6 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-
 package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
@@ -25,14 +24,14 @@ import java.util.List;
  * @author Deepesh Patel
  * @version 3.0.1
  */
-public class RepetitiveCombinationForSequence<T> extends AbstractGenerator<T> {
+public class RepetitiveCombinationOfRanks<T> extends AbstractGenerator<T> {
 
     private final int r;
     private final Calculator calculator;
     private final Iterable<BigInteger> ranks;
 
     /**
-     * Constructs a new RepetitiveCombinationForSequence instance.
+     * Constructs a new RepetitiveCombinationOfRanks instance.
      *
      * @param elements   the list of N items from which combinations are generated
      * @param r          the size of each combination (r); must be non-negative
@@ -40,7 +39,7 @@ public class RepetitiveCombinationForSequence<T> extends AbstractGenerator<T> {
      * @param calculator the Calculator used for computing combination counts
      * @throws IllegalArgumentException if r is negative
      */
-    public RepetitiveCombinationForSequence(List<T> elements, int r, Iterable<BigInteger> ranks, Calculator calculator) {
+    public RepetitiveCombinationOfRanks(List<T> elements, int r, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements);
         this.r = r;
         this.ranks = ranks;

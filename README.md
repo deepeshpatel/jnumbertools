@@ -27,7 +27,8 @@ Add the following section to your `pom.xml` file.
 
 1. [Permutations: 23 different types of permutations](docs/permutations/README.md)
 2. [Combinations: 15 different types of combinations](docs/combinations/README.md)
-3. [Set/subset generations: 7 different types available](docs/sets/sets.md)
+3. [Set/subset generations: 7 different types available](docs/sets/README.md)
 4. [Cartesian Product: 4 different types of products](docs/products/README.md)
 5. [Ranking of permutations & combinations: 7 different types of rankings](docs/ranking/README.md)
 6. [Number system algorithms: 3 different types for combinatorics](docs/numbersystem/README.md)
+7. [Math Functions](docs/calculator/README.md)

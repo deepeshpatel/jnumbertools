@@ -11,7 +11,7 @@ import static io.github.deepeshpatel.jnumbertools.TestBase.assertEveryMthValue;
 import static io.github.deepeshpatel.jnumbertools.TestBase.combination;
 import static org.junit.jupiter.api.Assertions.*;
 
-class MultisetCombinationForSequenceTest {
+class MultisetCombinationOfRanksTest {
 
     @Nested
     class MultisetCombinationMthTest {

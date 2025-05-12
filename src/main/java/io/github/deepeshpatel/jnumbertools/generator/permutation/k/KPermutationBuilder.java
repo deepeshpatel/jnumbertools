@@ -2,7 +2,6 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
@@ -53,20 +52,35 @@ public final class KPermutationBuilder<T> {
         return new KPermutationLexOrder<>(elements, r);
     }
 
-    public KPermutationForSequence<T> choice(int sampleSize) {
+    public KPermutationOfRanks<T> choice(int sampleSize) {
         BigInteger max = calculator.nPr(elements.size(), r);
         var choice = new BigIntegerChoice(max, sampleSize);
-        return new KPermutationForSequence<>(elements, r, choice, calculator);
+        return new KPermutationOfRanks<>(elements, r, choice, calculator);
     }
 
-    public KPermutationForSequence<T> sample(int sampleSize) {
+    public KPermutationOfRanks<T> sample(int sampleSize) {
         BigInteger max = calculator.nPr(elements.size(), r);
         var sample = new BigIntegerSample(max, sampleSize);
-        return new KPermutationForSequence<>(elements, r, sample, calculator);
+        return new KPermutationOfRanks<>(elements, r, sample, calculator);
     }
 
-    public KPermutationForSequence<T>  fromSequence(Iterable<BigInteger> iterable) {
-        return new KPermutationForSequence<>(elements ,r ,iterable, calculator);
+    /**
+     * Builder for generating k-permutations (ordered subsets) from an input collection.
+     * Supports both lexicographical and combination-based ordering strategies.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * // Generate 2-length permutations of [A, B, C] in lex order
+     * new KPermutationBuilder(Arrays.asList("A", "B", "C"))
+     *     .k(2)
+     *     .lex()
+     *     .all()
+     * }</pre>
+     *
+     * @param ranks Iterable of BigInteger ranks to generate specific k-permutations
+     */
+    public KPermutationOfRanks<T> ofRank(Iterable<BigInteger> ranks) {
+        return new KPermutationOfRanks<>(elements ,r ,ranks, calculator);
     }
 
     /**
@@ -83,10 +97,10 @@ public final class KPermutationBuilder<T> {
      *
      * @param m     the increment between permutations (e.g., m=2 for every 2nd permutation); must be positive
      * @param start the starting rank (0-based); must be non-negative
-     * @return a {@link KPermutationForSequence} instance for mᵗʰ permutations in lex order
+     * @return a {@link KPermutationOfRanks} instance for mᵗʰ permutations in lex order
      * @throws IllegalArgumentException if m or start is invalid
      */
-    public KPermutationForSequence<T> lexOrderMth(long m, long start) {
+    public KPermutationOfRanks<T> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
@@ -95,12 +109,12 @@ public final class KPermutationBuilder<T> {
      *
      * @param m     the increment between permutations; must be positive
      * @param start the starting rank (0-based); must be non-negative
-     * @return a {@link KPermutationForSequence} instance for mᵗʰ permutations in lex order
+     * @return a {@link KPermutationOfRanks} instance for mᵗʰ permutations in lex order
      * @throws IllegalArgumentException if m or start is invalid
      */
-    public KPermutationForSequence<T> lexOrderMth(BigInteger m, BigInteger start) {
+    public KPermutationOfRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
         EveryMthIterable iterator = new EveryMthIterable(start, m, calculator.nPr(elements.size(), r));
-        return new KPermutationForSequence<>(elements, r, iterator, calculator);
+        return new KPermutationOfRanks<>(elements, r, iterator, calculator);
         //return new KPermutationLexOrderMth<>(elements, r, m, start, calculator);
     }
 

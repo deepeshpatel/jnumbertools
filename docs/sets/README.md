@@ -1,7 +1,7 @@
 [Home](../../README.md)
 </br>[Permutation Generators](../permutations/README.md)
 </br>[Combination Generators](../combinations/README.md)
-</br>[Set/Subset Generators](../sets/sets.md)
+</br>[Set/Subset Generators](../sets/README.md)
 </br>[Cartesian Product Generators](../products/README.md)
 </br>[Math Functions](../calculator/README.md)
 </br>[Ranking Algorithms](../ranking/README.md)
@@ -19,7 +19,7 @@ JNumberTools provides the following 7 generators for sets and subsets. All m<sup
 4. [Every m<sup>th</sup> subsets in a given size range in lex order](#4-every-m-th-subsets-in-range-in-lex-order)
 5. [Random subset choice](#5-random-subset-choice)
 6. [Random subset sample](#6-random-subset-sample)
-7. [Subsets from sequence](#7-subsets-from-sequence)
+7. [Subsets of ranks](#7-subsets-of-ranks)
 
 ---
 
@@ -109,7 +109,7 @@ JNumberTools.subsets()
     .stream().forEach(System.out::println);
 ```
 
-### 7. Subsets from sequence
+### 7. Subsets of ranks
 Generates subsets at indices specified by a custom sequence.
 
 ```java
@@ -118,14 +118,14 @@ var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("10000000000000000
 JNumberTools.subsets()
     .of(100)
     .all()
-    .fromSequence(iterable)
+    .ofRanks(iterable)
     .stream().toList();
 ```
 
 [Home](../../README.md)
 </br>[Permutation Generators](../permutations/README.md)
 </br>[Combination Generators](../combinations/README.md)
-</br>[Set/Subset Generators](../sets/sets.md)
+</br>[Set/Subset Generators](../sets/README.md)
 </br>[Cartesian Product Generators](../products/README.md)
 </br>[Math Functions](../calculator/README.md)
 </br>[Ranking Algorithms](../ranking/README.md)

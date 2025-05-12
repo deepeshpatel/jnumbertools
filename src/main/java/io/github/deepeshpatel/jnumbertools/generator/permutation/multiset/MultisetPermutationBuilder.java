@@ -2,7 +2,6 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
@@ -82,33 +81,56 @@ public final class MultisetPermutationBuilder<T> {
      * Creates an instance that samples multiset permutations randomly without replacement.
      *
      * @param sampleSize the number of permutations to generate; must be positive and ≤ total permutations
-     * @return a new {@link MultisetPermutationForSequence} instance for random sampling
+     * @return a new {@link MultisetPermutationOFRanks} instance for random sampling
      * @throws IllegalArgumentException if {@code sampleSize} is not positive or exceeds total permutations
      */
-    public MultisetPermutationForSequence<T> sample(int sampleSize) {
+    public MultisetPermutationOFRanks<T> sample(int sampleSize) {
         BigInteger total = calculator.multinomial(options.values().stream().mapToInt(Integer::intValue).toArray());
         if (sampleSize <= 0 || BigInteger.valueOf(sampleSize).compareTo(total) > 0) {
             throw new IllegalArgumentException("Sample size must be positive and not exceed total permutations");
         }
-        return new MultisetPermutationForSequence<>(options, new BigIntegerSample(total, sampleSize), calculator);
+        return new MultisetPermutationOFRanks<>(options, new BigIntegerSample(total, sampleSize), calculator);
     }
 
     /**
      * Creates an instance that samples multiset permutations randomly with replacement.
      *
      * @param sampleSize the number of permutations to generate; must be positive
-     * @return a new {@link MultisetPermutationForSequence} instance for random sampling with replacement
+     * @return a new {@link MultisetPermutationOFRanks} instance for random sampling with replacement
      * @throws IllegalArgumentException if {@code sampleSize} is not positive
      */
-    public MultisetPermutationForSequence<T> choice(int sampleSize) {
+    public MultisetPermutationOFRanks<T> choice(int sampleSize) {
         if (sampleSize <= 0) {
             throw new IllegalArgumentException("Sample size must be positive");
         }
         BigInteger total = calculator.multinomial(options.values().stream().mapToInt(Integer::intValue).toArray());
-        return new MultisetPermutationForSequence<>(options, new BigIntegerChoice(total, sampleSize), calculator);
+        return new MultisetPermutationOFRanks<>(options, new BigIntegerChoice(total, sampleSize), calculator);
     }
 
-    public MultisetPermutationForSequence<T> fromSequence(Iterable<BigInteger> iterable) {
-        return new MultisetPermutationForSequence<>(options, iterable, calculator);
+    /**
+     * Generates unique multiset permutations at specified lexicographical rank positions.
+     * <p>
+     * <b>Example for [A, A, B, C]:</b>
+     * <pre>
+     * Rank | Permutation    | Note
+     * -----|---------------|------
+     * 0    | [A, A, B, C]  |
+     * 1    | [A, A, C, B]  |
+     * 2    | [A, B, A, C]  |
+     * ...  | ...           | (12 total unique permutations)
+     * 11   | [C, B, A, A]  |
+     *
+     * atRanks([0, 2, 11]) → [A,A,B,C], [A,B,A,C], [C,B,A,A]
+     * </pre>
+     *
+     * @param ranks Iterable of 0-based rank numbers (0 ≤ rank < n!/(m₁!m₂!...))
+     *             where mᵢ are duplicate counts
+     * @return Multiset permutation generator
+     * @throws IllegalArgumentException if any rank ≥ total unique permutations
+     * @throws IllegalStateException if no generation strategy was selected
+     *
+     */
+    public MultisetPermutationOFRanks<T> arRanks(Iterable<BigInteger> ranks) {
+        return new MultisetPermutationOFRanks<>(options, ranks, calculator);
     }
 }

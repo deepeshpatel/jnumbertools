@@ -2,7 +2,6 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-
 package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
@@ -58,28 +57,28 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
         return new RepetitiveCombination<>(elements, size);
     }
 
-    public RepetitiveCombinationForSequence<T> sample(int sampleSize) {
+    public RepetitiveCombinationOfRanks<T> sample(int sampleSize) {
         BigInteger nCrRepetitive = calculator.nCrRepetitive(elements.size(), size);
-        return new RepetitiveCombinationForSequence<>(elements, size, new BigIntegerSample(nCrRepetitive, sampleSize), calculator);
+        return new RepetitiveCombinationOfRanks<>(elements, size, new BigIntegerSample(nCrRepetitive, sampleSize), calculator);
     }
 
-    public RepetitiveCombinationForSequence<T> choice(int sampleSize) {
+    public RepetitiveCombinationOfRanks<T> choice(int sampleSize) {
         BigInteger nCrRepetitive = calculator.nCrRepetitive(elements.size(), size);
-        return new RepetitiveCombinationForSequence<>(elements, size, new BigIntegerChoice(nCrRepetitive, sampleSize), calculator);
+        return new RepetitiveCombinationOfRanks<>(elements, size, new BigIntegerChoice(nCrRepetitive, sampleSize), calculator);
     }
 
-    public RepetitiveCombinationForSequence<T> lexOrderMth(long m, long start) {
+    public RepetitiveCombinationOfRanks<T> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
-    public RepetitiveCombinationForSequence<T> lexOrderMth(BigInteger m, BigInteger start) {
+    public RepetitiveCombinationOfRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
         BigInteger nCrRepetitive = calculator.nCrRepetitive(elements.size(), size);
         Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, nCrRepetitive);
-        return new RepetitiveCombinationForSequence<>(elements, size, mthIterable, calculator);
+        return new RepetitiveCombinationOfRanks<>(elements, size, mthIterable, calculator);
     }
 
-    public RepetitiveCombinationForSequence<T> withSequence(Iterable<BigInteger> ranks) {
-        return new RepetitiveCombinationForSequence<>(elements, size, ranks, calculator);
+    public RepetitiveCombinationOfRanks<T> withSequence(Iterable<BigInteger> ranks) {
+        return new RepetitiveCombinationOfRanks<>(elements, size, ranks, calculator);
     }
 
     /**

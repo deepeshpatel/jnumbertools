@@ -2,7 +2,6 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
 import org.junit.jupiter.api.Nested;
@@ -18,9 +17,9 @@ import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for {@link RepetitivePermutationForSequence}, covering choice and sampling strategies.
+ * Test class for {@link RepetitivePermutationOfRanks}, covering choice and sampling strategies.
  */
-class RepetitivePermutationForSequenceTest {
+class RepetitivePermutationOfRanksTest {
 
     @Nested
     public class RepetitivePermutationChoiceTest {

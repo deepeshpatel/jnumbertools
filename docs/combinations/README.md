@@ -1,7 +1,7 @@
 [Home](../../README.md)
 </br>[Permutation Generators](../permutations/README.md)
 </br>[Combination Generators](../combinations/README.md)
-</br>[Set/Subset Generators](../sets/sets.md)
+</br>[Set/Subset Generators](../sets/README.md)
 </br>[Cartesian Product Generators](../products/README.md)
 </br>[Math Functions](../calculator/README.md)
 </br>[Ranking Algorithms](../ranking/README.md)
@@ -18,21 +18,21 @@ JNumberTools provides the following 15 combination generation APIs. All m<sup>th
    2. [Every m<sup>th</sup> unique combination in lex order](#12-every-m-th-unique-combination-in-lex-order)
    3. [Unique combination random choice](#13-unique-combination-random-choice)
    4. [Unique combination random sample](#14-unique-combination-random-sample)
-   5. [Unique combination from sequence](#15-unique-combination-from-sequence)
+   5. [Unique combination for ranks](#15-unique-combination-for-ranks)
 
 2. [Multiset Combinations](#2-multiset-combinations)
    1. [Multiset combination in lex order](#21-multiset-combination-in-lex-order)
    2. [Every m<sup>th</sup> multiset combination](#22-every-m-th-multiset-combination)
    3. [Multiset combination random choice](#23-multiset-combination-random-choice)
    4. [Multiset combination random sample](#24-multiset-combination-random-sample)
-   5. [Multiset combination from sequence](#25-multiset-combination-from-sequence)
+   5. [Multiset combination for ranks](#25-multiset-combination-for-ranks)
 
 3. [Repetitive Combinations](#3-repetitive-combinations)
    1. [Repetitive combination in lex order](#31-repetitive-combination-in-lex-order)
    2. [Every m<sup>th</sup> repetitive combination](#32-every-m-th-repetitive-combination)
    3. [Repetitive combination random choice](#33-repetitive-combination-random-choice)
    4. [Repetitive combination random sample](#34-repetitive-combination-random-sample)
-   5. [Repetitive combination from sequence](#35-repetitive-combination-from-sequence)
+   5. [Repetitive combination for ranks](#35-repetitive-combination-for-ranks)
 
 ---
 
@@ -106,7 +106,7 @@ JNumberTools.combinations()
     .stream().forEach(System.out::println);
 ```
 
-#### 1.5 Unique combination from sequence
+#### 1.5 Unique combination for ranks
 Generates combinations at indices specified by a custom sequence.
 
 ```java
@@ -114,7 +114,7 @@ Generates combinations at indices specified by a custom sequence.
 var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
 JNumberTools.combinations()
     .unique(200, 100)
-    .fromSequence(iterable)
+    .ofRanks(iterable)
     .stream().toList();
 ```
 
@@ -168,7 +168,7 @@ JNumberTools.combinations()
     .stream().forEach(System.out::println);
 ```
 
-#### 2.5 Multiset combination from sequence
+#### 2.5 Multiset combination for ranks
 Generates multiset combinations at indices specified by a custom sequence.
 
 ```java
@@ -177,7 +177,7 @@ var elements = new LinkedHashMap<>(Map.of("Apple", 50, "Banana", 50));
 var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
 JNumberTools.combinations()
     .multiset(elements, 3)
-    .fromSequence(iterable)
+    .ofRanks(iterable)
     .stream().toList();
 ```
 
@@ -239,7 +239,7 @@ JNumberTools.combinations()
     .stream().forEach(System.out::println);
 ```
 
-#### 3.5 Repetitive combination from sequence
+#### 3.5 Repetitive combination for ranks
 Generates repetitive combinations at indices specified by a custom sequence.
 
 ```java
@@ -247,13 +247,13 @@ Generates repetitive combinations at indices specified by a custom sequence.
 var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
 JNumberTools.combinations()
     .repetitive(200, 100)
-    .fromSequence(iterable)
+    .ofRanks(iterable)
     .stream().toList();
 ```
 [Home](../../README.md)
 </br>[Permutation Generators](../permutations/README.md)
 </br>[Combination Generators](../combinations/README.md)
-</br>[Set/Subset Generators](../sets/sets.md)
+</br>[Set/Subset Generators](../sets/README.md)
 </br>[Cartesian Product Generators](../products/README.md)
 </br>[Math Functions](../calculator/README.md)
 </br>[Ranking Algorithms](../ranking/README.md)

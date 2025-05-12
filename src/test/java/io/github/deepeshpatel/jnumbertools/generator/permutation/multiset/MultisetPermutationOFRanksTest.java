@@ -10,7 +10,7 @@ import java.util.Map;
 import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
 import static org.junit.jupiter.api.Assertions.*;
 
-class MultisetPermutationForSequenceTest {
+class MultisetPermutationOFRanksTest {
 
     @Nested
     class MultisetPermutationSampleTest {

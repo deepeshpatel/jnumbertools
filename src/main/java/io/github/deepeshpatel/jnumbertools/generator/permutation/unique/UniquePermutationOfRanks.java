@@ -2,7 +2,6 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
@@ -30,7 +29,7 @@ import java.util.NoSuchElementException;
  * @author Deepesh Patel
  * @version 3.0.1
  */
-public final class UniquePermutationForSequence<T> extends AbstractGenerator<T> {
+public final class UniquePermutationOfRanks<T> extends AbstractGenerator<T> {
 
     private final BigInteger totalPermutations;
     private final Iterable<BigInteger> ranks;
@@ -44,7 +43,7 @@ public final class UniquePermutationForSequence<T> extends AbstractGenerator<T> 
      * @param calculator utility for computing factorials and permutations
      * @throws IllegalArgumentException if elements is null
      */
-    public UniquePermutationForSequence(List<T> elements, Iterable<BigInteger> ranks, Calculator calculator) {
+    public UniquePermutationOfRanks(List<T> elements, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements);
         this.ranks = ranks;
         this.totalPermutations = calculator.factorial(elements.size());

@@ -1,3 +1,7 @@
+/*
+ * JNumberTools Library v3.0.1
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
@@ -8,13 +12,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public class KPermutationForSequence<T> extends AbstractKPermutation<T> {
+public class KPermutationOfRanks<T> extends AbstractKPermutation<T> {
     final int[] initialValue;
     final BigInteger nPk;
 
     final Iterable<BigInteger> sequence;
 
-    public KPermutationForSequence(List<T> elements, int k, Iterable<BigInteger> sequence, Calculator calculator) {
+    public KPermutationOfRanks(List<T> elements, int k, Iterable<BigInteger> sequence, Calculator calculator) {
         super(elements, k);
         this.sequence = sequence;
         this.initialValue = IntStream.range(0, k).toArray();

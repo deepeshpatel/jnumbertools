@@ -2,7 +2,6 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
@@ -29,19 +28,19 @@ import java.util.Map;
  * @author Deepesh Patel
  * @version 3.0.1
  */
-public class MultisetCombinationForSequence<T> extends AbstractMultisetCombination<T> {
+public class MultisetCombinationOfRanks<T> extends AbstractMultisetCombination<T> {
 
     private final Iterable<BigInteger> ranks;
 
     /**
-     * Constructs a new MultisetCombinationForSequence instance.
+     * Constructs a new MultisetCombinationOfRanks instance.
      *
      * @param options    the {@code LinkedHashMap} of distinct elements and their frequencies defining the multiset
      * @param r          the size of each combination (r); must be non-negative
      * @param ranks      the iterable providing the sequence of ranks; each rank must be in [0, total combinations)
      * @throws IllegalArgumentException if r is negative or options/frequencies are invalid
      */
-    public MultisetCombinationForSequence(LinkedHashMap<T, Integer> options, int r, Iterable<BigInteger> ranks) {
+    public MultisetCombinationOfRanks(LinkedHashMap<T, Integer> options, int r, Iterable<BigInteger> ranks) {
         super(options, r);
         this.ranks = ranks;
     }
