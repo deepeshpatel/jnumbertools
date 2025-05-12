@@ -17,7 +17,6 @@ import java.util.NoSuchElementException;
  * </p>
  *
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public class SimpleProduct implements Iterable<List<Object>> {
 

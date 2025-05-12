@@ -14,17 +14,17 @@ import java.math.BigInteger;
 import java.util.List;
 
 /**
- * Builder for generating unique combinations of elements with various sampling strategies.
+ * Builder for generating unique combinations of size r from n items.
  * <p>
- * This builder provides methods to generate combinations in lexicographical order, sample combinations
- * randomly with or without replacement, or follow a custom sequence of ranks. It leverages a
- * {@link Calculator} to compute combination counts and supports flexible rank sequences via
- * {@link UniqueCombinationOfRanks}.
+ * A unique combination is a selection of r items from n distinct items where order does not matter,
+ * with the total number of combinations given by ⁿCᵣ = n! / (r! * (n-r)!).
+ * This builder supports generating combinations in lexicographical order, sampling combinations
+ * randomly with or without replacement, or following a custom sequence of ranks.
+ * It uses a {@link Calculator} for computing combination counts and ranks.
  * </p>
  *
  * @param <T> the type of elements in the combinations
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public final class UniqueCombinationBuilder<T> implements Builder<T> {
 
@@ -33,11 +33,12 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
     private final Calculator calculator;
 
     /**
-     * Constructs a new builder for unique combinations.
+     * Constructs a builder for unique combinations.
      *
-     * @param elements   the list of elements from which combinations are generated
-     * @param size       the size of each combination (r); must be non-negative and ≤ elements.size()
-     * @param calculator the calculator used for computing combination counts and ranks
+     * @param elements   the list of items to generate combinations from (must not be null or empty)
+     * @param size       the size of each combination (0 ≤ r ≤ n)
+     * @param calculator the calculator for computing combination counts and ranks
+     * @throws IllegalArgumentException if size < 0, size > n, or elements is null/empty
      */
     public UniqueCombinationBuilder(List<T> elements, int size, Calculator calculator) {
         this.elements = elements;
@@ -46,23 +47,23 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Creates an instance that generates all unique combinations in lexicographical order.
+     * Creates a generator for all unique combinations in lexicographical order.
      *
-     * @return a {@link UniqueCombination} instance for full lexicographical iteration
+     * @return a {@link UniqueCombination} for iterating all ⁿCᵣ combinations
      */
     public UniqueCombination<T> lexOrder() {
         return new UniqueCombination<>(elements, size);
     }
 
     /**
-     * Creates an instance that samples unique combinations randomly without replacement.
+     * Creates a generator that samples unique combinations randomly without replacement.
      * <p>
      * Uses {@link BigIntegerSample} to ensure each combination in the sample is distinct.
      * </p>
      *
-     * @param sampleSize the number of combinations to generate; must be positive and ≤ nCr
-     * @return a {@link UniqueCombinationOfRanks} instance for random sampling without replacement
-     * @throws IllegalArgumentException if sampleSize is invalid or exceeds total combinations
+     * @param sampleSize the number of combinations to sample (1 ≤ sampleSize ≤ ⁿCᵣ)
+     * @return a {@link UniqueCombinationOfRanks} for random sampling without replacement
+     * @throws IllegalArgumentException if sampleSize ≤ 0 or sampleSize > ⁿCᵣ
      */
     public UniqueCombinationOfRanks<T> sample(int sampleSize) {
         BigInteger nCr = calculator.nCr(elements.size(), size);
@@ -70,14 +71,14 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Creates an instance that samples unique combinations randomly with replacement.
+     * Creates a generator that samples unique combinations randomly with replacement.
      * <p>
-     * Uses {@link BigIntegerChoice} to allow duplicate combinations across the sample.
+     * Uses {@link BigIntegerChoice} to allow duplicate combinations in the sample.
      * </p>
      *
-     * @param sampleSize the number of combinations to generate; must be positive
-     * @return a {@link UniqueCombinationOfRanks} instance for random sampling with replacement
-     * @throws IllegalArgumentException if sampleSize is not positive
+     * @param sampleSize the number of combinations to sample (sampleSize ≥ 1)
+     * @return a {@link UniqueCombinationOfRanks} for random sampling with replacement
+     * @throws IllegalArgumentException if sampleSize ≤ 0
      */
     public UniqueCombinationOfRanks<T> choice(int sampleSize) {
         BigInteger nCr = calculator.nCr(elements.size(), size);
@@ -85,43 +86,44 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Generates combinations at the specified combinatorial rank positions.
+     * Creates a generator for combinations at specified ranks.
      * <p>
-     * Example for C(3,2) (3 total combinations):
-     * <pre>
-     * atRanks([0, 2]) → [A,B], [A,C]
-     * </pre>
+     * For example, for ⁿCᵣ with n=3, r=2, ranks [0, 2] might yield [A, B], [B, C].
+     * </p>
      *
-     * @throws IllegalArgumentException if rank ≥ C(n,k)
+     * @param iterable the iterable of ranks (each rank in [0, ⁿCᵣ))
+     * @return a {@link UniqueCombinationOfRanks} for the specified ranks
+     * @throws IllegalArgumentException if any rank < 0 or rank ≥ ⁿCᵣ
      */
     public UniqueCombinationOfRanks<T> ofRank(Iterable<BigInteger> iterable) {
-        return new UniqueCombinationOfRanks<>(elements, size , iterable, calculator);
+        return new UniqueCombinationOfRanks<>(elements, size, iterable, calculator);
     }
 
     /**
-     * Creates an instance that generates every mᵗʰ combination in lexicographical order starting from a given rank,
-     * using long values for convenience.
+     * Creates a generator for every mᵗʰ combination in lexicographical order, starting from a given rank.
+     * <p>
+     * Generates ranks: start, start+m, start+2m, ..., up to ⁿCᵣ - 1.
+     * </p>
      *
-     * @param m      the increment between combination ranks; must be positive
-     * @param start  the starting rank (inclusive); must be non-negative and less than nCr
-     * @return a {@link UniqueCombinationOfRanks} instance for lexicographical sequence
-     * @throws IllegalArgumentException if m or start is invalid
-     * @see #lexOrderMth(BigInteger, BigInteger)
+     * @param m     the increment between ranks (m > 0)
+     * @param start the starting rank (0 ≤ start < ⁿCᵣ)
+     * @return a {@link UniqueCombinationOfRanks} for the sequence
+     * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿCᵣ
      */
     public UniqueCombinationOfRanks<T> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
     /**
-     * Creates an instance that generates every mᵗʰ combination in lexicographical order starting from a given rank.
+     * Creates a generator for every mᵗʰ combination in lexicographical order, starting from a given rank.
      * <p>
-     * Uses {@link EveryMthIterable} to produce a sequence of ranks: start, start+m, start+2m, etc., up to nCr.
+     * Uses {@link EveryMthIterable} to produce ranks: start, start+m, start+2m, ..., up to ⁿCᵣ - 1.
      * </p>
      *
-     * @param m      the increment between combination ranks; must be positive
-     * @param start  the starting rank (inclusive); must be non-negative and less than nCr
-     * @return a {@link UniqueCombinationOfRanks} instance for lexicographical sequence
-     * @throws IllegalArgumentException if m or start is invalid
+     * @param m     the increment between ranks (m > 0)
+     * @param start the starting rank (0 ≤ start < ⁿCᵣ)
+     * @return a {@link UniqueCombinationOfRanks} for the sequence
+     * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿCᵣ
      */
     public UniqueCombinationOfRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
         BigInteger nCr = calculator.nCr(elements.size(), size);
@@ -130,23 +132,20 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Creates an instance that generates combinations based on a custom sequence of ranks.
+     * Creates a generator for combinations based on a custom sequence of ranks.
      *
-     * @param ranks the iterable providing the sequence of ranks; each rank must be in [0, nCr)
-     * @return a {@link UniqueCombinationOfRanks} instance for custom sequence
-     * @throws IllegalArgumentException if ranks contains invalid values
+     * @param ranks the iterable of ranks (each rank in [0, ⁿCᵣ))
+     * @return a {@link UniqueCombinationOfRanks} for the custom sequence
+     * @throws IllegalArgumentException if any rank < 0 or rank ≥ ⁿCᵣ
      */
     public UniqueCombinationOfRanks<T> withSequence(Iterable<BigInteger> ranks) {
         return new UniqueCombinationOfRanks<>(elements, size, ranks, calculator);
     }
 
     /**
-     * Returns the total number of possible unique combinations (nCr).
-     * <p>
-     * Computed using the combination formula, leveraging cached values in the calculator for efficiency.
-     * </p>
+     * Returns the total number of unique combinations.
      *
-     * @return the total number of unique combinations as a {@link BigInteger}
+     * @return the value of ⁿCᵣ as a {@link BigInteger}
      */
     public BigInteger count() {
         return calculator.nCr(elements.size(), size);

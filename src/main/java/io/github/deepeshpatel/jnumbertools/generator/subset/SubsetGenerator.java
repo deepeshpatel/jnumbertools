@@ -19,13 +19,11 @@ import java.util.List;
  * </p>
  * <p>
  * <strong>Note:</strong> Instances of this class are intended to be constructed via a builder,
- * so its constructor is package‑private.
+ * so its constructor is package-private.
  * </p>
  *
  * @param <T> the type of elements in the subsets
- * @since 1.0.3
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public final class SubsetGenerator<T> extends AbstractGenerator<T> {
 

@@ -24,7 +24,6 @@ import java.util.List;
  *
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel
- * @version 3.0.1
  * @see <a href="https://en.wikipedia.org/wiki/Permutation">Wikipedia: Permutation</a>
  */
 public final class UniquePermutation<T> extends AbstractGenerator<T> {

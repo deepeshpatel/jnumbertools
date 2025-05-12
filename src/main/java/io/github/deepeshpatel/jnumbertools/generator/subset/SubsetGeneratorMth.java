@@ -26,7 +26,6 @@ import java.util.NoSuchElementException;
  * </p>
  *
  * @param <T> the type of elements in the subsets
- * @since 1.0.3
  * @author Deepesh Patel
  */
 public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> implements MthElementGenerator<T> {
@@ -45,7 +44,7 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> implements
      *
      * @param from       the minimum subset size (inclusive)
      * @param to         the maximum subset size (inclusive)
-     * @param m          the increment for selecting subsets (i.e. every mᵗʰ subset will be generated)
+     * @param m          the increment for selecting subsets (i.e., every mᵗʰ subset will be generated)
      * @param start      the initial position for generating subsets
      * @param elements   the list of elements from which subsets are generated (each item is treated as unique)
      * @param calculator the calculator used for combinatorial calculations
@@ -67,6 +66,9 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> implements
      * This is useful because creating an iterator may involve expensive computations in {@code hasNext()}.
      * </p>
      *
+     * <p>Note: This method relies on {@code indicesToValues}, defined in the parent class
+     * {@code AbstractGenerator}, to map index arrays to element lists.
+     *
      * @return the mᵗʰ subset as a list of elements
      */
     public List<T> build() {
@@ -74,6 +76,12 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> implements
         return indicesToValues(mthIndices.stream().mapToInt(Integer::intValue).toArray());
     }
 
+    /**
+     * Computes the indices of the mᵗʰ subset in lexicographical order.
+     *
+     * @param m the position of the subset to compute
+     * @return the list of indices representing the mᵗʰ subset
+     */
     private List<Integer> mth(BigInteger m) {
         int r = 0;
         int size = elements.size();
@@ -94,6 +102,11 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> implements
                 .lexOrderMth(m, m).iterator().next();
     }
 
+    /**
+     * Calculates the total number of subsets before the specified range.
+     *
+     * @return the total number of subsets with sizes from 0 to from−1
+     */
     private BigInteger totalSubsetsBeforeRange() {
         return calculator.totalSubsetsInRange(0, from - 1, elements.size());
     }

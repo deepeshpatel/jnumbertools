@@ -8,18 +8,25 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- /**
- * Calculator required for combinatorics calculation. This calculator uses memoization
- * for nCr, nPr, factorial, and subFactorial values. All internal caches are implemented
- * using thread-safe collections and are properly synchronized.
- * <p>
- * Thread Safety: This class is thread safe. Instances of this class can be safely shared
- * among multiple threads. A public method {@code clearCaches()} is provided to allow users
- * to evict memoized values if needed. Note that eviction may result in temporary re-computation
- * overhead if other threads are concurrently accessing the caches.
- * </p>
+ * Calculator for combinatorial computations with memoization.
  *
+ * Provides thread-safe methods for calculating binomial coefficients (`ⁿCᵣ`, `ⁿ⁺ᵣ⁻¹Cᵣ`),
+ * permutations (`ⁿPₖ`), factorials (`n!`), subfactorials (`!n`), multinomial coefficients
+ * (`n! / Π(nᵢ!)`), multiset combinations, and more. Uses memoization to cache frequently
+ * computed values (`ⁿCᵣ`, `ⁿPₖ`, `n!`, `!n`) in thread-safe collections with synchronized
+ * access. The `clearCaches()` method allows cache eviction, which may cause temporary
+ * re-computation overhead if accessed concurrently.
  *
+ * Example usage:
+ * ```
+ * Calculator calc = new Calculator();
+ * BigInteger nCr = calc.nCr(5, 2); // 10
+ * BigInteger factorial = calc.factorial(5); // 120
+ * BigInteger multinomial = calc.multinomial(2, 2, 1); // 30
+ * ```
+ *
+ * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
+ * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  * @author Deepesh Patel
  */
 public final class Calculator {
@@ -30,19 +37,19 @@ public final class Calculator {
     private final List<BigInteger> subFactorialCache = Collections.synchronizedList(new ArrayList<>());
 
     /**
-     * Constructs a new {@code Calculator} instance with default cache sizes.
+     * Constructs a new Calculator instance with default cache sizes.
      */
     public Calculator() {
-        this(10, 10, 10,2);
+        this(10, 10, 10, 2);
     }
 
     /**
-     * Constructs a new {@code Calculator} instance with specified cache sizes.
+     * Constructs a new Calculator instance with specified cache sizes.
      *
-     * @param nCrCacheSize The size of the cache for nCr values.
-     * @param nPrCacheSize The size of the cache for nPr values.
-     * @param factorialCacheSize The size of the cache for factorial values.
-     * @param subFactorialCacheSize The size of the cache for sub-factorial values.
+     * @param nCrCacheSize the size of the cache for `ⁿCᵣ` values
+     * @param nPrCacheSize the size of the cache for `ⁿPₖ` values
+     * @param factorialCacheSize the size of the cache for `n!` values
+     * @param subFactorialCacheSize the size of the cache for `!n` values
      */
     public Calculator(int nCrCacheSize, int nPrCacheSize, int factorialCacheSize, int subFactorialCacheSize) {
         setupFactorialCache(factorialCacheSize);
@@ -58,7 +65,7 @@ public final class Calculator {
 
     private void setupSubFactorialCache(int cacheSize) {
         subFactorialCache.add(BigInteger.ONE); // !0 = 1
-        subFactorialCache.add(BigInteger.ZERO);  // !1 = 0
+        subFactorialCache.add(BigInteger.ZERO); // !1 = 0
         subFactorial(cacheSize);
     }
 
@@ -79,25 +86,28 @@ public final class Calculator {
     }
 
     /**
-     * Calculates the binomial coefficient with repetition allowed.
+     * Calculates the binomial coefficient with replacement (`ⁿ⁺ᵣ⁻¹Cᵣ`).
      *
-     * @param n The total number of distinct objects.
-     * @param r The number of objects to choose.
-     * @return The number of ways to choose r objects from n with repetition.
+     * Represents the number of ways to choose r items from n distinct types, allowing repetition.
+     *
+     * @param n the number of distinct item types (n ≥ 0)
+     * @param r the number of items to choose (r ≥ 0)
+     * @return the number of combinations with replacement as a BigInteger
      */
     public BigInteger nCrRepetitive(int n, int r) {
         return nCr(n + r - 1, r);
     }
 
     /**
-     * Calculates the number of ways to choose a sample of r elements from a set of n distinct objects.
+     * Calculates the binomial coefficient (`ⁿCᵣ`) for unique combinations.
      *
-     * @param n The total number of distinct objects.
-     * @param r The number of objects to choose.
-     * @return The number of ways to choose r objects from n without repetition.
+     * Represents the number of ways to choose r distinct items from n distinct items without regard to order.
+     *
+     * @param n the number of distinct items (n ≥ 0)
+     * @param r the number of items to choose (0 ≤ r ≤ n)
+     * @return the number of unique combinations as a BigInteger
      */
     public BigInteger nCr(int n, int r) {
-
         if (r == n || r == 0) {
             return BigInteger.ONE;
         }
@@ -114,11 +124,13 @@ public final class Calculator {
     }
 
     /**
-     * Finds the smallest n such that nCr(n, r) > max.
+     * Finds the smallest n such that `ⁿCᵣ` exceeds max.
      *
-     * @param r the number of elements to choose.
-     * @param max the maximum value to exceed.
-     * @return the smallest n such that nCr(n, r) > max.
+     * Used to determine the minimal set size for combination ranking where the number of combinations exceeds a threshold.
+     *
+     * @param r the number of items to choose (r ≥ 0)
+     * @param max the threshold to exceed (max ≥ 0)
+     * @return the smallest n such that `ⁿCᵣ` > max
      */
     public int nCrUpperBound(int r, BigInteger max) {
         int n = r;
@@ -133,11 +145,13 @@ public final class Calculator {
     }
 
     /**
-     * Calculates the number of ways to arrange r elements from a set of n distinct objects where order matters.
+     * Calculates the number of k-permutations (`ⁿPₖ`).
      *
-     * @param n The total number of distinct objects.
-     * @param r The number of objects to arrange.
-     * @return The number of ways to arrange r objects from n.
+     * Represents the number of ways to arrange k distinct items from n distinct items, where order matters.
+     *
+     * @param n the number of distinct items (n ≥ 0)
+     * @param r the number of items to arrange (0 ≤ r ≤ n)
+     * @return the number of k-permutations as a BigInteger
      */
     public BigInteger nPr(int n, int r) {
         if (r < 0 || n < r) {
@@ -155,19 +169,17 @@ public final class Calculator {
     }
 
     /**
-     * Returns the smallest integer n such that n! (n factorial) is greater than the specified non-negative integer.
-     * <p>
-     * This method iteratively computes factorial values starting from 1! and increments n until the computed factorial
-     * exceeds {@code nonNegativeInt}. It then returns the current value of n.
-     * </p>
+     * Finds the smallest n such that n! exceeds the specified value.
      *
-     * @param nonNegativeInt a {@code BigInteger} representing the threshold that n! must exceed; must be non-negative.
-     * @return the smallest integer n for which factorial(n) > {@code nonNegativeInt}
+     * Iteratively computes factorials until n! > value, used for permutation ranking thresholds.
+     *
+     * @param nonNegativeInt the threshold to exceed (nonNegativeInt ≥ 0)
+     * @return the smallest n such that n! > nonNegativeInt
      */
-    public int factorialUpperBound(BigInteger nonNegativeInt){
-        int i=1;
-        while(true) {
-            if(factorial(i).compareTo(nonNegativeInt) > 0) {
+    public int factorialUpperBound(BigInteger nonNegativeInt) {
+        int i = 1;
+        while (true) {
+            if (factorial(i).compareTo(nonNegativeInt) > 0) {
                 return i;
             }
             i++;
@@ -175,11 +187,13 @@ public final class Calculator {
     }
 
     /**
-     * Calculates the factorial of a non-negative integer n.
+     * Calculates the factorial of a non-negative integer (`n!`).
      *
-     * @param n The integer to calculate the factorial for.
-     * @return The factorial of n.
-     * @throws IllegalArgumentException If n is negative.
+     * Represents the product of all positive integers up to n.
+     *
+     * @param n the integer to calculate the factorial for (n ≥ 0)
+     * @return the factorial of n as a BigInteger
+     * @throws IllegalArgumentException if n is negative
      */
     public BigInteger factorial(int n) {
         if (n < 0) {
@@ -196,10 +210,13 @@ public final class Calculator {
     }
 
     /**
-     * Computes the subFactorial (!n) using recursion with memoization.
+     * Calculates the subfactorial of a non-negative integer (`!n`).
      *
-     * @param n The number for which to compute the subFactorial.
-     * @return The subFactorial of n as a BigInteger.
+     * Represents the number of derangements (permutations with no fixed points) of n items.
+     *
+     * @param n the integer to calculate the subfactorial for (n ≥ 0)
+     * @return the subfactorial of n as a BigInteger
+     * @throws IllegalArgumentException if n is negative
      */
     public BigInteger subFactorial(int n) {
         if (n < 0) {
@@ -217,23 +234,23 @@ public final class Calculator {
     }
 
     /**
-     * Calculates the power of a base raised to an exponent.
+     * Calculates the power of a base raised to an exponent (`baseᵉˣᵖᵒⁿᵉⁿᵗ`).
      *
-     * @param base The base number.
-     * @param exponent The exponent to raise the base to.
-     * @return The result of base^exponent.
+     * @param base the base number
+     * @param exponent the exponent (exponent ≥ 0)
+     * @return the result of base^exponent as a BigInteger
      */
     public BigInteger power(long base, long exponent) {
         return power(BigInteger.valueOf(base), BigInteger.valueOf(exponent));
     }
 
     /**
-     * Calculates the power of a base raised to an exponent.
+     * Calculates the power of a base raised to an exponent (`baseᵉˣᵖᵒⁿᵉⁿᵗ`).
      *
-     * @param base The base number.
-     * @param exponent The exponent to raise the base to.
-     * @return The result of base^exponent.
-     * @throws IllegalArgumentException If exponent is negative.
+     * @param base the base number
+     * @param exponent the exponent (exponent ≥ 0)
+     * @return the result of base^exponent as a BigInteger
+     * @throws IllegalArgumentException if exponent is negative
      */
     public BigInteger power(BigInteger base, BigInteger exponent) {
         if (exponent.signum() < 0) {
@@ -249,35 +266,30 @@ public final class Calculator {
     }
 
     /**
-     * Calculates the total number of possible subsets of size in the range [from, to] for a given number of elements.
+     * Calculates the total number of subsets of sizes in the range [from, to] for n elements (`∑ⁿCᵣ`).
      *
-     * @param from The minimum subset size.
-     * @param to The maximum subset size.
-     * @param noOfElements The total number of elements.
-     * @return The total number of possible subsets.
+     * Represents the sum of binomial coefficients `ⁿCᵣ` for r from `from` to `to`, or 2ⁿ if from=0 and to=n.
+     *
+     * @param from the minimum subset size (from ≥ 0)
+     * @param to the maximum subset size (to ≤ n)
+     * @param n the total number of elements (n ≥ 0)
+     * @return the total number of subsets as a BigInteger
      */
-    public BigInteger totalSubsetsInRange(int from, int to, int noOfElements) {
-
-        if (from == 0 && to == noOfElements) return power(2, noOfElements);
+    public BigInteger totalSubsetsInRange(int from, int to, int n) {
+        if (from == 0 && to == n) return power(2, n);
 
         BigInteger sum = BigInteger.ZERO;
         for (int i = from; i <= to; i++) {
-            sum = sum.add(nCr(noOfElements, i));
+            sum = sum.add(nCr(n, i));
         }
         return sum;
     }
 
     /**
-     * Calculates the multinomial coefficient for the given counts.
-     * <p>
-     * Given counts {n₁, n₂, ..., nₖ} where n = n₁ + n₂ + ... + nₖ, the multinomial
-     * coefficient is given by:
-     * <pre>
-     *     multinomial = n! / Π(nₖ!)
-     * </pre>
-     * This value represents the number of distinct permutations of a multiset
-     * with the specified counts.
-     * </p>
+     * Calculates the multinomial coefficient (`n! / Π(nᵢ!)`) for the given counts.
+     *
+     * Represents the number of distinct permutations of a multiset with counts {n₁, n₂, ..., nₖ},
+     * where n = n₁ + n₂ + ... + nₖ.
      *
      * @param counts an array of non-negative integers representing the counts of distinct items
      * @return the multinomial coefficient as a BigInteger
@@ -296,6 +308,16 @@ public final class Calculator {
         return factorial(total).divide(denominator);
     }
 
+    /**
+     * Calculates the total number of multiset permutations for every m-th rank.
+     *
+     * Used to determine the number of permutations between rank `start` and the last rank, stepping by `m`.
+     *
+     * @param start the starting rank (start ≥ 0)
+     * @param m the step size (m ≥ 1)
+     * @param counts an array of non-negative integers representing the counts of distinct items
+     * @return the total number of permutations as a BigInteger
+     */
     public BigInteger totalMthMultinomial(long start, long m, int... counts) {
         return multinomial(counts)
                 .subtract(BigInteger.ONE)
@@ -304,64 +326,38 @@ public final class Calculator {
                 .add(BigInteger.ONE);
     }
 
-
     /**
-     * Computes the number of ways to select exactly s items from a multiset for all s in the range
-     * [0, ⌊total⌋/2], where total is the sum of the frequencies.
-     * <p>
-     * The multiset is represented by an array of non-negative integers, where each element denotes
-     * the frequency (available count) of a distinct item. This method uses dynamic programming to compute
-     * the coefficients of the generating function:
-     * <pre>
-     *     ∏ (1 + x + x^2 + ... + x^(frequency))
-     * </pre>
-     * The returned array {@code dp} has length ⌊total/2⌋ + 1, and for each index s (0 ≤ s ≤ ⌊total/2⌋),
-     * {@code dp[s]} is the number of ways to select exactly s items from the multiset.
-     * </p>
-     * <p>
-     * Note: Due to symmetry in the generating function, the number of ways to select s items is equal to
-     * the number of ways to select (total - s) items. Therefore, if you need the count for selections
-     * where s > ⌊total/2⌋, you can obtain it by reading the value at index (total - s) in the full set of
-     * coefficients.
-     * </p>
-     * <p>
-     * Example: For frequencies = {2, 2, 3}, the total number of items is 2+2+3 = 7. This method returns
-     * an array of size ⌊7/2⌋ + 1 = 4, where:
-     * <ul>
-     *   <li>dp[0] = 1   (1 way to select 0 items)</li>
-     *   <li>dp[1] = 3   (3 ways to select 1 item)</li>
-     *   <li>dp[2] = 6   (6 ways to select 2 items)</li>
-     *   <li>dp[3] = 8   (8 ways to select 3 items)</li>
-     * </ul>
-     * The combinations for 4, 5, 6, and 7 items can be derived by symmetry:
-     * <ul>
-     *   <li>Ways to select 4 items = dp[7 - 4] = dp[3] = 8</li>
-     *   <li>Ways to select 5 items = dp[7 - 5] = dp[2] = 6</li>
-     *   <li>Ways to select 6 items = dp[7 - 6] = dp[1] = 3</li>
-     *   <li>Ways to select 7 items = dp[7 - 7] = dp[0] = 1</li>
-     * </ul>
-     * </p>
-     * <p>
-     * If you need to calculate the number of combinations for selecting exactly a given number of items,
-     * use {@link #multisetCombinationsCount(int, int...)} instead.
-     * </p>
+     * Calculates the number of ways to select exactly s items from a multiset for all s in [0, ⌊total/2⌋].
      *
-     * @param frequencies an array of non-negative integers representing the available count of each item.
-     * @return an array of integers where the value at index s (0 ≤ s ≤ ⌊total⌋/2) is the number of ways
-     *         to select exactly s items from the multiset.
+     * The multiset is defined by multiplicities, where each integer represents the count of a distinct item type.
+     * Uses dynamic programming to compute coefficients of the generating function Π(1 + x + x² + ... + xᶠʳᵉᵠᵘᵉⁿᶜʸ).
+     * Returns an array dp of length ⌊total/2⌋ + 1, where dp[s] is the number of ways to select exactly s items.
+     * Due to symmetry, ways to select (total - s) items equals dp[s].
+     *
+     * Example: For multiplicities {2, 2, 3} (total=7), returns dp[0..3]:
+     * - dp[0] = 1 (select 0 items)
+     * - dp[1] = 3 (select 1 item)
+     * - dp[2] = 6 (select 2 items)
+     * - dp[3] = 8 (select 3 items)
+     * Symmetry gives: ways for 4=dp[3], 5=dp[2], 6=dp[1], 7=dp[0].
+     *
+     * Use `multisetCombinationsCount` for a specific s.
+     *
+     * @param frequencies an array of non-negative integers representing the multiplicities of item types
+     * @return an array where dp[s] is the number of ways to select s items (0 ≤ s ≤ ⌊total/2⌋)
      * @see #multisetCombinationsCount(int, int...)
      */
     public static int[] multisetCombinationsCountAll(int... frequencies) {
         /*
-            Note: Currently, the method iteratively updates a DP array by “convolving” with the polynomial
-            (1 + x + x^2 + ... + x^freq) for each frequency. Thi is ok for small values but for very large values
-            This can be optimized using FFT-based polynomial
+         * Note: Currently, the method iteratively updates a DP array by “convolving” with the polynomial
+         * (1 + x + x^2 + ... + x^freq) for each frequency. This is ok for small values but for very large values
+         * this can be optimized using FFT-based polynomial.
          */
 
         // Initialize a DP array to store the coefficients of the generating function.
         int k = Arrays.stream(frequencies).sum() / 2;
         int[] dp = new int[k + 1];
-        dp[0] = 1; //1 way to select 0 items
+        dp[0] = 1; // 1 way to select 0 items
 
         for (int freq : frequencies) {
             // temp array to store the updated coefficients.
@@ -380,37 +376,32 @@ public final class Calculator {
 
     /**
      * Calculates the number of ways to select exactly k items from a multiset.
-     * <p>
-     * The multiset is represented by an array of non-negative integers, where each element
-     * denotes the available count of a distinct item. This method uses an optimized recursive
-     * dynamic programming approach with precomputed suffix sums and memoization.
-     * </p>
      *
-     * @param k the exact number of items to select from the multiset.
-     * @param counts an array of non-negative integers representing the counts of each item type.
-     * @return the total number of ways to select exactly k items from the multiset as a BigInteger.
-     * @throws IllegalArgumentException if k is negative or any count is negative.
+     * The multiset is defined by multiplicities, where each integer represents the count of a distinct item type.
+     * Uses recursive dynamic programming with memoization and precomputed suffix sums for efficiency.
+     *
+     * @param k the number of items to select (k ≥ 0)
+     * @param counts an array of non-negative integers representing the multiplicities of item types
+     * @return the number of ways to select k items as a BigInteger
+     * @throws IllegalArgumentException if k or any count is negative
      */
     public static BigInteger multisetCombinationsCount(int k, int... counts) {
         return multisetCombinationsCountStartingFromIndex(k, 0, counts);
     }
 
     /**
-     * Counts the number of ways to select exactly k items from a multiset defined by frequencies,
-     * considering only the item types from the specified index onward.
-     * <p>
-     * This method uses an optimized recursive dynamic programming approach with precomputed suffix sums
-     * and memoization.
-     * </p>
+     * Calculates the number of ways to select exactly k items from a multiset, starting from a given index.
      *
-     * @param k      the exact number of items to select from the multiset.
-     * @param index  the starting index from which to consider item types.
-     * @param counts an array of non-negative integers representing the counts of each item type.
-     * @return the total number of ways to select exactly k items from the multiset from index onward as a BigInteger.
-     * @throws IllegalArgumentException if k is negative, if index is out of range, or if any count is negative.
+     * The multiset is defined by multiplicities, considering item types from the specified index onward.
+     * Uses recursive dynamic programming with memoization and precomputed suffix sums for efficiency.
+     *
+     * @param k the number of items to select (k ≥ 0)
+     * @param index the starting index of item types to consider (0 ≤ index ≤ counts.length)
+     * @param counts an array of non-negative integers representing the multiplicities of item types
+     * @return the number of ways to select k items as a BigInteger
+     * @throws IllegalArgumentException if k is negative, index is out of range, or any count is negative
      */
     public static BigInteger multisetCombinationsCountStartingFromIndex(int k, int index, int... counts) {
-
         if (k < 0) {
             throw new IllegalArgumentException("k must be non-negative.");
         }
@@ -432,8 +423,9 @@ public final class Calculator {
             suffixSum[i] = suffixSum[i + 1] + counts[i];
         }
         TwoLevelMap<Integer, Integer, BigInteger> memo = new TwoLevelMap<>();
-        return  multisetCombinationsHelper(counts, index, k, memo, suffixSum);
+        return multisetCombinationsHelper(counts, index, k, memo, suffixSum);
     }
+
     private static BigInteger multisetCombinationsHelper(int[] counts, int index, int k,
                                                          TwoLevelMap<Integer, Integer, BigInteger> memo, int[] suffixSum) {
         if (k == 0) {
@@ -460,12 +452,13 @@ public final class Calculator {
     }
 
     /**
-     * Computes the Rencontres number, which represents the number of permutations
-     * of size n with exactly k fixed points.
+     * Calculates the Rencontres number (`ⁿCₖ · !(n-k)`).
      *
-     * @param n The size of the permutation.
-     * @param k The number of fixed points.
-     * @return The Rencontres number for (n, k) as a BigInteger.
+     * Represents the number of permutations of n items with exactly k fixed points (elements mapped to themselves).
+     *
+     * @param n the size of the permutation (n ≥ 0)
+     * @param k the number of fixed points (0 ≤ k ≤ n)
+     * @return the Rencontres number as a BigInteger
      */
     public BigInteger rencontresNumber(int n, int k) {
         if (k > n || k < 0) {
@@ -476,15 +469,13 @@ public final class Calculator {
 
     /**
      * Calculates the Greatest Common Divisor (GCD) of multiple BigInteger numbers.
-     * <p>
-     * Uses the binary GCD algorithm iteratively to compute the GCD of all inputs.
-     * Returns 0 if all inputs are 0, the absolute value of the single input if only one is provided,
-     * and throws an exception if the input array is empty or null.
-     * </p>
      *
-     * @param a Variable number of BigInteger inputs.
-     * @return The GCD of all inputs as a BigInteger.
-     * @throws IllegalArgumentException If the input array is null or empty.
+     * Uses the binary GCD algorithm iteratively. Returns 0 if all inputs are 0, the absolute value of a single input,
+     * or throws an exception if the input array is empty or null.
+     *
+     * @param a variable number of BigInteger inputs
+     * @return the GCD of all inputs as a BigInteger
+     * @throws IllegalArgumentException if the input array is null or empty
      */
     public static BigInteger gcd(BigInteger... a) {
         BigInteger result = a[0] == null ? BigInteger.ZERO : a[0].abs();
@@ -498,23 +489,20 @@ public final class Calculator {
 
     /**
      * Calculates the Least Common Multiple (LCM) of multiple BigInteger numbers.
-     * <p>
-     * Computes LCM iteratively using the formula LCM(a, b) = |a * b| / GCD(a, b).
-     * Returns 0 if any input is 0, the absolute value of the single input if only one is provided,
-     * and throws an exception if the input array is empty or null.
-     * </p>
      *
-     * @param a Variable number of BigInteger inputs.
-     * @return The LCM of all inputs as a BigInteger.
-     * @throws IllegalArgumentException If the input array is null or empty.
+     * Computes LCM iteratively using LCM(a, b) = |a * b| / GCD(a, b). Returns 0 if any input is 0,
+     * the absolute value of a single input, or throws an exception if the input array is empty or null.
+     *
+     * @param a variable number of BigInteger inputs
+     * @return the LCM of all inputs as a BigInteger
+     * @throws IllegalArgumentException if the input array is null or empty
      */
-
     public static BigInteger lcm(BigInteger... a) {
         return lcmTree(a, 0, a.length - 1);
     }
 
     private static BigInteger lcmTree(BigInteger[] arr, int start, int end) {
-        if (end - start + 1 <= 10) { //THRESHOLD to switch to iterative
+        if (end - start + 1 <= 10) { // THRESHOLD to switch to iterative
             return iterativeLCM(arr, start, end);
         }
 
@@ -540,13 +528,9 @@ public final class Calculator {
     }
 
     /**
-     * Clears all memoization caches used by this Calculator.
-     * <p>
-     * This method clears the caches for nCr, nPr, factorial, and subfactorial values.
-     * Note that if another thread is concurrently computing a value while this method is called,
-     * that computation may be recomputed and re-cached. The Calculator remains thread safe,
-     * but eviction may result in temporary re-computation overhead.
-     * </p>
+     * Clears all memoization caches (`ⁿCᵣ`, `ⁿPₖ`, `n!`, `!n`).
+     *
+     * Eviction may cause temporary re-computation overhead if accessed concurrently. The Calculator remains thread-safe.
      */
     public void clearCaches() {
         nCrMemo.clear();
@@ -561,5 +545,4 @@ public final class Calculator {
             setupSubFactorialCache(3);
         }
     }
-
 }

@@ -27,13 +27,11 @@ import java.util.NoSuchElementException;
  *
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public final class UniquePermutationOfRanks<T> extends AbstractGenerator<T> {
 
     private final BigInteger totalPermutations;
     private final Iterable<BigInteger> ranks;
-
 
     /**
      * Constructs a generator for unique permutations based on a rank sequence.

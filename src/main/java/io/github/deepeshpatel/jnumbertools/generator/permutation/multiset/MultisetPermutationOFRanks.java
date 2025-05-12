@@ -9,10 +9,47 @@ import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import java.math.BigInteger;
 import java.util.*;
 
+/**
+ * Generates multiset permutations at specific lexicographical rank positions.
+ * <p>
+ * Given a multiset with element frequencies (f₁, f₂, ..., fₖ), this class efficiently computes
+ * permutations at specified ranks without generating all preceding permutations.
+ * The total number of permutations is n!/(f₁! × f₂! × ... × fₖ!) where n = ∑fᵢ.
+ * </p>
+ *
+ * <p><b>Example:</b>
+ * <pre>{@code
+ * // Generate permutations at ranks 0, 2 for multiset [A, A, B]
+ * LinkedHashMap<String, Integer> multiset = new LinkedHashMap<>();
+ * multiset.put("A", 2);
+ * multiset.put("B", 1);
+ *
+ * new MultisetPermutationOFRanks<>(multiset, List.of(BigInteger.ZERO, BigInteger.valueOf(2)), calculator)
+ *     .forEach(System.out::println);
+ *
+ * // Output:
+ * // [A, A, B] (rank 0)
+ * // [A, B, A] (rank 2)
+ * }</pre>
+ *
+ * @param <T> the type of elements in the multiset
+ * @author Deepesh Patel
+ * @see MultisetPermutation
+ * @see MultisetPermutationBuilder
+ * @since 1.0.0
+ */
 public final class MultisetPermutationOFRanks<T> extends AbstractMultisetPermutation<T> {
 
     private final Iterable<BigInteger> ranks;
 
+    /**
+     * Constructs a multiset permutation generator for specific ranks.
+     *
+     * @param multiset the multiset with element frequencies (must not be null or empty)
+     * @param ranks the 0-based rank positions to generate (each rank must be 0 ≤ rank < n!/(∏fᵢ!))
+     * @param calculator the calculator for combinatorial operations
+     * @throws IllegalArgumentException if multiset is empty or any rank is invalid
+     */
     public MultisetPermutationOFRanks(LinkedHashMap<T, Integer> multiset, Iterable<BigInteger> ranks, Calculator calculator) {
         super(multiset, calculator);
         this.ranks = ranks;

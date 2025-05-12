@@ -23,7 +23,6 @@ import java.util.List;
  * </p>
  *
  * @param <T> the type of elements in the subsets
- * @since 1.0.3
  * @author Deepesh Patel
  */
 public class SubsetBuilder<T> implements Builder<T> {

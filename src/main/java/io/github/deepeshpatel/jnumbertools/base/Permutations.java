@@ -15,35 +15,25 @@ import java.util.stream.IntStream;
 
 import static java.util.Arrays.asList;
 
-
 /**
- * Builder class to generating various types of permutations.
- *
+ * Builder for generating various types of permutations.
  * <p>
- * Supports following permutations -
- * <ul>
- *     <li><strong>Unique permutation generation in lex order:</strong> </li>
- *     <li><strong>Unique permutation generation with single swap order</strong> as as per Heap's algorithm</li>
- *     <li><strong>Mth unique permutation generation in lex order</strong> </li>
- *     <li><strong>Repetitive permutation generation in lex order</strong> </li>
- *     <li><strong>Mth Repetitive permutation generation in lex order</strong> </li>
- *     <li><strong>Multiset permutation generation in lex order</strong> </li>
- *     <li><strong>Mth multiset permutation generation in lex order</strong> </li>
- *     <li><strong>k-permutation generation in lex order</strong> </li>
- *     <li><strong>Mth k-permutation generation in lex order</strong> </li>
- *     <li><strong>k-permutation generation in combination order</strong> </li>
- *     <li><strong>Mth k-permutation generation in combination order</strong> </li>
- * </ul>
- *
+ * A permutation is an order-dependent arrangement of elements. This class supports:
+ * <p>
+ * - Unique Permutations (`ⁿ!`): All permutations of n distinct elements, in lexicographical or single-swap (Heap's algorithm) order, or by rank.
+ * - k-Permutations (`ⁿPₖ`): Permutations of k elements from n distinct elements, in lexicographical or combination order, or by rank.
+ * - Repetitive Permutations (`nᵣ`): Permutations of r elements from n distinct elements with repetition, in lexicographical order or by rank.
+ * - Multiset Permutations: Permutations of a multiset with specified multiplicities, output as frequency maps, in lexicographical order or by rank.
+ * </p>
+ * Outputs are lists of elements, except for multiset permutations (frequency maps).
  * Example usage:
  * <pre>
- * <code>
  * Permutations perm = new Permutations();
- * List&lt;List&lt;Integer&gt;&gt; result = perm.nPr(3,2).lexOrder().stream().toList();
- * </code>
+ * List<List<Integer>> result = perm.nPk(3, 2).lexOrder().stream().toList();
  * </pre>
  *
  * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
+ * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  * @author Deepesh Patel
  */
 public final class Permutations {
@@ -51,51 +41,61 @@ public final class Permutations {
     private final Calculator calculator;
 
     /**
-     * Creates a new instance of {@code Permutations} with a default {@code Calculator}.
+     * Constructs a new Permutations instance with a default Calculator.
      */
     public Permutations() {
         this(new Calculator());
     }
 
     /**
-     * Creates a new instance of {@code Permutations} with the specified {@code Calculator}.
+     * Constructs a new Permutations instance with the specified Calculator.
      *
-     * @param calculator The {@code Calculator} to be used by this instance.
+     * @param calculator the Calculator for combinatorial computations
      */
     public Permutations(Calculator calculator) {
         this.calculator = calculator;
     }
 
     /**
-     * Creates a builder for unique permutations of a specified size.
+     * Creates a builder for unique permutations (`ⁿ!`) of a range of integers.
+     * <p>
+     * Generates all permutations of {0, 1, ..., n-1} in lexicographical or single-swap
+     * (Heap's algorithm) order, or by rank.
+     * </p>
      *
-     * @param size The size of the permutations.
-     * @return A builder for unique permutations.
+     * @param n the number of distinct elements (n ≥ 0)
+     * @return a UniquePermutationBuilder for integer elements
      */
-    public UniquePermutationBuilder<Integer> unique(int size) {
-        return unique(IntStream.range(0, size).boxed().toList());
+    public UniquePermutationBuilder<Integer> unique(int n) {
+        return unique(IntStream.range(0, n).boxed().toList());
     }
 
     /**
-     * Creates a builder for unique permutations of a specified list.
+     * Creates a builder for unique permutations (`ⁿ!`) of a list of elements.
+     * <p>
+     * Generates all permutations of the input list in lexicographical or single-swap
+     * (Heap's algorithm) order, or by rank.
+     * </p>
      *
-     * @param list The list of elements to permute.
-     * @param <T> The type of elements.
-     * @return A builder for unique permutations.
+     * @param list the list of distinct elements to permute
+     * @param <T> the type of elements
+     * @return a UniquePermutationBuilder for the specified elements
      */
     public <T> UniquePermutationBuilder<T> unique(List<T> list) {
         return new UniquePermutationBuilder<>(calculator, list);
     }
 
     /**
-     * Creates a builder for unique permutations of a specified array.
-     * Caution is required while using this method for single element as it may result in
-     * accidental invocation of method unique(int size) for single length char array.
-     * For example unique('a') will result in unique(97) because ASCII value of 'a' is 97
+     * Creates a builder for unique permutations (`ⁿ!`) of a varargs list of elements.
+     * <p>
+     * Generates all permutations of the input elements in lexicographical or single-swap
+     * (Heap's algorithm) order, or by rank. Caution: For a single character input (e.g., 'a'),
+     * this may invoke unique(int n) with the ASCII value (e.g., 97 for 'a').
+     * </p>
      *
-     * @param array The array of elements to permute.
-     * @param <T> The type of elements.
-     * @return A builder for unique permutations.
+     * @param array the elements to permute
+     * @param <T> the type of elements
+     * @return a UniquePermutationBuilder for the specified elements
      */
     @SafeVarargs
     public final <T> UniquePermutationBuilder<T> unique(T... array) {
@@ -103,90 +103,119 @@ public final class Permutations {
     }
 
     /**
-     * Creates a builder for permutations of r elements from a set of n elements.
+     * Creates a builder for k-permutations (`ⁿPₖ`) from a range of integers.
+     * <p>
+     * Generates permutations of k distinct elements from {0, 1, ..., n-1} in
+     * lexicographical or combination order, or by rank.
+     * </p>
      *
-     * @param n The total number of elements.
-     * @param k The number of elements to permute.
-     * @return A builder for permutations.
+     * @param n the number of distinct elements
+     * @param k the size of each permutation (k ≥ 0)
+     * @return a KPermutationBuilder for integer elements
      */
     public KPermutationBuilder<Integer> nPk(int n, int k) {
         return nPk(k, IntStream.range(0, n).boxed().toList());
     }
 
     /**
-     * Creates a builder for permutations of r elements from a list of elements.
+     * Creates a builder for k-permutations (`ⁿPₖ`) from a list of elements.
+     * <p>
+     * Generates permutations of k distinct elements from the input list in
+     * lexicographical or combination order, or by rank.
+     * </p>
      *
-     * @param k The number of elements to permute.
-     * @param allElements The list of all elements.
-     * @param <T> The type of elements.
-     * @return A builder for permutations.
+     * @param k the size of each permutation (k ≥ 0)
+     * @param allElements the list of distinct elements
+     * @param <T> the type of elements
+     * @return a KPermutationBuilder for the specified elements
      */
     public <T> KPermutationBuilder<T> nPk(int k, List<T> allElements) {
         return new KPermutationBuilder<>(allElements, k, calculator);
     }
 
     /**
-     * Creates a builder for permutations of r elements from a varargs list of elements.
+     * Creates a builder for k-permutations (`ⁿPₖ`) from a varargs list of elements.
+     * <p>
+     * Generates permutations of k distinct elements from the input elements in
+     * lexicographical or combination order, or by rank.
+     * </p>
      *
-     * @param k The number of elements to permute.
-     * @param allElements The varargs list of elements.
-     * @param <T> The type of elements.
-     * @return A builder for permutations.
+     * @param k the size of each permutation (k ≥ 0)
+     * @param allElements the elements to permute
+     * @param <T> the type of elements
+     * @return a KPermutationBuilder for the specified elements
      */
     @SafeVarargs
     public final <T> KPermutationBuilder<T> nPk(int k, T... allElements) {
         return nPk(k, asList(allElements));
     }
 
-//    /**
-//     * Creates a builder for multiset permutations of elements with specified frequencies.
-//     *
-//     * @param elements The list of elements.
-//     * @param frequencies The frequencies of elements.
-//     * @param <T> The type of elements.
-//     * @return A builder for multiset permutations.
-//     */
+    /**
+     * Creates a builder for multiset permutations.
+     * <p>
+     * Generates all permutations of a multiset with specified multiplicities, output as
+     * frequency maps, in lexicographical order or by rank. The number of permutations is
+     * n!/(f₁!·f₂!·...), where fᵢ are the multiplicities.
+     * </p>
+     *
+     * @param options a map of elements to their multiplicities (must not be null or empty)
+     * @param <T> the type of elements
+     * @return a MultisetPermutationBuilder for the specified multiset
+     */
     public <T> MultisetPermutationBuilder<T> multiset(LinkedHashMap<T, Integer> options) {
         return new MultisetPermutationBuilder<>(options, calculator);
     }
 
     /**
-     * Creates a builder for repetitive permutations of elements with specified width.
+     * Creates a builder for repetitive permutations (`nᵣ`) from a list of elements.
+     * <p>
+     * Generates permutations of r elements from the input list with repetition, in
+     * lexicographical order or by rank.
+     * </p>
      *
-     * @param width The width of the permutations.
-     * @param elements The list of elements.
-     * @param <T> The type of elements.
-     * @return A builder for repetitive permutations.
+     * @param r the size of each permutation (r ≥ 0)
+     * @param elements the list of distinct elements
+     * @param <T> the type of elements
+     * @return a RepetitivePermutationBuilder for the specified elements
      */
-    public  <T> RepetitivePermutationBuilder<T> repetitive(int width, List<T> elements) {
-        return new RepetitivePermutationBuilder<>(width, elements, calculator);
+    public <T> RepetitivePermutationBuilder<T> repetitive(int r, List<T> elements) {
+        return new RepetitivePermutationBuilder<>(r, elements, calculator);
     }
 
     /**
-     * Creates a builder for repetitive permutations of elements with specified width using varargs.
+     * Creates a builder for repetitive permutations (`nᵣ`) from a varargs list of elements.
+     * <p>
+     * Generates permutations of r elements from the input elements with repetition, in
+     * lexicographical order or by rank.
+     * </p>
      *
-     * @param width The width of the permutations.
-     * @param elements The varargs list of elements.
-     * @param <T> The type of elements.
-     * @return A builder for repetitive permutations.
+     * @param r the size of each permutation (r ≥ 0)
+     * @param elements the elements to permute
+     * @param <T> the type of elements
+     * @return a RepetitivePermutationBuilder for the specified elements
      */
     @SafeVarargs
-    public final <T> RepetitivePermutationBuilder<T> repetitive(int width, T... elements) {
-        return repetitive(width, List.of(elements));
+    public final <T> RepetitivePermutationBuilder<T> repetitive(int r, T... elements) {
+        return repetitive(r, List.of(elements));
     }
 
     /**
-     * Creates a builder for repetitive permutations of integers with specified width and base.
+     * Creates a builder for repetitive permutations (`nᵣ`) from a range of integers.
+     * <p>
+     * Generates permutations of r elements from {0, 1, ..., n-1} with repetition, in
+     * lexicographical order or by rank.
+     * </p>
      *
-     * @param width The width of the permutations.
-     * @param numberOfElements The max number symbols/elements int the permutations.
-     * @return A builder for repetitive permutations.
+     * @param r the size of each permutation (r ≥ 0)
+     * @param n the number of distinct elements (n ≥ 1)
+     * @return a RepetitivePermutationBuilder for integer elements
+     * @throws IllegalArgumentException if n ≤ 0
      */
-    public RepetitivePermutationBuilder<Integer> repetitive(int width, int numberOfElements) {
-        if(numberOfElements <=0) {
+    public RepetitivePermutationBuilder<Integer> repetitive(int r, int n) {
+        if (n <= 0) {
             throw new IllegalArgumentException("Repetitive permutation generation required at least 1 element/symbol");
         }
-        var symbols = IntStream.range(0, numberOfElements).boxed().toList();
-        return repetitive(width, symbols);
+        var symbols = IntStream.range(0, n).boxed().toList();
+        return repetitive(r, symbols);
     }
 }

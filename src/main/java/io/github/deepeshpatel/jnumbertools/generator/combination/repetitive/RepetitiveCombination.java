@@ -13,36 +13,32 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Utility for generating r-combinations of an input set with repetition allowed.
+ * Generates repetitive combinations of size r from n items in lexicographical order.
  * <p>
- * This class generates r-combinations from an input set of n elements (e.g., elements₀, elements₁, …, elementsₙ₋₁),
- * with combinations produced in lexicographical order based on the indices of items in a list.
- * The class does not check for duplicate values and treats all values as distinct based on their index.
+ * A repetitive combination allows items to be selected multiple times, with the total number of
+ * combinations given by ⁿ⁺ᵣ⁻¹Cᵣ = (n+r-1)! / (r! * (n-1)!). Order does not matter, and elements
+ * are treated as distinct based on their indices in the input list, with no duplicate checking.
  * </p>
  * <p>
- * Example of repetitive combinations of 3 items out of 2 {1, 2}:
+ * For example, for items [1, 2] and r=3, the combinations are:
  * <pre>
- * 111 112 122 222
+ * [1, 1, 1], [1, 1, 2], [1, 2, 2], [2, 2, 2]
  * </pre>
- * </p>
- * <p>
- * Instances of this class are intended to be created via a builder; therefore, it does not have a public constructor.
- * </p>
+ * Instances are created via a builder, so the constructor is package-private.
  *
- * @param <T> the type of elements in the combination.
+ * @param <T> the type of elements in the combinations
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public final class RepetitiveCombination<T> extends AbstractGenerator<T> {
 
     private final int r;
 
     /**
-     * Constructs a new {@code RepetitiveCombination} generator.
+     * Constructs a generator for repetitive combinations.
      *
-     * @param elements a list of n items (e.g., elements₀, elements₁, …, elementsₙ₋₁) from which combinations will be generated.
-     *                 n is the length of the input list.
-     * @param r        the number of items in each combination.
+     * @param elements the list of n items to generate combinations from (must not be null or empty)
+     * @param r        the size of each combination (r ≥ 0)
+     * @throws IllegalArgumentException if r < 0 or elements is null/empty
      */
     RepetitiveCombination(List<T> elements, int r) {
         super(elements);
@@ -50,27 +46,30 @@ public final class RepetitiveCombination<T> extends AbstractGenerator<T> {
     }
 
     /**
-     * Returns an iterator over the repetitive combinations.
+     * Returns an iterator over repetitive combinations in lexicographical order.
      *
-     * @return an {@code Iterator} over lists representing the repetitive combinations.
+     * @return an iterator of lists, each representing a combination
      */
     @Override
     public Iterator<List<T>> iterator() {
         return (r == 0 || elements.isEmpty()) ? Util.emptyListIterator() : new Itr();
     }
 
+    /**
+     * Iterator for generating repetitive combinations in lexicographical order.
+     */
     private class Itr implements Iterator<List<T>> {
 
         /**
-         * The current combination of indices, where each element indicesₖ corresponds to the index of the chosen element
-         * in the input list for the kth position (0 ≤ k < r).
+         * The current combination as an array of indices, where indices[i] is the index
+         * of the selected element from the input list (0 ≤ i < r).
          */
         int[] indices = new int[r];
 
         /**
-         * Checks if there are more combinations to generate.
+         * Checks if more combinations are available.
          *
-         * @return {@code true} if additional combinations exist, {@code false} otherwise.
+         * @return true if further combinations exist, false otherwise
          */
         @Override
         public boolean hasNext() {
@@ -78,10 +77,10 @@ public final class RepetitiveCombination<T> extends AbstractGenerator<T> {
         }
 
         /**
-         * Generates the next combination in lexicographical order.
+         * Returns the next repetitive combination.
          *
-         * @return the next combination as a list of elements.
-         * @throws NoSuchElementException if no further combinations are available.
+         * @return a list representing the next combination
+         * @throws NoSuchElementException if no further combinations are available
          */
         @Override
         public List<T> next() {
@@ -94,18 +93,18 @@ public final class RepetitiveCombination<T> extends AbstractGenerator<T> {
         }
 
         /**
-         * Computes the next combination of indices.
+         * Computes the next repetitive combination in lexicographical order.
          * <p>
-         * Each element aₖ in the input array {@code a} represents the index of the element selected for the kth position
-         * in the combination. This method calculates the next lexicographical combination of these indices.
-         * </p>
+         * Given the current combination of indices [a₀, a₁, ..., aᵣ₋₁], this method
+         * finds the rightmost index i where aᵢ < n-1, increments it, and sets all
+         * subsequent indices to the same value to maintain lexicographical order.
+         * Returns an empty array if no further combination exists.
          *
-         * @param a the current combination of indices.
-         * @param n the number of elements in the input list.
-         * @return the next combination of indices, or an empty array if no further combinations exist.
+         * @param a the current combination of indices
+         * @param n the number of elementsචn the number of items in the input list
+         * @return the next combination of indices, or an empty array if none exists
          */
         private int[] nextRepetitiveCombination(int[] a, int n) {
-
             final int[] next = Arrays.copyOf(a, a.length);
             final int maxSupportedValue = n - 1;
             int i = next.length - 1;

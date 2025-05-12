@@ -18,21 +18,21 @@ import java.util.NoSuchElementException;
 /**
  * Generates every mᵗʰ unique k-permutation in combination order.
  * <p>
- * This class produces permutations of a subset of size {@code k} from an input list (e.g., [A, B, C]),
- * skipping to every mᵗʰ permutation based on the specified {@code increment}. Permutations are ordered
- * by combinations in lexicographical order, then by permutations within each combination. The rank of
- * each permutation is decomposed into:
+ * This class produces permutations of a subset of size kₖ from an input list of nₙ elements
+ * (e.g., [A, B, C]), skipping to every mᵗʰ permutation based on the specified increment. The total
+ * number of k-permutations is Pₙ,ₖ = n!/(n−kₖ)!. Permutations are ordered by combinations in
+ * lexicographical order, then by permutations within each combination. The rank of each permutation
+ * is decomposed into:
  * <ul>
- *   <li><strong>Combination rank</strong>: rank ÷ k!, selecting the combination.</li>
- *   <li><strong>Permutation rank</strong>: rank mod k!, selecting the permutation within the combination.</li>
+ *   <li><strong>Combination rank</strong>: rank ÷ kₖ!, selecting the combination.</li>
+ *   <li><strong>Permutation rank</strong>: rank mod kₖ!, selecting the permutation within the combination.</li>
  * </ul>
- * For example, for [A, B, C], k=2, increment=2, start=0, it might generate [A, B], [A, C], [B, C], skipping
- * every other permutation (e.g., omitting [B, A], [C, A], [C, B]).
+ * For example, for [A, B, C], kₖ=2, increment=2, start=0, it might generate [A, B], [A, C], [B, C],
+ * skipping every other permutation (e.g., omitting [B, A], [C, A], [C, B]).
  * </p>
  *
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutation<T> {
 
@@ -45,17 +45,18 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
     /**
      * Constructs an instance for generating every mᵗʰ k-permutation in combination order.
      *
-     * @param elements   the input list of elements (e.g., [A, B, C]) to permute
-     * @param k          the size of each permutation; must be between 0 and elements.size()
-     * @param increment  the step size between permutations (e.g., 2 for every 2nd); must be positive
-     * @param start      the starting rank (0-based); must be non-negative
+     * @param elements the input list of elements (e.g., [A, B, C]) to permute
+     * @param k the size of each permutation (kₖ); must be between 0 and nₙ
+     * @param increment the step size for selecting every mᵗʰ permutation; must be positive
+     * @param start the starting rank (0-based); must be non-negative
      * @param calculator utility for combinatorial calculations
-     * @throws IllegalArgumentException if increment is non-positive or k/start bounds are invalid
+     * @return a new KPermutationCombinationOrderMth instance
+     * @throws IllegalArgumentException if m is non-positive or kₖ/start bounds are invalid
      */
     KPermutationCombinationOrderMth(List<T> elements, int k, BigInteger increment, BigInteger start, Calculator calculator) {
         super(elements, k);
         if (increment.signum() <= 0) {
-            throw new IllegalArgumentException("Increment value must be > 0 to generate every mth K-Permutation");
+            throw new IllegalArgumentException("Increment m must be > 0 to generate every mᵗʰ k-permutation");
         }
         this.start = start;
         this.increment = increment;
@@ -67,7 +68,7 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
     /**
      * Returns an iterator over every mᵗʰ k-permutation in combination order.
      * <p>
-     * If k=0 or the input list is empty, returns an empty iterator. Otherwise, iterates through
+     * If kₖ=0 or the input list is empty, returns an empty iterator. Otherwise, iterates through
      * permutations at the specified increment.
      * </p>
      *
@@ -82,7 +83,7 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
         private BigInteger currentIncrement = start;
 
         /**
-         * Constructs an iterator starting at the specified rank.
+         * Constructs an iterator starting at the specified start rank.
          */
         public Itr() {
         }
@@ -90,7 +91,7 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
         /**
          * Checks if there are more permutations to generate.
          *
-         * @return {@code true} if the current rank is less than the total permutations; {@code false} otherwise
+         * @return {@code true} if the current rank is less than Pₙ,ₖ; {@code false} otherwise
          */
         @Override
         public boolean hasNext() {
@@ -100,9 +101,9 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
         /**
          * Returns the next mᵗʰ k-permutation.
          * <p>
-         * Decomposes the current rank into a combination rank (quotient of rank ÷ k!) and permutation rank
-         * (remainder), retrieves the corresponding combination, and applies the permutation rank within it.
-         * Advances the rank by {@code increment} for the next iteration.
+         * Decomposes the current rank into a combination rank (rank ÷ kₖ!) and permutation rank
+         * (rank mod kₖ!), retrieves the corresponding combination, and applies the permutation rank
+         * within it. Advances the rank by m for the next iteration.
          * </p>
          *
          * @return the next permutation as a list of elements

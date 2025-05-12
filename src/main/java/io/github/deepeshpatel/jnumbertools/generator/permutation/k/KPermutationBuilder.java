@@ -15,31 +15,45 @@ import java.util.List;
 /**
  * Builder for generating k-permutations of a list of elements.
  * <p>
- * This builder provides methods to generate k-permutations in lexicographical or combination order,
- * as well as to retrieve specific mᵗʰ permutations in either order. For example, for elements [A, B, C]
- * and k=2, permutations might include [A, B], [B, A], [A, C], etc., depending on the order.
+ * This builder provides methods to generate k-permutations (ordered subsets of size kₖ from nₙ elements)
+ * in lexicographical or combination order, as well as to retrieve specific mᵗʰ permutations or permutations
+ * at specified ranks. The total number of k-permutations is given by Pₙ,ₖ = n!/(n−kₖ)!. For example, for
+ * elements [A, B, C] and kₖ=2, permutations might include [A, B], [B, A], [A, C], etc., depending on the order.
  * </p>
+ * <p>
+ * Example usage:
+ * <pre>{@code
+ * // Generate 2-length permutations of [A, B, C] in lex order
+ * new KPermutationBuilder<>(Arrays.asList("A", "B", "C"), 2, calculator)
+ *     .lexOrder()
+ *     .iterator();
+ * // Generate specific ranks in lex order
+ * new KPermutationBuilder<>(Arrays.asList("A", "B", "C"), 2, calculator)
+ *     .ofRank(Arrays.asList(BigInteger.ZERO, BigInteger.valueOf(2)))
+ *     .iterator();
+ * }</pre>
  *
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public final class KPermutationBuilder<T> {
 
     private final List<T> elements;
-    private final int r;
+    private final int k;
     private final Calculator calculator;
 
     /**
      * Constructs a builder for k-permutations.
      *
-     * @param elements   the list of elements to permute (e.g., [A, B, C])
-     * @param r          the size of each permutation (k); must be non-negative and ≤ elements.size()
+     * @param elements the list of elements to permute (e.g., [A, B, C])
+     * @param k the size of each permutation (kₖ); must be non-negative and ≤ nₙ
      * @param calculator utility for combinatorial calculations
+     * @return a new KPermutationBuilder instance
+     * @throws IllegalArgumentException if kₖ is negative or exceeds nₙ
      */
-    public KPermutationBuilder(List<T> elements, int r, Calculator calculator) {
+    public KPermutationBuilder(List<T> elements, int k, Calculator calculator) {
         this.elements = elements;
-        this.r = r;
+        this.k = k;
         this.calculator = calculator;
     }
 
@@ -49,38 +63,50 @@ public final class KPermutationBuilder<T> {
      * @return a {@link KPermutationLexOrder} instance for lexicographical iteration
      */
     public KPermutationLexOrder<T> lexOrder() {
-        return new KPermutationLexOrder<>(elements, r);
-    }
-
-    public KPermutationOfRanks<T> choice(int sampleSize) {
-        BigInteger max = calculator.nPr(elements.size(), r);
-        var choice = new BigIntegerChoice(max, sampleSize);
-        return new KPermutationOfRanks<>(elements, r, choice, calculator);
-    }
-
-    public KPermutationOfRanks<T> sample(int sampleSize) {
-        BigInteger max = calculator.nPr(elements.size(), r);
-        var sample = new BigIntegerSample(max, sampleSize);
-        return new KPermutationOfRanks<>(elements, r, sample, calculator);
+        return new KPermutationLexOrder<>(elements, k);
     }
 
     /**
-     * Builder for generating k-permutations (ordered subsets) from an input collection.
-     * Supports both lexicographical and combination-based ordering strategies.
+     * Generates k-permutations randomly with replacement.
      * <p>
-     * Example usage:
-     * <pre>{@code
-     * // Generate 2-length permutations of [A, B, C] in lex order
-     * new KPermutationBuilder(Arrays.asList("A", "B", "C"))
-     *     .k(2)
-     *     .lex()
-     *     .all()
-     * }</pre>
+     * The total number of k-permutations is Pₙ,ₖ = n!/(n−kₖ)!.
+     * </p>
      *
-     * @param ranks Iterable of BigInteger ranks to generate specific k-permutations
+     * @param sampleSize the number of permutations to generate; must be positive
+     * @return a {@link KPermutationOfRanks} instance for random sampling with replacement
+     * @throws IllegalArgumentException if sampleSize is not positive
+     */
+    public KPermutationOfRanks<T> choice(int sampleSize) {
+        BigInteger max = calculator.nPr(elements.size(), k);
+        var choice = new BigIntegerChoice(max, sampleSize);
+        return new KPermutationOfRanks<>(elements, k, choice, calculator);
+    }
+
+    /**
+     * Generates k-permutations randomly without replacement.
+     * <p>
+     * The total number of k-permutations is Pₙ,ₖ = n!/(n−kₖ)!.
+     * </p>
+     *
+     * @param sampleSize the number of permutations to generate; must be positive and ≤ Pₙ,ₖ
+     * @return a {@link KPermutationOfRanks} instance for random sampling without replacement
+     * @throws IllegalArgumentException if sampleSize is not positive or exceeds Pₙ,ₖ
+     */
+    public KPermutationOfRanks<T> sample(int sampleSize) {
+        BigInteger max = calculator.nPr(elements.size(), k);
+        var sample = new BigIntegerSample(max, sampleSize);
+        return new KPermutationOfRanks<>(elements, k, sample, calculator);
+    }
+
+    /**
+     * Generates k-permutations at specified lexicographical ranks.
+     *
+     * @param ranks an iterable of 0-based rank numbers (0 ≤ rank < Pₙ,ₖ)
+     * @return a {@link KPermutationOfRanks} instance for generating k-permutations at specified ranks
+     * @throws IllegalArgumentException if any rank is negative or ≥ Pₙ,ₖ
      */
     public KPermutationOfRanks<T> ofRank(Iterable<BigInteger> ranks) {
-        return new KPermutationOfRanks<>(elements ,r ,ranks, calculator);
+        return new KPermutationOfRanks<>(elements, k, ranks, calculator);
     }
 
     /**
@@ -89,13 +115,13 @@ public final class KPermutationBuilder<T> {
      * @return a {@link KPermutationCombinationOrder} instance for combination-order iteration
      */
     public KPermutationCombinationOrder<T> combinationOrder() {
-        return new KPermutationCombinationOrder<>(elements, r);
+        return new KPermutationCombinationOrder<>(elements, k);
     }
 
     /**
      * Generates every mᵗʰ k-permutation in lexicographical order, using long values.
      *
-     * @param m     the increment between permutations (e.g., m=2 for every 2nd permutation); must be positive
+     * @param m the step size for selecting every mᵗʰ permutation; must be positive
      * @param start the starting rank (0-based); must be non-negative
      * @return a {@link KPermutationOfRanks} instance for mᵗʰ permutations in lex order
      * @throws IllegalArgumentException if m or start is invalid
@@ -107,21 +133,21 @@ public final class KPermutationBuilder<T> {
     /**
      * Generates every mᵗʰ k-permutation in lexicographical order.
      *
-     * @param m     the increment between permutations; must be positive
+     * @param m the step size for selecting every mᵗʰ permutation; must be positive
      * @param start the starting rank (0-based); must be non-negative
      * @return a {@link KPermutationOfRanks} instance for mᵗʰ permutations in lex order
      * @throws IllegalArgumentException if m or start is invalid
      */
     public KPermutationOfRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable iterator = new EveryMthIterable(start, m, calculator.nPr(elements.size(), r));
-        return new KPermutationOfRanks<>(elements, r, iterator, calculator);
-        //return new KPermutationLexOrderMth<>(elements, r, m, start, calculator);
+        EveryMthIterable iterator = new EveryMthIterable(start, m, calculator.nPr(elements.size(), k));
+        return new KPermutationOfRanks<>(elements, k, iterator, calculator);
+        //return new KPermutationLexOrderMth<>(elements, k, m, start, calculator);
     }
 
     /**
      * Generates every mᵗʰ k-permutation in combination order, using long values.
      *
-     * @param m     the increment between permutations; must be positive
+     * @param m the step size for selecting every mᵗʰ permutation; must be positive
      * @param start the starting rank (0-based); must be non-negative
      * @return a {@link KPermutationCombinationOrderMth} instance for mᵗʰ permutations in combination order
      * @throws IllegalArgumentException if m or start is invalid
@@ -133,12 +159,12 @@ public final class KPermutationBuilder<T> {
     /**
      * Generates every mᵗʰ k-permutation in combination order.
      *
-     * @param m     the increment between permutations; must be positive
+     * @param m the step size for selecting every mᵗʰ permutation; must be positive
      * @param start the starting rank (0-based); must be non-negative
      * @return a {@link KPermutationCombinationOrderMth} instance for mᵗʰ permutations in combination order
      * @throws IllegalArgumentException if m or start is invalid
      */
     public KPermutationCombinationOrderMth<T> combinationOrderMth(BigInteger m, BigInteger start) {
-        return new KPermutationCombinationOrderMth<>(elements, r, m, start, calculator);
+        return new KPermutationCombinationOrderMth<>(elements, k, m, start, calculator);
     }
 }

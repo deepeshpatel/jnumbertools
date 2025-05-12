@@ -21,22 +21,21 @@ import java.util.stream.StreamSupport;
  * </p>
  *
  * @param <T> the type of elements in the products
- * @since 3.0.1
  * @author Deepesh Patel
  */
-public class ProductOfRanks<T> implements Iterable<List<T>> {
+public class CartesianProductOfRanks<T> implements Iterable<List<T>> {
 
     private final Iterable<BigInteger> ranks;
     private final List<Builder<T>> builders;
     private final BigInteger maxCount;
 
     /**
-     * Constructs a new ProductOfRanks instance.
+     * Constructs a new CartesianProductOfRanks instance.
      *
      * @param builders the list of builders generating combinations or subsets for each dimension
      * @param ranks    the iterable providing the sequence of ranks
      */
-    public ProductOfRanks(List<Builder<T>> builders, Iterable<BigInteger> ranks) {
+    public CartesianProductOfRanks(List<Builder<T>> builders, Iterable<BigInteger> ranks) {
         this.builders = builders;
         this.ranks = ranks;
         this.maxCount = maxCount();
@@ -83,7 +82,7 @@ public class ProductOfRanks<T> implements Iterable<List<T>> {
             throw new IllegalArgumentException("Rank " + m + " is out of bounds [0, " + maxCount + ")");
         }
         Deque<T> output = new ArrayDeque<>();
-        BigInteger remaining =m;
+        BigInteger remaining = m;
 
         for (int i = builders.size() - 1; i >= 0; i--) {
             Builder<T> e = builders.get(i);
@@ -107,7 +106,7 @@ public class ProductOfRanks<T> implements Iterable<List<T>> {
 
     @Override
     public String toString() {
-        return String.format("ProductOfRanks{maxCount=%s, buildersCount=%d}", maxCount, builders.size());
+        return String.format("CartesianProductOfRanks{maxCount=%s, buildersCount=%d}", maxCount, builders.size());
     }
 
     private class Itr implements Iterator<List<T>> {

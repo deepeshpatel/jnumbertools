@@ -13,141 +13,160 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 /**
- * Builder class to create various types of combinations of elements.
- *
+ * Builder for generating various types of combinations.
  * <p>
- * Supports creation of following 6 types of combinations -
- * <ul>
- *     <li><strong>Unique combination lex order:</strong> </li>A selection of r elements out of n without repetition
- *     <li><strong>Mth unique combination lex order:</strong> </li>generating mth combination directly
- *     <li><strong>Repetitive combination lex order:</strong> </li>A selection of r elements out of n with repetition
- *     <li><strong>Mth repetitive combination lex order:</strong> </li>generating mth combination directly
- *     <li><strong>Multiset combination lex order:</strong> </li>combination with given quantity of each element
- *     <li><strong>Mth multiset combination lex order:</strong> </li>generating mth combination directly
- * </ul>
- *
+ * A combination is a selection of r items from a set where order does not matter. This class supports:
+ * <p>
+ * - Unique Combinations (`ⁿCᵣ`): Select r elements from n distinct elements without repetition, in lexicographical order or by rank.
+ * - Repetitive Combinations (`ⁿ⁺ᵣ⁻¹Cᵣ`): Select r elements from n distinct elements with repetition, in lexicographical order or by rank.
+ * - Multiset Combinations: Select r elements from a multiset with specified multiplicities, in lexicographical order or by rank, output as frequency maps.
+ * </p>
  * Example usage:
  * <pre>
- * <code>
  * Combinations combinations = new Combinations();
- *
- * //selecting 3 out of 5 without repetition
- * List&lt;List&lt;Integer&gt;&gt; result = combinations.unique(5,3).lexOrder().stream().toList();
- * </code>
+ * // Select 3 out of 5 distinct elements without repetition
+ * List<List<Integer>> result = combinations.unique(5, 3).lexOrder().stream().toList();
  * </pre>
  *
  * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
- * @see <a href="overview.html">Overview</a> for more detailed examples and usage scenarios.
+ * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  * @author Deepesh Patel
  */
-
 public final class Combinations {
 
     private final Calculator calculator;
 
     /**
-     * Constructs a new {@code Combinations} instance with a default {@code Calculator}.
+     * Constructs a new Combinations instance with a default Calculator.
      */
     public Combinations() {
         this(new Calculator());
     }
 
     /**
-     * Constructs a new {@code Combinations} instance with the specified {@code Calculator}.
+     * Constructs a new Combinations instance with the specified Calculator.
      *
-     * @param calculator The {@code Calculator} to use for generating combinations.
+     * @param calculator the Calculator for combinatorial computations
      */
     public Combinations(Calculator calculator) {
         this.calculator = calculator;
     }
 
     /**
-     * Creates a builder for unique combinations of a specified size from a range of elements.
+     * Creates a builder for unique combinations (`ⁿCᵣ`) from a range of elements.
+     * <p>
+     * Generates combinations of r elements from {0, 1, ..., n-1} without repetition, in
+     * lexicographical order or by rank.
+     * </p>
      *
-     * @param n The range of elements.
-     * @param r The size of combinations.
-     * @return A builder for unique combinations.
+     * @param n the number of distinct elements
+     * @param r the size of each combination (r ≥ 0)
+     * @return a UniqueCombinationBuilder for integer elements
      */
     public UniqueCombinationBuilder<Integer> unique(int n, int r) {
-        var elements = IntStream.range(0,n).boxed().toList();
+        var elements = IntStream.range(0, n).boxed().toList();
         return unique(r, elements);
     }
 
     /**
-     * Creates a builder for unique combinations of a specified size from a varargs list of elements.
+     * Creates a builder for unique combinations (`ⁿCᵣ`) from a varargs list of elements.
+     * <p>
+     * Generates combinations of r elements from the input set without repetition, in
+     * lexicographical order or by rank.
+     * </p>
      *
-     * @param size The size of combinations.
-     * @param elements The varargs list of elements.
-     * @param <T> The type of elements.
-     * @return A builder for unique combinations.
+     * @param r the size of each combination (r ≥ 0)
+     * @param elements the elements to combine
+     * @param <T> the type of elements
+     * @return a UniqueCombinationBuilder for the specified elements
      */
     @SafeVarargs
-    public final <T> UniqueCombinationBuilder<T> unique(int size, T... elements) {
-        return unique(size, List.of(elements));
+    public final <T> UniqueCombinationBuilder<T> unique(int r, T... elements) {
+        return unique(r, List.of(elements));
     }
 
     /**
-     * Creates a builder for unique combinations of a specified size from a list of elements.
+     * Creates a builder for unique combinations (`ⁿCᵣ`) from a list of elements.
+     * <p>
+     * Generates combinations of r elements from the input set without repetition, in
+     * lexicographical order or by rank.
+     * </p>
      *
-     * @param size The size of combinations.
-     * @param elements The list of elements.
-     * @param <T> The type of elements.
-     * @return A builder for unique combinations.
+     * @param r the size of each combination (r ≥ 0)
+     * @param elements the list of elements to combine
+     * @param <T> the type of elements
+     * @return a UniqueCombinationBuilder for the specified elements
      */
-    public <T> UniqueCombinationBuilder<T> unique(int size, List<T> elements) {
-        return new UniqueCombinationBuilder<>(elements, size, calculator);
+    public <T> UniqueCombinationBuilder<T> unique(int r, List<T> elements) {
+        return new UniqueCombinationBuilder<>(elements, r, calculator);
     }
 
     /**
-     * Creates a builder for repetitive combinations of a specified size from a range of elements.
+     * Creates a builder for repetitive combinations (`ⁿ⁺ᵣ⁻¹Cᵣ`) from a range of elements.
+     * <p>
+     * Generates combinations of r elements from {0, 1, ..., n-1} with repetition, in
+     * lexicographical order or by rank.
+     * </p>
      *
-     * @param n The range of elements.
-     * @param r The size of combinations.
-     * @return A builder for repetitive combinations.
-     * @throws IllegalArgumentException if r &lt;  0
+     * @param n the number of distinct elements
+     * @param r the size of each combination (r ≥ 0)
+     * @return a RepetitiveCombinationBuilder for integer elements
+     * @throws IllegalArgumentException if r < 0
      */
     public RepetitiveCombinationBuilder<Integer> repetitive(int n, int r) {
-        if(r < 0 ) {
+        if (r < 0) {
             throw new IllegalArgumentException("r should be >=0");
         }
-        var elements = IntStream.range(0,n).boxed().toList();
+        var elements = IntStream.range(0, n).boxed().toList();
         return repetitive(r, elements);
     }
 
     /**
-     * Creates a builder for repetitive combinations of a specified size from a varargs list of elements.
+     * Creates a builder for repetitive combinations (`ⁿ⁺ᵣ⁻¹Cᵣ`) from a varargs list of elements.
+     * <p>
+     * Generates combinations of r elements from the input set with repetition, in
+     * lexicographical order or by rank.
+     * </p>
      *
-     * @param size The size of combinations.
-     * @param elements The varargs list of elements.
-     * @param <T> The type of elements.
-     * @return A builder for repetitive combinations.
+     * @param r the size of each combination (r ≥ 0)
+     * @param elements the elements to combine
+     * @param <T> the type of elements
+     * @return a RepetitiveCombinationBuilder for the specified elements
      */
     @SafeVarargs
-    public final <T> RepetitiveCombinationBuilder<T> repetitive(int size, T... elements) {
-        return  repetitive(size, List.of(elements));
+    public final <T> RepetitiveCombinationBuilder<T> repetitive(int r, T... elements) {
+        return repetitive(r, List.of(elements));
     }
 
     /**
-     * Creates a builder for repetitive combinations of a specified size from a list of elements.
+     * Creates a builder for repetitive combinations (`ⁿ⁺ᵣ⁻¹Cᵣ`) from a list of elements.
+     * <p>
+     * Generates combinations of r elements from the input set with repetition, in
+     * lexicographical order or by rank.
+     * </p>
      *
-     * @param size The size of combinations.
-     * @param elements The list of elements.
-     * @param <T> The type of elements.
-     * @return A builder for repetitive combinations.
+     * @param r the size of each combination (r ≥ 0)
+     * @param elements the list of elements to combine
+     * @param <T> the type of elements
+     * @return a RepetitiveCombinationBuilder for the specified elements
      */
-    public  <T> RepetitiveCombinationBuilder<T> repetitive(int size, List<T> elements) {
-        return new RepetitiveCombinationBuilder<>(elements, size, calculator);
+    public <T> RepetitiveCombinationBuilder<T> repetitive(int r, List<T> elements) {
+        return new RepetitiveCombinationBuilder<>(elements, r, calculator);
     }
 
     /**
-     * Creates a builder for multiset combinations of elements with specified frequencies and size.
+     * Creates a builder for multiset combinations from a map of elements and multiplicities.
+     * <p>
+     * Generates combinations of r elements from a multiset with specified multiplicities,
+     * output as frequency maps, in lexicographical order or by rank.
+     * </p>
      *
-     * @param options A map where keys are the elements and values are their corresponding frequencies.
-     * @param size The size of combinations.
-     * @param <T> The type of elements.
-     * @return A builder for multiset combinations.
+     * @param options a map of elements to their multiplicities (must not be null or empty)
+     * @param r the size of each combination (r ≥ 0)
+     * @param <T> the type of elements
+     * @return a MultisetCombinationBuilder for the specified multiset
      */
-    public <T> MultisetCombinationBuilder<T> multiset(LinkedHashMap<T, Integer> options, int size) {
-        return new MultisetCombinationBuilder<>(options, size);
+    public <T> MultisetCombinationBuilder<T> multiset(LinkedHashMap<T, Integer> options, int r) {
+        return new MultisetCombinationBuilder<>(options, r);
     }
 }

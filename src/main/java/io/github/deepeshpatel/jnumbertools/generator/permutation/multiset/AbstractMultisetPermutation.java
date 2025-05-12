@@ -15,14 +15,15 @@ import java.util.stream.StreamSupport;
  * Abstract base class for generating multiset permutations with sorting capability.
  * <p>
  * This class provides a foundation for permutation generators that operate on a multiset defined
- * by a map of elements to their frequencies (e.g., {A=2, B=1}). It ensures elements are comparable
- * for consistent lexicographical ordering and manages the multiset structure. Subclasses must
- * implement the {@code iterator()} method to generate permutations as lists, where position matters.
+ * by a map of elements to their frequencies (e.g., {A=2, B=1}). The total number of unique permutations
+ * is given by the multinomial coefficient n! / (f₁!·f₂!·…·fₖ!), where n is the sum of frequencies and
+ * fᵢ are the frequencies of distinct elements. It ensures elements are comparable for consistent
+ * lexicographical ordering and manages the multiset structure. Subclasses must implement the
+ * {@code iterator()} method to generate permutations as lists, where position matters.
  * </p>
  *
  * @param <T> the type of elements, must implement {@code Comparable} for sorting
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public abstract class AbstractMultisetPermutation<T> implements Iterable<List<T>> {
 
@@ -34,11 +35,13 @@ public abstract class AbstractMultisetPermutation<T> implements Iterable<List<T>
     /**
      * Constructs an {@code AbstractMultisetPermutation} instance with a sorted multiset.
      *
-     * @param multiset   the map of elements to their frequencies; must not be null or empty
+     * @param multiset a map of elements to their frequencies; must not be null or empty, with insertion order
+     *                 determining lexicographical order
      * @param calculator utility for computing permutations and factorials
-     * @throws IllegalArgumentException if multiset is null/empty, frequencies are negative, or sum is zero
+     * @return a new AbstractMultisetPermutation instance
+     * @throws IllegalArgumentException if multiset is null, empty, contains negative frequencies, or sum is zero
      */
-    protected AbstractMultisetPermutation(LinkedHashMap<T, Integer> multiset,Calculator calculator) {
+    protected AbstractMultisetPermutation(LinkedHashMap<T, Integer> multiset, Calculator calculator) {
         if (multiset == null || multiset.isEmpty()) {
             throw new IllegalArgumentException("Multiset map cannot be null or empty");
         }
@@ -64,6 +67,11 @@ public abstract class AbstractMultisetPermutation<T> implements Iterable<List<T>
         this.calculator = calculator;
     }
 
+    /**
+     * Populates the elements list and frequencies array from the provided multiset.
+     *
+     * @param multiset the map of elements to their frequencies
+     */
     private void createElementsAndFrequencies(LinkedHashMap<T, Integer> multiset) {
         int index = 0;
         for (var entry : multiset.entrySet()) {
@@ -72,6 +80,11 @@ public abstract class AbstractMultisetPermutation<T> implements Iterable<List<T>
         }
     }
 
+    /**
+     * Provides a sequential stream of the multiset permutations.
+     *
+     * @return a {@link Stream} of permutations as lists of elements
+     */
     public Stream<List<T>> stream() {
         return StreamSupport.stream(this.spliterator(), false);
     }
@@ -79,7 +92,7 @@ public abstract class AbstractMultisetPermutation<T> implements Iterable<List<T>
     /**
      * Returns the total number of permutations as a {@code BigInteger}.
      * <p>
-     * Computes n! / (f1! * f2! * ... * fk!), where n is the sum of frequencies and fi are individual frequencies.
+     * Computes n! / (f₁!·f₂!·…·fₖ!), where n is the sum of frequencies and fᵢ are individual frequencies.
      * </p>
      *
      * @return the total number of permutations

@@ -9,16 +9,16 @@ import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import java.util.List;
 
 /**
- * Abstract base class for generating permutations of a subset of size k from a list of elements.
+ * Abstract base class for generating permutations of a subset of size kₖ from a list of elements.
  * <p>
- * This class provides foundational functionality for k-permutation generators, ensuring the subset size
- * {@code k} is valid (between 0 and the input list size, inclusive). Subclasses implement specific
- * permutation generation strategies.
+ * This class provides foundational functionality for k-permutation generators, which produce permutations
+ * of kₖ elements chosen from nₙ elements, where order matters. The total number of k-permutations is
+ * given by Pₙ,ₖ = n!/(n−kₖ)!. Subclasses implement specific permutation generation strategies, ensuring
+ * the subset size kₖ is valid (0 ≤ kₖ ≤ nₙ).
  * </p>
  *
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public abstract class AbstractKPermutation<T> extends AbstractGenerator<T> {
 
@@ -31,8 +31,9 @@ public abstract class AbstractKPermutation<T> extends AbstractGenerator<T> {
      * Constructs an instance with the specified elements and subset size.
      *
      * @param elements the list of elements from which permutations are generated
-     * @param k        the size of the subset to permute; must be between 0 and elements.size()
-     * @throws IllegalArgumentException if k is negative or exceeds the input list size
+     * @param k the size of the subset to permute (kₖ); must be between 0 and elements.size()
+     * @return a new AbstractKPermutation instance
+     * @throws IllegalArgumentException if kₖ is negative or exceeds the input list size
      */
     protected AbstractKPermutation(List<T> elements, int k) {
         super(elements);
@@ -41,18 +42,18 @@ public abstract class AbstractKPermutation<T> extends AbstractGenerator<T> {
     }
 
     /**
-     * Validates the subset size k against the input list size.
+     * Validates the subset size kₖ against the input list size.
      *
-     * @param inputSize the size of the input list
-     * @param k         the size of the subset to permute
-     * @throws IllegalArgumentException if k is negative or exceeds inputSize
+     * @param inputSize the size of the input list (nₙ)
+     * @param k the size of the subset to permute (kₖ)
+     * @throws IllegalArgumentException if kₖ is negative or exceeds nₙ
      */
     protected void checkBoundsOfK(int inputSize, int k) {
         if (k > inputSize) {
-            throw new IllegalArgumentException("k must be <= input length to generate permutation");
+            throw new IllegalArgumentException("kₖ must be ≤ nₙ to generate permutation");
         }
         if (k < 0) {
-            throw new IllegalArgumentException("k must be >= 0 to generate permutation");
+            throw new IllegalArgumentException("kₖ must be ≥ 0 to generate permutation");
         }
     }
 }

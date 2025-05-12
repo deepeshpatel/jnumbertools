@@ -10,7 +10,7 @@ import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
-import io.github.deepeshpatel.jnumbertools.generator.product.ProductOfRanks;
+import io.github.deepeshpatel.jnumbertools.generator.product.CartesianProductOfRanks;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -34,7 +34,6 @@ import java.util.List;
  * </p>
  *
  * @author Deepesh Patel
- * @version 3.0.1
  */
 @SuppressWarnings({"unchecked"})
 public final class SimpleProductBuilder implements Builder<Object> {
@@ -105,16 +104,16 @@ public final class SimpleProductBuilder implements Builder<Object> {
     }
 
     /**
-     * Builds and returns a ProductOfRanks for every mᵗʰ product.
+     * Builds and returns a CartesianProductOfRanks for every mᵗʰ product.
      *
      * @param m     the interval to select every mᵗʰ product
      * @param start the starting position
-     * @return a ProductOfRanks for the specified intervals
+     * @return a CartesianProductOfRanks for the specified intervals
      */
     @Override
-    public ProductOfRanks<Object> lexOrderMth(BigInteger m, BigInteger start) {
+    public CartesianProductOfRanks<Object> lexOrderMth(BigInteger m, BigInteger start) {
         BigInteger maxCount = count();
-        return new ProductOfRanks(builders, new EveryMthIterable(start, m, maxCount));
+        return new CartesianProductOfRanks(builders, new EveryMthIterable(start, m, maxCount));
     }
 
     /**
@@ -122,9 +121,9 @@ public final class SimpleProductBuilder implements Builder<Object> {
      *
      * @param m     the interval to select every mᵗʰ product
      * @param start the starting position
-     * @return a ProductOfRanks for the specified intervals
+     * @return a CartesianProductOfRanks for the specified intervals
      */
-    public ProductOfRanks<Object> lexOrderMth(long m, long start) {
+    public CartesianProductOfRanks<Object> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
@@ -132,6 +131,7 @@ public final class SimpleProductBuilder implements Builder<Object> {
      * Generates Cartesian product tuples at specified rank positions.
      * <p>
      * Ranks follow row-major order (rightmost indices vary fastest).
+     * </p>
      * <p>
      * <b>Example for [A,B] × [1,2] × [X,Y]:</b>
      * <pre>
@@ -154,38 +154,38 @@ public final class SimpleProductBuilder implements Builder<Object> {
      * @throws IllegalArgumentException if any rank exceeds product space
      * @throws IllegalStateException if no sets were added
      */
-    public ProductOfRanks<Object> ofRanks(Iterable<BigInteger> ranks) {
-        return new ProductOfRanks(builders, ranks);
+    public CartesianProductOfRanks<Object> ofRanks(Iterable<BigInteger> ranks) {
+        return new CartesianProductOfRanks(builders, ranks);
     }
 
     /**
      * Generates a random sample of products with replacement.
      *
      * @param sampleSize the number of products to generate
-     * @return a ProductOfRanks for the sampled products
+     * @return a CartesianProductOfRanks for the sampled products
      * @throws IllegalArgumentException if sampleSize is negative
      */
-    public ProductOfRanks<Object> choice(int sampleSize) {
+    public CartesianProductOfRanks<Object> choice(int sampleSize) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
         BigInteger maxCount = count();
-        return new ProductOfRanks(builders, new BigIntegerChoice(maxCount, sampleSize));
+        return new CartesianProductOfRanks(builders, new BigIntegerChoice(maxCount, sampleSize));
     }
 
     /**
      * Generates a random sample of unique products.
      *
      * @param sampleSize the number of unique products to generate
-     * @return a ProductOfRanks for the sampled products
+     * @return a CartesianProductOfRanks for the sampled products
      * @throws IllegalArgumentException if sampleSize is negative or exceeds total products
      */
-    public ProductOfRanks<Object> sample(int sampleSize) {
+    public CartesianProductOfRanks<Object> sample(int sampleSize) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
         BigInteger maxCount = count();
-        return new ProductOfRanks(builders, new BigIntegerSample(maxCount, sampleSize));
+        return new CartesianProductOfRanks(builders, new BigIntegerSample(maxCount, sampleSize));
     }
 
     /**

@@ -21,7 +21,7 @@ public final class MultisetPermutationMth<T> extends AbstractMultisetPermutation
     private final BigInteger start;
     private final BigInteger increment;
 
-    MultisetPermutationMth(LinkedHashMap<T, Integer> multiset, BigInteger increment, BigInteger start,  Calculator calculator) {
+    MultisetPermutationMth(LinkedHashMap<T, Integer> multiset, BigInteger increment, BigInteger start, Calculator calculator) {
         super(multiset, calculator);
         if (start.signum() < 0) {
             throw new IllegalArgumentException("Start must be non-negative: " + start);
@@ -88,6 +88,5 @@ public final class MultisetPermutationMth<T> extends AbstractMultisetPermutation
             }
             return output;
         }
-
     }
 }

@@ -11,25 +11,27 @@ import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
 import java.math.BigInteger;
 
 /**
- * Provides methods for determining the permutation or combination corresponding to a given rank.
- * This class uses factoradic, permutadic, and combinadic algorithms to unrank permutations and combinations.
- *
+ * Determines the permutation or combination at a given lexicographical rank.
  * <p>
- * The class supports:
- * <ul>
- *     <li><strong>Unique Permutation Unranking:</strong> Determines the permutation corresponding to a given rank in unique permutations.</li>
- *     <li><strong>K-Permutation Unranking:</strong> Determines the permutation corresponding to a given rank in k-permutations.</li>
- *     <li><strong>Unique Combination Unranking:</strong> Determines the combination corresponding to a given rank in unique combinations.</li>
- * </ul>
- *
+ * Unranking finds the permutation or combination corresponding to a rank in its
+ * lexicographical order. Permutations are order-dependent arrangements, while
+ * combinations are order-independent selections. Outputs are arrays of indices.
+ * This class supports:
  * <p>
+ * - Unique Permutation (`ⁿ!`): Unranks a full permutation of n distinct elements.
+ * - k-Permutation (`ⁿPₖ`): Unranks a k-permutation from n distinct elements.
+ * - Unique Combination (`ⁿCᵣ`): Unranks a combination of r elements from n distinct elements.
+ * </p>
  * Example usage:
  * <pre>
  * UnrankOf unrankOf = new UnrankOf();
- * int[] uniquePerm = unrankOf.uniquePermutation(BigInteger.valueOf(10), 5);
- * int[] kPerm = unrankOf.kPermutation(BigInteger.valueOf(5), 10, 3);
- * int[] uniqueComb = unrankOf.uniqueCombination(BigInteger.valueOf(15), 5, 3);
+ * int[] uniquePermutation = unrankOf.uniquePermutation(BigInteger.valueOf(10), 5);
+ * int[] kPermutation = unrankOf.kPermutation(BigInteger.valueOf(5), 10, 3);
+ * int[] uniqueCombination = unrankOf.uniqueCombination(BigInteger.valueOf(15), 5, 3);
  * </pre>
+ *
+ * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
+ * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  * @author Deepesh Patel
  */
 public final class UnrankOf {
@@ -37,56 +39,78 @@ public final class UnrankOf {
     private final Calculator calculator;
 
     /**
-     * Constructs a new {@code UnrankOf} instance with a default {@code Calculator}.
+     * Constructs a new UnrankOf instance with a default Calculator.
      */
     public UnrankOf() {
         this(new Calculator());
     }
 
     /**
-     * Constructs a new {@code UnrankOf} instance with the specified {@code Calculator}.
+     * Constructs a new UnrankOf instance with the specified Calculator.
      *
-     * @param calculator The {@code Calculator} to use for unranking calculations.
+     * @param calculator the Calculator for combinatorial computations
      */
     public UnrankOf(Calculator calculator) {
         this.calculator = calculator;
     }
 
     /**
-     * Determines the unique permutation corresponding to a given rank.
+     * Determines the unique permutation (`ⁿ!`) at a given rank.
+     * <p>
+     * Unranks a full permutation of n distinct elements, returning an array of n
+     * distinct indices from {0, 1, ..., n-1} in lexicographical order.
+     * </p>
      *
-     * @param rank The rank of the permutation.
-     * @param size The size of the permutation.
-     * @return An array representing the unique permutation at the given rank.
+     * @param rank the lexicographical rank
+     * @param size the size of the permutation (n)
+     * @return an array of n distinct indices
      */
     public int[] uniquePermutation(BigInteger rank, int size) {
         return FactoradicAlgorithms.unRank(rank, size);
     }
 
+    /**
+     * Determines the unique permutation (`ⁿ!`) at a given rank with minimal size.
+     * <p>
+     * Unranks a full permutation, determining the smallest n where rank < n!, and
+     * returns an array of n distinct indices from {0, 1, ..., n-1} in lexicographical order.
+     * </p>
+     *
+     * @param rank the lexicographical rank
+     * @return an array of n distinct indices
+     */
     public int[] uniquePermutationMinimumSize(BigInteger rank) {
         int size = calculator.factorialUpperBound(rank);
         return FactoradicAlgorithms.unRank(rank, size);
     }
 
     /**
-     * Determines the k-permutation corresponding to a given rank.
+     * Determines the k-permutation (`ⁿPₖ`) at a given rank.
+     * <p>
+     * Unranks a k-permutation of k distinct elements from {0, 1, ..., n-1}, returning
+     * an array of k distinct indices in lexicographical order.
+     * </p>
      *
-     * @param rank The rank of the permutation.
-     * @param n The total number of distinct objects.
-     * @param k The size of the permutation.
-     * @return An array representing the k-permutation at the given rank.
+     * @param rank the lexicographical rank
+     * @param n the number of distinct elements
+     * @param k the size of the permutation (k ≥ 0)
+     * @return an array of k distinct indices
      */
     public int[] kPermutation(BigInteger rank, int n, int k) {
         return new PermutadicAlgorithms(calculator).unRankWithBoundCheck(rank, n, k);
     }
 
     /**
-     * Determines the unique combination corresponding to a given rank.
+     * Determines the unique combination (`ⁿCᵣ`) at a given rank.
+     * <p>
+     * Unranks a combination of r distinct elements from {0, 1, ..., n-1} without
+     * repetition, returning an array of r distinct indices in lexicographical order.
+     * </p>
      *
-     * @param rank The rank of the combination.
-     * @param n The total number of distinct objects.
-     * @param r The size of the combination.
-     * @return An array representing the unique combination at the given rank.
+     * @param rank the lexicographical rank
+     * @param n the number of distinct elements
+     * @param r the size of the combination (r ≥ 0)
+     * @return an array of r distinct indices
      */
     public int[] uniqueCombination(BigInteger rank, int n, int r) {
         return new CombinadicAlgorithms(calculator).unRank(rank, calculator.nCr(n, r), n, r);

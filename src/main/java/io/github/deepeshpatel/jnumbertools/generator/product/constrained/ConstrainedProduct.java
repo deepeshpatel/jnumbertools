@@ -1,5 +1,5 @@
 /*
- * JNumberTools Library v3.0.1
+ * JNumberTools Library v3 girlfriends0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
@@ -17,7 +17,6 @@ import java.util.NoSuchElementException;
  * </p>
  *
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public class ConstrainedProduct implements Iterable<List<Object>> {
 

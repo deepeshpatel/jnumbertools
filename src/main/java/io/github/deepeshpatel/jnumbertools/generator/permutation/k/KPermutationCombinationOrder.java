@@ -14,27 +14,32 @@ import java.util.List;
 
 /**
  * Generates unique k-permutations in combination order from a list of elements.
+ *
  * <p>
- * This class produces all permutations of a subset of size {@code k} from the input list, ordered by
- * combinations in lexicographical order followed by permutations of each combination. For example,
- * for [1, 2, 3] and k=2, it generates:
+ * This class produces all permutations of size k (Pₖ) from the input list, where permutations are ordered by:
+ * <ol>
+ *   <li>First by their underlying combination in lexicographical order</li>
+ *   <li>Then by permutations within each combination group</li>
+ * </ol>
+ *
+ * <p>Example for elements [A, B, C] (distinct by position) and k=2:
  * <pre>
- * [1, 2], [2, 1], [1, 3], [3, 1], [2, 3], [3, 2]
+ * [A, B], [B, A], [A, C], [C, A], [B, C], [C, B]
  * </pre>
- * Elements are treated as distinct based on their position (e.g., [elements₀, elements₁, ...]).
- * </p>
+ *
+ * <p>Elements are treated as distinct based on their position (e₀, e₁, e₂,...).
  *
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<T> {
 
     /**
      * Constructs an instance for generating k-permutations in combination order.
      *
-     * @param elements the list of elements to permute
-     * @param k        the size of each permutation; must be between 0 and elements.size()
+     * @param elements the list of elements to permute (must not be null)
+     * @param k the size of each permutation (0 ≤ k ≤ elements.size())
+     * @throws IllegalArgumentException if k is negative or exceeds elements size
      */
     KPermutationCombinationOrder(List<T> elements, int k) {
         super(elements, k);
@@ -42,12 +47,18 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
 
     /**
      * Returns an iterator over unique k-permutations in combination order.
-     * <p>
-     * If k=0 or the list is empty, returns an empty iterator. If k equals the list size, uses a direct
-     * permutation iterator. Otherwise, generates combinations of indices and permutes each.
-     * </p>
      *
-     * @return an iterator over lists representing k-permutations
+     * <p>The iterator behavior:
+     * <ul>
+     *   <li>Returns empty iterator if k=0 or elements is empty</li>
+     *   <li>Uses direct permutation iterator when k = n (full permutations)</li>
+     *   <li>Otherwise generates C(n,k) combinations and P(k,k) permutations for each</li>
+     * </ul>
+     *
+     * <p>Note: This method relies on {@code indicesToValues}, defined in the parent class,
+     * to map index arrays to element lists.
+     *
+     * @return an iterator producing k-permutations in combination order
      */
     @Override
     public Iterator<List<T>> iterator() {
@@ -64,6 +75,14 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
         private final Iterator<List<T>> combinationIterator;
         private Iterator<List<T>> currentIterator;
 
+        /**
+         * Initializes the iterator by creating a combination iterator for C(n,k)
+         * and setting up the first permutation iterator.
+         *
+         * <p>Note: The {@code Combinations} and {@code Permutations} constructors
+         * are passed {@code null} as the first argument, which is specific to the
+         * library's implementation for default behavior.
+         */
         public Itr() {
             combinationIterator = new Combinations(null).unique(k, elements).lexOrder().iterator();
             getNextIterator();
@@ -85,6 +104,11 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
             return currentIterator.next();
         }
 
+        /**
+         * Retrieves the next permutation iterator for the next combination.
+         *
+         * @return the iterator for permutations of the next combination
+         */
         private Iterator<List<T>> getNextIterator() {
             currentIterator = new Permutations(null)
                     .unique(combinationIterator.next())

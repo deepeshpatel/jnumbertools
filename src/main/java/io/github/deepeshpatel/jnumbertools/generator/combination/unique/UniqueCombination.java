@@ -13,42 +13,29 @@ import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
 /**
- * Utility class for generating unique r‑combinations from an input set.
+ * Generates unique combinations of size r from a list of n items in lexicographical order.
+ * A combination is a selection of r items from n distinct items where order does not matter.
+ * The total number of possible combinations is given by ⁿCᵣ = n! / (r! * (n-r)!).
  * <p>
- * Given an input list of n items (e.g. elements₀, elements₁, …, elementsₙ₋₁), this class generates
- * all unique r‑combinations (with r ≤ n) in lexicographic order based on the indices of the items.
- * <br>
- * Note that the class does not perform any duplicate value checks; it treats each element as distinct
- * based solely on its position in the list.
- * </p>
+ * For example, for items [1, 2, 3, 4] and r=2, the combinations in lexicographical order are:
+ * [1, 2], [1, 3], [1, 4], [2, 3], [2, 4], [3, 4].
  * <p>
- * For example, the unique 4‑combinations from a 6‑element list {1, 2, 3, 4, 5, 6} might be:
- * <pre>
- * 1234 1245 1345 1456 2356
- * 1235 1246 1346 2345 2456
- * 1236 1256 1356 2346 3456
- * </pre>
- * </p>
- * <p>
- * Instances of this class are intended to be created via a builder, so the constructor is package‑private.
- * </p>
+ * Elements are treated as distinct based on their indices in the input list, with no duplicate checking.
+ * Instances are created via a builder, so the constructor is package-private.
  *
  * @param <T> the type of elements in the combinations
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public final class UniqueCombination<T> extends AbstractGenerator<T> {
 
     private final int r;
 
     /**
-     * Constructs a new UniqueCombination generator with the specified list of elements and combination size.
-     * <p>
-     * The provided list contains n items (e.g. elements₀, elements₁, …, elementsₙ₋₁), and r must be ≤ n.
-     * </p>
+     * Constructs a generator for unique combinations.
      *
-     * @param elements the list of n items from which combinations will be generated
-     * @param r        the number of items in each combination (r‑combination); r must be ≤ n
+     * @param elements the list of n items to generate combinations from (must not be null or empty)
+     * @param r        the size of each combination (0 ≤ r ≤ n)
+     * @throws IllegalArgumentException if r < 0, r > n, or elements is null/empty
      */
     UniqueCombination(List<T> elements, int r) {
         super(elements);
@@ -57,9 +44,9 @@ public final class UniqueCombination<T> extends AbstractGenerator<T> {
     }
 
     /**
-     * Returns an iterator over all unique r‑combinations of the input elements in lexicographic order.
+     * Returns an iterator over unique r-combinations in lexicographical order.
      *
-     * @return an iterator over lists representing the unique combinations
+     * @return an iterator of lists, each representing a combination
      */
     @Override
     public Iterator<List<T>> iterator() {
@@ -67,13 +54,13 @@ public final class UniqueCombination<T> extends AbstractGenerator<T> {
     }
 
     /**
-     * An iterator implementation for generating the unique r‑combinations in lexicographic order.
+     * Iterator for generating unique r-combinations in lexicographical order.
      */
     private class Itr implements Iterator<List<T>> {
 
         /**
-         * The current combination represented as an array of indices.
-         * For example, indices[k] represents the index of the chosen element for the kth position (0 ≤ k < r).
+         * The current combination as an array of indices, where indices[i] is the index
+         * of the selected element from the input list (0 ≤ i < r).
          */
         int[] indices;
 
@@ -82,9 +69,9 @@ public final class UniqueCombination<T> extends AbstractGenerator<T> {
         }
 
         /**
-         * Checks if there are more combinations to generate.
+         * Checks if more combinations are available.
          *
-         * @return {@code true} if the current combination is not {@code null}; {@code false} otherwise
+         * @return true if further combinations exist, false otherwise
          */
         @Override
         public boolean hasNext() {
@@ -94,7 +81,7 @@ public final class UniqueCombination<T> extends AbstractGenerator<T> {
         /**
          * Returns the next unique combination.
          *
-         * @return the next combination as a list of elements
+         * @return a list representing the next combination
          * @throws NoSuchElementException if no further combinations are available
          */
         @Override
@@ -108,16 +95,16 @@ public final class UniqueCombination<T> extends AbstractGenerator<T> {
         }
 
         /**
-         * Computes the next lexicographic combination of indices.
+         * Computes the next combination in lexicographical order.
          * <p>
-         * Given the current combination (e.g. [a₀, a₁, …, aᵣ₋₁]), this method generates the next combination
-         * by incrementing the appropriate index while ensuring that the result remains in ascending order.
-         * If the current combination is the last possible combination, {@code null} is returned.
-         * </p>
+         * Given the current combination of indices [a₀, a₁, ..., aᵣ₋₁], this method
+         * finds the rightmost index i where aᵢ can be incremented (i.e., aᵢ < n - (r - i)).
+         * It increments aᵢ and resets subsequent indices to maintain ascending order.
+         * Returns null if no further combination exists.
          *
          * @param currentKCombination the current combination of indices
          * @param n                   the total number of elements in the input list
-         * @return the next combination of indices, or {@code null} if no further combination exists
+         * @return the next combination of indices, or null if none exists
          */
         private int[] nextCombination(int[] currentKCombination, int n) {
             if (currentKCombination.length == 0 ||

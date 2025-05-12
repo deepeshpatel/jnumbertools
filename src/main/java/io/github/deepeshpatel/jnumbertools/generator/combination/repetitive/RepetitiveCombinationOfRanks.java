@@ -12,17 +12,17 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Generates an iterable sequence of repetitive combinations based on a provided sequence of ranks.
+ * Generates repetitive combinations of size r from n items based on a sequence of ranks.
  * <p>
- * This class generates combinations of size {@code r} from the input elements, where elements may repeat
- * within each combination (e.g., [A, A, B]). The combinations are determined by ranks from the provided
- * {@code Iterable<BigInteger>}, mapped to combinations using a lexicographical unranking algorithm.
- * Supports various sampling strategies (e.g., without replacement, with replacement, lexicographical).
+ * A repetitive combination allows items to be selected multiple times, with the total number of
+ * combinations given by ⁿ⁺ᵣ⁻¹Cᵣ = (n+r-1)! / (r! * (n-1)!). Order does not matter, and elements
+ * are treated as distinct based on their indices in the input list. Each combination is identified
+ * by a rank in [0, ⁿ⁺ᵣ⁻¹Cᵣ), mapped to a combination using a lexicographical unranking algorithm.
+ * Supports strategies like random sampling or lexicographical sequences.
  * </p>
  *
  * @param <T> the type of elements in the combinations
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public class RepetitiveCombinationOfRanks<T> extends AbstractGenerator<T> {
 
@@ -31,13 +31,13 @@ public class RepetitiveCombinationOfRanks<T> extends AbstractGenerator<T> {
     private final Iterable<BigInteger> ranks;
 
     /**
-     * Constructs a new RepetitiveCombinationOfRanks instance.
+     * Constructs a generator for repetitive combinations based on a rank sequence.
      *
-     * @param elements   the list of N items from which combinations are generated
-     * @param r          the size of each combination (r); must be non-negative
-     * @param ranks      the iterable providing the sequence of ranks
-     * @param calculator the Calculator used for computing combination counts
-     * @throws IllegalArgumentException if r is negative
+     * @param elements   the list of n items to generate combinations from (must not be null or empty)
+     * @param r          the size of each combination (r ≥ 0)
+     * @param ranks      the iterable of ranks (each rank in [0, ⁿ⁺ᵣ⁻¹Cᵣ))
+     * @param calculator the calculator for computing combination counts
+     * @throws IllegalArgumentException if r < 0, elements is null/empty, or any rank < 0 or ≥ ⁿ⁺ᵣ⁻¹Cᵣ
      */
     public RepetitiveCombinationOfRanks(List<T> elements, int r, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements);
@@ -50,27 +50,42 @@ public class RepetitiveCombinationOfRanks<T> extends AbstractGenerator<T> {
     }
 
     /**
-     * Returns an iterator that generates repetitive combinations based on the provided rank sequence.
+     * Returns an iterator over repetitive combinations based on the provided rank sequence.
      *
-     * @return an iterator over lists of elements representing repetitive combinations
+     * @return an iterator of lists, each representing a combination
      */
     @Override
     public Iterator<List<T>> iterator() {
         return new SequenceIterator();
     }
 
+    /**
+     * Iterator for generating repetitive combinations based on the rank sequence.
+     */
     private class SequenceIterator implements Iterator<List<T>> {
         private final Iterator<BigInteger> rankIterator;
 
-        public SequenceIterator() {
+        private SequenceIterator() {
             this.rankIterator = ranks.iterator();
         }
 
+        /**
+         * Checks if more combinations are available.
+         *
+         * @return true if the rank sequence has more ranks, false otherwise
+         */
         @Override
         public boolean hasNext() {
             return rankIterator.hasNext();
         }
 
+        /**
+         * Returns the combination corresponding to the next rank.
+         *
+         * @return a list representing the next combination
+         * @throws java.util.NoSuchElementException if no more ranks are available
+         * @throws IllegalArgumentException if the rank is < 0 or ≥ ⁿ⁺ᵣ⁻¹Cᵣ
+         */
         @Override
         public List<T> next() {
             BigInteger m = rankIterator.next();
@@ -78,6 +93,18 @@ public class RepetitiveCombinationOfRanks<T> extends AbstractGenerator<T> {
             return indicesToValues(indices);
         }
 
+        /**
+         * Computes the indices for the mᵗʰ repetitive combination.
+         * <p>
+         * Given a rank m in [0, ⁿ⁺ᵣ⁻¹Cᵣ), this method calculates the corresponding combination
+         * indices using a lexicographical unranking algorithm based on the repetitive combination
+         * formula. It iteratively selects indices by comparing the remaining rank against the
+         * number of combinations for each possible element.
+         *
+         * @param m the rank of the combination (m ≥ 0)
+         * @return an array of indices representing the combination
+         * @throws ArithmeticException if m cannot be converted to a long
+         */
         private int[] mthCombinationWithRepetition(long m) {
             int n = elements.size();
             int[] result = new int[r];

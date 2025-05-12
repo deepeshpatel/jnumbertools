@@ -18,7 +18,6 @@ import java.util.Random;
  * </p>
  *
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public class BigIntegerChoice implements Iterable<BigInteger> {
 

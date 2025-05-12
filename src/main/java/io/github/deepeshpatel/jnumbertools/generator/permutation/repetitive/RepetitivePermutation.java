@@ -14,9 +14,9 @@ import java.util.NoSuchElementException;
  * Utility for generating all permutations of a given set of items with repetition allowed.
  * <p>
  * Permutations are generated in lexicographical order based on the indices of the input values,
- * treating each value at a specific index (e.g. elements₀, elements₁, …, elementsₙ₋₁) as unique.
+ * treating each value at a specific index (e.g., elements₀, elements₁, …, elementsₙ₋₁) as unique.
  * This means that even if the same element appears more than once in a permutation, its occurrence
- * is determined by its position (i.e. index) in the input list.
+ * is determined by its position (i.e., index) in the input list.
  * </p>
  * <p>
  * Note that the length of each permutation (specified by {@code size}) may be greater than the number
@@ -27,7 +27,6 @@ import java.util.NoSuchElementException;
  *
  * @param <T> the type of elements to permute
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public final class RepetitivePermutation<T> extends AbstractGenerator<T> {
 
@@ -48,8 +47,8 @@ public final class RepetitivePermutation<T> extends AbstractGenerator<T> {
     /**
      * Returns an iterator over all repetitive permutations of the input elements.
      * <p>
-     * The iterator generates each permutation by treating the current indices as a base‑<em>n</em> counter
-     * (where <em>n</em> is the number of unique elements) and incrementing it in lexicographical order.
+     * The iterator generates each permutation by treating the current indices as a base-n counter
+     * (where n is the number of unique elements) and incrementing it in lexicographical order.
      * </p>
      *
      * @return an iterator for generating permutations as lists of elements
@@ -66,7 +65,7 @@ public final class RepetitivePermutation<T> extends AbstractGenerator<T> {
 
         /**
          * The current permutation represented as an array of indices.
-         * The initial value is an array of zeros (e.g. [0, 0, …, 0]), corresponding to repeating the first element.
+         * The initial value is an array of zeros (e.g., [0, 0, …, 0]), corresponding to repeating the first element.
          */
         private final int[] currentIndices = new int[size];
 
@@ -104,9 +103,9 @@ public final class RepetitivePermutation<T> extends AbstractGenerator<T> {
         /**
          * Advances the indices array to the next permutation in lexicographical order.
          * <p>
-         * This method treats the indices as digits of a base‑<em>base</em> number (where <em>base</em> equals the
+         * This method treats the indices as digits of a base-n number (where n equals the
          * number of unique elements) and increments the number by one. If a digit reaches its maximum value
-         * (i.e. base‑1), it is reset to 0 and the next more significant digit is incremented.
+         * (i.e., base-1), it is reset to 0 and the next more significant digit is incremented.
          * </p>
          *
          * @param indices the current indices representing the permutation

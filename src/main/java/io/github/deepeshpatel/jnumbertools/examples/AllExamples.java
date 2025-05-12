@@ -121,9 +121,9 @@ public class AllExamples {
         out.println(JNumberTools.rankOf().uniqueCombination(8, 1,2,3,4));
 
         //un-ranking: same as finding mth. Remove it
-        out.println(Arrays.toString(JNumberTools.unRankingOf().uniquePermutation(BigInteger.valueOf(23), 4)));
-        out.println(Arrays.toString(JNumberTools.unRankingOf().kPermutation(BigInteger.valueOf(1000), 8, 4)));
-        out.println(Arrays.toString(JNumberTools.unRankingOf().uniqueCombination(BigInteger.valueOf(35), 8, 4)));
-        //TODO JNumberTools.unRankingOf().repeatedPermutation(3,1,2,1).longValue();
+        out.println(Arrays.toString(JNumberTools.unrankOf().uniquePermutation(BigInteger.valueOf(23), 4)));
+        out.println(Arrays.toString(JNumberTools.unrankOf().kPermutation(BigInteger.valueOf(1000), 8, 4)));
+        out.println(Arrays.toString(JNumberTools.unrankOf().uniqueCombination(BigInteger.valueOf(35), 8, 4)));
+        //TODO JNumberTools.unrankOf().repeatedPermutation(3,1,2,1).longValue();
     }
 }

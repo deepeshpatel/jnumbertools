@@ -15,16 +15,29 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Builder for generating unique permutations of a list of elements.
- * <p>
- * This builder supports generating all permutations in lexicographical order, specific mᵗʰ permutations,
- * permutations via single swaps (Heap's algorithm), and a placeholder for a fast unordered method.
- * Instances of permutation generators should be created through this builder.
- * </p>
+ * Builder class for generating various types of unique permutations of input elements.
+ * Provides multiple permutation generation strategies:
+ * <ul>
+ *   <li>Lexicographical order (all permutations)</li>
+ *   <li>Every mᵗʰ permutation in lexicographical order</li>
+ *   <li>Random sampling of permutations</li>
+ *   <li>Permutations at specific ranks</li>
+ *   <li>Single-swap permutations (Heap's algorithm)</li>
+ * </ul>
+ *
+ * <p><b>Example:</b>
+ * <pre>{@code
+ * // Generate all permutations of [A, B, C] in lex order
+ * new UniquePermutationBuilder<>(calculator, Arrays.asList("A", "B", "C"))
+ *     .lexOrder()
+ *     .forEach(System.out::println);
+ * }</pre>
  *
  * @param <T> the type of elements to permute
  * @author Deepesh Patel
- * @version 3.0.1
+ * @see UniquePermutation
+ * @see UniquePermutationOfRanks
+ * @see UniquePermutationSingleSwap
  */
 public final class UniquePermutationBuilder<T> {
 
@@ -135,5 +148,4 @@ public final class UniquePermutationBuilder<T> {
     public UniquePermutationSingleSwap<T> singleSwap() {
         return new UniquePermutationSingleSwap<>(elements);
     }
-
 }

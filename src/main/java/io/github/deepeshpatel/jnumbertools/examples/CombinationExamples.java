@@ -102,7 +102,7 @@ public class CombinationExamples {
         int n = 20;
         int r = 11;
         BigInteger rank = BigInteger.valueOf(41559);
-        int[] combination = JNumberTools.unRankingOf().uniqueCombination(rank,n, r);
+        int[] combination = JNumberTools.unrankOf().uniqueCombination(rank,n, r);
         System.out.printf("%dth combination of %d items selected from %d items is " + Arrays.toString(combination),rank, r,n);
     }
 }

@@ -10,15 +10,14 @@ import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProduc
 import java.util.List;
 
 /**
- * Provides methods for generating Cartesian products of elements.
- * This class includes functionality to compute Cartesian products with different configurations,
- * including simple and constrained products.
- * The class supports:
- * <ul>
- *     <li><strong>Simple Product:</strong> Computes the Cartesian product of a list of elements, where each element can appear in any position.</li>
- *     <li><strong>Constrained Product:</strong> Computes the Cartesian product with a specified quantity of elements, allowing more flexible product configurations.</li>
- * </ul>
- *
+ * Generates Cartesian products of elements from given sets.
+ * <p>
+ * The Cartesian product of sets A₁, A₂, ..., Aₖ is the set of all ordered tuples (a₁, a₂, ..., aₖ)
+ * where aᵢ ∈ Aᵢ. This class supports:
+ * <p>
+ * - Simple Product: Computes Aⁿ, where A is a single set of elements repeated n times.
+ * - Constrained Product: Computes A₁ × A₂ × ... × Aₖ, where k is a specified tuple length and each Aᵢ is a set of elements.
+ * </p>
  * Example usage:
  * <pre>
  * CartesianProduct cartesianProduct = new CartesianProduct();
@@ -27,7 +26,7 @@ import java.util.List;
  * </pre>
  *
  * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
- * @see <a href="overview.html">Overview</a> for more detailed examples and usage scenarios.
+ * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  * @author Deepesh Patel
  */
 public final class CartesianProduct {
@@ -35,37 +34,45 @@ public final class CartesianProduct {
     private final Calculator calculator;
 
     /**
-     * Constructs a new {@code CartesianProduct} instance with a default {@code Calculator}.
+     * Constructs a new CartesianProduct instance with a default Calculator.
      */
     public CartesianProduct() {
         this(new Calculator());
     }
 
     /**
-     * Constructs a new {@code CartesianProduct} instance with the specified {@code Calculator}.
+     * Constructs a new CartesianProduct instance with the specified Calculator.
      *
-     * @param calculator The {@code Calculator} to use for generating Cartesian products.
+     * @param calculator the Calculator for combinatorial computations
      */
     public CartesianProduct(Calculator calculator) {
         this.calculator = calculator;
     }
 
     /**
-     * Creates a builder for simple Cartesian products of a list of elements.
+     * Creates a builder for simple Cartesian products over a set of elements.
+     * <p>
+     * Generates the product Aⁿ, where A is the input set and n is the number of repetitions
+     * specified in the builder.
+     * </p>
      *
-     * @param elements The list of elements to compute the Cartesian product for.
-     * @return A builder for simple Cartesian products.
+     * @param elements the list of elements forming the set
+     * @return a SimpleProductBuilder for configuring the product
      */
     public SimpleProductBuilder simpleProductOf(List<?> elements) {
         return new SimpleProductBuilder(elements, calculator);
     }
 
     /**
-     * Creates a builder for simple Cartesian products of a varargs list of elements.
+     * Creates a builder for simple Cartesian products over a varargs set of elements.
+     * <p>
+     * Generates the product Aⁿ, where A is the input set and n is the number of repetitions
+     * specified in the builder.
+     * </p>
      *
-     * @param elements The varargs list of elements to compute the Cartesian product for.
-     * @param <E> The type of elements.
-     * @return A builder for simple Cartesian products.
+     * @param elements the varargs list of elements forming the set
+     * @param <E> the type of elements
+     * @return a SimpleProductBuilder for configuring the product
      */
     @SafeVarargs
     public final <E> SimpleProductBuilder simpleProductOf(E... elements) {
@@ -73,23 +80,31 @@ public final class CartesianProduct {
     }
 
     /**
-     * Creates a builder for constrained Cartesian products of a specified quantity from a list of elements.
+     * Creates a builder for constrained Cartesian products with a specified tuple length.
+     * <p>
+     * Generates the product A₁ × A₂ × ... × Aₖ, where k is the quantity (tuple length) and
+     * each Aᵢ is the input set of elements.
+     * </p>
      *
-     * @param quantity The quantity of elements for the Cartesian product.
-     * @param elements The list of elements to compute the Cartesian product for.
-     * @return A builder for constrained Cartesian products.
+     * @param quantity the tuple length (number of sets, k)
+     * @param elements the list of elements forming each set
+     * @return a ConstrainedProductBuilder for configuring the product
      */
     public ConstrainedProductBuilder constrainedProductOf(int quantity, List<?> elements) {
         return new ConstrainedProductBuilder(quantity, elements, calculator);
     }
 
     /**
-     * Creates a builder for constrained Cartesian products of a specified quantity from a varargs list of elements.
+     * Creates a builder for constrained Cartesian products with a specified tuple length.
+     * <p>
+     * Generates the product A₁ × A₂ × ... × Aₖ, where k is the quantity (tuple length) and
+     * each Aᵢ is the input set of elements.
+     * </p>
      *
-     * @param quantity The quantity of elements for the Cartesian product.
-     * @param elements The varargs list of elements to compute the Cartesian product for.
-     * @param <E> The type of elements.
-     * @return A builder for constrained Cartesian products.
+     * @param quantity the tuple length (number of sets, k)
+     * @param elements the varargs list of elements forming each set
+     * @param <E> the type of elements
+     * @return a ConstrainedProductBuilder for configuring the product
      */
     @SafeVarargs
     public final <E> ConstrainedProductBuilder constrainedProductOf(int quantity, E... elements) {

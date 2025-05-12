@@ -109,7 +109,7 @@ class KPermutationExamples {
     static void printKPermutationForGivenRank() {
         System.out.println("\n*** Print two hundred octillion-th 20-permutation of 40 items *** ");
         int[] permutation = JNumberTools
-                .unRankingOf()
+                .unrankOf()
                 .kPermutation(new BigInteger("200000000000000000000000000000"),40,20);
 
         System.out.println(Arrays.toString(permutation));

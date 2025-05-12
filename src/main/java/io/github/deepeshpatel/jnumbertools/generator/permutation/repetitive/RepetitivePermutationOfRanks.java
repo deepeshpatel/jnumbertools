@@ -19,13 +19,12 @@ import java.util.NoSuchElementException;
  * This class produces permutations of length {@code width} from the input list, allowing elements to repeat
  * (e.g., for [A, B], width=2: [A, A], [A, B], [B, A], [B, B]). Permutations are determined by ranks from
  * the provided {@code Iterable<BigInteger>}, mapped using base-n unranking (n = number of elements).
- * Total permutations are n^width. Supports lexicographical order (all or mᵗʰ), sampling with/without replacement,
+ * Total permutations are nᵂ where w is the width. Supports lexicographical order (all or mᵗʰ), sampling with/without replacement,
  * and custom rank sequences.
  * </p>
  *
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public final class RepetitivePermutationOfRanks<T> extends AbstractGenerator<T> {
 
@@ -39,7 +38,7 @@ public final class RepetitivePermutationOfRanks<T> extends AbstractGenerator<T> 
      *
      * @param elements   the list of distinct elements to permute; must not be null or empty
      * @param width      the length of each permutation; must be non-negative
-     * @param ranks      the sequence of ranks to generate permutations; each rank must be in [0, n^width)
+     * @param ranks      the sequence of ranks to generate permutations; each rank must be in [0, nᵂ)
      * @param calculator utility for computing powers and permutations
      * @throws IllegalArgumentException if width is negative, elements is null/empty, or ranks are invalid
      */
@@ -97,7 +96,7 @@ public final class RepetitivePermutationOfRanks<T> extends AbstractGenerator<T> 
          * digit to an index in the elements list to form a permutation of length width.
          * </p>
          *
-         * @param rank   the rank of the permutation (0 to n^width - 1)
+         * @param rank   the rank of the permutation (0 to nᵂ - 1)
          * @param n      the number of distinct elements
          * @param width  the length of the permutation
          * @return an array of indices representing the permutation

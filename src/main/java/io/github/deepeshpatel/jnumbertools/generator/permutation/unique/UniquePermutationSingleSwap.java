@@ -13,33 +13,45 @@ import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
 /**
- * Generates all unique permutations using Heap's single-swap algorithm.
- * <p>
- * This class implements Heap's algorithm, which generates permutations by performing a single swap per step,
- * operating on indices (e.g., elements₀, elements₁, ...) and mapping them to the input elements. It’s efficient
- * for sequential generation but not order-preserving (not lexicographical). Instances should be created via
- * a builder.
- * </p>
+ * Generates unique permutations of input elements using Heap's algorithm which minimizes
+ * movement by generating each permutation from the previous one by swapping two elements.
+ * This implementation is memory-efficient as it generates permutations on-demand.
  *
- * @param <T> the type of elements to permute
+ * <p><b>Note:</b> This does not generate permutations in lexicographic order. For lexicographic
+ * order, use {@link UniquePermutation} instead. The time complexity is O(n!) and space
+ * complexity is O(n) where n is the number of elements.
+ *
+ * <p>Example:
+ * <pre>{@code
+ * // Generates all permutations of [1, 2, 3] (not in lex order)
+ * new UniquePermutationSingleSwap<>(Arrays.asList(1, 2, 3))
+ *     .stream()
+ *     .forEach(System.out::println);
+ * }</pre>
+ *
+ * @param <T> the type of elements to be permuted
  * @author Deepesh Patel
- * @version 3.0.1
+ * @see UniquePermutation
+ * @see UniquePermutationBuilder
  */
 public final class UniquePermutationSingleSwap<T> extends AbstractGenerator<T> {
 
     /**
-     * Constructs a generator using Heap's algorithm for the specified elements.
+     * Constructs a permutation generator for the given items.
      *
-     * @param elements the list of elements to permute; may be empty
+     * @param elements the list of items to permute (must not be null or empty)
+     * @throws IllegalArgumentException if items is null or empty
      */
     UniquePermutationSingleSwap(List<T> elements) {
         super(elements);
     }
 
     /**
-     * Returns an iterator over all unique permutations using single swaps.
+     * Returns an iterator over all unique permutations of the input elements.
+     * The iterator uses Heap's algorithm to generate permutations on-demand.
      *
-     * @return an iterator over lists representing permutations
+     * @return an iterator that generates permutations using single-swap approach
+     *         (not in lexicographic order)
      */
     @Override
     public Iterator<List<T>> iterator() {

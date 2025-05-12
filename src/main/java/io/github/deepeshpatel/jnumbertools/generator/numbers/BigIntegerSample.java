@@ -17,7 +17,6 @@ import java.util.*;
  * </p>
  *
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public class BigIntegerSample implements Iterable<BigInteger> {
 
@@ -70,7 +69,7 @@ class FisherYatesIterator implements Iterator<BigInteger> {
 
     public FisherYatesIterator(int max, int sampleSize) {
         this.sampleSize = sampleSize;
-        Random  random = new Random();
+        Random random = new Random();
         this.numbers = new int[sampleSize];
         this.currentIndex = 0;
 

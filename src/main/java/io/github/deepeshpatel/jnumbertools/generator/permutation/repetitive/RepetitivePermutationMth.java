@@ -13,26 +13,29 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Utility for generating every mᵗʰ repetitive permutation of a specified width in lexicographical order.
+ * Generates the mᵗʰ repetitive permutation of a given multiset in lexicographical order.
  * <p>
- * This class generates permutations of length {@code width} from the input list, allowing repetition,
- * starting from a specified rank (default 0) and advancing by {@code m} in lexicographical order of indices
- * (e.g., for [A, B], width=2, m=2: [A, A], [B, A]). It uses a base-n (n = number of elements) addition
- * algorithm with carry propagation on an integer array for efficiency. Total permutations are n^width;
- * iteration stops when the permutation exceeds this implicitly via carry propagation. Instances are
- * created via a builder.
+ * This class is designed to efficiently compute a specific permutation at rank m (0-based)
+ * from a multiset where elements may have repetitions. The implementation uses combinatorial
+ * mathematics to determine the permutation without generating all preceding permutations.
  * </p>
- * <p>Example:
- * <pre>
- * List<String> elements = List.of("A", "B");
- * RepetitivePermutationMth<String> perms = new RepetitivePermutationMth<>(elements, 2, BigInteger.valueOf(2), BigInteger.ZERO);
- * perms.stream().toList(); // [[A, A], [B, A]]
- * </pre>
+ * <p><b>Example:</b>
+ * <pre>{@code
+ * // Get the 2nd repetitive permutation of [A, A, B]
+ * List<String> items = Arrays.asList("A", "A", "B");
+ * int[] multiset = {2, 1}; // 2 A's, 1 B
+ * RepetitivePermutationMth<String> generator = new RepetitivePermutationMth<>(items, multiset, BigInteger.valueOf(2));
+ * System.out.println(generator.next()); // Outputs: [A, B, A]
+ * }</pre>
+ * <p>
+ * <b>Note:</b> The total number of permutations is calculated as n! / (f₁! * f₂! * ... * fₖ!),
+ * where n is the total number of elements, and fᵢ are the frequencies of distinct elements.
  * </p>
  *
- * @param <T> the type of elements to permute
+ * @param <T> the type of elements in the permutation
  * @author Deepesh Patel
- * @version 3.0.1
+ * @see RepetitivePermutation
+ * @see RepetitivePermutationBuilder
  */
 public final class RepetitivePermutationMth<T> extends AbstractGenerator<T> {
 
@@ -41,13 +44,14 @@ public final class RepetitivePermutationMth<T> extends AbstractGenerator<T> {
     private final BigInteger start;
 
     /**
-     * Constructs a new {@code RepetitivePermutationMth} instance.
+     * Constructs a generator for every m<sup>th</sup> repetitive permutation.
      *
-     * @param elements  the list of elements to permute; must not be null or empty
-     * @param width     the length of each permutation; must be non-negative
-     * @param increment the step size for generating permutations; must be positive
-     * @param start     the starting permutation index (0-based); must be non-negative
-     * @throws IllegalArgumentException if width is negative, increment is non-positive, start is negative, or elements is null/empty
+     * @param elements the elements to permute (must not be null or empty)
+     * @param width the length of each permutation (must be positive)
+     * @param increment the step size between permutations (must be positive)
+     * @param start the starting rank (0-based, must be non-negative)
+     * @throws IllegalArgumentException if elements is empty, length ≤ 0,
+     *         m ≤ 0, or start < 0
      */
     RepetitivePermutationMth(List<T> elements, int width, BigInteger increment, BigInteger start) {
         super(elements);

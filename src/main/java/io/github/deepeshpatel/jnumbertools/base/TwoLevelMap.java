@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @param <K2> the type of the second key.
  * @param <V>  the type of the value.
  */
-public class TwoLevelMap<K1, K2, V> extends ConcurrentHashMap<K1, Map<K2, V>> {
+class TwoLevelMap<K1, K2, V> extends ConcurrentHashMap<K1, Map<K2, V>> {
 
     public V get(K1 key1, K2 key2) {
         var map = get(key1);

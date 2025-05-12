@@ -14,15 +14,14 @@ import java.util.List;
  * Provides algorithms for converting between Combinadic and decimal representations,
  * and for computing ranks and un-ranks of combinations using the Combinadic number system.
  * <p>
- * The combinadic representation is a unique method to represent non-negative integers as combinations,
- * enabling direct computation of the nth combination in lexicographical order without enumeration of
- * all preceding combinations. This class includes methods to convert a given combination to its combinadic
- * representation, to convert a combinadic representation back to a combination, and to convert between
- * decimal and combinadic formats.
+ * The Combinadic representation is a unique method to represent non-negative integers as combinations,
+ * enabling direct computation of the nᵗʰ combination in lexicographical order without enumeration of
+ * all preceding combinations. This class includes methods to convert a given combination to its Combinadic
+ * representation, to convert a Combinadic representation back to a combination, and to convert between
+ * decimal and Combinadic formats.
  * </p>
  *
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public final class CombinadicAlgorithms {
 
@@ -31,26 +30,27 @@ public final class CombinadicAlgorithms {
     /**
      * Constructs an instance of {@link CombinadicAlgorithms} with the specified calculator.
      *
-     * @param calculator the calculator used for combinatorial calculations.
+     * @param calculator the calculator used for combinatorial calculations
+     * @return a new instance of CombinadicAlgorithms initialized with the provided calculator
      */
     public CombinadicAlgorithms(Calculator calculator) {
         this.calculator = calculator;
     }
 
     /**
-     * Computes the rank of a given combination in the combinadic representation.
+     * Computes the rank of a given combination in the Combinadic representation.
      * <p>
-     * The rank is calculated by converting the provided combination into its combinadic form,
+     * The rank is calculated by converting the provided combination into its Combinadic form,
      * then into a decimal value, and finally computing the rank as:
      * <pre>
-     *     rank = nCr - decimalValue - 1
+     *     rank = Cₙ,ᵣ − decimalValue − 1
      * </pre>
-     * where nCr is the total number of combinations of the given size.
+     * where Cₙ,ᵣ is the total number of combinations of the given size.
      * </p>
      *
-     * @param n              the total number of elements.
-     * @param mthCombination the combination whose rank is to be computed.
-     * @return the rank of the given combination in the combinadic representation.
+     * @param n the total number of elements (nₙ)
+     * @param mthCombination the combination (array of indices) whose rank is to be computed
+     * @return the rank of the given combination in the Combinadic representation
      */
     public BigInteger rank(int n, int[] mthCombination) {
         int[] combinadic = combinationToCombinadic(n, mthCombination);
@@ -60,20 +60,20 @@ public final class CombinadicAlgorithms {
     }
 
     /**
-     * Computes the combination corresponding to a given rank in the combinadic representation.
+     * Computes the combination corresponding to a given rank in the Combinadic representation.
      * <p>
      * This method computes:
      * <pre>
-     *     x = nCr - rank - 1
+     *     x = Cₙ,ᵣ − rank − 1
      * </pre>
-     * then converts x to a combinadic representation of degree r and transforms it back into a combination.
+     * then converts x to a Combinadic representation of size rᵣ and transforms it back into a combination.
      * </p>
      *
-     * @param rank the rank of the combination.
-     * @param nCr  the total number of combinations.
-     * @param n    the total number of elements.
-     * @param r    the size of the combination.
-     * @return the combination corresponding to the given rank.
+     * @param rank the rank of the combination
+     * @param nCr the total number of combinations (Cₙ,ᵣ)
+     * @param n the total number of elements (nₙ)
+     * @param r the size of the combination (rᵣ)
+     * @return the combination corresponding to the given rank
      */
     public int[] unRank(BigInteger rank, BigInteger nCr, int n, int r) {
         BigInteger x = nCr.subtract(rank).subtract(BigInteger.ONE);
@@ -82,17 +82,17 @@ public final class CombinadicAlgorithms {
     }
 
     /**
-     * Converts a combination to its combinadic representation.
+     * Converts a combination to its Combinadic representation.
      * <p>
      * This is achieved by mapping each element of the combination as:
      * <pre>
-     *     combinadic[i] = n - 1 - mthCombination[i]
+     *     combinadic[i] = nₙ − 1 − mthCombination[i]
      * </pre>
      * </p>
      *
-     * @param n              the total number of elements.
-     * @param mthCombination the combination to be converted.
-     * @return an array representing the combinadic values of the combination.
+     * @param n the total number of elements (nₙ)
+     * @param mthCombination the combination (array of indices) to be converted
+     * @return an array representing the Combinadic values of the combination
      */
     public static int[] combinationToCombinadic(int n, int[] mthCombination) {
         int[] combinadic = new int[mthCombination.length];
@@ -103,14 +103,14 @@ public final class CombinadicAlgorithms {
     }
 
     /**
-     * Converts a combinadic representation to its corresponding combination.
+     * Converts a Combinadic representation to its corresponding combination.
      * <p>
      * This method reverses the transformation done by {@link #combinationToCombinadic(int, int[])}.
      * </p>
      *
-     * @param combinadic the combinadic representation to convert.
-     * @param n          the total number of elements.
-     * @return an array representing the original combination.
+     * @param combinadic the Combinadic representation to convert
+     * @param n the total number of elements (nₙ)
+     * @return an array representing the original combination
      */
     public static int[] combinadicToCombination(int[] combinadic, int n) {
         int[] a = Arrays.copyOf(combinadic, combinadic.length);
@@ -121,13 +121,13 @@ public final class CombinadicAlgorithms {
     }
 
     /**
-     * Converts a combinadic representation to its decimal equivalent.
+     * Converts a Combinadic representation to its decimal equivalent.
      * <p>
-     * The decimal value is computed as the sum of binomial coefficients for each position in the combinadic array.
+     * The decimal value is computed as the sum of binomial coefficients for each position in the Combinadic array.
      * </p>
      *
-     * @param combinadic the combinadic representation to convert.
-     * @return the decimal value of the combinadic representation.
+     * @param combinadic the Combinadic representation to convert
+     * @return the decimal value of the Combinadic representation
      */
     public BigInteger combinadicToDecimal(int[] combinadic) {
         BigInteger decimalValue = BigInteger.ZERO;
@@ -140,15 +140,15 @@ public final class CombinadicAlgorithms {
     }
 
     /**
-     * Converts a decimal value to its combinadic representation.
+     * Converts a decimal value to its Combinadic representation.
      * <p>
      * The conversion is performed by repeatedly finding the largest integer n such that
-     * the binomial coefficient C(n, r) is less than or equal to the remaining value.
+     * the binomial coefficient C(n, rᵣ) is less than or equal to the remaining value.
      * </p>
      *
-     * @param value  the decimal value to convert.
-     * @param degree the degree (length) of the combinadic representation.
-     * @return an array representing the combinadic values of the decimal number.
+     * @param value the decimal value to convert
+     * @param degree the size of the combination (rᵣ)
+     * @return an array representing the Combinadic values of the decimal number
      */
     public int[] decimalToCombinadic(BigInteger value, int degree) {
         int[] combinadic = new int[degree];
@@ -163,14 +163,14 @@ public final class CombinadicAlgorithms {
     }
 
     /**
-     * Computes the next combinadic value in the sequence.
+     * Computes the next Combinadic value in the sequence.
      * <p>
-     * This method returns a new combinadic number by incrementing the current combinadic representation.
+     * This method returns a new Combinadic number by incrementing the current Combinadic representation.
      * The algorithm increases the rightmost element and resets it if necessary, propagating a carry as required.
      * </p>
      *
-     * @param combinadic a list representing the current combinadic number.
-     * @return an array representing the next combinadic number.
+     * @param combinadic a list representing the current Combinadic number
+     * @return an array representing the next Combinadic number
      */
     public static int[] nextCombinadic(List<Integer> combinadic) {
         int[] result = combinadic.stream().mapToInt(Integer::intValue).toArray();
@@ -185,6 +185,4 @@ public final class CombinadicAlgorithms {
         result[0]++;
         return result;
     }
-
-    // TODO: Add algorithm for nextMthCombinadic(int[] combinadic) without converting to decimal.
 }

@@ -12,8 +12,9 @@ import java.util.stream.IntStream;
 /**
  * An iterator that generates unique permutations of integer indices in lexicographical order.
  * <p>
- * This iterator produces permutations of indices (e.g., [0, 1, 2], [0, 2, 1], etc.), which can be mapped
- * to actual elements by higher-level classes. For example, with size 3, it generates:
+ * This iterator produces all nₙ! permutations of indices {0, 1, ..., nₙ−1} (e.g., [0, 1, 2], [0, 2, 1], etc.),
+ * where nₙ is the input size. These can be mapped to actual elements by higher-level classes. For example,
+ * with size=3, it generates:
  * <pre>
  * [0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]
  * </pre>
@@ -22,8 +23,6 @@ import java.util.stream.IntStream;
  * </p>
  *
  * @author Deepesh Patel
- * @version 3.0.1
- * @since 1.0.3
  */
 public final class UniquePermutationLexIndicesIterator implements Iterator<int[]> {
 
@@ -32,10 +31,12 @@ public final class UniquePermutationLexIndicesIterator implements Iterator<int[]
     /**
      * Constructs an iterator for permutations of indices of the specified size.
      * <p>
-     * Initializes with the identity permutation: [0, 1, 2, ..., size-1].
+     * Initializes with the identity permutation: [0, 1, 2, ..., nₙ−1].
      * </p>
      *
-     * @param size the number of indices to permute; must be non-negative
+     * @param size the number of indices to permute (nₙ); must be non-negative
+     * @return a new UniquePermutationLexIndicesIterator instance
+     * @throws IllegalArgumentException if size is negative
      */
     UniquePermutationLexIndicesIterator(int size) {
         this.indices = IntStream.range(0, size).toArray();
@@ -44,7 +45,9 @@ public final class UniquePermutationLexIndicesIterator implements Iterator<int[]
     /**
      * Constructs an iterator with a specified starting permutation.
      *
-     * @param startingPermutation the initial permutation of indices; must be a valid permutation
+     * @param startingPermutation the initial permutation of indices; must be a valid permutation of {0, 1, ..., nₙ−1}
+     * @return a new UniquePermutationLexIndicesIterator instance
+     * @throws IllegalArgumentException if startingPermutation is invalid
      */
     public UniquePermutationLexIndicesIterator(int[] startingPermutation) {
         this.indices = startingPermutation;
@@ -81,10 +84,10 @@ public final class UniquePermutationLexIndicesIterator implements Iterator<int[]
      * <p>
      * The algorithm:
      * <ol>
-     *   <li>Finds the rightmost index {@code i} where {@code c[i] < c[i+1]}.</li>
+     *   <li>Finds the rightmost index i where cᵢ < cᵢ₊₁.</li>
      *   <li>If no such index exists, returns an empty array (indicating the last permutation).</li>
-     *   <li>Finds the rightmost index {@code j} where {@code c[j] > c[i]} and swaps {@code c[i]} and {@code c[j]}.</li>
-     *   <li>Reverses the subarray from {@code i+1} to the end.</li>
+     *   <li>Finds the rightmost index j where cⱼ > cᵢ and swaps cᵢ and cⱼ.</li>
+     *   <li>Reverses the subarray from i+1 to the end.</li>
      * </ol>
      * </p>
      *
@@ -120,6 +123,13 @@ public final class UniquePermutationLexIndicesIterator implements Iterator<int[]
         return c;
     }
 
+    /**
+     * Swaps two elements in the array at the specified indices.
+     *
+     * @param a the array to modify
+     * @param i the index of the first element
+     * @param j the index of the second element
+     */
     private static void swap(int[] a, int i, int j) {
         int t = a[i];
         a[i] = a[j];
