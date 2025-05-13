@@ -14,7 +14,7 @@ import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
 
-class UniqueCombinationOfRanksTest {
+class UniqueCombinationByRanksTest {
 
     @Nested
     class UniqueCombinationChoiceTest {

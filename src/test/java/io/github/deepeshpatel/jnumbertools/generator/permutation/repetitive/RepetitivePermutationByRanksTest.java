@@ -17,9 +17,9 @@ import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for {@link RepetitivePermutationOfRanks}, covering choice and sampling strategies.
+ * Test class for {@link RepetitivePermutationByRanks}, covering choice and sampling strategies.
  */
-class RepetitivePermutationOfRanksTest {
+class RepetitivePermutationByRanksTest {
 
     @Nested
     public class RepetitivePermutationChoiceTest {

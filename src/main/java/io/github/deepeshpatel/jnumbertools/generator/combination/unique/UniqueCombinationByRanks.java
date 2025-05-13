@@ -24,7 +24,7 @@ import java.util.List;
  * @param <T> the type of elements in the combinations
  * @author Deepesh Patel
  */
-public class UniqueCombinationOfRanks<T> extends AbstractGenerator<T> {
+public class UniqueCombinationByRanks<T> extends AbstractGenerator<T> {
 
     private final int r;
     private final BigInteger nCr;
@@ -40,7 +40,7 @@ public class UniqueCombinationOfRanks<T> extends AbstractGenerator<T> {
      * @param calculator the calculator for computing combination counts
      * @throws IllegalArgumentException if r < 0, r > n, elements is null/empty, or any rank < 0 or ≥ ⁿCᵣ
      */
-    public UniqueCombinationOfRanks(List<T> elements, int r, Iterable<BigInteger> ranks, Calculator calculator) {
+    public UniqueCombinationByRanks(List<T> elements, int r, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements);
         this.r = r;
         this.ranks = ranks;

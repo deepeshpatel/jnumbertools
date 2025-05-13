@@ -15,7 +15,7 @@ import java.util.LinkedHashMap;
 /**
  * Builder for generating multiset combinations with various sampling and ordering strategies.
  * <p>
- * This builder constructs {@link MultisetCombination} or {@link MultisetCombinationOfRanks} instances
+ * This builder constructs {@link MultisetCombination} or {@link MultisetCombinationByRanks} instances
  * to generate combinations of size r from a multiset of n distinct elements with specified multiplicities
  * (e.g., {A:2, B:1}). Combinations are output as frequency maps (e.g., {A:1, B:2}), where order does not
  * matter. The total number of combinations is given by the multichoose formula, constrained by
@@ -65,15 +65,15 @@ public class MultisetCombinationBuilder<T> {
      * </p>
      *
      * @param sampleSize the number of combinations to sample (1 ≤ sampleSize ≤ total combinations)
-     * @return a {@link MultisetCombinationOfRanks} for random sampling without replacement
+     * @return a {@link MultisetCombinationByRanks} for random sampling without replacement
      * @throws IllegalArgumentException if sampleSize ≤ 0 or exceeds total combinations
      */
-    public MultisetCombinationOfRanks<T> sample(int sampleSize) {
+    public MultisetCombinationByRanks<T> sample(int sampleSize) {
         BigInteger total = Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
         if (sampleSize <= 0 || BigInteger.valueOf(sampleSize).compareTo(total) > 0) {
             throw new IllegalArgumentException("Sample size must be positive and not exceed total combinations");
         }
-        return new MultisetCombinationOfRanks<>(options, r, new BigIntegerSample(total, sampleSize));
+        return new MultisetCombinationByRanks<>(options, r, new BigIntegerSample(total, sampleSize));
     }
 
     /**
@@ -84,15 +84,15 @@ public class MultisetCombinationBuilder<T> {
      * </p>
      *
      * @param sampleSize the number of combinations to sample (sampleSize ≥ 1)
-     * @return a {@link MultisetCombinationOfRanks} for random sampling with replacement
+     * @return a {@link MultisetCombinationByRanks} for random sampling with replacement
      * @throws IllegalArgumentException if sampleSize ≤ 0
      */
-    public MultisetCombinationOfRanks<T> choice(int sampleSize) {
+    public MultisetCombinationByRanks<T> choice(int sampleSize) {
         if (sampleSize <= 0) {
             throw new IllegalArgumentException("Sample size must be positive");
         }
         BigInteger total = Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
-        return new MultisetCombinationOfRanks<>(options, r, new BigIntegerChoice(total, sampleSize));
+        return new MultisetCombinationByRanks<>(options, r, new BigIntegerChoice(total, sampleSize));
     }
 
     /**
@@ -105,10 +105,10 @@ public class MultisetCombinationBuilder<T> {
      *
      * @param m     the increment between ranks (m > 0)
      * @param start the starting rank (0 ≤ start < total combinations)
-     * @return a {@link MultisetCombinationOfRanks} for the sequence
+     * @return a {@link MultisetCombinationByRanks} for the sequence
      * @throws IllegalArgumentException if m ≤ 0 or start < 0
      */
-    public MultisetCombinationOfRanks<T> lexOrderMth(long m, long start) {
+    public MultisetCombinationByRanks<T> lexOrderMth(long m, long start) {
         if (m <= 0) {
             throw new IllegalArgumentException("Increment 'm' must be positive");
         }
@@ -128,10 +128,10 @@ public class MultisetCombinationBuilder<T> {
      *
      * @param m     the increment between ranks (m > 0)
      * @param start the starting rank (0 ≤ start < total combinations)
-     * @return a {@link MultisetCombinationOfRanks} for the sequence
+     * @return a {@link MultisetCombinationByRanks} for the sequence
      * @throws IllegalArgumentException if m ≤ 0 or start < 0
      */
-    public MultisetCombinationOfRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
+    public MultisetCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
         if (m.signum() <= 0) {
             throw new IllegalArgumentException("Increment 'm' must be positive");
         }
@@ -140,7 +140,7 @@ public class MultisetCombinationBuilder<T> {
         }
         BigInteger total = Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
         Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, total);
-        return new MultisetCombinationOfRanks<>(options, r, mthIterable);
+        return new MultisetCombinationByRanks<>(options, r, mthIterable);
     }
 
     /**
@@ -151,13 +151,13 @@ public class MultisetCombinationBuilder<T> {
      * </p>
      *
      * @param ranks the iterable of ranks (each in [0, total combinations))
-     * @return a {@link MultisetCombinationOfRanks} for the custom sequence
+     * @return a {@link MultisetCombinationByRanks} for the custom sequence
      * @throws IllegalArgumentException if ranks is null
      */
-    public MultisetCombinationOfRanks<T> withSequence(Iterable<BigInteger> ranks) {
+    public MultisetCombinationByRanks<T> withSequence(Iterable<BigInteger> ranks) {
         if (ranks == null) {
             throw new IllegalArgumentException("Ranks sequence cannot be null");
         }
-        return new MultisetCombinationOfRanks<>(options, r, ranks);
+        return new MultisetCombinationByRanks<>(options, r, ranks);
     }
 }

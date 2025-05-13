@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
@@ -29,7 +30,7 @@ import java.util.List;
  *     .iterator();
  * // Generate specific ranks in lex order
  * new KPermutationBuilder<>(Arrays.asList("A", "B", "C"), 2, calculator)
- *     .ofRank(Arrays.asList(BigInteger.ZERO, BigInteger.valueOf(2)))
+ *     .byRank(Arrays.asList(BigInteger.ZERO, BigInteger.valueOf(2)))
  *     .iterator();
  * }</pre>
  *
@@ -73,13 +74,13 @@ public final class KPermutationBuilder<T> {
      * </p>
      *
      * @param sampleSize the number of permutations to generate; must be positive
-     * @return a {@link KPermutationOfRanks} instance for random sampling with replacement
+     * @return a {@link KPermutationByRanks} instance for random sampling with replacement
      * @throws IllegalArgumentException if sampleSize is not positive
      */
-    public KPermutationOfRanks<T> choice(int sampleSize) {
+    public KPermutationByRanks<T> choice(int sampleSize) {
         BigInteger max = calculator.nPr(elements.size(), k);
         var choice = new BigIntegerChoice(max, sampleSize);
-        return new KPermutationOfRanks<>(elements, k, choice, calculator);
+        return new KPermutationByRanks<>(elements, k, choice, calculator);
     }
 
     /**
@@ -89,24 +90,24 @@ public final class KPermutationBuilder<T> {
      * </p>
      *
      * @param sampleSize the number of permutations to generate; must be positive and ≤ Pₙ,ₖ
-     * @return a {@link KPermutationOfRanks} instance for random sampling without replacement
+     * @return a {@link KPermutationByRanks} instance for random sampling without replacement
      * @throws IllegalArgumentException if sampleSize is not positive or exceeds Pₙ,ₖ
      */
-    public KPermutationOfRanks<T> sample(int sampleSize) {
+    public KPermutationByRanks<T> sample(int sampleSize) {
         BigInteger max = calculator.nPr(elements.size(), k);
         var sample = new BigIntegerSample(max, sampleSize);
-        return new KPermutationOfRanks<>(elements, k, sample, calculator);
+        return new KPermutationByRanks<>(elements, k, sample, calculator);
     }
 
     /**
      * Generates k-permutations at specified lexicographical ranks.
      *
      * @param ranks an iterable of 0-based rank numbers (0 ≤ rank < Pₙ,ₖ)
-     * @return a {@link KPermutationOfRanks} instance for generating k-permutations at specified ranks
+     * @return a {@link KPermutationByRanks} instance for generating k-permutations at specified ranks
      * @throws IllegalArgumentException if any rank is negative or ≥ Pₙ,ₖ
      */
-    public KPermutationOfRanks<T> ofRank(Iterable<BigInteger> ranks) {
-        return new KPermutationOfRanks<>(elements, k, ranks, calculator);
+    public KPermutationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
+        return new KPermutationByRanks<>(elements, k, ranks, calculator);
     }
 
     /**
@@ -123,10 +124,10 @@ public final class KPermutationBuilder<T> {
      *
      * @param m the step size for selecting every mᵗʰ permutation; must be positive
      * @param start the starting rank (0-based); must be non-negative
-     * @return a {@link KPermutationOfRanks} instance for mᵗʰ permutations in lex order
+     * @return a {@link KPermutationByRanks} instance for mᵗʰ permutations in lex order
      * @throws IllegalArgumentException if m or start is invalid
      */
-    public KPermutationOfRanks<T> lexOrderMth(long m, long start) {
+    public KPermutationByRanks<T> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
@@ -135,12 +136,12 @@ public final class KPermutationBuilder<T> {
      *
      * @param m the step size for selecting every mᵗʰ permutation; must be positive
      * @param start the starting rank (0-based); must be non-negative
-     * @return a {@link KPermutationOfRanks} instance for mᵗʰ permutations in lex order
+     * @return a {@link KPermutationByRanks} instance for mᵗʰ permutations in lex order
      * @throws IllegalArgumentException if m or start is invalid
      */
-    public KPermutationOfRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
+    public KPermutationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
         EveryMthIterable iterator = new EveryMthIterable(start, m, calculator.nPr(elements.size(), k));
-        return new KPermutationOfRanks<>(elements, k, iterator, calculator);
+        return new KPermutationByRanks<>(elements, k, iterator, calculator);
         //return new KPermutationLexOrderMth<>(elements, k, m, start, calculator);
     }
 

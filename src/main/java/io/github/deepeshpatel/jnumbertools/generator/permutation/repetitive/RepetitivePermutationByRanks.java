@@ -26,7 +26,7 @@ import java.util.NoSuchElementException;
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel
  */
-public final class RepetitivePermutationOfRanks<T> extends AbstractGenerator<T> {
+public final class RepetitivePermutationByRanks<T> extends AbstractGenerator<T> {
 
     private final int width;
     private final BigInteger totalPermutations;
@@ -42,7 +42,7 @@ public final class RepetitivePermutationOfRanks<T> extends AbstractGenerator<T> 
      * @param calculator utility for computing powers and permutations
      * @throws IllegalArgumentException if width is negative, elements is null/empty, or ranks are invalid
      */
-    public RepetitivePermutationOfRanks(List<T> elements, int width, Iterable<BigInteger> ranks, Calculator calculator) {
+    public RepetitivePermutationByRanks(List<T> elements, int width, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements);
         if (width < 0) {
             throw new IllegalArgumentException("Width must be non-negative: " + width);

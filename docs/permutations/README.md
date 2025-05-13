@@ -144,7 +144,7 @@ Generates all permutations at indices specified by a custom sequence.
 var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
 JNumberTools.permutations()
     .unique(100)
-    .ofRanks(iterable)
+    .byRanks(iterable)
     .stream().toList();
 ```
 
@@ -209,7 +209,7 @@ var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("10000000000000000
 var elements = new LinkedHashMap<>(Map.of("Apple", 50, "Banana", 200, "Guava", 50));
 JNumberTools.permutations()
     .multiset(elements)
-    .ofRanks(iterable)
+    .byRanks(iterable)
     .stream().forEach(System.out::println);
 ```
 
@@ -316,7 +316,7 @@ var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("10000000000000000
 var elements = new LinkedHashMap<>(Map.of("Apple", 50, "Banana", 200, "Guava", 50));
 JNumberTools.permutations()
     .nPk(200, 100)
-    .ofRanks(iterable)
+    .byRanks(iterable)
     .stream().forEach(System.out::println);
 ```
 
@@ -388,7 +388,7 @@ Generates all repetitive permutations at indices specified by a custom sequence.
 var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
 JNumberTools.permutations()
     .repetitive(300, 500)
-    .ofRanks(iterable)
+    .byRanks(iterable)
     .stream().toList();
 ```
 

@@ -18,7 +18,7 @@ import java.util.stream.IntStream;
  * of a fixed size (degree) from a set of items. This class encapsulates such a representation,
  * providing methods to convert a decimal number into its combinadic format and to generate successive
  * combinadic values. The combinadic number system is particularly useful for directly computing the
- * nth combination in lexicographical order without enumerating all previous combinations.
+ * nᵗʰ combination in lexicographical order without enumerating all previous combinations.
  * </p>
  *
  * @author Deepesh Patel

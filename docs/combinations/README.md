@@ -114,7 +114,7 @@ Generates combinations at indices specified by a custom sequence.
 var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
 JNumberTools.combinations()
     .unique(200, 100)
-    .ofRanks(iterable)
+    .byRanks(iterable)
     .stream().toList();
 ```
 
@@ -177,7 +177,7 @@ var elements = new LinkedHashMap<>(Map.of("Apple", 50, "Banana", 50));
 var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
 JNumberTools.combinations()
     .multiset(elements, 3)
-    .ofRanks(iterable)
+    .byRanks(iterable)
     .stream().toList();
 ```
 
@@ -247,7 +247,7 @@ Generates repetitive combinations at indices specified by a custom sequence.
 var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
 JNumberTools.combinations()
     .repetitive(200, 100)
-    .ofRanks(iterable)
+    .byRanks(iterable)
     .stream().toList();
 ```
 [Home](../../README.md)

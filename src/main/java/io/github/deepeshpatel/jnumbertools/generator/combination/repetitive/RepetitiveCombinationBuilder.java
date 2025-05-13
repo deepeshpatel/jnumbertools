@@ -62,12 +62,12 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
      * </p>
      *
      * @param sampleSize the number of combinations to sample (1 ≤ sampleSize ≤ ⁿ⁺ᵣ⁻¹Cᵣ)
-     * @return a {@link RepetitiveCombinationOfRanks} for random sampling without replacement
+     * @return a {@link RepetitiveCombinationByRanks} for random sampling without replacement
      * @throws IllegalArgumentException if sampleSize ≤ 0 or sampleSize > ⁿ⁺ᵣ⁻¹Cᵣ
      */
-    public RepetitiveCombinationOfRanks<T> sample(int sampleSize) {
+    public RepetitiveCombinationByRanks<T> sample(int sampleSize) {
         BigInteger nCrRepetitive = calculator.nCrRepetitive(elements.size(), size);
-        return new RepetitiveCombinationOfRanks<>(elements, size, new BigIntegerSample(nCrRepetitive, sampleSize), calculator);
+        return new RepetitiveCombinationByRanks<>(elements, size, new BigIntegerSample(nCrRepetitive, sampleSize), calculator);
     }
 
     /**
@@ -77,12 +77,12 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
      * </p>
      *
      * @param sampleSize the number of combinations to sample (sampleSize ≥ 1)
-     * @return a {@link RepetitiveCombinationOfRanks} for random sampling with replacement
+     * @return a {@link RepetitiveCombinationByRanks} for random sampling with replacement
      * @throws IllegalArgumentException if sampleSize ≤ 0
      */
-    public RepetitiveCombinationOfRanks<T> choice(int sampleSize) {
+    public RepetitiveCombinationByRanks<T> choice(int sampleSize) {
         BigInteger nCrRepetitive = calculator.nCrRepetitive(elements.size(), size);
-        return new RepetitiveCombinationOfRanks<>(elements, size, new BigIntegerChoice(nCrRepetitive, sampleSize), calculator);
+        return new RepetitiveCombinationByRanks<>(elements, size, new BigIntegerChoice(nCrRepetitive, sampleSize), calculator);
     }
 
     /**
@@ -93,10 +93,10 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
      *
      * @param m     the increment between ranks (m > 0)
      * @param start the starting rank (0 ≤ start < ⁿ⁺ᵣ⁻¹Cᵣ)
-     * @return a {@link RepetitiveCombinationOfRanks} for the sequence
+     * @return a {@link RepetitiveCombinationByRanks} for the sequence
      * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿ⁺ᵣ⁻¹Cᵣ
      */
-    public RepetitiveCombinationOfRanks<T> lexOrderMth(long m, long start) {
+    public RepetitiveCombinationByRanks<T> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
@@ -108,24 +108,24 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
      *
      * @param m     the increment between ranks (m > 0)
      * @param start the starting rank (0 ≤ start < ⁿ⁺ᵣ⁻¹Cᵣ)
-     * @return a {@link RepetitiveCombinationOfRanks} for the sequence
+     * @return a {@link RepetitiveCombinationByRanks} for the sequence
      * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿ⁺ᵣ⁻¹Cᵣ
      */
-    public RepetitiveCombinationOfRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
+    public RepetitiveCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
         BigInteger nCrRepetitive = calculator.nCrRepetitive(elements.size(), size);
         Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, nCrRepetitive);
-        return new RepetitiveCombinationOfRanks<>(elements, size, mthIterable, calculator);
+        return new RepetitiveCombinationByRanks<>(elements, size, mthIterable, calculator);
     }
 
     /**
      * Creates a generator for repetitive combinations based on a custom sequence of ranks.
      *
      * @param ranks the iterable of ranks (each rank in [0, ⁿ⁺ᵣ⁻¹Cᵣ))
-     * @return a {@link RepetitiveCombinationOfRanks} for the custom sequence
+     * @return a {@link RepetitiveCombinationByRanks} for the custom sequence
      * @throws IllegalArgumentException if any rank < 0 or rank ≥ ⁿ⁺ᵣ⁻¹Cᵣ
      */
-    public RepetitiveCombinationOfRanks<T> withSequence(Iterable<BigInteger> ranks) {
-        return new RepetitiveCombinationOfRanks<>(elements, size, ranks, calculator);
+    public RepetitiveCombinationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
+        return new RepetitiveCombinationByRanks<>(elements, size, ranks, calculator);
     }
 
     /**

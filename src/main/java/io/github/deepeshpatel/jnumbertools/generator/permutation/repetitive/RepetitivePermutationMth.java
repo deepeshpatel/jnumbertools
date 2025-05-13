@@ -44,7 +44,7 @@ public final class RepetitivePermutationMth<T> extends AbstractGenerator<T> {
     private final BigInteger start;
 
     /**
-     * Constructs a generator for every m<sup>th</sup> repetitive permutation.
+     * Constructs a generator for every mᵗʰ repetitive permutation.
      *
      * @param elements the elements to permute (must not be null or empty)
      * @param width the length of each permutation (must be positive)

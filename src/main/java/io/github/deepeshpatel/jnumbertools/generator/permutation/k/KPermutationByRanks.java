@@ -25,7 +25,7 @@ import java.util.stream.IntStream;
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel
  */
-public class KPermutationOfRanks<T> extends AbstractKPermutation<T> {
+public class KPermutationByRanks<T> extends AbstractKPermutation<T> {
 
     /**
      * The initial identity permutation indices [0, 1, ..., kₖ−1].
@@ -40,21 +40,21 @@ public class KPermutationOfRanks<T> extends AbstractKPermutation<T> {
     /**
      * The iterable sequence of rank numbers to generate permutations.
      */
-    final Iterable<BigInteger> sequence;
+    final Iterable<BigInteger> ranks;
 
     /**
      * Constructs an instance for generating k-permutations at specified ranks.
      *
      * @param elements the input list of elements to permute (nₙ elements)
      * @param k the size of each permutation (kₖ); must be between 0 and nₙ
-     * @param sequence an iterable of 0-based rank numbers (0 ≤ rank < Pₙ,ₖ)
+     * @param ranks an iterable of 0-based rank numbers (0 ≤ rank < Pₙ,ₖ)
      * @param calculator utility for combinatorial calculations
-     * @return a new KPermutationOfRanks instance
+     * @return a new KPermutationByRanks instance
      * @throws IllegalArgumentException if kₖ is negative, exceeds nₙ, or sequence contains invalid ranks
      */
-    public KPermutationOfRanks(List<T> elements, int k, Iterable<BigInteger> sequence, Calculator calculator) {
+    public KPermutationByRanks(List<T> elements, int k, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements, k);
-        this.sequence = sequence;
+        this.ranks = ranks;
         this.initialValue = IntStream.range(0, k).toArray();
         nPk = calculator.nPr(elements.size(), initialValue.length);
     }
@@ -66,7 +66,7 @@ public class KPermutationOfRanks<T> extends AbstractKPermutation<T> {
      */
     @Override
     public Iterator<List<T>> iterator() {
-        return new Itr(sequence.iterator());
+        return new Itr(ranks.iterator());
     }
 
     /**

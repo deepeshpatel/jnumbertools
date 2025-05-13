@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
@@ -16,7 +17,7 @@ import java.util.List;
 /**
  * Builder for generating repetitive permutations of a specified width from a list of elements.
  * <p>
- * This builder creates {@link RepetitivePermutationOfRanks} instances for lexicographical order (all or mᵗʰ),
+ * This builder creates {@link RepetitivePermutationByRanks} instances for lexicographical order (all or mᵗʰ),
  * sampling with/without replacement, and custom rank sequences. For example:
  * <pre>
  * List<String> elements = Arrays.asList("A", "B");
@@ -29,7 +30,7 @@ import java.util.List;
  * @param <T> the type of elements to permute
  * @author Deepesh Patel
  */
-public final class RepetitivePermutationBuilder<T> {
+public final class RepetitivePermutationBuilder<T> implements Builder<T> {
 
     private final int width;
     private final List<T> elements;
@@ -85,24 +86,24 @@ public final class RepetitivePermutationBuilder<T> {
      * Generates a sample of repetitive permutations without replacement.
      *
      * @param sampleSize the number of permutations to sample; must be positive and ≤ nᵂ
-     * @return a {@link RepetitivePermutationOfRanks} instance for sampled permutations
+     * @return a {@link RepetitivePermutationByRanks} instance for sampled permutations
      * @throws IllegalArgumentException if sampleSize is invalid
      */
-    public RepetitivePermutationOfRanks<T> sample(int sampleSize) {
+    public RepetitivePermutationByRanks<T> sample(int sampleSize) {
         BigInteger total = calculator.power(elements.size(), width);
-        return new RepetitivePermutationOfRanks<>(elements, width, new BigIntegerSample(total, sampleSize), calculator);
+        return new RepetitivePermutationByRanks<>(elements, width, new BigIntegerSample(total, sampleSize), calculator);
     }
 
     /**
      * Generates a sample of repetitive permutations with replacement.
      *
      * @param sampleSize the number of permutations to sample; must be positive
-     * @return a {@link RepetitivePermutationOfRanks} instance for sampled permutations
+     * @return a {@link RepetitivePermutationByRanks} instance for sampled permutations
      * @throws IllegalArgumentException if sampleSize is invalid
      */
-    public RepetitivePermutationOfRanks<T> choice(int sampleSize) {
+    public RepetitivePermutationByRanks<T> choice(int sampleSize) {
         BigInteger total = calculator.power(elements.size(), width);
-        return new RepetitivePermutationOfRanks<>(elements, width, new BigIntegerChoice(total, sampleSize), calculator);
+        return new RepetitivePermutationByRanks<>(elements, width, new BigIntegerChoice(total, sampleSize), calculator);
     }
 
     /**
@@ -125,7 +126,7 @@ public final class RepetitivePermutationBuilder<T> {
      * 6    | 110    | [B, B, A]
      * 7    | 111    | [B, B, B]
      *
-     * atRanks([0, 7]) → [A, A, A], [B, B, B]
+     * byRanks([0, 7]) → [A, A, A], [B, B, B]
      * </pre>
      *
      * @param ranks Iterable of 0-based rank numbers (0 ≤ rank < nᵏ)
@@ -133,7 +134,23 @@ public final class RepetitivePermutationBuilder<T> {
      * @throws IllegalArgumentException if any rank ≥ nᵏ
      * @throws IllegalStateException if length k was not configured
      */
-    public RepetitivePermutationOfRanks<T> ofRanks(Iterable<BigInteger> ranks) {
-        return new RepetitivePermutationOfRanks<>(elements, width, ranks, calculator);
+    public RepetitivePermutationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
+        return new RepetitivePermutationByRanks<>(elements, width, ranks, calculator);
+    }
+
+    /**
+     * Returns the total number of possible repetitive permutations.
+     *
+     * @return the count of permutations as a BigInteger
+     */
+    @Override
+    public BigInteger count() {
+        if (elements.isEmpty() && width > 0) {
+            return BigInteger.ZERO;
+        }
+        if (width == 0) {
+            return BigInteger.ONE;
+        }
+        return calculator.power(elements.size(), width);
     }
 }

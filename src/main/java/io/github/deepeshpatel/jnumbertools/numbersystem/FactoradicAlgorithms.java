@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
  * The Factoradic numeral system represents a non-negative integer as a sum of factorials weighted by digits.
  * This class includes methods to convert between decimal and Factoradic representations, as well as utility
  * functions for ranking and unranking permutations. These algorithms are useful for directly computing
- * the nth permutation of a set.
+ * the nᵗʰ permutation of a set.
  * </p>
  *
  * @author Deepesh Patel

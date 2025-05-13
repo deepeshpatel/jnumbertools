@@ -309,7 +309,7 @@ public final class Calculator {
     }
 
     /**
-     * Calculates the total number of multiset permutations for every m-th rank.
+     * Calculates the total number of multiset permutations for every mᵗʰ rank.
      *
      * Used to determine the number of permutations between rank `start` and the last rank, stepping by `m`.
      *

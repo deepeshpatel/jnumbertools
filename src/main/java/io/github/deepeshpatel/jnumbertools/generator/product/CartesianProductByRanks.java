@@ -23,19 +23,19 @@ import java.util.stream.StreamSupport;
  * @param <T> the type of elements in the products
  * @author Deepesh Patel
  */
-public class CartesianProductOfRanks<T> implements Iterable<List<T>> {
+public class CartesianProductByRanks<T> implements Iterable<List<T>> {
 
     private final Iterable<BigInteger> ranks;
     private final List<Builder<T>> builders;
     private final BigInteger maxCount;
 
     /**
-     * Constructs a new CartesianProductOfRanks instance.
+     * Constructs a new CartesianProductByRanks instance.
      *
      * @param builders the list of builders generating combinations or subsets for each dimension
      * @param ranks    the iterable providing the sequence of ranks
      */
-    public CartesianProductOfRanks(List<Builder<T>> builders, Iterable<BigInteger> ranks) {
+    public CartesianProductByRanks(List<Builder<T>> builders, Iterable<BigInteger> ranks) {
         this.builders = builders;
         this.ranks = ranks;
         this.maxCount = maxCount();
@@ -106,7 +106,7 @@ public class CartesianProductOfRanks<T> implements Iterable<List<T>> {
 
     @Override
     public String toString() {
-        return String.format("CartesianProductOfRanks{maxCount=%s, buildersCount=%d}", maxCount, builders.size());
+        return String.format("CartesianProductByRanks{maxCount=%s, buildersCount=%d}", maxCount, builders.size());
     }
 
     private class Itr implements Iterator<List<T>> {

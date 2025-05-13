@@ -28,7 +28,7 @@ import java.util.NoSuchElementException;
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel
  */
-public final class UniquePermutationOfRanks<T> extends AbstractGenerator<T> {
+public final class UniquePermutationByRanks<T> extends AbstractGenerator<T> {
 
     private final BigInteger totalPermutations;
     private final Iterable<BigInteger> ranks;
@@ -41,7 +41,7 @@ public final class UniquePermutationOfRanks<T> extends AbstractGenerator<T> {
      * @param calculator utility for computing factorials and permutations
      * @throws IllegalArgumentException if elements is null
      */
-    public UniquePermutationOfRanks(List<T> elements, Iterable<BigInteger> ranks, Calculator calculator) {
+    public UniquePermutationByRanks(List<T> elements, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements);
         this.ranks = ranks;
         this.totalPermutations = calculator.factorial(elements.size());

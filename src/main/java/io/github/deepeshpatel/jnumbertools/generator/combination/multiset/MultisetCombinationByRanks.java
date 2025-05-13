@@ -28,7 +28,7 @@ import java.util.Map;
  * @param <T> the type of elements in the combinations; must be comparable for LEX/REVERSE_LEX ordering
  * @author Deepesh Patel
  */
-public class MultisetCombinationOfRanks<T> extends AbstractMultisetCombination<T> {
+public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T> {
 
     /**
      * The iterable sequence of rank numbers to generate combinations.
@@ -36,15 +36,15 @@ public class MultisetCombinationOfRanks<T> extends AbstractMultisetCombination<T
     private final Iterable<BigInteger> ranks;
 
     /**
-     * Constructs a new MultisetCombinationOfRanks instance.
+     * Constructs a new MultisetCombinationByRanks instance.
      *
      * @param options a {@code LinkedHashMap} of distinct elements and their frequencies; insertion order affects INSERTION ordering
      * @param r the size of each combination (rᵣ); must be non-negative
      * @param ranks an iterable of 0-based rank numbers (0 ≤ rank < total combinations)
-     * @return a new MultisetCombinationOfRanks instance
+     * @return a new MultisetCombinationByRanks instance
      * @throws IllegalArgumentException if rᵣ is negative, options is invalid, or ranks are out of bounds
      */
-    public MultisetCombinationOfRanks(LinkedHashMap<T, Integer> options, int r, Iterable<BigInteger> ranks) {
+    public MultisetCombinationByRanks(LinkedHashMap<T, Integer> options, int r, Iterable<BigInteger> ranks) {
         super(options, r);
         this.ranks = ranks;
     }

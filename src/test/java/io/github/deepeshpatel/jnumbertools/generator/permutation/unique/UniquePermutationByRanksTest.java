@@ -19,9 +19,9 @@ import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for {@link UniquePermutationOfRanks}, covering mᵗʰ permutations, choice, and sampling strategies.
+ * Test class for {@link UniquePermutationByRanks}, covering mᵗʰ permutations, choice, and sampling strategies.
  */
-class UniquePermutationOfRanksTest {
+class UniquePermutationByRanksTest {
 
     @Nested
     public class UniquePermutationMthTest {

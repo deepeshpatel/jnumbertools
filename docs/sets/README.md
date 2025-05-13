@@ -118,7 +118,7 @@ var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("10000000000000000
 JNumberTools.subsets()
     .of(100)
     .all()
-    .ofRanks(iterable)
+    .byRanks(iterable)
     .stream().toList();
 ```
 

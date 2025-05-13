@@ -50,6 +50,9 @@ public interface Builder<E> {
      */
     Iterable<List<E>> lexOrderMth(BigInteger m, BigInteger start);
 
+
+    Iterable<List<E>>  byRanks(Iterable<BigInteger> ranks);
+
     /**
      * Returns the total number of generatable structures.
      *
@@ -58,4 +61,6 @@ public interface Builder<E> {
      * @return the total count as a BigInteger
      */
     BigInteger count();
+
+
 }

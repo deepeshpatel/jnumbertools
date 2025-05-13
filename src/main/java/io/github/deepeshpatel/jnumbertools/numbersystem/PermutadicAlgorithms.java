@@ -16,7 +16,7 @@ import static java.util.stream.Collectors.toCollection;
 /**
  * Provides algorithms for operations related to the Permutadic number system, which is a mixed radix system based on permutations.
  * <p>
- * The class includes methods to convert between decimal values and Permutadic representations, compute m-th permutations,
+ * The class includes methods to convert between decimal values and Permutadic representations, compute mᵗʰ permutations,
  * and rank or un-rank permutations.
  *
  * <p>
@@ -24,8 +24,8 @@ import static java.util.stream.Collectors.toCollection;
  * <ul>
  * <li>Convert a decimal value to a Permutadic representation: {@link #toPermutadic(BigInteger, int)}</li>
  * <li>Convert a Permutadic representation to a decimal value: {@link #toDecimal(List, int)}</li>
- * <li>Compute the m-th permutation from a Permutadic representation: {@link #toMthPermutation(List, int, int)}</li>
- * <li>Convert an m-th permutation to Permutadic representation: {@link #mthPermutationToPermutadic(int[], int)}</li>
+ * <li>Compute the mᵗʰ permutation from a Permutadic representation: {@link #toMthPermutation(List, int, int)}</li>
+ * <li>Convert an mᵗʰ permutation to Permutadic representation: {@link #mthPermutationToPermutadic(int[], int)}</li>
  * <li>Rank a permutation: {@link #rank(int, int...)}</li>
  * <li>Un-rank a permutation with or without bound checks: {@link #unRankWithoutBoundCheck(BigInteger, int, int)}, {@link #unRankWithBoundCheck(BigInteger, int, int)}</li>
  * </ul>
@@ -87,12 +87,12 @@ public final class PermutadicAlgorithms {
     }
 
     /**
-     * Computes the m-th permutation from the given Permutadic representation.
+     * Computes the mᵗʰ permutation from the given Permutadic representation.
      *
      * @param permutadic the Permutadic representation to be converted.
      * @param s the size of the set from which the permutation is selected.
      * @param k the number of items to be selected for the permutation.
-     * @return an array representing the m-th permutation.
+     * @return an array representing the mᵗʰ permutation.
      */
     public static int[] toMthPermutation(List<Integer> permutadic, int s, int k) {
         int[] a = new int[k];
@@ -109,9 +109,9 @@ public final class PermutadicAlgorithms {
     }
 
     /**
-     * Converts an m-th permutation to its Permutadic representation.
+     * Converts an mᵗʰ permutation to its Permutadic representation.
      *
-     * @param mthPermutation the m-th permutation to be converted.
+     * @param mthPermutation the mᵗʰ permutation to be converted.
      * @param degree the degree of the Permutadic representation.
      * @return a list of integers representing the Permutadic value.
      */
@@ -141,7 +141,7 @@ public final class PermutadicAlgorithms {
      * Computes the rank of a permutation in the Permutadic system.
      *
      * @param size the size of the set from which the permutation is selected.
-     * @param mth_kPermutation the m-th permutation to be ranked.
+     * @param mth_kPermutation the mᵗʰ permutation to be ranked.
      * @return the rank of the given permutation.
      */
     public static BigInteger rank(int size, int... mth_kPermutation) {
@@ -175,7 +175,7 @@ public final class PermutadicAlgorithms {
     public int[] unRankWithBoundCheck(BigInteger rank, int size, int k) {
         BigInteger maxPermutationCount = calculator.nPr(size, k);
         if (maxPermutationCount.compareTo(rank) <= 0) {
-            String message = "Out of range. Can't decode %d to m-th permutation as it is >= Permutation(%d,%d).";
+            String message = "Out of range. Can't decode %d to mᵗʰ permutation as it is >= Permutation(%d,%d).";
             message = String.format(message, rank, size, k);
             throw new ArithmeticException(message);
         }

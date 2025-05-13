@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
@@ -100,15 +101,15 @@ public final class MultisetPermutationBuilder<T> {
      * </p>
      *
      * @param sampleSize the number of permutations to generate; must be positive and ≤ n! / (m₁!·m₂!·…)
-     * @return a new {@link MultisetPermutationOFRanks} instance for random sampling
+     * @return a new {@link MultisetPermutationByRanks} instance for random sampling
      * @throws IllegalArgumentException if {@code sampleSize} is not positive or exceeds total permutations
      */
-    public MultisetPermutationOFRanks<T> sample(int sampleSize) {
+    public MultisetPermutationByRanks<T> sample(int sampleSize) {
         BigInteger total = calculator.multinomial(options.values().stream().mapToInt(Integer::intValue).toArray());
         if (sampleSize <= 0 || BigInteger.valueOf(sampleSize).compareTo(total) > 0) {
             throw new IllegalArgumentException("Sample size must be positive and not exceed total permutations");
         }
-        return new MultisetPermutationOFRanks<>(options, new BigIntegerSample(total, sampleSize), calculator);
+        return new MultisetPermutationByRanks<>(options, new BigIntegerSample(total, sampleSize), calculator);
     }
 
     /**
@@ -119,15 +120,15 @@ public final class MultisetPermutationBuilder<T> {
      * </p>
      *
      * @param sampleSize the number of permutations to generate; must be positive
-     * @return a new {@link MultisetPermutationOFRanks} instance for random sampling with replacement
+     * @return a new {@link MultisetPermutationByRanks} instance for random sampling with replacement
      * @throws IllegalArgumentException if {@code sampleSize} is not positive
      */
-    public MultisetPermutationOFRanks<T> choice(int sampleSize) {
+    public MultisetPermutationByRanks<T> choice(int sampleSize) {
         if (sampleSize <= 0) {
             throw new IllegalArgumentException("Sample size must be positive");
         }
         BigInteger total = calculator.multinomial(options.values().stream().mapToInt(Integer::intValue).toArray());
-        return new MultisetPermutationOFRanks<>(options, new BigIntegerChoice(total, sampleSize), calculator);
+        return new MultisetPermutationByRanks<>(options, new BigIntegerChoice(total, sampleSize), calculator);
     }
 
     /**
@@ -143,15 +144,15 @@ public final class MultisetPermutationBuilder<T> {
      * ...  | ...           | (12 total unique permutations)
      * 11   | [C, B, A, A]  |
      *
-     * atRanks([0, 2, 11]) → [A,A,B,C], [A,B,A,C], [C,B,A,A]
+     * byRanks([0, 2, 11]) → [A,A,B,C], [A,B,A,C], [C,B,A,A]
      * </pre>
      *
      * @param ranks Iterable of 0-based rank numbers (0 ≤ rank < n! / (m₁!·m₂!·…)), where mᵢ are duplicate counts
-     * @return a new {@link MultisetPermutationOFRanks} instance for generating permutations at specified ranks
+     * @return a new {@link MultisetPermutationByRanks} instance for generating permutations at specified ranks
      * @throws IllegalArgumentException if any rank ≥ n! / (m₁!·m₂!·…)
      * @throws IllegalStateException if no generation strategy was selected
      */
-    public MultisetPermutationOFRanks<T> ofRanks(Iterable<BigInteger> ranks) {
-        return new MultisetPermutationOFRanks<>(options, ranks, calculator);
+    public MultisetPermutationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
+        return new MultisetPermutationByRanks<>(options, ranks, calculator);
     }
 }

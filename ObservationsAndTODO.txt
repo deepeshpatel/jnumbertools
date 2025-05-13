@@ -1,16 +1,11 @@
 
 R&D Observations:
-[] Is there any relationship between permutation rank and number of cycles?
-    Trying to figure out pattern. One interesting thing I observed is that
-    for factoradic/permutadic representation, it is exactly equal to number of zeroes
-    if remaining digits are 1.
-    For example if factoradic is 1,0,0,0,1,1,0 you can safely say that number of
-    cycle/orbits is 4
 
 [] Observation about  permutation product : a x b = (a' x b)' where a' = (max rank - rank of a)
     for example for permutation or size 4  :  3 x 11 = (3' x 11)' = (20 x 11)' = 8' = 23-8 = 15
 
 TODO: Priority todo list
+[] implement Builder for class not extending AbstractGenerator.
 [] add test cases for start parameter
 [] add check for start vs increment parameter
 [] replace 'hack' implementation of mth repetitive permutation with actual

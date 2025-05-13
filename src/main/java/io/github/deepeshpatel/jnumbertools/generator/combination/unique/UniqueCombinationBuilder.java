@@ -62,12 +62,12 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
      * </p>
      *
      * @param sampleSize the number of combinations to sample (1 ≤ sampleSize ≤ ⁿCᵣ)
-     * @return a {@link UniqueCombinationOfRanks} for random sampling without replacement
+     * @return a {@link UniqueCombinationByRanks} for random sampling without replacement
      * @throws IllegalArgumentException if sampleSize ≤ 0 or sampleSize > ⁿCᵣ
      */
-    public UniqueCombinationOfRanks<T> sample(int sampleSize) {
+    public UniqueCombinationByRanks<T> sample(int sampleSize) {
         BigInteger nCr = calculator.nCr(elements.size(), size);
-        return new UniqueCombinationOfRanks<>(elements, size, new BigIntegerSample(nCr, sampleSize), calculator);
+        return new UniqueCombinationByRanks<>(elements, size, new BigIntegerSample(nCr, sampleSize), calculator);
     }
 
     /**
@@ -77,12 +77,12 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
      * </p>
      *
      * @param sampleSize the number of combinations to sample (sampleSize ≥ 1)
-     * @return a {@link UniqueCombinationOfRanks} for random sampling with replacement
+     * @return a {@link UniqueCombinationByRanks} for random sampling with replacement
      * @throws IllegalArgumentException if sampleSize ≤ 0
      */
-    public UniqueCombinationOfRanks<T> choice(int sampleSize) {
+    public UniqueCombinationByRanks<T> choice(int sampleSize) {
         BigInteger nCr = calculator.nCr(elements.size(), size);
-        return new UniqueCombinationOfRanks<>(elements, size, new BigIntegerChoice(nCr, sampleSize), calculator);
+        return new UniqueCombinationByRanks<>(elements, size, new BigIntegerChoice(nCr, sampleSize), calculator);
     }
 
     /**
@@ -91,12 +91,12 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
      * For example, for ⁿCᵣ with n=3, r=2, ranks [0, 2] might yield [A, B], [B, C].
      * </p>
      *
-     * @param iterable the iterable of ranks (each rank in [0, ⁿCᵣ))
-     * @return a {@link UniqueCombinationOfRanks} for the specified ranks
+     * @param ranks the iterable of ranks (each rank in [0, ⁿCᵣ))
+     * @return a {@link UniqueCombinationByRanks} for the specified ranks
      * @throws IllegalArgumentException if any rank < 0 or rank ≥ ⁿCᵣ
      */
-    public UniqueCombinationOfRanks<T> ofRank(Iterable<BigInteger> iterable) {
-        return new UniqueCombinationOfRanks<>(elements, size, iterable, calculator);
+    public UniqueCombinationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
+        return new UniqueCombinationByRanks<>(elements, size, ranks, calculator);
     }
 
     /**
@@ -107,10 +107,10 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
      *
      * @param m     the increment between ranks (m > 0)
      * @param start the starting rank (0 ≤ start < ⁿCᵣ)
-     * @return a {@link UniqueCombinationOfRanks} for the sequence
+     * @return a {@link UniqueCombinationByRanks} for the sequence
      * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿCᵣ
      */
-    public UniqueCombinationOfRanks<T> lexOrderMth(long m, long start) {
+    public UniqueCombinationByRanks<T> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
@@ -122,24 +122,13 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
      *
      * @param m     the increment between ranks (m > 0)
      * @param start the starting rank (0 ≤ start < ⁿCᵣ)
-     * @return a {@link UniqueCombinationOfRanks} for the sequence
+     * @return a {@link UniqueCombinationByRanks} for the sequence
      * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿCᵣ
      */
-    public UniqueCombinationOfRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
+    public UniqueCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
         BigInteger nCr = calculator.nCr(elements.size(), size);
         Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, nCr);
-        return new UniqueCombinationOfRanks<>(elements, size, mthIterable, calculator);
-    }
-
-    /**
-     * Creates a generator for combinations based on a custom sequence of ranks.
-     *
-     * @param ranks the iterable of ranks (each rank in [0, ⁿCᵣ))
-     * @return a {@link UniqueCombinationOfRanks} for the custom sequence
-     * @throws IllegalArgumentException if any rank < 0 or rank ≥ ⁿCᵣ
-     */
-    public UniqueCombinationOfRanks<T> withSequence(Iterable<BigInteger> ranks) {
-        return new UniqueCombinationOfRanks<>(elements, size, ranks, calculator);
+        return new UniqueCombinationByRanks<>(elements, size, mthIterable, calculator);
     }
 
     /**

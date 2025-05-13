@@ -75,9 +75,9 @@ public final class Permutadic implements Serializable {
     }
 
     /**
-     * Creates a Permutadic instance from an m-th permutation and a degree.
+     * Creates a Permutadic instance from an mᵗʰ permutation and a degree.
      *
-     * @param mthPerm the m-th permutation to be converted.
+     * @param mthPerm the mᵗʰ permutation to be converted.
      * @param degree the degree of the Permutadic representation.
      * @return a Permutadic instance representing the given permutation and degree.
      */
@@ -88,10 +88,10 @@ public final class Permutadic implements Serializable {
     }
 
     /**
-     * Converts this Permutadic instance to an m-th permutation with a given count of selected items.
+     * Converts this Permutadic instance to an mᵗʰ permutation with a given count of selected items.
      *
      * @param countOfSelectItems the number of selected items.
-     * @return an array representing the m-th permutation.
+     * @return an array representing the mᵗʰ permutation.
      */
     public int[] toMthPermutation(int countOfSelectItems) {
         return PermutadicAlgorithms.toMthPermutation(permutadicValues, degree + countOfSelectItems, countOfSelectItems);

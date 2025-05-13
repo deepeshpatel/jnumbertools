@@ -24,7 +24,7 @@ import java.util.List;
  * @param <T> the type of elements in the combinations
  * @author Deepesh Patel
  */
-public class RepetitiveCombinationOfRanks<T> extends AbstractGenerator<T> {
+public class RepetitiveCombinationByRanks<T> extends AbstractGenerator<T> {
 
     private final int r;
     private final Calculator calculator;
@@ -39,7 +39,7 @@ public class RepetitiveCombinationOfRanks<T> extends AbstractGenerator<T> {
      * @param calculator the calculator for computing combination counts
      * @throws IllegalArgumentException if r < 0, elements is null/empty, or any rank < 0 or ≥ ⁿ⁺ᵣ⁻¹Cᵣ
      */
-    public RepetitiveCombinationOfRanks(List<T> elements, int r, Iterable<BigInteger> ranks, Calculator calculator) {
+    public RepetitiveCombinationByRanks(List<T> elements, int r, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements);
         this.r = r;
         this.ranks = ranks;

@@ -96,6 +96,11 @@ public class SubsetBuilder<T> implements Builder<T> {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
+    public SubsetGeneratorMth<T> byRanks(Iterable<BigInteger> ranks) {
+        //TODO:
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
     /**
      * Creates a {@link SubsetGeneratorMth} that generates every mᵗʰ subset in lexicographical order, starting from the specified position.
      *

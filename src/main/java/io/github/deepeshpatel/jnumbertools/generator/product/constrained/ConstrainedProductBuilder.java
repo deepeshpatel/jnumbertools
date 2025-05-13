@@ -12,7 +12,7 @@ import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
-import io.github.deepeshpatel.jnumbertools.generator.product.CartesianProductOfRanks;
+import io.github.deepeshpatel.jnumbertools.generator.product.CartesianProductByRanks;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import java.util.List;
  * You can add distinct combinations, multi-select (repetitive) combinations, or subsets (of a given range)
  * from various input lists. The final constrained product can be generated in lexicographical order
  * (via {@link #lexOrder()}), at specific intervals (via {@link #lexOrderMth(BigInteger, BigInteger)}),
- * based on a custom sequence of ranks (via {@link #ofRank(Iterable)}), or sampled randomly with
+ * based on a custom sequence of ranks (via {@link #byRanks(Iterable)}), or sampled randomly with
  * or without replacement (via {@link #choice(int)} and {@link #sample(int)}).
  * </p>
  * <p>
@@ -122,16 +122,16 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
     }
 
     /**
-     * Builds and returns a CartesianProductOfRanks for every mᵗʰ product.
+     * Builds and returns a CartesianProductByRanks for every mᵗʰ product.
      *
      * @param m     the interval to select every mᵗʰ product
      * @param start the starting position
-     * @return a CartesianProductOfRanks for the specified intervals
+     * @return a CartesianProductByRanks for the specified intervals
      */
     @Override
-    public CartesianProductOfRanks<Object> lexOrderMth(BigInteger m, BigInteger start) {
+    public CartesianProductByRanks<Object> lexOrderMth(BigInteger m, BigInteger start) {
         BigInteger maxCount = count();
-        return new CartesianProductOfRanks((List<Builder<Object>>) (List) builders, new EveryMthIterable(start, m, maxCount));
+        return new CartesianProductByRanks((List<Builder<Object>>) (List) builders, new EveryMthIterable(start, m, maxCount));
     }
 
     /**
@@ -139,9 +139,9 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      *
      * @param m     the interval to select every mᵗʰ product
      * @param start the starting position
-     * @return a CartesianProductOfRanks for the specified intervals
+     * @return a CartesianProductByRanks for the specified intervals
      */
-    public CartesianProductOfRanks<Object> lexOrderMth(long m, long start) {
+    public CartesianProductByRanks<Object> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
@@ -156,8 +156,8 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      * Input sets: [A, B] × [X, Y]
      * Valid tuples: [A,Y], [B,X], [B,Y] (total 3)
      *
-     * ofRank(0) → [A, Y]
-     * ofRank(2) → [B, Y]
+     * byRank(0) → [A, Y]
+     * byRank(2) → [B, Y]
      * </pre>
      *
      * @param ranks The 0-based position in the constrained product enumeration
@@ -167,38 +167,38 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      * @implNote Time complexity is O(k) where k is the number of dimensions,
      *           as this performs a mixed-radix decomposition of the rank value
      */
-    public CartesianProductOfRanks<Object> ofRank(Iterable<BigInteger> ranks) {
-        return new CartesianProductOfRanks((List<Builder<Object>>) (List) builders, ranks);
+    public CartesianProductByRanks<Object> byRanks(Iterable<BigInteger> ranks) {
+        return new CartesianProductByRanks((List<Builder<Object>>) (List) builders, ranks);
     }
 
     /**
      * Generates a random sample of products with replacement.
      *
      * @param sampleSize the number of products to generate
-     * @return a CartesianProductOfRanks for the sampled products
+     * @return a CartesianProductByRanks for the sampled products
      * @throws IllegalArgumentException if sampleSize is negative
      */
-    public CartesianProductOfRanks<Object> choice(int sampleSize) {
+    public CartesianProductByRanks<Object> choice(int sampleSize) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
         BigInteger maxCount = count();
-        return new CartesianProductOfRanks((List<Builder<Object>>) (List) builders, new BigIntegerChoice(maxCount, sampleSize));
+        return new CartesianProductByRanks((List<Builder<Object>>) (List) builders, new BigIntegerChoice(maxCount, sampleSize));
     }
 
     /**
      * Generates a random sample of unique products.
      *
      * @param sampleSize the number of unique products to generate
-     * @return a CartesianProductOfRanks for the sampled products
+     * @return a CartesianProductByRanks for the sampled products
      * @throws IllegalArgumentException if sampleSize is negative or exceeds total products
      */
-    public CartesianProductOfRanks<Object> sample(int sampleSize) {
+    public CartesianProductByRanks<Object> sample(int sampleSize) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
         BigInteger maxCount = count();
-        return new CartesianProductOfRanks((List<Builder<Object>>) (List) builders, new BigIntegerSample(maxCount, sampleSize));
+        return new CartesianProductByRanks((List<Builder<Object>>) (List) builders, new BigIntegerSample(maxCount, sampleSize));
     }
 
     /**
@@ -243,6 +243,11 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         @Override
         public Iterable<List<Object>> lexOrderMth(BigInteger m, BigInteger start) {
             return m.equals(BigInteger.ZERO) ? Collections.singletonList(Collections.emptyList()) : Collections.emptyList();
+        }
+
+        @Override
+        public Iterable<List<Object>> byRanks(Iterable<BigInteger> ranks) {
+            throw new UnsupportedOperationException("EmptyBuilder does not support rank-based generation");
         }
     }
 }

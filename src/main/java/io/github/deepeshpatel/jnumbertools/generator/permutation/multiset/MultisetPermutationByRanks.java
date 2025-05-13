@@ -24,7 +24,7 @@ import java.util.*;
  * multiset.put("A", 2);
  * multiset.put("B", 1);
  *
- * new MultisetPermutationOFRanks<>(multiset, List.of(BigInteger.ZERO, BigInteger.valueOf(2)), calculator)
+ * new MultisetPermutationByRanks<>(multiset, List.of(BigInteger.ZERO, BigInteger.valueOf(2)), calculator)
  *     .forEach(System.out::println);
  *
  * // Output:
@@ -38,7 +38,7 @@ import java.util.*;
  * @see MultisetPermutationBuilder
  * @since 1.0.0
  */
-public final class MultisetPermutationOFRanks<T> extends AbstractMultisetPermutation<T> {
+public final class MultisetPermutationByRanks<T> extends AbstractMultisetPermutation<T> {
 
     private final Iterable<BigInteger> ranks;
 
@@ -50,7 +50,7 @@ public final class MultisetPermutationOFRanks<T> extends AbstractMultisetPermuta
      * @param calculator the calculator for combinatorial operations
      * @throws IllegalArgumentException if multiset is empty or any rank is invalid
      */
-    public MultisetPermutationOFRanks(LinkedHashMap<T, Integer> multiset, Iterable<BigInteger> ranks, Calculator calculator) {
+    public MultisetPermutationByRanks(LinkedHashMap<T, Integer> multiset, Iterable<BigInteger> ranks, Calculator calculator) {
         super(multiset, calculator);
         this.ranks = ranks;
     }
