@@ -139,26 +139,39 @@ public class RepetitivePermutationMthTest {
 
     @Test
     void shouldThrowExceptionForNegativeWidth() {
-        assertThrows(IllegalArgumentException.class, () -> permutation.repetitive(-1, "A", "B")
+        var exp = assertThrows(IllegalArgumentException.class, () -> permutation.repetitive(-1, "A", "B")
                 .lexOrderMth(1, 0)
                 .stream()
-                .toList(), "Negative width should throw exception");
+                .toList());
+        assertEquals(exp.getMessage(), "Width (r) cannot be negative for repetitive permutation generation");
     }
 
     @Test
-    void shouldThrowExceptionForNegativeStart() {
-        assertThrows(IllegalArgumentException.class, () -> permutation.repetitive(2, "A", "B")
+    void testBoundaryConditionsForStartingValue() {
+
+        var repetitivePerm = permutation.repetitive(2, "A", "B");
+
+        var exp  = assertThrows(IllegalArgumentException.class, () -> repetitivePerm
                 .lexOrderMth(1, -1)
                 .stream()
-                .toList(), "Negative start should throw exception");
+                .toList());
+
+        assertEquals(exp.getMessage(), "Start rank must be non-negative");
+
+        //should return empty list if start rank is greater than total permutations
+        var output = repetitivePerm.lexOrderMth(1,10).stream().toList();
+        assertTrue(output.isEmpty());
     }
 
     @Test
-    void shouldThrowExceptionForEmptyInput() {
-        assertThrows(IllegalArgumentException.class, () -> permutation.repetitive(2, Collections.emptyList())
+    void shouldWorkForEmptyElementList() {
+        //by the definition of exponentiation, for n=0 and k>0 0^k = 0
+        //hence empty input should me allowed and the result is the empty collection
+        var output = permutation.repetitive(2, Collections.emptyList())
                 .lexOrderMth(1, 0)
                 .stream()
-                .toList(), "Empty input should throw exception");
+                .toList();
+        assertTrue(output.isEmpty());
     }
 
     @Test
@@ -170,13 +183,53 @@ public class RepetitivePermutationMthTest {
     }
 
     @Test
-    void shouldHandleZeroIncrement() {
+    void shouldThrowExceptionForZeroAndNegativeIncrement() {
         List<String> elements = of("A", "B");
         int width = 2;
-        assertThrows(IllegalArgumentException.class, () -> permutation.repetitive(width, elements)
+        var repetitivePerm = permutation.repetitive(width, elements);
+
+        var exp1 = assertThrows(IllegalArgumentException.class, () -> repetitivePerm
                 .lexOrderMth(0, 0)
                 .stream()
-                .toList(), "Zero increment should throw exception");
+                .toList());
+
+        var exp2= assertThrows(IllegalArgumentException.class, () -> repetitivePerm
+                .lexOrderMth(-1, 0)
+                .stream()
+                .toList());
+
+        assertEquals(exp1.getMessage(), "Increment 'm' must be positive");
+        assertEquals(exp2.getMessage(), "Increment 'm' must be positive");
+    }
+
+    @Test
+    void shouldHandleLargeMWithNonZeroStart() {
+        List<Integer> input = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+        int width = 12;
+        BigInteger largeM = BigInteger.valueOf(200_000_000_000L);
+        BigInteger start = BigInteger.valueOf(100_000_000_000L);
+
+        var permutations = permutation.repetitive(width, input)
+                .lexOrderMth(largeM, start)
+                .stream()
+                .toList();
+
+        // Just verify it doesn't throw and returns something
+        assertNotNull(permutations);
+        assertFalse(permutations.isEmpty());
+    }
+
+    @Test
+    void shouldHandleIncrementLargerThanTotal() {
+        int width = 2;
+        int n = 2; // 2^2 = 4 total
+        var result = permutation.repetitive(width, 0, 1)
+                .lexOrderMth(10, 0) // increment > total
+                .stream()
+                .toList();
+
+        assertEquals(1, result.size(), "Should return only first permutation");
+        assertEquals(of(0, 0), result.get(0));
     }
 
     @Test

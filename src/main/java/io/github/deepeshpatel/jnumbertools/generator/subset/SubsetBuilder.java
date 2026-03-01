@@ -100,8 +100,25 @@ public class SubsetBuilder<T> implements Builder<T> {
      * @param start the starting position for subsets
      * @return a {@code SubsetGeneratorMth} instance
      */
-    public SubsetGeneratorByRanks<T> lexOrderMth(long m, long start) {
+    public SubsetGeneratorMth<T> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
+    }
+
+    /**
+     * Creates a {@link SubsetGeneratorByRanks} that generates every mᵗʰ subset in lexicographical order, starting from the specified position.
+     *
+     * @param m     the interval for selecting subsets (every mᵗʰ subset) as a {@link BigInteger}
+     * @param start the starting position for subsets as a {@link BigInteger}
+     * @return a {@code SubsetGeneratorMth} instance
+     */
+    public SubsetGeneratorMth<T> lexOrderMth(BigInteger m, BigInteger start) {
+        if (m.signum() <= 0) {
+            throw new IllegalArgumentException("Increment 'm' must be positive");
+        }
+        if (start.signum() < 0) {
+            throw new IllegalArgumentException("Start rank must be non-negative");
+        }
+        return new SubsetGeneratorMth<>(from, to, m, start, elements, calculator);
     }
 
     public SubsetGeneratorByRanks<T> byRanks(Iterable<BigInteger> ranks) {
@@ -168,18 +185,6 @@ public class SubsetBuilder<T> implements Builder<T> {
         return byRanks(ranks);
     }
 
-    /**
-     * Creates a {@link SubsetGeneratorByRanks} that generates every mᵗʰ subset in lexicographical order, starting from the specified position.
-     *
-     * @param m     the interval for selecting subsets (every mᵗʰ subset) as a {@link BigInteger}
-     * @param start the starting position for subsets as a {@link BigInteger}
-     * @return a {@code SubsetGeneratorMth} instance
-     */
-    public SubsetGeneratorByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
-        BigInteger total = count();
-        Iterable<BigInteger> ranks = new EveryMthIterable(start, m, total);
-        return byRanks(ranks);
-    }
 
     /**
      * Returns the total number of subsets in the specified range.

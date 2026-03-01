@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
@@ -9,8 +10,7 @@ import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UniquePermutationTest {
 
@@ -32,7 +32,23 @@ public class UniquePermutationTest {
 
         var lists1 = iterable.stream().toList();
         var lists2 = iterable.stream().toList();
-        assertEquals(lists1, lists2);
+        assertIterableEquals(lists1, lists2);
+        assertNotSame(lists1, lists2);
+    }
+
+    @Test
+    void shouldReturnImmutableOuterCollection() {
+        var results = permutation.unique("A", "B").lexOrder().stream().toList();
+        assertThrows(UnsupportedOperationException.class, () -> results.add(List.of("X")));
+        assertThrows(UnsupportedOperationException.class, () -> results.remove(0));
+    }
+
+    @Test
+    void shouldReturnImmutableInnerLists() {
+        var results = permutation.unique("A", "B").lexOrder().stream().toList();
+        var first =  results.get(0);
+        assertThrows(UnsupportedOperationException.class, () -> first.add("X"));
+        assertThrows(UnsupportedOperationException.class, () -> first.set(0, "X"));
     }
 
     @Test
@@ -69,6 +85,7 @@ public class UniquePermutationTest {
     }
 
     @Test
+    @DisplayName("Null input is treated as empty input (API contract)")
     void shouldConsiderNullAsEmpty() {
         assertIterableEquals(listOfEmptyList, permutationsOf((List<String>) null));
     }

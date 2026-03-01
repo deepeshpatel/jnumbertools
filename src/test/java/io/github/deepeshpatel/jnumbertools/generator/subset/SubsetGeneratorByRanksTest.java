@@ -75,8 +75,8 @@ public class SubsetGeneratorByRanksTest {
     class Choice {
         @Test
         void shouldGenerateRandomChoice() {
-            var builder = subsets.of(A_B_C_D).inRange(2, 3);
-            var result = builder.choice(5).stream().toList();
+            var builder = subsets.of(A_B_C_D).inRange(2, 3).choice(5);
+            var result = builder.stream().toList();
             assertEquals(5, result.size());
             for (var subset : result) {
                 assertTrue(subset.size() >= 2 && subset.size() <= 3);

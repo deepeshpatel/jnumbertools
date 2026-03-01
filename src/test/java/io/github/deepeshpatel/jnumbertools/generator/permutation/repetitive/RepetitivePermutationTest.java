@@ -87,6 +87,55 @@ public class RepetitivePermutationTest {
         assertIterableEquals(expected, output);
     }
 
+    @Test
+    void shouldHandleZeroWidth() {
+        // Width = 0 should return exactly one empty permutation
+        var result = permutation.repetitive(0, "A", "B", "C")
+                .lexOrder()
+                .stream()
+                .toList();
+
+        assertEquals(1, result.size());
+        assertEquals(of(), result.get(0));
+    }
+
+    @Test
+    void shouldThrowExceptionForNegativeWidth() {
+        var exp = assertThrows(IllegalArgumentException.class, () ->
+                permutation.repetitive(-1, "A", "B").lexOrder()
+        );
+        assertEquals(exp.getMessage(), "Width (r) cannot be negative for repetitive permutation generation");
+    }
+
+    @Test
+    void shouldThrowExceptionForNullElementsList() {
+        var exp1 = assertThrows(IllegalArgumentException.class, () ->
+                permutation.repetitive(2, (List<String>) null).lexOrder()
+        );
+
+        String expectedMessage = "Elements list cannot be null or empty for repetitive permutation generation";
+        assertEquals(exp1.getMessage(), expectedMessage);
+    }
+
+    @Test
+    void shouldWorkForEmptyElementList() {
+        //by the definition of exponentiation, for n=0 and k>0 0^k = 0
+        //hence empty input should me allowed and the result is the empty collection
+        var output = permutation.repetitive(2,Collections.emptyList()).lexOrder().stream().toList();
+        assertTrue(output.isEmpty());
+    }
+
+    @Test
+    void shouldHandleMaximumWidthForSmallN() {
+        // Test with n=2, width=20 (about 1 million permutations - count only)
+        long count = permutation.repetitive(20, 0, 1)
+                .lexOrder()
+                .stream()
+                .count();
+
+        assertEquals(1_048_576L, count); // 2^20
+    }
+
     @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
     @Test
     void stressTesting() {

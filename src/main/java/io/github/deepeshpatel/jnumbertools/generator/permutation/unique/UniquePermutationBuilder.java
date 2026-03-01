@@ -86,6 +86,12 @@ public final class UniquePermutationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if m or start is invalid
      */
     public UniquePermutationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
+        if (m.signum() <= 0) {
+            throw new IllegalArgumentException("Increment 'm' must be positive");
+        }
+        if (start.signum() < 0) {
+            throw new IllegalArgumentException("Start rank must be non-negative");
+        }
         BigInteger total = calculator.factorial(elements.size());
         return new UniquePermutationByRanks<>(elements, new EveryMthIterable(start, m, total), calculator);
     }

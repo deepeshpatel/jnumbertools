@@ -5,7 +5,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.base.Combinations;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
 import java.math.BigInteger;
@@ -17,8 +16,8 @@ import java.util.NoSuchElementException;
  * Generates subsets of a set within a specified size range, producing the subsets
  * at the specified ranks in lexicographical order.
  * <p>
- * This generator uses an efficient approach to directly access the subset at a given rank
- * without generating all preceding subsets.
+ * This class is a thin wrapper that delegates single-rank lookups to {@link SubsetGeneratorMth#build()}
+ * and arithmetic progressions (lexOrderMth) directly to {@link SubsetGeneratorMth}.
  * </p>
  *
  * @param <T> the type of elements in the subsets
@@ -27,69 +26,44 @@ import java.util.NoSuchElementException;
 public final class SubsetGeneratorByRanks<T> extends AbstractGenerator<T> {
 
     private final Calculator calculator;
-    private final Combinations combinations;
     private final Iterable<BigInteger> ranks;
     private final int from;
     private final int to;
 
-    /**
-     * Constructs a {@code SubsetGeneratorByRanks} to generate subsets at the given ranks
-     * within the specified size range.
-     *
-     * @param from       the minimum subset size (inclusive)
-     * @param to         the maximum subset size (inclusive)
-     * @param ranks      the iterable providing the ranks (0-based) of subsets to generate
-     * @param elements   the list of elements from which subsets are generated
-     * @param calculator the calculator used for combinatorial calculations
-     */
     SubsetGeneratorByRanks(int from, int to, Iterable<BigInteger> ranks, List<T> elements, Calculator calculator) {
         super(elements);
         this.from = from;
         this.to = to;
         this.ranks = ranks;
         this.calculator = calculator;
-        this.combinations = new Combinations(calculator);
     }
 
     /**
-     * Computes the indices of the subset at the given rank in lexicographical order.
+     * Creates a generator for every mᵗʰ subset in lexicographical order, starting from the specified position.
+     * Delegates directly to the optimized {@link SubsetGeneratorMth} class.
      *
-     * @param rank the position of the subset to compute
-     * @return the list of indices representing the subset at the given rank
+     * @param m     the step size (must be > 0)
+     * @param start the starting rank (must be >= 0)
+     * @return a {@code SubsetGeneratorMth} instance
+     * @throws IllegalArgumentException if m <= 0 or start < 0
      */
-    private List<Integer> subsetAtRank(BigInteger rank) {
-        int r = 0;
-        int size = elements.size();
-        BigInteger sum = BigInteger.ZERO;
-        BigInteger prev = BigInteger.ZERO;
-
-        for (; r < size && sum.compareTo(rank) < 0; r++) {
-            prev = sum;
-            sum = sum.add(calculator.nCr(size, r));
+    public SubsetGeneratorMth<T> lexOrderMth(BigInteger m, BigInteger start) {
+        if (m == null || m.signum() <= 0) {
+            throw new IllegalArgumentException("m must be strictly positive");
         }
-
-        if (sum.equals(rank)) {
-            return combinations.unique(size, r).lexOrder().iterator().next();
+        if (start == null || start.signum() < 0) {
+            throw new IllegalArgumentException("start must be non-negative");
         }
-
-        rank = rank.subtract(prev);
-        return new Combinations(calculator).unique(size, r - 1)
-                .lexOrderMth(rank, rank).iterator().next();
+        System.out.println("Deep from to is " + from + " " + to);
+        return new SubsetGeneratorMth<>(from, to, m, start, elements, calculator);
     }
 
-    /**
-     * Calculates the total number of subsets before the specified range.
-     *
-     * @return the total number of subsets with sizes from 0 to from−1
-     */
-    private BigInteger totalSubsetsBeforeRange() {
-        return calculator.totalSubsetsInRange(0, from - 1, elements.size());
-    }
-
-    public synchronized Iterator<List<T>> iterator() {
+    @Override
+    public Iterator<List<T>> iterator() {
         return new Itr();
     }
 
+    @Override
     public String toString() {
         return "SubsetGeneratorByRanks{from=" + from + ", to=" + to + ", ranks=" + ranks + "}";
     }
@@ -110,11 +84,18 @@ public final class SubsetGeneratorByRanks<T> extends AbstractGenerator<T> {
             }
 
             BigInteger relativeRank = rankIterator.next();
-            BigInteger offset = totalSubsetsBeforeRange();
-            BigInteger absoluteRank = relativeRank.add(offset);
+            // Delegate single-rank computation to Mth's build() method
+            SubsetGeneratorMth<T> singleMth = new SubsetGeneratorMth<>(
+                    from, to, BigInteger.ONE, relativeRank, elements, calculator
+            );
 
-            List<Integer> result = subsetAtRank(absoluteRank);
-            return indicesToValues(result.stream().mapToInt(Integer::intValue).toArray());
+            List<T> subset = singleMth.build();
+
+            if (subset == null) {
+                throw new NoSuchElementException("No subset at relative rank " + relativeRank);
+            }
+
+            return subset;
         }
     }
 }

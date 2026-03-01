@@ -179,6 +179,13 @@ public final class Permutations {
      * @return a RepetitivePermutationBuilder for the specified elements
      */
     public <T> RepetitivePermutationBuilder<T> repetitive(int r, List<T> elements) {
+        if(elements == null ) {
+            throw new IllegalArgumentException("Elements list cannot be null or empty for repetitive permutation generation");
+        }
+
+        if(r<0) {
+            throw new IllegalArgumentException("Width (r) cannot be negative for repetitive permutation generation");
+        }
         return new RepetitivePermutationBuilder<>(r, elements, calculator);
     }
 

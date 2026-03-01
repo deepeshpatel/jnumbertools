@@ -44,7 +44,6 @@ public class SubsetGeneratorMthTest {
     @Test
     void test_start_parameter_greater_than_0() {
         var builder = subsets.of(A_B_C_D);
-
         var listOfAll = builder.all()
                 .lexOrderMth(5, 3).stream().toList();
         assertEquals("[[C], [B, C], [A, C, D]]", listOfAll.toString());

@@ -8,6 +8,7 @@ import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -58,15 +59,10 @@ public final class RepetitivePermutationMth<T> extends AbstractGenerator<T> {
         if (width < 0) {
             throw new IllegalArgumentException("Width must be non-negative: " + width);
         }
-        if (elements.isEmpty()) {
-            throw new IllegalArgumentException("Elements list cannot be empty for repetitive permutations");
-        }
-        if (increment.signum() <= 0) {
-            throw new IllegalArgumentException("Increment must be positive: " + increment);
-        }
-        if (start.signum() < 0) {
-            throw new IllegalArgumentException("Start rank must be non-negative: " + start);
-        }
+//        if (elements.isEmpty()) {
+//            throw new IllegalArgumentException("Elements list cannot be empty for repetitive permutations");
+//        }
+
         this.width = width;
         this.start = start;
         this.increment = increment;
@@ -79,6 +75,11 @@ public final class RepetitivePermutationMth<T> extends AbstractGenerator<T> {
      */
     @Override
     public Iterator<List<T>> iterator() {
+        if(elements.isEmpty()) {
+            //by the definition of exponentiation, for n=0 and k>0 0^k = 0
+            //hence empty input should me allowed and the result is the empty collection
+            return Collections.emptyIterator();
+        }
         return width == 0 ? Util.emptyListIterator() : new RepetitiveMthIterator();
     }
 

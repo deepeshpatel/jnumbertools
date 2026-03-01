@@ -3,12 +3,11 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import org.junit.jupiter.api.Test;
 
-import java.math.BigInteger;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
-import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,6 +39,16 @@ public class MultisetPermutationMthTest {
         LinkedHashMap<String, Integer> options = createMap(elements, frequencies);
         assertThrows(IllegalArgumentException.class, () ->
                 permutation.multiset(options).lexOrderMth(5, 0));
+    }
+
+    @Test
+    void shouldThrowExceptionForZeroMValues() {
+        LinkedHashMap<String, Integer> map = new LinkedHashMap<>();
+        map.put("A", 2);
+        map.put("B", 1);
+        var exception = assertThrows(IllegalArgumentException.class, () ->
+                permutation.multiset(map).lexOrderMth(0, 1));
+        assertTrue(exception.getMessage().contains("Index 'm' should be > 0  and 'start' must be non-negative"));
     }
 
     @Test

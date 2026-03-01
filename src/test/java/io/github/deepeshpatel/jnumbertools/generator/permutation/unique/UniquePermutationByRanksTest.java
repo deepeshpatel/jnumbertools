@@ -120,9 +120,26 @@ class UniquePermutationByRanksTest {
         }
 
         @Test
-        void shouldThrowExceptionForNegativeIncrement() {
-            assertThrows(IllegalArgumentException.class,
-                    () -> uniquePermutation(-1, 0, "A", "B", "C"));
+        void testBoundaryConditionsForIncrementM() {
+            var uniquePerm = permutation.unique("A", "B", "C");
+            var ex1 = assertThrows(IllegalArgumentException.class,
+                    () -> uniquePerm.lexOrderMth(0,1));
+            var ex2 = assertThrows(IllegalArgumentException.class,
+                    () -> uniquePerm.lexOrderMth(-1,1));
+            String expected = "Increment 'm' must be positive";
+            assertEquals(ex1.getMessage(), expected);
+            assertEquals(ex2.getMessage(), expected);
+        }
+
+        @Test
+        void testBoundaryConditionsForStartingValue() {
+            var uniquePerm = permutation.unique("A", "B", "C");
+            var exception =  assertThrows(IllegalArgumentException.class,
+                    () -> uniquePerm.lexOrderMth(1,-1));
+            assertEquals(exception.getMessage(), "Start rank must be non-negative");
+
+            //should return empty list if start rank is greater than total permutations
+            assertTrue(uniquePerm.lexOrderMth(1,10).stream().toList().isEmpty());
         }
 
         @EnabledIfSystemProperty(named = "stress.testing", matches = "true")

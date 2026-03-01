@@ -89,9 +89,7 @@ public class CartesianProductByRanks<T> implements StreamableIterable<T> {
             Builder<T> e = builders.get(i);
             BigInteger[] division = remaining.divideAndRemainder(e.count());
             remaining = division[0];
-
-            //List<T> values = e.lexOrderMth(division[1], division[1]).iterator().next();
-            List<T> values = e.byRanks(Collections.singleton(division[1])).iterator().next();
+            List<T> values = e.lexOrderMth(BigInteger.ONE, division[1]).iterator().next();
 
             // Add elements to the front in reverse order
             for (int j = values.size() - 1; j >= 0; j--) {

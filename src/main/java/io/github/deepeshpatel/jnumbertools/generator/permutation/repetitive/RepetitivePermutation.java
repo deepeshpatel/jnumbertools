@@ -6,6 +6,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -55,6 +56,11 @@ public final class RepetitivePermutation<T> extends AbstractGenerator<T> {
      */
     @Override
     public Iterator<List<T>> iterator() {
+        if(elements.isEmpty()) {
+            //by the definition of exponentiation, for n=0 and k>0 0^k = 0
+            //hence empty input should me allowed and the result is the empty collection
+            return Collections.emptyIterator();
+        }
         return new NumberIterator();
     }
 
