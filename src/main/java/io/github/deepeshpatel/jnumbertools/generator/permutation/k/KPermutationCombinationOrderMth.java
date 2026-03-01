@@ -7,7 +7,6 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.base.Combinations;
 import io.github.deepeshpatel.jnumbertools.base.Permutations;
-import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
 import java.math.BigInteger;
@@ -50,7 +49,6 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
      * @param increment the step size for selecting every mᵗʰ permutation; must be positive
      * @param start the starting rank (0-based); must be non-negative
      * @param calculator utility for combinatorial calculations
-     * @return a new KPermutationCombinationOrderMth instance
      * @throws IllegalArgumentException if m is non-positive or kₖ/start bounds are invalid
      */
     KPermutationCombinationOrderMth(List<T> elements, int k, BigInteger increment, BigInteger start, Calculator calculator) {

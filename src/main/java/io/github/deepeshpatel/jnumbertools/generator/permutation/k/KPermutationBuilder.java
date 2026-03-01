@@ -5,7 +5,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
@@ -49,7 +48,6 @@ public final class KPermutationBuilder<T> {
      * @param elements the list of elements to permute (e.g., [A, B, C])
      * @param k the size of each permutation (kₖ); must be non-negative and ≤ nₙ
      * @param calculator utility for combinatorial calculations
-     * @return a new KPermutationBuilder instance
      * @throws IllegalArgumentException if kₖ is negative or exceeds nₙ
      */
     public KPermutationBuilder(List<T> elements, int k, Calculator calculator) {

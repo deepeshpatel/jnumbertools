@@ -7,9 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.base.Combinations;
 import io.github.deepeshpatel.jnumbertools.base.Subsets;
-import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
-import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
+import io.github.deepeshpatel.jnumbertools.generator.base.*;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 import io.github.deepeshpatel.jnumbertools.generator.product.CartesianProductByRanks;
@@ -114,10 +112,10 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
     /**
      * Builds and returns a generator for all products in lexicographical order.
      *
-     * @return an AbstractGenerator containing all the generated products
+     * @return an StreamableIterable containing all the generated products
      */
     @Override
-    public AbstractGenerator<Object> lexOrder() {
+    public StreamableIterable<Object> lexOrder() {
         return new ConstrainedProductGenerator();
     }
 
@@ -168,7 +166,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      *           as this performs a mixed-radix decomposition of the rank value
      */
     public CartesianProductByRanks<Object> byRanks(Iterable<BigInteger> ranks) {
-        return new CartesianProductByRanks((List<Builder<Object>>) (List) builders, ranks);
+        return new CartesianProductByRanks<>((List<Builder<Object>>)(List<?>) builders, ranks);
     }
 
     /**
@@ -232,7 +230,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
 
         @Override
         public AbstractGenerator<Object> lexOrder() {
-            return new AbstractGenerator<Object>(Collections.emptyList()) {
+            return new AbstractGenerator<>(Collections.emptyList()) {
                 @Override
                 public Iterator<List<Object>> iterator() {
                     return Collections.singletonList(Collections.emptyList()).iterator();
@@ -241,13 +239,16 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         }
 
         @Override
-        public Iterable<List<Object>> lexOrderMth(BigInteger m, BigInteger start) {
-            return m.equals(BigInteger.ZERO) ? Collections.singletonList(Collections.emptyList()) : Collections.emptyList();
+        public StreamableIterable<Object> lexOrderMth(BigInteger m, BigInteger start) {
+                return new StreamableIteratorImpl<>(Collections.singletonList(Collections.emptyList()).iterator());
         }
 
         @Override
-        public Iterable<List<Object>> byRanks(Iterable<BigInteger> ranks) {
+        public StreamableIterable<Object> byRanks(Iterable<BigInteger> ranks) {
             throw new UnsupportedOperationException("EmptyBuilder does not support rank-based generation");
         }
+
+        //return m.equals(BigInteger.ZERO) ? Collections.singletonList(Collections.emptyList()) : Collections.emptyList();
+
     }
 }

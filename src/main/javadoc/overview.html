@@ -79,7 +79,7 @@
     <li><strong>Flexible Sampling</strong>: Support for random sampling with or without replacement, enabling efficient selection from large combinatorial spaces.</li>
     <li><strong>BigInteger Support</strong>: Handle large numbers for combinatorial counts and ranks, ensuring scalability for extensive datasets.</li>
     <li><strong>Lexicographical Ordering</strong>: Generate outcomes in a predictable, ordered sequence or select every mᵗʰ outcome for systematic exploration.</li>
-    <li><strong>Rank-Based Generation</strong>: Map ranks to specific combinatorial objects using algorithms like factoradic and combinadic unranking.</li>
+    <li><strong>Rank-Based Generation</strong>: Map sequences of ranks to specific combinatorial objects using algorithms like factoradic and combinadic unranking.</li>
     <li><strong>Modular Design</strong>: Organized into packages for specific combinatorial tasks, with builders for intuitive configuration.</li>
 </ul>
 
@@ -107,13 +107,25 @@
     <tr>
         <td><code>io.github.deepeshpatel.jnumbertools.generator.permutation</code></td>
         <td>
-            Generators for unique, repetitive, and multiset permutations, supporting lexicographical order, mᵗʰ permutations, and random sampling. Includes subpackages for specific permutation types.
+            Generators for unique, repetitive, multiset, and k-permutations, supporting lexicographical order, mᵗʰ permutations, single-swap algorithms, and rank-based generation via classes like <code>UniquePermutationByRanks</code>.
+        </td>
+    </tr>
+    <tr>
+        <td><code>io.github.deepeshpatel.jnumbertools.generator.combination</code></td>
+        <td>
+            Generators for unique, repetitive, and multiset combinations, supporting lexicographical order and rank-based generation via classes like <code>UniqueCombinationByRanks</code>.
         </td>
     </tr>
     <tr>
         <td><code>io.github.deepeshpatel.jnumbertools.generator.product</code></td>
         <td>
-            Generators for simple and constrained Cartesian products, allowing combinations of elements or subsets from multiple lists, with support for lexicographical order and random sampling.
+            Generators for simple and constrained Cartesian products, allowing combinations of elements or subsets from multiple lists, with support for lexicographical order and rank-based generation via <code>CartesianProductByRanks</code>.
+        </td>
+    </tr>
+    <tr>
+        <td><code>io.github.deepeshpatel.jnumbertools.generator.subset</code></td>
+        <td>
+            Generators for subsets of a given size range, supporting lexicographical order and mᵗʰ subset generation.
         </td>
     </tr>
     <tr>
@@ -125,7 +137,7 @@
     <tr>
         <td><code>io.github.deepeshpatel.jnumbertools.numbersystem</code></td>
         <td>
-            Algorithms for number system conversions, such as factoradic and combinadic unranking, used to map ranks to combinatorial objects like permutations and combinations.
+            Algorithms for number system conversions, such as factoradic, combinadic, and permutadic unranking, used to map ranks to combinatorial objects.
         </td>
     </tr>
 </table>
@@ -153,12 +165,12 @@ List<List<String>> sample = combinations.unique(2, elements).sample(2).stream().
         </pre>
 </div>
 <div class="note">
-    <strong>Cartesian Product of Lists:</strong>
+    <strong>Cartesian Product by Ranks:</strong>
     <pre>
 List<List<String>> lists = Arrays.asList(Arrays.asList("A", "B"), Arrays.asList("1", "2"));
 SimpleProductBuilder builder = new SimpleProductBuilder(lists.get(0), new Calculator()).and(lists.get(1));
-List<List<Object>> products = builder.lexOrder().stream().toList();
-// Output: [[A, 1], [A, 2], [B, 1], [B, 2]]
+List<List<Object>> products = builder.byRanks(Arrays.asList(BigInteger.ZERO, BigInteger.ONE)).stream().toList();
+// Output: [[A, 1], [A, 2]]
         </pre>
 </div>
 

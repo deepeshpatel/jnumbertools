@@ -4,10 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
-import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
+import io.github.deepeshpatel.jnumbertools.generator.base.*;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 import io.github.deepeshpatel.jnumbertools.generator.product.CartesianProductByRanks;
@@ -40,16 +37,12 @@ public final class SimpleProductBuilder implements Builder<Object> {
 
     private final List<Builder<Object>> builders = new ArrayList<>();
     private final List<List<?>> allLists = new ArrayList<>();
-    private final Calculator calculator;
 
     /**
      * Constructs a SimpleProductBuilder with an initial list of elements.
-     *
      * @param elements   the initial list of elements (may be null or empty)
-     * @param calculator the calculator used for combinatorial computations
      */
-    public SimpleProductBuilder(List<?> elements, Calculator calculator) {
-        this.calculator = calculator;
+    public SimpleProductBuilder(List<?> elements) {
         elements = elements == null ? Collections.emptyList() : elements;
         allLists.add(elements);
         builders.add(new SingleListBuilder(elements));
@@ -96,24 +89,24 @@ public final class SimpleProductBuilder implements Builder<Object> {
     /**
      * Builds and returns a generator for all products in lexicographical order.
      *
-     * @return an AbstractGenerator containing all the generated products
+     * @return a StreamableIterable containing all the generated products
      */
     @Override
-    public AbstractGenerator<Object> lexOrder() {
+    public StreamableIterable<Object> lexOrder() {
         return new SimpleProductGenerator();
     }
 
     /**
-     * Builds and returns a CartesianProductByRanks for every mᵗʰ product.
+     * Builds and returns a generator for every mᵗʰ product in lexicographical order.
      *
      * @param m     the interval to select every mᵗʰ product
-     * @param start the starting position
-     * @return a CartesianProductByRanks for the specified intervals
+     * @param start the starting rank
+     * @return a StreamableIterable for the specified intervals
      */
     @Override
-    public CartesianProductByRanks<Object> lexOrderMth(BigInteger m, BigInteger start) {
+    public StreamableIterable<Object> lexOrderMth(BigInteger m, BigInteger start) {
         BigInteger maxCount = count();
-        return new CartesianProductByRanks(builders, new EveryMthIterable(start, m, maxCount));
+        return new StreamableIteratorImpl<>(new CartesianProductByRanks<>(builders, new EveryMthIterable(start, m, maxCount)).iterator());
     }
 
     /**
@@ -121,9 +114,9 @@ public final class SimpleProductBuilder implements Builder<Object> {
      *
      * @param m     the interval to select every mᵗʰ product
      * @param start the starting position
-     * @return a CartesianProductByRanks for the specified intervals
+     * @return a StreamableIterable for the specified intervals
      */
-    public CartesianProductByRanks<Object> lexOrderMth(long m, long start) {
+    public StreamableIterable<Object> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
@@ -150,42 +143,43 @@ public final class SimpleProductBuilder implements Builder<Object> {
      * </pre>
      *
      * @param ranks Iterable of 0-based rank numbers (0 ≤ rank < product of set sizes)
-     * @return Product generator for specified ranks
+     * @return a StreamableIterable for the specified ranks
      * @throws IllegalArgumentException if any rank exceeds product space
      * @throws IllegalStateException if no sets were added
      */
-    public CartesianProductByRanks<Object> byRanks(Iterable<BigInteger> ranks) {
-        return new CartesianProductByRanks(builders, ranks);
+    @Override
+    public StreamableIterable<Object> byRanks(Iterable<BigInteger> ranks) {
+        return new StreamableIteratorImpl<>(new CartesianProductByRanks<>(builders, ranks).iterator());
     }
 
     /**
      * Generates a random sample of products with replacement.
      *
      * @param sampleSize the number of products to generate
-     * @return a CartesianProductByRanks for the sampled products
+     * @return a StreamableIterable for the sampled products
      * @throws IllegalArgumentException if sampleSize is negative
      */
-    public CartesianProductByRanks<Object> choice(int sampleSize) {
+    public StreamableIterable<Object> choice(int sampleSize) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
         BigInteger maxCount = count();
-        return new CartesianProductByRanks(builders, new BigIntegerChoice(maxCount, sampleSize));
+        return new StreamableIteratorImpl<>(new CartesianProductByRanks<>(builders, new BigIntegerChoice(maxCount, sampleSize)).iterator());
     }
 
     /**
      * Generates a random sample of unique products.
      *
      * @param sampleSize the number of unique products to generate
-     * @return a CartesianProductByRanks for the sampled products
+     * @return a StreamableIterable for the sampled products
      * @throws IllegalArgumentException if sampleSize is negative or exceeds total products
      */
-    public CartesianProductByRanks<Object> sample(int sampleSize) {
+    public StreamableIterable<Object> sample(int sampleSize) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
         BigInteger maxCount = count();
-        return new CartesianProductByRanks(builders, new BigIntegerSample(maxCount, sampleSize));
+        return new StreamableIteratorImpl<>(new CartesianProductByRanks<>(builders, new BigIntegerSample(maxCount, sampleSize)).iterator());
     }
 
     /**
@@ -207,69 +201,67 @@ public final class SimpleProductBuilder implements Builder<Object> {
     }
 
     /**
-     * A builder that wraps a single list as a set of single-element combinations.
-     */
-    private static class SingleListBuilder implements Builder<Object> {
-        private final List<?> elements;
+         * A builder that wraps a single list as a set of single-element combinations.
+         */
+        private record SingleListBuilder(List<?> elements) implements Builder<Object> {
+            private SingleListBuilder(List<?> elements) {
+                this.elements = elements != null ? elements : Collections.emptyList();
+            }
 
-        SingleListBuilder(List<?> elements) {
-            this.elements = elements;
-        }
+            @Override
+            public BigInteger count() {
+                return BigInteger.valueOf(elements.size());
+            }
 
-        @Override
-        public BigInteger count() {
-            return BigInteger.valueOf(elements.size());
-        }
-
-        @Override
-        public AbstractGenerator<Object> lexOrder() {
-            return new AbstractGenerator<Object>(Collections.emptyList()) {
-                @Override
-                public Iterator<List<Object>> iterator() {
-                    List<List<Object>> result = new ArrayList<>();
-                    for (Object e : elements) {
-                        result.add(List.of(e));
+            @Override
+            public StreamableIterable<Object> lexOrder() {
+                return new AbstractGenerator<>(Collections.emptyList()) {
+                    @Override
+                    public Iterator<List<Object>> iterator() {
+                        List<List<Object>> result = new ArrayList<>();
+                        for (Object e : elements) {
+                            result.add(List.of(e));
+                        }
+                        return result.iterator();
                     }
-                    return result.iterator();
-                }
-            };
+                };
+            }
+
+            @Override
+            public StreamableIterable<Object> lexOrderMth(BigInteger m, BigInteger start) {
+                return new StreamableIteratorImpl<>(new Iterator<>() {
+                    private final Iterator<BigInteger> indexIterator =
+                            new EveryMthIterable(start, m, BigInteger.valueOf(elements.size())).iterator();
+
+                    @Override
+                    public boolean hasNext() {
+                        return indexIterator.hasNext();
+                    }
+
+                    @Override
+                    public List<Object> next() {
+                        BigInteger index = indexIterator.next();
+                        return List.of(elements.get(index.intValue()));
+                    }
+                });
+            }
+
+            @Override
+            public StreamableIterable<Object> byRanks(Iterable<BigInteger> ranks) {
+                return new StreamableIteratorImpl<>(new Iterator<>() {
+                    private final Iterator<BigInteger> rankIterator = ranks.iterator();
+
+                    @Override
+                    public boolean hasNext() {
+                        return rankIterator.hasNext();
+                    }
+
+                    @Override
+                    public List<Object> next() {
+                        BigInteger index = rankIterator.next();
+                        return List.of(elements.get(index.intValue()));
+                    }
+                });
+            }
         }
-
-        @Override
-        public Iterable<List<Object>> lexOrderMth(BigInteger m, BigInteger start) {
-            return () -> new Iterator<List<Object>>() {
-                private final Iterator<BigInteger> indexIterator =
-                        new EveryMthIterable(start, m, BigInteger.valueOf(elements.size())).iterator();
-
-                @Override
-                public boolean hasNext() {
-                    return indexIterator.hasNext();
-                }
-
-                @Override
-                public List<Object> next() {
-                    BigInteger index = indexIterator.next();
-                    return List.of(elements.get(index.intValue()));
-                }
-            };
-        }
-
-        @Override
-        public Iterable<List<Object>> byRanks(Iterable<BigInteger> ranks) {
-            return () -> new Iterator<List<Object>>() {
-                private final Iterator<BigInteger> rankIterator = ranks.iterator();
-
-                @Override
-                public boolean hasNext() {
-                    return rankIterator.hasNext();
-                }
-
-                @Override
-                public List<Object> next() {
-                    BigInteger index = rankIterator.next();
-                    return List.of(elements.get(index.intValue()));
-                }
-            };
-        }
-    }
 }

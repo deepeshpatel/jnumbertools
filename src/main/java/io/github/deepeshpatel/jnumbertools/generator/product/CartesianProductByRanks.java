@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.product;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
+import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -23,7 +24,7 @@ import java.util.stream.StreamSupport;
  * @param <T> the type of elements in the products
  * @author Deepesh Patel
  */
-public class CartesianProductByRanks<T> implements Iterable<List<T>> {
+public class CartesianProductByRanks<T> implements StreamableIterable<T> {
 
     private final Iterable<BigInteger> ranks;
     private final List<Builder<T>> builders;
@@ -89,7 +90,8 @@ public class CartesianProductByRanks<T> implements Iterable<List<T>> {
             BigInteger[] division = remaining.divideAndRemainder(e.count());
             remaining = division[0];
 
-            List<T> values = e.lexOrderMth(division[1], division[1]).iterator().next();
+            //List<T> values = e.lexOrderMth(division[1], division[1]).iterator().next();
+            List<T> values = e.byRanks(Collections.singleton(division[1])).iterator().next();
 
             // Add elements to the front in reverse order
             for (int j = values.size() - 1; j >= 0; j--) {

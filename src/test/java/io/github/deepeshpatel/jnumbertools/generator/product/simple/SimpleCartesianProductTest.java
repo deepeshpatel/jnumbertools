@@ -7,6 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
@@ -93,6 +94,20 @@ public class SimpleCartesianProductTest {
                     List.of(List.of('B', 1), List.of('B', 3), List.of('C', 2)),
                     builder.lexOrderMth(2, 3).stream().toList()
             );
+        }
+
+        @Test
+        void shouldReturnCorrectTupleAtSpecificRank() {
+            var builder = cartesianProduct
+                    .simpleProductOf(List.of('A', 'B', 'C'))   // size 3
+                    .and(List.of(1, 2, 3, 4))                  // size 4
+                    .and(List.of("X", "Y"));                   // size 2
+
+            // Rank 6 in lex order should be: C,1,X  (0-based: A1X=0, A1Y=1, A2X=2, A3X=3, A4X=4, B1X=5, C1X=6)
+            var result = builder.byRanks(List.of(BigInteger.valueOf(6))).stream().toList();
+
+            assertEquals(1, result.size());
+            assertEquals(List.of('A', 4, "X"), result.get(0));
         }
     }
 

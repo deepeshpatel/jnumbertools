@@ -6,6 +6,9 @@ package io.github.deepeshpatel.jnumbertools.generator.subset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
+import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
+import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
+import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -24,6 +27,11 @@ import java.util.List;
  *
  * @param <T> the type of elements in the subsets
  * @author Deepesh Patel
+ * @author Deepesh Patel
+ * @see SubsetGeneratorByRanks
+ * @see EveryMthIterable
+ * @see BigIntegerChoice
+ * @see BigIntegerSample
  */
 public class SubsetBuilder<T> implements Builder<T> {
 
@@ -31,7 +39,7 @@ public class SubsetBuilder<T> implements Builder<T> {
     private final Calculator calculator;
     private int from = -1;
     private int to = -1;
-    private BigInteger count = BigInteger.valueOf(-1);
+    //private BigInteger count = BigInteger.valueOf(-1);
 
     /**
      * Constructs a {@code SubsetBuilder} with the specified elements and calculator.
@@ -86,30 +94,91 @@ public class SubsetBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Creates a {@link SubsetGeneratorMth} that generates every mᵗʰ subset in lexicographical order, starting from the specified position.
+     * Creates a {@link SubsetGeneratorByRanks} that generates every mᵗʰ subset in lexicographical order, starting from the specified position.
      *
      * @param m     the interval for selecting subsets (every mᵗʰ subset)
      * @param start the starting position for subsets
      * @return a {@code SubsetGeneratorMth} instance
      */
-    public SubsetGeneratorMth<T> lexOrderMth(long m, long start) {
+    public SubsetGeneratorByRanks<T> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
-    public SubsetGeneratorMth<T> byRanks(Iterable<BigInteger> ranks) {
+    public SubsetGeneratorByRanks<T> byRanks(Iterable<BigInteger> ranks) {
         //TODO:
-        throw new UnsupportedOperationException("Not yet implemented");
+        if (from < 0 || to < 0) {
+            throw new IllegalStateException("Must specify range via inRange() or all()");
+        }
+        return new SubsetGeneratorByRanks<>(from, to, ranks, elements, calculator);
     }
 
     /**
-     * Creates a {@link SubsetGeneratorMth} that generates every mᵗʰ subset in lexicographical order, starting from the specified position.
+     * Generates a random sample of subsets with replacement.
+     * <p>
+     * Each subset is chosen independently and uniformly at random from all possible subsets
+     * in the configured range. The same subset may appear multiple times in the result.
+     * </p>
+     * <p>
+     * This is equivalent to generating {@code sampleSize} random ranks in [0, count())
+     * with replacement and returning the corresponding subsets.
+     * </p>
+     *
+     * @param sampleSize the number of subsets to generate
+     * @return a {@code SubsetGeneratorByRanks} producing the random subsets
+     * @throws IllegalArgumentException if {@code sampleSize} is negative
+     * @see #sample(int)
+     * @see BigIntegerChoice
+     */
+    public SubsetGeneratorByRanks<T> choice(int sampleSize) {
+        if (sampleSize < 0) {
+            throw new IllegalArgumentException("Sample size cannot be negative");
+        }
+        BigInteger total = count();
+        Iterable<BigInteger> ranks = new BigIntegerChoice(total, sampleSize);
+        return byRanks(ranks);
+    }
+
+    /**
+     * Generates a random sample of unique subsets without replacement.
+     * <p>
+     * All returned subsets are distinct and chosen uniformly at random from all possible
+     * subsets in the configured range. The order is random (not lexicographical).
+     * </p>
+     * <p>
+     * This is equivalent to generating {@code sampleSize} distinct random ranks in [0, count())
+     * and returning the corresponding subsets.
+     * </p>
+     *
+     * @param sampleSize the number of unique subsets to generate
+     * @return a {@code SubsetGeneratorByRanks} producing the random unique subsets
+     * @throws IllegalArgumentException if {@code sampleSize} is negative or exceeds the total number of subsets in range
+     * @see #choice(int)
+     * @see BigIntegerSample
+     */
+    public SubsetGeneratorByRanks<T> sample(int sampleSize) {
+        if (sampleSize < 0) {
+            throw new IllegalArgumentException("Sample size cannot be negative");
+        }
+        BigInteger total = count();
+        if (BigInteger.valueOf(sampleSize).compareTo(total) > 0) {
+            throw new IllegalArgumentException(
+                    "Sample size cannot exceed total subsets in range: " + total);
+        }
+        Iterable<BigInteger> ranks = new BigIntegerSample(total, sampleSize);
+        return byRanks(ranks);
+    }
+
+    /**
+     * Creates a {@link SubsetGeneratorByRanks} that generates every mᵗʰ subset in lexicographical order, starting from the specified position.
      *
      * @param m     the interval for selecting subsets (every mᵗʰ subset) as a {@link BigInteger}
      * @param start the starting position for subsets as a {@link BigInteger}
      * @return a {@code SubsetGeneratorMth} instance
      */
-    public SubsetGeneratorMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        return new SubsetGeneratorMth<>(from, to, m, start, elements, calculator);
+    public SubsetGeneratorByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
+        BigInteger total = count();
+        Iterable<BigInteger> ranks = new EveryMthIterable(start, m, total);
+        return byRanks(ranks);
     }
 
     /**
@@ -121,11 +190,8 @@ public class SubsetBuilder<T> implements Builder<T> {
      *
      * @return the count of subsets
      */
-    public synchronized BigInteger count() {
-        if (count.intValue() == -1) {
-            count = calculator.totalSubsetsInRange(from, to, elements.size());
-        }
-        return count;
+    public  BigInteger count() {
+        return calculator.totalSubsetsInRange(from, to, elements.size());
     }
 
     @Override
@@ -134,7 +200,6 @@ public class SubsetBuilder<T> implements Builder<T> {
                 "elements=" + elements +
                 ", from=" + from +
                 ", to=" + to +
-                ", count=" + count +
                 '}';
     }
 }

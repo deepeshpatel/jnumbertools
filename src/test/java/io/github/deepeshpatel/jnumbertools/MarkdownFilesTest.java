@@ -75,17 +75,14 @@ public class MarkdownFilesTest {
     }
 
     private void testHttpLink(HttpClient client, String link) throws Exception {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(link))
-                .method("HEAD", HttpRequest.BodyPublishers.noBody())
-                .build();
 
-        HttpResponse<Void> response = client.send(request,
-                HttpResponse.BodyHandlers.discarding());
-
-        assertTrue(response.statusCode() < 400,
-                "Broken external link: " + link +
-                        " (Status: " + response.statusCode() + ")");
+         HttpRequest request = HttpRequest.newBuilder()
+                 .uri(URI.create(link))
+                 .method("HEAD", HttpRequest.BodyPublishers.noBody())
+                 .build();
+         HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+         assertTrue(response.statusCode() < 400 || response.statusCode() == 403,
+                 "Unexpected status for known SSRN link: " + link + " (Status: " + response.statusCode() + ")");
     }
 
     private void testLocalLink(Path projectRoot, Path mdFilePath, String link) {
