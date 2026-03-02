@@ -56,6 +56,38 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
     }
 
     /**
+     * Creates a generator for every mᵗʰ combination in lexicographical order, starting from a given rank.
+     * <p>
+     * Uses {@link EveryMthIterable} to produce ranks: start, start+m, start+2m, ..., up to ⁿCᵣ - 1.
+     * </p>
+     *
+     * @param m     the increment between ranks (m > 0)
+     * @param start the starting rank (0 ≤ start < ⁿCᵣ)
+     * @return a {@link UniqueCombinationByRanks} for the sequence
+     * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿCᵣ
+     */
+    public UniqueCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
+        EveryMthIterable.validateLexOrderMthParams(m, start);
+        BigInteger nCr = calculator.nCr(elements.size(), size);
+        Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, nCr);
+        return new UniqueCombinationByRanks<>(elements, size, mthIterable, calculator);
+    }
+
+    /**
+     * Creates a generator for combinations at specified ranks.
+     * <p>
+     * For example, for ⁿCᵣ with n=3, r=2, ranks [0, 2] might yield [A, B], [B, C].
+     * </p>
+     *
+     * @param ranks the iterable of ranks (each rank in [0, ⁿCᵣ))
+     * @return a {@link UniqueCombinationByRanks} for the specified ranks
+     * @throws IllegalArgumentException if any rank < 0 or rank ≥ ⁿCᵣ
+     */
+    public UniqueCombinationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
+        return new UniqueCombinationByRanks<>(elements, size, ranks, calculator);
+    }
+
+    /**
      * Creates a generator that samples unique combinations randomly without replacement.
      * <p>
      * Uses {@link BigIntegerSample} to ensure each combination in the sample is distinct.
@@ -83,52 +115,6 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
     public UniqueCombinationByRanks<T> choice(int sampleSize) {
         BigInteger nCr = calculator.nCr(elements.size(), size);
         return new UniqueCombinationByRanks<>(elements, size, new BigIntegerChoice(nCr, sampleSize), calculator);
-    }
-
-    /**
-     * Creates a generator for combinations at specified ranks.
-     * <p>
-     * For example, for ⁿCᵣ with n=3, r=2, ranks [0, 2] might yield [A, B], [B, C].
-     * </p>
-     *
-     * @param ranks the iterable of ranks (each rank in [0, ⁿCᵣ))
-     * @return a {@link UniqueCombinationByRanks} for the specified ranks
-     * @throws IllegalArgumentException if any rank < 0 or rank ≥ ⁿCᵣ
-     */
-    public UniqueCombinationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
-        return new UniqueCombinationByRanks<>(elements, size, ranks, calculator);
-    }
-
-    /**
-     * Creates a generator for every mᵗʰ combination in lexicographical order, starting from a given rank.
-     * <p>
-     * Generates ranks: start, start+m, start+2m, ..., up to ⁿCᵣ - 1.
-     * </p>
-     *
-     * @param m     the increment between ranks (m > 0)
-     * @param start the starting rank (0 ≤ start < ⁿCᵣ)
-     * @return a {@link UniqueCombinationByRanks} for the sequence
-     * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿCᵣ
-     */
-    public UniqueCombinationByRanks<T> lexOrderMth(long m, long start) {
-        return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
-    }
-
-    /**
-     * Creates a generator for every mᵗʰ combination in lexicographical order, starting from a given rank.
-     * <p>
-     * Uses {@link EveryMthIterable} to produce ranks: start, start+m, start+2m, ..., up to ⁿCᵣ - 1.
-     * </p>
-     *
-     * @param m     the increment between ranks (m > 0)
-     * @param start the starting rank (0 ≤ start < ⁿCᵣ)
-     * @return a {@link UniqueCombinationByRanks} for the sequence
-     * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿCᵣ
-     */
-    public UniqueCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
-        BigInteger nCr = calculator.nCr(elements.size(), size);
-        Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, nCr);
-        return new UniqueCombinationByRanks<>(elements, size, mthIterable, calculator);
     }
 
     /**

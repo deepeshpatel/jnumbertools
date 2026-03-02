@@ -39,7 +39,6 @@ public class SubsetBuilder<T> implements Builder<T> {
     private final Calculator calculator;
     private int from = -1;
     private int to = -1;
-    //private BigInteger count = BigInteger.valueOf(-1);
 
     /**
      * Constructs a {@code SubsetBuilder} with the specified elements and calculator.
@@ -96,33 +95,20 @@ public class SubsetBuilder<T> implements Builder<T> {
     /**
      * Creates a {@link SubsetGeneratorByRanks} that generates every mᵗʰ subset in lexicographical order, starting from the specified position.
      *
-     * @param m     the interval for selecting subsets (every mᵗʰ subset)
-     * @param start the starting position for subsets
-     * @return a {@code SubsetGeneratorMth} instance
-     */
-    public SubsetGeneratorMth<T> lexOrderMth(long m, long start) {
-        return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
-    }
-
-    /**
-     * Creates a {@link SubsetGeneratorByRanks} that generates every mᵗʰ subset in lexicographical order, starting from the specified position.
-     *
      * @param m     the interval for selecting subsets (every mᵗʰ subset) as a {@link BigInteger}
      * @param start the starting position for subsets as a {@link BigInteger}
      * @return a {@code SubsetGeneratorMth} instance
      */
     public SubsetGeneratorMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        if (m.signum() <= 0) {
-            throw new IllegalArgumentException("Increment 'm' must be positive");
-        }
-        if (start.signum() < 0) {
-            throw new IllegalArgumentException("Start rank must be non-negative");
+        EveryMthIterable.validateLexOrderMthParams(m,start);
+        BigInteger totalSubsets = calculator.totalSubsetsInRange(from, to, elements.size());
+        if(start.compareTo(totalSubsets) >= 0 ) {
+            throw new IllegalArgumentException("start must be < total subsets in range (0-based)");
         }
         return new SubsetGeneratorMth<>(from, to, m, start, elements, calculator);
     }
 
     public SubsetGeneratorByRanks<T> byRanks(Iterable<BigInteger> ranks) {
-        //TODO:
         if (from < 0 || to < 0) {
             throw new IllegalStateException("Must specify range via inRange() or all()");
         }

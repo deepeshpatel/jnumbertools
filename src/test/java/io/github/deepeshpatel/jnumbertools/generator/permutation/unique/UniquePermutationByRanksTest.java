@@ -126,9 +126,9 @@ class UniquePermutationByRanksTest {
                     () -> uniquePerm.lexOrderMth(0,1));
             var ex2 = assertThrows(IllegalArgumentException.class,
                     () -> uniquePerm.lexOrderMth(-1,1));
-            String expected = "Increment 'm' must be positive";
-            assertEquals(ex1.getMessage(), expected);
-            assertEquals(ex2.getMessage(), expected);
+
+            assertEquals(ex1.getMessage(), incrementErrMsg);
+            assertEquals(ex2.getMessage(), incrementErrMsg);
         }
 
         @Test
@@ -136,7 +136,7 @@ class UniquePermutationByRanksTest {
             var uniquePerm = permutation.unique("A", "B", "C");
             var exception =  assertThrows(IllegalArgumentException.class,
                     () -> uniquePerm.lexOrderMth(1,-1));
-            assertEquals(exception.getMessage(), "Start rank must be non-negative");
+            assertEquals(exception.getMessage(), startErrMsg);
 
             //should return empty list if start rank is greater than total permutations
             assertTrue(uniquePerm.lexOrderMth(1,10).stream().toList().isEmpty());

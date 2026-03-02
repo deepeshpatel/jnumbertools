@@ -34,16 +34,23 @@ public class EveryMthIterable implements Iterable<BigInteger> {
 
     /**
      * Constructs an iterable for generating every mᵗʰ rank.
+     * <p>
+     * Produces ranks starting from {@code start}, incrementing by {@code increment},
+     * until reaching (but not including) {@code upperBound}.
+     * </p>
+     * <p>
+     * This constructor does not perform parameter validation. Validation (m > 0, start ≥ 0, etc.)
+     * is expected to be done by the caller (typically a {@link Builder} implementation) for fail-fast behavior.
+     * Invalid parameters may lead to empty sequences, infinite loops, or unexpected behavior.
+     * </p>
      *
-     * @param start the starting rank (start ≥ 0)
-     * @param increment the step size for ranks (increment > 0)
-     * @param upperBound the exclusive upper limit for ranks (upperBound ≥ start)
-     * @throws IllegalArgumentException if increment ≤ 0
+     * @param start       the starting rank (should be ≥ 0)
+     * @param increment   the step size between ranks (should be > 0)
+     * @param upperBound  the exclusive upper limit for ranks (should be ≥ start)
+     * @see EveryMthIterable#validateLexOrderMthParams(BigInteger, BigInteger)
+     * @author Deepesh Patel
      */
     public EveryMthIterable(BigInteger start, BigInteger increment, BigInteger upperBound) {
-        if (increment.signum() < 0) {
-            throw new IllegalArgumentException("increment value should be > 0");
-        }
         this.start = start;
         this.increment = increment;
         this.upperBound = upperBound;
@@ -74,5 +81,24 @@ public class EveryMthIterable implements Iterable<BigInteger> {
                 return result;
             }
         };
+    }
+
+    /**
+     * Validates parameters commonly used in lexOrderMth(m, start) calls.
+     * <p>
+     * Builders should call this method before creating a generator
+     * to ensure fail-fast validation.
+     * </p>
+     * @param m     increment/step size
+     * @param start starting rank
+     * @throws IllegalArgumentException if m is null or ≤ 0, or if start is null or < 0
+     */
+    public static void validateLexOrderMthParams(BigInteger m, BigInteger start) {
+        if (m == null || m.signum() <= 0) {
+            throw new IllegalArgumentException("Increment 'm' must be positive (m > 0)");
+        }
+        if (start == null || start.signum() < 0) {
+            throw new IllegalArgumentException("Start position must be non-negative (start >= 0)");
+        }
     }
 }

@@ -31,7 +31,6 @@ public final class CombinadicAlgorithms {
      * Constructs an instance of {@link CombinadicAlgorithms} with the specified calculator.
      *
      * @param calculator the calculator used for combinatorial calculations
-     * @return a new instance of CombinadicAlgorithms initialized with the provided calculator
      */
     public CombinadicAlgorithms(Calculator calculator) {
         this.calculator = calculator;

@@ -143,7 +143,7 @@ public class RepetitivePermutationMthTest {
                 .lexOrderMth(1, 0)
                 .stream()
                 .toList());
-        assertEquals(exp.getMessage(), "Width (r) cannot be negative for repetitive permutation generation");
+        assertEquals("Width (r) cannot be negative for repetitive permutation generation", exp.getMessage());
     }
 
     @Test
@@ -156,7 +156,7 @@ public class RepetitivePermutationMthTest {
                 .stream()
                 .toList());
 
-        assertEquals(exp.getMessage(), "Start rank must be non-negative");
+        assertEquals(startErrMsg, exp.getMessage());
 
         //should return empty list if start rank is greater than total permutations
         var output = repetitivePerm.lexOrderMth(1,10).stream().toList();
@@ -166,7 +166,7 @@ public class RepetitivePermutationMthTest {
     @Test
     void shouldWorkForEmptyElementList() {
         //by the definition of exponentiation, for n=0 and k>0 0^k = 0
-        //hence empty input should me allowed and the result is the empty collection
+        //hence empty input should be allowed and the result is the empty collection
         var output = permutation.repetitive(2, Collections.emptyList())
                 .lexOrderMth(1, 0)
                 .stream()
@@ -198,8 +198,8 @@ public class RepetitivePermutationMthTest {
                 .stream()
                 .toList());
 
-        assertEquals(exp1.getMessage(), "Increment 'm' must be positive");
-        assertEquals(exp2.getMessage(), "Increment 'm' must be positive");
+        assertEquals(incrementErrMsg, exp1.getMessage());
+        assertEquals(incrementErrMsg, exp2.getMessage());
     }
 
     @Test
@@ -222,7 +222,6 @@ public class RepetitivePermutationMthTest {
     @Test
     void shouldHandleIncrementLargerThanTotal() {
         int width = 2;
-        int n = 2; // 2^2 = 4 total
         var result = permutation.repetitive(width, 0, 1)
                 .lexOrderMth(10, 0) // increment > total
                 .stream()

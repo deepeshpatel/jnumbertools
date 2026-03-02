@@ -34,7 +34,6 @@ public final class UniquePermutationLexElementIterator<T> implements Iterator<Li
      *
      * @param size the number of elements to permute (nₙ); must be non-negative
      * @param mapper the mapper that converts an array of indices to a list of corresponding element values
-     * @return a new UniquePermutationLexElementIterator instance
      * @throws IllegalArgumentException if size is negative
      */
     public UniquePermutationLexElementIterator(int size, IndicesToValueMapper<T> mapper) {
@@ -47,7 +46,6 @@ public final class UniquePermutationLexElementIterator<T> implements Iterator<Li
      *
      * @param mapper the mapper that converts an array of indices to a list of corresponding element values
      * @param initialStateOfIndices the initial permutation of indices; must be a valid permutation of {0, 1, ..., nₙ−1}
-     * @return a new UniquePermutationLexElementIterator instance
      * @throws IllegalArgumentException if initialStateOfIndices is invalid
      */
     public UniquePermutationLexElementIterator(IndicesToValueMapper<T> mapper, int[] initialStateOfIndices) {

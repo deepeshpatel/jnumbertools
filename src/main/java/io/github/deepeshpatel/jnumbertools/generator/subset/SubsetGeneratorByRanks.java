@@ -5,7 +5,9 @@
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.Subsets;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 
 import java.math.BigInteger;
 import java.util.Iterator;
@@ -48,13 +50,7 @@ public final class SubsetGeneratorByRanks<T> extends AbstractGenerator<T> {
      * @throws IllegalArgumentException if m <= 0 or start < 0
      */
     public SubsetGeneratorMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        if (m == null || m.signum() <= 0) {
-            throw new IllegalArgumentException("m must be strictly positive");
-        }
-        if (start == null || start.signum() < 0) {
-            throw new IllegalArgumentException("start must be non-negative");
-        }
-        System.out.println("Deep from to is " + from + " " + to);
+        EveryMthIterable.validateLexOrderMthParams(m,start);
         return new SubsetGeneratorMth<>(from, to, m, start, elements, calculator);
     }
 
@@ -84,18 +80,8 @@ public final class SubsetGeneratorByRanks<T> extends AbstractGenerator<T> {
             }
 
             BigInteger relativeRank = rankIterator.next();
-            // Delegate single-rank computation to Mth's build() method
-            SubsetGeneratorMth<T> singleMth = new SubsetGeneratorMth<>(
-                    from, to, BigInteger.ONE, relativeRank, elements, calculator
-            );
+            return new Subsets(calculator).of(elements).inRange(from,to).lexOrderMth(BigInteger.ONE, relativeRank).build();
 
-            List<T> subset = singleMth.build();
-
-            if (subset == null) {
-                throw new NoSuchElementException("No subset at relative rank " + relativeRank);
-            }
-
-            return subset;
         }
     }
 }

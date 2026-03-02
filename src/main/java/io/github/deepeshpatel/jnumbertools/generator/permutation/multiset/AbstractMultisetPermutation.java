@@ -38,14 +38,13 @@ public abstract class AbstractMultisetPermutation<T> implements Iterable<List<T>
      * @param multiset a map of elements to their frequencies; must not be null or empty, with insertion order
      *                 determining lexicographical order
      * @param calculator utility for computing permutations and factorials
-     * @return a new AbstractMultisetPermutation instance
      * @throws IllegalArgumentException if multiset is null, empty, contains negative frequencies, or sum is zero
      */
     protected AbstractMultisetPermutation(LinkedHashMap<T, Integer> multiset, Calculator calculator) {
         if (multiset == null || multiset.isEmpty()) {
             throw new IllegalArgumentException("Multiset map cannot be null or empty");
         }
-        int size = multiset.keySet().size();
+        int size = multiset.size();
         frequencies = new int[size];
         elements = new ArrayList<>(size);
         createElementsAndFrequencies(multiset);

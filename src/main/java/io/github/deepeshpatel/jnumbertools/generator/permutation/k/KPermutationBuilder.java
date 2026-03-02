@@ -138,9 +138,9 @@ public final class KPermutationBuilder<T> {
      * @throws IllegalArgumentException if m or start is invalid
      */
     public KPermutationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
+        EveryMthIterable.validateLexOrderMthParams(m,start);
         EveryMthIterable iterator = new EveryMthIterable(start, m, calculator.nPr(elements.size(), k));
         return new KPermutationByRanks<>(elements, k, iterator, calculator);
-        //return new KPermutationLexOrderMth<>(elements, k, m, start, calculator);
     }
 
     /**

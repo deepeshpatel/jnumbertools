@@ -6,6 +6,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
+import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
@@ -59,18 +60,6 @@ public final class RepetitivePermutationBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Generates every mᵗʰ repetitive permutation in lexicographical order, using long values.
-     *
-     * @param m     the increment between permutations; must be positive
-     * @param start the starting rank (0-based); must be non-negative
-     * @return a {@link RepetitivePermutationMth} instance for mᵗʰ permutations
-     * @throws IllegalArgumentException if m or start is invalid
-     */
-    public RepetitivePermutationMth<T> lexOrderMth(long m, long start) {
-        return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
-    }
-
-    /**
      * Generates every mᵗʰ repetitive permutation in lexicographical order.
      *
      * @param m     the increment between permutations; must be positive
@@ -79,12 +68,7 @@ public final class RepetitivePermutationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if m or start is invalid
      */
     public RepetitivePermutationMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        if (m.signum() <= 0) {
-            throw new IllegalArgumentException("Increment 'm' must be positive");
-        }
-        if (start.signum() < 0) {
-            throw new IllegalArgumentException("Start rank must be non-negative");
-        }
+        EveryMthIterable.validateLexOrderMthParams(m,start);
         return new RepetitivePermutationMth<>(elements, width, m, start);
     }
 

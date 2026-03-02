@@ -30,6 +30,9 @@ public class TestBase {
     public static final List<Integer> num_1_to_4 = List.of(1, 2, 3, 4);
     public static final List<Integer> num_0_to_5 = List.of(0, 1, 2, 3, 4, 5);
 
+    public static final String incrementErrMsg = "Increment 'm' must be positive (m > 0)";
+    public static final String startErrMsg = "Start position must be non-negative (start >= 0)";
+
     private static List<?> everyMthValue(Stream<?> stream, int start, long m) {
         final int[] j = {0};
         return stream.filter(e -> {
@@ -53,7 +56,6 @@ public class TestBase {
         return frequencies;
     }
 
-    //TODO: temp method remove this
     public static <K, Integer> LinkedHashMap createMap(List<K> list, int[] freq) {
         var options = new LinkedHashMap<>();
         for(int i=0; i<freq.length; i++) {

@@ -94,7 +94,7 @@ public final class MultisetCombination<T> extends AbstractMultisetCombination<T>
          * Computes the next multiset combination in lexicographical order.
          * <p>
          * Given the current combination of indices [a₀, a₁, ..., aᵣ₋₁], this method finds the
-         * rightmost index i where aᵢ can be incremented (aᵢ < n-1) while respecting element
+         * rightmost index i, where aᵢ can be incremented (aᵢ < n-1) while respecting element
          * multiplicities, increments it, and fills subsequent positions with valid indices.
          * Returns an empty array if no further combination exists.
          *
@@ -234,7 +234,7 @@ public final class MultisetCombination<T> extends AbstractMultisetCombination<T>
         /**
          * Computes the next multiset combination in lexicographical order.
          * <p>
-         * Given the current frequency vector, this method finds the rightmost index i where the
+         * Given the current frequency vector, this method finds the rightmost index i, where the
          * frequency can be incremented (respecting element multiplicities), adjusts the vector,
          * and fills subsequent positions with valid frequencies. Returns null if no further
          * combination exists.

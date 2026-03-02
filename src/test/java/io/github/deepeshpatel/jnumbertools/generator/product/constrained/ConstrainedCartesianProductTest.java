@@ -123,7 +123,7 @@ public class ConstrainedCartesianProductTest {
             long mm = -m;
             for (List<?> row : rows) {
                 mm += m;
-                assertEquals(row, builder.lexOrderMth(mm, mm).iterator().next());
+                assertEquals(row, builder.lexOrderMth(1, mm).iterator().next());
             }
         }
     }

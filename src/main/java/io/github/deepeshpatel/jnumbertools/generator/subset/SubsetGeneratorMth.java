@@ -34,19 +34,29 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> {
     private final Combinations combinations;
     private BigInteger limit;
     private final BigInteger initialM;
-    private int from;
-    private int to;
+    private final int from;
+    private final int to;
 
     /**
      * Constructs a {@code SubsetGeneratorMth} to generate every mᵗʰ subset within the specified size range,
      * starting from the specified initial position.
+     * <p>
+     * <strong>This constructor is intended for internal use only.</strong> Parameter validation (range,
+     * non-negative values, m > 0, start < total, etc.) is performed in the {@link SubsetBuilder} methods
+     * ({@code all()}, {@code inRange(int, int)}, {@code lexOrderMth(...)}) to ensure fail-fast behavior
+     * at the builder level, before creating the generator instance.
+     * </p>
+     * <p>
+     * Direct calls to this constructor bypass validation and are not part of the public API.
+     * Always create instances via {@link SubsetBuilder} for correct behavior and safety.
+     * </p>
      *
-     * @param from       the minimum subset size (inclusive)
-     * @param to         the maximum subset size (inclusive)
-     * @param m          the increment for selecting subsets (i.e., every mᵗʰ subset will be generated)
-     * @param start      the initial position for generating subsets
-     * @param elements   the list of elements from which subsets are generated (each item is treated as unique)
-     * @param calculator the calculator used for combinatorial calculations
+     * @param from       minimum subset size (inclusive); must be >= 0
+     * @param to         maximum subset size (inclusive); must be >= from
+     * @param m          step size for every mᵗʰ subset; must be > 0
+     * @param start      starting rank (0-based); must be >= 0 and < total subsets in range
+     * @param elements   list of elements from which subsets are generated (assumed unique)
+     * @param calculator calculator for combinatorial operations
      */
     SubsetGeneratorMth(int from, int to, BigInteger m, BigInteger start, List<T> elements, Calculator calculator) {
         super(elements);
@@ -55,7 +65,7 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> {
         this.increment = m;
         this.calculator = calculator;
         combinations = new Combinations(calculator);
-        initialM = start.add(totalSubsetsBeforeRange());  // ← removed .add(increment)
+        initialM = start.add(totalSubsetsBeforeRange());
     }
 
     /**

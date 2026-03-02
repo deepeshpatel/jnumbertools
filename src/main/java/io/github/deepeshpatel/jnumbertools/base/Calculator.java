@@ -9,14 +9,12 @@ import java.util.*;
 
 /**
  * Calculator for combinatorial computations with memoization.
- *
  * Provides thread-safe methods for calculating binomial coefficients (`ⁿCᵣ`, `ⁿ⁺ᵣ⁻¹Cᵣ`),
- * permutations (`ⁿPₖ`), factorials (`n!`), subfactorials (`!n`), multinomial coefficients
+ * permutations (`ⁿPₖ`), factorials (`n!`), sub-factorials (`!n`), multinomial coefficients
  * (`n! / Π(nᵢ!)`), multiset combinations, and more. Uses memoization to cache frequently
  * computed values (`ⁿCᵣ`, `ⁿPₖ`, `n!`, `!n`) in thread-safe collections with synchronized
  * access. The `clearCaches()` method allows cache eviction, which may cause temporary
  * re-computation overhead if accessed concurrently.
- *
  * Example usage:
  * ```
  * Calculator calc = new Calculator();
@@ -87,9 +85,7 @@ public final class Calculator {
 
     /**
      * Calculates the binomial coefficient with replacement (`ⁿ⁺ᵣ⁻¹Cᵣ`).
-     *
      * Represents the number of ways to choose r items from n distinct types, allowing repetition.
-     *
      * @param n the number of distinct item types (n ≥ 0)
      * @param r the number of items to choose (r ≥ 0)
      * @return the number of combinations with replacement as a BigInteger
@@ -100,9 +96,7 @@ public final class Calculator {
 
     /**
      * Calculates the binomial coefficient (`ⁿCᵣ`) for unique combinations.
-     *
      * Represents the number of ways to choose r distinct items from n distinct items without regard to order.
-     *
      * @param n the number of distinct items (n ≥ 0)
      * @param r the number of items to choose (0 ≤ r ≤ n)
      * @return the number of unique combinations as a BigInteger
@@ -125,9 +119,7 @@ public final class Calculator {
 
     /**
      * Finds the smallest n such that `ⁿCᵣ` exceeds max.
-     *
      * Used to determine the minimal set size for combination ranking where the number of combinations exceeds a threshold.
-     *
      * @param r the number of items to choose (r ≥ 0)
      * @param max the threshold to exceed (max ≥ 0)
      * @return the smallest n such that `ⁿCᵣ` > max
@@ -146,9 +138,7 @@ public final class Calculator {
 
     /**
      * Calculates the number of k-permutations (`ⁿPₖ`).
-     *
      * Represents the number of ways to arrange k distinct items from n distinct items, where order matters.
-     *
      * @param n the number of distinct items (n ≥ 0)
      * @param r the number of items to arrange (0 ≤ r ≤ n)
      * @return the number of k-permutations as a BigInteger
@@ -170,9 +160,7 @@ public final class Calculator {
 
     /**
      * Finds the smallest n such that n! exceeds the specified value.
-     *
      * Iteratively computes factorials until n! > value, used for permutation ranking thresholds.
-     *
      * @param nonNegativeInt the threshold to exceed (nonNegativeInt ≥ 0)
      * @return the smallest n such that n! > nonNegativeInt
      */
@@ -188,9 +176,7 @@ public final class Calculator {
 
     /**
      * Calculates the factorial of a non-negative integer (`n!`).
-     *
      * Represents the product of all positive integers up to n.
-     *
      * @param n the integer to calculate the factorial for (n ≥ 0)
      * @return the factorial of n as a BigInteger
      * @throws IllegalArgumentException if n is negative
@@ -210,12 +196,10 @@ public final class Calculator {
     }
 
     /**
-     * Calculates the subfactorial of a non-negative integer (`!n`).
-     *
+     * Calculates the sub-factorial of a non-negative integer (`!n`).
      * Represents the number of derangements (permutations with no fixed points) of n items.
-     *
-     * @param n the integer to calculate the subfactorial for (n ≥ 0)
-     * @return the subfactorial of n as a BigInteger
+     * @param n the integer to calculate the sub-factorial for (n ≥ 0)
+     * @return the sub-factorial of n as a BigInteger
      * @throws IllegalArgumentException if n is negative
      */
     public BigInteger subFactorial(int n) {
@@ -235,7 +219,6 @@ public final class Calculator {
 
     /**
      * Calculates the power of a base raised to an exponent (`baseᵉˣᵖᵒⁿᵉⁿᵗ`).
-     *
      * @param base the base number
      * @param exponent the exponent (exponent ≥ 0)
      * @return the result of base^exponent as a BigInteger
@@ -246,7 +229,6 @@ public final class Calculator {
 
     /**
      * Calculates the power of a base raised to an exponent (`baseᵉˣᵖᵒⁿᵉⁿᵗ`).
-     *
      * @param base the base number
      * @param exponent the exponent (exponent ≥ 0)
      * @return the result of base^exponent as a BigInteger
@@ -267,9 +249,7 @@ public final class Calculator {
 
     /**
      * Calculates the total number of subsets of sizes in the range [from, to] for n elements (`∑ⁿCᵣ`).
-     *
      * Represents the sum of binomial coefficients `ⁿCᵣ` for r from `from` to `to`, or 2ⁿ if from=0 and to=n.
-     *
      * @param from the minimum subset size (from ≥ 0)
      * @param to the maximum subset size (to ≤ n)
      * @param n the total number of elements (n ≥ 0)
@@ -287,10 +267,8 @@ public final class Calculator {
 
     /**
      * Calculates the multinomial coefficient (`n! / Π(nᵢ!)`) for the given counts.
-     *
      * Represents the number of distinct permutations of a multiset with counts {n₁, n₂, ..., nₖ},
      * where n = n₁ + n₂ + ... + nₖ.
-     *
      * @param counts an array of non-negative integers representing the counts of distinct items
      * @return the multinomial coefficient as a BigInteger
      * @throws IllegalArgumentException if any count is negative
@@ -310,9 +288,7 @@ public final class Calculator {
 
     /**
      * Calculates the total number of multiset permutations for every mᵗʰ rank.
-     *
      * Used to determine the number of permutations between rank `start` and the last rank, stepping by `m`.
-     *
      * @param start the starting rank (start ≥ 0)
      * @param m the step size (m ≥ 1)
      * @param counts an array of non-negative integers representing the counts of distinct items
@@ -328,21 +304,17 @@ public final class Calculator {
 
     /**
      * Calculates the number of ways to select exactly s items from a multiset for all s in [0, ⌊total/2⌋].
-     *
      * The multiset is defined by multiplicities, where each integer represents the count of a distinct item type.
      * Uses dynamic programming to compute coefficients of the generating function Π(1 + x + x² + ... + xᶠʳᵉᵠᵘᵉⁿᶜʸ).
      * Returns an array dp of length ⌊total/2⌋ + 1, where dp[s] is the number of ways to select exactly s items.
      * Due to symmetry, ways to select (total - s) items equals dp[s].
-     *
      * Example: For multiplicities {2, 2, 3} (total=7), returns dp[0..3]:
      * - dp[0] = 1 (select 0 items)
      * - dp[1] = 3 (select 1 item)
      * - dp[2] = 6 (select 2 items)
      * - dp[3] = 8 (select 3 items)
      * Symmetry gives: ways for 4=dp[3], 5=dp[2], 6=dp[1], 7=dp[0].
-     *
      * Use `multisetCombinationsCount` for a specific s.
-     *
      * @param frequencies an array of non-negative integers representing the multiplicities of item types
      * @return an array where dp[s] is the number of ways to select s items (0 ≤ s ≤ ⌊total/2⌋)
      * @see #multisetCombinationsCount(int, int...)
@@ -376,10 +348,8 @@ public final class Calculator {
 
     /**
      * Calculates the number of ways to select exactly k items from a multiset.
-     *
      * The multiset is defined by multiplicities, where each integer represents the count of a distinct item type.
      * Uses recursive dynamic programming with memoization and precomputed suffix sums for efficiency.
-     *
      * @param k the number of items to select (k ≥ 0)
      * @param counts an array of non-negative integers representing the multiplicities of item types
      * @return the number of ways to select k items as a BigInteger
@@ -391,10 +361,8 @@ public final class Calculator {
 
     /**
      * Calculates the number of ways to select exactly k items from a multiset, starting from a given index.
-     *
      * The multiset is defined by multiplicities, considering item types from the specified index onward.
      * Uses recursive dynamic programming with memoization and precomputed suffix sums for efficiency.
-     *
      * @param k the number of items to select (k ≥ 0)
      * @param index the starting index of item types to consider (0 ≤ index ≤ counts.length)
      * @param counts an array of non-negative integers representing the multiplicities of item types
@@ -453,9 +421,7 @@ public final class Calculator {
 
     /**
      * Calculates the Rencontres number (`ⁿCₖ · !(n-k)`).
-     *
      * Represents the number of permutations of n items with exactly k fixed points (elements mapped to themselves).
-     *
      * @param n the size of the permutation (n ≥ 0)
      * @param k the number of fixed points (0 ≤ k ≤ n)
      * @return the Rencontres number as a BigInteger
@@ -469,10 +435,8 @@ public final class Calculator {
 
     /**
      * Calculates the Greatest Common Divisor (GCD) of multiple BigInteger numbers.
-     *
      * Uses the binary GCD algorithm iteratively. Returns 0 if all inputs are 0, the absolute value of a single input,
      * or throws an exception if the input array is empty or null.
-     *
      * @param a variable number of BigInteger inputs
      * @return the GCD of all inputs as a BigInteger
      * @throws IllegalArgumentException if the input array is null or empty
@@ -489,10 +453,8 @@ public final class Calculator {
 
     /**
      * Calculates the Least Common Multiple (LCM) of multiple BigInteger numbers.
-     *
      * Computes LCM iteratively using LCM(a, b) = |a * b| / GCD(a, b). Returns 0 if any input is 0,
      * the absolute value of a single input, or throws an exception if the input array is empty or null.
-     *
      * @param a variable number of BigInteger inputs
      * @return the LCM of all inputs as a BigInteger
      * @throws IllegalArgumentException if the input array is null or empty
@@ -529,7 +491,6 @@ public final class Calculator {
 
     /**
      * Clears all memoization caches (`ⁿCᵣ`, `ⁿPₖ`, `n!`, `!n`).
-     *
      * Eviction may cause temporary re-computation overhead if accessed concurrently. The Calculator remains thread-safe.
      */
     public void clearCaches() {

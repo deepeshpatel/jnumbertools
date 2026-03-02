@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
@@ -68,9 +69,7 @@ public final class MultisetPermutationBuilder<T> {
      * @throws IllegalArgumentException if {@code m} or {@code start} is negative
      */
     public MultisetPermutationMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        if (m.signum() <= 0 || start.signum() < 0) {
-            throw new IllegalArgumentException("Index 'm' should be > 0  and 'start' must be non-negative");
-        }
+        EveryMthIterable.validateLexOrderMthParams(m,start);
         return new MultisetPermutationMth<>(options, m, start, calculator);
     }
 

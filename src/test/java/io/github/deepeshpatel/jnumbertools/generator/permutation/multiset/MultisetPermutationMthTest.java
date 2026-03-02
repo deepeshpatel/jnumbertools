@@ -48,7 +48,7 @@ public class MultisetPermutationMthTest {
         map.put("B", 1);
         var exception = assertThrows(IllegalArgumentException.class, () ->
                 permutation.multiset(map).lexOrderMth(0, 1));
-        assertTrue(exception.getMessage().contains("Index 'm' should be > 0  and 'start' must be non-negative"));
+        assertEquals(incrementErrMsg,exception.getMessage());
     }
 
     @Test

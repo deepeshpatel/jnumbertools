@@ -49,7 +49,6 @@ public class FreqVector {
      *
      * @param r the size of the combination (rᵣ); must be non-negative
      * @param n the number of distinct keys (nₙ); must be positive
-     * @return a new FreqVector instance
      * @throws IllegalArgumentException if rᵣ is negative or nₙ is non-positive
      */
     public FreqVector(int r, int n) {
@@ -63,8 +62,7 @@ public class FreqVector {
     /**
      * Constructs a frequency vector by copying an existing one.
      *
-     * @param freqVector the FreqVector to copy
-     * @return a new FreqVector instance with the same state
+     * @param freqVector the FreqVector to copy (must not be null)
      */
     public FreqVector(FreqVector freqVector) {
         this.r = freqVector.r;

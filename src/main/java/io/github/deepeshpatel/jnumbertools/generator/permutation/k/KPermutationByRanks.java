@@ -49,7 +49,6 @@ public class KPermutationByRanks<T> extends AbstractKPermutation<T> {
      * @param k the size of each permutation (kₖ); must be between 0 and nₙ
      * @param ranks an iterable of 0-based rank numbers (0 ≤ rank < Pₙ,ₖ)
      * @param calculator utility for combinatorial calculations
-     * @return a new KPermutationByRanks instance
      * @throws IllegalArgumentException if kₖ is negative, exceeds nₙ, or sequence contains invalid ranks
      */
     public KPermutationByRanks(List<T> elements, int k, Iterable<BigInteger> ranks, Calculator calculator) {

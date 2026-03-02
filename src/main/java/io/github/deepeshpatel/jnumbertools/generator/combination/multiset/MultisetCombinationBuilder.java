@@ -6,6 +6,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
+import io.github.deepeshpatel.jnumbertools.generator.base.MultisetBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
@@ -26,7 +27,7 @@ import java.util.LinkedHashMap;
  * @param <T> the type of elements in the combinations; must implement {@link Comparable}
  * @author Deepesh Patel
  */
-public class MultisetCombinationBuilder<T> {
+public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
 
     private final LinkedHashMap<T, Integer> options;
     private final int r;
@@ -109,12 +110,6 @@ public class MultisetCombinationBuilder<T> {
      * @throws IllegalArgumentException if m ≤ 0 or start < 0
      */
     public MultisetCombinationByRanks<T> lexOrderMth(long m, long start) {
-        if (m <= 0) {
-            throw new IllegalArgumentException("Increment 'm' must be positive");
-        }
-        if (start < 0) {
-            throw new IllegalArgumentException("Start rank must be non-negative");
-        }
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
@@ -132,12 +127,7 @@ public class MultisetCombinationBuilder<T> {
      * @throws IllegalArgumentException if m ≤ 0 or start < 0
      */
     public MultisetCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
-        if (m.signum() <= 0) {
-            throw new IllegalArgumentException("Increment 'm' must be positive");
-        }
-        if (start.signum() < 0) {
-            throw new IllegalArgumentException("Start rank must be non-negative");
-        }
+        EveryMthIterable.validateLexOrderMthParams(m, start);
         BigInteger total = Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
         Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, total);
         return new MultisetCombinationByRanks<>(options, r, mthIterable);
@@ -154,10 +144,15 @@ public class MultisetCombinationBuilder<T> {
      * @return a {@link MultisetCombinationByRanks} for the custom sequence
      * @throws IllegalArgumentException if ranks is null
      */
-    public MultisetCombinationByRanks<T> withSequence(Iterable<BigInteger> ranks) {
+    public MultisetCombinationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
         if (ranks == null) {
             throw new IllegalArgumentException("Ranks sequence cannot be null");
         }
         return new MultisetCombinationByRanks<>(options, r, ranks);
+    }
+
+    @Override
+    public BigInteger count() {
+        return Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
     }
 }

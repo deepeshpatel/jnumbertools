@@ -32,7 +32,6 @@ public abstract class AbstractKPermutation<T> extends AbstractGenerator<T> {
      *
      * @param elements the list of elements from which permutations are generated
      * @param k the size of the subset to permute (kₖ); must be between 0 and elements.size()
-     * @return a new AbstractKPermutation instance
      * @throws IllegalArgumentException if kₖ is negative or exceeds the input list size
      */
     protected AbstractKPermutation(List<T> elements, int k) {

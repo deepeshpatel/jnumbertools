@@ -45,7 +45,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      * Constructs a ConstrainedProductBuilder with an initial combination of size {@code n}.
      *
      * @param n          the size of the initial combinations
-     * @param elements   the list of elements to create combinations from (may be null or empty)
+     * @param elements   the list of elements to create combinations from (null and empty allowed )
      * @param calculator the calculator used for combinatorial computations
      */
     public ConstrainedProductBuilder(int n, List<?> elements, Calculator calculator) {
@@ -58,7 +58,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      * Adds a distinct combination of the specified quantity to the builder.
      *
      * @param quantity the size of the distinct combinations
-     * @param elements the list of elements to create combinations from (may be null or empty)
+     * @param elements the list of elements to create combinations from (null and empty allowed)
      * @return the current instance of ConstrainedProductBuilder for method chaining
      */
     public ConstrainedProductBuilder andDistinct(int quantity, List<?> elements) {
@@ -71,7 +71,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      * Adds a multi-select (repetitive) combination of the specified quantity to the builder.
      *
      * @param quantity the size of the multi-select combinations
-     * @param elements the list of elements to create combinations from (may be null or empty)
+     * @param elements the list of elements to create combinations from (null and empty allowed)
      * @return the current instance of ConstrainedProductBuilder for method chaining
      */
     public ConstrainedProductBuilder andMultiSelect(int quantity, List<?> elements) {
@@ -85,28 +85,13 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      *
      * @param from     the minimum size of the subsets
      * @param to       the maximum size of the subsets
-     * @param elements the list of elements to create subsets from (may be null or empty)
+     * @param elements the list of elements to create subsets from (null and empty allowed)
      * @return the current instance of ConstrainedProductBuilder for method chaining
      */
     public ConstrainedProductBuilder andInRange(int from, int to, List<?> elements) {
         elements = elements == null ? Collections.emptyList() : elements;
         builders.add(new Subsets(calculator).of(elements).inRange(from, to));
         return this;
-    }
-
-    /**
-     * Returns the total number of possible products.
-     *
-     * @return the count of products as a BigInteger
-     */
-    @Override
-    public BigInteger count() {
-        if (builders.isEmpty() || builders.stream().allMatch(b -> b.count().equals(BigInteger.ZERO))) {
-            return BigInteger.ONE;
-        }
-        return builders.stream()
-                .map(Builder::count)
-                .reduce(BigInteger.ONE, BigInteger::multiply);
     }
 
     /**
@@ -128,19 +113,9 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      */
     @Override
     public CartesianProductByRanks<Object> lexOrderMth(BigInteger m, BigInteger start) {
+        EveryMthIterable.validateLexOrderMthParams(m, start);
         BigInteger maxCount = count();
         return new CartesianProductByRanks((List<Builder<Object>>) (List) builders, new EveryMthIterable(start, m, maxCount));
-    }
-
-    /**
-     * Convenience method for lexOrderMth using long values.
-     *
-     * @param m     the interval to select every mᵗʰ product
-     * @param start the starting position
-     * @return a CartesianProductByRanks for the specified intervals
-     */
-    public CartesianProductByRanks<Object> lexOrderMth(long m, long start) {
-        return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
     /**
@@ -167,6 +142,21 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      */
     public CartesianProductByRanks<Object> byRanks(Iterable<BigInteger> ranks) {
         return new CartesianProductByRanks<>((List<Builder<Object>>)(List<?>) builders, ranks);
+    }
+
+    /**
+     * Returns the total number of possible products.
+     *
+     * @return the count of products as a BigInteger
+     */
+    @Override
+    public BigInteger count() {
+        if (builders.isEmpty() || builders.stream().allMatch(b -> b.count().equals(BigInteger.ZERO))) {
+            return BigInteger.ONE;
+        }
+        return builders.stream()
+                .map(Builder::count)
+                .reduce(BigInteger.ONE, BigInteger::multiply);
     }
 
     /**
@@ -248,7 +238,14 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
             throw new UnsupportedOperationException("EmptyBuilder does not support rank-based generation");
         }
 
-        //return m.equals(BigInteger.ZERO) ? Collections.singletonList(Collections.emptyList()) : Collections.emptyList();
+        @Override
+        public StreamableIterable<Object> choice(int sampleSize) {
+            return null;
+        }
 
+        @Override
+        public StreamableIterable<Object> sample(int sampleSize) {
+            return null;
+        }
     }
 }

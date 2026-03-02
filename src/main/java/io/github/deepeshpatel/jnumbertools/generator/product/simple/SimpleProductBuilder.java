@@ -40,7 +40,7 @@ public final class SimpleProductBuilder implements Builder<Object> {
 
     /**
      * Constructs a SimpleProductBuilder with an initial list of elements.
-     * @param elements   the initial list of elements (may be null or empty)
+     * @param elements   the initial list of elements (null and empty allowed)
      */
     public SimpleProductBuilder(List<?> elements) {
         elements = elements == null ? Collections.emptyList() : elements;
@@ -51,7 +51,7 @@ public final class SimpleProductBuilder implements Builder<Object> {
     /**
      * Adds a new list of elements to the product.
      *
-     * @param elements the list of elements to add (may be null or empty)
+     * @param elements the list of elements to add (null and empty allowed)
      * @return the current instance of SimpleProductBuilder for method chaining
      */
     public SimpleProductBuilder and(List<?> elements) {
@@ -69,21 +69,6 @@ public final class SimpleProductBuilder implements Builder<Object> {
      */
     public SimpleProductBuilder and(Object... elements) {
         return and(List.of(elements));
-    }
-
-    /**
-     * Returns the total number of possible products.
-     *
-     * @return the count of products as a BigInteger
-     */
-    @Override
-    public BigInteger count() {
-        if (allLists.isEmpty() || allLists.stream().allMatch(List::isEmpty)) {
-            return BigInteger.ONE;
-        }
-        return allLists.stream()
-                .map(list -> BigInteger.valueOf(list.size()))
-                .reduce(BigInteger.ONE, BigInteger::multiply);
     }
 
     /**
@@ -105,19 +90,9 @@ public final class SimpleProductBuilder implements Builder<Object> {
      */
     @Override
     public StreamableIterable<Object> lexOrderMth(BigInteger m, BigInteger start) {
+        EveryMthIterable.validateLexOrderMthParams(m, start);
         BigInteger maxCount = count();
         return new StreamableIteratorImpl<>(new CartesianProductByRanks<>(builders, new EveryMthIterable(start, m, maxCount)).iterator());
-    }
-
-    /**
-     * Convenience method for lexOrderMth using long values.
-     *
-     * @param m     the interval to select every mᵗʰ product
-     * @param start the starting position
-     * @return a StreamableIterable for the specified intervals
-     */
-    public StreamableIterable<Object> lexOrderMth(long m, long start) {
-        return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
     /**
@@ -183,6 +158,21 @@ public final class SimpleProductBuilder implements Builder<Object> {
     }
 
     /**
+     * Returns the total number of possible products.
+     *
+     * @return the count of products as a BigInteger
+     */
+    @Override
+    public BigInteger count() {
+        if (allLists.isEmpty() || allLists.stream().allMatch(List::isEmpty)) {
+            return BigInteger.ONE;
+        }
+        return allLists.stream()
+                .map(list -> BigInteger.valueOf(list.size()))
+                .reduce(BigInteger.ONE, BigInteger::multiply);
+    }
+
+    /**
      * A generator for simple products, extending AbstractGenerator.
      */
     private class SimpleProductGenerator extends AbstractGenerator<Object> {
@@ -201,67 +191,77 @@ public final class SimpleProductBuilder implements Builder<Object> {
     }
 
     /**
-         * A builder that wraps a single list as a set of single-element combinations.
-         */
-        private record SingleListBuilder(List<?> elements) implements Builder<Object> {
-            private SingleListBuilder(List<?> elements) {
-                this.elements = elements != null ? elements : Collections.emptyList();
-            }
-
-            @Override
-            public BigInteger count() {
-                return BigInteger.valueOf(elements.size());
-            }
-
-            @Override
-            public StreamableIterable<Object> lexOrder() {
-                return new AbstractGenerator<>(Collections.emptyList()) {
-                    @Override
-                    public Iterator<List<Object>> iterator() {
-                        List<List<Object>> result = new ArrayList<>();
-                        for (Object e : elements) {
-                            result.add(List.of(e));
-                        }
-                        return result.iterator();
-                    }
-                };
-            }
-
-            @Override
-            public StreamableIterable<Object> lexOrderMth(BigInteger m, BigInteger start) {
-                return new StreamableIteratorImpl<>(new Iterator<>() {
-                    private final Iterator<BigInteger> indexIterator =
-                            new EveryMthIterable(start, m, BigInteger.valueOf(elements.size())).iterator();
-
-                    @Override
-                    public boolean hasNext() {
-                        return indexIterator.hasNext();
-                    }
-
-                    @Override
-                    public List<Object> next() {
-                        BigInteger index = indexIterator.next();
-                        return List.of(elements.get(index.intValue()));
-                    }
-                });
-            }
-
-            @Override
-            public StreamableIterable<Object> byRanks(Iterable<BigInteger> ranks) {
-                return new StreamableIteratorImpl<>(new Iterator<>() {
-                    private final Iterator<BigInteger> rankIterator = ranks.iterator();
-
-                    @Override
-                    public boolean hasNext() {
-                        return rankIterator.hasNext();
-                    }
-
-                    @Override
-                    public List<Object> next() {
-                        BigInteger index = rankIterator.next();
-                        return List.of(elements.get(index.intValue()));
-                    }
-                });
-            }
+     * A builder that wraps a single list as a set of single-element combinations.
+    */
+    private record SingleListBuilder(List<?> elements) implements Builder<Object> {
+        private SingleListBuilder(List<?> elements) {
+            this.elements = elements != null ? elements : Collections.emptyList();
         }
+
+        @Override
+        public BigInteger count() {
+            return BigInteger.valueOf(elements.size());
+        }
+
+        @Override
+        public StreamableIterable<Object> lexOrder() {
+            return new AbstractGenerator<>(Collections.emptyList()) {
+                @Override
+                public Iterator<List<Object>> iterator() {
+                    List<List<Object>> result = new ArrayList<>();
+                    for (Object e : elements) {
+                        result.add(List.of(e));
+                    }
+                    return result.iterator();
+                }
+            };
+        }
+
+        @Override
+        public StreamableIterable<Object> lexOrderMth(BigInteger m, BigInteger start) {
+            return new StreamableIteratorImpl<>(new Iterator<>() {
+                private final Iterator<BigInteger> indexIterator =
+                        new EveryMthIterable(start, m, BigInteger.valueOf(elements.size())).iterator();
+
+                @Override
+                public boolean hasNext() {
+                    return indexIterator.hasNext();
+                }
+
+                @Override
+                public List<Object> next() {
+                    BigInteger index = indexIterator.next();
+                    return List.of(elements.get(index.intValue()));
+                }
+            });
+        }
+
+        @Override
+        public StreamableIterable<Object> byRanks(Iterable<BigInteger> ranks) {
+            return new StreamableIteratorImpl<>(new Iterator<>() {
+                private final Iterator<BigInteger> rankIterator = ranks.iterator();
+
+                @Override
+                public boolean hasNext() {
+                    return rankIterator.hasNext();
+                }
+
+                @Override
+                public List<Object> next() {
+                    BigInteger index = rankIterator.next();
+                    return List.of(elements.get(index.intValue()));
+                }
+            });
+        }
+
+        @Override
+        public StreamableIterable<Object> choice(int sampleSize) {
+            return null;
+        }
+
+        @Override
+        public StreamableIterable<Object> sample(int sampleSize) {
+            return null;
+        }
+    }
 }

@@ -56,6 +56,24 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
     }
 
     /**
+     * Creates a generator for every mᵗʰ repetitive combination in lexicographical order, starting from a given rank.
+     * <p>
+     * Uses {@link EveryMthIterable} to produce ranks: start, start+m, start+2m, ..., up to ⁿ⁺ᵣ⁻¹Cᵣ - 1.
+     * </p>
+     *
+     * @param m     the increment between ranks (m > 0)
+     * @param start the starting rank (0 ≤ start < ⁿ⁺ᵣ⁻¹Cᵣ)
+     * @return a {@link RepetitiveCombinationByRanks} for the sequence
+     * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿ⁺ᵣ⁻¹Cᵣ
+     */
+    public RepetitiveCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
+        EveryMthIterable.validateLexOrderMthParams(m,start);
+        BigInteger nCrRepetitive = calculator.nCrRepetitive(elements.size(), size);
+        Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, nCrRepetitive);
+        return new RepetitiveCombinationByRanks<>(elements, size, mthIterable, calculator);
+    }
+
+    /**
      * Creates a generator that samples repetitive combinations randomly without replacement.
      * <p>
      * Uses {@link BigIntegerSample} to ensure each combination in the sample is distinct.
@@ -83,38 +101,6 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
     public RepetitiveCombinationByRanks<T> choice(int sampleSize) {
         BigInteger nCrRepetitive = calculator.nCrRepetitive(elements.size(), size);
         return new RepetitiveCombinationByRanks<>(elements, size, new BigIntegerChoice(nCrRepetitive, sampleSize), calculator);
-    }
-
-    /**
-     * Creates a generator for every mᵗʰ repetitive combination in lexicographical order, starting from a given rank.
-     * <p>
-     * Generates ranks: start, start+m, start+2m, ..., up to ⁿ⁺ᵣ⁻¹Cᵣ - 1.
-     * </p>
-     *
-     * @param m     the increment between ranks (m > 0)
-     * @param start the starting rank (0 ≤ start < ⁿ⁺ᵣ⁻¹Cᵣ)
-     * @return a {@link RepetitiveCombinationByRanks} for the sequence
-     * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿ⁺ᵣ⁻¹Cᵣ
-     */
-    public RepetitiveCombinationByRanks<T> lexOrderMth(long m, long start) {
-        return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
-    }
-
-    /**
-     * Creates a generator for every mᵗʰ repetitive combination in lexicographical order, starting from a given rank.
-     * <p>
-     * Uses {@link EveryMthIterable} to produce ranks: start, start+m, start+2m, ..., up to ⁿ⁺ᵣ⁻¹Cᵣ - 1.
-     * </p>
-     *
-     * @param m     the increment between ranks (m > 0)
-     * @param start the starting rank (0 ≤ start < ⁿ⁺ᵣ⁻¹Cᵣ)
-     * @return a {@link RepetitiveCombinationByRanks} for the sequence
-     * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿ⁺ᵣ⁻¹Cᵣ
-     */
-    public RepetitiveCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
-        BigInteger nCrRepetitive = calculator.nCrRepetitive(elements.size(), size);
-        Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, nCrRepetitive);
-        return new RepetitiveCombinationByRanks<>(elements, size, mthIterable, calculator);
     }
 
     /**

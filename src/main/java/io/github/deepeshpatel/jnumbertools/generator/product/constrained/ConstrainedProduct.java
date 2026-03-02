@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * A class that generates the Cartesian product of a list of lists of lists.
+ * A class that generates the Cartesian product of a list of, lists of lists.
  * <p>
- * This class takes a list of lists of lists, where each inner list represents a set of elements
+ * This class takes a list of, lists of lists, where each inner list represents a set of elements
  * (e.g., combinations or subsets), and generates the Cartesian product of these sets in lexicographical order.
  * </p>
  *
@@ -23,9 +23,9 @@ public class ConstrainedProduct implements Iterable<List<Object>> {
     private final List<List<List<Object>>> all;
 
     /**
-     * Constructs a ConstrainedProduct with the given list of lists of lists.
+     * Constructs a ConstrainedProduct with the given list of, lists of lists.
      *
-     * @param all the list of lists of lists to generate the Cartesian product from
+     * @param all the list of, lists of lists to generate the Cartesian product from
      */
     public ConstrainedProduct(List<List<List<Object>>> all) {
         this.all = all;

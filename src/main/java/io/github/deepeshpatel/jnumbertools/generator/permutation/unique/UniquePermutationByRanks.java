@@ -24,9 +24,16 @@ import java.util.NoSuchElementException;
  * yield [A, B, C], [A, C, B], [B, A, C]. Supports lexicographical order (all or mᵗʰ), single-swap,
  * and sampling with/without replacement.
  * </p>
+ * <p>
+ * <strong>This class is intended for internal use via {@link UniquePermutationBuilder}.</strong>
+ * All parameter validation (non-negative ranks, ranks < n!, etc.) is performed in the builder methods
+ * ({@code lexOrderMth}, {@code byRanks}, {@code choice}, {@code sample}) to ensure fail-fast behavior.
+ * Direct instantiation of this class bypasses validation and is not part of the public API.
+ * </p>
  *
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel
+ * @see UniquePermutationBuilder
  */
 public final class UniquePermutationByRanks<T> extends AbstractGenerator<T> {
 
@@ -35,7 +42,6 @@ public final class UniquePermutationByRanks<T> extends AbstractGenerator<T> {
 
     /**
      * Constructs a generator for unique permutations based on a rank sequence.
-     *
      * @param elements   the list of elements to permute; must not be null
      * @param ranks      the sequence of ranks to generate permutations; each rank must be in [0, n!)
      * @param calculator utility for computing factorials and permutations
@@ -49,7 +55,6 @@ public final class UniquePermutationByRanks<T> extends AbstractGenerator<T> {
 
     /**
      * Returns an iterator over permutations specified by the rank sequence.
-     *
      * @return an iterator over lists representing permutations; empty if the input list is empty
      */
     @Override

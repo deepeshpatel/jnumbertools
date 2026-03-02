@@ -44,7 +44,6 @@ public final class MultisetPermutation<T> extends AbstractMultisetPermutation<T>
      * @param multiset a {@code LinkedHashMap} mapping elements to their frequency counts; must not be null or empty,
      *                 with insertion order determining lexicographical order
      * @param calculator utility for computing permutations and factorials
-     * @return a new MultisetPermutation instance
      * @throws IllegalArgumentException if multiset is null, empty, contains negative frequencies, or sum is zero
      */
     MultisetPermutation(LinkedHashMap<T, Integer> multiset, Calculator calculator) {

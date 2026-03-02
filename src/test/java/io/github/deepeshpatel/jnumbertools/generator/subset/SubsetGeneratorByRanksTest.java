@@ -12,7 +12,8 @@ import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.*;
+import static io.github.deepeshpatel.jnumbertools.TestBase.A_B_C_D;
+import static io.github.deepeshpatel.jnumbertools.TestBase.subsets;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -21,53 +22,41 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SubsetGeneratorByRanksTest {
 
     @Nested
-    class Mth {
+    class CustomRanks {
+
         @Test
-        void shouldGenerateCorrectMthValueForAllSubsets() {
+        void shouldGenerateSingleRank() {
+            var builder = subsets.of(A_B_C_D).inRange(2, 3);
+            var result = builder.byRanks(List.of(BigInteger.valueOf(3))).stream().toList();
+            assertEquals(1, result.size());
+            assertEquals(List.of('B', 'C'), result.get(0));
+        }
+
+        @Test
+        void shouldGenerateMultipleCustomRanks() {
             var builder = subsets.of(A_B_C_D).all();
-            int m = 5;
-            int start = 3;
-            var expected = List.of(List.of('C'), List.of('B', 'C'), List.of('A', 'C', 'D'));
-            var result = builder.lexOrderMth(m, start).stream().toList();
-            assertIterableEquals(expected, result);
+            var ranks = List.of(BigInteger.ZERO, BigInteger.valueOf(3), BigInteger.valueOf(10));
+            var result = builder.byRanks(ranks).stream().toList();
+            assertEquals(3, result.size());
+            assertEquals(List.of(), result.get(0));           // rank 0 = empty
+            assertEquals(List.of('C'), result.get(1));        // rank 3 = [C]
+            assertEquals(List.of('C', 'D'), result.get(2)); // rank 10 = [A,B,D]
         }
 
         @Test
-        void shouldGenerateCorrectMthValueForRangedSubsets() {
+        void shouldThrowErrorForOutOfRangeRank() {
             var builder = subsets.of(A_B_C_D).inRange(2, 3);
-            int m = 5;
-            int start = 3;
-            var expected = List.of(List.of('B', 'C'), List.of('A', 'C', 'D'));
-            var result = builder.lexOrderMth(m, start).stream().toList();
-            assertIterableEquals(expected, result);
+            var error = assertThrows(IllegalArgumentException.class, () ->
+                    builder.byRanks(List.of(BigInteger.valueOf(15))).stream().toList()
+            );
+            assertEquals(error.getMessage(), "start must be < total subsets in range (0-based)");
         }
 
         @Test
-        void shouldGenerateEmptyForStartGreaterThanTotal() {
-            var builder = subsets.of(A_B_C_D).inRange(2, 3);
-            var result = builder.lexOrderMth(5, 10).stream().toList();
+        void shouldWorkWithEmptyRankSequence() {
+            var builder = subsets.of(A_B_C_D).all();
+            var result = builder.byRanks(List.of()).stream().toList();
             assertTrue(result.isEmpty());
-        }
-
-        @Test
-        void shouldGenerateCorrectWithLargeM() {
-            var builder = subsets.of(A_B_C_D).all();
-            var result = builder.lexOrderMth(10, 2).stream().toList();
-            assertIterableEquals(List.of(List.of('B'), List.of('A', 'B', 'D')), result);
-        }
-
-        @Test
-        void shouldThrowOnNegativeM() {
-            var builder = subsets.of(A_B_C_D).inRange(1, 3);
-            assertThrows(IllegalArgumentException.class, () -> builder.lexOrderMth(BigInteger.valueOf(-1), BigInteger.ZERO));
-        }
-
-        @Test
-        void shouldGenerateForMEqualsOne() {
-            var builder = subsets.of(A_B_C_D).inRange(2, 2);
-            var result = builder.lexOrderMth(1, 0).stream().toList();
-            assertEquals(6, result.size());
-            assertIterableEquals(List.of(List.of('A', 'B'), List.of('A', 'C'), List.of('A', 'D'), List.of('B', 'C'), List.of('B', 'D'), List.of('C', 'D')), result);
         }
     }
 
