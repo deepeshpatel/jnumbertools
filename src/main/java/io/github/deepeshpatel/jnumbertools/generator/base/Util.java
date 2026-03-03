@@ -6,6 +6,11 @@ package io.github.deepeshpatel.jnumbertools.generator.base;
 
 import java.util.*;
 
+/**
+ * Utility class providing helper methods for combinatorial generators.
+ *
+ * @author Deepesh Patel
+ */
 public class Util {
     /**
      * Returns an iterator over a collection that contains a single element: an empty list.

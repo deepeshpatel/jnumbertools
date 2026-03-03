@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
@@ -19,11 +20,15 @@ import java.util.LinkedHashMap;
  * It supports generating all permutations in lexicographical order or retrieving a specific mᵗʰ permutation directly without
  * computing all preceding ones.
  * </p>
+ * <p>
+ * This builder is immutable and thread-safe. It can be safely shared across threads
+ * without synchronization.
+ * </p>
  *
  * @param <T> the type of elements in the multiset, must implement {@link Comparable}
  * @author Deepesh Patel
  */
-public final class MultisetPermutationBuilder<T> {
+public final class MultisetPermutationBuilder<T> implements Builder<T> {
 
     private final LinkedHashMap<T, Integer> options;
     private final Calculator calculator;
@@ -150,6 +155,24 @@ public final class MultisetPermutationBuilder<T> {
      * @throws IllegalStateException if no generation strategy was selected
      */
     public MultisetPermutationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
+        EveryMthIterable.validateByRanksParams(ranks);
         return new MultisetPermutationByRanks<>(options, ranks, calculator);
+    }
+
+    /**
+     * Returns the total number of unique multiset permutations.
+     *
+     * @return the total count as a {@link BigInteger}
+     */
+    public BigInteger count() {
+        return calculator.multinomial(options.values().stream().mapToInt(Integer::intValue).toArray());
+    }
+
+    @Override
+    public String toString() {
+        return "MultisetPermutationBuilder{" +
+                "options=" + options +
+                ", count=" + count() +
+                '}';
     }
 }

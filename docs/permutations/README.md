@@ -164,7 +164,7 @@ JNumberTools.permutations()
 ```
 
 #### 2.2 Every m-th multiset permutation
-Generates every m<sup>th</sup> multiset permutation from a given start index. This API directly generates the desired permutation without searching a sorted list, making it very efficient. There are a total of (∑ ai × si)! / Π(si!) such permutations.
+Generates every m<sup>th</sup> multiset permutation from a given start index. This API directly generates the desired permutation without searching a sorted list, making it very efficient. There are a total of (∑ aᵢ × sᵢ)!/Π(sᵢ!) such permutations.
 
 ```java
 // Every 3rd permutation of 2 Apple, 1 Banana, and 3 Guava, starting from 5th (i.e., 5th, 8th, 11th...)
@@ -247,7 +247,7 @@ JNumberTools.permutations()
 // Generates every 3rd permutation starting from 0th of size 3 out of a list of n elements
 JNumberTools.permutations()
     .nPk(2, "A", "B", "C", "D", "E")
-    .lexOrder()
+    .lexOrderMth(3, 0)
     .stream().toList();
 ```
 

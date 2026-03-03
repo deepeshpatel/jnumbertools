@@ -12,8 +12,8 @@ import java.util.stream.IntStream;
 /**
  * An iterator that generates unique permutations of integer indices in lexicographical order.
  * <p>
- * This iterator produces all nₙ! permutations of indices {0, 1, ..., nₙ−1} (e.g., [0, 1, 2], [0, 2, 1], etc.),
- * where nₙ is the input size. These can be mapped to actual elements by higher-level classes. For example,
+ * This iterator produces all n! permutations of indices {0, 1, ..., n−1} (e.g., [0, 1, 2], [0, 2, 1], etc.),
+ * where n is the input size. These can be mapped to actual elements by higher-level classes. For example,
  * with size=3, it generates:
  * <pre>
  * [0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]
@@ -31,10 +31,10 @@ public final class UniquePermutationLexIndicesIterator implements Iterator<int[]
     /**
      * Constructs an iterator for permutations of indices of the specified size.
      * <p>
-     * Initializes with the identity permutation: [0, 1, 2, ..., nₙ−1].
+     * Initializes with the identity permutation: [0, 1, 2, ..., n−1].
      * </p>
      *
-     * @param size the number of indices to permute (nₙ); must be non-negative
+     * @param size the number of indices to permute (n); must be non-negative
      * @return a new UniquePermutationLexIndicesIterator instance
      * @throws IllegalArgumentException if size is negative
      */
@@ -45,7 +45,7 @@ public final class UniquePermutationLexIndicesIterator implements Iterator<int[]
     /**
      * Constructs an iterator with a specified starting permutation.
      *
-     * @param startingPermutation the initial permutation of indices; must be a valid permutation of {0, 1, ..., nₙ−1}
+     * @param startingPermutation the initial permutation of indices; must be a valid permutation of {0, 1, ..., n−1}
      * @return a new UniquePermutationLexIndicesIterator instance
      * @throws IllegalArgumentException if startingPermutation is invalid
      */

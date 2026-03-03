@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * An iterator for generating unique permutations of a list of elements.
  * <p>
- * This iterator generates all nₙ! unique permutations of nₙ elements in lexicographical order by
+ * This iterator generates all n! unique permutations of n elements in lexicographical order by
  * converting permutations of indices (produced by {@link UniquePermutationLexIndicesIterator}) into
  * permutations of the actual elements. It is especially useful for generating permutations without
  * manually handling index arrays.

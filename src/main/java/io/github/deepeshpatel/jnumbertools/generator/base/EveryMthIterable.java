@@ -48,7 +48,6 @@ public class EveryMthIterable implements Iterable<BigInteger> {
      * @param increment   the step size between ranks (should be > 0)
      * @param upperBound  the exclusive upper limit for ranks (should be ≥ start)
      * @see EveryMthIterable#validateLexOrderMthParams(BigInteger, BigInteger)
-     * @author Deepesh Patel
      */
     public EveryMthIterable(BigInteger start, BigInteger increment, BigInteger upperBound) {
         this.start = start;
@@ -99,6 +98,23 @@ public class EveryMthIterable implements Iterable<BigInteger> {
         }
         if (start == null || start.signum() < 0) {
             throw new IllegalArgumentException("Start position must be non-negative (start >= 0)");
+        }
+    }
+
+    /**
+     * Validates parameters commonly used in byRanks(ranks) calls.
+     * <p>
+     * Builders should call this method before creating a generator
+     * to ensure fail-fast validation for null parameters only.
+     * Invalid rank values (negative, out of bounds) will be caught
+     * naturally during iteration without performance overhead.
+     * </p>
+     * @param ranks iterable of ranks to validate
+     * @throws IllegalArgumentException if ranks is null
+     */
+    public static void validateByRanksParams(Iterable<BigInteger> ranks) {
+        if (ranks == null) {
+            throw new IllegalArgumentException("Ranks sequence cannot be null");
         }
     }
 }

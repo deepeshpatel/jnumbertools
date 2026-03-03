@@ -21,12 +21,16 @@ import java.util.List;
  * can generate every mᵗʰ subset starting from a given position.
  * </p>
  * <p>
+ * This builder is immutable and thread-safe. It can be safely shared across threads
+ * without synchronization. The {@code all()} and {@code inRange()} methods return new instances
+ * rather than modifying the current instance.
+ * </p>
+ * <p>
  * <strong>Note:</strong> This builder is intended to be used to construct subset generators, and its associated
  * generator classes (which extend {@code AbstractGenerator}) should be obtained via this builder.
  * </p>
  *
  * @param <T> the type of elements in the subsets
- * @author Deepesh Patel
  * @author Deepesh Patel
  * @see SubsetGeneratorByRanks
  * @see EveryMthIterable
@@ -37,8 +41,8 @@ public class SubsetBuilder<T> implements Builder<T> {
 
     private final List<T> elements;
     private final Calculator calculator;
-    private int from = -1;
-    private int to = -1;
+    private final int from;
+    private final int to;
 
     /**
      * Constructs a {@code SubsetBuilder} with the specified elements and calculator.
@@ -49,17 +53,27 @@ public class SubsetBuilder<T> implements Builder<T> {
     public SubsetBuilder(List<T> elements, Calculator calculator) {
         this.elements = elements;
         this.calculator = calculator;
+        this.from = -1;
+        this.to = -1;
+    }
+
+    /**
+     * Private constructor for creating new instances with range specified.
+     */
+    private SubsetBuilder(List<T> elements, Calculator calculator, int from, int to) {
+        this.elements = elements;
+        this.calculator = calculator;
+        this.from = from;
+        this.to = to;
     }
 
     /**
      * Configures the builder to generate all subsets of the given elements.
      *
-     * @return this builder instance
+     * @return a new SubsetBuilder instance configured for all subsets
      */
     public SubsetBuilder<T> all() {
-        this.from = 0;
-        this.to = elements.size();
-        return this;
+        return new SubsetBuilder<>(elements, calculator, 0, elements.size());
     }
 
     /**
@@ -67,16 +81,14 @@ public class SubsetBuilder<T> implements Builder<T> {
      *
      * @param from the minimum size of subsets to generate (inclusive)
      * @param to   the maximum size of subsets to generate (inclusive)
-     * @return this builder instance
+     * @return a new SubsetBuilder instance configured for the specified range
      * @throws IllegalArgumentException if {@code to} is less than {@code from}
      */
     public SubsetBuilder<T> inRange(int from, int to) {
         if (to < from) {
             throw new IllegalArgumentException("parameter 'to' must be greater than or equal to parameter 'from'");
         }
-        this.from = from;
-        this.to = to;
-        return this;
+        return new SubsetBuilder<>(elements, calculator, from, to);
     }
 
     /**
@@ -112,6 +124,7 @@ public class SubsetBuilder<T> implements Builder<T> {
         if (from < 0 || to < 0) {
             throw new IllegalStateException("Must specify range via inRange() or all()");
         }
+        EveryMthIterable.validateByRanksParams(ranks);
         return new SubsetGeneratorByRanks<>(from, to, ranks, elements, calculator);
     }
 
@@ -191,6 +204,7 @@ public class SubsetBuilder<T> implements Builder<T> {
                 "elements=" + elements +
                 ", from=" + from +
                 ", to=" + to +
+                ", count=" + (from >= 0 && to >= 0 ? count() : "unspecified") +
                 '}';
     }
 }

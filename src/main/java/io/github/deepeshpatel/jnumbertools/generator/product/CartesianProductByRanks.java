@@ -79,7 +79,7 @@ public class CartesianProductByRanks<T> implements StreamableIterable<T> {
             }
             throw new IllegalArgumentException("Rank " + m + " is out of bounds [0, 1)");
         }
-        if (m.compareTo(BigInteger.ZERO) < 0 || m.compareTo(maxCount) >= 0) {
+        if (m.signum() < 0 || m.compareTo(maxCount) >= 0) {
             throw new IllegalArgumentException("Rank " + m + " is out of bounds [0, " + maxCount + ")");
         }
         Deque<T> output = new ArrayDeque<>();

@@ -16,6 +16,8 @@ import java.util.List;
  * It is optimized for frequent updates and index-based lookups using a cumulative frequency array,
  * enabling efficient operations in multiset combination algorithms.
  * </p>
+ *
+ * @author Deepesh Patel
  */
 public class FreqVector {
 

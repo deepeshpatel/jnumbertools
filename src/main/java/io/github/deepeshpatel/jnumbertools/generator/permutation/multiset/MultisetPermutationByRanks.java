@@ -41,6 +41,7 @@ import java.util.*;
 public final class MultisetPermutationByRanks<T> extends AbstractMultisetPermutation<T> {
 
     private final Iterable<BigInteger> ranks;
+    private final BigInteger totalPermutations;
 
     /**
      * Constructs a multiset permutation generator for specific ranks.
@@ -53,6 +54,7 @@ public final class MultisetPermutationByRanks<T> extends AbstractMultisetPermuta
     public MultisetPermutationByRanks(LinkedHashMap<T, Integer> multiset, Iterable<BigInteger> ranks, Calculator calculator) {
         super(multiset, calculator);
         this.ranks = ranks;
+        this.totalPermutations = getTotalPermutations();
     }
 
     @Override
@@ -78,10 +80,9 @@ public final class MultisetPermutationByRanks<T> extends AbstractMultisetPermuta
                 throw new NoSuchElementException("No more permutations available in rank sequence");
             }
             BigInteger rank = rankIterator.next();
-            if (rank.compareTo(getTotalPermutations()) >= 0) {
-                throw new IllegalArgumentException("Rank " + rank + " exceeds total permutations " + getTotalPermutations());
+            if (rank.signum() < 0 || rank.compareTo(totalPermutations) >= 0) {
+                throw new IllegalArgumentException("Rank " + rank + " is out of bounds [0, " + totalPermutations + ")");
             }
-
             return generatePermutationFromRank(rank);
         }
 

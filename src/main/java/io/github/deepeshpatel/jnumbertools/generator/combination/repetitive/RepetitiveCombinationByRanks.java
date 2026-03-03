@@ -29,6 +29,7 @@ public class RepetitiveCombinationByRanks<T> extends AbstractGenerator<T> {
     private final int r;
     private final Calculator calculator;
     private final Iterable<BigInteger> ranks;
+    private final BigInteger totalCombinations;
 
     /**
      * Constructs a generator for repetitive combinations based on a rank sequence.
@@ -47,6 +48,7 @@ public class RepetitiveCombinationByRanks<T> extends AbstractGenerator<T> {
         if (r < 0) {
             throw new IllegalArgumentException("Combination size (r) must be non-negative");
         }
+        totalCombinations = calculator.nCrRepetitive(elements.size(), r);
     }
 
     /**
@@ -89,6 +91,11 @@ public class RepetitiveCombinationByRanks<T> extends AbstractGenerator<T> {
         @Override
         public List<T> next() {
             BigInteger m = rankIterator.next();
+
+            if (m.signum() < 0 || m.compareTo(totalCombinations) >= 0) {
+                throw new IllegalArgumentException("Rank " + m + " is out of bounds [0, " + totalCombinations + ")");
+            }
+
             int[] indices = mthCombinationWithRepetition(m.longValueExact());
             return indicesToValues(indices);
         }

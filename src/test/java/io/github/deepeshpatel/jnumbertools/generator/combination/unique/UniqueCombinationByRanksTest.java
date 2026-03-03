@@ -4,6 +4,7 @@ import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -313,6 +314,7 @@ class UniqueCombinationByRanksTest {
 
         @Test
         void assertCount() {
+            // nCr with mᵗʰ: n!/(r!·(n−r)!)/m
             for (int n = 3; n < 6; n++) {
                 var input = Collections.nCopies(n, "A");
                 for (int increment = 1; increment <= 4; increment++) {
@@ -378,7 +380,83 @@ class UniqueCombinationByRanksTest {
                     .lexOrderMth(2, 3).stream().toList();
             assertIterableEquals(expected, output);
         }
+    }
 
+    @Nested
+    class ByRanksValidationTest {
+
+        @Test
+        void byRanks_withNullRanks_shouldThrowException() {
+            assertThrows(IllegalArgumentException.class, () -> {
+                combination.unique(3, 2, "A", "B", "C").byRanks(null);
+            }, "Null ranks should throw IllegalArgumentException");
+        }
+
+        @Test
+        void byRanks_withNegativeRank_shouldThrowException() {
+            // Note: This test demonstrates that negative ranks pass validation
+            // but cause exceptions during iteration
+            var result = combination.unique(3, 2, "A", "B", "C").byRanks(of(BigInteger.valueOf(-1)));
+
+            assertThrows(Exception.class, () -> {
+                result.stream().toList(); // Exception occurs during iteration
+            }, "Negative rank should throw exception during iteration");
+        }
+
+        @Test
+        void byRanks_withOutOfBoundRank_shouldThrowException() {
+            // Note: This test demonstrates that out-of-bounds ranks pass validation
+            // but cause exceptions during iteration
+            var result = combination.unique(3, 2, "A", "B", "C").byRanks(of(BigInteger.valueOf(1000000000)));
+
+            assertThrows(IllegalArgumentException.class, () -> {
+                result.stream().toList(); // Exception occurs during iteration
+            }, "Out-of-bounds rank should throw IllegalArgumentException during iteration");
+        }
+
+        @Test
+        void byRanks_withMixedValidInvalidRanks_shouldThrowException() {
+            // Note: This test demonstrates that mixed valid/invalid ranks pass validation
+            // but cause exceptions during iteration when invalid ranks are encountered
+            var result = combination.unique(3, 2, "A", "B", "C").byRanks(of(
+                    BigInteger.ZERO,        // valid
+                    BigInteger.valueOf(10), // invalid - out of bounds
+                    BigInteger.valueOf(-1)   // invalid - negative
+            ));
+
+            assertThrows(Exception.class, () -> {
+                result.stream().toList(); // Exception occurs during iteration
+            }, "Mixed valid/invalid ranks should throw exception during iteration");
+            //ArrayIndexOutOfBoundsException instead of IllegalArgumentException
+        }
+
+        @Test
+        void byRanks_withValidRanks_shouldWork() {
+            assertDoesNotThrow(() -> {
+                var result = combination.unique(3, 2, "A", "B", "C").byRanks(of(
+                        BigInteger.ZERO,
+                        BigInteger.ONE,
+                        BigInteger.valueOf(2)
+                ));
+                var combinations = result.stream().toList();
+                assertEquals(3, combinations.size());
+            });
+        }
+
+        @Test
+        void byRanks_withRandomValidRanks_shouldWork() {
+            assertDoesNotThrow(() -> {
+                // For n=4, r=2, total combinations = 6, valid ranks are 0-5
+                var result = combination.unique(4, 2, "A", "B", "C", "D").byRanks(of(
+                        BigInteger.valueOf(3),
+                        BigInteger.ZERO,
+                        BigInteger.valueOf(4),
+                        BigInteger.ONE
+                ));
+                var combinations = result.stream().toList();
+                assertEquals(4, combinations.size());
+            });
+        }
     }
 
 }

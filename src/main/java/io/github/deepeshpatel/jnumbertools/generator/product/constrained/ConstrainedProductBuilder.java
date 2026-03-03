@@ -29,6 +29,11 @@ import java.util.List;
  * or without replacement (via {@link #choice(int)} and {@link #sample(int)}).
  * </p>
  * <p>
+ * This builder is immutable and thread-safe. It can be safely shared across threads
+ * without synchronization. The builder methods return new instances rather than
+ * modifying the current instance.
+ * </p>
+ * <p>
  * Implements {@link Builder} to support future composition in complex combinatorial structures,
  * such as nested products or filtered generators. Uses {@code Object} to handle mixed element types.
  * </p>
@@ -38,7 +43,7 @@ import java.util.List;
 @SuppressWarnings({"unchecked"})
 public final class ConstrainedProductBuilder implements Builder<Object> {
 
-    private final List<Builder<?>> builders = new ArrayList<>();
+    private final List<Builder<?>> builders;
     private final Calculator calculator;
 
     /**
@@ -50,8 +55,17 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      */
     public ConstrainedProductBuilder(int n, List<?> elements, Calculator calculator) {
         this.calculator = calculator;
+        this.builders = new ArrayList<>();
         elements = elements == null ? Collections.emptyList() : elements;
         builders.add(elements.isEmpty() && n > 0 ? new EmptyBuilder() : new Combinations(calculator).unique(n, elements));
+    }
+
+    /**
+     * Private constructor for creating new instances with existing data.
+     */
+    private ConstrainedProductBuilder(List<Builder<?>> builders, Calculator calculator) {
+        this.builders = builders;
+        this.calculator = calculator;
     }
 
     /**
@@ -59,12 +73,13 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      *
      * @param quantity the size of the distinct combinations
      * @param elements the list of elements to create combinations from (null and empty allowed)
-     * @return the current instance of ConstrainedProductBuilder for method chaining
+     * @return a new instance of ConstrainedProductBuilder with the additional combination
      */
     public ConstrainedProductBuilder andDistinct(int quantity, List<?> elements) {
         elements = elements == null ? Collections.emptyList() : elements;
-        builders.add(elements.isEmpty() && quantity > 0 ? new EmptyBuilder() : new Combinations(calculator).unique(quantity, elements));
-        return this;
+        List<Builder<?>> newBuilders = new ArrayList<>(this.builders);
+        newBuilders.add(elements.isEmpty() && quantity > 0 ? new EmptyBuilder() : new Combinations(calculator).unique(quantity, elements));
+        return new ConstrainedProductBuilder(newBuilders, calculator);
     }
 
     /**
@@ -72,12 +87,13 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      *
      * @param quantity the size of the multi-select combinations
      * @param elements the list of elements to create combinations from (null and empty allowed)
-     * @return the current instance of ConstrainedProductBuilder for method chaining
+     * @return a new instance of ConstrainedProductBuilder with the additional combination
      */
     public ConstrainedProductBuilder andMultiSelect(int quantity, List<?> elements) {
         elements = elements == null ? Collections.emptyList() : elements;
-        builders.add(elements.isEmpty() && quantity > 0 ? new EmptyBuilder() : new Combinations(calculator).repetitive(quantity, elements));
-        return this;
+        List<Builder<?>> newBuilders = new ArrayList<>(this.builders);
+        newBuilders.add(elements.isEmpty() && quantity > 0 ? new EmptyBuilder() : new Combinations(calculator).repetitive(quantity, elements));
+        return new ConstrainedProductBuilder(newBuilders, calculator);
     }
 
     /**
@@ -86,12 +102,13 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      * @param from     the minimum size of the subsets
      * @param to       the maximum size of the subsets
      * @param elements the list of elements to create subsets from (null and empty allowed)
-     * @return the current instance of ConstrainedProductBuilder for method chaining
+     * @return a new instance of ConstrainedProductBuilder with the additional subset
      */
     public ConstrainedProductBuilder andInRange(int from, int to, List<?> elements) {
         elements = elements == null ? Collections.emptyList() : elements;
-        builders.add(new Subsets(calculator).of(elements).inRange(from, to));
-        return this;
+        List<Builder<?>> newBuilders = new ArrayList<>(this.builders);
+        newBuilders.add(new Subsets(calculator).of(elements).inRange(from, to));
+        return new ConstrainedProductBuilder(newBuilders, calculator);
     }
 
     /**
@@ -141,6 +158,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      *           as this performs a mixed-radix decomposition of the rank value
      */
     public CartesianProductByRanks<Object> byRanks(Iterable<BigInteger> ranks) {
+        EveryMthIterable.validateByRanksParams(ranks);
         return new CartesianProductByRanks<>((List<Builder<Object>>)(List<?>) builders, ranks);
     }
 
@@ -207,6 +225,14 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
             }
             return new ConstrainedProduct(all).iterator();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "ConstrainedProductBuilder{" +
+                "builders=" + builders +
+                ", count=" + count() +
+                '}';
     }
 
     /**

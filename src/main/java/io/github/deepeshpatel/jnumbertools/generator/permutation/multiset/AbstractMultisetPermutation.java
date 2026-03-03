@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -25,7 +26,7 @@ import java.util.stream.StreamSupport;
  * @param <T> the type of elements, must implement {@code Comparable} for sorting
  * @author Deepesh Patel
  */
-public abstract class AbstractMultisetPermutation<T> implements Iterable<List<T>> {
+public abstract class AbstractMultisetPermutation<T> implements StreamableIterable<T> {
 
     protected final List<T> elements;
     protected final int[] frequencies;

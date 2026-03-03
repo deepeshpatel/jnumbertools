@@ -15,6 +15,7 @@ public class RepetitivePermutationTest {
 
     @Test
     void assertCount(){
+        // nʳ permutations with repetition
         for(int n=1; n<3; n++) {
             var input = Collections.nCopies(n, "A");
             for(int r=0; r<=n+1; r++) {

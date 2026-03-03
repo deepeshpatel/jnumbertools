@@ -22,6 +22,7 @@ public class RepetitivePermutationMthTest {
 
     @Test
     void assertCount() {
+        // nʳ with mᵗʰ: nʳ/m
         int increment = 4;
         for (int n = 1; n <= 5; n++) {
             var input = Collections.nCopies(n, 'A');

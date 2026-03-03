@@ -28,6 +28,7 @@ class UniquePermutationByRanksTest {
 
         @Test
         void assertCount() {
+            // n! with mᵗʰ: n!/m
             for (int n = 0; n < 6; n++) {
                 var input = Collections.nCopies(n, "A");
                 for (int increment = 1; increment <= 4; increment++) {
@@ -327,6 +328,42 @@ class UniquePermutationByRanksTest {
                 assertEquals(3, perm.size(), "Each permutation should have size n");
                 assertEquals(new HashSet<>(perm).size(), 3, "Permutations should be unique within themselves");
             }
+        }
+    }
+
+    @Nested
+    class ByRanksValidationTest {
+
+        @Test
+        void byRanks_withNegativeRank_shouldThrowException() {
+            var result = permutation.unique("A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(-1)));
+            
+            assertThrows(IllegalArgumentException.class, () -> {
+                result.stream().toList(); // Should throw during iteration
+            }, "Negative rank should throw IllegalArgumentException");
+        }
+
+        @Test
+        void byRanks_withOutOfBoundRank_shouldThrowException() {
+            var result = permutation.unique("A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(1000000000)));
+            
+            assertThrows(IllegalArgumentException.class, () -> {
+                result.stream().toList(); // Should throw during iteration
+            }, "Out-of-bounds rank should throw IllegalArgumentException");
+        }
+
+        @Test
+        void byRanks_withValidRanks_shouldWork() {
+            var result = permutation.unique("A", "B", "C").byRanks(of(
+                java.math.BigInteger.ZERO,
+                java.math.BigInteger.ONE,
+                java.math.BigInteger.valueOf(2)
+            ));
+            
+            assertDoesNotThrow(() -> {
+                var permutations = result.stream().toList();
+                assertEquals(3, permutations.size());
+            });
         }
     }
 }

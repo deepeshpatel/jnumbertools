@@ -13,6 +13,7 @@ public class RepetitiveCombinationTest {
 
     @Test
     void assertCount() {
+        // nCr with repetition: (n+r−1)!/(r!·(n−1)!)
         for (int n = 1; n <= 4; n++) {
             var input = Collections.nCopies(n, "A");
             for (int r = 0; r <= n; r++) {

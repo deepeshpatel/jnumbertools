@@ -17,6 +17,7 @@ public class MultisetCombinationTest {
 
     @Test
     void assertCount() {
+        // Multiset combinations: Σₖ Πᵢ C(nᵢ, kᵢ)
         int[] frequencies = {5, 4, 7, 3};
         int[] expectedCounts = Calculator.multisetCombinationsCountAll(frequencies);
         int maxSize = Arrays.stream(frequencies).sum();

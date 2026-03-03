@@ -14,6 +14,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RepetitiveCombinationByRanksTest {
 
+    @Test
+    void assertCount() {
+        // nCr with repetition: (n+r−1)!/(r!·(n−1)!)
+        for (int n = 1; n <= 4; n++) {
+            var input = Collections.nCopies(n, "A");
+            for (int r = 0; r <= n + 2; r++) {
+                long size = combination.repetitive(n, r)
+                        .lexOrder()
+                        .stream().count();
+                assertEquals(calculator.nCrRepetitive(n, r).longValue(), size);
+            }
+        }
+    }
+
     @Nested
     public class RepetitiveCombinationMthTest {
 
@@ -370,4 +384,39 @@ class RepetitiveCombinationByRanksTest {
         }
     }
 
+    @Nested
+    class ByRanksValidationTest {
+
+        @Test
+        void byRanks_withNegativeRank_shouldThrowException() {
+            var result = combination.repetitive(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(-1)));
+            
+            assertThrows(IllegalArgumentException.class, () -> {
+                result.stream().toList(); // Should throw during iteration
+            }, "Negative rank should throw IllegalArgumentException");
+        }
+
+        @Test
+        void byRanks_withOutOfBoundRank_shouldThrowException() {
+            var result = combination.repetitive(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(1000000000)));
+            
+            assertThrows(IllegalArgumentException.class, () -> {
+                result.stream().toList(); // Should throw during iteration
+            }, "Out-of-bounds rank should throw IllegalArgumentException");
+        }
+
+        @Test
+        void byRanks_withValidRanks_shouldWork() {
+            var result = combination.repetitive(2, "A", "B", "C").byRanks(of(
+                java.math.BigInteger.ZERO,
+                java.math.BigInteger.ONE,
+                java.math.BigInteger.valueOf(2)
+            ));
+            
+            assertDoesNotThrow(() -> {
+                var combinations = result.stream().toList();
+                assertEquals(3, combinations.size());
+            });
+        }
+    }
 }

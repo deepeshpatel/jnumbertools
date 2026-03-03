@@ -21,6 +21,32 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class RepetitivePermutationByRanksTest {
 
+    @Test
+    void assertCount() {
+        // nʳ permutations with repetition
+        for (int n = 1; n <= 4; n++) {
+            var input = Collections.nCopies(n, "A");
+            for (int r = 0; r <= n + 1; r++) {
+                long size = permutation.repetitive(r, input)
+                        .lexOrder()
+                        .stream().count();
+                assertEquals(repetitionCount(input, n, r), size);
+            }
+        }
+    }
+
+    //TODO: Add method in calculator and remove from here and builder if suitable
+    private static int repetitionCount(List<String> input, int n, int r) {
+        if (input.isEmpty() && r > 0) {
+            return 0;
+        }
+        if (r == 0) {
+            return 1;
+        }
+        return calculator.power(input.size(), r).intValue();
+    }
+
+
     @Nested
     public class RepetitivePermutationChoiceTest {
 
@@ -193,6 +219,42 @@ class RepetitivePermutationByRanksTest {
                 assertEquals(2, perm.size(), "Each permutation should have size width");
                 assertTrue(of("A", "B").containsAll(perm), "Elements should be from input");
             }
+        }
+    }
+
+    @Nested
+    class ByRanksValidationTest {
+
+        @Test
+        void byRanks_withNegativeRank_shouldThrowException() {
+            var result = permutation.repetitive(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(-1)));
+            
+            assertThrows(IllegalArgumentException.class, () -> {
+                result.stream().toList(); // Should throw during iteration
+            }, "Negative rank should throw IllegalArgumentException");
+        }
+
+        @Test
+        void byRanks_withOutOfBoundRank_shouldThrowException() {
+            var result = permutation.repetitive(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(1000000000)));
+            
+            assertThrows(IllegalArgumentException.class, () -> {
+                result.stream().toList(); // Should throw during iteration
+            }, "Out-of-bounds rank should throw IllegalArgumentException");
+        }
+
+        @Test
+        void byRanks_withValidRanks_shouldWork() {
+            var result = permutation.repetitive(2, "A", "B", "C").byRanks(of(
+                java.math.BigInteger.ZERO,
+                java.math.BigInteger.ONE,
+                java.math.BigInteger.valueOf(2)
+            ));
+            
+            assertDoesNotThrow(() -> {
+                var permutations = result.stream().toList();
+                assertEquals(3, permutations.size());
+            });
         }
     }
 }

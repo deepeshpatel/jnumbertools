@@ -23,6 +23,10 @@ import java.util.LinkedHashMap;
  * multiplicities. Supports lexicographical order (based on {@link LinkedHashMap} keys), random sampling
  * with/without replacement, every mᵗʰ combination, and custom rank sequences.
  * </p>
+ * <p>
+ * This builder is immutable and thread-safe. It can be safely shared across threads
+ * without synchronization.
+ * </p>
  *
  * @param <T> the type of elements in the combinations; must implement {@link Comparable}
  * @author Deepesh Patel
@@ -74,7 +78,7 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
         if (sampleSize <= 0 || BigInteger.valueOf(sampleSize).compareTo(total) > 0) {
             throw new IllegalArgumentException("Sample size must be positive and not exceed total combinations");
         }
-        return new MultisetCombinationByRanks<>(options, r, new BigIntegerSample(total, sampleSize));
+        return new MultisetCombinationByRanks<>(options, r, new BigIntegerSample(total, sampleSize), count());
     }
 
     /**
@@ -93,7 +97,7 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
             throw new IllegalArgumentException("Sample size must be positive");
         }
         BigInteger total = Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
-        return new MultisetCombinationByRanks<>(options, r, new BigIntegerChoice(total, sampleSize));
+        return new MultisetCombinationByRanks<>(options, r, new BigIntegerChoice(total, sampleSize), count());
     }
 
     /**
@@ -130,7 +134,7 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
         EveryMthIterable.validateLexOrderMthParams(m, start);
         BigInteger total = Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
         Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, total);
-        return new MultisetCombinationByRanks<>(options, r, mthIterable);
+        return new MultisetCombinationByRanks<>(options, r, mthIterable, count());
     }
 
     /**
@@ -145,14 +149,21 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
      * @throws IllegalArgumentException if ranks is null
      */
     public MultisetCombinationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
-        if (ranks == null) {
-            throw new IllegalArgumentException("Ranks sequence cannot be null");
-        }
-        return new MultisetCombinationByRanks<>(options, r, ranks);
+        EveryMthIterable.validateByRanksParams(ranks);
+        return new MultisetCombinationByRanks<>(options, r, ranks, count());
     }
 
     @Override
     public BigInteger count() {
         return Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
+    }
+
+    @Override
+    public String toString() {
+        return "MultisetCombinationBuilder{" +
+                "options=" + options +
+                ", r=" + r +
+                ", count=" + count() +
+                '}';
     }
 }

@@ -155,7 +155,7 @@ public final class Permutations {
      * <p>
      * Generates all permutations of a multiset with specified multiplicities, output as
      * frequency maps, in lexicographical order or by rank. The number of permutations is
-     * n!/(f₁!·f₂!·...), where fᵢ are the multiplicities.
+     * n!/(n₁!·n₂!·...·nₖ!), where nᵢ are the multiplicities.
      * </p>
      *
      * @param options a map of elements to their multiplicities (must not be null or empty)

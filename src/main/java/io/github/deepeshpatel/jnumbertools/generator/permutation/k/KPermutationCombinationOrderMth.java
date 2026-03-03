@@ -17,16 +17,16 @@ import java.util.NoSuchElementException;
 /**
  * Generates every mᵗʰ unique k-permutation in combination order.
  * <p>
- * This class produces permutations of a subset of size kₖ from an input list of nₙ elements
+ * This class produces permutations of a subset of size k from an input list of n elements
  * (e.g., [A, B, C]), skipping to every mᵗʰ permutation based on the specified increment. The total
- * number of k-permutations is Pₙ,ₖ = n!/(n−kₖ)!. Permutations are ordered by combinations in
+ * number of k-permutations is Pₙ,ₖ = n!/(n−k)!. Permutations are ordered by combinations in
  * lexicographical order, then by permutations within each combination. The rank of each permutation
  * is decomposed into:
  * <ul>
- *   <li><strong>Combination rank</strong>: rank ÷ kₖ!, selecting the combination.</li>
- *   <li><strong>Permutation rank</strong>: rank mod kₖ!, selecting the permutation within the combination.</li>
+ *   <li><strong>Combination rank</strong>: rank ÷ k!, selecting the combination.</li>
+ *   <li><strong>Permutation rank</strong>: rank mod k!, selecting the permutation within the combination.</li>
  * </ul>
- * For example, for [A, B, C], kₖ=2, increment=2, start=0, it might generate [A, B], [A, C], [B, C],
+ * For example, for [A, B, C], k=2, increment=2, start=0, it might generate [A, B], [A, C], [B, C],
  * skipping every other permutation (e.g., omitting [B, A], [C, A], [C, B]).
  * </p>
  *

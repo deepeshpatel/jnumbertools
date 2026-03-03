@@ -15,12 +15,10 @@
  * Example usage:
  * ```
  * // Generate all unique permutations of {A, B, C}
- * Permutations permutations = new Permutations();
- * permutations.unique("A", "B", "C").lexOrder().forEach(System.out::println);
+ * JNumberTools.permutations().unique("A", "B", "C").lexOrder().forEach(System.out::println);
  *
  * // Generate all unique combinations of 2 elements from {A, B, C}
- * Combinations combinations = new Combinations();
- * combinations.unique(2, "A", "B", "C").lexOrder().forEach(System.out::println);
+ * JNumberTools.combinations().unique(2, "A", "B", "C").lexOrder().forEach(System.out::println);
  * ```
  *
  * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples

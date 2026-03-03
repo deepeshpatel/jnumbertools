@@ -26,6 +26,11 @@ import java.util.List;
  * or without replacement (via {@link #choice(int)} and {@link #sample(int)}).
  * </p>
  * <p>
+ * This builder is immutable and thread-safe. It can be safely shared across threads
+ * without synchronization. The {@code and()} methods return new instances rather than
+ * modifying the current instance.
+ * </p>
+ * <p>
  * Implements {@link Builder} to support composition in complex combinatorial structures,
  * such as nested products or filtered generators. Uses {@code Object} to handle mixed element types.
  * </p>
@@ -35,8 +40,8 @@ import java.util.List;
 @SuppressWarnings({"unchecked"})
 public final class SimpleProductBuilder implements Builder<Object> {
 
-    private final List<Builder<Object>> builders = new ArrayList<>();
-    private final List<List<?>> allLists = new ArrayList<>();
+    private final List<Builder<Object>> builders;
+    private final List<List<?>> allLists;
 
     /**
      * Constructs a SimpleProductBuilder with an initial list of elements.
@@ -44,28 +49,41 @@ public final class SimpleProductBuilder implements Builder<Object> {
      */
     public SimpleProductBuilder(List<?> elements) {
         elements = elements == null ? Collections.emptyList() : elements;
-        allLists.add(elements);
-        builders.add(new SingleListBuilder(elements));
+        this.allLists = new ArrayList<>();
+        this.builders = new ArrayList<>();
+        this.allLists.add(elements);
+        this.builders.add(new SingleListBuilder(elements));
+    }
+
+    /**
+     * Private constructor for creating new instances with existing data.
+     */
+    private SimpleProductBuilder() {
+        this.allLists = new ArrayList<>();
+        this.builders = new ArrayList<>();
     }
 
     /**
      * Adds a new list of elements to the product.
      *
      * @param elements the list of elements to add (null and empty allowed)
-     * @return the current instance of SimpleProductBuilder for method chaining
+     * @return a new instance of SimpleProductBuilder with the additional elements
      */
     public SimpleProductBuilder and(List<?> elements) {
         elements = elements == null ? Collections.emptyList() : elements;
-        allLists.add(elements);
-        builders.add(new SingleListBuilder(elements));
-        return this;
+        SimpleProductBuilder newBuilder = new SimpleProductBuilder();
+        newBuilder.allLists.addAll(this.allLists);
+        newBuilder.builders.addAll(this.builders);
+        newBuilder.allLists.add(elements);
+        newBuilder.builders.add(new SingleListBuilder(elements));
+        return newBuilder;
     }
 
     /**
      * Adds a new list of elements to the product from a varargs array.
      *
      * @param elements the elements to add
-     * @return the current instance of SimpleProductBuilder for method chaining
+     * @return a new instance of SimpleProductBuilder with the additional elements
      */
     public SimpleProductBuilder and(Object... elements) {
         return and(List.of(elements));
@@ -124,6 +142,7 @@ public final class SimpleProductBuilder implements Builder<Object> {
      */
     @Override
     public StreamableIterable<Object> byRanks(Iterable<BigInteger> ranks) {
+        EveryMthIterable.validateByRanksParams(ranks);
         return new StreamableIteratorImpl<>(new CartesianProductByRanks<>(builders, ranks).iterator());
     }
 
@@ -170,6 +189,14 @@ public final class SimpleProductBuilder implements Builder<Object> {
         return allLists.stream()
                 .map(list -> BigInteger.valueOf(list.size()))
                 .reduce(BigInteger.ONE, BigInteger::multiply);
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleProductBuilder{" +
+                "allLists=" + allLists +
+                ", count=" + count() +
+                '}';
     }
 
     /**

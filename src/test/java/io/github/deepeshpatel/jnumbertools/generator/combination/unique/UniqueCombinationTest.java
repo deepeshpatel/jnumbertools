@@ -15,7 +15,7 @@ public class UniqueCombinationTest {
 
     @Test
     void assertCount() {
-
+        // nCr: n!/(r!·(n−r)!)
         for (int n = 0; n <= 4; n++) {
             List<String> input = Collections.nCopies(n, "A");
             for (int r = 0; r <= n; r++) {

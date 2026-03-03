@@ -17,10 +17,14 @@ import java.util.List;
  * Builder for generating repetitive combinations of size r from n items.
  * <p>
  * A repetitive combination allows items to be selected multiple times, with the total number of
- * combinations given by ⁿ⁺ᵣ⁻¹Cᵣ = (n+r-1)! / (r! * (n-1)!). Order does not matter, and elements
+ * combinations given by ⁿ⁺ʳ⁻¹Cᵣ = (n+r−1)!/(r!·(n−1)!). Order does not matter, and elements
  * are treated as distinct based on their indices in the input list. This builder supports generating
  * all combinations in lexicographical order, sampling randomly with or without replacement, selecting
  * every mᵗʰ combination, or using custom rank sequences.
+ * </p>
+ * <p>
+ * This builder is immutable and thread-safe. It can be safely shared across threads
+ * without synchronization.
  * </p>
  *
  * @param <T> the type of elements in the combinations
@@ -111,6 +115,7 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if any rank < 0 or rank ≥ ⁿ⁺ᵣ⁻¹Cᵣ
      */
     public RepetitiveCombinationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
+        EveryMthIterable.validateByRanksParams(ranks);
         return new RepetitiveCombinationByRanks<>(elements, size, ranks, calculator);
     }
 

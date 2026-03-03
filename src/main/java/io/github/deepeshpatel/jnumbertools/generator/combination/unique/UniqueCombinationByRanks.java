@@ -89,6 +89,9 @@ public class UniqueCombinationByRanks<T> extends AbstractGenerator<T> {
         @Override
         public List<T> next() {
             BigInteger m = rankIterator.next();
+            if (m.signum() < 0 || m.compareTo(nCr) >= 0) {
+                throw new IllegalArgumentException("Rank " + m + " is out of bounds. Valid range is [0, " + nCr + ")");
+            }
             int[] indices = algorithms.unRank(m, nCr, elements.size(), r);
             return indicesToValues(indices);
         }

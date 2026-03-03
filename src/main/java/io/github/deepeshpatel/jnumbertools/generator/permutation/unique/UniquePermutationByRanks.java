@@ -80,7 +80,10 @@ public final class UniquePermutationByRanks<T> extends AbstractGenerator<T> {
                 throw new NoSuchElementException("No more permutations available in rank sequence");
             }
             BigInteger rank = rankIterator.next();
-            if (rank.compareTo(totalPermutations) >= 0) {
+            if (rank.signum() < 0) {
+                throw new IllegalArgumentException("Rank " + rank + " cannot be negative. Valid range is [0, " + totalPermutations + ")");
+            }
+            if (rank.signum() >= 0 && rank.compareTo(totalPermutations) >= 0) {
                 throw new IllegalArgumentException("Rank " + rank + " exceeds total permutations " + totalPermutations);
             }
             int[] indices = FactoradicAlgorithms.unRank(rank, elements.size());

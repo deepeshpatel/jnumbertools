@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
+import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
@@ -15,10 +16,14 @@ import java.util.List;
 /**
  * Builder for generating k-permutations of a list of elements.
  * <p>
- * This builder provides methods to generate k-permutations (ordered subsets of size kₖ from nₙ elements)
+ * This builder provides methods to generate k-permutations (ordered subsets of size k from n elements)
  * in lexicographical or combination order, as well as to retrieve specific mᵗʰ permutations or permutations
- * at specified ranks. The total number of k-permutations is given by Pₙ,ₖ = n!/(n−kₖ)!. For example, for
- * elements [A, B, C] and kₖ=2, permutations might include [A, B], [B, A], [A, C], etc., depending on the order.
+ * at specified ranks. The total number of k-permutations is given by Pₙ,ₖ = n!/(n−k)!. For example, for
+ * elements [A, B, C] and k=2, permutations might include [A, B], [B, A], [A, C], etc., depending on the order.
+ * </p>
+ * <p>
+ * This builder is immutable and thread-safe. It can be safely shared across threads
+ * without synchronization.
  * </p>
  * <p>
  * Example usage:
@@ -36,7 +41,7 @@ import java.util.List;
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel
  */
-public final class KPermutationBuilder<T> {
+public final class KPermutationBuilder<T> implements Builder<T> {
 
     private final List<T> elements;
     private final int k;
@@ -63,6 +68,15 @@ public final class KPermutationBuilder<T> {
      */
     public KPermutationLexOrder<T> lexOrder() {
         return new KPermutationLexOrder<>(elements, k);
+    }
+
+    /**
+     * Returns the total number of k-permutations.
+     *
+     * @return the value of Pₙ,ₖ as a {@link BigInteger}
+     */
+    public BigInteger count() {
+        return calculator.nPr(elements.size(), k);
     }
 
     /**
@@ -105,6 +119,7 @@ public final class KPermutationBuilder<T> {
      * @throws IllegalArgumentException if any rank is negative or ≥ Pₙ,ₖ
      */
     public KPermutationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
+        EveryMthIterable.validateByRanksParams(ranks);
         return new KPermutationByRanks<>(elements, k, ranks, calculator);
     }
 
@@ -165,5 +180,14 @@ public final class KPermutationBuilder<T> {
      */
     public KPermutationCombinationOrderMth<T> combinationOrderMth(BigInteger m, BigInteger start) {
         return new KPermutationCombinationOrderMth<>(elements, k, m, start, calculator);
+    }
+
+    @Override
+    public String toString() {
+        return "KPermutationBuilder{" +
+                "elements=" + elements +
+                ", k=" + k +
+                ", count=" + count() +
+                '}';
     }
 }

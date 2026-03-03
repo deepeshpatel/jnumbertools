@@ -26,6 +26,11 @@ import java.util.List;
  *   <li>Single-swap permutations (Heap's algorithm)</li>
  * </ul>
  *
+ * <p>
+ * This builder is immutable and thread-safe. It can be safely shared across threads
+ * without synchronization.
+ * </p>
+ *
  * <p><b>Example:</b>
  * <pre>{@code
  * // Generate all permutations of [A, B, C] in lex order
@@ -102,6 +107,7 @@ public final class UniquePermutationBuilder<T> implements Builder<T> {
      * @throws IllegalStateException if no generation strategy was selected
      */
     public UniquePermutationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
+        EveryMthIterable.validateByRanksParams(ranks);
         return new UniquePermutationByRanks<>(elements, ranks, calculator);
     }
 
@@ -140,5 +146,13 @@ public final class UniquePermutationBuilder<T> implements Builder<T> {
 
     public BigInteger count() {
         return calculator.factorial(elements.size());
+    }
+
+    @Override
+    public String toString() {
+        return "UniquePermutationBuilder{" +
+                "elements=" + elements +
+                ", count=" + count() +
+                '}';
     }
 }

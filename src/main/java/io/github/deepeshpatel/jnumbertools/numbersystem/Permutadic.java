@@ -17,8 +17,8 @@ import static io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorit
  * <p>
  * The Permutadic number system, denoted as Permutadic(s, k), where s is the size and k is the degree,
  * represents natural numbers as k-permutations with a unique representation for all natural numbers.
- * The number n corresponding to the permutadic string [Ck−1, Ck−2, Ck−3 . . . C1, C0][s] is expressed by
- * the equation: n = Summation[Permutation(s-i,k-i) * Ck-i] for i= 1 to k
+ * The number n corresponding to the permutadic string [Cₖ₋₁, Cₖ₋₂, Cₖ₋₃...C₁, C₀][s] is expressed by
+ * the equation: n = Σ[Permutation(s−i,k−i) · Cₖ₋ᵢ] for i=1 to k
  *
  * <p>
  * Example:

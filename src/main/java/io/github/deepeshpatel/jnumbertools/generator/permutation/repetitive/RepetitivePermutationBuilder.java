@@ -27,6 +27,10 @@ import java.util.List;
  * // Generates: [[A, A], [A, B], [B, A], [B, B]]
  * </pre>
  * </p>
+ * <p>
+ * This builder is immutable and thread-safe. It can be safely shared across threads
+ * without synchronization.
+ * </p>
  *
  * @param <T> the type of elements to permute
  * @author Deepesh Patel
@@ -125,6 +129,7 @@ public final class RepetitivePermutationBuilder<T> implements Builder<T> {
      * @throws IllegalStateException if length k was not configured
      */
     public RepetitivePermutationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
+        EveryMthIterable.validateByRanksParams(ranks);
         return new RepetitivePermutationByRanks<>(elements, width, ranks, calculator);
     }
 
@@ -142,5 +147,14 @@ public final class RepetitivePermutationBuilder<T> implements Builder<T> {
             return BigInteger.ONE;
         }
         return calculator.power(elements.size(), width);
+    }
+
+    @Override
+    public String toString() {
+        return "RepetitivePermutationBuilder{" +
+                "width=" + width +
+                ", elements=" + elements +
+                ", count=" + count() +
+                '}';
     }
 }

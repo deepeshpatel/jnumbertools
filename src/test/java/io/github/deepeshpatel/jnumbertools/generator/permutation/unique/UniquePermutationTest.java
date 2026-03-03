@@ -16,6 +16,7 @@ public class UniquePermutationTest {
 
     @Test
     void assertCount() {
+        // n! permutations
         for (int n = 0; n < 6; n++) {
             var input = Collections.nCopies(n, "A");
             long size = permutation

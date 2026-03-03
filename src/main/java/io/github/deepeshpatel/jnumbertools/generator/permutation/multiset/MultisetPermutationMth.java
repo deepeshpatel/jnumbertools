@@ -15,12 +15,50 @@ import java.util.NoSuchElementException;
 
 import static io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator.initIndicesForMultisetPermutation;
 
+/**
+ * Generates every mᵗʰ multiset permutation in lexicographical order, starting from a specified rank.
+ * <p>
+ * This class produces permutations of a multiset with specified multiplicities, output as frequency maps,
+ * in lexicographical order or by rank. The number of permutations is given by the multinomial coefficient
+ * divided by m for every mᵗʰ permutation:
+ * </p>
+ * <p>
+ * <strong>Formula:</strong> Total permutations = n!/(n₁!·n₂!·...·nₖ!)/m
+ * <br>
+ * where nᵢ are the multiplicities of each distinct element.
+ * </p>
+ * <p>
+ * <strong>Performance:</strong>
+ * <ul>
+ *   <li>Time Complexity: O(1) per permutation (direct computation)</li>
+ *   <li>Space Complexity: O(k) where k is number of distinct elements</li>
+ *   <li>Memory Efficient: Generates permutations on-demand</li>
+ * </ul>
+ * </p>
+ * <p>
+ * <strong>Example:</strong> For multiset {A:2, B:1, C:1} with m=2, start=0:
+ * Generates 0th, 2nd, 4th... permutations instead of all 12 permutations.
+ * </p>
+ *
+ * @param <T> the type of elements in the multiset
+ * @author Deepesh Patel
+ * @see <a href="https://en.wikipedia.org/wiki/Multinomial_coefficient">Wikipedia: Multinomial Coefficient</a>
+ */
 public final class MultisetPermutationMth<T> extends AbstractMultisetPermutation<T> {
 
     private final BigInteger possiblePermutations;
     private final BigInteger start;
     private final BigInteger increment;
 
+    /**
+     * Constructs a generator for every mᵗʰ multiset permutation.
+     *
+     * @param multiset   the multiset with element multiplicities (must not be null)
+     * @param increment  the step size between permutations (must be positive)
+     * @param start      the starting rank (must be non-negative)
+     * @param calculator the calculator for combinatorial computations (must not be null)
+     * @throws IllegalArgumentException if multiset or calculator is null, increment ≤ 0, or start < 0
+     */
     MultisetPermutationMth(LinkedHashMap<T, Integer> multiset, BigInteger increment, BigInteger start, Calculator calculator) {
         super(multiset, calculator);
         if (start.signum() < 0) {

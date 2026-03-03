@@ -24,10 +24,20 @@ public class ConstrainedCartesianProductTest {
     private final List<String> cheese = of("Ricotta", "Mozzarella", "Cheddar");
     private final List<String> toppings = of("tomato", "capsicum", "onion", "paneer", "corn");
 
+    @Test
+    void assertCount() {
+        var product = cartesianProduct.constrainedProductOf(1, pizzaBase)
+                .andDistinct(2, cheese)
+                .andMultiSelect(2, sauce)
+                .andInRange(1, 5, toppings);
+        var list = product.lexOrder().stream().toList();
+        assertEquals(product.count().longValue(), list.size());
+    }
+
     @Nested
     class All {
         @Test
-        void shouldGenerateCorrectNumOfCombinations() {
+        void shouldGenerateCorrectCombinations() {
             var product = cartesianProduct.constrainedProductOf(1, pizzaBase)
                     .andDistinct(2, cheese)
                     .andMultiSelect(2, sauce)

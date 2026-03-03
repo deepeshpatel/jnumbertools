@@ -15,6 +15,7 @@ public class MultisetPermutationMthTest {
 
     @Test
     void assertCount() {
+        // Multiset permutations with mᵗʰ: n!/(n₁!·n₂!·...·nₖ!)/m
         Random random = new Random(System.currentTimeMillis());
         int increment = 4;
         int start = 0;

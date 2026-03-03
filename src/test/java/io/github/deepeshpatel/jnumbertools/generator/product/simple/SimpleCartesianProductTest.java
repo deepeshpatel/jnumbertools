@@ -18,6 +18,17 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class SimpleCartesianProductTest {
 
+    @Test
+    void assertCount() {
+        // Cartesian product: n₁·n₂·...·nₖ
+        var product = cartesianProduct.simpleProductOf(List.of(0, 1))
+                .and(List.of('A', 'B'))
+                .and(List.of(1, 2, 3));
+        long expected = 2 * 2 * 3; // 12
+        long actual = product.lexOrder().stream().count();
+        assertEquals(expected, actual);
+    }
+
     @Nested
     class All {
         @Test

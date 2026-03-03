@@ -20,12 +20,11 @@
  * Example usage:
  * ```
  * // Generate unique permutations via base package builder
- * Permutations permutations = new Permutations();
- * permutations.unique("A", "B", "C").lexOrder().forEach(System.out::println);
+ * JNumberTools.permutations().unique("A", "B", "C").lexOrder().forEach(System.out::println);
  *
  * // Generate multiset combinations via generator.combination subpackage
- * MultisetCombinationBuilder<String> builder = new MultisetCombinationBuilder<>(new int[]{2, 1}, List.of("A", "B"));
- * builder.lexOrder().forEach(System.out::println);
+ * var elements = new LinkedHashMap<>(Map.of("A", 2, "B", 1));
+ * JNumberTools.combinations().multiset(elements, 2).lexOrder().forEach(System.out::println);
  * ```
  *
  * @see io.github.deepeshpatel.jnumbertools.base

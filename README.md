@@ -11,17 +11,36 @@
 4. Seamless integration with Spark, Flink, and Hadoop for big data workflows.
 
 ## Latest Version
-The latest release of the library is [v3.0.0](https://github.com/deepeshpatel/jnumbertools/releases/tag/v3.0.0).
-It is available through The Maven Central Repository [here](https://central.sonatype.com/search?q=jnumbertools&smo=true).
-Add the following section to your `pom.xml` file.
+The latest release of the library is available on [GitHub](https://github.com/deepeshpatel/jnumbertools/releases).
+It is available through The Maven Central Repository [here](https://mvnrepository.com/artifact/io.github.deepeshpatel/jnumbertools/versions).
+Add the following section to your configuration(pom/gradle etc) file.
 
 ```xml
 <dependency>
     <groupId>io.github.deepeshpatel</groupId>
     <artifactId>jnumbertools</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
 </dependency>
 ```
+
+**Gradle**
+```gradle
+implementation 'io.github.deepeshpatel:jnumbertools:3.0.1'
+```
+**SBT**
+```sbt
+libraryDependencies += "io.github.deepeshpatel" % "jnumbertools" % "3.0.1"
+```
+
+## Performance
+
+- **BigInteger Support**: Handle indices up to 10^100 and beyond
+- **Memory Efficient**: Stream-based generation for massive datasets
+- **Big Data Ready**: Native integration with Apache Spark, Flink, Hadoop
+- **Optimized Algorithms**: Efficient lexicographical generation and ranking
+
+![License](https://img.shields.io/github/license/deepeshpatel/jnumbertools)
+![Stars](https://img.shields.io/github/stars/deepeshpatel/jnumbertools?style=social)
 
 **Currently Available Algorithms**
 

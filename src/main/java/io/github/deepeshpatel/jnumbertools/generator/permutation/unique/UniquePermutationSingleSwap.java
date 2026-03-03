@@ -50,8 +50,8 @@ public final class UniquePermutationSingleSwap<T> extends AbstractGenerator<T> {
      * Returns an iterator over all unique permutations of the input elements.
      * The iterator uses Heap's algorithm to generate permutations on-demand.
      *
-     * @return an iterator that generates permutations using single-swap approach
-     *         (not in lexicographic order)
+     * @return an iterator that generates all permutations using single-swap approach
+     *         (not in lexicographic order); returns empty iterator if input list is empty
      */
     @Override
     public Iterator<List<T>> iterator() {

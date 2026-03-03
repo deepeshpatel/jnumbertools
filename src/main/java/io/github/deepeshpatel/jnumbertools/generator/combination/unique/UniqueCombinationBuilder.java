@@ -17,10 +17,14 @@ import java.util.List;
  * Builder for generating unique combinations of size r from n items.
  * <p>
  * A unique combination is a selection of r items from n distinct items where order does not matter,
- * with the total number of combinations given by ⁿCᵣ = n! / (r! * (n-r)!).
+ * with the total number of combinations given by ⁿCᵣ = n!/(r!·(n−r)!).
  * This builder supports generating combinations in lexicographical order, sampling combinations
  * randomly with or without replacement, or following a custom sequence of ranks.
  * It uses a {@link Calculator} for computing combination counts and ranks.
+ * </p>
+ * <p>
+ * This builder is immutable and thread-safe. It can be safely shared across threads
+ * without synchronization.
  * </p>
  *
  * @param <T> the type of elements in the combinations
@@ -78,12 +82,24 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
      * <p>
      * For example, for ⁿCᵣ with n=3, r=2, ranks [0, 2] might yield [A, B], [B, C].
      * </p>
+     * <p>
+     * <strong>Validation:</strong> Only validates that the ranks parameter is not null.
+     * Invalid rank values (negative, out of bounds, null values in iterable) will be caught
+     * naturally during iteration. This design avoids performance overhead for large or infinite streams.
+     * </p>
+     * <p>
+     * <strong>Range Validation:</strong> During iteration, each rank is validated to be in [0, ⁿCᵣ).
+     * Invalid ranks will throw {@link IllegalArgumentException} with the specific rank and valid range.
+     * </p>
      *
      * @param ranks the iterable of ranks (each rank in [0, ⁿCᵣ))
      * @return a {@link UniqueCombinationByRanks} for the specified ranks
-     * @throws IllegalArgumentException if any rank < 0 or rank ≥ ⁿCᵣ
+     * @throws IllegalArgumentException if ranks is null or if any rank is out of bounds during iteration
+     * @throws NullPointerException if null values are encountered during iteration
+     * @throws ArithmeticException or other algorithm-specific exceptions for invalid ranks during generation
      */
     public UniqueCombinationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
+        EveryMthIterable.validateByRanksParams(ranks);
         return new UniqueCombinationByRanks<>(elements, size, ranks, calculator);
     }
 

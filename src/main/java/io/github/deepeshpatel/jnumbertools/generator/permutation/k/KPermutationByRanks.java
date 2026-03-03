@@ -107,6 +107,11 @@ public class KPermutationByRanks<T> extends AbstractKPermutation<T> {
         @Override
         public List<T> next() {
             BigInteger rank = seqGenerator.next();
+
+            if (rank.signum() < 0 || rank.compareTo(nPk) >= 0) {
+                throw new IllegalArgumentException("Rank " + rank + " is out of bounds [0, " + nPk + ")");
+            }
+
             int[] next = PermutadicAlgorithms.unRankWithoutBoundCheck(rank, elements.size(), k);
             return indicesToValues(next);
         }

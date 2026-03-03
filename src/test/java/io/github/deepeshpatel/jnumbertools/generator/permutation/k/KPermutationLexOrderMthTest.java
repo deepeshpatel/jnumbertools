@@ -15,6 +15,7 @@ public class KPermutationLexOrderMthTest {
 
     @Test
     void assertCount() {
+        // nPk with mᵗʰ: n!/(n−k)!/m
         int increment = 3;
         for (int n = 0; n <= 4; n++) {
             var input = Collections.nCopies(n, "A");

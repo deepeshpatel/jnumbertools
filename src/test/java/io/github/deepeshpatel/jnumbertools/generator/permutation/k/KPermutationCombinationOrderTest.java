@@ -14,6 +14,7 @@ public class KPermutationCombinationOrderTest {
 
     @Test
     void assertCount() {
+        // nPk: n!/(n−k)!
         for (int n = 0; n <= 4; n++) {
             var input = Collections.nCopies(n, "A");
             for (int k = 0; k < n; k++) {

@@ -18,6 +18,8 @@ public class TestBase {
     public static final CartesianProduct cartesianProduct = new CartesianProduct(calculator);
     public static final Subsets subsets = new Subsets(calculator);
     public static final NumberSystem numberSystem = new NumberSystem(calculator);
+    public static final RankOf rankOf = new RankOf(calculator);
+    public static final UnrankOf unrankOf = new UnrankOf(calculator);
 
     public static final List<?> listOfEmptyList = List.of(Collections.emptyList());
     public static final List<?> listOfEmptyMap = List.of(Collections.emptyMap());

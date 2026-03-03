@@ -35,6 +35,8 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
      */
     private final Iterable<BigInteger> ranks;
 
+    private final BigInteger totalCombinations;
+
     /**
      * Constructs a new MultisetCombinationByRanks instance.
      *
@@ -43,9 +45,10 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
      * @param ranks an iterable of 0-based rank numbers (0 ≤ rank < total combinations)
      * @throws IllegalArgumentException if rᵣ is negative, options is invalid, or ranks are out of bounds
      */
-    public MultisetCombinationByRanks(LinkedHashMap<T, Integer> options, int r, Iterable<BigInteger> ranks) {
+    public MultisetCombinationByRanks(LinkedHashMap<T, Integer> options, int r, Iterable<BigInteger> ranks, BigInteger totalCombinations) {
         super(options, r);
         this.ranks = ranks;
+        this.totalCombinations = totalCombinations;
     }
 
     /**
@@ -100,6 +103,12 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
         @Override
         public Map<T, Integer> next() {
             BigInteger m = rankIterator.next();
+            if (m.signum() < 0) {
+                throw new IllegalArgumentException("Rank " + m + " cannot be negative. Valid range is [0, " + totalCombinations + ")");
+            }
+            if (m.signum() >= 0 && m.compareTo(totalCombinations) >= 0) {
+                throw new IllegalArgumentException("Rank " + m + " exceeds total multiset combinations " + totalCombinations);
+            }
             int[] countVector = unrankMultisetCombination(r, m.intValue());
             outputMap.clear();
             for (int i = 0; i < countVector.length; i++) {

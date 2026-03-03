@@ -20,4 +20,7 @@ TODO:
     given rank and permutation
 
 
+  rank(unrank(rank(x))) == rank(x)
+
+
 

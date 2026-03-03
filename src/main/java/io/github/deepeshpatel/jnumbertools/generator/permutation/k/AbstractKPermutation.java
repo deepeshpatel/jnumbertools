@@ -9,12 +9,12 @@ import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import java.util.List;
 
 /**
- * Abstract base class for generating permutations of a subset of size kₖ from a list of elements.
+ * Abstract base class for generating permutations of a subset of size k from a list of elements.
  * <p>
  * This class provides foundational functionality for k-permutation generators, which produce permutations
- * of kₖ elements chosen from nₙ elements, where order matters. The total number of k-permutations is
- * given by Pₙ,ₖ = n!/(n−kₖ)!. Subclasses implement specific permutation generation strategies, ensuring
- * the subset size kₖ is valid (0 ≤ kₖ ≤ nₙ).
+ * of k elements chosen from n elements, where order matters. The total number of k-permutations is
+ * given by Pₙ,ₖ = n!/(n−k)!. Subclasses implement specific permutation generation strategies, ensuring
+ * the subset size k is valid (0 ≤ k ≤ n).
  * </p>
  *
  * @param <T> the type of elements in the permutations
