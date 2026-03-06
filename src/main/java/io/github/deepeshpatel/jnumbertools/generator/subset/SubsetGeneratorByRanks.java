@@ -7,7 +7,6 @@ package io.github.deepeshpatel.jnumbertools.generator.subset;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.base.Subsets;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 
 import java.math.BigInteger;
 import java.util.Iterator;
@@ -20,6 +19,9 @@ import java.util.NoSuchElementException;
  * <p>
  * This class is a thin wrapper that delegates single-rank lookups to {@link SubsetGeneratorMth#build()}
  * and arithmetic progressions (lexOrderMth) directly to {@link SubsetGeneratorMth}.
+ * </p>
+ * <p>
+ * Ranks are 0-based in lexicographical order.
  * </p>
  *
  * @param <T> the type of elements in the subsets
@@ -50,7 +52,6 @@ public final class SubsetGeneratorByRanks<T> extends AbstractGenerator<T> {
      * @throws IllegalArgumentException if m <= 0 or start < 0
      */
     public SubsetGeneratorMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m,start);
         return new SubsetGeneratorMth<>(from, to, m, start, elements, calculator);
     }
 

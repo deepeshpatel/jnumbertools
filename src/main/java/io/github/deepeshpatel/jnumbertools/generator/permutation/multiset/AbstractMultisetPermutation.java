@@ -8,7 +8,11 @@ import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -122,4 +126,17 @@ public abstract class AbstractMultisetPermutation<T> implements StreamableIterab
      */
     @Override
     public abstract Iterator<List<T>> iterator();
+
+    /**
+     * Creates a flattened array of indices representing the multiset permutation.
+     * Each element index is repeated according to its frequency.
+     *
+     * @param frequencies array of frequencies for each distinct element
+     * @return flattened int[] of indices (length = sum of frequencies)
+     */
+    protected int[] createFlattenedIndices(int... frequencies) {
+        return IntStream.range(0, frequencies.length)
+                .flatMap(i -> IntStream.generate(() -> i).limit(frequencies[i]))
+                .toArray();
+    }
 }

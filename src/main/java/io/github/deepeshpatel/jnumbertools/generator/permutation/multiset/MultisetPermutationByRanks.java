@@ -32,6 +32,10 @@ import java.util.*;
  * // [A, B, A] (rank 2)
  * }</pre>
  *
+ * <p>
+ * Ranks are 0-based in lexicographical order.
+ * </p>
+ *
  * @param <T> the type of elements in the multiset
  * @author Deepesh Patel
  * @see MultisetPermutation

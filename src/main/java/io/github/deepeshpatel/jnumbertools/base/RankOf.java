@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
 import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
 
@@ -16,20 +17,52 @@ import java.math.BigInteger;
  * Permutations are order-dependent arrangements, while combinations are order-independent
  * selections. This class supports:
  * <p>
- * - k-Permutation (`ⁿPₖ`): Ranks a k-permutation of n distinct elements.
- * - Unique Permutation (`ⁿ!`): Ranks a full permutation of n distinct elements.
- * - Repeated Permutation (`nᵣ`): Ranks a permutation of r elements from n distinct elements with repetition.
- * - Unique Combination (`ⁿCᵣ`): Ranks a combination of r elements from n distinct elements without repetition.
+ * - k-Permutation (ⁿPₖ): Ranks a k-permutation of n distinct elements.
+ * - Unique Permutation (n!): Ranks a full permutation of n distinct elements.
+ * - Repeated Permutation (nʳ): Ranks a permutation of r elements from n distinct elements with repetition.
+ * - Unique Combination (ⁿCᵣ): Ranks a combination of r elements from n distinct elements without repetition.
  * </p>
- * Example usage:
+ *
+ * <h2>Usage Examples</h2>
+ *
+ * <h3>Ranking k-Permutations</h3>
  * <pre>
  * RankOf rankOf = new RankOf();
- * BigInteger kPermutationRank = rankOf.kPermutation(5, 2, 1, 0);
- * BigInteger uniquePermutationRank = rankOf.uniquePermutation(3, 2, 1, 0);
- * BigInteger repeatedPermutationRank = rankOf.repeatedPermutation(4, 2, 1, 0);
- * BigInteger uniqueCombinationRank = rankOf.uniqueCombination(5, 2, 1, 0);
+ *
+ * // Rank of 2-permutation [1,0] from set of size 3
+ * BigInteger rank = rankOf.kPermutation(2, 1, 0);
+ * System.out.println(rank); // Rank of [1,0] among 3P2 = 6 permutations
  * </pre>
  *
+ * <h3>Ranking Unique Permutations</h3>
+ * <pre>
+ * // Rank of full permutation [2,0,1] of 3 elements
+ * BigInteger rank = rankOf.uniquePermutation(2, 0, 1);
+ * System.out.println(rank); // 3 (since [2,0,1] is the 4th permutation of [0,1,2])
+ * </pre>
+ *
+ * <h3>Ranking Repeated Permutations</h3>
+ * <pre>
+ * // Rank of repeated permutation [1,0,1] from binary set {0,1} with length 3
+ * BigInteger rank = rankOf.repeatedPermutation(2, 1, 0, 1);
+ * System.out.println(rank); // Rank among 2³ = 8 permutations
+ * </pre>
+ *
+ * <h3>Ranking Unique Combinations</h3>
+ * <pre>
+ * // Rank of combination [1,3,4] from set of 5 elements
+ * BigInteger rank = rankOf.uniqueCombination(5, 1, 3, 4);
+ * System.out.println(rank); // Rank among C(5,3) = 10 combinations
+ * </pre>
+ *
+ * <p>
+ * This class is immutable and thread-safe. All methods are stateless and can be safely shared across threads.
+ * </p>
+ *
+ * @see AllExamples
+ * @see UnrankOf
+ * @see NumberSystem
+ * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  * @author Deepesh Patel
  */
 public final class RankOf {
@@ -68,7 +101,7 @@ public final class RankOf {
     }
 
     /**
-     * Calculates the lexicographical rank of a unique permutation (`ⁿ!`).
+     * Calculates the lexicographical rank of a unique permutation (`n!`).
      * <p>
      * Ranks a full permutation of n distinct elements, where the input array contains
      * n distinct indices from {0, 1, ..., n-1} in lexicographical order.

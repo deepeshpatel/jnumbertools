@@ -8,7 +8,7 @@
  * Contains subpackages (e.g., generator.permutation, generator.combination, generator.subset, generator.product)
  * with classes for generating combinatorial structures, used via builder classes in the base package.
  * Supports generation of:
- * - Unique permutations (`ⁿ!`), k-permutations (`ⁿPₖ`), repetitive permutations (`nᵣ`), and multiset permutations.
+ * - Unique permutations (`n!`), k-permutations (`ⁿPₖ`), repetitive permutations (`nᵣ`), and multiset permutations.
  * - Unique combinations (`ⁿCᵣ`) and multiset combinations.
  * - Subsets (`2ⁿ`).
  * - Simple and constrained Cartesian products.

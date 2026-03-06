@@ -12,8 +12,9 @@ import java.util.NoSuchElementException;
 /**
  * A class that generates the Cartesian product of a list of, lists of lists.
  * <p>
- * This class takes a list of, lists of lists, where each inner list represents a set of elements
+ * This class takes a list of lists of lists, where each inner list represents a set of elements
  * (e.g., combinations or subsets), and generates the Cartesian product of these sets in lexicographical order.
+ * The product of zero components yields exactly one empty tuple.
  * </p>
  *
  * @author Deepesh Patel
@@ -47,9 +48,11 @@ public class ConstrainedProduct implements Iterable<List<Object>> {
             for (int i = 0; i < all.size(); i++) {
                 maxIndices[i] = all.get(i).size();
             }
-            hasNext = !all.isEmpty() && all.stream().noneMatch(List::isEmpty);
-            if (!hasNext && !all.isEmpty()) {
-                hasNext = true; // Handle empty input case
+
+            if (all.isEmpty()) {
+                hasNext = true;  // one empty tuple
+            } else {
+                hasNext = !all.stream().anyMatch(List::isEmpty);
             }
         }
 
@@ -64,10 +67,18 @@ public class ConstrainedProduct implements Iterable<List<Object>> {
                 throw new NoSuchElementException();
             }
 
+            if (all.isEmpty()) {
+                hasNext = false;
+                return List.of();
+            }
+
             List<Object> result = new ArrayList<>();
             for (int i = 0; i < indices.length; i++) {
                 if (!all.get(i).isEmpty()) {
-                    result.addAll(all.get(i).get(indices[i]));
+                    // Get the current selection for this dimension
+                    List<Object> dimensionResult = all.get(i).get(indices[i]);
+                    // Add all its elements directly to the flat tuple
+                    result.addAll(dimensionResult);
                 }
             }
 

@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -26,6 +27,27 @@ public class RepetitivePermutationTest {
                 assertEquals((int)Math.pow(n,r), size);
             }
         }
+    }
+
+    @Test
+    void shouldHandleEmptyInputWithZeroWidth() {
+        // Mathematical note:
+        // - Empty set (∅) with width 0 has exactly one permutation conceptually
+        // - However, since there are no elements to permute, the iterator returns empty
+        // - This matches the definition of exponentiation: 0⁰ = 1 (conceptually) but ∅⁰ = ∅ (no elements)
+        // - count() returns 1, iteration returns 0 elements
+
+        var generator = permutation.repetitive(0, Collections.emptyList());
+        assertEquals(BigInteger.ONE, generator.count(), "Count should be 1 (empty set exists)");
+
+        var result = generator.lexOrder().stream().toList();
+        assertTrue(result.isEmpty(), "Iterator should return no elements");
+    }
+
+    @Test
+    void shouldHandleEmptyInputWithPositiveWidth() {
+        var result = permutation.repetitive(2, Collections.emptyList()).lexOrder().stream().toList();
+        assertTrue(result.isEmpty());
     }
 
     @Test

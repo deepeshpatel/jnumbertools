@@ -136,15 +136,20 @@ public final class FactoradicAlgorithms {
     }
 
     /**
-     * Converts a given rank to the corresponding permutation of a specified size.
+     * Converts a rank to its corresponding permutation of specified size.
      * <p>
-     * This method first converts the rank into its Factoradic representation with a known size,
-     * and then maps that Factoradic representation to the permutation.
+     * Uses factoradic representation to directly compute the permutation at the given
+     * lexicographical rank without generating all preceding permutations.
+     * </p>
+     * <p>
+     * Example: For size=3, rank 0 returns [0,1,2], rank 1 returns [0,2,1],
+     * rank 5 returns [2,1,0] (the last permutation).
      * </p>
      *
-     * @param rank the rank of the permutation.
-     * @param size the size of the permutation.
-     * @return an array representing the permutation corresponding to the given rank.
+     * @param rank the 0-based lexicographical rank of the desired permutation
+     * @param size the size of the permutation (number of elements)
+     * @return an array of indices representing the permutation at the specified rank
+     * @throws IllegalArgumentException if rank is negative or ≥ size!
      */
     public static int[] unRank(BigInteger rank, int size) {
         return factoradicToMthPermutation(intToFactoradicKnownSize(rank, size));

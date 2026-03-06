@@ -7,7 +7,6 @@ package io.github.deepeshpatel.jnumbertools.generator.base;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -73,18 +72,6 @@ public abstract class AbstractGenerator<E> implements StreamableIterable<E> {
      */
     public Stream<List<E>> stream() {
         return StreamSupport.stream(this.spliterator(), false);
-    }
-
-    /**
-     * Initializes an array of indices for generating multiset permutations based on given frequencies.
-     *
-     * @param frequencies an array of frequencies for the multiset permutation
-     * @return an array of indices corresponding to the provided frequencies
-     */
-    public static int[] initIndicesForMultisetPermutation(int... frequencies) {
-        return IntStream.range(0, frequencies.length)
-                .flatMap(i -> IntStream.generate(() -> i).limit(frequencies[i]))
-                .toArray();
     }
 
     /**

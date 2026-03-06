@@ -6,7 +6,7 @@
  * Contains builder classes for the major public APIs in JNumberTools.
  *
  * This package provides the entry point for creating generators of combinatorial structures, such as
- * permutations (`ⁿ!`, `ⁿPₖ`, `nᵣ`, multiset), combinations (`ⁿCᵣ`, multiset), subsets (`2ⁿ`), Cartesian
+ * permutations (`n!`, `ⁿPₖ`, `nᵣ`, multiset), combinations (`ⁿCᵣ`, multiset), subsets (`2ⁿ`), Cartesian
  * products, and number system conversions (permutadic, combinadic, factoradic). Key classes include
  * JNumberTools, Calculator, Permutations, Combinations, Subsets, RankOf, UnrankOf, CartesianProduct,
  * and NumberSystem. These classes support generating structures in lexicographical order, by rank, or

@@ -16,6 +16,9 @@ import java.util.Map;
  * <p>
  * All methods return generators producing {@link Map <T,Integer>} (immutable frequency maps).
  * </p>
+ * <p>
+ * Implementations are expected to be immutable and thread-safe. Configuration methods should return new instances.
+ * </p>
  *
  * @param <T> the type of elements in the multiset
  * @author Deepesh Patel
@@ -49,6 +52,9 @@ public interface MultisetBuilder<T> {
 
     /**
      * Generates multiset combinations at the specified ranks.
+     * <p>
+     * Ranks are 0-based in lexicographical order.
+     * </p>
      *
      * @param ranks the sequence of ranks (each must be >= 0 and < total)
      * @return a generator producing combinations at the given ranks

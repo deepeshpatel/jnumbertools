@@ -1,49 +1,233 @@
-/*
- * JNumberTools Library v3.0.1
- * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
- */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
+import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test class for {@link RepetitivePermutationByRanks}, covering choice and sampling strategies.
- */
 class RepetitivePermutationByRanksTest {
 
-    @Test
-    void assertCount() {
-        // nʳ permutations with repetition
-        for (int n = 1; n <= 4; n++) {
-            var input = Collections.nCopies(n, "A");
-            for (int r = 0; r <= n + 1; r++) {
-                long size = permutation.repetitive(r, input)
-                        .lexOrder()
-                        .stream().count();
-                assertEquals(repetitionCount(input, n, r), size);
+    @Nested
+    public class RepetitivePermutationMthTest {
+        @Test
+        void assertCount() {
+            // nʳ permutations with repetition
+            for (int n = 1; n <= 4; n++) {
+                var input = Collections.nCopies(n, "A");
+                for (int r = 0; r <= n + 1; r++) {
+                    long size = permutation.repetitive(r, input)
+                            .lexOrder()
+                            .stream().count();
+                    assertEquals(repetitionCount(input, n, r), size);
+                }
             }
         }
-    }
 
-    //TODO: Add method in calculator and remove from here and builder if suitable
-    private static int repetitionCount(List<String> input, int n, int r) {
-        if (input.isEmpty() && r > 0) {
-            return 0;
+        //TODO: Add method in calculator and remove from here and builder if suitable
+        private static int repetitionCount(List<String> input, int n, int r) {
+            if (input.isEmpty() && r > 0) {
+                return 0;
+            }
+            if (r == 0) {
+                return 1;
+            }
+            return calculator.power(input.size(), r).intValue();
         }
-        if (r == 0) {
-            return 1;
+
+        @Test
+        void shouldReturnSameResultForDifferentIteratorObjects() {
+            var iterable = permutation.repetitive(2, 'A', 'B', 'C')
+                    .lexOrderMth(2, 0);
+            assertIterableEquals(iterable.stream().toList(), iterable.stream().toList());
         }
-        return calculator.power(input.size(), r).intValue();
+
+        @Test
+        void shouldGenerateAllPermutationsOf2Values() {
+            var expected = List.of(
+                    of(0, 0, 0),
+                    of(0, 1, 0),
+                    of(1, 0, 0),
+                    of(1, 1, 0)
+            );
+            var output = permutation.repetitive(3, 0, 1)
+                    .lexOrderMth(2, 0)
+                    .stream()
+                    .toList();
+            assertIterableEquals(expected, output);
+        }
+
+        @Test
+        void testMthPermutationAgainstFixedOutput() {
+            var expected = List.of(
+                    of("A", "A"),
+                    of("A", "C"),
+                    of("B", "B"),
+                    of("C", "A"),
+                    of("C", "C")
+            );
+            var output = permutation.repetitive(2, "A", "B", "C")
+                    .lexOrderMth(2, 0)
+                    .stream()
+                    .toList();
+            assertIterableEquals(expected, output);
+        }
+
+        @Test
+        void test_start_parameter_greater_than_0() {
+            var expected = List.of(
+                    of("B", "A"),
+                    of("B", "C"),
+                    of("C", "B")
+            );
+            var output = permutation.repetitive(2, "A", "B", "C")
+                    .lexOrderMth(2, 3)
+                    .stream()
+                    .toList();
+            assertIterableEquals(expected, output);
+        }
+
+        @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
+        @Test
+        void stressTesting() {
+            int n = 4;
+            int width = 1000;
+            for (int x = 2000; x <= 2010; x++) {
+                BigInteger totalRepetitivePerm = calculator.power(x, width).divide(BigInteger.valueOf(n));
+                long count = permutation.repetitive(width, x)
+                        .lexOrderMth(totalRepetitivePerm, BigInteger.ZERO)
+                        .stream()
+                        .count();
+                assertEquals(n, count, 1);
+            }
+        }
+
+        @Test
+        void shouldGeneratePermutationsForVeryLargeM() {
+            List<Integer> input = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+            int width = 12;
+
+            // Hardcoded expected result for very big m, verified once for correctness
+            var expected = List.of(
+                    of(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                    of(2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                    of(4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                    of(6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                    of(8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+            );
+
+            BigInteger largeM = BigInteger.valueOf(200_000_000_000L); // 200 billion
+
+            var permutations = permutation.repetitive(width, input)
+                    .lexOrderMth(largeM, BigInteger.ZERO)
+                    .stream()
+                    .toList();
+
+            assertIterableEquals(expected, permutations);
+        }
+
+        @Test
+        void shouldHandleZeroWidth() {
+            var expected = List.of(of());
+            var output = permutation.repetitive(0, "A", "B")
+                    .lexOrderMth(1, 0)
+                    .stream()
+                    .toList();
+            assertIterableEquals(expected, output, "Should generate one empty permutation for width=0");
+        }
+
+        @Test
+        void shouldThrowExceptionForNegativeWidth() {
+            var exp = assertThrows(IllegalArgumentException.class, () -> permutation.repetitive(-1, "A", "B")
+                    .lexOrderMth(1, 0)
+                    .stream()
+                    .toList());
+            assertEquals("Width (r) cannot be negative for repetitive permutation generation", exp.getMessage());
+        }
+
+        @Test
+        void testFailFastForLexOrderMth() {
+            var repetitivePerm = permutation.repetitive(2, "A", "B");
+
+            // m <= 0
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> repetitivePerm.lexOrderMth(0, 0));
+            assertEquals(errMsgForIncrement, exception.getMessage());
+
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> repetitivePerm.lexOrderMth(-1, 0));
+            assertEquals(errMsgForIncrement, exception.getMessage());
+
+            // start < 0
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> repetitivePerm.lexOrderMth(1, -1));
+            assertTrue(exception.getMessage().startsWith("Element should be in range"));
+
+            // start >= count
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> repetitivePerm.lexOrderMth(1, 10));
+            assertTrue(exception.getMessage().startsWith("Element should be in range"));
+        }
+
+        @Test
+        void shouldWorkForEmptyElementList() {
+            //by the definition of exponentiation, for n=0 and k>0 0^k = 0
+            //hence empty input should be allowed and the result is the empty collection
+            var output = permutation.repetitive(2, Collections.emptyList())
+                    .lexOrderMth(1, 0)
+                    .stream()
+                    .toList();
+            assertTrue(output.isEmpty());
+        }
+
+        @Test
+        void shouldHandleLargeMWithNonZeroStart() {
+            List<Integer> input = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+            int width = 12;
+            BigInteger largeM = BigInteger.valueOf(200_000_000_000L);
+            BigInteger start = BigInteger.valueOf(100_000_000_000L);
+
+            var permutations = permutation.repetitive(width, input)
+                    .lexOrderMth(largeM, start)
+                    .stream()
+                    .toList();
+
+            // Just verify it doesn't throw and returns something
+            assertNotNull(permutations);
+            assertFalse(permutations.isEmpty());
+        }
+
+        @Test
+        void shouldHandleIncrementLargerThanTotal() {
+            int width = 2;
+            var result = permutation.repetitive(width, 0, 1)
+                    .lexOrderMth(10, 0) // increment > total
+                    .stream()
+                    .toList();
+
+            assertEquals(1, result.size(), "Should return only first permutation");
+            assertEquals(of(0, 0), result.get(0));
+        }
+
+        @Test
+        void shouldGenerateRepetitiveMthPermutations() {
+            int width =3;
+            int noOfElements = 5;
+            int start = 2;
+            for(int m=1; m<=32; m++) {
+                var all =      permutation.repetitive(width, noOfElements).lexOrder().stream();
+                var everyMth = permutation.repetitive(width, noOfElements).lexOrderMth(m, start).stream();
+                assertEveryMthValue(all, everyMth, start, m);
+            }
+        }
+
     }
 
 
@@ -228,7 +412,7 @@ class RepetitivePermutationByRanksTest {
         @Test
         void byRanks_withNegativeRank_shouldThrowException() {
             var result = permutation.repetitive(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(-1)));
-            
+
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
             }, "Negative rank should throw IllegalArgumentException");
@@ -237,7 +421,7 @@ class RepetitivePermutationByRanksTest {
         @Test
         void byRanks_withOutOfBoundRank_shouldThrowException() {
             var result = permutation.repetitive(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(1000000000)));
-            
+
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
             }, "Out-of-bounds rank should throw IllegalArgumentException");
@@ -246,11 +430,11 @@ class RepetitivePermutationByRanksTest {
         @Test
         void byRanks_withValidRanks_shouldWork() {
             var result = permutation.repetitive(2, "A", "B", "C").byRanks(of(
-                java.math.BigInteger.ZERO,
-                java.math.BigInteger.ONE,
-                java.math.BigInteger.valueOf(2)
+                    java.math.BigInteger.ZERO,
+                    java.math.BigInteger.ONE,
+                    java.math.BigInteger.valueOf(2)
             ));
-            
+
             assertDoesNotThrow(() -> {
                 var permutations = result.stream().toList();
                 assertEquals(3, permutations.size());

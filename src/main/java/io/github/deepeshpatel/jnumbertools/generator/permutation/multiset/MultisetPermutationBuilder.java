@@ -14,18 +14,133 @@ import java.math.BigInteger;
 import java.util.LinkedHashMap;
 
 /**
- * Builder class for generating permutations of a multiset.
+ * Builder for generating distinct permutations of a multiset.
  * <p>
- * This class facilitates the generation of permutations for a multiset, where elements may repeat based on specified frequencies.
- * It supports generating all permutations in lexicographical order or retrieving a specific mᵗʰ permutation directly without
- * computing all preceding ones.
- * </p>
- * <p>
- * This builder is immutable and thread-safe. It can be safely shared across threads
- * without synchronization.
+ * A multiset permutation is an ordered arrangement of elements where some elements
+ * may be identical. Given frequencies f₁, f₂, ..., fₖ for k distinct element types,
+ * the total number of distinct permutations is n!/(f₁!·f₂!·...·fₖ!) where n = ∑fᵢ.
  * </p>
  *
- * @param <T> the type of elements in the multiset, must implement {@link Comparable}
+ * <h2>Key Characteristics</h2>
+ * <ul>
+ *   <li><b>Duplicate elements</b> - Elements can appear multiple times based on frequencies</li>
+ *   <li><b>Order matters</b> - Different arrangements are considered distinct permutations</li>
+ *   <li><b>Output format</b> - Each permutation is a List&lt;T&gt; of length n = sum of frequencies</li>
+ *   <li><b>Total count</b> - Multinomial coefficient n!/(f₁!·f₂!·...·fₖ!)</li>
+ * </ul>
+ *
+ * <h2>Usage Examples</h2>
+ *
+ * <h3>Basic Generation</h3>
+ * <pre>
+ * // Define multiset: A appears 2 times, B appears 1 time
+ * LinkedHashMap&lt;String, Integer&gt; multiset = new LinkedHashMap&lt;&gt;();
+ * multiset.put("A", 2);
+ * multiset.put("B", 1);
+ *
+ * MultisetPermutationBuilder&lt;String&gt; builder =
+ *     new MultisetPermutationBuilder&lt;&gt;(multiset, calculator);
+ *
+ * // All 3!/(2!·1!) = 3 distinct permutations
+ * builder.lexOrder()
+ *        .forEach(System.out::println);
+ * // Output: [A, A, B], [A, B, A], [B, A, A]
+ * </pre>
+ *
+ * <h3>Larger Example</h3>
+ * <pre>
+ * // Mississippi example: M=1, i=4, s=4, p=2 (total 11 letters)
+ * LinkedHashMap&lt;String, Integer&gt; mississippi = new LinkedHashMap&lt;&gt;();
+ * mississippi.put("M", 1);
+ * mississippi.put("i", 4);
+ * mississippi.put("s", 4);
+ * mississippi.put("p", 2);
+ *
+ * MultisetPermutationBuilder&lt;String&gt; msBuilder =
+ *     new MultisetPermutationBuilder&lt;&gt;(mississippi, calculator);
+ * System.out.println("Total permutations: " + msBuilder.count());
+ * // Output: 11!/(1!·4!·4!·2!) = 34,650
+ * </pre>
+ *
+ * <h3>Integer Range Input</h3>
+ * <pre>
+ * // Multiset: 0 appears 2 times, 1 appears 1 time, 2 appears 1 time
+ * LinkedHashMap&lt;Integer, Integer&gt; intMultiset = new LinkedHashMap&lt;&gt;();
+ * intMultiset.put(0, 2);
+ * intMultiset.put(1, 1);
+ * intMultiset.put(2, 1);
+ *
+ * MultisetPermutationBuilder&lt;Integer&gt; intBuilder =
+ *     new MultisetPermutationBuilder&lt;&gt;(intMultiset, calculator);
+ *
+ * intBuilder.lexOrder().forEach(System.out::println);
+ * // Output: [0,0,1,2], [0,0,2,1], [0,1,0,2], [0,1,2,0], [0,2,0,1], [0,2,1,0],
+ * //         [1,0,0,2], [1,0,2,0], [1,2,0,0], [2,0,0,1], [2,0,1,0], [2,1,0,0]
+ * </pre>
+ *
+ * <h3>Every mᵗʰ Permutation</h3>
+ * <pre>
+ * // Every 2nd permutation starting from rank 1
+ * builder.lexOrderMth(2, 1)
+ *        .forEach(System.out::println);
+ * // Output for [A=2,B=1]: [A,B,A], [B,A,A] (ranks 1 and 2)
+ * </pre>
+ *
+ * <h3>Random Sampling</h3>
+ * <pre>
+ * // Sample 2 unique permutations without replacement
+ * builder.sample(2)
+ *        .forEach(System.out::println);
+ *
+ * // Sample 4 permutations with replacement (duplicates allowed)
+ * builder.choice(4)
+ *        .forEach(System.out::println);
+ * </pre>
+ *
+ * <h3>Rank-Based Access</h3>
+ * <pre>
+ * // Get permutations at ranks 0, 1, and 2
+ * builder.byRanks(List.of(BigInteger.ZERO,
+ *                         BigInteger.ONE,
+ *                         BigInteger.valueOf(2)))
+ *        .forEach(System.out::println);
+ * // Output: [A,A,B], [A,B,A], [B,A,A]
+ * </pre>
+ *
+ * <h3>Empty and Edge Cases</h3>
+ * <pre>
+ * // Single element type with frequency f
+ * LinkedHashMap&lt;String, Integer&gt; single = new LinkedHashMap&lt;&gt;();
+ * single.put("X", 3);
+ * MultisetPermutationBuilder&lt;String&gt; singleBuilder =
+ *     new MultisetPermutationBuilder&lt;&gt;(single, calculator);
+ * System.out.println(singleBuilder.count()); // 1
+ * singleBuilder.lexOrder().forEach(System.out::println); // Prints: [X, X, X]
+ *
+ * // Zero frequencies not allowed (throws IllegalArgumentException)
+ * LinkedHashMap&lt;String, Integer&gt; invalid = new LinkedHashMap&lt;&gt;();
+ * invalid.put("A", 0);
+ * // new MultisetPermutationBuilder&lt;&gt;(invalid, calculator); // Exception!
+ * </pre>
+ *
+ * <h3>Performance Note</h3>
+ * <pre>
+ * // This implementation flattens frequencies into an initial index array.
+ * // For extremely large frequencies (e.g., 10⁹⁹), this approach may be inefficient,
+ * // but such cases would generate astronomically large numbers of permutations
+ * // that cannot be enumerated in practice anyway.
+ * </pre>
+ *
+ * <p>
+ * This builder is immutable and thread-safe. All configuration methods return new instances.
+ * </p>
+ *
+ * @param <T> the type of elements in the permutations
+ * @see MultisetPermutation
+ * @see MultisetPermutationMth
+ * @see MultisetPermutationByRanks
+ * @see <a href="https://en.wikipedia.org/wiki/Multinomial_coefficient">Multinomial Coefficient</a>
+ * @see <a href="https://en.wikipedia.org/wiki/Permutation#Permutations_of_multisets">Permutations of Multisets</a>
  * @author Deepesh Patel
  */
 public final class MultisetPermutationBuilder<T> implements Builder<T> {
@@ -74,7 +189,7 @@ public final class MultisetPermutationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if {@code m} or {@code start} is negative
      */
     public MultisetPermutationMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m,start);
+        EveryMthIterable.validateLexOrderMthParams(m,start, count());
         return new MultisetPermutationMth<>(options, m, start, calculator);
     }
 

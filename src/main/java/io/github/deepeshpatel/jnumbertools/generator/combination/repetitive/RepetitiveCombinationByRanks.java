@@ -20,6 +20,9 @@ import java.util.List;
  * by a rank in [0, ⁿ⁺ᵣ⁻¹Cᵣ), mapped to a combination using a lexicographical unranking algorithm.
  * Supports strategies like random sampling or lexicographical sequences.
  * </p>
+ * <p>
+ * Ranks are 0-based in lexicographical order.
+ * </p>
  *
  * @param <T> the type of elements in the combinations
  * @author Deepesh Patel

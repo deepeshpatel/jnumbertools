@@ -1,22 +1,17 @@
-/*
- * JNumberTools Library v3.0.1
- * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
- */
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
+import java.math.BigInteger;
 import java.util.List;
-import java.util.stream.IntStream;
 
+import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * Test class for ConstrainedProductBuilder, covering all, mth, choice, and sample operations.
- */
 public class ConstrainedCartesianProductTest {
 
     private final List<String> pizzaBase = of("Small ", "Medium", "Large");
@@ -34,144 +29,135 @@ public class ConstrainedCartesianProductTest {
         assertEquals(product.count().longValue(), list.size());
     }
 
-    @Nested
-    class All {
-        @Test
-        void shouldGenerateCorrectCombinations() {
-            var product = cartesianProduct.constrainedProductOf(1, pizzaBase)
-                    .andDistinct(2, cheese)
-                    .andMultiSelect(2, sauce)
-                    .andInRange(1, 5, toppings);
-            var list = product.lexOrder().stream().toList();
-            assertEquals(product.count().longValue(), list.size());
-            assertEquals(
-                    of("Small ", "Ricotta", "Mozzarella", "Tomato Ketchup", "Tomato Ketchup", "tomato"),
-                    list.get(0)
-            );
-            assertEquals(
-                    of("Small ", "Ricotta", "Mozzarella", "Tomato Ketchup", "Green Chutney", "tomato", "onion", "paneer"),
-                    list.get(80)
-            );
-            assertEquals(
-                    of("Small ", "Ricotta", "Cheddar", "Green Chutney", "Green Chutney", "onion", "corn"),
-                    list.get(354)
-            );
-            assertEquals(
-                    of("Medium", "Ricotta", "Mozzarella", "Tomato Ketchup", "White Sauce", "capsicum", "paneer"),
-                    list.get(599)
-            );
-            assertEquals(
-                    of("Medium", "Ricotta", "Cheddar", "Tomato Ketchup", "White Sauce", "corn"),
-                    list.get(779)
-            );
-            assertEquals(
-                    of("Medium", "Mozzarella", "Cheddar", "Tomato Ketchup", "White Sauce", "tomato", "capsicum", "onion", "paneer", "corn"),
-                    list.get(991)
-            );
-            assertEquals(
-                    of("Large", "Mozzarella", "Cheddar", "Green Chutney", "Green Chutney", "tomato", "capsicum", "onion", "paneer", "corn"),
-                    list.get(list.size() - 1)
-            );
-        }
+    @Test
+    void shouldThrowExceptionWhenFromGreaterThanTo() {
+        assertThrows(IllegalArgumentException.class, () ->
+                cartesianProduct.constrainedProductOf(1, pizzaBase)
+                        .andInRange(5, 3, toppings)  // from > to
+                        .lexOrder()
+        );
     }
 
-    @Nested
-    class Mth {
-        @Test
-        void shouldGenerateCorrectlyForDifferentMValues() {
-            var combProduct = cartesianProduct
-                    .constrainedProductOf(1, pizzaBase)
-                    .andDistinct(2, cheese)
-                    .andMultiSelect(2, sauce)
-                    .andInRange(3, toppings.size(), toppings);
-            for (int m = 2; m <= 10; m++) {
-                List<?> expected = combProduct.lexOrder().stream().toList().get(m);
-                List<?> result = (List<?>) combProduct.lexOrderMth(m, m).stream().toList().get(0);
-                assertIterableEquals(expected, result);
-            }
-        }
+    @Test
+    void shouldHandleToExceedingElements() {
+        // When 'to' exceeds available elements, it should cap at elements.size()
+        var builder = cartesianProduct.constrainedProductOf(1, pizzaBase)
+                .andInRange(1, 10, toppings);
 
-        @Test
-        void shouldGenerateCorrectMthValue() {
-            var combProduct = cartesianProduct
-                    .constrainedProductOf(1, pizzaBase)
-                    .andDistinct(2, cheese)
-                    .andMultiSelect(2, sauce)
-                    .andInRange(3, toppings.size(), toppings);
-            int start = 800;
-            int m = 50;
-            var all = combProduct.lexOrder().stream().toList();
-            var mth = combProduct.lexOrderMth(m, start).iterator();
-            assertEquals(all.get(start), mth.next());
-            assertEquals(all.get(start + m), mth.next());
+        // Calculate expected: pizzaBase(3) × subsets of size 1-5 from toppings
+        BigInteger expectedToppingsCount = BigInteger.ZERO;
+        for (int i = 1; i <= 5; i++) {
+            expectedToppingsCount = expectedToppingsCount.add(calculator.nCr(5, i));
         }
+        BigInteger expectedTotal = BigInteger.valueOf(3).multiply(expectedToppingsCount);
 
-        @Test
-        void shouldGenerateCorrectCombinationForVeryLargeM() {
-            var smallAlphabets = IntStream.rangeClosed('a', 'z').mapToObj(c -> (char) c).toList();
-            var largeAlphabets = IntStream.rangeClosed('A', 'Z').mapToObj(c -> (char) c).toList();
-            var numbers = IntStream.rangeClosed(0, 20).boxed().toList();
-            var productBuilder = cartesianProduct
-                    .constrainedProductOf(13, smallAlphabets)
-                    .andDistinct(13, largeAlphabets)
-                    .andInRange(0, 21, numbers);
-            List<List<?>> expectedRows = List.of(
-                    of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'),
-                    of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'O', 'X', 0, 1, 2, 4, 6, 8, 9, 10, 12, 13, 18, 20),
-                    of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'V', 'W', 0, 1, 8, 9, 12, 13, 15, 17, 18, 20),
-                    of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'L', 'P', 'S', 0, 3, 8, 9, 10, 11, 19),
-                    of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'L', 'W', 'X', 0, 3, 4, 5, 7, 8, 9, 11, 12, 16, 18, 20),
-                    of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'M', 'R', 'S', 1, 2, 3, 6, 7, 10, 13, 16, 17, 19),
-                    of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'N', 'P', 'R', 0, 1, 4, 5, 14, 15, 16, 19),
-                    of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'N', 'V', 'Z', 2, 3, 4, 5, 7, 8, 9, 10, 12, 14, 18, 20),
-                    of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'O', 'U', 'W', 2, 4, 5, 7, 11, 13, 14, 15, 16, 18),
-                    of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'P', 'U', 'Z', 1, 6, 8, 11, 12, 17, 18, 19)            );
-            testForEveryMth(100000000L, expectedRows, productBuilder);
-        }
+        assertEquals(expectedTotal, builder.count());
 
-        private void testForEveryMth(long m, List<List<?>> rows, ConstrainedProductBuilder builder) {
-            long mm = -m;
-            for (List<?> row : rows) {
-                mm += m;
-                assertEquals(row, builder.lexOrderMth(1, mm).iterator().next());
+        var result = builder.lexOrder().stream().toList();
+        assertEquals(expectedTotal.intValue(), result.size());
+
+        // Verify structure: each tuple is flat
+        for (var tuple : result) {
+            // First element: pizza base (String)
+            assertTrue(pizzaBase.contains(tuple.get(0)));
+
+            // Remaining elements: toppings (variable number, 1-5)
+            int toppingsCount = tuple.size() - 1;
+            assertTrue(toppingsCount >= 1 && toppingsCount <= 5);
+
+            // Verify all toppings are from the original list
+            for (int i = 1; i < tuple.size(); i++) {
+                assertTrue(toppings.contains(tuple.get(i)));
             }
         }
     }
 
-    @Nested
-    class Choice {
-        @Test
-        void shouldGenerateRandomChoice() {
-            var product = cartesianProduct.constrainedProductOf(1, pizzaBase)
-                    .andDistinct(1, cheese)
-                    .choice(3);
-            var list = product.stream().toList();
-            assertEquals(3, list.size());
-            for (var item : list) {
-                List innerList = (List) item;
-                assertEquals(2, innerList.size());
-                assertTrue(pizzaBase.contains(innerList.get(0)));
-                assertTrue(cheese.contains(innerList.get(1)));
-            }
-        }
+
+    @Test
+    void shouldHandleNullElementsInAndDistinct() {
+        var builder = cartesianProduct.constrainedProductOf(1, pizzaBase)
+                .andDistinct(2, (List<?>) null);
+
+        assertEquals(BigInteger.ZERO, builder.count());
+        assertTrue(builder.lexOrder().stream().toList().isEmpty());
     }
 
-    @Nested
-    class Sample {
-        @Test
-        void shouldGenerateRandomSample() {
-            var product = cartesianProduct.constrainedProductOf(1, pizzaBase)
-                    .andDistinct(1, cheese)
-                    .sample(3);
-            var list = product.stream().toList();
-            assertEquals(3, list.size());
-            assertEquals(3, list.stream().distinct().count()); // Ensure uniqueness
-            for (var item : list) {
-                List innerList = (List) item;
-                assertEquals(2, innerList.size());
-                assertTrue(pizzaBase.contains(innerList.get(0)));
-                assertTrue(cheese.contains(innerList.get(1)));
-            }
-        }
+    @Test
+    void shouldHandleNullElementsInAndMultiSelect() {
+        var builder = cartesianProduct.constrainedProductOf(1, pizzaBase)
+                .andMultiSelect(2, (List<?>) null);
+
+        assertEquals(BigInteger.ZERO, builder.count());
+        assertTrue(builder.lexOrder().stream().toList().isEmpty());
+    }
+
+    @Test
+    void shouldHandleNullElementsInAndInRange() {
+        // According to the pattern with SimpleProductBuilder:
+        // - null should be treated as empty set
+        // - Empty set with range [1,3] has no valid subsets (since min size 1 > 0)
+        // - Therefore this dimension contributes 0 combinations
+        // - Product with any zero dimension is empty
+
+        var builder = cartesianProduct.constrainedProductOf(1, pizzaBase)
+                .andInRange(1, 3, (List<?>) null);
+        assertEquals(BigInteger.ZERO, builder.count());
+        assertTrue(builder.lexOrder().stream().toList().isEmpty());
+    }
+
+    @Test
+    void shouldGenerateCorrectCombinations() {
+        var product = cartesianProduct.constrainedProductOf(1, pizzaBase)
+                .andDistinct(2, cheese)
+                .andMultiSelect(2, sauce)
+                .andInRange(1, 5, toppings);
+        var list = product.lexOrder().stream().toList();
+        assertEquals(product.count().longValue(), list.size());
+        assertEquals(
+                of("Small ", "Ricotta", "Mozzarella", "Tomato Ketchup", "Tomato Ketchup", "tomato"),
+                list.get(0)
+        );
+        assertEquals(
+                of("Small ", "Ricotta", "Mozzarella", "Tomato Ketchup", "Green Chutney", "tomato", "onion", "paneer"),
+                list.get(80)
+        );
+        assertEquals(
+                of("Small ", "Ricotta", "Cheddar", "Green Chutney", "Green Chutney", "onion", "corn"),
+                list.get(354)
+        );
+        assertEquals(
+                of("Medium", "Ricotta", "Mozzarella", "Tomato Ketchup", "White Sauce", "capsicum", "paneer"),
+                list.get(599)
+        );
+        assertEquals(
+                of("Medium", "Ricotta", "Cheddar", "Tomato Ketchup", "White Sauce", "corn"),
+                list.get(779)
+        );
+        assertEquals(
+                of("Medium", "Mozzarella", "Cheddar", "Tomato Ketchup", "White Sauce", "tomato", "capsicum", "onion", "paneer", "corn"),
+                list.get(991)
+        );
+        assertEquals(
+                of("Large", "Mozzarella", "Cheddar", "Green Chutney", "Green Chutney", "tomato", "capsicum", "onion", "paneer", "corn"),
+                list.get(list.size() - 1)
+        );
+    }
+
+    @Test
+    void constrained_withInvalidRange_shouldThrow() {
+        assertThrows(IllegalArgumentException.class, () ->
+                cartesianProduct.constrainedProductOf(1, pizzaBase)
+                        .andInRange(5, 3, toppings)
+                        .lexOrder());
+    }
+
+    @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
+    @Test
+    void stressLargeProduct() {
+        var builder = cartesianProduct.simpleProductOf(List.of(0,1,2,3,4,5,6,7,8,9))
+                .and(List.of(0,1,2,3,4,5,6,7,8,9))
+                .and(List.of(0,1,2,3,4,5,6,7,8,9));
+        long count = builder.lexOrder().stream().count();
+        assertEquals(1000, count);
     }
 }

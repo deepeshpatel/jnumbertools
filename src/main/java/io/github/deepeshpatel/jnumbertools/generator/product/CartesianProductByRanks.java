@@ -20,6 +20,9 @@ import java.util.stream.StreamSupport;
  * Cartesian products, replacing {@code SimpleProductMth} and {@code ConstrainedProductMth}. The products
  * are computed efficiently using combinadic unranking, suitable for random sampling, choice, or mᵗʰ sequences.
  * </p>
+ * <p>
+ * Ranks are 0-based in lexicographical order.
+ * </p>
  *
  * @param <T> the type of elements in the products
  * @author Deepesh Patel

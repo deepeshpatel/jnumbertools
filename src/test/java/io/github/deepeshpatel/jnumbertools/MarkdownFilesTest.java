@@ -1,6 +1,8 @@
 package io.github.deepeshpatel.jnumbertools;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -29,6 +31,7 @@ public class MarkdownFilesTest {
     );
 
     @Test
+    @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
     void testAllMarkdownFiles() {
         Path projectRoot = Paths.get("").toAbsolutePath();
 

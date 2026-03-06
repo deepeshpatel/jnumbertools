@@ -32,6 +32,26 @@ class RepetitiveCombinationByRanksTest {
     public class RepetitiveCombinationMthTest {
 
         @Test
+        void assertCount() {
+            // nCr with repetition and mᵗʰ: (n+r−1)!/(r!·(n−1)!)/m
+            int increment = 4;
+            int start = 0;
+
+            for (int n = 1; n <= 4; n++) {
+                for (int r = 1; r <= 3; r++) {
+                    long count = combination.repetitive(n, r)
+                            .lexOrderMth(increment, start)
+                            .stream()
+                            .count();
+
+                    long totalCombinations = calculator.nCrRepetitive(n, r).longValue();
+                    double expected = Math.ceil(totalCombinations / (double) increment);
+                    assertEquals((long) expected, count);
+                }
+            }
+        }
+
+        @Test
         void should_generate_correct_combinations_for_r_greater_than_n() {
             int n = 3;
             int r = 5;
@@ -72,14 +92,6 @@ class RepetitiveCombinationByRanksTest {
         }
 
         @Test
-        void should_return_empty_lists_for_m_out_of_bounds() {
-            int n = 2;
-            int r = 2;
-            var list = combination.repetitive(n, r).lexOrderMth(8, 8).stream().toList();
-            assertTrue(list.isEmpty());
-        }
-
-        @Test
         void should_return_empty_list_when_r_equals_0() {
             int n = 3;
             int r = 0;
@@ -106,6 +118,32 @@ class RepetitiveCombinationByRanksTest {
                 var mth = combination.repetitive(n, r).lexOrderMth(m, start);
                 assertEveryMthValue(all.stream(), mth.stream(), start, m);
             }
+        }
+
+        @Test
+        void testFailFastForLexOrderMth() {
+            int n = 3;
+            int r = 2;
+            var repetitiveComb = combination.repetitive(n, r);
+
+            // m <= 0
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> repetitiveComb.lexOrderMth(0, 1));
+            assertEquals(errMsgForIncrement, exception.getMessage());
+
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> repetitiveComb.lexOrderMth(-1, 1));
+            assertEquals(errMsgForIncrement, exception.getMessage());
+
+            // start < 0
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> repetitiveComb.lexOrderMth(1, -1));
+            assertTrue(exception.getMessage().startsWith("Element should be in range"));
+
+            // start >= count
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> repetitiveComb.lexOrderMth(1, 100));
+            assertTrue(exception.getMessage().startsWith("Element should be in range"));
         }
     }
 
@@ -390,7 +428,7 @@ class RepetitiveCombinationByRanksTest {
         @Test
         void byRanks_withNegativeRank_shouldThrowException() {
             var result = combination.repetitive(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(-1)));
-            
+
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
             }, "Negative rank should throw IllegalArgumentException");
@@ -399,7 +437,7 @@ class RepetitiveCombinationByRanksTest {
         @Test
         void byRanks_withOutOfBoundRank_shouldThrowException() {
             var result = combination.repetitive(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(1000000000)));
-            
+
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
             }, "Out-of-bounds rank should throw IllegalArgumentException");
@@ -408,11 +446,11 @@ class RepetitiveCombinationByRanksTest {
         @Test
         void byRanks_withValidRanks_shouldWork() {
             var result = combination.repetitive(2, "A", "B", "C").byRanks(of(
-                java.math.BigInteger.ZERO,
-                java.math.BigInteger.ONE,
-                java.math.BigInteger.valueOf(2)
+                    java.math.BigInteger.ZERO,
+                    java.math.BigInteger.ONE,
+                    java.math.BigInteger.valueOf(2)
             ));
-            
+
             assertDoesNotThrow(() -> {
                 var combinations = result.stream().toList();
                 assertEquals(3, combinations.size());

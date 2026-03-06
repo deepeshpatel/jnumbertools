@@ -27,6 +27,26 @@ public class KPermutationCombinationOrderTest {
     }
 
     @Test
+    void shouldThrowExceptionForKGreaterThanN() {
+        assertThrows(IllegalArgumentException.class, () ->
+                permutation.nPk(4, List.of('A', 'B', 'C')).combinationOrder());
+    }
+
+    @Test
+    void shouldHandleEmptyInput() {
+        var result = permutation.nPk(0, Collections.emptyList()).combinationOrder().stream().toList();
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).isEmpty());
+    }
+
+    @Test
+    void shouldHandleKEqualsZero() {
+        var result = permutation.nPk(0, List.of("A", "B", "C")).combinationOrder().stream().toList();
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).isEmpty());
+    }
+
+    @Test
     void shouldReturnSameResultForDifferentIteratorObjects() {
         var iterable = permutation.nPk(2, "A", "B", "C")
                 .combinationOrder();

@@ -13,8 +13,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator.initIndicesForMultisetPermutation;
-
 /**
  * Generates every mᵗʰ multiset permutation in lexicographical order, starting from a specified rank.
  * <p>
@@ -79,7 +77,7 @@ public final class MultisetPermutationMth<T> extends AbstractMultisetPermutation
         private int[] currentIndices;
 
         public Itr() {
-            currentIndices = initIndicesForMultisetPermutation(frequencies);
+            currentIndices = createFlattenedIndices(frequencies);
         }
 
         @Override

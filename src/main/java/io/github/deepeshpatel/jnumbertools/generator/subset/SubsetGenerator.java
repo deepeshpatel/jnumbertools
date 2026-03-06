@@ -7,6 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.subset;
 import io.github.deepeshpatel.jnumbertools.base.Combinations;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -49,6 +50,22 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
         this.toSize = toSize;
     }
 
+    /**
+     * Returns an iterator over all subsets within the specified size range.
+     * <p>
+     * Subsets are generated in lexicographical order, first by increasing size,
+     * then by combination order within each size.
+     * </p>
+     * <p>
+     * Example: For elements [A, B, C] with range 1 to 2, the iterator produces:
+     * [A], [B], [C], [A,B], [A,C], [B,C]
+     * </p>
+     *
+     * @return an iterator over subsets in lexicographical order;
+     *         returns an iterator with a single empty subset if fromSize = 0;
+     *         returns an empty iterator if fromSize > toSize or fromSize > elements.size()
+     * @see SubsetBuilder#inRange(int, int)
+     */
     @Override
     public Iterator<List<T>> iterator() {
         return new OnDemandIterator(fromSize);
@@ -68,7 +85,11 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
          */
         public OnDemandIterator(int start) {
             this.start = start;
-            current = new Combinations(null).unique(start, elements).lexOrder().iterator();
+            if (start > elements.size()) {
+                current = Collections.emptyIterator();
+            } else {
+                current = new Combinations(null).unique(start, elements).lexOrder().iterator();
+            }
         }
 
         @Override
@@ -77,7 +98,12 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
                 return true;
             }
             if (start < toSize) {
-                current = new Combinations(null).unique(++start, elements).lexOrder().iterator();
+                start++;
+                if (start > elements.size()) {
+                    current = Collections.emptyIterator();
+                } else {
+                    current = new Combinations(null).unique(start, elements).lexOrder().iterator();
+                }
                 return hasNext();
             }
             return false;

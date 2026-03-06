@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
 import io.github.deepeshpatel.jnumbertools.numbersystem.FactoradicAlgorithms;
 import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
@@ -18,9 +19,12 @@ import java.math.BigInteger;
  * combinations are order-independent selections. Outputs are arrays of indices.
  * This class supports:
  * <p>
- * - Unique Permutation (`ⁿ!`): Unranks a full permutation of n distinct elements.
+ * - Unique Permutation (`n!`): Unranks a full permutation of n distinct elements.
  * - k-Permutation (`ⁿPₖ`): Unranks a k-permutation from n distinct elements.
  * - Unique Combination (`ⁿCᵣ`): Unranks a combination of r elements from n distinct elements.
+ * </p>
+ * <p>
+ * This class is immutable and thread-safe. All methods are stateless and can be safely shared across threads.
  * </p>
  * Example usage:
  * <pre>
@@ -30,7 +34,7 @@ import java.math.BigInteger;
  * int[] uniqueCombination = unrankOf.uniqueCombination(BigInteger.valueOf(15), 5, 3);
  * </pre>
  *
- * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
+ * @see AllExamples
  * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  * @author Deepesh Patel
  */
@@ -55,7 +59,7 @@ public final class UnrankOf {
     }
 
     /**
-     * Determines the unique permutation (`ⁿ!`) at a given rank.
+     * Determines the unique permutation (`n!`) at a given rank.
      * <p>
      * Unranks a full permutation of n distinct elements, returning an array of n
      * distinct indices from {0, 1, ..., n-1} in lexicographical order.
@@ -70,7 +74,7 @@ public final class UnrankOf {
     }
 
     /**
-     * Determines the unique permutation (`ⁿ!`) at a given rank with minimal size.
+     * Determines the unique permutation (`n!`) at a given rank with minimal size.
      * <p>
      * Unranks a full permutation, determining the smallest n where rank < n!, and
      * returns an array of n distinct indices from {0, 1, ..., n-1} in lexicographical order.

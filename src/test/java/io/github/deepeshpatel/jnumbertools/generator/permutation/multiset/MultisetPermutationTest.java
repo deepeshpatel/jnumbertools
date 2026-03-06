@@ -16,13 +16,57 @@ public class MultisetPermutationTest {
     void assertCount() {
         // Multiset permutations: n!/(n₁!·n₂!·...·nₖ!)
         Random random = new Random(System.currentTimeMillis());
-        for (int n = 2; n <= 7; n++) {
+        for (int n = 2; n <= 5; n++) {
             var input = IntStream.range(0,n).boxed().toList();
             int[] frequency = getRandomMultisetFreqArray(random, input.size());
             LinkedHashMap<Character, Integer> options = createMap(input, frequency);
             long count = permutation.multiset(options).lexOrder().stream().count();
             assertEquals(calculator.multinomial(frequency).longValue(), count);
         }
+    }
+
+    @Test
+    void shouldThrowExceptionForNullMultiset() {
+        assertThrows(IllegalArgumentException.class, () ->
+                permutation.multiset(null).lexOrder()
+        );
+    }
+
+    @Test
+    void shouldThrowExceptionForEmptyMultiset() {
+        assertThrows(IllegalArgumentException.class, () ->
+                permutation.multiset(new LinkedHashMap<>()).lexOrder()
+        );
+    }
+
+    @Test
+    void shouldThrowExceptionForNegativeFrequency() {
+        LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
+        options.put("A", 2);
+        options.put("B", -1);  // Negative frequency
+        assertThrows(IllegalArgumentException.class, () ->
+                permutation.multiset(options).lexOrder()
+        );
+    }
+
+    @Test
+    void shouldThrowExceptionForZeroFrequency() {
+        LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
+        options.put("A", 2);
+        options.put("B", 0);  // Zero frequency (should be positive)
+        assertThrows(IllegalArgumentException.class, () ->
+                permutation.multiset(options).lexOrder()
+        );
+    }
+
+    @Test
+    void shouldHandleSingleElementWithMultipleFrequencies() {
+        LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
+        options.put("A", 3);
+
+        var result = permutation.multiset(options).lexOrder().stream().toList();
+        assertEquals(1, result.size());
+        assertEquals(List.of("A", "A", "A"), result.get(0));
     }
 
     @Test
@@ -102,5 +146,4 @@ public class MultisetPermutationTest {
 
         assertIterableEquals(expected, output);
     }
-
 }

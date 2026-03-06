@@ -22,6 +22,9 @@ import java.util.NoSuchElementException;
  * Total permutations are nᵂ where w is the width. Supports lexicographical order (all or mᵗʰ), sampling with/without replacement,
  * and custom rank sequences.
  * </p>
+ * <p>
+ * Ranks are 0-based in lexicographical order.
+ * </p>
  *
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel

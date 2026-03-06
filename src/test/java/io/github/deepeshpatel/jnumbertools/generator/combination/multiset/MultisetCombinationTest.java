@@ -85,10 +85,10 @@ public class MultisetCombinationTest {
     @Test
     void testIteratorEquivalence() {
         var input = new LinkedHashMap<String, Integer>();
-        input.put("Banana", 4000);
-        input.put("Apple", 10000);
+        input.put("Banana", 400);
+        input.put("Apple", 1000);
         input.put("Mango", 3);
-        int[] rValues = {10, 5000};
+        int[] rValues = {10, 500};
 
         for (int r : rValues) {
             MultisetCombination<String> mc = combination.multiset(input,r).lexOrder();

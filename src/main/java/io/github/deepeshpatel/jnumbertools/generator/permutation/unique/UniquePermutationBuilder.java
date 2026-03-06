@@ -16,34 +16,103 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Builder class for generating various types of unique permutations of input elements.
- * Provides multiple permutation generation strategies:
- * <ul>
- *   <li>Lexicographical order (all permutations)</li>
- *   <li>Every mᵗʰ permutation in lexicographical order</li>
- *   <li>Random sampling of permutations</li>
- *   <li>Permutations at specific ranks</li>
- *   <li>Single-swap permutations (Heap's algorithm)</li>
- * </ul>
- *
+ * Builder for generating unique permutations of input elements.
  * <p>
- * This builder is immutable and thread-safe. It can be safely shared across threads
- * without synchronization.
+ * A unique permutation is an ordered arrangement of all n distinct elements,
+ * where each element appears exactly once. The total number of unique permutations
+ * is n! (n factorial).
  * </p>
  *
- * <p><b>Example:</b>
- * <pre>{@code
- * // Generate all permutations of [A, B, C] in lex order
- * new UniquePermutationBuilder<>(calculator, Arrays.asList("A", "B", "C"))
- *     .lexOrder()
- *     .forEach(System.out::println);
- * }</pre>
+ * <h2>Generation Strategies</h2>
+ * <p>
+ * This builder provides multiple permutation generation strategies:
+ * <ul>
+ *   <li><b>Lexicographical Order</b> - {@link #lexOrder()}: Generates all n! permutations
+ *       in lexicographical (dictionary) order based on element indices.</li>
+ *   <li><b>Single-Swap Order</b> - {@link #singleSwap()}: Generates permutations using
+ *       Heap's algorithm, where each successive permutation differs by a single swap.</li>
+ *   <li><b>Every mᵗʰ Permutation</b> - {@link #lexOrderMth(BigInteger, BigInteger)}:
+ *       Efficiently generates permutations at ranks start, start+m, start+2m, etc.</li>
+ *   <li><b>Random Sampling</b> - {@link #sample(int)} and {@link #choice(int)}:
+ *       Generate random samples with or without replacement.</li>
+ *   <li><b>Rank-Based Access</b> - {@link #byRanks(Iterable)}: Generate permutations
+ *       at specific lexicographical rank positions.</li>
+ * </ul>
+ * </p>
+ *
+ * <h2>Usage Examples</h2>
+ *
+ * <h3>Basic Generation</h3>
+ * <pre>
+ * UniquePermutationBuilder&lt;String&gt; builder = new UniquePermutationBuilder&lt;&gt;(
+ *     calculator, List.of("A", "B", "C"));
+ *
+ * // All 3! = 6 permutations in lexicographical order
+ * builder.lexOrder()
+ *        .forEach(System.out::println);
+ * // Output: [A,B,C], [A,C,B], [B,A,C], [B,C,A], [C,A,B], [C,B,A]
+ *
+ * // Using Heap's algorithm (single-swap order)
+ * builder.singleSwap()
+ *        .forEach(System.out::println);
+ * </pre>
+ *
+ * <h3>Every mᵗʰ Permutation</h3>
+ * <pre>
+ * // Every 2nd permutation starting from rank 1
+ * builder.lexOrderMth(2, 1)
+ *        .forEach(System.out::println);
+ * // Output for 3 elements: [A,C,B], [B,C,A], [C,B,A] (ranks 1,3,5)
+ * </pre>
+ *
+ * <h3>Random Sampling</h3>
+ * <pre>
+ * // Sample 4 unique permutations without replacement
+ * builder.sample(4)
+ *        .forEach(System.out::println);
+ *
+ * // Sample 5 permutations with replacement (duplicates allowed)
+ * builder.choice(5)
+ *        .forEach(System.out::println);
+ * </pre>
+ *
+ * <h3>Rank-Based Access</h3>
+ * <pre>
+ * // Get permutations at ranks 0, 2, and 4
+ * builder.byRanks(List.of(BigInteger.ZERO,
+ *                         BigInteger.valueOf(2),
+ *                         BigInteger.valueOf(4)))
+ *        .forEach(System.out::println);
+ * // Output for 3 elements: [A,B,C], [B,A,C], [C,A,B]
+ * </pre>
+ *
+ * <h3>Integer Range Input</h3>
+ * <pre>
+ * // Permutations of {0,1,2,3}
+ * UniquePermutationBuilder&lt;Integer&gt; intBuilder =
+ *     new UniquePermutationBuilder&lt;&gt;(calculator, 4);
+ * intBuilder.lexOrder().forEach(System.out::println);
+ * </pre>
+ *
+ * <h3>Empty Input</h3>
+ * <pre>
+ * // Empty input produces one empty permutation
+ * UniquePermutationBuilder&lt;String&gt; emptyBuilder =
+ *     new UniquePermutationBuilder&lt;&gt;(calculator, Collections.emptyList());
+ * System.out.println(emptyBuilder.count()); // 1
+ * emptyBuilder.lexOrder().forEach(System.out::println); // Prints: []
+ * </pre>
+ *
+ * <p>
+ * This builder is immutable and thread-safe. All configuration methods return new instances.
+ * </p>
  *
  * @param <T> the type of elements to permute
- * @author Deepesh Patel
  * @see UniquePermutation
  * @see UniquePermutationByRanks
  * @see UniquePermutationSingleSwap
+ * @see <a href="https://en.wikipedia.org/wiki/Heap%27s_algorithm">Heap's Algorithm</a>
+ * @author Deepesh Patel
  */
 public final class UniquePermutationBuilder<T> implements Builder<T> {
 
@@ -71,15 +140,19 @@ public final class UniquePermutationBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Generates every mᵗʰ unique permutation in lexicographical order.
+     * Generates every mᵗʰ unique permutation in lexicographical order, starting from the specified rank.
+     * <p>
+     * For example, with elements [A, B, C] and m=2, start=0, this generates permutations at ranks 0, 2, 4:
+     * [A,B,C], [B,A,C], [C,A,B] (assuming 6 total permutations).
+     * </p>
      *
-     * @param m     the increment between permutations; must be positive
-     * @param start the starting rank (0-based); must be non-negative
-     * @return a {@link UniquePermutationByRanks} instance for mᵗʰ permutations
-     * @throws IllegalArgumentException if m or start is invalid
+     * @param m the step size between selected permutations (must be > 0)
+     * @param start the starting rank (0-based, must be ≥ 0 and < total permutations)
+     * @return a generator for every mᵗʰ permutation in lexicographical order
+     * @throws IllegalArgumentException if m ≤ 0, start < 0, or start ≥ total permutations
      */
     public UniquePermutationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m,start);
+        EveryMthIterable.validateLexOrderMthParams(m,start,count());
         BigInteger total = calculator.factorial(elements.size());
         return new UniquePermutationByRanks<>(elements, new EveryMthIterable(start, m, total), calculator);
     }

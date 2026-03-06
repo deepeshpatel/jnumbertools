@@ -21,6 +21,9 @@ import java.util.stream.IntStream;
  * of indices, which are then converted to element permutations. For example, for elements [A, B, C],
  * kₖ=2, and ranks [0, 2], it might generate [A, B], [A, C].
  * </p>
+ * <p>
+ * Ranks are 0-based in lexicographical order.
+ * </p>
  *
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel

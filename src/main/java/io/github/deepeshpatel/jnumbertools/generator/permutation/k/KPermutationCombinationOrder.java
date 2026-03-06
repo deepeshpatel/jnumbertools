@@ -46,19 +46,19 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
     }
 
     /**
-     * Returns an iterator over unique k-permutations in combination order.
+     * Returns an iterator over k-permutations in combination order.
+     * <p>
+     * Permutations are ordered first by their underlying combination in lexicographical order,
+     * then by all permutations within each combination group.
+     * </p>
+     * <p>
+     * Example for elements [A, B, C] with k=2, the iterator produces:
+     * [A,B], [B,A], [A,C], [C,A], [B,C], [C,B]
+     * </p>
      *
-     * <p>The iterator behavior:
-     * <ul>
-     *   <li>Returns empty iterator if k=0 or elements is empty</li>
-     *   <li>Uses direct permutation iterator when k = n (full permutations)</li>
-     *   <li>Otherwise generates C(n,k) combinations and P(k,k) permutations for each</li>
-     * </ul>
-     *
-     * <p>Note: This method relies on {@code indicesToValues}, defined in the parent class,
-     * to map index arrays to element lists.
-     *
-     * @return an iterator producing k-permutations in combination order
+     * @return an iterator over k-permutations in combination order;
+     *         returns an empty iterator if k = 0 or the input list is empty
+     * @throws IllegalArgumentException if k < 0 or k > elements.size()
      */
     @Override
     public Iterator<List<T>> iterator() {

@@ -52,7 +52,6 @@ public class CalculatorTest {
         assertEquals(BigInteger.ONE, calculator.nCr(5, 0));
         assertEquals(BigInteger.valueOf(10), calculator.nCr(5, 2));
         assertEquals(BigInteger.valueOf(1), calculator.nCr(5, 5));
-        //assertThrows(IllegalArgumentException.class, () -> calculator.nCr(5, -1));
     }
 
     @Test
@@ -320,7 +319,8 @@ public class CalculatorTest {
 
         @Test
         void testInvalidInputEmptyArray() {
-            Calculator.lcm(); //should not throw exception
+            var exception = assertThrows(IllegalArgumentException.class, () -> Calculator.lcm());
+            assertEquals("At least one number required",exception.getMessage());
         }
 
         @Test

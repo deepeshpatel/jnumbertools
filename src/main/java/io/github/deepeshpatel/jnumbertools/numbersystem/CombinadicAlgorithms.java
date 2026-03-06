@@ -37,19 +37,20 @@ public final class CombinadicAlgorithms {
     }
 
     /**
-     * Computes the rank of a given combination in the Combinadic representation.
+     * Computes the lexicographical rank of a given combination.
      * <p>
-     * The rank is calculated by converting the provided combination into its Combinadic form,
-     * then into a decimal value, and finally computing the rank as:
-     * <pre>
-     *     rank = Cₙ,ᵣ − decimalValue − 1
-     * </pre>
-     * where Cₙ,ᵣ is the total number of combinations of the given size.
+     * The rank is 0-based, meaning the first combination in lexicographical order
+     * has rank 0. Uses combinadic representation for efficient computation.
+     * </p>
+     * <p>
+     * Example: For n=5, r=3, the combination [0,1,2] has rank 0,
+     * [0,1,3] has rank 1, [2,3,4] has rank 9, etc.
      * </p>
      *
-     * @param n the total number of elements (nₙ)
-     * @param mthCombination the combination (array of indices) whose rank is to be computed
-     * @return the rank of the given combination in the Combinadic representation
+     * @param n the total number of elements (n ≥ 0)
+     * @param mthCombination the combination (sorted array of indices) whose rank is to be computed
+     * @return the 0-based lexicographical rank of the combination
+     * @throws IllegalArgumentException if the combination is invalid for the given n
      */
     public BigInteger rank(int n, int[] mthCombination) {
         int[] combinadic = combinationToCombinadic(n, mthCombination);

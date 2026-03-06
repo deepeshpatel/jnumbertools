@@ -151,12 +151,22 @@ public final class PermutadicAlgorithms {
     }
 
     /**
-     * Un-ranks a permutation without bound checking.
+     * Converts a rank to its corresponding k-permutation without bounds checking.
+     * <p>
+     * Directly computes the k-permutation at the given lexicographical rank using
+     * permutadic representation. This method skips bounds validation for performance,
+     * assuming the caller has verified that 0 ≤ rank < P(n,k).
+     * </p>
+     * <p>
+     * Example: For size=5, k=3, rank 0 returns [0,1,2], rank 1 returns [0,1,3],
+     * etc., selecting 3 elements from the set {0,1,2,3,4}.
+     * </p>
      *
-     * @param rank the rank of the permutation to be un-ranked.
-     * @param size the size of the set from which the permutation is selected.
-     * @param k the number of items to be selected for the permutation.
-     * @return an array representing the un-ranked permutation.
+     * @param rank the 0-based lexicographical rank of the desired k-permutation
+     * @param size the total number of elements (n)
+     * @param k the number of elements to select for the permutation
+     * @return an array of length k representing the k-permutation at the specified rank
+     * @see PermutadicAlgorithms#unRankWithBoundCheck(BigInteger, int, int)
      */
     public static int[] unRankWithoutBoundCheck(BigInteger rank, int size, int k) {
         List<Integer> permutadic = toPermutadic(rank, size - k);

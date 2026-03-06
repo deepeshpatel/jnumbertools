@@ -6,20 +6,124 @@ package io.github.deepeshpatel.jnumbertools.generator.subset;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.A_B_C_D;
-import static io.github.deepeshpatel.jnumbertools.TestBase.subsets;
+import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class for SubsetGeneratorByRanks, covering mth, choice, and sample operations.
  */
 public class SubsetGeneratorByRanksTest {
+
+    @Nested
+    public class SubsetGeneratorMthTest {
+
+        @Test
+        void assertCount() {
+            // 2ⁿ with mᵗʰ: 2ⁿ/m
+            int increment = 3;
+            int start = 0;
+            
+            // Test all subsets
+            for (int n = 1; n <= 5; n++) {
+                var input = num_0_to_5.subList(0, n);
+                long count = subsets.of(input).all()
+                        .lexOrderMth(increment, start)
+                        .stream()
+                        .count();
+                double expected = Math.ceil(Math.pow(2, n) / increment);
+                assertEquals((long) expected, count);
+            }
+            
+            // Test range subsets using correct calculator method
+            for (int from = 1; from <= 3; from++) {
+                for (int to = from; to <= 4; to++) {
+                    var input = num_0_to_5.subList(0, 5);
+                    long count = subsets.of(input).inRange(from, to)
+                            .lexOrderMth(increment, start)
+                            .stream()
+                            .count();
+                    long totalRange = calculator.totalSubsetsInRange(from, to, input.size()).longValue();
+                    double expected = Math.ceil(totalRange / (double) increment);
+                    assertEquals((long) expected, count);
+                }
+            }
+        }
+
+        @Test
+        void testFailFastForLexOrderMth() {
+            var subsetBuilder = subsets.of(A_B_C_D).inRange(1, 3);
+
+            // m <= 0
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> subsetBuilder.lexOrderMth(0, 1));
+            assertEquals(errMsgForIncrement, exception.getMessage());
+
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> subsetBuilder.lexOrderMth(-1, 1));
+            assertEquals(errMsgForIncrement, exception.getMessage());
+
+            // start < 0
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> subsetBuilder.lexOrderMth(1, -1));
+            assertTrue(exception.getMessage().startsWith("Element should be in range"));
+
+            // start >= count
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> subsetBuilder.lexOrderMth(1, 100));
+            assertTrue(exception.getMessage().startsWith("Element should be in range"));
+        }
+
+        @Test
+        void shouldGenerate_AllSubsets_For_4Elements_and_M_Equals1() {
+
+            var iter_expected = subsets.of(A_B_C_D).all().lexOrder().iterator();
+            var iter_testResult = subsets.of(A_B_C_D).all().lexOrderMth(1, 0).iterator();
+            while (iter_expected.hasNext()) {
+                assertEquals(iter_expected.next(), iter_testResult.next());
+            }
+        }
+
+        @Test
+        void should_generate_all_subsets_for_6elements_and_different_m_for_range_3_6() {
+            int start = 0;
+            for (int from = 1; from < num_0_to_5.size(); from++) {
+                for (int to = from; to < num_0_to_5.size(); to++) {
+                    for (int m = 1; m < 6; m++) {
+                        var all = subsets.of(num_0_to_5).inRange(from, to).lexOrder().stream();
+                        var mth = subsets.of(num_0_to_5).inRange(from, to).lexOrderMth(m, start).stream();
+                        assertEveryMthValue(all, mth, start, m);
+                    }
+                }
+            }
+        }
+
+        @Test
+        void should_generate_all_subsets_for_4elements_and_different_m() {
+            int start = 3;
+            for (int m = 1; m <= 15; m+=2) {
+                var all = subsets.of(A_B_C_D).all().lexOrder().stream();
+                var mth = subsets.of(A_B_C_D).all().lexOrderMth(m, start).stream();
+                assertEveryMthValue(all, mth, start, m);
+            }
+        }
+
+        @Test
+        void test_start_parameter_greater_than_0() {
+            var builder = subsets.of(A_B_C_D);
+            var listOfAll = builder.all()
+                    .lexOrderMth(5, 3).stream().toList();
+            assertEquals("[[C], [B, C], [A, C, D]]", listOfAll.toString());
+
+            var listOfRange = builder.inRange(2, 3)
+                    .lexOrderMth(5, 3).stream().toList();
+            assertEquals("[[B, C], [A, C, D]]", listOfRange.toString());
+        }
+    }
 
     @Nested
     class CustomRanks {
@@ -41,15 +145,6 @@ public class SubsetGeneratorByRanksTest {
             assertEquals(List.of(), result.get(0));           // rank 0 = empty
             assertEquals(List.of('C'), result.get(1));        // rank 3 = [C]
             assertEquals(List.of('C', 'D'), result.get(2)); // rank 10 = [A,B,D]
-        }
-
-        @Test
-        void shouldThrowErrorForOutOfRangeRank() {
-            var builder = subsets.of(A_B_C_D).inRange(2, 3);
-            var error = assertThrows(IllegalArgumentException.class, () ->
-                    builder.byRanks(List.of(BigInteger.valueOf(15))).stream().toList()
-            );
-            assertEquals(error.getMessage(), "start must be < total subsets in range (0-based)");
         }
 
         @Test
@@ -159,9 +254,4 @@ public class SubsetGeneratorByRanksTest {
         }
     }
 
-    @Nested
-    @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
-    class Stress {
-
-    }
 }

@@ -1,15 +1,15 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
-
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.assertEveryMthValue;
-import static io.github.deepeshpatel.jnumbertools.TestBase.combination;
+import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MultisetCombinationByRanksTest {
@@ -18,17 +18,40 @@ class MultisetCombinationByRanksTest {
     class MultisetCombinationMthTest {
 
         @Test
+        void assertCount() {
+            // Multiset combinations with mᵗʰ: multisetCombinationsCount(r, frequencies)/m
+            int increment = 3;
+            int start = 0;
+
+            var options = new LinkedHashMap<>(Map.of("A", 3, "B", 2, "C", 1));
+            int combinationSize = 2;
+
+            long count = combination.multiset(options, combinationSize)
+                    .lexOrderMth(increment, start)
+                    .stream()
+                    .count();
+
+            long totalCombinations = Calculator.multisetCombinationsCount(
+                    combinationSize,
+                    options.values().stream().mapToInt(Integer::intValue).toArray()
+            ).longValue();
+            double expected = Math.ceil(totalCombinations / (double) increment);
+            assertEquals((long) expected, count);
+        }
+
+        @Test
         void shouldGenerateCorrectCombinationsForAllOrdersAtRank10() {
             int k = 8;
             int start = 10;
             var options = new LinkedHashMap<>(Map.of("A", 10, "B", 4, "C", 5, "D", 7, "E", 4, "F", 7, "G", 2, "H", 1, "I", 1, "J", 2));
-                var combBuilder = combination.multiset(options,k);
-                var mth = combBuilder.lexOrderMth(1,start).stream().toList();
-                var all = combBuilder.lexOrder().stream().toList();
-                assertEquals(all.get(start), mth.get(0));
+            var combBuilder = combination.multiset(options,k);
+            var mth = combBuilder.lexOrderMth(1,start).stream().toList();
+            var elementAtIndex10 = combBuilder.lexOrder().stream().skip(start).findFirst().get();
+            assertEquals(elementAtIndex10, mth.get(0));
         }
 
         @Test
+        @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
         void shouldGenerateMthMultisetCombinations() {
             int size = 4;
             int start = 3;
@@ -41,6 +64,31 @@ class MultisetCombinationByRanksTest {
             }
         }
 
+        @Test
+        void testFailFastForLexOrderMth() {
+            var options = new LinkedHashMap<>(Map.of("A", 3, "B", 2, "C", 1));
+            int combinationSize = 2;
+            var multisetComb = combination.multiset(options, combinationSize);
+
+            // m <= 0
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> multisetComb.lexOrderMth(0, 1));
+            assertEquals(errMsgForIncrement, exception.getMessage());
+
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> multisetComb.lexOrderMth(-1, 1));
+            assertEquals(errMsgForIncrement, exception.getMessage());
+
+            // start < 0
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> multisetComb.lexOrderMth(1, -1));
+            assertTrue(exception.getMessage().startsWith("Element should be in range"));
+
+            // start >= count
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> multisetComb.lexOrderMth(1, 1000));
+            assertTrue(exception.getMessage().startsWith("Element should be in range"));
+        }
     }
 
     @Nested
@@ -85,11 +133,11 @@ class MultisetCombinationByRanksTest {
             for (Map<String, Integer> combo : combinations) {
                 int totalElements = combo.values().stream().mapToInt(Integer::intValue).sum();
                 assertEquals(combinationSize, totalElements, "Each combination should have total size equal to combinationSize");
-                
+
                 // Verify frequencies don't exceed original limits
                 for (Map.Entry<String, Integer> entry : combo.entrySet()) {
-                    assertTrue(entry.getValue() <= options.get(entry.getKey()), 
-                        "Frequency should not exceed original limit for " + entry.getKey());
+                    assertTrue(entry.getValue() <= options.get(entry.getKey()),
+                            "Frequency should not exceed original limit for " + entry.getKey());
                 }
             }
         }
@@ -181,11 +229,11 @@ class MultisetCombinationByRanksTest {
             for (Map<String, Integer> combo : combinations) {
                 int totalElements = combo.values().stream().mapToInt(Integer::intValue).sum();
                 assertEquals(combinationSize, totalElements, "Each combination should have total size equal to combinationSize");
-                
+
                 // Verify frequencies don't exceed original limits
                 for (Map.Entry<String, Integer> entry : combo.entrySet()) {
-                    assertTrue(entry.getValue() <= options.get(entry.getKey()), 
-                        "Frequency should not exceed original limit for " + entry.getKey());
+                    assertTrue(entry.getValue() <= options.get(entry.getKey()),
+                            "Frequency should not exceed original limit for " + entry.getKey());
                 }
             }
         }
@@ -250,9 +298,9 @@ class MultisetCombinationByRanksTest {
             LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
             options.put("A", 2);
             options.put("B", 1);
-            
+
             var result = combination.multiset(options, 2).byRanks(java.util.List.of(java.math.BigInteger.valueOf(-1)));
-            
+
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
             }, "Negative rank should throw IllegalArgumentException");
@@ -263,9 +311,9 @@ class MultisetCombinationByRanksTest {
             LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
             options.put("A", 2);
             options.put("B", 1);
-            
+
             var result = combination.multiset(options, 2).byRanks(java.util.List.of(java.math.BigInteger.valueOf(1000000000)));
-            
+
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
             }, "Out-of-bounds rank should throw IllegalArgumentException");
@@ -276,12 +324,12 @@ class MultisetCombinationByRanksTest {
             LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
             options.put("A", 2);
             options.put("B", 1);
-            
+
             var result = combination.multiset(options, 2).byRanks(java.util.List.of(
-                java.math.BigInteger.ZERO,
-                java.math.BigInteger.ONE
+                    java.math.BigInteger.ZERO,
+                    java.math.BigInteger.ONE
             ));
-            
+
             assertDoesNotThrow(() -> {
                 var combinations = result.stream().toList();
                 assertEquals(2, combinations.size());

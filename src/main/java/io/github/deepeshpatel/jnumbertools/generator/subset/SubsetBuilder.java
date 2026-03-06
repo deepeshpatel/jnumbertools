@@ -11,31 +11,148 @@ import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * A builder for creating subsets from a list of elements.
+ * Builder for generating subsets of elements within a specified size range.
  * <p>
- * The {@code SubsetBuilder} class provides methods to define a range of subset sizes and to generate subsets
- * in lexicographical order. It supports creating all subsets or subsets within a specified size range, and it
- * can generate every mᵗʰ subset starting from a given position.
+ * A subset is a selection of 0 to n elements from a set, where order does not matter.
+ * For a set of n elements, the total number of subsets is 2ⁿ. This builder allows
+ * generating all subsets or restricting to a specific size range.
  * </p>
+ *
+ * <h2>Key Characteristics</h2>
+ * <ul>
+ *   <li><b>Order doesn't matter</b> - Each subset is returned as a List&lt;T&gt;</li>
+ *   <li><b>Size range</b> - Can generate all subsets or restrict to [from, to] range</li>
+ *   <li><b>Generation order</b> - Subsets are generated in lexicographical order,
+ *       first by size, then by combination order within each size</li>
+ *   <li><b>Total count</b> - Sum of C(n,i) for i from 'from' to 'to'</li>
+ * </ul>
+ *
+ * <h2>Usage Examples</h2>
+ *
+ * <h3>All Subsets</h3>
+ * <pre>
+ * SubsetBuilder&lt;String&gt; builder = new SubsetBuilder&lt;&gt;(
+ *     List.of("A", "B", "C"), calculator);
+ *
+ * // All 2³ = 8 subsets
+ * builder.all()
+ *        .lexOrder()
+ *        .forEach(System.out::println);
+ * // Output: [], [A], [B], [C], [A,B], [A,C], [B,C], [A,B,C]
+ * </pre>
+ *
+ * <h3>Subsets in Size Range</h3>
+ * <pre>
+ * // Subsets of size 1 to 2 only
+ * builder.inRange(1, 2)
+ *        .lexOrder()
+ *        .forEach(System.out::println);
+ * // Output: [A], [B], [C], [A,B], [A,C], [B,C]
+ *
+ * // Subsets of size exactly 2
+ * builder.inRange(2, 2)
+ *        .lexOrder()
+ *        .forEach(System.out::println);
+ * // Output: [A,B], [A,C], [B,C]
+ * </pre>
+ *
+ * <h3>Integer Range Input</h3>
+ * <pre>
+ * // Subsets of {0,1,2,3,4}
+ * SubsetBuilder&lt;Integer&gt; intBuilder = new SubsetBuilder&lt;&gt;(5, calculator);
+ *
+ * // All subsets of size 2 to 4
+ * intBuilder.inRange(2, 4)
+ *           .lexOrder()
+ *           .forEach(System.out::println);
+ * </pre>
+ *
+ * <h3>Every mᵗʰ Subset</h3>
+ * <pre>
+ * // Every 3rd subset starting from rank 1
+ * builder.all()
+ *        .lexOrderMth(3, 1)
+ *        .forEach(System.out::println);
+ * // Output for [A,B,C]: ranks 1,4,7 → [A], [A,C], [A,B,C]
+ * </pre>
+ *
+ * <h3>Random Sampling</h3>
+ * <pre>
+ * // Sample 3 unique subsets without replacement
+ * builder.inRange(1, 3)
+ *        .sample(3)
+ *        .forEach(System.out::println);
+ *
+ * // Sample 4 subsets with replacement (duplicates allowed)
+ * builder.all()
+ *        .choice(4)
+ *        .forEach(System.out::println);
+ * </pre>
+ *
+ * <h3>Rank-Based Access</h3>
+ * <pre>
+ * // Get subsets at ranks 0, 3, and 6
+ * builder.all()
+ *        .byRanks(List.of(BigInteger.ZERO,
+ *                         BigInteger.valueOf(3),
+ *                         BigInteger.valueOf(6)))
+ *        .forEach(System.out::println);
+ * // Output for [A,B,C]: [], [C], [B,C] (ranks 0,3,6)
+ * </pre>
+ *
+ * <h3>Empty and Edge Cases</h3>
+ * <pre>
+ * // Empty set has one subset (the empty set itself)
+ * SubsetBuilder&lt;String&gt; emptyBuilder =
+ *     new SubsetBuilder&lt;&gt;(Collections.emptyList(), calculator);
+ * System.out.println(emptyBuilder.all().count()); // 1
+ * emptyBuilder.all().lexOrder().forEach(System.out::println); // Prints: []
+ *
+ * // Range with from=0, to=0 produces only the empty subset
+ * builder.inRange(0, 0)
+ *        .lexOrder()
+ *        .forEach(System.out::println); // Prints: []
+ *
+ * // Invalid ranges throw IllegalArgumentException
+ * // builder.inRange(3, 1); // Exception: to must be >= from
+ * // builder.inRange(5, 6); // Exception: to cannot exceed n
+ * </pre>
+ *
+ * <h3>Mathematical Properties</h3>
+ * <pre>
+ * // Total subsets = 2ⁿ
+ * SubsetBuilder&lt;String&gt; builder4 = new SubsetBuilder&lt;&gt;(List.of("A","B","C","D"), calculator);
+ * System.out.println(builder4.all().count()); // 16
+ *
+ * // Sum of C(4,i) for i=0..4 = 16
+ * // Sum of C(4,i) for i=2..3 = C(4,2)+C(4,3) = 6+4 = 10
+ * System.out.println(builder4.inRange(2, 3).count()); // 10
+ * </pre>
+ *
+ * <h3>Combining with Other Operations</h3>
+ * <pre>
+ * // Subsets can be used as dimensions in constrained Cartesian products
+ * CartesianProduct cp = new CartesianProduct(calculator);
+ * cp.constrainedProductOf(1, "X", "Y")
+ *   .andInRange(1, 2, List.of("A", "B", "C"))  // Subsets as a dimension
+ *   .lexOrder()
+ *   .forEach(System.out::println);
+ * </pre>
+ *
  * <p>
- * This builder is immutable and thread-safe. It can be safely shared across threads
- * without synchronization. The {@code all()} and {@code inRange()} methods return new instances
- * rather than modifying the current instance.
- * </p>
- * <p>
- * <strong>Note:</strong> This builder is intended to be used to construct subset generators, and its associated
- * generator classes (which extend {@code AbstractGenerator}) should be obtained via this builder.
+ * This builder is immutable and thread-safe. All configuration methods return new instances.
  * </p>
  *
  * @param <T> the type of elements in the subsets
- * @author Deepesh Patel
+ * @see SubsetGenerator
+ * @see SubsetGeneratorMth
  * @see SubsetGeneratorByRanks
- * @see EveryMthIterable
- * @see BigIntegerChoice
- * @see BigIntegerSample
+ * @see <a href="https://en.wikipedia.org/wiki/Power_set">Power Set</a>
+ * @author Deepesh Patel
  */
 public class SubsetBuilder<T> implements Builder<T> {
 
@@ -51,7 +168,7 @@ public class SubsetBuilder<T> implements Builder<T> {
      * @param calculator a calculator used for computing subset counts
      */
     public SubsetBuilder(List<T> elements, Calculator calculator) {
-        this.elements = elements;
+        this.elements = elements != null ? elements : Collections.emptyList();
         this.calculator = calculator;
         this.from = -1;
         this.to = -1;
@@ -77,12 +194,16 @@ public class SubsetBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Configures the builder to generate subsets within a specified size range.
+     * Restricts subset generation to sizes within the specified range.
+     * <p>
+     * Only subsets whose size is between {@code from} and {@code to} (inclusive) will be generated.
+     * Subsets are produced in lexicographical order, first by size, then by combination order within each size.
+     * </p>
      *
-     * @param from the minimum size of subsets to generate (inclusive)
-     * @param to   the maximum size of subsets to generate (inclusive)
-     * @return a new SubsetBuilder instance configured for the specified range
-     * @throws IllegalArgumentException if {@code to} is less than {@code from}
+     * @param from the minimum subset size (inclusive, must be ≥ 0)
+     * @param to the maximum subset size (inclusive, must be ≥ from and ≤ elements.size())
+     * @return a new SubsetBuilder configured for the specified size range
+     * @throws IllegalArgumentException if to < from, from < 0, or to > elements.size()
      */
     public SubsetBuilder<T> inRange(int from, int to) {
         if (to < from) {
@@ -112,14 +233,22 @@ public class SubsetBuilder<T> implements Builder<T> {
      * @return a {@code SubsetGeneratorMth} instance
      */
     public SubsetGeneratorMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m,start);
-        BigInteger totalSubsets = calculator.totalSubsetsInRange(from, to, elements.size());
-        if(start.compareTo(totalSubsets) >= 0 ) {
+        EveryMthIterable.validateLexOrderMthParams(m,start, count());
+        if(start.compareTo(count()) >= 0 ) {
             throw new IllegalArgumentException("start must be < total subsets in range (0-based)");
         }
         return new SubsetGeneratorMth<>(from, to, m, start, elements, calculator);
     }
 
+    /**
+     * Generates subsets at specified lexicographical ranks.
+     * <p>
+     * Ranks are 0-based in lexicographical order.
+     * </p>
+     *
+     * @param ranks the iterable of ranks (each rank must be >= 0 and < total subsets)
+     * @return a generator producing subsets at the given ranks
+     */
     public SubsetGeneratorByRanks<T> byRanks(Iterable<BigInteger> ranks) {
         if (from < 0 || to < 0) {
             throw new IllegalStateException("Must specify range via inRange() or all()");

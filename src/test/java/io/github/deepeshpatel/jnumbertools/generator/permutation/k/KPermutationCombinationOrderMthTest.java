@@ -90,15 +90,6 @@ public class KPermutationCombinationOrderMthTest {
     }
 
     @Test
-    void shouldHandleLargeIncrementValues() {
-        var input = of('A', 'B', 'C', 'D');
-        var output = permutation.nPk(2, input)
-                .combinationOrderMth(1, 12)
-                .stream().toList();
-        Assertions.assertTrue(output.isEmpty());
-    }
-
-    @Test
     void shouldGenerateAllPermutationsWhenKEqualsInputSize() {
         var output = permutation.nPk(3, A_B_C)
                 .combinationOrderMth(1, 0)

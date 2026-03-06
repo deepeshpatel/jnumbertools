@@ -11,8 +11,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator.initIndicesForMultisetPermutation;
-
 /**
  * An iterable that generates multiset permutations from a {@code LinkedHashMap} of elements to their frequencies.
  * <p>
@@ -48,20 +46,30 @@ public final class MultisetPermutation<T> extends AbstractMultisetPermutation<T>
      */
     MultisetPermutation(LinkedHashMap<T, Integer> multiset, Calculator calculator) {
         super(multiset, calculator);
-        // TODO: Enhancement advice – Develop an algorithm to calculate the next permutation
-        // without flattening the frequency counts. The current implementation may not work efficiently
-        // for very large frequency values (e.g., 10⁹⁹).
-        this.initialIndices = initIndicesForMultisetPermutation(frequencies);
+        //Note: using freq vector is more practical for combination where the return type is multi-beg.
+        //for permutations, flattening once at the beginning is simpler, faster in practice,
+        // and not meaningfully worse in memory unless frequencies are astronomically large
+        // (in which case the whole permutation is impossible to enumerate anyway).
+        //It's possible (some papers/algorithms do it), but the complexity explodes, and each next()
+        // becomes O(total items) time anyway (because you have to output the full list)
+        //so I am choosing the simple flattening to
+        this.initialIndices = createFlattenedIndices(frequencies);
     }
 
     /**
-     * Returns an iterator over the multiset permutations.
+     * Returns an iterator over all distinct permutations of the multiset in lexicographical order.
      * <p>
-     * The iterator uses {@code UniquePermutationLexElementIterator} to generate permutations in lexicographical
-     * order based on the sorted indices, converting them to lists of actual elements.
+     * The total number of permutations is given by the multinomial coefficient:
+     * n! / (f₁! × f₂! × ... × fₖ!), where n is the sum of all frequencies.
+     * </p>
+     * <p>
+     * Example: For multiset {A=2, B=1}, the iterator produces:
+     * [A,A,B], [A,B,A], [B,A,A]
      * </p>
      *
-     * @return an iterator for generating multiset permutations as lists of elements
+     * @return an iterator over multiset permutations in lexicographical order;
+     *         returns an empty iterator if the multiset is empty
+     * @throws IllegalStateException if the multiset was not properly initialized
      */
     @Override
     public Iterator<List<T>> iterator() {

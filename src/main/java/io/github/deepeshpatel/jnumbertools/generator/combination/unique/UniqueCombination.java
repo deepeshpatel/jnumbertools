@@ -45,9 +45,18 @@ public final class UniqueCombination<T> extends AbstractGenerator<T> {
 
     /**
      * Returns an iterator over unique r-combinations in lexicographical order.
+     * <p>
+     * The iterator generates all possible combinations of size r from the input elements,
+     * where order does not matter. Each combination is returned as an immutable list.
+     * </p>
+     * <p>
+     * Example for elements [A, B, C, D] with r=2, the iterator produces:
+     * [A,B], [A,C], [A,D], [B,C], [B,D], [C,D]
+     * </p>
      *
-     * @return an iterator of lists, each representing a combination of size r;
-     *         returns empty iterator if r > n or input list is empty
+     * @return an iterator over unique r-combinations in lexicographical order;
+     *         returns an empty iterator if r > elements.size() or the input list is empty
+     * @see UniqueCombination
      */
     @Override
     public Iterator<List<T>> iterator() {

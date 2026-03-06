@@ -8,8 +8,7 @@ import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class KPermutationLexOrderTest {
 
@@ -25,6 +24,39 @@ public class KPermutationLexOrderTest {
                 assertEquals(calculator.nPr(n, k).longValue(), size);
             }
         }
+    }
+
+    @Test
+    void shouldHandleEmptyInput() {
+        // Test with empty input list
+        var result = permutation.nPk(0, Collections.emptyList()).lexOrder().stream().toList();
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).isEmpty());
+
+        // Test with empty input and k=0
+        var result2 = permutation.nPk(0, Collections.emptyList()).lexOrder().stream().toList();
+        assertEquals(1, result2.size());
+        assertTrue(result2.get(0).isEmpty());
+    }
+
+    @Test
+    void shouldHandleKEqualsZero() {
+        // k=0 should return one empty permutation
+        var result = permutation.nPk(0, List.of("A", "B", "C")).lexOrder().stream().toList();
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).isEmpty());
+    }
+
+    @Test
+    void shouldThrowExceptionForNegativeK() {
+        assertThrows(IllegalArgumentException.class, () ->
+                permutation.nPk(-1, List.of("A", "B")).lexOrder());
+    }
+
+    @Test
+    void shouldThrowExceptionForKGreaterThanN() {
+        assertThrows(IllegalArgumentException.class, () ->
+                permutation.nPk(5, List.of("A", "B", "C")).lexOrder());
     }
 
     @Test

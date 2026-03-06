@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Combinadic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Factoradic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
@@ -13,22 +14,91 @@ import java.math.BigInteger;
 /**
  * Converts decimal numbers to specialized number systems for combinatorial computations.
  * <p>
- * This class supports permutadic, combinadic, and factoradic number systems, used for
- * ranking and unranking permutations and combinations. Permutadic represents k-permutations
- * (`ⁿPₖ`), combinadic represents unique combinations (`ⁿCᵣ`), and factoradic represents
- * unique permutations (`ⁿ!`). Each method converts a decimal number to its respective
- * number system representation.
+ * This class provides conversions to three fundamental combinatorial number systems:
+ * <ul>
+ *   <li><b>Permutadic</b> - For k-permutations (ⁿPₖ). Each permutadic number uniquely
+ *       represents a k-permutation of n distinct elements.</li>
+ *   <li><b>Combinadic</b> - For unique combinations (ⁿCᵣ). Each combinadic number uniquely
+ *       represents a combination of r elements from n distinct elements.</li>
+ *   <li><b>Factoradic</b> - For unique permutations (n!). Each factoradic number uniquely
+ *       represents a full permutation of n distinct elements.</li>
+ * </ul>
+ * These number systems are essential for ranking (finding the position) and unranking
+ * (generating the element at a given position) combinatorial structures without
+ * enumerating all possibilities.
  * </p>
- * Example usage:
+ *
+ * <h2>Usage Examples</h2>
+ *
+ * <h3>Permutadic - For k-Permutations</h3>
  * <pre>
- * NumberSystem numberSystem = new NumberSystem();
- * Permutadic permutadic = numberSystem.permutadic(42, 3);
- * Combinadic combinadic = numberSystem.combinadic(15, 2);
- * Factoradic factoradic = numberSystem.factoradic(120);
+ * NumberSystem ns = new NumberSystem();
+ *
+ * // Convert decimal 42 to permutadic for k=3 (3-permutations)
+ * Permutadic perm = ns.permutadic(42, 3);
+ * System.out.println(perm);                 // e.g., [2,1,0](3)
+ * System.out.println(perm.toMathExpression()); // Shows mathematical representation
+ *
+ * // Convert back to k-permutation of size 5
+ * int[] permutation = perm.toMthPermutation(5);
+ * System.out.println(Arrays.toString(permutation));
  * </pre>
  *
- * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
- * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
+ * <h3>Combinadic - For Unique Combinations</h3>
+ * <pre>
+ * // Convert decimal 15 to combinadic for r=2 (2-combinations)
+ * Combinadic comb = ns.combinadic(15, 2);
+ * System.out.println(comb);                  // e.g., [6,2]
+ *
+ * // Get the next combinadic value
+ * Combinadic next = comb.next();
+ * System.out.println(next);
+ * </pre>
+ *
+ * <h3>Factoradic - For Unique Permutations</h3>
+ * <pre>
+ * // Convert decimal 120 to factoradic
+ * Factoradic fac = ns.factoradic(120);
+ * System.out.println(fac);                    // e.g., [1,0,0,0,0]
+ * System.out.println(fac.decimalValue);       // 120
+ * </pre>
+ *
+ * <h3>BigInteger Support</h3>
+ * <pre>
+ * // All methods support BigInteger for arbitrarily large values
+ * BigInteger huge = new BigInteger("10000000000000000000");
+ * Permutadic bigPerm = ns.permutadic(huge, 10);
+ * Combinadic bigComb = ns.combinadic(huge, 5);
+ * Factoradic bigFac = ns.factoradic(huge);
+ * </pre>
+ *
+ * <h3>Integration with Ranking</h3>
+ * <pre>
+ * // These number systems are used internally by RankOf and UnrankOf
+ * RankOf rankOf = new RankOf();
+ * UnrankOf unrankOf = new UnrankOf();
+ *
+ * // The rank of a permutation can be converted to factoradic
+ * int[] permutation = {2, 0, 1};
+ * BigInteger rank = rankOf.uniquePermutation(permutation);
+ * Factoradic fac = ns.factoradic(rank);
+ *
+ * // And factoradic can generate the permutation at that rank
+ * int[] samePerm = unrankOf.uniquePermutation(3).atRank(rank);
+ * </pre>
+ *
+ * <p>
+ * This class is immutable and thread-safe. All methods are stateless and can be safely shared across threads.
+ * </p>
+ *
+ * @see AllExamples
+ * @see Permutadic
+ * @see Combinadic
+ * @see Factoradic
+ * @see RankOf
+ * @see UnrankOf
+ * @see <a href="https://en.wikipedia.org/wiki/Factorial_number_system">Factorial Number System</a>
+ * @see <a href="https://en.wikipedia.org/wiki/Combinatorial_number_system">Combinatorial Number System</a>
  * @author Deepesh Patel
  */
 public class NumberSystem {
@@ -112,7 +182,7 @@ public class NumberSystem {
     }
 
     /**
-     * Converts a decimal number to its factoradic representation for unique permutations (`ⁿ!`).
+     * Converts a decimal number to its factoradic representation for unique permutations (`n!`).
      * <p>
      * Factoradic numbers are used to rank and unrank unique permutations of n distinct elements.
      * </p>
@@ -125,7 +195,7 @@ public class NumberSystem {
     }
 
     /**
-     * Converts a decimal number to its factoradic representation for unique permutations (`ⁿ!`).
+     * Converts a decimal number to its factoradic representation for unique permutations (`n!`).
      * <p>
      * Factoradic numbers are used to rank and unrank unique permutations of n distinct elements.
      * </p>

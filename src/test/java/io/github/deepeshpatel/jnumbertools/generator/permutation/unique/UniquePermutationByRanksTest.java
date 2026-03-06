@@ -114,34 +114,59 @@ class UniquePermutationByRanksTest {
             assertIterableEquals(expected, uniquePermutation(1, 0, "A"));
         }
 
-        @Test
-        void shouldHandleIncrementLargerThanPermutations() {
-            var input = of("A", "B");
-            assertTrue(uniquePermutation(5, 5, input).isEmpty());
-        }
+//        @Test
+//        void shouldHandleIncrementLargerThanPermutations() {
+//            var input = of("A", "B");
+//            assertTrue(uniquePermutation(5, 5, input).isEmpty());
+//        }
 
         @Test
-        void testBoundaryConditionsForIncrementM() {
+        void testFailFastForLexOrderMth() {
+            //should fail fast for m<0, m=0, start<0 and start>=count()
             var uniquePerm = permutation.unique("A", "B", "C");
-            var ex1 = assertThrows(IllegalArgumentException.class,
-                    () -> uniquePerm.lexOrderMth(0,1));
-            var ex2 = assertThrows(IllegalArgumentException.class,
+            //m<0
+            var exception = assertThrows(IllegalArgumentException.class,
                     () -> uniquePerm.lexOrderMth(-1,1));
+            assertEquals(exception.getMessage(), errMsgForIncrement);
 
-            assertEquals(ex1.getMessage(), incrementErrMsg);
-            assertEquals(ex2.getMessage(), incrementErrMsg);
-        }
+            //m==0
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> uniquePerm.lexOrderMth(0,1));
+            assertEquals(exception.getMessage(), errMsgForIncrement);
 
-        @Test
-        void testBoundaryConditionsForStartingValue() {
-            var uniquePerm = permutation.unique("A", "B", "C");
-            var exception =  assertThrows(IllegalArgumentException.class,
+            //start < 0
+            exception = assertThrows(IllegalArgumentException.class,
                     () -> uniquePerm.lexOrderMth(1,-1));
-            assertEquals(exception.getMessage(), startErrMsg);
+            assertTrue(exception.getMessage().startsWith(errMsgForStart));
 
-            //should return empty list if start rank is greater than total permutations
-            assertTrue(uniquePerm.lexOrderMth(1,10).stream().toList().isEmpty());
+            //start >=count
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> uniquePerm.lexOrderMth(1,100));
+            assertTrue(exception.getMessage().startsWith(errMsgForStart));
         }
+
+//        @Test
+//        void testBoundaryConditionsForIncrementM() {
+//            var uniquePerm = permutation.unique("A", "B", "C");
+//            var ex1 = assertThrows(IllegalArgumentException.class,
+//                    () -> uniquePerm.lexOrderMth(0,1));
+//            var ex2 = assertThrows(IllegalArgumentException.class,
+//                    () -> uniquePerm.lexOrderMth(-1,1));
+//
+//            assertEquals(ex1.getMessage(), incrementErrMsg);
+//            assertEquals(ex2.getMessage(), incrementErrMsg);
+//        }
+
+//        @Test
+//        void testBoundaryConditionsForStartingValue() {
+//            var uniquePerm = permutation.unique("A", "B", "C");
+//            var exception =  assertThrows(IllegalArgumentException.class,
+//                    () -> uniquePerm.lexOrderMth(1,-1));
+//            assertEquals(exception.getMessage(), startErrMsg);
+//
+//            //should return empty list if start rank is greater than total permutations
+//            assertTrue(uniquePerm.lexOrderMth(1,10).stream().toList().isEmpty());
+//        }
 
         @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
         @Test

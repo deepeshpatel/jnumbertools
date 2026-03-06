@@ -36,26 +36,21 @@ import java.util.List;
  */
 public final class MixedRadix {
     /**
-     * Converts a decimal number to mixed radix representation.
+     * Converts a decimal number to its representation in a mixed radix number system.
      * <p>
-     * This method converts a standard decimal integer to its representation in a mixed radix
-     * number system where each digit position has a different base. The conversion is performed
-     * from least significant digit to most significant digit.
+     * In a mixed radix system, each digit position has its own base (radix). The conversion
+     * proceeds from least significant digit to most significant digit.
      * </p>
      * <p>
-     * <strong>Example:</strong>
-     * <pre>{@code
-     * // Convert 47 to mixed radix with bases [3, 4, 5]
-     * int[] result = MixedRadix.toMixedRadix(47, new int[]{3, 4, 5});
-     * // Returns: [1, 2, 3, 2] representing 1·3·4·5 + 2·4·5 + 3·5 + 2
-     * }</pre>
+     * Example: toMixedRadix(47, new int[]{3, 4, 5}) returns [1, 2, 3, 2]
+     * representing 1×3×4×5 + 2×4×5 + 3×5 + 2 = 47.
      * </p>
      *
-     * @param num   the decimal number to convert (must be non-negative)
+     * @param num the decimal number to convert (must be non-negative)
      * @param bases an array of bases for each digit position, from most significant to least significant
-     * @return an array representing the mixed radix digits
-     * @throws IllegalArgumentException if num is negative, bases is null/empty, or any base is ≤ 1
-     * @see #toDecimal(int[], int[]) for the reverse conversion
+     * @return an array of digits representing the mixed radix number
+     * @throws IllegalArgumentException if num is negative, bases is null/empty, or any base ≤ 1
+     * @see MixedRadix#toDecimal(int[], int[])
      */
     public static int[] toMixedRadix(int num, int[] bases) {
         List<Integer> digits = new ArrayList<>();
@@ -70,28 +65,22 @@ public final class MixedRadix {
     }
 
     /**
-     * Converts a mixed radix number back to decimal representation.
+     * Converts a mixed radix number back to its decimal representation.
      * <p>
-     * This method performs the reverse operation of {@link #toMixedRadix(int, int[])},
-     * converting a mixed radix representation back to a standard decimal integer.
-     * The conversion is performed by multiplying each digit by its positional factor
-     * and summing the results.
+     * Performs the reverse operation of {@link #toMixedRadix(int, int[])} by multiplying
+     * each digit by its positional factor and summing the results.
      * </p>
      * <p>
-     * <strong>Example:</strong>
-     * <pre>{@code
-     * // Convert mixed radix [1, 2, 3, 2] with bases [3, 4, 5] back to decimal
-     * int result = MixedRadix.toDecimal(new int[]{1, 2, 3, 2}, new int[]{3, 4, 5});
-     * // Returns: 47 (1·3·4·5 + 2·4·5 + 3·5 + 2)
-     * }</pre>
+     * Example: toDecimal(new int[]{1, 2, 3, 2}, new int[]{3, 4, 5}) returns 47,
+     * computed as 1×3×4×5 + 2×4×5 + 3×5 + 2 = 47.
      * </p>
      *
-     * @param mixedRadix an array representing the mixed radix digits
-     * @param radix      an array of bases for each digit position, must match mixedRadix length
-     * @return the decimal representation of the mixed radix number
-     * @throws IllegalArgumentException if mixedRadix or radix is null/empty, lengths don't match,
-     *                                  any base is ≤ 1, or any digit is out of valid range
-     * @see #toMixedRadix(int, int[]) for the forward conversion
+     * @param mixedRadix an array of digits representing the mixed radix number
+     * @param radix an array of bases for each digit position, must match mixedRadix length
+     * @return the decimal equivalent of the mixed radix number
+     * @throws IllegalArgumentException if mixedRadix or radix is null, lengths don't match,
+     *         any base ≤ 1, or any digit is out of valid range for its position
+     * @see MixedRadix#toMixedRadix(int, int[])
      */
     public static int toDecimal(int[] mixedRadix, int[] radix) {
         int decimal = 0;

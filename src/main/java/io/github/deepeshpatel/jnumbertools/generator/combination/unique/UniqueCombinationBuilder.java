@@ -14,20 +14,111 @@ import java.math.BigInteger;
 import java.util.List;
 
 /**
- * Builder for generating unique combinations of size r from n items.
+ * Builder for generating unique combinations (ⁿCᵣ) of elements.
  * <p>
- * A unique combination is a selection of r items from n distinct items where order does not matter,
- * with the total number of combinations given by ⁿCᵣ = n!/(r!·(n−r)!).
- * This builder supports generating combinations in lexicographical order, sampling combinations
- * randomly with or without replacement, or following a custom sequence of ranks.
- * It uses a {@link Calculator} for computing combination counts and ranks.
+ * A unique combination is a selection of r elements from a set of n distinct elements
+ * where order does not matter and each element can be selected at most once.
+ * The total number of unique combinations is given by the binomial coefficient
+ * C(n,r) = n!/(r!·(n−r)!).
  * </p>
+ *
+ * <h2>Key Characteristics</h2>
+ * <ul>
+ *   <li>Elements are distinct (no repetitions)</li>
+ *   <li>Order does not matter ([A,B] is the same as [B,A])</li>
+ *   <li>Each combination is returned as a sorted list</li>
+ *   <li>Total count = C(n,r) = n!/(r!·(n−r)!)</li>
+ * </ul>
+ *
+ * <h2>Usage Examples</h2>
+ *
+ * <h3>Basic Generation</h3>
+ * <pre>
+ * UniqueCombinationBuilder&lt;String&gt; builder =
+ *     new UniqueCombinationBuilder&lt;&gt;(List.of("A", "B", "C", "D"), 2, calculator);
+ *
+ * // All C(4,2) = 6 combinations of size 2
+ * builder.lexOrder()
+ *        .forEach(System.out::println);
+ * // Output: [A,B], [A,C], [A,D], [B,C], [B,D], [C,D]
+ * </pre>
+ *
+ * <h3>Integer Range Input</h3>
+ * <pre>
+ * // Combinations of size 3 from {0,1,2,3,4}
+ * UniqueCombinationBuilder&lt;Integer&gt; intBuilder =
+ *     new UniqueCombinationBuilder&lt;&gt;(5, 3, calculator);
+ * intBuilder.lexOrder().forEach(System.out::println);
+ * // Output: [0,1,2], [0,1,3], [0,1,4], [0,2,3], [0,2,4], [0,3,4],
+ * //         [1,2,3], [1,2,4], [1,3,4], [2,3,4]
+ * </pre>
+ *
+ * <h3>Every mᵗʰ Combination</h3>
+ * <pre>
+ * // Every 2nd combination starting from rank 1
+ * builder.lexOrderMth(2, 1)
+ *        .forEach(System.out::println);
+ * // Output for 4 elements size 2: [A,C], [B,C], [C,D] (ranks 1,3,5)
+ * </pre>
+ *
+ * <h3>Random Sampling</h3>
+ * <pre>
+ * // Sample 4 unique combinations without replacement
+ * builder.sample(4)
+ *        .forEach(System.out::println);
+ *
+ * // Sample 5 combinations with replacement (duplicates allowed)
+ * builder.choice(5)
+ *        .forEach(System.out::println);
+ * </pre>
+ *
+ * <h3>Rank-Based Access</h3>
+ * <pre>
+ * // Get combinations at ranks 0, 2, and 4
+ * builder.byRanks(List.of(BigInteger.ZERO,
+ *                         BigInteger.valueOf(2),
+ *                         BigInteger.valueOf(4)))
+ *        .forEach(System.out::println);
+ * // Output for 4 elements size 2: [A,B], [A,D], [B,D] (ranks 0,2,4)
+ * </pre>
+ *
+ * <h3>Empty and Edge Cases</h3>
+ * <pre>
+ * // r = 0 produces one empty combination
+ * UniqueCombinationBuilder&lt;String&gt; emptyBuilder =
+ *     new UniqueCombinationBuilder&lt;&gt;(List.of("A", "B", "C"), 0, calculator);
+ * System.out.println(emptyBuilder.count()); // 1
+ * emptyBuilder.lexOrder().forEach(System.out::println); // Prints: []
+ *
+ * // r = n produces one combination containing all elements
+ * UniqueCombinationBuilder&lt;String&gt; fullBuilder =
+ *     new UniqueCombinationBuilder&lt;&gt;(List.of("A", "B", "C"), 3, calculator);
+ * System.out.println(fullBuilder.count()); // 1
+ * fullBuilder.lexOrder().forEach(System.out::println); // Prints: [A,B,C]
+ *
+ * // r > n throws IllegalArgumentException
+ * // new UniqueCombinationBuilder&lt;&gt;(List.of("A", "B"), 3, calculator); // Exception!
+ * </pre>
+ *
+ * <h3>Mathematical Properties</h3>
+ * <pre>
+ * // Symmetry: C(n,r) = C(n,n-r)
+ * UniqueCombinationBuilder&lt;String&gt; builder1 =
+ *     new UniqueCombinationBuilder&lt;&gt;(5, 2, calculator);
+ * UniqueCombinationBuilder&lt;String&gt; builder2 =
+ *     new UniqueCombinationBuilder&lt;&gt;(5, 3, calculator);
+ * System.out.println(builder1.count()); // 10
+ * System.out.println(builder2.count()); // 10
+ * </pre>
+ *
  * <p>
- * This builder is immutable and thread-safe. It can be safely shared across threads
- * without synchronization.
+ * This builder is immutable and thread-safe. All configuration methods return new instances.
  * </p>
  *
  * @param <T> the type of elements in the combinations
+ * @see UniqueCombination
+ * @see UniqueCombinationByRanks
+ * @see <a href="https://en.wikipedia.org/wiki/Binomial_coefficient">Binomial Coefficient</a>
  * @author Deepesh Patel
  */
 public final class UniqueCombinationBuilder<T> implements Builder<T> {
@@ -71,7 +162,7 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿCᵣ
      */
     public UniqueCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m, start);
+        EveryMthIterable.validateLexOrderMthParams(m, start, count());
         BigInteger nCr = calculator.nCr(elements.size(), size);
         Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, nCr);
         return new UniqueCombinationByRanks<>(elements, size, mthIterable, calculator);

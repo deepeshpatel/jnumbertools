@@ -380,6 +380,30 @@ class UniqueCombinationByRanksTest {
                     .lexOrderMth(2, 3).stream().toList();
             assertIterableEquals(expected, output);
         }
+
+        @Test
+        void testFailFastForLexOrderMth() {
+            var uniqueComb = combination.unique(2, "A", "B", "C");
+
+            // m <= 0
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> uniqueComb.lexOrderMth(0, 1));
+            assertEquals(errMsgForIncrement, exception.getMessage());
+
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> uniqueComb.lexOrderMth(-1, 1));
+            assertEquals(errMsgForIncrement, exception.getMessage());
+
+            // start < 0
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> uniqueComb.lexOrderMth(1, -1));
+            assertTrue(exception.getMessage().startsWith("Element should be in range"));
+
+            // start >= count
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> uniqueComb.lexOrderMth(1, 100));
+            assertTrue(exception.getMessage().startsWith("Element should be in range"));
+        }
     }
 
     @Nested
@@ -458,5 +482,4 @@ class UniqueCombinationByRanksTest {
             });
         }
     }
-
 }

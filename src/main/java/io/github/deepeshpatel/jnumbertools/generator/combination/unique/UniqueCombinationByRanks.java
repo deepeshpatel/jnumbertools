@@ -20,6 +20,9 @@ import java.util.List;
  * identified by a rank in [0, ⁿCᵣ), and this class maps provided ranks to combinations using
  * combinadic unranking. Supports strategies like random sampling or lexicographical sequences.
  * </p>
+ * <p>
+ * Ranks are 0-based in lexicographical order.
+ * </p>
  *
  * @param <T> the type of elements in the combinations
  * @author Deepesh Patel

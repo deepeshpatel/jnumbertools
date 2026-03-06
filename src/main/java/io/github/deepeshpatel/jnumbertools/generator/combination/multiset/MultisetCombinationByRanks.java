@@ -24,6 +24,9 @@ import java.util.Map;
  * frequency map. The order of elements is controlled by the specified {@code Order} parameter:
  * {@code LEX} (ascending), {@code REVERSE_LEX} (descending), or {@code INSERTION} (map's insertion order).
  * </p>
+ * <p>
+ * Ranks are 0-based in lexicographical order.
+ * </p>
  *
  * @param <T> the type of elements in the combinations; must be comparable for LEX/REVERSE_LEX ordering
  * @author Deepesh Patel
@@ -34,7 +37,6 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
      * The iterable sequence of rank numbers to generate combinations.
      */
     private final Iterable<BigInteger> ranks;
-
     private final BigInteger totalCombinations;
 
     /**

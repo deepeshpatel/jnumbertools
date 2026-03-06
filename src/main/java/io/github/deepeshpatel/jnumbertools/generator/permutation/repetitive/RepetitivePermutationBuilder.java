@@ -16,23 +16,101 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Builder for generating repetitive permutations of a specified width from a list of elements.
+ * Builder for generating repetitive permutations (permutations with repetition allowed).
  * <p>
- * This builder creates {@link RepetitivePermutationByRanks} instances for lexicographical order (all or mᵗʰ),
- * sampling with/without replacement, and custom rank sequences. For example:
- * <pre>
- * List<String> elements = Arrays.asList("A", "B");
- * RepetitivePermutationBuilder<String> builder = new RepetitivePermutationBuilder<>(2, elements, calculator);
- * List<List<String>> perms = builder.lexOrder().stream().toList();
- * // Generates: [[A, A], [A, B], [B, A], [B, B]]
- * </pre>
+ * A repetitive permutation selects r elements from a set of n distinct elements,
+ * where elements can be repeated and order matters. The total number of such permutations
+ * is nʳ (n raised to the power r).
  * </p>
+ *
+ * <h2>Key Characteristics</h2>
+ * <ul>
+ *   <li>Elements can appear multiple times in a single permutation</li>
+ *   <li>Order matters (different orders produce different permutations)</li>
+ *   <li>The permutation length r can be greater than the number of distinct elements n</li>
+ *   <li>Total count = nʳ</li>
+ * </ul>
+ *
+ * <h2>Usage Examples</h2>
+ *
+ * <h3>Basic Generation</h3>
+ * <pre>
+ * RepetitivePermutationBuilder&lt;String&gt; builder =
+ *     new RepetitivePermutationBuilder&lt;&gt;(2, List.of("A", "B"), calculator);
+ *
+ * // All 2² = 4 permutations of length 2
+ * builder.lexOrder()
+ *        .forEach(System.out::println);
+ * // Output: [A,A], [A,B], [B,A], [B,B]
+ *
+ * // Permutations of length 3 from binary set (2³ = 8)
+ * RepetitivePermutationBuilder&lt;Integer&gt; binaryBuilder =
+ *     new RepetitivePermutationBuilder&lt;&gt;(3, 2, calculator);
+ * binaryBuilder.lexOrder().forEach(System.out::println);
+ * // Output: [0,0,0], [0,0,1], [0,1,0], [0,1,1], [1,0,0], [1,0,1], [1,1,0], [1,1,1]
+ * </pre>
+ *
+ * <h3>Every mᵗʰ Permutation</h3>
+ * <pre>
+ * // Every 3rd permutation of length 2 from [A,B] starting at rank 1
+ * builder.lexOrderMth(3, 1)
+ *        .forEach(System.out::println);
+ * // Output: [A,B], [B,B] (ranks 1 and 4)
+ * </pre>
+ *
+ * <h3>Random Sampling</h3>
+ * <pre>
+ * // Sample 3 unique permutations without replacement
+ * builder.sample(3)
+ *        .forEach(System.out::println);
+ *
+ * // Sample 5 permutations with replacement (duplicates allowed)
+ * builder.choice(5)
+ *        .forEach(System.out::println);
+ * </pre>
+ *
+ * <h3>Rank-Based Access</h3>
+ * <pre>
+ * // Get permutations at ranks 0, 2, and 5
+ * builder.byRanks(List.of(BigInteger.ZERO,
+ *                         BigInteger.valueOf(2),
+ *                         BigInteger.valueOf(5)))
+ *        .forEach(System.out::println);
+ * // Output for length 2 from [A,B]: [A,A], [B,A], [B,B] (ranks 0,2,5)
+ * </pre>
+ *
+ * <h3>Mathematical Interpretation</h3>
+ * <pre>
+ * // Each permutation corresponds to a base-n number with r digits
+ * // For n=2, r=3: rank 5 (binary 101) → [1,0,1] → [B,A,B]
+ * int rank = 5;
+ * var perm = builder.lexOrderMth(1, rank).iterator().next();
+ * System.out.println(perm); // [B,A,B] for [A,B] input
+ * </pre>
+ *
+ * <h3>Empty Input Handling</h3>
+ * <pre>
+ * // Empty set with r>0 produces no permutations (count = 0)
+ * RepetitivePermutationBuilder&lt;String&gt; emptyBuilder =
+ *     new RepetitivePermutationBuilder&lt;&gt;(2, Collections.emptyList(), calculator);
+ * System.out.println(emptyBuilder.count()); // 0
+ * System.out.println(emptyBuilder.lexOrder().stream().count()); // 0
+ *
+ * // r = 0 always produces one empty permutation
+ * RepetitivePermutationBuilder&lt;String&gt; zeroBuilder =
+ *     new RepetitivePermutationBuilder&lt;&gt;(0, List.of("A", "B"), calculator);
+ * System.out.println(zeroBuilder.count()); // 1
+ * zeroBuilder.lexOrder().forEach(System.out::println); // Prints: []
+ * </pre>
+ *
  * <p>
- * This builder is immutable and thread-safe. It can be safely shared across threads
- * without synchronization.
+ * This builder is immutable and thread-safe. All configuration methods return new instances.
  * </p>
  *
  * @param <T> the type of elements to permute
+ * @see RepetitivePermutation
+ * @see RepetitivePermutationMth
+ * @see RepetitivePermutationByRanks
  * @author Deepesh Patel
  */
 public final class RepetitivePermutationBuilder<T> implements Builder<T> {
@@ -72,16 +150,24 @@ public final class RepetitivePermutationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if m or start is invalid
      */
     public RepetitivePermutationMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m,start);
+        EveryMthIterable.validateLexOrderMthParams(m,start, count());
         return new RepetitivePermutationMth<>(elements, width, m, start);
     }
 
     /**
-     * Generates a sample of repetitive permutations without replacement.
+     * Generates a random sample of unique repetitive permutations without replacement.
+     * <p>
+     * All returned permutations are distinct and chosen uniformly at random from all possible
+     * nʳ permutations. The order is random (not lexicographical).
+     * </p>
+     * <p>
+     * Example: For elements [A, B] with width=2, total permutations = 4 ([A,A], [A,B], [B,A], [B,B]).
+     * sample(2) might return [B,A] and [A,A] in random order.
+     * </p>
      *
-     * @param sampleSize the number of permutations to sample; must be positive and ≤ nᵂ
-     * @return a {@link RepetitivePermutationByRanks} instance for sampled permutations
-     * @throws IllegalArgumentException if sampleSize is invalid
+     * @param sampleSize the number of unique permutations to generate (must be > 0 and ≤ nʳ)
+     * @return a generator producing unique random permutations without replacement
+     * @throws IllegalArgumentException if sampleSize ≤ 0 or sampleSize > total permutations
      */
     public RepetitivePermutationByRanks<T> sample(int sampleSize) {
         BigInteger total = calculator.power(elements.size(), width);
@@ -140,8 +226,10 @@ public final class RepetitivePermutationBuilder<T> implements Builder<T> {
      */
     @Override
     public BigInteger count() {
+        //by the definition of exponentiation, for n=0 and k>0 0^k = 0
+        //hence empty input should be allowed and the result is the empty collection
         if (elements.isEmpty() && width > 0) {
-            return BigInteger.ZERO;
+            return BigInteger.ONE;
         }
         if (width == 0) {
             return BigInteger.ONE;

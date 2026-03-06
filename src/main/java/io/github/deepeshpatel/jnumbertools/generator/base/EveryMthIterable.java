@@ -47,7 +47,7 @@ public class EveryMthIterable implements Iterable<BigInteger> {
      * @param start       the starting rank (should be ≥ 0)
      * @param increment   the step size between ranks (should be > 0)
      * @param upperBound  the exclusive upper limit for ranks (should be ≥ start)
-     * @see EveryMthIterable#validateLexOrderMthParams(BigInteger, BigInteger)
+     * @see EveryMthIterable#validateLexOrderMthParams(BigInteger, BigInteger, BigInteger)
      */
     public EveryMthIterable(BigInteger start, BigInteger increment, BigInteger upperBound) {
         this.start = start;
@@ -82,24 +82,35 @@ public class EveryMthIterable implements Iterable<BigInteger> {
         };
     }
 
+
     /**
-     * Validates parameters commonly used in lexOrderMth(m, start) calls.
+     * Validates parameters commonly used in lexOrderMth(m, start) calls, including upper bound check.
      * <p>
-     * Builders should call this method before creating a generator
-     * to ensure fail-fast validation.
+     * Builders should call this method before creating a generator to ensure fail-fast validation.
+     * This enhanced version also validates that the starting rank is within the valid range
+     * of available elements.
      * </p>
-     * @param m     increment/step size
-     * @param start starting rank
-     * @throws IllegalArgumentException if m is null or ≤ 0, or if start is null or < 0
+     *
+     * @param m     increment/step size (must be positive)
+     * @param start starting rank (must be non-negative and less than count)
+     * @param count total number of elements available (must be non-negative)
+     * @throws IllegalArgumentException if:
+     *         <ul>
+     *           <li>m is null or ≤ 0</li>
+     *           <li>start is null or < 0</li>
+     *           <li>start is ≥ count (out of valid range)</li>
+     *         </ul>
      */
-    public static void validateLexOrderMthParams(BigInteger m, BigInteger start) {
+    public static void validateLexOrderMthParams(BigInteger m, BigInteger start, BigInteger count) {
         if (m == null || m.signum() <= 0) {
             throw new IllegalArgumentException("Increment 'm' must be positive (m > 0)");
         }
-        if (start == null || start.signum() < 0) {
-            throw new IllegalArgumentException("Start position must be non-negative (start >= 0)");
+
+        if (start == null || start.signum() < 0 || start.compareTo(count) >= 0) {
+            throw new IllegalArgumentException("Element should be in range [0, " + count + ")");
         }
     }
+
 
     /**
      * Validates parameters commonly used in byRanks(ranks) calls.

@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 public class TestBase {
     static { System.getProperties().setProperty("stress.testing","true"); }
 
-    public static final Calculator calculator = new Calculator(100, 100, 100,2);
+    public static final Calculator calculator = new Calculator();
     public static final Permutations permutation = new Permutations(calculator);
     public static final Combinations combination = new Combinations(calculator);
     public static final CartesianProduct cartesianProduct = new CartesianProduct(calculator);
@@ -32,8 +32,8 @@ public class TestBase {
     public static final List<Integer> num_1_to_4 = List.of(1, 2, 3, 4);
     public static final List<Integer> num_0_to_5 = List.of(0, 1, 2, 3, 4, 5);
 
-    public static final String incrementErrMsg = "Increment 'm' must be positive (m > 0)";
-    public static final String startErrMsg = "Start position must be non-negative (start >= 0)";
+    public static final String errMsgForIncrement = "Increment 'm' must be positive (m > 0)";
+    public static final String errMsgForStart = "Element should be in range [0,";
 
     private static List<?> everyMthValue(Stream<?> stream, int start, long m) {
         final int[] j = {0};

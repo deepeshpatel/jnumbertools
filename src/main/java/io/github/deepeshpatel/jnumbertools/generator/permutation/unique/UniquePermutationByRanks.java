@@ -30,6 +30,9 @@ import java.util.NoSuchElementException;
  * ({@code lexOrderMth}, {@code byRanks}, {@code choice}, {@code sample}) to ensure fail-fast behavior.
  * Direct instantiation of this class bypasses validation and is not part of the public API.
  * </p>
+ * <p>
+ * Ranks are 0-based in lexicographical order.
+ * </p>
  *
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel

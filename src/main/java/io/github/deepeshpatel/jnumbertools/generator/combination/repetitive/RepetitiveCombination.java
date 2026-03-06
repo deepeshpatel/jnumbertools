@@ -47,8 +47,19 @@ public final class RepetitiveCombination<T> extends AbstractGenerator<T> {
 
     /**
      * Returns an iterator over repetitive combinations in lexicographical order.
+     * <p>
+     * A repetitive combination allows items to be selected multiple times. The combinations
+     * are generated in lexicographical order based on element indices.
+     * </p>
+     * <p>
+     * Example for elements [A, B] with r=3, the iterator produces:
+     * [A,A,A], [A,A,B], [A,B,B], [B,B,B]
+     * </p>
      *
-     * @return an iterator of lists, each representing a combination
+     * @return an iterator over repetitive combinations of size r in lexicographical order;
+     *         returns an empty iterator if r = 0 (returns one empty combination) or
+     *         if the input list is empty (returns empty iterator for r > 0)
+     * @throws IllegalArgumentException if r < 0
      */
     @Override
     public Iterator<List<T>> iterator() {

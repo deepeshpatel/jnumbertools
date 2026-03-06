@@ -4,34 +4,33 @@ import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.assertEveryMthValue;
-import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
+import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
 
 class KPermutationByRanksTest {
 
-    @Test
-    void assertCount() {
-        // nPk: n!/(n−k)!
-        for (int n = 0; n <= 4; n++) {
-            var input = Collections.nCopies(n, "A");
-            for (int k = 0; k <= n; k++) {
-                long size = permutation.nPk(k, input)
-                        .lexOrder()
-                        .stream().count();
-                assertEquals(calculator.nPr(n, k).longValue(), size);
-            }
-        }
-    }
-
     @Nested
     class KPermutationMthTest {
+
+        @Test
+        void assertCount() {
+            // nPk: n!/(n−k)!
+            for (int n = 0; n <= 4; n++) {
+                var input = Collections.nCopies(n, "A");
+                for (int k = 0; k <= n; k++) {
+                    long size = permutation.nPk(k, input)
+                            .lexOrder()
+                            .stream().count();
+                    assertEquals(calculator.nPr(n, k).longValue(), size);
+                }
+            }
+        }
 
         @Test
         void shouldGenerateMthKPermutations() {
@@ -43,14 +42,6 @@ class KPermutationByRanksTest {
                 var mth = permutation.nPk(k, input).lexOrderMth(m, start);
                 assertEveryMthValue(all.lexOrder().stream(), mth.stream(), start, m);
             }
-        }
-
-        @Test
-        void shouldReturnEmptyListForStartGreaterThanTotalPermutations() {
-            var input = List.of(0, 1, 2, 3);
-            int k = 2;
-            var result = permutation.nPk(k, input).lexOrderMth(1, 20).stream().toList();
-            assertTrue(result.isEmpty(), "Should return empty list when start > total permutations");
         }
 
         @Test
@@ -86,20 +77,29 @@ class KPermutationByRanksTest {
         }
 
         @Test
-        void shouldThrowExceptionForNegativeIncrement() {
-            var input = List.of(0, 1, 2);
+        void testFailFastForLexOrderMth() {
+            var input = List.of(0, 1, 2, 3);
             int k = 2;
             var kPermBuilder = permutation.nPk(k, input);
-            assertThrows(IllegalArgumentException.class, () -> kPermBuilder.lexOrderMth(0, 1));
-            assertThrows(IllegalArgumentException.class, () -> kPermBuilder.lexOrderMth(-1, 1));
-        }
 
-        @Test
-        void shouldThrowExceptionForNegativeStart() {
-            var input = List.of(0, 1, 2);
-            int k = 2;
-            var kPermBuilder = permutation.nPk(k, input);
-            assertThrows(IllegalArgumentException.class, () -> kPermBuilder.lexOrderMth(1, -1));
+            // m <= 0
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> kPermBuilder.lexOrderMth(0, 1));
+            assertEquals(errMsgForIncrement, exception.getMessage());
+
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> kPermBuilder.lexOrderMth(-1, 1));
+            assertEquals(errMsgForIncrement, exception.getMessage());
+
+            // start < 0
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> kPermBuilder.lexOrderMth(1, -1));
+            assertTrue(exception.getMessage().startsWith("Element should be in range"));
+
+            // start >= count
+            exception = assertThrows(IllegalArgumentException.class,
+                    () -> kPermBuilder.lexOrderMth(1, 100));
+            assertTrue(exception.getMessage().startsWith("Element should be in range"));
         }
 
         @Test
@@ -125,6 +125,35 @@ class KPermutationByRanksTest {
                     assertTrue(element >= 0 && element < input.size(), "Element should be in range [0, input.size()-1]: " + element);
                 }
             }
+        }
+
+        @Test
+        void shouldSupportVeryLargeMthKPermutation() {
+            // Find every 10^29th 20-Permutation of 40 elements (20P40)
+            BigInteger increment = new BigInteger("100000000000000000000000000000");
+            var expected = of(
+                    of(11, 37, 6, 5, 26, 15, 0, 25, 9, 22, 27, 16, 12, 21, 24, 31, 33, 34, 17, 38),
+                    of(23, 34, 12, 11, 10, 28, 1, 8, 18, 3, 9, 30, 24, 0, 6, 20, 26, 27, 37, 35),
+                    of(35, 30, 18, 16, 38, 1, 2, 32, 23, 22, 33, 3, 29, 17, 26, 6, 12, 14, 11, 28)
+            );
+
+            var permutations = permutation.nPk(40, 20)
+                    .lexOrderMth(increment, increment)
+                    .stream().toList();
+            assertIterableEquals(expected, permutations);
+        }
+
+        @Test
+        void testStartParameterGreaterThanZero() {
+            var expected = List.of(
+                    of('a', 'c', 'e'),
+                    of('c', 'a', 'd'),
+                    of('d', 'e', 'a')
+            );
+            var output = permutation.nPk(3, 'a', 'b', 'c', 'd', 'e')
+                    .lexOrderMth(20, 5)
+                    .stream().toList();
+            assertIterableEquals(expected, output);
         }
     }
 
@@ -337,7 +366,7 @@ class KPermutationByRanksTest {
         @Test
         void byRanks_withNegativeRank_shouldThrowException() {
             var result = JNumberTools.permutations().nPk(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(-1)));
-            
+
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
             }, "Negative rank should throw IllegalArgumentException");
@@ -346,7 +375,7 @@ class KPermutationByRanksTest {
         @Test
         void byRanks_withOutOfBoundRank_shouldThrowException() {
             var result = JNumberTools.permutations().nPk(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(1000000000)));
-            
+
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
             }, "Out-of-bounds rank should throw IllegalArgumentException");
@@ -355,11 +384,11 @@ class KPermutationByRanksTest {
         @Test
         void byRanks_withValidRanks_shouldWork() {
             var result = JNumberTools.permutations().nPk(2, "A", "B", "C").byRanks(of(
-                java.math.BigInteger.ZERO,
-                java.math.BigInteger.ONE,
-                java.math.BigInteger.valueOf(2)
+                    java.math.BigInteger.ZERO,
+                    java.math.BigInteger.ONE,
+                    java.math.BigInteger.valueOf(2)
             ));
-            
+
             assertDoesNotThrow(() -> {
                 var permutations = result.stream().toList();
                 assertEquals(3, permutations.size());

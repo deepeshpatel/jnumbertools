@@ -53,9 +53,6 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
      */
     KPermutationCombinationOrderMth(List<T> elements, int k, BigInteger increment, BigInteger start, Calculator calculator) {
         super(elements, k);
-        if (increment.signum() <= 0) {
-            throw new IllegalArgumentException("Increment m must be > 0 to generate every mᵗʰ k-permutation");
-        }
         this.start = start;
         this.increment = increment;
         this.totalPermutations = calculator.nPr(elements.size(), k);

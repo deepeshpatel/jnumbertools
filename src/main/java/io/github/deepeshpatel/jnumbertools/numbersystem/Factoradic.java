@@ -67,6 +67,16 @@ public final class Factoradic implements Serializable {
         return Factoradic.of(BigInteger.valueOf(positiveInt));
     }
 
+    /**
+     * Returns a string representation of this Factoradic number.
+     * <p>
+     * The digits are printed from most significant to least significant for readability.
+     * For example, the Factoradic representation of decimal 10 is displayed as [1, 2, 0, 0]
+     * representing 1×3! + 2×2! + 0×1! + 0×0!.
+     * </p>
+     *
+     * @return a string in the format "[dₖ, dₖ₋₁, …, d₀]" where d₀ is the least significant digit
+     */
     @Override
     public String toString() {
         // Print the Factoradic digits in reverse order for readability.
