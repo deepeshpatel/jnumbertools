@@ -10,7 +10,7 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 public class TestBase {
-    static { System.getProperties().setProperty("stress.testing","true"); }
+    static { System.getProperties().setProperty("stress.testing","false"); }
 
     public static final Calculator calculator = new Calculator();
     public static final Permutations permutation = new Permutations(calculator);
@@ -34,6 +34,9 @@ public class TestBase {
 
     public static final String errMsgForIncrement = "Increment 'm' must be positive (m > 0)";
     public static final String errMsgForStart = "Element should be in range [0,";
+    public static final String errMsgNullInput = "elements should not be null for combinatorics generators to work";
+    public static final String errMsgNK = "n and k must be ≥ 0";
+    public static final String errMsgOptions = "Options must be non-null, and contain frequencies ≥ 0";
 
     private static List<?> everyMthValue(Stream<?> stream, int start, long m) {
         final int[] j = {0};

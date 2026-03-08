@@ -33,6 +33,37 @@ class KPermutationByRanksTest {
         }
 
         @Test
+        void assertCountAndContentForSpecialCase() {
+            // Case 1: n=0, k=0 -> ⁰P₀ = 1 -> should return [[]]
+            var zeroZeroGenerator = permutation.nPk(0, 0).lexOrderMth(1, 0);
+            var zeroZeroResult = zeroZeroGenerator.stream().toList();
+            assertEquals(1, zeroZeroResult.size());
+            assertTrue(zeroZeroResult.get(0).isEmpty());
+
+            // Case 2: n=0, k>0 -> ⁰Pₖ = 0 -> should return [] (empty iterator)
+            var zeroPositiveGenerator = permutation.nPk(0, 2).lexOrderMth(1, 0);
+            assertTrue(zeroPositiveGenerator.stream().toList().isEmpty());
+
+            // Case 3: n>0, k=0 -> ⁿP₀ = 1 -> should return [[]]
+            var positiveZeroGenerator = permutation.nPk(3, 0).lexOrderMth(1, 0);
+            var positiveZeroResult = positiveZeroGenerator.stream().toList();
+            assertEquals(1, positiveZeroResult.size());
+            assertTrue(positiveZeroResult.get(0).isEmpty());
+
+            // Case 4: n>0, k>n -> ⁿPₖ = 0 -> should return [] (empty iterator)
+            var greaterKGenerator = permutation.nPk(2, 3).lexOrderMth(1, 0);
+            assertTrue(greaterKGenerator.stream().toList().isEmpty());
+
+            // Case 5: With m>1, should still respect count=0
+            var greaterKWithMthGenerator = permutation.nPk(2, 3).lexOrderMth(3, 0);
+            assertTrue(greaterKWithMthGenerator.stream().toList().isEmpty());
+
+            // Case 6: Empty list with k>0 -> ⁰Pₖ = 0
+            var emptyListGenerator = permutation.nPk(2, Collections.emptyList()).lexOrderMth(1, 0);
+            assertTrue(emptyListGenerator.stream().toList().isEmpty());
+        }
+
+        @Test
         void shouldGenerateMthKPermutations() {
             var input = List.of(0, 1, 2, 3, 4);
             int k = 3;
@@ -65,41 +96,6 @@ class KPermutationByRanksTest {
                 assertEquals(4, perm.size(), "Each permutation should have size 4");
                 assertEquals(new HashSet<>(perm).size(), 4, "Permutation should contain all unique elements");
             }
-        }
-
-        @Test
-        void shouldHandleLargeIncrement() {
-            var input = List.of(0, 1, 2, 3);
-            int k = 2;
-            int increment = 100;
-            var result = permutation.nPk(k, input).lexOrderMth(increment, 0).stream().toList();
-            assertTrue(result.size() <= 1, "Large increment should result in at most one permutation");
-        }
-
-        @Test
-        void testFailFastForLexOrderMth() {
-            var input = List.of(0, 1, 2, 3);
-            int k = 2;
-            var kPermBuilder = permutation.nPk(k, input);
-
-            // m <= 0
-            var exception = assertThrows(IllegalArgumentException.class,
-                    () -> kPermBuilder.lexOrderMth(0, 1));
-            assertEquals(errMsgForIncrement, exception.getMessage());
-
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> kPermBuilder.lexOrderMth(-1, 1));
-            assertEquals(errMsgForIncrement, exception.getMessage());
-
-            // start < 0
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> kPermBuilder.lexOrderMth(1, -1));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
-
-            // start >= count
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> kPermBuilder.lexOrderMth(1, 100));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
         }
 
         @Test

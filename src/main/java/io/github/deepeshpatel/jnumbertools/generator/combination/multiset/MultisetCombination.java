@@ -27,9 +27,16 @@ public final class MultisetCombination<T> extends AbstractMultisetCombination<T>
     /**
      * Constructs a generator for multiset combinations.
      *
-     * @param map a map of n distinct elements to their multiplicities (must not be null or empty)
-     * @param r   the size of each combination (r ≥ 0)
-     * @throws IllegalArgumentException if r < 0 or map is null/empty
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.base.Combinations#multiset(LinkedHashMap, int)}.
+     * All parameter validation (null check, non-negative frequencies, zero-frequency filtering, r ≥ 0)
+     * is handled by the builder.
+     * </p>
+     *
+     * @param map a {@code LinkedHashMap} of elements and their frequencies (assumes zero frequencies filtered)
+     * @param r the size of each combination (assumed r ≥ 0)
      */
     MultisetCombination(LinkedHashMap<T, Integer> map, int r) {
         super(map, r);
@@ -38,15 +45,39 @@ public final class MultisetCombination<T> extends AbstractMultisetCombination<T>
     /**
      * Returns an iterator over multiset combinations in lexicographical order.
      * <p>
-     * Uses {@link ArrayIterator} for small r (r < 1000) for simplicity, and {@link FreqVectorIterator}
-     * for large r to optimize performance.
+     * A multiset combination selects r items from a multiset with specified frequencies.
+     * The iterator handles all mathematical edge cases:
+     * <ul>
+     *   <li>r = 0 → returns one empty map [{}] (⁰C₀ = 1)</li>
+     *   <li>Empty multiset or r > total available → returns empty iterator</li>
+     *   <li>Normal case (0 < r ≤ total) → generates all valid combinations</li>
+     * </ul>
      * </p>
      *
-     * @return an iterator of maps, each representing a combination as element frequencies
+     * @return an iterator over frequency maps representing multiset combinations;
+     *         returns {@link Util#emptyMapIterator()} for r = 0;
+     *         returns empty iterator when no combinations are possible
      */
     @Override
     public Iterator<Map<T, Integer>> iterator() {
-        if (r == 0 || options.length == 0) return Util.emptyMapIterator();
+        // Case 1: r = 0 → one empty combination
+        if (r == 0) {
+            return Util.emptyMapIterator();
+        }
+
+        // Case 2: No elements available
+        if (options.length == 0) {
+            return Collections.emptyIterator();
+        }
+
+        int totalAvailable = Arrays.stream(frequencies).sum();
+
+        // Case 3: r exceeds total available
+        if (r > totalAvailable) {
+            return Collections.emptyIterator();
+        }
+
+        // Case 4: Normal case - use appropriate iterator based on size
         return (r < CROSSOVER_THRESHOLD) ? new ArrayIterator() : new FreqVectorIterator();
     }
 

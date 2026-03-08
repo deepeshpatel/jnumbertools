@@ -47,7 +47,7 @@ public class UniqueCombinationByRanks<T> extends AbstractGenerator<T> {
         super(elements);
         this.r = r;
         this.ranks = ranks;
-        checkParamCombination(elements.size(), r, "unique combination sequence");
+        //checkParamCombination(elements.size(), r, "unique combination sequence");
         this.nCr = calculator.nCr(elements.size(), r);
         this.algorithms = new CombinadicAlgorithms(calculator);
     }

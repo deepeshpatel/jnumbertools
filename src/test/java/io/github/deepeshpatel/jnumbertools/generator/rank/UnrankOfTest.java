@@ -62,7 +62,38 @@ public class UnrankOfTest {
         Exception exception = assertThrows(ArithmeticException.class,
                 () -> JNumberTools.unrankOf().kPermutation(BigInteger.valueOf(totalPermutations), n, r));
 
-        String output = String.format(">= Permutation(%d,%d)", n, r);
+        String output = String.format("≥ Permutation(%d,%d)", n, r);
         assertTrue(exception.getMessage().contains(output));
+    }
+
+    @Test
+    void shouldGenerateUniquePermutationWithMinimumSize() {
+        // Test rank 5 - smallest n with n! > 5 is 3 (3! = 6)
+        BigInteger rank = BigInteger.valueOf(5);
+        int[] permutation = unrankOf.uniquePermutationMinimumSize(rank);
+        assertEquals(3, permutation.length);
+
+        // Verify it's the correct permutation at rank 5 for size 3
+        // All permutations of size 3 in lex order:
+        // 0:[0,1,2], 1:[0,2,1], 2:[1,0,2], 3:[1,2,0], 4:[2,0,1], 5:[2,1,0]
+        int[] expected = {2, 1, 0};
+        assertArrayEquals(expected, permutation);
+
+        // Test rank 0 (special case)
+        int[] zeroPerm = unrankOf.uniquePermutationMinimumSize(BigInteger.ZERO);
+        assertEquals(1, zeroPerm.length);
+        assertArrayEquals(new int[]{0}, zeroPerm);
+
+        // Test boundary: rank 5 (within 3!)
+        // rank 6 would require size 4 since 3! = 6 and rank must be < n!
+        BigInteger rank6 = BigInteger.valueOf(6);
+        int[] perm6 = unrankOf.uniquePermutationMinimumSize(rank6);
+        assertEquals(4, perm6.length);
+
+        // Test large rank
+        BigInteger rank1000 = BigInteger.valueOf(1000);
+        int[] perm1000 = unrankOf.uniquePermutationMinimumSize(rank1000);
+        // 6! = 720, 7! = 5040, so rank 1000 requires size 7
+        assertEquals(7, perm1000.length);
     }
 }

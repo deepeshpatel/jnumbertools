@@ -4,9 +4,10 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
-import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
@@ -133,6 +134,11 @@ public final class KPermutationBuilder<T> implements Builder<T> {
         return calculator.nPr(elements.size(), k);
     }
 
+    @Override
+    public boolean isEmpty() {
+        return elements.isEmpty() || k == 0;
+    }
+
     /**
      * Generates a random sample of k-permutations with replacement.
      * <p>
@@ -175,7 +181,7 @@ public final class KPermutationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if any rank is negative or ≥ Pₙ,ₖ
      */
     public KPermutationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
-        EveryMthIterable.validateByRanksParams(ranks);
+        Util.validateByRanksParams(ranks);
         return new KPermutationByRanks<>(elements, k, ranks, calculator);
     }
 
@@ -209,7 +215,7 @@ public final class KPermutationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if m or start is invalid
      */
     public KPermutationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m,start, count());
+        Util.validateLexOrderMthParams(m,start, count());
         EveryMthIterable iterator = new EveryMthIterable(start, m, calculator.nPr(elements.size(), k));
         return new KPermutationByRanks<>(elements, k, iterator, calculator);
     }
@@ -235,7 +241,7 @@ public final class KPermutationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if m or start is invalid
      */
     public KPermutationCombinationOrderMth<T> combinationOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m,start, count());
+        Util.validateLexOrderMthParams(m,start, count());
         return new KPermutationCombinationOrderMth<>(elements, k, m, start, calculator);
     }
 

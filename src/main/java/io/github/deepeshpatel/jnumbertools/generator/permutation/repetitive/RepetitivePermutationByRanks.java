@@ -39,11 +39,18 @@ public final class RepetitivePermutationByRanks<T> extends AbstractGenerator<T> 
     /**
      * Constructs a generator for repetitive permutations based on a rank sequence.
      *
-     * @param elements   the list of distinct elements to permute; must not be null or empty
-     * @param width      the length of each permutation; must be non-negative
-     * @param ranks      the sequence of ranks to generate permutations; each rank must be in [0, nᵂ)
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive.RepetitivePermutationBuilder#byRanks(Iterable)}.
+     * All parameter validation (null checks, width ≥ 0) is handled by the builder.
+     * Rank validation (non-negative, less than total) is deferred to iteration.
+     * </p>
+     *
+     * @param elements   the list of distinct elements to permute (assumed non-null)
+     * @param width      the length of each permutation (assumed ≥ 0)
+     * @param ranks      the sequence of ranks to generate permutations
      * @param calculator utility for computing powers and permutations
-     * @throws IllegalArgumentException if width is negative, elements is null/empty, or ranks are invalid
      */
     public RepetitivePermutationByRanks(List<T> elements, int width, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements);

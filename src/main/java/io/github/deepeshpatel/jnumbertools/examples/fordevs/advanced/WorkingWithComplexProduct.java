@@ -35,7 +35,7 @@ public class WorkingWithComplexProduct {
 
         // Build pizza with constraints using ConstrainedProductBuilder
         var pizzaBuilder = JNumberTools.cartesianProduct()
-                .constrainedProductOf(1, bases)                    // Choose 1 base
+                .constrainedProductOfDistinct(1, bases)                    // Choose 1 base
                 .andDistinct(2, cheeses)                           // Choose 2 distinct cheeses
                 .andMultiSelect(2, sauces)                         // Choose 2 sauces (can repeat)
                 .andInRange(0, 3, meats)                           // 0-3 meats (optional)

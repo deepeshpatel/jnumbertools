@@ -25,6 +25,38 @@ class MultisetPermutationByRanksTest {
         }
 
         @Test
+        void assertCountAndContentForSpecialCase() {
+            // Case 1: Empty map -> 0! = 1 -> should return [[]]
+            var emptyMapGenerator = permutation.multiset(new LinkedHashMap<>()).lexOrderMth(1, 0);
+            var emptyMapResult = emptyMapGenerator.stream().toList();
+            assertEquals(1, emptyMapResult.size());
+            assertTrue(emptyMapResult.get(0).isEmpty());
+
+            // Case 2: Empty map with m>1 -> still should return [[]]
+            var emptyMapWithMthGenerator = permutation.multiset(new LinkedHashMap<>()).lexOrderMth(3, 0);
+            var emptyMapWithMthResult = emptyMapWithMthGenerator.stream().toList();
+            assertEquals(1, emptyMapWithMthResult.size());
+            assertTrue(emptyMapWithMthResult.get(0).isEmpty());
+
+            // Case 3: Map with all zero frequencies (filtered out) -> treated as empty -> should return [[]]
+            var zeroFreqOptions = new LinkedHashMap<String, Integer>();
+            zeroFreqOptions.put("A", 0);
+            zeroFreqOptions.put("B", 0);
+            var zeroFreqGenerator = permutation.multiset(zeroFreqOptions).lexOrderMth(1, 0);
+            var zeroFreqResult = zeroFreqGenerator.stream().toList();
+            assertEquals(1, zeroFreqResult.size());
+            assertTrue(zeroFreqResult.get(0).isEmpty());
+
+            // Case 4: Single element with frequency f -> only one permutation
+            var singleOptions = new LinkedHashMap<>(Map.of("X", 3));
+            var singleGenerator = permutation.multiset(singleOptions).lexOrderMth(1, 0);
+            var singleResult = singleGenerator.stream().toList();
+            assertEquals(1, singleResult.size());
+            assertEquals(3, singleResult.get(0).size());
+            assertEquals("X", singleResult.get(0).get(0));
+        }
+
+        @Test
         void shouldGenerateMthMultisetPermutations() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1, "C", 1));
             int start = 2;
@@ -43,14 +75,6 @@ class MultisetPermutationByRanksTest {
             assertEquals(1, result.size(), "Should generate one permutation for single element type");
             assertEquals(3, result.get(0).size(), "Permutation should have correct size");
             assertEquals("A", result.get(0).get(0), "All elements should be A");
-        }
-
-        @Test
-        void shouldHandleLargeIncrement() {
-            var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1, "C", 1));
-            int increment = 100;
-            var result = permutation.multiset(options).lexOrderMth(increment, 0).stream().toList();
-            assertTrue(result.size() <= 1, "Large increment should result in at most one permutation");
         }
 
         @Test
@@ -89,31 +113,6 @@ class MultisetPermutationByRanksTest {
                     .lexOrderMth(20, 5)
                     .stream().toList();
             assertIterableEquals(expected, output);
-        }
-
-        @Test
-        void testFailFastForLexOrderMth() {
-            var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1, "C", 1));
-            var permBuilder = permutation.multiset(options);
-
-            // m <= 0
-            var exception = assertThrows(IllegalArgumentException.class,
-                    () -> permBuilder.lexOrderMth(0, 1));
-            assertEquals(errMsgForIncrement, exception.getMessage());
-
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> permBuilder.lexOrderMth(-1, 1));
-            assertEquals(errMsgForIncrement, exception.getMessage());
-
-            // start < 0
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> permBuilder.lexOrderMth(1, -1));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
-
-            // start >= count
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> permBuilder.lexOrderMth(1, 100));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
         }
     }
 

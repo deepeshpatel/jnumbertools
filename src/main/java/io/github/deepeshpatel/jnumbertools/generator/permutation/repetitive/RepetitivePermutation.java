@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -37,8 +38,14 @@ public final class RepetitivePermutation<T> extends AbstractGenerator<T> {
      * Constructs a new {@code RepetitivePermutation} instance for generating all permutations
      * (with repetition) of the specified size from the given list of elements.
      *
-     * @param elements the list of elements to permute
-     * @param size the size (length) of each permutation. This value can be greater than the number of unique elements.
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via {@link io.github.deepeshpatel.jnumbertools.base.Permutations#repetitive(int, List)}.
+     * All parameter validation (null check, non-negative size) is handled by the builder.
+     * </p>
+     *
+     * @param elements the list of elements to permute (assumed non-null)
+     * @param size the length of each permutation (assumed ≥ 0)
      */
     RepetitivePermutation(List<T> elements, int size) {
         super(elements);
@@ -56,11 +63,9 @@ public final class RepetitivePermutation<T> extends AbstractGenerator<T> {
      */
     @Override
     public Iterator<List<T>> iterator() {
-        if(elements.isEmpty()) {
-            //by the definition of exponentiation, for n=0 and k>0 0^k = 0
-            //hence empty input should me allowed and the result is the empty collection
-            return Collections.emptyIterator();
-        }
+        // In context of combinatorics: 0⁰ = 1, 0ʳ = 0 (r>0), n⁰ = 1 (n>0)
+        if(elements.isEmpty() && size==0) return Util.emptyListIterator(); // 0⁰ = 1 -> returns [[]]
+        if(elements.isEmpty()) return Collections.emptyIterator(); // 0ʳ = 0 (r>0) -> returns []
         return new NumberIterator();
     }
 

@@ -7,6 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
@@ -152,7 +153,7 @@ public final class UniquePermutationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if m ≤ 0, start < 0, or start ≥ total permutations
      */
     public UniquePermutationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m,start,count());
+        Util.validateLexOrderMthParams(m,start,count());
         BigInteger total = calculator.factorial(elements.size());
         return new UniquePermutationByRanks<>(elements, new EveryMthIterable(start, m, total), calculator);
     }
@@ -180,7 +181,7 @@ public final class UniquePermutationBuilder<T> implements Builder<T> {
      * @throws IllegalStateException if no generation strategy was selected
      */
     public UniquePermutationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
-        EveryMthIterable.validateByRanksParams(ranks);
+        Util.validateByRanksParams(ranks);
         return new UniquePermutationByRanks<>(elements, ranks, calculator);
     }
 
@@ -219,6 +220,11 @@ public final class UniquePermutationBuilder<T> implements Builder<T> {
 
     public BigInteger count() {
         return calculator.factorial(elements.size());
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return elements.isEmpty();
     }
 
     @Override

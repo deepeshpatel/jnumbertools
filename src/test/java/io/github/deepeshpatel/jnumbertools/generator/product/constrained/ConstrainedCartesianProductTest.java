@@ -4,24 +4,24 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static java.util.List.of;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ConstrainedCartesianProductTest {
 
-    private final List<String> pizzaBase = of("Small ", "Medium", "Large");
-    private final List<String> sauce = of("Tomato Ketchup", "White Sauce", "Green Chutney");
-    private final List<String> cheese = of("Ricotta", "Mozzarella", "Cheddar");
-    private final List<String> toppings = of("tomato", "capsicum", "onion", "paneer", "corn");
+    static final List<String> pizzaBase = of("Small ", "Medium", "Large");
+    static final List<String> sauce = of("Tomato Ketchup", "White Sauce", "Green Chutney");
+    static final List<String> cheese = of("Ricotta", "Mozzarella", "Cheddar");
+    static final List<String> toppings = of("tomato", "capsicum", "onion", "paneer", "corn");
 
     @Test
     void assertCount() {
-        var product = cartesianProduct.constrainedProductOf(1, pizzaBase)
+        var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
                 .andDistinct(2, cheese)
                 .andMultiSelect(2, sauce)
                 .andInRange(1, 5, toppings);
@@ -30,84 +30,39 @@ public class ConstrainedCartesianProductTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenFromGreaterThanTo() {
-        assertThrows(IllegalArgumentException.class, () ->
-                cartesianProduct.constrainedProductOf(1, pizzaBase)
-                        .andInRange(5, 3, toppings)  // from > to
-                        .lexOrder()
-        );
-    }
+    void assertCountAndContentForSpecialCase() {
+        // Case 1: Single dimension with empty list and quantity 0 -> count=1, returns [[]]
+        var singleEmptyZero = cartesianProduct.constrainedProductOfDistinct(0, Collections.emptyList());
+        assertEquals(BigInteger.ONE, singleEmptyZero.count());
+        var result1 = singleEmptyZero.lexOrder().stream().toList();
+        assertEquals(1, result1.size());
+        assertEquals(List.of(), result1.get(0));
 
-    @Test
-    void shouldHandleToExceedingElements() {
-        // When 'to' exceeds available elements, it should cap at elements.size()
-        var builder = cartesianProduct.constrainedProductOf(1, pizzaBase)
-                .andInRange(1, 10, toppings);
+        // Case 2: Single dimension with empty list and quantity > 0 -> count=0, returns []
+        var singleEmptyPositive = cartesianProduct.constrainedProductOfDistinct(2, Collections.emptyList());
+        assertEquals(BigInteger.ZERO, singleEmptyPositive.count());
+        assertTrue(singleEmptyPositive.lexOrder().stream().toList().isEmpty());
 
-        // Calculate expected: pizzaBase(3) × subsets of size 1-5 from toppings
-        BigInteger expectedToppingsCount = BigInteger.ZERO;
-        for (int i = 1; i <= 5; i++) {
-            expectedToppingsCount = expectedToppingsCount.add(calculator.nCr(5, i));
-        }
-        BigInteger expectedTotal = BigInteger.valueOf(3).multiply(expectedToppingsCount);
+        // Case 3: Multiple dimensions with any empty (quantity>0) -> count=0, returns []
+        var multiWithEmpty = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+                .andDistinct(2, Collections.emptyList())
+                .andMultiSelect(2, sauce);
+        assertEquals(BigInteger.ZERO, multiWithEmpty.count());
+        assertTrue(multiWithEmpty.lexOrder().stream().toList().isEmpty());
 
-        assertEquals(expectedTotal, builder.count());
-
-        var result = builder.lexOrder().stream().toList();
-        assertEquals(expectedTotal.intValue(), result.size());
-
-        // Verify structure: each tuple is flat
-        for (var tuple : result) {
-            // First element: pizza base (String)
-            assertTrue(pizzaBase.contains(tuple.get(0)));
-
-            // Remaining elements: toppings (variable number, 1-5)
-            int toppingsCount = tuple.size() - 1;
-            assertTrue(toppingsCount >= 1 && toppingsCount <= 5);
-
-            // Verify all toppings are from the original list
-            for (int i = 1; i < tuple.size(); i++) {
-                assertTrue(toppings.contains(tuple.get(i)));
-            }
-        }
-    }
-
-
-    @Test
-    void shouldHandleNullElementsInAndDistinct() {
-        var builder = cartesianProduct.constrainedProductOf(1, pizzaBase)
-                .andDistinct(2, (List<?>) null);
-
-        assertEquals(BigInteger.ZERO, builder.count());
-        assertTrue(builder.lexOrder().stream().toList().isEmpty());
-    }
-
-    @Test
-    void shouldHandleNullElementsInAndMultiSelect() {
-        var builder = cartesianProduct.constrainedProductOf(1, pizzaBase)
-                .andMultiSelect(2, (List<?>) null);
-
-        assertEquals(BigInteger.ZERO, builder.count());
-        assertTrue(builder.lexOrder().stream().toList().isEmpty());
-    }
-
-    @Test
-    void shouldHandleNullElementsInAndInRange() {
-        // According to the pattern with SimpleProductBuilder:
-        // - null should be treated as empty set
-        // - Empty set with range [1,3] has no valid subsets (since min size 1 > 0)
-        // - Therefore this dimension contributes 0 combinations
-        // - Product with any zero dimension is empty
-
-        var builder = cartesianProduct.constrainedProductOf(1, pizzaBase)
-                .andInRange(1, 3, (List<?>) null);
-        assertEquals(BigInteger.ZERO, builder.count());
-        assertTrue(builder.lexOrder().stream().toList().isEmpty());
+        // Case 4: Multiple dimensions with all count=1 -> count=1, returns [[]]
+        var allOnes = cartesianProduct.constrainedProductOfDistinct(0, Collections.emptyList())
+                .andDistinct(0, Collections.emptyList())
+                .andMultiSelect(0, Collections.emptyList());
+        assertEquals(BigInteger.ONE, allOnes.count());
+        var result4 = allOnes.lexOrder().stream().toList();
+        assertEquals(1, result4.size());
+        assertEquals(List.of(), result4.get(0));
     }
 
     @Test
     void shouldGenerateCorrectCombinations() {
-        var product = cartesianProduct.constrainedProductOf(1, pizzaBase)
+        var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
                 .andDistinct(2, cheese)
                 .andMultiSelect(2, sauce)
                 .andInRange(1, 5, toppings);
@@ -143,13 +98,6 @@ public class ConstrainedCartesianProductTest {
         );
     }
 
-    @Test
-    void constrained_withInvalidRange_shouldThrow() {
-        assertThrows(IllegalArgumentException.class, () ->
-                cartesianProduct.constrainedProductOf(1, pizzaBase)
-                        .andInRange(5, 3, toppings)
-                        .lexOrder());
-    }
 
     @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
     @Test

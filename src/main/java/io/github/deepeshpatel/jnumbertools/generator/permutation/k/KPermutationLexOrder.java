@@ -7,11 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermutationLexElementIterator;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toCollection;
@@ -40,9 +36,15 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
     /**
      * Constructs a generator for k-permutations in lexicographical order.
      *
-     * @param elements the list of elements to permute (must not be null)
-     * @param k the size of each permutation (0 ≤ k ≤ elements.size())
-     * @throws IllegalArgumentException if k is negative or exceeds elements size
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.base.Permutations#nPk(int, List)}.
+     * All parameter validation (null check, 0 ≤ k ≤ n) is handled by the builder.
+     * </p>
+     *
+     * @param elements the list of elements to permute (assumed non-null)
+     * @param k the size of each permutation (assumed 0 ≤ k ≤ elements.size())
      */
     KPermutationLexOrder(List<T> elements, int k) {
         super(elements, k);
@@ -65,7 +67,10 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
      */
     @Override
     public Iterator<List<T>> iterator() {
-        if (k == 0) return Util.emptyListIterator();
+        //⁰Pₖ = 0  and ⁿPₖ = 0 for k>n
+        if(k > elements.size()) return Collections.emptyIterator();
+        //⁰P₀ = 1 and ⁿP₀ = 1
+        if(k ==0)  return Util.emptyListIterator();
         if (k == elements.size()) return new UniquePermutationLexElementIterator<>(elements.size(), this::indicesToValues);
         return new Itr();
     }

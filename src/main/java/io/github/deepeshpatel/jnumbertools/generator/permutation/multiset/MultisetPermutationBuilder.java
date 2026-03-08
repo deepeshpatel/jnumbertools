@@ -6,7 +6,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
-import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
@@ -156,9 +156,7 @@ public final class MultisetPermutationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if {@code options} is null, empty, or contains non-positive frequencies
      */
     public MultisetPermutationBuilder(LinkedHashMap<T, Integer> options, Calculator calculator) {
-        if (options == null || options.isEmpty() || options.values().stream().anyMatch(f -> f <= 0)) {
-            throw new IllegalArgumentException("Options must be non-null, non-empty, and contain positive frequencies");
-        }
+        Util.filterZeroFrequencies(options);
         this.options = options;
         this.calculator = calculator;
     }
@@ -189,7 +187,7 @@ public final class MultisetPermutationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if {@code m} or {@code start} is negative
      */
     public MultisetPermutationMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m,start, count());
+        Util.validateLexOrderMthParams(m,start, count());
         return new MultisetPermutationMth<>(options, m, start, calculator);
     }
 
@@ -263,14 +261,26 @@ public final class MultisetPermutationBuilder<T> implements Builder<T> {
      *
      * byRanks([0, 2, 11]) → [A,A,B,C], [A,B,A,C], [C,B,A,A]
      * </pre>
+     * </p>
      *
-     * @param ranks Iterable of 0-based rank numbers (0 ≤ rank < n! / (m₁!·m₂!·…)), where mᵢ are duplicate counts
+     * <p>
+     * <strong>Rank Validation:</strong>
+     * <ul>
+     *   <li>Ranks are 0-based positions in lexicographical order</li>
+     *   <li>Each rank must satisfy 0 ≤ rank < total permutations (n!/(∏fᵢ!))</li>
+     *   <li>Invalid ranks (negative, out of bounds) will throw {@link IllegalArgumentException} during iteration</li>
+     *   <li>Null rank iterable throws {@link IllegalArgumentException} immediately</li>
+     * </ul>
+     * </p>
+     *
+     * @param ranks Iterable of 0-based rank numbers
      * @return a new {@link MultisetPermutationByRanks} instance for generating permutations at specified ranks
-     * @throws IllegalArgumentException if any rank ≥ n! / (m₁!·m₂!·…)
-     * @throws IllegalStateException if no generation strategy was selected
+     * @throws IllegalArgumentException if ranks is null
+     * @see #lexOrder()
+     * @see #lexOrderMth(BigInteger, BigInteger)
      */
     public MultisetPermutationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
-        EveryMthIterable.validateByRanksParams(ranks);
+        Util.validateByRanksParams(ranks);
         return new MultisetPermutationByRanks<>(options, ranks, calculator);
     }
 
@@ -284,6 +294,11 @@ public final class MultisetPermutationBuilder<T> implements Builder<T> {
     }
 
     @Override
+    public boolean isEmpty() {
+        return options.isEmpty();
+    }
+
+    @Override
     public String toString() {
         return "MultisetPermutationBuilder{" +
                 "options=" + options +
@@ -291,3 +306,4 @@ public final class MultisetPermutationBuilder<T> implements Builder<T> {
                 '}';
     }
 }
+

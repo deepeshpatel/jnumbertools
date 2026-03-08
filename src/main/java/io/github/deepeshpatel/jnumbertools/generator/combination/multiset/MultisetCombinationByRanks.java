@@ -42,10 +42,19 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
     /**
      * Constructs a new MultisetCombinationByRanks instance.
      *
-     * @param options a {@code LinkedHashMap} of distinct elements and their frequencies; insertion order affects INSERTION ordering
-     * @param r the size of each combination (rᵣ); must be non-negative
-     * @param ranks an iterable of 0-based rank numbers (0 ≤ rank < total combinations)
-     * @throws IllegalArgumentException if rᵣ is negative, options is invalid, or ranks are out of bounds
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.generator.combination.multiset.MultisetCombinationBuilder#byRanks(Iterable)}.
+     * All parameter validation (null check, non-negative frequencies, zero-frequency filtering, r ≥ 0)
+     * is handled by the builder.
+     * Rank validation (non-negative, less than total) is deferred to iteration.
+     * </p>
+     *
+     * @param options a {@code LinkedHashMap} of distinct elements and their frequencies (assumes zero frequencies filtered)
+     * @param r the size of each combination (assumed r ≥ 0)
+     * @param ranks an iterable of 0-based rank numbers
+     * @param totalCombinations pre-computed total for validation (assumed correct)
      */
     public MultisetCombinationByRanks(LinkedHashMap<T, Integer> options, int r, Iterable<BigInteger> ranks, BigInteger totalCombinations) {
         super(options, r);

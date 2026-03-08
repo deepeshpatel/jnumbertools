@@ -9,6 +9,7 @@ import io.github.deepeshpatel.jnumbertools.base.Permutations;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermutationLexElementIterator;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,9 +38,16 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
     /**
      * Constructs an instance for generating k-permutations in combination order.
      *
-     * @param elements the list of elements to permute (must not be null)
-     * @param k the size of each permutation (0 ≤ k ≤ elements.size())
-     * @throws IllegalArgumentException if k is negative or exceeds elements size
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.base.Permutations#nPk(int, List)} and then
+     * {@link io.github.deepeshpatel.jnumbertools.generator.permutation.k.KPermutationBuilder#combinationOrder()}.
+     * All parameter validation (null check, 0 ≤ k ≤ n) is handled by the builder.
+     * </p>
+     *
+     * @param elements the list of elements to permute (assumed non-null)
+     * @param k the size of each permutation (assumed 0 ≤ k ≤ elements.size())
      */
     KPermutationCombinationOrder(List<T> elements, int k) {
         super(elements, k);
@@ -56,18 +64,27 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
      * [A,B], [B,A], [A,C], [C,A], [B,C], [C,B]
      * </p>
      *
-     * @return an iterator over k-permutations in combination order;
-     *         returns an empty iterator if k = 0 or the input list is empty
-     * @throws IllegalArgumentException if k < 0 or k > elements.size()
+     * @return an iterator over k-permutations in combination order
      */
     @Override
     public Iterator<List<T>> iterator() {
-        if (k == 0 || elements.isEmpty()) {
+        // Case 1: k = 0 → one empty permutation (ⁿP₀ = 1)
+        if (k == 0) {
             return Util.emptyListIterator();
         }
+
+        // Case 2: Empty list with k > 0 → no permutations (⁰Pₖ = 0)
+        // Case 3: k > n → no permutations (ⁿPₖ = 0)
+        if (elements.isEmpty() || k > elements.size()) {
+            return Collections.emptyIterator();
+        }
+
+        // Case 4: k = n → full permutations
         if (k == elements.size()) {
             return new UniquePermutationLexElementIterator<>(elements.size(), this::indicesToValues);
         }
+
+        // Case 5: Normal case (0 < k < n)
         return new Itr();
     }
 

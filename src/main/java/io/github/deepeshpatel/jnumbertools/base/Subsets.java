@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetGeneratorByRanks;
@@ -148,6 +149,7 @@ public final class Subsets {
      * @return a SubsetBuilder for the specified elements
      */
     public <T> SubsetBuilder<T> of(List<T> elements) {
+        Util.validateInput(elements);
         return new SubsetBuilder<>(elements, calculator);
     }
 
@@ -162,6 +164,9 @@ public final class Subsets {
      * @return a SubsetBuilder for the integer range
      */
     public SubsetBuilder<Integer> of(int dataSize) {
+        if(dataSize < 0) {
+            throw new IllegalArgumentException("dataSize should be ≥ 0 to generate subsets");
+        }
         var elements = IntStream.range(0, dataSize).boxed().toList();
         return new SubsetBuilder<>(elements, calculator);
     }

@@ -7,6 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
@@ -107,7 +108,7 @@ import java.util.List;
  * System.out.println(singleBuilder.count()); // 1
  * singleBuilder.lexOrder().forEach(System.out::println); // Prints: [A,A,A]
  *
- * // n = 0, r > 0 produces no combinations (empty set)
+ * // n = 0, r > 0 produces no combinations [empty-set(∅)]
  * RepetitiveCombinationBuilder&lt;String&gt; zeroBuilder =
  *     new RepetitiveCombinationBuilder&lt;&gt;(Collections.emptyList(), 3, calculator);
  * System.out.println(zeroBuilder.count()); // 0
@@ -174,7 +175,7 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿ⁺ᵣ⁻¹Cᵣ
      */
     public RepetitiveCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m,start, count());
+        Util.validateLexOrderMthParams(m,start, count());
         BigInteger nCrRepetitive = calculator.nCrRepetitive(elements.size(), size);
         Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, nCrRepetitive);
         return new RepetitiveCombinationByRanks<>(elements, size, mthIterable, calculator);
@@ -221,7 +222,7 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if any rank < 0 or rank ≥ ⁿ⁺ᵣ⁻¹Cᵣ
      */
     public RepetitiveCombinationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
-        EveryMthIterable.validateByRanksParams(ranks);
+        Util.validateByRanksParams(ranks);
         return new RepetitiveCombinationByRanks<>(elements, size, ranks, calculator);
     }
 
@@ -232,6 +233,11 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
      */
     public BigInteger count() {
         return calculator.nCrRepetitive(elements.size(), size);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return elements.isEmpty() || size == 0;
     }
 
     @Override

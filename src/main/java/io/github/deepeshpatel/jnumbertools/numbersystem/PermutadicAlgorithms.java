@@ -185,7 +185,7 @@ public final class PermutadicAlgorithms {
     public int[] unRankWithBoundCheck(BigInteger rank, int size, int k) {
         BigInteger maxPermutationCount = calculator.nPr(size, k);
         if (maxPermutationCount.compareTo(rank) <= 0) {
-            String message = "Out of range. Can't decode %d to mᵗʰ permutation as it is >= Permutation(%d,%d).";
+            String message = "Out of range. Can't decode %d to mᵗʰ permutation as it is ≥ Permutation(%d,%d).";
             message = String.format(message, rank, size, k);
             throw new ArithmeticException(message);
         }

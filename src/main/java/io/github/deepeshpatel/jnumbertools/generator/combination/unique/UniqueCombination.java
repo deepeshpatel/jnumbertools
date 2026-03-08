@@ -5,11 +5,9 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.IntStream;
 
 /**
@@ -33,14 +31,20 @@ public final class UniqueCombination<T> extends AbstractGenerator<T> {
     /**
      * Constructs a generator for unique combinations.
      *
-     * @param elements the list of n items to generate combinations from (must not be null or empty)
-     * @param r        the size of each combination (0 ≤ r ≤ n)
-     * @throws IllegalArgumentException if r < 0, r > n, or elements is null/empty
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.base.Combinations#unique(int, List)}.
+     * All parameter validation (null check, 0 ≤ r ≤ n) is handled by the builder.
+     * </p>
+     *
+     * @param elements the list of items to generate combinations from (assumed non-null)
+     * @param r        the size of each combination (assumed 0 ≤ r ≤ elements.size())
      */
     UniqueCombination(List<T> elements, int r) {
         super(elements);
         this.r = r;
-        checkParamCombination(elements.size(), r, "unique combinations");
+        //checkParamCombination(elements.size(), r, "unique combinations");
     }
 
     /**
@@ -60,6 +64,16 @@ public final class UniqueCombination<T> extends AbstractGenerator<T> {
      */
     @Override
     public Iterator<List<T>> iterator() {
+        // Case 1: ⁿC₀ = 0 for n > 0 and r > n
+        if (r > elements.size()) return Collections.emptyIterator();
+
+        // Case 2: ⁿC₀ = 1
+        if (r == 0) return Util.emptyListIterator();
+
+        // Case 3: r = n -> one combination containing all elements (ⁿCₙ = 1)
+        if (r == elements.size()) return Collections.singletonList(elements).iterator();
+
+        // Case 4: Normal case (0 < r < n)
         return new Itr();
     }
 

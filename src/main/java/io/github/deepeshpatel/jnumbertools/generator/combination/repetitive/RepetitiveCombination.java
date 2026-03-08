@@ -7,10 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * Generates repetitive combinations of size r from n items in lexicographical order.
@@ -36,9 +33,15 @@ public final class RepetitiveCombination<T> extends AbstractGenerator<T> {
     /**
      * Constructs a generator for repetitive combinations.
      *
-     * @param elements the list of n items to generate combinations from (must not be null or empty)
-     * @param r        the size of each combination (r ≥ 0)
-     * @throws IllegalArgumentException if r < 0 or elements is null/empty
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.base.Combinations#repetitive(int, List)}.
+     * All parameter validation (null check, r ≥ 0) is handled by the builder.
+     * </p>
+     *
+     * @param elements the list of items to generate combinations from (assumed non-null)
+     * @param r        the size of each combination (assumed r ≥ 0)
      */
     RepetitiveCombination(List<T> elements, int r) {
         super(elements);
@@ -57,15 +60,20 @@ public final class RepetitiveCombination<T> extends AbstractGenerator<T> {
      * </p>
      *
      * @return an iterator over repetitive combinations of size r in lexicographical order;
-     *         returns an empty iterator if r = 0 (returns one empty combination) or
-     *         if the input list is empty (returns empty iterator for r > 0)
-     * @throws IllegalArgumentException if r < 0
+     *         returns {@link Util#emptyListIterator()} for r = 0 (one empty combination);
+     *         returns empty iterator for n = 0, r > 0 (no combinations possible)
      */
     @Override
     public Iterator<List<T>> iterator() {
-        return (r == 0 || elements.isEmpty()) ? Util.emptyListIterator() : new Itr();
-    }
+        // Case 1: r = 0 → one empty combination (⁰C₀ = 1, ⁿC₀ = 1)
+        if (r == 0) return Util.emptyListIterator();
 
+        // Case 2: n = 0 and r > 0 → 0ʳ = 0 → empty iterator
+        if (elements.isEmpty()) return Collections.emptyIterator();
+
+        // Case 3: Normal case (n > 0, r > 0)
+        return new Itr();
+    }
     /**
      * Iterator for generating repetitive combinations in lexicographical order.
      */

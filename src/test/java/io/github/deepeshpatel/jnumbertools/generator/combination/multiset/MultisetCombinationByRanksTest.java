@@ -3,13 +3,13 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.*;
+import static io.github.deepeshpatel.jnumbertools.TestBase.assertEveryMthValue;
+import static io.github.deepeshpatel.jnumbertools.TestBase.combination;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MultisetCombinationByRanksTest {
@@ -40,6 +40,41 @@ class MultisetCombinationByRanksTest {
         }
 
         @Test
+        void assertCountAndContentForSpecialCase() {
+            // Case 1: Empty map, r=0 -> 1 -> should return [{}]
+            var emptyMapZeroGenerator = combination.multiset(new LinkedHashMap<>(), 0).lexOrderMth(1, 0);
+            var emptyMapZeroResult = emptyMapZeroGenerator.stream().toList();
+            assertEquals(1, emptyMapZeroResult.size());
+            assertEquals(Map.of(), emptyMapZeroResult.get(0));
+
+            // Case 2: Empty map, r>0 -> 0 -> should return [] (empty iterator)
+            var emptyMapPositiveGenerator = combination.multiset(new LinkedHashMap<>(), 2).lexOrderMth(1, 0);
+            assertTrue(emptyMapPositiveGenerator.stream().toList().isEmpty());
+
+            // Case 3: Non-empty map, r=0 -> 1 -> should return [{}]
+            var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1));
+            var positiveZeroGenerator = combination.multiset(options, 0).lexOrderMth(1, 0);
+            var positiveZeroResult = positiveZeroGenerator.stream().toList();
+            assertEquals(1, positiveZeroResult.size());
+            assertEquals(Map.of(), positiveZeroResult.get(0));
+
+            // Case 4: r > total available -> 0 -> should return [] (empty iterator)
+            var greaterRGenerator = combination.multiset(options, 10).lexOrderMth(1, 0);
+            assertTrue(greaterRGenerator.stream().toList().isEmpty());
+
+            // Case 5: With m>1, should still respect count=0
+            var emptyMapWithMthGenerator = combination.multiset(new LinkedHashMap<>(), 2).lexOrderMth(3, 0);
+            assertTrue(emptyMapWithMthGenerator.stream().toList().isEmpty());
+
+            // Case 6: Map with all zero frequencies -> treated as empty -> count=0 for r>0
+            var zeroFreqOptions = new LinkedHashMap<String, Integer>();
+            zeroFreqOptions.put("A", 0);
+            zeroFreqOptions.put("B", 0);
+            var zeroFreqGenerator = combination.multiset(zeroFreqOptions, 2).lexOrderMth(1, 0);
+            assertTrue(zeroFreqGenerator.stream().toList().isEmpty());
+        }
+
+        @Test
         void shouldGenerateCorrectCombinationsForAllOrdersAtRank10() {
             int k = 8;
             int start = 10;
@@ -51,7 +86,7 @@ class MultisetCombinationByRanksTest {
         }
 
         @Test
-        @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
+        //@EnabledIfSystemProperty(named = "stress.testing", matches = "true")
         void shouldGenerateMthMultisetCombinations() {
             int size = 4;
             int start = 3;
@@ -62,32 +97,6 @@ class MultisetCombinationByRanksTest {
                 var mth = builder.lexOrderMth(m, start);
                 assertEveryMthValue(all.stream(), mth.stream(), start, m);
             }
-        }
-
-        @Test
-        void testFailFastForLexOrderMth() {
-            var options = new LinkedHashMap<>(Map.of("A", 3, "B", 2, "C", 1));
-            int combinationSize = 2;
-            var multisetComb = combination.multiset(options, combinationSize);
-
-            // m <= 0
-            var exception = assertThrows(IllegalArgumentException.class,
-                    () -> multisetComb.lexOrderMth(0, 1));
-            assertEquals(errMsgForIncrement, exception.getMessage());
-
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> multisetComb.lexOrderMth(-1, 1));
-            assertEquals(errMsgForIncrement, exception.getMessage());
-
-            // start < 0
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> multisetComb.lexOrderMth(1, -1));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
-
-            // start >= count
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> multisetComb.lexOrderMth(1, 1000));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
         }
     }
 

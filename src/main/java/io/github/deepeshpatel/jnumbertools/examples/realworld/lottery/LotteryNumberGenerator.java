@@ -82,7 +82,7 @@ public class LotteryNumberGenerator {
 
         System.out.println("\n   One random PowerBall ticket:");
         var ticket = JNumberTools.cartesianProduct()
-                .constrainedProductOf(whitePick, range(1, whiteBalls + 1))
+                .constrainedProductOfDistinct(whitePick, range(1, whiteBalls + 1))
                 .andDistinct(powerPick, range(1, powerBalls + 1))
                 .choice(1)
                 .stream()
@@ -109,7 +109,7 @@ public class LotteryNumberGenerator {
 
         System.out.println("\n   One random EuroMillions-style ticket:");
         var ticket = JNumberTools.cartesianProduct()
-                .constrainedProductOf(mainPick, range(1, main + 1))
+                .constrainedProductOfDistinct(mainPick, range(1, main + 1))
                 .andDistinct(starsPick, range(1, stars + 1))
                 .choice(1)
                 .stream()

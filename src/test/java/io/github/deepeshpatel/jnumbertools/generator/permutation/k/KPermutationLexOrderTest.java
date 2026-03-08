@@ -2,6 +2,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,15 +16,39 @@ public class KPermutationLexOrderTest {
     @Test
     void assertCount() {
         // nPk: n!/(n−k)!
-        for (int n = 0; n <= 4; n++) {
+        for (int n = 1; n <= 4; n++) {
             var input = Collections.nCopies(n, "A");
-            for (int k = 0; k < n; k++) {
+            for (int k = 1; k <= n; k++) {
                 long size = permutation.nPk(k, input)
                         .lexOrder()
                         .stream().count();
                 assertEquals(calculator.nPr(n, k).longValue(), size);
             }
         }
+    }
+
+    @Test
+    void assertCountAndContentForSpecialCase() {
+        //n=0 and k>0
+        var nZeroBuilder = permutation.nPk(0,1);
+        assertEquals(BigInteger.ZERO, nZeroBuilder.count());
+        assertTrue(nZeroBuilder.lexOrder().stream().toList().isEmpty());
+
+        //n> and k>n
+        var greaterKBuilder =  permutation.nPk(1,2);
+        assertEquals(BigInteger.ZERO,greaterKBuilder.count());
+        assertTrue(greaterKBuilder.lexOrder().stream().toList().isEmpty());
+
+        //n=0 and k=0
+        var bothZeroBuilder = permutation.nPk(0,0);
+        assertEquals(BigInteger.ONE,bothZeroBuilder.count());
+        assertTrue(bothZeroBuilder.lexOrder().stream().toList().get(0).isEmpty());
+
+        //n>0 and k=0
+        var onlyKZeroBuilder = permutation.nPk(2,0);
+        assertEquals(BigInteger.ONE,onlyKZeroBuilder.count());
+        assertTrue(onlyKZeroBuilder.lexOrder().stream().toList().get(0).isEmpty());
+
     }
 
     @Test
@@ -51,12 +76,6 @@ public class KPermutationLexOrderTest {
     void shouldThrowExceptionForNegativeK() {
         assertThrows(IllegalArgumentException.class, () ->
                 permutation.nPk(-1, List.of("A", "B")).lexOrder());
-    }
-
-    @Test
-    void shouldThrowExceptionForKGreaterThanN() {
-        assertThrows(IllegalArgumentException.class, () ->
-                permutation.nPk(5, List.of("A", "B", "C")).lexOrder());
     }
 
     @Test

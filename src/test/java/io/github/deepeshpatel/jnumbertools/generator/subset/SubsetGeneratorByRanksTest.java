@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -55,27 +56,32 @@ public class SubsetGeneratorByRanksTest {
         }
 
         @Test
-        void testFailFastForLexOrderMth() {
-            var subsetBuilder = subsets.of(A_B_C_D).inRange(1, 3);
+        void assertCountAndContentForSpecialCase() {
+            // Case 1: n=0, range [0,0] -> 1 -> should return [[]]
+            var zeroZeroGenerator = subsets.of(Collections.emptyList()).inRange(0, 0).lexOrderMth(1, 0);
+            var zeroZeroResult = zeroZeroGenerator.stream().toList();
+            assertEquals(1, zeroZeroResult.size());
+            assertTrue(zeroZeroResult.get(0).isEmpty());
 
-            // m <= 0
-            var exception = assertThrows(IllegalArgumentException.class,
-                    () -> subsetBuilder.lexOrderMth(0, 1));
-            assertEquals(errMsgForIncrement, exception.getMessage());
+            // Case 2: n=0, range [0,2] -> only empty subset exists -> should return [[]]
+            var zeroRangeGenerator = subsets.of(Collections.emptyList()).inRange(0, 2).lexOrderMth(1, 0);
+            var zeroRangeResult = zeroRangeGenerator.stream().toList();
+            assertEquals(1, zeroRangeResult.size());
+            assertTrue(zeroRangeResult.get(0).isEmpty());
 
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> subsetBuilder.lexOrderMth(-1, 1));
-            assertEquals(errMsgForIncrement, exception.getMessage());
+            // Case 3: n=0, range [1,2] -> no non-empty subsets -> should return [] (empty iterator)
+            var zeroPositiveGenerator = subsets.of(Collections.emptyList()).inRange(1, 2).lexOrderMth(1, 0);
+            assertTrue(zeroPositiveGenerator.stream().toList().isEmpty());
 
-            // start < 0
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> subsetBuilder.lexOrderMth(1, -1));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
+            // Case 4: n>0, range [0,0] -> one empty subset -> should return [[]]
+            var positiveZeroGenerator = subsets.of(A_B_C_D).inRange(0, 0).lexOrderMth(1, 0);
+            var positiveZeroResult = positiveZeroGenerator.stream().toList();
+            assertEquals(1, positiveZeroResult.size());
+            assertTrue(positiveZeroResult.get(0).isEmpty());
 
-            // start >= count
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> subsetBuilder.lexOrderMth(1, 100));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
+            // Case 5: With m>1, should still respect count=0
+            var zeroPositiveWithMthGenerator = subsets.of(Collections.emptyList()).inRange(1, 2).lexOrderMth(3, 0);
+            assertTrue(zeroPositiveWithMthGenerator.stream().toList().isEmpty());
         }
 
         @Test

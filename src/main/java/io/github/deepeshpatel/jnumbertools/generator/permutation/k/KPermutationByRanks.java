@@ -48,11 +48,18 @@ public class KPermutationByRanks<T> extends AbstractKPermutation<T> {
     /**
      * Constructs an instance for generating k-permutations at specified ranks.
      *
-     * @param elements the input list of elements to permute (nₙ elements)
-     * @param k the size of each permutation (kₖ); must be between 0 and nₙ
-     * @param ranks an iterable of 0-based rank numbers (0 ≤ rank < Pₙ,ₖ)
-     * @param calculator utility for combinatorial calculations
-     * @throws IllegalArgumentException if kₖ is negative, exceeds nₙ, or sequence contains invalid ranks
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.generator.permutation.k.KPermutationBuilder#byRanks(Iterable)}.
+     * All parameter validation (null check, 0 ≤ k ≤ n) is handled by the builder.
+     * Rank validation (non-negative, less than total) is deferred to iteration.
+     * </p>
+     *
+     * @param elements the input list of elements to permute (assumed non-null)
+     * @param k the size of each permutation (assumed 0 ≤ k ≤ elements.size())
+     * @param ranks an iterable of 0-based rank numbers
+     * @param calculator utility for combinatorial calculations (assumed non-null)
      */
     public KPermutationByRanks(List<T> elements, int k, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements, k);

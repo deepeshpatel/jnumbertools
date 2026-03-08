@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermutationLexElementIterator;
 
 import java.util.Iterator;
@@ -17,20 +18,26 @@ import java.util.List;
  * This class generates permutations in lexicographical order based on the insertion order of elements
  * in the provided {@code LinkedHashMap}, where each element is repeated according to its frequency count
  * (e.g., {A=2, B=1} → [A,A,B], [A,B,A], [B,A,A]). The total number of unique permutations is given by
- * the multinomial coefficient n! / (m₁!·m₂!·…), where n is the sum of frequencies and mᵢ are the frequencies
+ * the multinomial coefficient n! / ∏ (mᵢ!), where n = ∑mᵢ is the sum of frequencies and mᵢ are the frequencies
  * of distinct elements. Extends {@link AbstractMultisetPermutation} to leverage its sorting and multiset
  * management capabilities, ensuring consistent ordering via {@code Comparable}.
  * </p>
+ *
  * <p>
- * <strong>Note:</strong> The current implementation flattens frequency counts into an initial index array using
- * {@code initIndicesForMultisetPermutation}. For extremely large frequency values (e.g., 10⁹⁹), this may be inefficient.
+ * <strong>Note:</strong> This class is intended for internal use only and should not be instantiated directly.
+ * Use {@link io.github.deepeshpatel.jnumbertools.base.Permutations#multiset(LinkedHashMap)} to create instances.
+ * All parameter validation (null checks, non-negative frequencies, zero-frequency filtering) is handled by the builder.
  * </p>
+ *
  * <p>
- * Instances are intended to be created via a builder; thus, the constructor is package-private.
+ * <strong>Performance Note:</strong> The current implementation flattens frequency counts into an initial index array.
+ * For extremely large frequency values (e.g., 10⁹⁹), this may be inefficient, but such cases would generate
+ * astronomically large numbers of permutations that cannot be enumerated in practice anyway.
  * </p>
  *
  * @param <T> the type of elements, must implement {@code Comparable} for lexicographical ordering
  * @author Deepesh Patel
+ * @see io.github.deepeshpatel.jnumbertools.base.Permutations#multiset(LinkedHashMap)
  */
 public final class MultisetPermutation<T> extends AbstractMultisetPermutation<T> {
 
@@ -73,6 +80,10 @@ public final class MultisetPermutation<T> extends AbstractMultisetPermutation<T>
      */
     @Override
     public Iterator<List<T>> iterator() {
+        // Handle empty map case: 0! = 1 -> returns [[]]
+        if (elements.isEmpty()) {
+            return Util.emptyListIterator();
+        }
         return new UniquePermutationLexElementIterator<>(this::indicesToValues, initialIndices);
     }
 }

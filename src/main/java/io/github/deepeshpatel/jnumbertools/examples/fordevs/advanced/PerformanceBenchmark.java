@@ -137,7 +137,7 @@ public class PerformanceBenchmark {
                 .lexOrderMth(step, BigInteger.ZERO)
                 .stream()
                 .limit(limit)
-                .collect(Collectors.toList());
+                .toList();
 
         long timeMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
         long memUsed = usedMemory() - memBefore;
@@ -199,7 +199,7 @@ public class PerformanceBenchmark {
         memStart = usedMemory();
 
         var list = new Combinations(CALC).unique(n, r).lexOrder()
-                .stream().limit(limit).collect(Collectors.toList());
+                .stream().limit(limit).toList();
         long memList = usedMemory() - memStart;
 
         System.out.printf("   Streaming %,d combos: ~%,d KB%n", limit, memStream / 1024);

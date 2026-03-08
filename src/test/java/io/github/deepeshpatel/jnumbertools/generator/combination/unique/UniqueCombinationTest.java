@@ -2,6 +2,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,6 +11,7 @@ import java.util.stream.Stream;
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UniqueCombinationTest {
 
@@ -24,6 +26,29 @@ public class UniqueCombinationTest {
                 assertEquals(calculator.nCr(n, r).longValue(), count);
             }
         }
+    }
+
+    @Test
+    void assertCountAndContentForSpecialCase() {
+        // n=0 and r=0 -> 0C0 = 1 -> count = 1, returns [[]]
+        var zeroZeroBuilder = combination.unique(0, Collections.emptyList());
+        assertEquals(BigInteger.ONE, zeroZeroBuilder.count());
+        assertTrue(zeroZeroBuilder.lexOrder().stream().toList().get(0).isEmpty());
+
+        // n=0 and r>0 -> 0Cr = 0 -> count = 0, returns []
+        var zeroPositiveBuilder = combination.unique(1, Collections.emptyList());
+        assertEquals(BigInteger.ZERO, zeroPositiveBuilder.count());
+        assertTrue(zeroPositiveBuilder.lexOrder().stream().toList().isEmpty());
+
+        // n>0 and r=0 -> nC0 = 1 -> count = 1, returns [[]]
+        var positiveZeroBuilder = combination.unique(0, "A", "B", "C");
+        assertEquals(BigInteger.ONE, positiveZeroBuilder.count());
+        assertTrue(positiveZeroBuilder.lexOrder().stream().toList().get(0).isEmpty());
+
+        // n>0 and r>n -> nCr = 0 -> count = 0, returns []
+        var greaterRBuilder = combination.unique(2, "A");
+        assertEquals(BigInteger.ZERO, greaterRBuilder.count());
+        assertTrue(greaterRBuilder.lexOrder().stream().toList().isEmpty());
     }
 
     @Test
@@ -43,26 +68,6 @@ public class UniqueCombinationTest {
                 of("Green", "Blue")
         );
         assertIterableEquals(expected, output(2, elements));
-    }
-
-    @Test
-    void shouldReturnEmptyListForSizeEqualsZero() {
-        assertEquals(listOfEmptyList, output(0, of("A")));
-    }
-
-    @Test
-    void shouldThrowExceptionForSizeGreaterThanN() {
-        assertThrows(IllegalArgumentException.class, () -> output(3, of("A")));
-    }
-
-    @Test
-    void shouldGenerateEmptyListForNullInput() {
-        assertEquals(listOfEmptyList, output(0, Collections.emptyList()));
-    }
-
-    @Test
-    void shouldThrowExceptionForEmptyInputListWithNonZeroSize() {
-        assertThrows(IllegalArgumentException.class, () -> output(3, Collections.emptyList()));
     }
 
     @Test

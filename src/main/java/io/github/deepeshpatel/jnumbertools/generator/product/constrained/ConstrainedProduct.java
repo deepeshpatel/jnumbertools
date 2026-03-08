@@ -10,12 +10,23 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * A class that generates the Cartesian product of a list of, lists of lists.
+ * Generates the constrained Cartesian product of multiple dimensions in lexicographical order.
  * <p>
  * This class takes a list of lists of lists, where each inner list represents a set of elements
- * (e.g., combinations or subsets), and generates the Cartesian product of these sets in lexicographical order.
- * The product of zero components yields exactly one empty tuple.
+ * (e.g., combinations or subsets), and generates the Cartesian product of these sets.
  * </p>
+ *
+ * <h2>Mathematical Rules</h2>
+ * <pre>
+ * ┌─────────────────────────────────┬─────────────────────────────┐
+ * │ Input                           │ Output                      │
+ * ├─────────────────────────────────┼─────────────────────────────┤
+ * │ No dimensions                   │ [[]] (one empty tuple)      │
+ * │ One dimension (any content)      │ elements of that dimension  │
+ * │ Multiple dims, all non-empty     │ Full Cartesian product      │
+ * │ Multiple dims, any empty         │ [] (empty iterator)         │
+ * └─────────────────────────────────┴─────────────────────────────┘
+ * </pre>
  *
  * @author Deepesh Patel
  */
@@ -24,9 +35,17 @@ public class ConstrainedProduct implements Iterable<List<Object>> {
     private final List<List<List<Object>>> all;
 
     /**
-     * Constructs a ConstrainedProduct with the given list of, lists of lists.
+     * Constructs a ConstrainedProduct with the given dimensions.
      *
-     * @param all the list of, lists of lists to generate the Cartesian product from
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder#lexOrder()}.
+     * All parameter validation and dimension configuration is handled by the builder.
+     * </p>
+     *
+     * @param all the list of dimensions, each dimension being a list of possible values
+     *            (assumes all inner lists are non-null, may be empty)
      */
     public ConstrainedProduct(List<List<List<Object>>> all) {
         this.all = all;
@@ -45,14 +64,21 @@ public class ConstrainedProduct implements Iterable<List<Object>> {
         ConstrainedProductIterator() {
             indices = new int[all.size()];
             maxIndices = new int[all.size()];
+
             for (int i = 0; i < all.size(); i++) {
                 maxIndices[i] = all.get(i).size();
             }
 
+            // Determine if there are any elements to iterate
             if (all.isEmpty()) {
-                hasNext = true;  // one empty tuple
+                // No dimensions → one empty tuple
+                hasNext = true;
+            } else if (all.size() == 1) {
+                // Single dimension → iterate its elements
+                hasNext = !all.get(0).isEmpty();
             } else {
-                hasNext = !all.stream().anyMatch(List::isEmpty);
+                // Multiple dimensions → product is empty if any dimension is empty
+                hasNext = all.stream().noneMatch(List::isEmpty);
             }
         }
 
@@ -64,38 +90,52 @@ public class ConstrainedProduct implements Iterable<List<Object>> {
         @Override
         public List<Object> next() {
             if (!hasNext) {
-                throw new NoSuchElementException();
+                throw new NoSuchElementException("No more tuples available");
             }
 
+            // Handle no dimensions case
             if (all.isEmpty()) {
                 hasNext = false;
                 return List.of();
             }
 
-            List<Object> result = new ArrayList<>();
-            for (int i = 0; i < indices.length; i++) {
-                if (!all.get(i).isEmpty()) {
-                    // Get the current selection for this dimension
-                    List<Object> dimensionResult = all.get(i).get(indices[i]);
-                    // Add all its elements directly to the flat tuple
-                    result.addAll(dimensionResult);
-                }
+            // Handle single dimension case
+            if (all.size() == 1) {
+                List<Object> result = all.get(0).get(indices[0]);
+                hasNext = ++indices[0] < maxIndices[0];
+                return result;
             }
 
-            hasNext = createNext(indices, maxIndices);
+            // Handle multiple dimensions case
+            List<Object> result = new ArrayList<>();
+            for (int i = 0; i < indices.length; i++) {
+                result.addAll(all.get(i).get(indices[i]));
+            }
+
+            hasNext = advanceIndices();
             return result;
         }
 
-        private boolean createNext(int[] current, int[] maxIndices) {
-            for (int i = 0, j = current.length - 1; j >= 0; j--, i++) {
-                if (current[j] == maxIndices[j] - 1) {
-                    current[j] = 0;
-                } else {
-                    current[j]++;
+        /**
+         * Advances indices to the next combination.
+         *
+         * @return true if there is a next combination, false otherwise
+         */
+        private boolean advanceIndices() {
+            for (int i = indices.length - 1; i >= 0; i--) {
+                if (indices[i] < maxIndices[i] - 1) {
+                    indices[i]++;
                     return true;
+                } else {
+                    indices[i] = 0;
                 }
             }
             return false;
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("ConstrainedProduct{dimensions=%d}", all.size());
     }
 }

@@ -45,10 +45,18 @@ public final class UniquePermutationByRanks<T> extends AbstractGenerator<T> {
 
     /**
      * Constructs a generator for unique permutations based on a rank sequence.
-     * @param elements   the list of elements to permute; must not be null
-     * @param ranks      the sequence of ranks to generate permutations; each rank must be in [0, n!)
+     *
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.generator.permutation.unique.UniquePermutationBuilder#byRanks(Iterable)}.
+     * All parameter validation (null checks) is handled by the builder.
+     * Rank validation (non-negative, less than n!) is deferred to iteration.
+     * </p>
+     *
+     * @param elements   the list of elements to permute (assumed non-null)
+     * @param ranks      the sequence of ranks to generate permutations
      * @param calculator utility for computing factorials and permutations
-     * @throws IllegalArgumentException if elements is null
      */
     public UniquePermutationByRanks(List<T> elements, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements);

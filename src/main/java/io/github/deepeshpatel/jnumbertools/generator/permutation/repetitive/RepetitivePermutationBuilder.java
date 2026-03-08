@@ -6,7 +6,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
-import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
@@ -90,7 +90,7 @@ import java.util.List;
  *
  * <h3>Empty Input Handling</h3>
  * <pre>
- * // Empty set with r>0 produces no permutations (count = 0)
+ * // Empty-set(∅) with r>0 produces no permutations (count = 0)
  * RepetitivePermutationBuilder&lt;String&gt; emptyBuilder =
  *     new RepetitivePermutationBuilder&lt;&gt;(2, Collections.emptyList(), calculator);
  * System.out.println(emptyBuilder.count()); // 0
@@ -150,7 +150,7 @@ public final class RepetitivePermutationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if m or start is invalid
      */
     public RepetitivePermutationMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m,start, count());
+        Util.validateLexOrderMthParams(m,start, count());
         return new RepetitivePermutationMth<>(elements, width, m, start);
     }
 
@@ -215,7 +215,7 @@ public final class RepetitivePermutationBuilder<T> implements Builder<T> {
      * @throws IllegalStateException if length k was not configured
      */
     public RepetitivePermutationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
-        EveryMthIterable.validateByRanksParams(ranks);
+        Util.validateByRanksParams(ranks);
         return new RepetitivePermutationByRanks<>(elements, width, ranks, calculator);
     }
 
@@ -226,15 +226,15 @@ public final class RepetitivePermutationBuilder<T> implements Builder<T> {
      */
     @Override
     public BigInteger count() {
-        //by the definition of exponentiation, for n=0 and k>0 0^k = 0
-        //hence empty input should be allowed and the result is the empty collection
-        if (elements.isEmpty() && width > 0) {
-            return BigInteger.ONE;
-        }
-        if (width == 0) {
-            return BigInteger.ONE;
-        }
+        // In context of combinatorics 0⁰ = 1, 0⁰ = 1  and 0ʳ = 0
+        if(width==0) return BigInteger.ONE;
+        if(elements.isEmpty()) return BigInteger.ZERO;
         return calculator.power(elements.size(), width);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return elements.isEmpty() || width == 0;
     }
 
     @Override

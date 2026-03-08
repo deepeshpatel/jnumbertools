@@ -34,15 +34,26 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
     /**
      * Constructs a {@code SubsetGenerator} to generate subsets with sizes ranging from
      * {@code fromSize} to {@code toSize}.
+     *
      * <p>
-     * If both {@code fromSize} and {@code toSize} are negative, no subsets will be generated.
-     * If {@code fromSize} is less than or equal to zero and {@code toSize} is greater than or equal to zero,
-     * one empty subset will be generated. This behavior is mathematically correct, although it might seem unintuitive.
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.generator.subset.SubsetBuilder#lexOrder()}
+     * after configuring the range with {@code inRange()} or {@code all()}.
+     * All parameter validation (range validation, null checks) is handled by the builder.
      * </p>
      *
-     * @param elements the list of elements from which subsets are generated (each item is treated as unique)
+     * <p>
+     * Mathematical behavior for edge cases:
+     * <ul>
+     *   <li>If {@code fromSize} ≤ 0 and {@code toSize} ≥ 0, one empty subset is generated</li>
+     *   <li>If both {@code fromSize} and {@code toSize} are negative, no subsets are generated</li>
+     * </ul>
+     * </p>
+     *
+     * @param elements the list of elements from which subsets are generated (assumed non-null)
      * @param fromSize the minimum subset size to generate (inclusive)
-     * @param toSize the maximum subset size to generate (inclusive); must be greater than or equal to {@code fromSize}
+     * @param toSize the maximum subset size to generate (inclusive); must be ≥ {@code fromSize}
      */
     SubsetGenerator(List<T> elements, int fromSize, int toSize) {
         super(elements);

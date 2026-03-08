@@ -51,8 +51,8 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> {
      * Always create instances via {@link SubsetBuilder} for correct behavior and safety.
      * </p>
      *
-     * @param from       minimum subset size (inclusive); must be >= 0
-     * @param to         maximum subset size (inclusive); must be >= from
+     * @param from       minimum subset size (inclusive); must be ≥ 0
+     * @param to         maximum subset size (inclusive); must be ≥ from
      * @param m          step size for every mᵗʰ subset; must be > 0
      * @param start      starting rank (0-based); must be >= 0 and < total subsets in range
      * @param elements   list of elements from which subsets are generated (assumed unique)

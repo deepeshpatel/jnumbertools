@@ -100,7 +100,7 @@ public class MonteCarloSimulation {
 
             // Check for at least one pair
             var rankCounts = hand.stream()
-                    .map(card -> ((String)card).substring(0, ((String)card).length() - 1))
+                    .map(card -> card.substring(0, card.length() - 1))
                     .collect(Collectors.groupingBy(
                             r -> r, Collectors.counting()));
 

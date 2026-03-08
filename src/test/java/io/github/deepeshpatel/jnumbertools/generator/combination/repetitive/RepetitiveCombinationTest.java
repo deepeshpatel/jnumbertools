@@ -2,6 +2,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,13 +17,34 @@ public class RepetitiveCombinationTest {
         // nCr with repetition: (n+r−1)!/(r!·(n−1)!)
         for (int n = 1; n <= 4; n++) {
             var input = Collections.nCopies(n, "A");
-            for (int r = 0; r <= n; r++) {
+            for (int r = 0; r <= n+2; r++) {
                 long count = combination.repetitive(r, input)
                         .lexOrder().stream().count();
                 long expectedCount = calculator.nCrRepetitive(n, r).longValue();
                 assertEquals(expectedCount, count);
             }
         }
+    }
+
+    @Test
+    void assertCountAndContentForSpecialCase() {
+        // n=0 and r=0 -> by convention: count = 1, returns [[]]
+        var zeroZeroBuilder = combination.repetitive(0, Collections.emptyList());
+        assertEquals(BigInteger.ONE, zeroZeroBuilder.count());
+        assertTrue(zeroZeroBuilder.lexOrder().stream().toList().get(0).isEmpty());
+
+        // n=0 and r>0 -> 0 -> count = 0, returns []
+        var zeroPositiveBuilder = combination.repetitive(2, Collections.emptyList());
+        assertEquals(BigInteger.ZERO, zeroPositiveBuilder.count());
+        assertTrue(zeroPositiveBuilder.lexOrder().stream().toList().isEmpty());
+
+        // n>0 and r=0 -> 1 -> count = 1, returns [[]]
+        var positiveZeroBuilder = combination.repetitive(0, "A", "B");
+        assertEquals(BigInteger.ONE, positiveZeroBuilder.count());
+        assertTrue(positiveZeroBuilder.lexOrder().stream().toList().get(0).isEmpty());
+
+        // Note: For repetitive combinations, r > n is always valid (unlike unique combinations)
+        // This is tested in assertCount() loop
     }
 
     @Test
@@ -48,11 +70,6 @@ public class RepetitiveCombinationTest {
     }
 
     @Test
-    void shouldReturnEmptyListForSizeLessThanOrEqualsZero() {
-        assertEquals(listOfEmptyList, output(0, "A", "B"));
-    }
-
-    @Test
     void shouldAbleToGenerateRepetitivePermutationForSizeGreaterThanN() {
         var expected = List.of(
                 of("A", "A", "A"),
@@ -70,10 +87,5 @@ public class RepetitiveCombinationTest {
                 .lexOrder()
                 .stream()
                 .toList();
-    }
-
-    @Test
-    void shouldThrowExceptionForNegativeRValue() {
-        assertThrows(IllegalArgumentException.class, () -> combination.repetitive(3, -2).lexOrder());
     }
 }

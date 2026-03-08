@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.k.KPermutationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.multiset.MultisetPermutationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive.RepetitivePermutationBuilder;
@@ -125,6 +126,7 @@ public final class Permutations {
      * @return a UniquePermutationBuilder for integer elements
      */
     public UniquePermutationBuilder<Integer> unique(int n) {
+        if(n < 0) throw new IllegalArgumentException("n should be ≥ 0 for unique permutation generation");
         return unique(IntStream.range(0, n).boxed().toList());
     }
 
@@ -136,11 +138,13 @@ public final class Permutations {
      * their position in the list.
      * </p>
      *
-     * @param list the list of distinct elements to permute
+     * @param list the list of distinct elements to permute (must not be null)
      * @param <T> the type of elements
      * @return a UniquePermutationBuilder for the specified elements
+     * @throws NullPointerException if the input list is null
      */
     public <T> UniquePermutationBuilder<T> unique(List<T> list) {
+        Util.validateInput(list);
         return new UniquePermutationBuilder<>(calculator, list);
     }
 
@@ -175,8 +179,10 @@ public final class Permutations {
      * @param n the number of distinct elements (n ≥ 0)
      * @param k the size of each permutation (0 ≤ k ≤ n)
      * @return a KPermutationBuilder for integer elements
+     * @throws IllegalArgumentException if k < 0 or k > n
      */
     public KPermutationBuilder<Integer> nPk(int n, int k) {
+        Util.validateNK(n,k);
         return nPk(k, IntStream.range(0, n).boxed().toList());
     }
 
@@ -188,13 +194,15 @@ public final class Permutations {
      * distinct based on their position in the list.
      * </p>
      *
-     * @param k the size of each permutation (0 ≤ k ≤ allElements.size())
-     * @param allElements the list of distinct elements
+     * @param k the size of each permutation (0 ≤ k ≤ elements.size())
+     * @param elements the list of distinct elements
      * @param <T> the type of elements
      * @return a KPermutationBuilder for the specified elements
      */
-    public <T> KPermutationBuilder<T> nPk(int k, List<T> allElements) {
-        return new KPermutationBuilder<>(allElements, k, calculator);
+    public <T> KPermutationBuilder<T> nPk(int k, List<T> elements) {
+        Util.validateInput(elements);
+        Util.validateNK(elements.size(), k);
+        return new KPermutationBuilder<>(elements, k, calculator);
     }
 
     /**
@@ -229,9 +237,11 @@ public final class Permutations {
      * @param options a map of elements to their multiplicities (must not be null or empty)
      * @param <T> the type of elements
      * @return a MultisetPermutationBuilder for the specified multiset
-     * @throws IllegalArgumentException if options is null, empty, or contains non-positive frequencies
+     * @throws IllegalArgumentException if options is null, or contains non-positive frequencies
+     * (empty map is allowed, treated as ∅)
      */
     public <T> MultisetPermutationBuilder<T> multiset(LinkedHashMap<T, Integer> options) {
+        Util.validateMapOptions(options);
         return new MultisetPermutationBuilder<>(options, calculator);
     }
 
@@ -253,9 +263,7 @@ public final class Permutations {
      * @throws IllegalArgumentException if r < 0 or elements is null
      */
     public <T> RepetitivePermutationBuilder<T> repetitive(int r, List<T> elements) {
-        if(elements == null ) {
-            throw new IllegalArgumentException("Elements list cannot be null or empty for repetitive permutation generation");
-        }
+        Util.validateInput(elements);
         if(r<0) {
             throw new IllegalArgumentException("Width (r) cannot be negative for repetitive permutation generation");
         }

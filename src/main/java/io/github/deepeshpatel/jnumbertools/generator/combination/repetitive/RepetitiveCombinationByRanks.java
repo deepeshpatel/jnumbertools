@@ -37,11 +37,18 @@ public class RepetitiveCombinationByRanks<T> extends AbstractGenerator<T> {
     /**
      * Constructs a generator for repetitive combinations based on a rank sequence.
      *
-     * @param elements   the list of n items to generate combinations from (must not be null or empty)
-     * @param r          the size of each combination (r ≥ 0)
-     * @param ranks      the iterable of ranks (each rank in [0, ⁿ⁺ᵣ⁻¹Cᵣ))
-     * @param calculator the calculator for computing combination counts
-     * @throws IllegalArgumentException if r < 0, elements is null/empty, or any rank < 0 or ≥ ⁿ⁺ᵣ⁻¹Cᵣ
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.generator.combination.repetitive.RepetitiveCombinationBuilder#byRanks(Iterable)}.
+     * All parameter validation (null check, r ≥ 0) is handled by the builder.
+     * Rank validation (non-negative, less than total) is deferred to iteration.
+     * </p>
+     *
+     * @param elements   the list of items to generate combinations from (assumed non-null)
+     * @param r          the size of each combination (assumed r ≥ 0)
+     * @param ranks      the iterable of ranks
+     * @param calculator the calculator for computing combination counts (assumed non-null)
      */
     public RepetitiveCombinationByRanks(List<T> elements, int r, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements);

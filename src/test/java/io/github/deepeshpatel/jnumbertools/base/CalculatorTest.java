@@ -153,11 +153,11 @@ public class CalculatorTest {
         // For noOfElements = 3, from = 1 and to = 2, expected result is nCr(3,1) + nCr(3,2) = 3 + 3 = 6.
         assertEquals(BigInteger.valueOf(6), calculator.totalSubsetsInRange(1, 2, 3));
 
-        // Case 3: When only the empty set is considered (from = 0 and to = 0).
+        // Case 3: When only the empty-set(∅) is considered (from = 0 and to = 0).
         // For noOfElements = 3, expected result is nCr(3,0) = 1.
         assertEquals(BigInteger.ONE, calculator.totalSubsetsInRange(0, 0, 3));
 
-        // Case 4: When noOfElements is 0, there is only one subset (the empty set).
+        // Case 4: When noOfElements is 0, there is only one subset - the empty-set(∅).
         // Since from = 0 and to = 0 equals noOfElements, it returns power(2, 0) = 1.
         assertEquals(BigInteger.ONE, calculator.totalSubsetsInRange(0, 0, 0));
     }

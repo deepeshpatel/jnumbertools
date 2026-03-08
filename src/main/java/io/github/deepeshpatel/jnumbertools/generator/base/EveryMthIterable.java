@@ -47,7 +47,6 @@ public class EveryMthIterable implements Iterable<BigInteger> {
      * @param start       the starting rank (should be ≥ 0)
      * @param increment   the step size between ranks (should be > 0)
      * @param upperBound  the exclusive upper limit for ranks (should be ≥ start)
-     * @see EveryMthIterable#validateLexOrderMthParams(BigInteger, BigInteger, BigInteger)
      */
     public EveryMthIterable(BigInteger start, BigInteger increment, BigInteger upperBound) {
         this.start = start;
@@ -80,52 +79,5 @@ public class EveryMthIterable implements Iterable<BigInteger> {
                 return result;
             }
         };
-    }
-
-
-    /**
-     * Validates parameters commonly used in lexOrderMth(m, start) calls, including upper bound check.
-     * <p>
-     * Builders should call this method before creating a generator to ensure fail-fast validation.
-     * This enhanced version also validates that the starting rank is within the valid range
-     * of available elements.
-     * </p>
-     *
-     * @param m     increment/step size (must be positive)
-     * @param start starting rank (must be non-negative and less than count)
-     * @param count total number of elements available (must be non-negative)
-     * @throws IllegalArgumentException if:
-     *         <ul>
-     *           <li>m is null or ≤ 0</li>
-     *           <li>start is null or < 0</li>
-     *           <li>start is ≥ count (out of valid range)</li>
-     *         </ul>
-     */
-    public static void validateLexOrderMthParams(BigInteger m, BigInteger start, BigInteger count) {
-        if (m == null || m.signum() <= 0) {
-            throw new IllegalArgumentException("Increment 'm' must be positive (m > 0)");
-        }
-
-        if (start == null || start.signum() < 0 || start.compareTo(count) >= 0) {
-            throw new IllegalArgumentException("Element should be in range [0, " + count + ")");
-        }
-    }
-
-
-    /**
-     * Validates parameters commonly used in byRanks(ranks) calls.
-     * <p>
-     * Builders should call this method before creating a generator
-     * to ensure fail-fast validation for null parameters only.
-     * Invalid rank values (negative, out of bounds) will be caught
-     * naturally during iteration without performance overhead.
-     * </p>
-     * @param ranks iterable of ranks to validate
-     * @throws IllegalArgumentException if ranks is null
-     */
-    public static void validateByRanksParams(Iterable<BigInteger> ranks) {
-        if (ranks == null) {
-            throw new IllegalArgumentException("Ranks sequence cannot be null");
-        }
     }
 }

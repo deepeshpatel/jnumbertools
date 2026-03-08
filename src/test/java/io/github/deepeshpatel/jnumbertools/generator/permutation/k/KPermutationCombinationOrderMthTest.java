@@ -1,15 +1,13 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
 
 import java.util.Collections;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class KPermutationCombinationOrderMthTest {
 
@@ -24,9 +22,40 @@ public class KPermutationCombinationOrderMthTest {
                         .combinationOrderMth(increment, 0)
                         .stream().count();
                 double expected = Math.ceil(calculator.nPr(n, k).longValue() / (double) increment);
-                Assertions.assertEquals((long) expected, size);
+                assertEquals((long) expected, size);
             }
         }
+    }
+
+    @Test
+    void assertCountAndContentForSpecialCase() {
+        // Case 1: n=0, k=0 -> ⁰P₀ = 1 -> should return [[]]
+        var zeroZeroGenerator = permutation.nPk(0, 0).combinationOrderMth(1, 0);
+        var zeroZeroResult = zeroZeroGenerator.stream().toList();
+        assertEquals(1, zeroZeroResult.size());
+        assertTrue(zeroZeroResult.get(0).isEmpty());
+
+        // Case 2: n=0, k>0 -> ⁰Pₖ = 0 -> should return [] (empty iterator)
+        var zeroPositiveGenerator = permutation.nPk(0, 2).combinationOrderMth(1, 0);
+        assertTrue(zeroPositiveGenerator.stream().toList().isEmpty());
+
+        // Case 3: n>0, k=0 -> ⁿP₀ = 1 -> should return [[]]
+        var positiveZeroGenerator = permutation.nPk(3, 0).combinationOrderMth(1, 0);
+        var positiveZeroResult = positiveZeroGenerator.stream().toList();
+        assertEquals(1, positiveZeroResult.size());
+        assertTrue(positiveZeroResult.get(0).isEmpty());
+
+        // Case 4: n>0, k>n -> ⁿPₖ = 0 -> should return [] (empty iterator)
+        var greaterKGenerator = permutation.nPk(2, 3).combinationOrderMth(1, 0);
+        assertTrue(greaterKGenerator.stream().toList().isEmpty());
+
+        // Case 5: With m>1, should still respect count=0
+        var greaterKWithMthGenerator = permutation.nPk(2, 3).combinationOrderMth(3, 0);
+        assertTrue(greaterKWithMthGenerator.stream().toList().isEmpty());
+
+        // Case 6: Empty list with k>0 -> ⁰Pₖ = 0
+        var emptyListGenerator = permutation.nPk(2, Collections.emptyList()).combinationOrderMth(1, 0);
+        assertTrue(emptyListGenerator.stream().toList().isEmpty());
     }
 
     @Test
@@ -42,18 +71,6 @@ public class KPermutationCombinationOrderMthTest {
     void shouldThrowExceptionForKLessThan0() {
         assertThrows(IllegalArgumentException.class, () ->
                 permutation.nPk(-1, 1).combinationOrderMth(3, 0));
-    }
-
-    @Test
-    void shouldThrowExceptionForKGreaterThanInputLength() {
-        assertThrows(IllegalArgumentException.class, () ->
-                permutation.nPk(1, 5).combinationOrderMth(3, 0));
-    }
-
-    @Test
-    void shouldThrowExceptionForZeroAndNegativeIncrementValue() {
-        assertThrows(IllegalArgumentException.class, () ->
-                permutation.nPk(1, 1).combinationOrderMth(0, 0));
     }
 
     @Test
@@ -95,7 +112,7 @@ public class KPermutationCombinationOrderMthTest {
                 .combinationOrderMth(1, 0)
                 .stream().toList();
 
-        Assertions.assertEquals("[[A, B, C], [A, C, B], [B, A, C], [B, C, A], [C, A, B], [C, B, A]]",
+        assertEquals("[[A, B, C], [A, C, B], [B, A, C], [B, C, A], [C, A, B], [C, B, A]]",
                 output.toString());
     }
 
@@ -106,6 +123,6 @@ public class KPermutationCombinationOrderMthTest {
                 .combinationOrderMth(1, 0)
                 .stream().toList();
 
-        Assertions.assertEquals(30240, output.size());
+        assertEquals(30240, output.size());
     }
 }

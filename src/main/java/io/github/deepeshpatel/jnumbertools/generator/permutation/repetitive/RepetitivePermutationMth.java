@@ -47,22 +47,20 @@ public final class RepetitivePermutationMth<T> extends AbstractGenerator<T> {
     /**
      * Constructs a generator for every mᵗʰ repetitive permutation.
      *
-     * @param elements the elements to permute (must not be null or empty)
-     * @param width the length of each permutation (must be positive)
-     * @param increment the step size between permutations (must be positive)
-     * @param start the starting rank (0-based, must be non-negative)
-     * @throws IllegalArgumentException if elements is empty, length ≤ 0,
-     *         m ≤ 0, or start < 0
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive.RepetitivePermutationBuilder#lexOrderMth(BigInteger, BigInteger)}.
+     * All parameter validation is handled by the builder.
+     * </p>
+     *
+     * @param elements the list of elements to permute (assumed non-null)
+     * @param width the length of each permutation (assumed ≥ 0)
+     * @param increment the step size between permutations (assumed > 0)
+     * @param start the starting rank (assumed ≥ 0 and < total permutations when count > 0)
      */
     RepetitivePermutationMth(List<T> elements, int width, BigInteger increment, BigInteger start) {
         super(elements);
-        if (width < 0) {
-            throw new IllegalArgumentException("Width must be non-negative: " + width);
-        }
-//        if (elements.isEmpty()) {
-//            throw new IllegalArgumentException("Elements list cannot be empty for repetitive permutations");
-//        }
-
         this.width = width;
         this.start = start;
         this.increment = increment;
@@ -75,12 +73,13 @@ public final class RepetitivePermutationMth<T> extends AbstractGenerator<T> {
      */
     @Override
     public Iterator<List<T>> iterator() {
-        if(elements.isEmpty()) {
-            //by the definition of exponentiation, for n=0 and k>0 0^k = 0
-            //hence empty input should me allowed and the result is the empty collection
-            return Collections.emptyIterator();
-        }
-        return width == 0 ? Util.emptyListIterator() : new RepetitiveMthIterator();
+        //width = 0 -> one empty permutation (n⁰ = 1)
+        if(width == 0 ) return Util.emptyListIterator();
+
+        //empty elements with width > 0 -> no permutations (0ʳ = 0)
+        if(elements.isEmpty()) return Collections.emptyListIterator();
+
+        return new RepetitiveMthIterator();
     }
 
     /**

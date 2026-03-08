@@ -10,6 +10,7 @@ import io.github.deepeshpatel.jnumbertools.base.Permutations;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -44,12 +45,19 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
     /**
      * Constructs an instance for generating every mᵗʰ k-permutation in combination order.
      *
-     * @param elements the input list of elements (e.g., [A, B, C]) to permute
-     * @param k the size of each permutation (kₖ); must be between 0 and nₙ
-     * @param increment the step size for selecting every mᵗʰ permutation; must be positive
-     * @param start the starting rank (0-based); must be non-negative
-     * @param calculator utility for combinatorial calculations
-     * @throws IllegalArgumentException if m is non-positive or kₖ/start bounds are invalid
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.generator.permutation.k.KPermutationBuilder#combinationOrderMth(BigInteger, BigInteger)}.
+     * All parameter validation (null check, 0 ≤ k ≤ n, increment > 0, start ≥ 0, start < total when count > 0)
+     * is handled by the builder.
+     * </p>
+     *
+     * @param elements the input list of elements to permute (assumed non-null)
+     * @param k the size of each permutation (assumed 0 ≤ k ≤ elements.size())
+     * @param increment the step size for selecting every mᵗʰ permutation (assumed > 0)
+     * @param start the starting rank (assumed ≥ 0)
+     * @param calculator utility for combinatorial calculations (assumed non-null)
      */
     KPermutationCombinationOrderMth(List<T> elements, int k, BigInteger increment, BigInteger start, Calculator calculator) {
         super(elements, k);
@@ -71,7 +79,18 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
      */
     @Override
     public Iterator<List<T>> iterator() {
-        return (k == 0 || elements.isEmpty()) ? Util.emptyListIterator() : new Itr();
+        // Case 1: k = 0 -> one empty permutation (ⁿP₀ = 1)
+        if (k == 0) {
+            return Util.emptyListIterator();  // Returns [[]]
+        }
+
+        // Case 2: elements empty with k > 0 -> no permutations (⁰Pₖ = 0)
+        if (elements.isEmpty()) {
+            return Collections.emptyIterator();  // Returns []
+        }
+
+        // Case 3: Normal case
+        return new Itr();
     }
 
     private class Itr implements Iterator<List<T>> {

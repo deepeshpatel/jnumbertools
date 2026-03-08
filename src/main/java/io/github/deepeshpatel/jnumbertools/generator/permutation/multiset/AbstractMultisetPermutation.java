@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.Permutations;
 import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
 
 import java.math.BigInteger;
@@ -21,8 +22,8 @@ import java.util.stream.StreamSupport;
  * <p>
  * This class provides a foundation for permutation generators that operate on a multiset defined
  * by a map of elements to their frequencies (e.g., {A=2, B=1}). The total number of unique permutations
- * is given by the multinomial coefficient n! / (f₁!·f₂!·…·fₖ!), where n is the sum of frequencies and
- * fᵢ are the frequencies of distinct elements. It ensures elements are comparable for consistent
+ * is given by tthe multinomial coefficient n! / ∏ (fᵢ!), where n = ∑fᵢ is the sum of frequencies and fᵢ are
+ * the frequencies of distinct elements. It ensures elements are comparable for consistent
  * lexicographical ordering and manages the multiset structure. Subclasses must implement the
  * {@code iterator()} method to generate permutations as lists, where position matters.
  * </p>
@@ -39,16 +40,27 @@ public abstract class AbstractMultisetPermutation<T> implements StreamableIterab
 
     /**
      * Constructs an {@code AbstractMultisetPermutation} instance with a sorted multiset.
+     * <p>
+     * <strong>For internal/library use only.</strong>
+     * Application code must use the {@link Permutations} builder instead.
+     * </p>
+     * <p>
+     * This constructor assumes that the input has already been validated by the builder:
+     * <ul>
+     *   <li>{@code multiset} is not null</li>
+     *   <li>All frequencies are non-negative</li>
+     *   <li>The map uses insertion order for lexicographical ordering</li>
+     * </ul>
+     * Zero frequencies are permitted (element is ignored in generation but preserved for order).
+     * An empty map is allowed and results in a single empty permutation.
+     * </p>
      *
-     * @param multiset a map of elements to their frequencies; must not be null or empty, with insertion order
-     *                 determining lexicographical order
-     * @param calculator utility for computing permutations and factorials
-     * @throws IllegalArgumentException if multiset is null, empty, contains negative frequencies, or sum is zero
+     * @param multiset   a {@link LinkedHashMap} defining the multiset; keys determine lexicographical order,
+     *                   values are non-negative frequencies (zero allowed)
+     * @param calculator utility for computing factorials and multinomial coefficients
      */
     protected AbstractMultisetPermutation(LinkedHashMap<T, Integer> multiset, Calculator calculator) {
-        if (multiset == null || multiset.isEmpty()) {
-            throw new IllegalArgumentException("Multiset map cannot be null or empty");
-        }
+
         int size = multiset.size();
         frequencies = new int[size];
         elements = new ArrayList<>(size);
@@ -57,15 +69,9 @@ public abstract class AbstractMultisetPermutation<T> implements StreamableIterab
         int sum = 0;
         for (int i = 0; i < elements.size(); i++) {
             T element = elements.get(i);
-            int freq = multiset.getOrDefault(element, 0);
-            if (freq < 0) {
-                throw new IllegalArgumentException("Frequencies must be non-negative: " + freq + " for " + element);
-            }
+            int freq = multiset.get(element);
             frequencies[i] = freq;
             sum += freq;
-        }
-        if (sum == 0) {
-            throw new IllegalArgumentException("Sum of frequencies must be positive");
         }
         this.totalLength = sum;
         this.calculator = calculator;

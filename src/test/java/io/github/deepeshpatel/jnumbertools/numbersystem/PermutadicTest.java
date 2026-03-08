@@ -117,6 +117,4 @@ public class PermutadicTest {
             rank = rank.add(trillion);
         }
     }
-
-
 }

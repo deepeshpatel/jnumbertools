@@ -1,9 +1,9 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,7 +17,7 @@ public class UniquePermutationTest {
     @Test
     void assertCount() {
         // n! permutations
-        for (int n = 0; n < 6; n++) {
+        for (int n = 1; n < 6; n++) {
             var input = Collections.nCopies(n, "A");
             long size = permutation
                     .unique(input)
@@ -25,6 +25,13 @@ public class UniquePermutationTest {
                     .stream().count();
             assertEquals(calculator.nPr(n, n).longValue(), size);
         }
+    }
+
+    @Test
+    void assertCountAndContentForSpecialCase() {
+        var zeroBuilder = permutation.unique(0);
+        assertEquals(BigInteger.ONE, zeroBuilder.count());
+        assertTrue(zeroBuilder.lexOrder().stream().toList().get(0).isEmpty());
     }
 
     @Test
@@ -85,11 +92,11 @@ public class UniquePermutationTest {
         assertIterableEquals(listOfEmptyList, permutationsOf(new ArrayList<>()));
     }
 
-    @Test
-    @DisplayName("Null input is treated as empty input (API contract)")
-    void shouldConsiderNullAsEmpty() {
-        assertIterableEquals(listOfEmptyList, permutationsOf((List<String>) null));
-    }
+//    @Test
+//    @DisplayName("Null input is treated as empty input (API contract)")
+//    void shouldConsiderNullAsEmpty() {
+//        assertIterableEquals(listOfEmptyList, permutationsOf((List<String>) null));
+//    }
 
     @Test
     void shouldHandleMixedTypes() {

@@ -7,6 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.base.MultisetBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
@@ -134,7 +135,7 @@ import java.util.LinkedHashMap;
  * <h3>Performance Considerations</h3>
  * <pre>
  * // For large combinations, the builder automatically switches to
- * // an optimized frequency-vector based implementation when r >= 1000
+ * // an optimized frequency-vector based implementation when r ≥ 1000
  * LinkedHashMap&lt;String, Integer&gt; largeMultiset = new LinkedHashMap&lt;&gt;();
  * largeMultiset.put("A", 500);
  * largeMultiset.put("B", 500);
@@ -255,7 +256,7 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
      * @throws IllegalArgumentException if m ≤ 0 or start < 0
      */
     public MultisetCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m, start, count());
+        Util.validateLexOrderMthParams(m, start, count());
         BigInteger total = Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
         Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, total);
         return new MultisetCombinationByRanks<>(options, r, mthIterable, count());
@@ -274,7 +275,7 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
      * @throws IllegalArgumentException if ranks is null or contains invalid ranks during iteration
      */
     public MultisetCombinationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
-        EveryMthIterable.validateByRanksParams(ranks);
+        Util.validateByRanksParams(ranks);
         return new MultisetCombinationByRanks<>(options, r, ranks, count());
     }
 

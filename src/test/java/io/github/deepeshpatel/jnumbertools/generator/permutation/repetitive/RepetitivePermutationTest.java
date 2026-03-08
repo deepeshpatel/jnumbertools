@@ -19,7 +19,7 @@ public class RepetitivePermutationTest {
         // nʳ permutations with repetition
         for(int n=1; n<3; n++) {
             var input = Collections.nCopies(n, "A");
-            for(int r=0; r<=n+1; r++) {
+            for(int r=1; r<=n+1; r++) {
                 long size = permutation.repetitive(r, input)
                         .lexOrder()
                         .stream().count();
@@ -30,26 +30,24 @@ public class RepetitivePermutationTest {
     }
 
     @Test
-    void shouldHandleEmptyInputWithZeroWidth() {
-        // Mathematical note:
-        // - Empty set (∅) with width 0 has exactly one permutation conceptually
-        // - However, since there are no elements to permute, the iterator returns empty
-        // - This matches the definition of exponentiation: 0⁰ = 1 (conceptually) but ∅⁰ = ∅ (no elements)
-        // - count() returns 1, iteration returns 0 elements
+    void assertCountAndContentForSpecialCase() {
+        //n=0 and r=0 -> 0⁰ = 1
+        var zeroZeroBuilder = permutation.repetitive(0, Collections.emptyList());
+        assertEquals(BigInteger.ONE, zeroZeroBuilder.count());
+        assertTrue(zeroZeroBuilder.lexOrder().stream().toList().get(0).isEmpty());
 
-        var generator = permutation.repetitive(0, Collections.emptyList());
-        assertEquals(BigInteger.ONE, generator.count(), "Count should be 1 (empty set exists)");
+        //n=0 and r>0 -> 0ʳ = 0
+        var zeroPositiveBuilder = permutation.repetitive(2, Collections.emptyList());
+        assertEquals(BigInteger.ZERO, zeroPositiveBuilder.count());
+        assertTrue(zeroPositiveBuilder.lexOrder().stream().toList().isEmpty());
 
-        var result = generator.lexOrder().stream().toList();
-        assertTrue(result.isEmpty(), "Iterator should return no elements");
+        //n>0 and r=0 -> n⁰ = 1
+        var positiveZeroBuilder = permutation.repetitive(0, "A", "B");
+        assertEquals(BigInteger.ONE, positiveZeroBuilder.count());
+        assertTrue(positiveZeroBuilder.lexOrder().stream().toList().get(0).isEmpty());
     }
 
-    @Test
-    void shouldHandleEmptyInputWithPositiveWidth() {
-        var result = permutation.repetitive(2, Collections.emptyList()).lexOrder().stream().toList();
-        assertTrue(result.isEmpty());
-    }
-
+    
     @Test
     void shouldThrowExpIfIterateAfterLastElement(){
         var iterator = permutation.repetitive(1,"A")
@@ -110,17 +108,6 @@ public class RepetitivePermutationTest {
         assertIterableEquals(expected, output);
     }
 
-    @Test
-    void shouldHandleZeroWidth() {
-        // Width = 0 should return exactly one empty permutation
-        var result = permutation.repetitive(0, "A", "B", "C")
-                .lexOrder()
-                .stream()
-                .toList();
-
-        assertEquals(1, result.size());
-        assertEquals(of(), result.get(0));
-    }
 
     @Test
     void shouldThrowExceptionForNegativeWidth() {
@@ -130,23 +117,6 @@ public class RepetitivePermutationTest {
         assertEquals(exp.getMessage(), "Width (r) cannot be negative for repetitive permutation generation");
     }
 
-    @Test
-    void shouldThrowExceptionForNullElementsList() {
-        var exp1 = assertThrows(IllegalArgumentException.class, () ->
-                permutation.repetitive(2, (List<String>) null).lexOrder()
-        );
-
-        String expectedMessage = "Elements list cannot be null or empty for repetitive permutation generation";
-        assertEquals(exp1.getMessage(), expectedMessage);
-    }
-
-    @Test
-    void shouldWorkForEmptyElementList() {
-        //by the definition of exponentiation, for n=0 and k>0 0^k = 0
-        //hence empty input should me allowed and the result is the empty collection
-        var output = permutation.repetitive(2,Collections.emptyList()).lexOrder().stream().toList();
-        assertTrue(output.isEmpty());
-    }
 
     @Test
     void shouldHandleMaximumWidthForSmallN() {

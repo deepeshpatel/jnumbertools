@@ -7,6 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
@@ -147,6 +148,7 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
      * @return a {@link UniqueCombination} for iterating all ⁿCᵣ combinations
      */
     public UniqueCombination<T> lexOrder() {
+
         return new UniqueCombination<>(elements, size);
     }
 
@@ -162,7 +164,7 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿCᵣ
      */
     public UniqueCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m, start, count());
+        Util.validateLexOrderMthParams(m, start, count());
         BigInteger nCr = calculator.nCr(elements.size(), size);
         Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, nCr);
         return new UniqueCombinationByRanks<>(elements, size, mthIterable, calculator);
@@ -190,7 +192,7 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
      * @throws ArithmeticException or other algorithm-specific exceptions for invalid ranks during generation
      */
     public UniqueCombinationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
-        EveryMthIterable.validateByRanksParams(ranks);
+        Util.validateByRanksParams(ranks);
         return new UniqueCombinationByRanks<>(elements, size, ranks, calculator);
     }
 
@@ -231,6 +233,11 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
      */
     public BigInteger count() {
         return calculator.nCr(elements.size(), size);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return elements.isEmpty() || size == 0;
     }
 
     @Override

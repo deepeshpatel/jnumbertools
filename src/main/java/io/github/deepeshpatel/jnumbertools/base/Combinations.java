@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.combination.multiset.MultisetCombinationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.combination.repetitive.RepetitiveCombinationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.combination.unique.UniqueCombinationBuilder;
@@ -125,6 +126,7 @@ public final class Combinations {
      * @return a UniqueCombinationBuilder for integer elements
      */
     public UniqueCombinationBuilder<Integer> unique(int n, int r) {
+        Util.validateNK(n,r);
         var elements = IntStream.range(0, n).boxed().toList();
         return unique(r, elements);
     }
@@ -161,6 +163,8 @@ public final class Combinations {
      * @return a UniqueCombinationBuilder for the specified elements
      */
     public <T> UniqueCombinationBuilder<T> unique(int r, List<T> elements) {
+        Util.validateInput(elements);
+        Util.validateNK(elements.size(), r);
         return new UniqueCombinationBuilder<>(elements, r, calculator);
     }
 
@@ -181,9 +185,7 @@ public final class Combinations {
      * @throws IllegalArgumentException if r < 0
      */
     public RepetitiveCombinationBuilder<Integer> repetitive(int n, int r) {
-        if (r < 0) {
-            throw new IllegalArgumentException("r should be >=0");
-        }
+        Util.validateNK(n, r);
         var elements = IntStream.range(0, n).boxed().toList();
         return repetitive(r, elements);
     }
@@ -219,6 +221,11 @@ public final class Combinations {
      * @return a RepetitiveCombinationBuilder for the specified elements
      */
     public <T> RepetitiveCombinationBuilder<T> repetitive(int r, List<T> elements) {
+        Util.validateInput(elements);
+        // r>n is allowed for repetitive combination
+        if (r < 0) {
+            throw new IllegalArgumentException("r must be ≥ 0 to generate repetitive combination");
+        }
         return new RepetitiveCombinationBuilder<>(elements, r, calculator);
     }
 
@@ -242,6 +249,7 @@ public final class Combinations {
      * @throws IllegalArgumentException if options is null, contains non-positive frequencies, or r < 0
      */
     public <T> MultisetCombinationBuilder<T> multiset(LinkedHashMap<T, Integer> options, int r) {
+        Util.validateMapOptions(options, r);
         return new MultisetCombinationBuilder<>(options, r);
     }
 }

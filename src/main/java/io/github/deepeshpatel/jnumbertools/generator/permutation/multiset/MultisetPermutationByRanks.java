@@ -50,10 +50,17 @@ public final class MultisetPermutationByRanks<T> extends AbstractMultisetPermuta
     /**
      * Constructs a multiset permutation generator for specific ranks.
      *
-     * @param multiset the multiset with element frequencies (must not be null or empty)
-     * @param ranks the 0-based rank positions to generate (each rank must be 0 ≤ rank < n!/(∏fᵢ!))
-     * @param calculator the calculator for combinatorial operations
-     * @throws IllegalArgumentException if multiset is empty or any rank is invalid
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.generator.permutation.multiset.MultisetPermutationBuilder#byRanks(Iterable)}.
+     * All parameter validation (null checks, frequency filtering) is handled by the builder.
+     * Rank validation (non-negative, less than total) is deferred to iteration.
+     * </p>
+     *
+     * @param multiset   the multiset with element frequencies (assumes zero frequencies filtered, map non-null)
+     * @param ranks      the sequence of 0-based rank positions to generate
+     * @param calculator the calculator for combinatorial operations (assumed non-null)
      */
     public MultisetPermutationByRanks(LinkedHashMap<T, Integer> multiset, Iterable<BigInteger> ranks, Calculator calculator) {
         super(multiset, calculator);

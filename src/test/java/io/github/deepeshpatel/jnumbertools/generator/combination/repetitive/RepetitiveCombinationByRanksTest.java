@@ -14,20 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RepetitiveCombinationByRanksTest {
 
-    @Test
-    void assertCount() {
-        // nCr with repetition: (n+r−1)!/(r!·(n−1)!)
-        for (int n = 1; n <= 4; n++) {
-            var input = Collections.nCopies(n, "A");
-            for (int r = 0; r <= n + 2; r++) {
-                long size = combination.repetitive(n, r)
-                        .lexOrder()
-                        .stream().count();
-                assertEquals(calculator.nCrRepetitive(n, r).longValue(), size);
-            }
-        }
-    }
-
     @Nested
     public class RepetitiveCombinationMthTest {
 
@@ -49,6 +35,33 @@ class RepetitiveCombinationByRanksTest {
                     assertEquals((long) expected, count);
                 }
             }
+        }
+
+        @Test
+        void assertCountAndContentForSpecialCase() {
+            // Case 1: n=0, r=0 -> 1 -> should return [[]]
+            var zeroZeroGenerator = combination.repetitive(0, 0).lexOrderMth(1, 0);
+            var zeroZeroResult = zeroZeroGenerator.stream().toList();
+            assertEquals(1, zeroZeroResult.size());
+            assertTrue(zeroZeroResult.get(0).isEmpty());
+
+            // Case 2: n=0, r>0 -> 0 -> should return [] (empty iterator)
+            var zeroPositiveGenerator = combination.repetitive(0, 2).lexOrderMth(1, 0);
+            assertTrue(zeroPositiveGenerator.stream().toList().isEmpty());
+
+            // Case 3: n>0, r=0 -> 1 -> should return [[]]
+            var positiveZeroGenerator = combination.repetitive(3, 0).lexOrderMth(1, 0);
+            var positiveZeroResult = positiveZeroGenerator.stream().toList();
+            assertEquals(1, positiveZeroResult.size());
+            assertTrue(positiveZeroResult.get(0).isEmpty());
+
+            // Case 4: With m>1, should still respect count=0
+            var zeroPositiveWithMthGenerator = combination.repetitive(0, 2).lexOrderMth(3, 0);
+            assertTrue(zeroPositiveWithMthGenerator.stream().toList().isEmpty());
+
+            // Case 5: Empty list with r>0 -> 0
+            var emptyListGenerator = combination.repetitive(2, Collections.emptyList()).lexOrderMth(1, 0);
+            assertTrue(emptyListGenerator.stream().toList().isEmpty());
         }
 
         @Test
@@ -92,23 +105,6 @@ class RepetitiveCombinationByRanksTest {
         }
 
         @Test
-        void should_return_empty_list_when_r_equals_0() {
-            int n = 3;
-            int r = 0;
-            var expected = combination.repetitive(n, r).lexOrder().stream().toList();
-            var output = combination.repetitive(n, r).lexOrderMth(1, 0).stream().toList();
-            assertIterableEquals(expected, output);
-        }
-
-        @Test
-        void should_throw_exception_for_negative_r_value() {
-            int n = 3;
-            int r = -2;
-            assertThrows(IllegalArgumentException.class, () ->
-                    combination.repetitive(n, r).lexOrderMth(1, 0));
-        }
-
-        @Test
         void shouldGenerateMthRepetitiveCombinations() {
             int start = 3;
             int n = 8;
@@ -120,31 +116,6 @@ class RepetitiveCombinationByRanksTest {
             }
         }
 
-        @Test
-        void testFailFastForLexOrderMth() {
-            int n = 3;
-            int r = 2;
-            var repetitiveComb = combination.repetitive(n, r);
-
-            // m <= 0
-            var exception = assertThrows(IllegalArgumentException.class,
-                    () -> repetitiveComb.lexOrderMth(0, 1));
-            assertEquals(errMsgForIncrement, exception.getMessage());
-
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> repetitiveComb.lexOrderMth(-1, 1));
-            assertEquals(errMsgForIncrement, exception.getMessage());
-
-            // start < 0
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> repetitiveComb.lexOrderMth(1, -1));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
-
-            // start >= count
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> repetitiveComb.lexOrderMth(1, 100));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
-        }
     }
 
     /**

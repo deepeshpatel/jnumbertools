@@ -6,7 +6,7 @@ package io.github.deepeshpatel.jnumbertools.generator.subset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
-import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
@@ -106,7 +106,7 @@ import java.util.List;
  *
  * <h3>Empty and Edge Cases</h3>
  * <pre>
- * // Empty set has one subset (the empty set itself)
+ * // Empty-set(∅) has one subset (the empty-set itself)
  * SubsetBuilder&lt;String&gt; emptyBuilder =
  *     new SubsetBuilder&lt;&gt;(Collections.emptyList(), calculator);
  * System.out.println(emptyBuilder.all().count()); // 1
@@ -118,7 +118,7 @@ import java.util.List;
  *        .forEach(System.out::println); // Prints: []
  *
  * // Invalid ranges throw IllegalArgumentException
- * // builder.inRange(3, 1); // Exception: to must be >= from
+ * // builder.inRange(3, 1); // Exception: to must be ≥ from
  * // builder.inRange(5, 6); // Exception: to cannot exceed n
  * </pre>
  *
@@ -137,7 +137,7 @@ import java.util.List;
  * <pre>
  * // Subsets can be used as dimensions in constrained Cartesian products
  * CartesianProduct cp = new CartesianProduct(calculator);
- * cp.constrainedProductOf(1, "X", "Y")
+ * cp.constrainedProductOfDistinct(1, "X", "Y")
  *   .andInRange(1, 2, List.of("A", "B", "C"))  // Subsets as a dimension
  *   .lexOrder()
  *   .forEach(System.out::println);
@@ -206,9 +206,26 @@ public class SubsetBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if to < from, from < 0, or to > elements.size()
      */
     public SubsetBuilder<T> inRange(int from, int to) {
-        if (to < from) {
-            throw new IllegalArgumentException("parameter 'to' must be greater than or equal to parameter 'from'");
+        if (from < 0 || to < from) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid range: from=%d, to=%d - must satisfy 0 ≤ from ≤ to", from, to)
+            );
+            //throw new IllegalArgumentException("Invalid range: from must be ≥ 0 and to must be ≥ from");
         }
+
+        // Empty list special cases
+        if (elements.isEmpty()) {
+            // All ranges with from ≥ 0 are valid, but will produce:
+            // - from=0 → count=1, returns [[]]
+            // - from>0 → count=0, returns []
+            return new SubsetBuilder<>(elements, calculator, from, to);
+        }
+
+        // For non-empty list, validate bounds
+        if (to > elements.size()) {
+            throw new IllegalArgumentException("Invalid range: to cannot exceed " + elements.size());
+        }
+
         return new SubsetBuilder<>(elements, calculator, from, to);
     }
 
@@ -233,7 +250,13 @@ public class SubsetBuilder<T> implements Builder<T> {
      * @return a {@code SubsetGeneratorMth} instance
      */
     public SubsetGeneratorMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m,start, count());
+        Util.validateLexOrderMthParams(m, start, count());
+
+        // When count is zero, any start should return empty generator
+        if (count().equals(BigInteger.ZERO)) {
+            return new SubsetGeneratorMth<>(from, to, m, start, elements, calculator);
+        }
+
         if(start.compareTo(count()) >= 0 ) {
             throw new IllegalArgumentException("start must be < total subsets in range (0-based)");
         }
@@ -246,14 +269,14 @@ public class SubsetBuilder<T> implements Builder<T> {
      * Ranks are 0-based in lexicographical order.
      * </p>
      *
-     * @param ranks the iterable of ranks (each rank must be >= 0 and < total subsets)
+     * @param ranks the iterable of ranks (each rank must be ≥ 0 and < total subsets)
      * @return a generator producing subsets at the given ranks
      */
     public SubsetGeneratorByRanks<T> byRanks(Iterable<BigInteger> ranks) {
         if (from < 0 || to < 0) {
             throw new IllegalStateException("Must specify range via inRange() or all()");
         }
-        EveryMthIterable.validateByRanksParams(ranks);
+        Util.validateByRanksParams(ranks);
         return new SubsetGeneratorByRanks<>(from, to, ranks, elements, calculator);
     }
 
@@ -323,8 +346,30 @@ public class SubsetBuilder<T> implements Builder<T> {
      *
      * @return the count of subsets
      */
-    public  BigInteger count() {
+    public BigInteger count() {
+        if (from < 0 || to < 0) {
+            return BigInteger.ZERO; // Not configured yet
+        }
+
+        // Empty list special cases
+        if (elements.isEmpty()) {
+            if (from == 0) {
+                return BigInteger.ONE; // empty-set(∅) exists
+            }
+            return BigInteger.ZERO; // No non-empty subsets
+        }
+
         return calculator.totalSubsetsInRange(from, to, elements.size());
+    }
+
+    @Override
+    public boolean isEmpty() {
+        // A builder is empty only if it produces NO elements
+        // For empty list with range [0,0], it produces one element ([[]]), so NOT empty
+        if (elements.isEmpty() && from == 0) {
+            return false;  // empty-set(∅) exists, produces [[]]
+        }
+        return count().equals(BigInteger.ZERO);
     }
 
     @Override

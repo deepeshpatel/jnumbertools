@@ -26,16 +26,29 @@ public class MultisetPermutationTest {
     }
 
     @Test
-    void shouldThrowExceptionForNullMultiset() {
-        assertThrows(IllegalArgumentException.class, () ->
-                permutation.multiset(null).lexOrder()
-        );
+    void assertCountAndContentForSpecialCase() {
+        // Empty map -> 0! = 1 -> count = 1, returns [[]]
+        var emptyMap = new LinkedHashMap<String, Integer>();
+        var emptyBuilder = permutation.multiset(emptyMap);
+        assertEquals(calculator.factorial(0), emptyBuilder.count());
+        assertTrue(emptyBuilder.lexOrder().stream().toList().get(0).isEmpty());
+
+        // Map with all zero frequencies -> should be treated as empty -> count = 1, returns [[]]
+        // But we don't put zero-frequency entries in the map at all!
+        var zeroFreqMap = new LinkedHashMap<String, Integer>();
+        // zeroFreqMap.put("A", 0);  // Don't include zero frequencies
+        // zeroFreqMap.put("B", 0);  // Don't include zero frequencies
+        var zeroFreqBuilder = permutation.multiset(zeroFreqMap);
+        assertEquals(calculator.factorial(0), zeroFreqBuilder.count());
+        var result = zeroFreqBuilder.lexOrder().stream().toList();
+        assertEquals(1, result.size(), "Should have exactly one empty permutation");
+        assertTrue(result.get(0).isEmpty(), "The single permutation should be empty");
     }
 
     @Test
-    void shouldThrowExceptionForEmptyMultiset() {
-        assertThrows(IllegalArgumentException.class, () ->
-                permutation.multiset(new LinkedHashMap<>()).lexOrder()
+    void shouldThrowExceptionForNullMultiset() {
+        assertThrows(NullPointerException.class, () ->
+                permutation.multiset(null).lexOrder()
         );
     }
 
@@ -44,16 +57,6 @@ public class MultisetPermutationTest {
         LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
         options.put("A", 2);
         options.put("B", -1);  // Negative frequency
-        assertThrows(IllegalArgumentException.class, () ->
-                permutation.multiset(options).lexOrder()
-        );
-    }
-
-    @Test
-    void shouldThrowExceptionForZeroFrequency() {
-        LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
-        options.put("A", 2);
-        options.put("B", 0);  // Zero frequency (should be positive)
         assertThrows(IllegalArgumentException.class, () ->
                 permutation.multiset(options).lexOrder()
         );

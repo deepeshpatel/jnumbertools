@@ -38,7 +38,7 @@ public class PasswordGenerator {
         System.out.println("  - Rest from full charset\n");
 
         var builder = JNumberTools.cartesianProduct()
-                .constrainedProductOf(1, UPPERCASE)          // at least 1 uppercase
+                .constrainedProductOfDistinct(1, UPPERCASE)          // at least 1 uppercase
                 .andInRange(1, 3, DIGITS)   // at least 1 and at most 3 digits
                 .andInRange(2, 3, SYMBOLS)  // at least 2 and at most 3 symbols
                 .andDistinct (5, combine(LOWERCASE, UPPERCASE, DIGITS, SYMBOLS)); // rest to fill

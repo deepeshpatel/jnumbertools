@@ -34,31 +34,21 @@ public abstract class AbstractMultisetCombination<T> implements Iterable<Map<T, 
     /**
      * Constructs a base for multiset combination generators.
      *
-     * @param map the map of n distinct elements to their multiplicities (must not be null)
-     * @param r   the size of each combination (r ≥ 0)
-     * @throws IllegalArgumentException if r < 0, map is null, or any multiplicity ≤ 0
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Concrete instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.base.Combinations#multiset(LinkedHashMap, int)}.
+     * All parameter validation (null check, non-negative frequencies, zero-frequency filtering, r ≥ 0)
+     * is handled by the builder.
+     * </p>
+     *
+     * @param map the {@code LinkedHashMap} of elements to their multiplicities (assumes zero frequencies filtered)
+     * @param r   the size of each combination (assumed r ≥ 0)
      */
     protected AbstractMultisetCombination(LinkedHashMap<T, Integer> map, int r) {
-        checkParameters(map, r);
         this.options = orderOptions(map);
         this.frequencies = extractFrequencies(this.options);
         this.r = r;
-    }
-
-    /**
-     * Validates the input parameters for multiset combinations.
-     *
-     * @param map the map of elements to their multiplicities
-     * @param r   the combination size
-     * @throws IllegalArgumentException if r < 0, map is null, or any multiplicity ≤ 0
-     */
-    private void checkParameters(Map<T, Integer> map, int r) {
-        if (r < 0) throw new IllegalArgumentException("Parameter r (number of items in each combination) must be >= 0");
-        if (map == null) throw new IllegalArgumentException("Options map cannot be null");
-        for (Map.Entry<T, Integer> entry : map.entrySet()) {
-            Integer freq = entry.getValue();
-            if (freq == null || freq <= 0) throw new IllegalArgumentException("All frequencies must be positive: found " + freq);
-        }
     }
 
     /**
@@ -69,8 +59,7 @@ public abstract class AbstractMultisetCombination<T> implements Iterable<Map<T, 
      */
     @SuppressWarnings("unchecked")
     private Map.Entry<T, Integer>[] orderOptions(Map<T, Integer> map) {
-        return map.entrySet().stream()
-                .toArray(Map.Entry[]::new);
+        return map.entrySet().toArray(Map.Entry[]::new);
     }
 
     /**

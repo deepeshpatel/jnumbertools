@@ -23,29 +23,23 @@ public class RankOfTest {
 
     @Test
     void shouldGenerateCorrectRankOfRepetitivePermutation() {
-        int base = 4;
-        int expected = 27;
+
         BigInteger rank = rankOf.repeatedPermutation(4, 1, 2, 3);
-        assertEquals(expected, rank.intValue());
+        assertEquals(27, rank.intValue());
+
+        rank = rankOf.repeatedPermutation(4, 3, 1, 2, 3);
+        assertEquals(219, rank.intValue());
     }
 
     @Test
     void shouldGenerateCorrectRankOfRepetitivePermutationForLargeBase() {
-        int base = 4;
-        int expected = 255;
         BigInteger rank = rankOf.repeatedPermutation(4, 3, 3, 3, 3);
-        assertEquals(expected, rank.intValue());
+        assertEquals(255, rank.intValue());
     }
 
     @Test
     void shouldGenerateCorrectRankOfUniqueCombination() {
         BigInteger rank = rankOf.uniqueCombination(5, 2, 1, 0);
         assertEquals(2, rank.intValue());
-    }
-
-    @Test
-    void shouldGenerateCorrectRankOfRepetitiveCombination() {
-        BigInteger rank = rankOf.repeatedPermutation(4, 3, 1, 2, 3);
-        assertEquals(219, rank.intValue());
     }
 }

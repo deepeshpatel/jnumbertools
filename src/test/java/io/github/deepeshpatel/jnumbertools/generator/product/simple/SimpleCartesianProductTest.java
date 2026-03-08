@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -7,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
-import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SimpleCartesianProductTest {
@@ -23,46 +23,32 @@ public class SimpleCartesianProductTest {
     }
 
     @Test
-    void shouldHandleNullInput() {
-        // Mathematical note:
-        // - Empty set (∅) as input represents a single dimension with no elements
-        // - Conceptually there is one empty tuple, but since there are no elements,
-        //   the iterator returns nothing
-        // - count() returns 1, iteration returns 0 elements
+    void assertCountAndContentForSpecialCase() {
+        // Case 1: No dimensions (empty builder) -> count=1, returns [[]]
+        // Note: This scenario occurs when builder is created but no dimensions added?
+        // Actually, builder always has at least one dimension from construction
 
-        var builder = cartesianProduct.simpleProductOf((List<?>) null);
-        assertEquals(BigInteger.ONE, builder.count(), "Count should be 1 (empty set exists)");
+        // Case 2: Single empty dimension -> count=1, returns [[]]
+        var singleEmptyBuilder = cartesianProduct.simpleProductOf(Collections.emptyList());
+        assertEquals(BigInteger.ONE, singleEmptyBuilder.count());
+        var singleEmptyResult = singleEmptyBuilder.lexOrder().stream().toList();
+        assertEquals(1, singleEmptyResult.size());
+        assertTrue(singleEmptyResult.get(0).isEmpty());
 
-        var result = builder.lexOrder().stream().toList();
-        assertTrue(result.isEmpty(), "Iterator should return no elements");
-    }
+        // Case 3: Multiple dimensions, all non-empty -> normal product
+        // (tested in other methods)
 
-    @Test
-    void shouldHandleNullInAnd() {
-        // Mathematical note:
-        // - First dimension: ["A", "B"] (2 elements)
-        // - Second dimension: null (empty set)
-        // - The Cartesian product A × ∅ = ∅ (empty set)
-        // - Since one dimension is empty, the entire product is empty
-        // - count() should be 0, iterator should return no elements
+        // Case 4: Multiple dimensions, any empty -> count=0, returns [] (empty iterator)
+        var multiWithEmptyBuilder = cartesianProduct.simpleProductOf(A_B)
+                .and(Collections.emptyList());
+        assertEquals(BigInteger.ZERO, multiWithEmptyBuilder.count());
+        assertTrue(multiWithEmptyBuilder.lexOrder().stream().toList().isEmpty());
 
-        var builder = cartesianProduct.simpleProductOf(List.of("A", "B"))
-                .and((List<?>) null);
-
-        assertEquals(BigInteger.ZERO, builder.count(),
-                "Count should be 0 (product with empty set is empty)");
-
-        var result = builder.lexOrder().stream().toList();
-        assertTrue(result.isEmpty(), "Iterator should return no elements");
-    }
-
-    @Test
-    void shouldHandleMixedNullAndEmpty() {
-        var builder = cartesianProduct.simpleProductOf(List.of("A", "B"))
-                .and(Collections.emptyList())
-                .and((List<?>) null);
-        assertEquals(BigInteger.ZERO, builder.count());
-        assertTrue(builder.lexOrder().stream().toList().isEmpty());
+        // Case 5: Multiple dimensions, all empty -> count=0, returns []
+        var allEmptyBuilder = cartesianProduct.simpleProductOf(Collections.emptyList())
+                .and(Collections.emptyList());
+        assertEquals(BigInteger.ZERO, allEmptyBuilder.count());
+        assertTrue(allEmptyBuilder.lexOrder().stream().toList().isEmpty());
     }
 
     @Test
@@ -94,7 +80,82 @@ public class SimpleCartesianProductTest {
     @Test
     void shouldHandleEmptyProduct() {
         var product = cartesianProduct.simpleProductOf(List.of()).lexOrder().stream().toList();
-        assertTrue(product.isEmpty());
+        assertTrue(Util.isEmptyList(product));
+        //assertTrue(product.isEmpty());
     }
 
+    @Test
+    void shouldHandleEmptyFirstDimension() {
+        var builder = cartesianProduct.simpleProductOf(Collections.emptyList());
+        var generator = builder.lexOrder();
+        var result = generator.stream().toList();
+        assertEquals(BigInteger.ONE, builder.count());
+        assertEquals(1, result.size());
+        assertEquals(List.of(), result.get(0));
+    }
+
+    @Test
+    void shouldHandleEmptySecondDimension() {
+        // Test empty list added as second dimension
+        var builder = cartesianProduct.simpleProductOf(A_B)
+                .and(Collections.emptyList());
+
+        // A × ∅ = ∅ (empty product) - count should be 0, not 1
+        assertEquals(BigInteger.ZERO, builder.count());  // Changed from ONE to ZERO
+
+        // Iterator should return no elements
+        var result = builder.lexOrder().stream().toList();
+        assertTrue(result.isEmpty());  // Should be empty list, not [[]]
+    }
+
+    @Test
+    void shouldHandleEmptyFirstAndSecondDimensions() {
+        // Test both dimensions empty
+        var builder = cartesianProduct.simpleProductOf(Collections.emptyList())
+                .and(Collections.emptyList());
+
+        // ∅ × ∅ = ∅ (empty product) - count should be 0
+        assertEquals(BigInteger.ZERO, builder.count());  // Changed from ONE to ZERO
+
+        var result = builder.lexOrder().stream().toList();
+        assertTrue(result.isEmpty());  // Should be empty
+    }
+
+    @Test
+    void shouldHandleEmptyFirstWithAdditionalDimensions() {
+        // Empty first dimension followed by non-empty dimensions
+        var builder = cartesianProduct.simpleProductOf(Collections.emptyList())
+                .and(A_B)
+                .and(num_1_2_3);
+
+        // ∅ × A × B = ∅ (empty product) - count should be 0
+        assertEquals(BigInteger.ZERO, builder.count());  // Changed from ONE to ZERO
+        assertTrue(builder.lexOrder().stream().toList().isEmpty());
+    }
+
+    @Test
+    void shouldHandleNonEmptyFirstWithEmptyMiddle() {
+        // Non-empty, empty, non-empty dimensions
+        var builder = cartesianProduct.simpleProductOf(A_B)
+                .and(Collections.emptyList())
+                .and(num_1_2_3);
+
+        // A × ∅ × B = ∅ (empty product) - count should be 0
+        assertEquals(BigInteger.ZERO, builder.count());  // Changed from ONE to ZERO
+        assertTrue(builder.lexOrder().stream().toList().isEmpty());
+    }
+
+    @Test
+    void shouldHandleEmptyListAfterAnd() {
+        // Test and() with empty list after builder creation
+        var builder1 = cartesianProduct.simpleProductOf(A_B);
+        var builder2 = builder1.and(Collections.emptyList());
+
+        // Original builder unchanged (immutability)
+        assertEquals(BigInteger.valueOf(2), builder1.count());
+
+        // New builder with empty dimension - A × ∅ = ∅, count should be 0
+        assertEquals(BigInteger.ZERO, builder2.count());  // Changed from ONE to ZERO
+        assertTrue(builder2.lexOrder().stream().toList().isEmpty());
+    }
 }

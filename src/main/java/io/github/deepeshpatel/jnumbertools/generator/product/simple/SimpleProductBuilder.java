@@ -21,13 +21,19 @@ import java.util.*;
  * and provides various generation strategies.
  * </p>
  *
- * <h2>Key Characteristics</h2>
- * <ul>
- *   <li><b>Order matters</b> - Tuples preserve the order of input sets</li>
- *   <li><b>Rightmost index varies fastest</b> - Lexicographical order follows row-major order</li>
- *   <li><b>Mixed types supported</b> - Different sets can contain different element types</li>
- *   <li><b>Total count</b> - Product of sizes of all input sets</li>
- * </ul>
+ * <h2>Mathematical Rules</h2>
+ * <pre>
+ * ┌────────────────────┬───────────┬──────────────┬───────────┐
+ * │ Scenario           │ count()   │ iterator     │ isEmpty() │
+ * ├────────────────────┼───────────┼──────────────┼───────────┤
+ * │ No dimensions      │ 1         │ [[]]         │ false     │
+ * │ Single empty dim   │ 1         │ [[]]         │ false     │
+ * │ Multiple dims,     │ Π sizes   │ products     │ false     │
+ * │   none empty       │           │              │           │
+ * │ Multiple dims,     │ 0         │ []           │ true      │
+ * │   any empty        │           │              │           │
+ * └────────────────────┴───────────┴──────────────┴───────────┘
+ * </pre>
  *
  * <h2>Usage Examples</h2>
  *
@@ -44,100 +50,25 @@ import java.util.*;
  * //         [B,1,X], [B,1,Y], [B,2,X], [B,2,Y]
  * </pre>
  *
- * <h3>Single Set Product</h3>
- * <pre>
- * // Product of a single set returns each element as a singleton tuple
- * SimpleProductBuilder singleBuilder = new SimpleProductBuilder(List.of("A", "B", "C"));
- * singleBuilder.lexOrder().forEach(System.out::println);
- * // Output: [A], [B], [C]
- * </pre>
- *
- * <h3>Varargs Convenience</h3>
- * <pre>
- * // Using varargs for cleaner syntax
- * SimpleProductBuilder builder2 = new SimpleProductBuilder(List.of("A", "B"))
- *     .and(1, 2, 3)           // varargs automatically converted to list
- *     .and("X", "Y", "Z");
- * </pre>
- *
- * <h3>Every mᵗʰ Product</h3>
- * <pre>
- * // Every 2nd product starting from rank 1
- * builder.lexOrderMth(2, 1)
- *        .forEach(System.out::println);
- * // Output: [A,1,Y], [A,2,Y], [B,1,Y], [B,2,Y] (ranks 1,3,5,7)
- * </pre>
- *
- * <h3>Random Sampling</h3>
- * <pre>
- * // Sample 3 unique products without replacement
- * builder.sample(3)
- *        .forEach(System.out::println);
- *
- * // Sample 5 products with replacement (duplicates allowed)
- * builder.choice(5)
- *        .forEach(System.out::println);
- * </pre>
- *
- * <h3>Rank-Based Access</h3>
- * <pre>
- * // Get products at ranks 0, 3, and 6
- * builder.byRanks(List.of(BigInteger.ZERO,
- *                         BigInteger.valueOf(3),
- *                         BigInteger.valueOf(6)))
- *        .forEach(System.out::println);
- * // Output: [A,1,X], [A,2,Y], [B,2,X] (ranks 0,3,6)
- * </pre>
- *
  * <h3>Empty and Edge Cases</h3>
  * <pre>
- * // Empty list as input
- * SimpleProductBuilder emptyBuilder = new SimpleProductBuilder(Collections.emptyList());
- * System.out.println(emptyBuilder.count()); // 1
- * emptyBuilder.lexOrder().forEach(System.out::println); // Prints: []
+ * // Single empty dimension -> count=1, returns [[]]
+ * SimpleProductBuilder emptyDim = new SimpleProductBuilder(Collections.emptyList());
+ * System.out.println(emptyDim.count());        // 1
+ * System.out.println(emptyDim.isEmpty());      // false
+ * emptyDim.lexOrder().forEach(System.out::println); // Prints: []
  *
- * // Adding empty list makes entire product empty
+ * // Adding empty dimension to existing product -> becomes empty
  * SimpleProductBuilder withEmpty = new SimpleProductBuilder(List.of("A", "B"))
- *     .and(Collections.emptyList())
- *     .and(List.of("X", "Y"));
- * System.out.println(withEmpty.count()); // 0
+ *     .and(Collections.emptyList());
+ * System.out.println(withEmpty.count());        // 0
+ * System.out.println(withEmpty.isEmpty());      // true
  * System.out.println(withEmpty.lexOrder().stream().count()); // 0
- *
- * // Single empty list returns one empty tuple
- * SimpleProductBuilder singleEmpty = new SimpleProductBuilder(Collections.emptyList());
- * System.out.println(singleEmpty.count()); // 1
- * singleEmpty.lexOrder().forEach(System.out::println); // Prints: []
  * </pre>
- *
- * <h3>Mathematical Properties</h3>
- * <pre>
- * // Product of sizes: |A| × |B| × |C|
- * SimpleProductBuilder sizes = new SimpleProductBuilder(List.of(1,2,3))      // size 3
- *     .and(List.of('a','b'))                                                 // size 2
- *     .and(List.of("X","Y","Z","W"));                                        // size 4
- * System.out.println(sizes.count()); // 3 × 2 × 4 = 24
- *
- * // Each tuple corresponds to a mixed-radix number
- * // For sets of sizes [3,2,4], rank 5 = [0,1,1] in mixed radix
- * // meaning first set index 0, second set index 1, third set index 1
- * </pre>
- *
- * <h3>Nested Builders</h3>
- * <pre>
- * // SimpleProductBuilder implements Builder&lt;Object&gt;, allowing composition
- * SimpleProductBuilder outer = new SimpleProductBuilder(List.of("Prefix"))
- *     .and(builder)  // Can include another builder's products as a dimension
- *     .and(List.of("Suffix"));
- * </pre>
- *
- * <p>
- * This builder is immutable and thread-safe. All configuration methods return new instances.
- * </p>
  *
  * @see SimpleProduct
  * @see CartesianProductByRanks
  * @see MixedRadix
- * @see <a href="https://en.wikipedia.org/wiki/Cartesian_product">Cartesian Product</a>
  * @author Deepesh Patel
  */
 @SuppressWarnings({"unchecked"})
@@ -145,10 +76,13 @@ public final class SimpleProductBuilder implements Builder<Object> {
 
     private final List<Builder<Object>> builders;
     private final List<List<?>> allLists;
+    private final boolean hasEmptyDimension;  // true if any dimension is empty
+    private final boolean isEmptyProduct;      // true if product yields no elements
 
     /**
      * Constructs a SimpleProductBuilder with an initial list of elements.
-     * @param elements   the initial list of elements (null and empty allowed)
+     *
+     * @param elements the initial list of elements (null treated as empty)
      */
     public SimpleProductBuilder(List<?> elements) {
         elements = elements == null ? Collections.emptyList() : elements;
@@ -156,14 +90,25 @@ public final class SimpleProductBuilder implements Builder<Object> {
         this.builders = new ArrayList<>();
         this.allLists.add(elements);
         this.builders.add(new SingleListBuilder(elements));
+
+        // Track empty dimensions
+        this.hasEmptyDimension = elements.isEmpty();
+        // Product is empty only if we have a dimension AND it's empty? No.
+        // For single dimension, empty is valid (produces [[]])
+        this.isEmptyProduct = false;
     }
 
     /**
      * Private constructor for creating new instances with existing data.
      */
-    private SimpleProductBuilder() {
-        this.allLists = new ArrayList<>();
-        this.builders = new ArrayList<>();
+    private SimpleProductBuilder(List<Builder<Object>> builders,
+                                 List<List<?>> allLists,
+                                 boolean hasEmptyDimension,
+                                 boolean isEmptyProduct) {
+        this.builders = builders;
+        this.allLists = allLists;
+        this.hasEmptyDimension = hasEmptyDimension;
+        this.isEmptyProduct = isEmptyProduct;
     }
 
     /**
@@ -172,28 +117,38 @@ public final class SimpleProductBuilder implements Builder<Object> {
      * The resulting product will be the Cartesian product of all previously added sets
      * and this new set. Order matters: elements from earlier sets appear first in each tuple.
      * </p>
+     * <p>
+     * <strong>Performance optimization:</strong> If the product is already empty,
+     * this method returns an empty builder immediately without processing further dimensions.
+     * </p>
      *
      * @param elements the list of elements to add as a new dimension (null treated as empty)
      * @return a new SimpleProductBuilder instance with the additional set
+     * @throws NullPointerException if elements is null
      */
     public SimpleProductBuilder and(List<?> elements) {
-        elements = elements == null ? Collections.emptyList() : elements;
-        SimpleProductBuilder newBuilder = new SimpleProductBuilder();
-        newBuilder.allLists.addAll(this.allLists);
-        newBuilder.builders.addAll(this.builders);
-        newBuilder.allLists.add(elements);
-        newBuilder.builders.add(new SingleListBuilder(elements));
-        return newBuilder;
-    }
+        Util.validateInput(elements);
 
-    /**
-     * Adds a new list of elements to the product from a varargs array.
-     *
-     * @param elements the elements to add
-     * @return a new instance of SimpleProductBuilder with the additional elements
-     */
-    public SimpleProductBuilder and(Object... elements) {
-        return and(List.of(elements));
+        // If product is already empty, return empty builder immediately
+        if (isEmptyProduct) {
+            return new SimpleProductBuilder(builders, allLists, true, true);
+        }
+
+        boolean newDimEmpty = elements.isEmpty();
+        boolean newHasEmptyDimension = hasEmptyDimension || newDimEmpty;
+
+        // Determine if product becomes empty:
+        // - If we already had a dimension and this new one is empty, product becomes empty
+        // - If this is the first dimension and it's empty, product is NOT empty (handled in constructor)
+        boolean newIsEmptyProduct = (!builders.isEmpty() && newDimEmpty);
+
+        List<Builder<Object>> newBuilders = new ArrayList<>(builders);
+        List<List<?>> newAllLists = new ArrayList<>(allLists);
+        newBuilders.add(new SingleListBuilder(elements));
+        newAllLists.add(elements);
+
+        return new SimpleProductBuilder(newBuilders, newAllLists,
+                newHasEmptyDimension, newIsEmptyProduct);
     }
 
     /**
@@ -203,6 +158,17 @@ public final class SimpleProductBuilder implements Builder<Object> {
      */
     @Override
     public StreamableIterable<Object> lexOrder() {
+        // Case 1: Product is empty -> return empty iterator
+        if (isEmptyProduct) {
+            return new StreamableIteratorImpl<>(Collections.emptyIterator());
+        }
+
+        // Case 2: Single empty dimension -> return [[]]
+        if (builders.size() == 1 && allLists.get(0).isEmpty()) {
+            return new StreamableIteratorImpl<>(Util.emptyListIterator());
+        }
+
+        // Case 3: Normal product
         return new SimpleProductGenerator();
     }
 
@@ -212,12 +178,30 @@ public final class SimpleProductBuilder implements Builder<Object> {
      * @param m     the interval to select every mᵗʰ product
      * @param start the starting rank
      * @return a StreamableIterable for the specified intervals
+     * @throws IllegalArgumentException if m ≤ 0, start < 0, or start ≥ count() when count() > 0
      */
     @Override
     public StreamableIterable<Object> lexOrderMth(BigInteger m, BigInteger start) {
-        EveryMthIterable.validateLexOrderMthParams(m, start, count());
+        Util.validateLexOrderMthParams(m, start, count());
+
+        // Case 1: Product is empty -> return empty iterator
+        if (isEmptyProduct) {
+            return new StreamableIteratorImpl<>(Collections.emptyIterator());
+        }
+
+        // Case 2: Single empty dimension (count=1) -> only rank 0 exists
+        if (count().equals(BigInteger.ONE) && builders.size() == 1 && allLists.get(0).isEmpty()) {
+            if (start.equals(BigInteger.ZERO) && m.equals(BigInteger.ONE)) {
+                return new StreamableIteratorImpl<>(Util.emptyListIterator());
+            }
+            return new StreamableIteratorImpl<>(Collections.emptyIterator());
+        }
+
+        // Case 3: Normal product
         BigInteger maxCount = count();
-        return new StreamableIteratorImpl<>(new CartesianProductByRanks<>(builders, new EveryMthIterable(start, m, maxCount)).iterator());
+        return new StreamableIteratorImpl<>(
+                new CartesianProductByRanks<>(builders, new EveryMthIterable(start, m, maxCount)).iterator()
+        );
     }
 
     /**
@@ -225,32 +209,17 @@ public final class SimpleProductBuilder implements Builder<Object> {
      * <p>
      * Ranks follow row-major order (rightmost indices vary fastest).
      * </p>
-     * <p>
-     * <b>Example for [A,B] × [1,2] × [X,Y]:</b>
-     * <pre>
-     * Rank | Tuple   | Mixed-Radix Digits
-     * -----|---------|--------------------
-     * 0    | [A,1,X] | [0,0,0]
-     * 1    | [A,1,Y] | [0,0,1]
-     * 2    | [A,2,X] | [0,1,0]
-     * 3    | [A,2,Y] | [0,1,1]
-     * 4    | [B,1,X] | [1,0,0]
-     * 5    | [B,1,Y] | [1,0,1]
-     * 6    | [B,2,X] | [1,1,0]
-     * 7    | [B,2,Y] | [1,1,1]
      *
-     * byRanks([0, 7]) → [A,1,X], [B,2,Y]
-     * </pre>
-     *
-     * @param ranks Iterable of 0-based rank numbers (0 ≤ rank < product of set sizes)
+     * @param ranks Iterable of 0-based rank numbers
      * @return a StreamableIterable for the specified ranks
-     * @throws IllegalArgumentException if any rank exceeds product space
-     * @throws IllegalStateException if no sets were added
+     * @throws IllegalArgumentException if ranks is null
      */
     @Override
     public StreamableIterable<Object> byRanks(Iterable<BigInteger> ranks) {
-        EveryMthIterable.validateByRanksParams(ranks);
-        return new StreamableIteratorImpl<>(new CartesianProductByRanks<>(builders, ranks).iterator());
+        Util.validateByRanksParams(ranks);
+        return new StreamableIteratorImpl<>(
+                new CartesianProductByRanks<>(builders, ranks).iterator()
+        );
     }
 
     /**
@@ -260,12 +229,21 @@ public final class SimpleProductBuilder implements Builder<Object> {
      * @return a StreamableIterable for the sampled products
      * @throws IllegalArgumentException if sampleSize is negative
      */
+    @Override
     public StreamableIterable<Object> choice(int sampleSize) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
+
+        // If product is empty, return empty result regardless of sampleSize
+        if (isEmptyProduct) {
+            return new StreamableIteratorImpl<>(Collections.emptyIterator());
+        }
+
         BigInteger maxCount = count();
-        return new StreamableIteratorImpl<>(new CartesianProductByRanks<>(builders, new BigIntegerChoice(maxCount, sampleSize)).iterator());
+        return new StreamableIteratorImpl<>(
+                new CartesianProductByRanks<>(builders, new BigIntegerChoice(maxCount, sampleSize)).iterator()
+        );
     }
 
     /**
@@ -275,12 +253,27 @@ public final class SimpleProductBuilder implements Builder<Object> {
      * @return a StreamableIterable for the sampled products
      * @throws IllegalArgumentException if sampleSize is negative or exceeds total products
      */
+    @Override
     public StreamableIterable<Object> sample(int sampleSize) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
+
+        // If product is empty, return empty result regardless of sampleSize
+        if (isEmptyProduct) {
+            return new StreamableIteratorImpl<>(Collections.emptyIterator());
+        }
+
         BigInteger maxCount = count();
-        return new StreamableIteratorImpl<>(new CartesianProductByRanks<>(builders, new BigIntegerSample(maxCount, sampleSize)).iterator());
+        if (BigInteger.valueOf(sampleSize).compareTo(maxCount) > 0) {
+            throw new IllegalArgumentException(
+                    "Sample size cannot exceed total products: " + maxCount
+            );
+        }
+
+        return new StreamableIteratorImpl<>(
+                new CartesianProductByRanks<>(builders, new BigIntegerSample(maxCount, sampleSize)).iterator()
+        );
     }
 
     /**
@@ -290,12 +283,35 @@ public final class SimpleProductBuilder implements Builder<Object> {
      */
     @Override
     public BigInteger count() {
-        if (allLists.isEmpty() || allLists.stream().allMatch(List::isEmpty)) {
+        // Case 1: Product is empty (multiple dimensions with empty)
+        if (isEmptyProduct) {
+            return BigInteger.ZERO;
+        }
+
+        // Case 2: Single empty dimension
+        if (builders.size() == 1 && allLists.get(0).isEmpty()) {
             return BigInteger.ONE;
         }
+
+        // Case 3: Normal product
         return allLists.stream()
                 .map(list -> BigInteger.valueOf(list.size()))
                 .reduce(BigInteger.ONE, BigInteger::multiply);
+    }
+
+    /**
+     * Indicates whether this builder will produce any elements.
+     * <p>
+     * A builder is empty if and only if its iterator will have no elements.
+     * Note that {@code count() == 1} does NOT imply {@code !isEmpty()},
+     * as a single empty dimension has count=1 and produces one element ([[]]).
+     * </p>
+     *
+     * @return {@code true} if the product yields no elements, {@code false} otherwise
+     */
+    @Override
+    public boolean isEmpty() {
+        return isEmptyProduct;
     }
 
     @Override
@@ -303,6 +319,7 @@ public final class SimpleProductBuilder implements Builder<Object> {
         return "SimpleProductBuilder{" +
                 "allLists=" + allLists +
                 ", count=" + count() +
+                ", isEmpty=" + isEmpty() +
                 '}';
     }
 
@@ -326,16 +343,21 @@ public final class SimpleProductBuilder implements Builder<Object> {
 
     /**
      * A builder that wraps a single list as a set of single-element combinations.
-    */
+     */
     private record SingleListBuilder(List<?> elements) implements Builder<Object> {
-        private SingleListBuilder(List<?> elements) {
-            this.elements = elements != null ? elements : Collections.emptyList();
+        private SingleListBuilder {
+            elements = elements != null ? elements : Collections.emptyList();
         }
 
         @Override
         public BigInteger count() {
-            // Empty set has one conceptual element (the empty tuple)
+            // empty-set(∅) has one conceptual element (the empty tuple)
             return elements.isEmpty() ? BigInteger.ONE : BigInteger.valueOf(elements.size());
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false; // Single list always produces at least one element
         }
 
         @Override
@@ -354,23 +376,14 @@ public final class SimpleProductBuilder implements Builder<Object> {
 
         @Override
         public StreamableIterable<Object> lexOrderMth(BigInteger m, BigInteger start) {
+            Util.validateLexOrderMthParams(m, start, count());
+
             if (elements.isEmpty()) {
-                // For empty list, only rank 0 exists and returns empty list
-                return new StreamableIteratorImpl<>(new Iterator<>() {
-                    private boolean hasNext = start.equals(BigInteger.ZERO) && m.equals(BigInteger.ONE);
-
-                    @Override
-                    public boolean hasNext() {
-                        return hasNext;
-                    }
-
-                    @Override
-                    public List<Object> next() {
-                        if (!hasNext) throw new NoSuchElementException();
-                        hasNext = false;
-                        return List.of();
-                    }
-                });
+                // Empty list: only rank 0 exists
+                if (start.equals(BigInteger.ZERO) && m.equals(BigInteger.ONE)) {
+                    return new StreamableIteratorImpl<>(Util.emptyListIterator());
+                }
+                return new StreamableIteratorImpl<>(Collections.emptyIterator());
             }
 
             return new StreamableIteratorImpl<>(new Iterator<>() {
@@ -403,6 +416,11 @@ public final class SimpleProductBuilder implements Builder<Object> {
                 @Override
                 public List<Object> next() {
                     BigInteger index = rankIterator.next();
+                    if (index.compareTo(BigInteger.valueOf(elements.size())) >= 0) {
+                        throw new IllegalArgumentException(
+                                "Rank " + index + " out of bounds for size " + elements.size()
+                        );
+                    }
                     return List.of(elements.get(index.intValue()));
                 }
             });
@@ -410,12 +428,12 @@ public final class SimpleProductBuilder implements Builder<Object> {
 
         @Override
         public StreamableIterable<Object> choice(int sampleSize) {
-            return null;
+            throw new UnsupportedOperationException("Single dimension does not support choice");
         }
 
         @Override
         public StreamableIterable<Object> sample(int sampleSize) {
-            return null;
+            throw new UnsupportedOperationException("Single dimension does not support sample");
         }
     }
 }

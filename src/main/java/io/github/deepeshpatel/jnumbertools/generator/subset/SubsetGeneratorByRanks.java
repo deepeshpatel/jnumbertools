@@ -34,6 +34,23 @@ public final class SubsetGeneratorByRanks<T> extends AbstractGenerator<T> {
     private final int from;
     private final int to;
 
+    /**
+     * Constructs a generator for subsets at specified ranks.
+     *
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.generator.subset.SubsetBuilder#byRanks(Iterable)}.
+     * All parameter validation (range validation, null checks) is handled by the builder.
+     * Rank validation (non-negative, less than total) is deferred to iteration.
+     * </p>
+     *
+     * @param from       minimum subset size (assumed 0 ≤ from ≤ elements.size())
+     * @param to         maximum subset size (assumed from ≤ to ≤ elements.size())
+     * @param ranks      iterable of 0-based rank numbers
+     * @param elements   list of elements from which subsets are generated (assumed non-null)
+     * @param calculator calculator for combinatorial operations (assumed non-null)
+     */
     SubsetGeneratorByRanks(int from, int to, Iterable<BigInteger> ranks, List<T> elements, Calculator calculator) {
         super(elements);
         this.from = from;
@@ -47,9 +64,9 @@ public final class SubsetGeneratorByRanks<T> extends AbstractGenerator<T> {
      * Delegates directly to the optimized {@link SubsetGeneratorMth} class.
      *
      * @param m     the step size (must be > 0)
-     * @param start the starting rank (must be >= 0)
+     * @param start the starting rank (must be ≥ 0)
      * @return a {@code SubsetGeneratorMth} instance
-     * @throws IllegalArgumentException if m <= 0 or start < 0
+     * @throws IllegalArgumentException if m ≤ 0 or start < 0
      */
     public SubsetGeneratorMth<T> lexOrderMth(BigInteger m, BigInteger start) {
         return new SubsetGeneratorMth<>(from, to, m, start, elements, calculator);

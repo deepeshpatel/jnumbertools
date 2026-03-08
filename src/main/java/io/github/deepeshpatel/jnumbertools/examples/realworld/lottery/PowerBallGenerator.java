@@ -18,7 +18,7 @@ public class PowerBallGenerator {
         var powerBalls = range(1, 27);
 
         var tickets = JNumberTools.cartesianProduct()
-                .constrainedProductOf(5, mainNumbers)  // Choose 5 main numbers (returns 5 individual numbers)
+                .constrainedProductOfDistinct(5, mainNumbers)  // Choose 5 main numbers (returns 5 individual numbers)
                 .andDistinct(1, powerBalls);           // Choose 1 powerball (returns 1 number)
 
         System.out.println("Total possible PowerBall combinations: " + tickets.count());

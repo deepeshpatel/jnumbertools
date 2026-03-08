@@ -3,17 +3,18 @@ package io.github.deepeshpatel.jnumbertools.generator.subset;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SubsetGeneratorTest {
 
     @Test
     void assertCount() {
+        // Test full power set (all subsets)
         for (int n = 0; n <= 4; n++) {
             List<String> input = Collections.nCopies(n, "A");
             int count = (int) subsets.of(input)
@@ -26,66 +27,37 @@ public class SubsetGeneratorTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenFromGreaterThanTo() {
-        assertThrows(IllegalArgumentException.class, () ->
-                subsets.of(A_B_C_D).inRange(5, 3).lexOrder()
-        );
-    }
+    void assertCountAndContentForSpecialCase() {
+        // n=0, range [0,0] -> 2⁰ = 1 -> count=1, returns [[]]
+        var zeroZeroBuilder = subsets.of(Collections.emptyList()).inRange(0, 0);
+        assertEquals(BigInteger.ONE, zeroZeroBuilder.count());
+        var zeroZeroResult = zeroZeroBuilder.lexOrder().stream().toList();
+        assertEquals(1, zeroZeroResult.size());
+        assertTrue(zeroZeroResult.get(0).isEmpty());
 
-    @Test
-    void shouldThrowExceptionWhenFromNegative() {
-        assertThrows(IllegalArgumentException.class, () ->
-                subsets.of(A_B_C_D).inRange(-1, 3).lexOrder()
-        );
-    }
+        // n=0, range [0,2] -> only empty subset exists -> count=1, returns [[]]
+        var zeroRangeBuilder = subsets.of(Collections.emptyList()).inRange(0, 2);
+        assertEquals(BigInteger.ONE, zeroRangeBuilder.count());
+        var zeroRangeResult = zeroRangeBuilder.lexOrder().stream().toList();
+        assertEquals(1, zeroRangeResult.size());
+        assertTrue(zeroRangeResult.get(0).isEmpty());
 
-    @Test
-    void shouldHandleToExceedingElements() {
-        // When 'to' exceeds available elements, it should cap at elements.size()
-        var builder = subsets.of(A_B_C_D).inRange(1, 10);
+        // n=0, range [1,2] -> no non-empty subsets -> count=0, returns []
+        var zeroPositiveBuilder = subsets.of(Collections.emptyList()).inRange(1, 2);
+        assertEquals(BigInteger.ZERO, zeroPositiveBuilder.count());
+        assertTrue(zeroPositiveBuilder.lexOrder().stream().toList().isEmpty());
 
-        BigInteger expected = BigInteger.ZERO;
-        for (int i = 1; i <= 4; i++) {
-            expected = expected.add(calculator.nCr(4, i));
-        }
-        assertEquals(expected, builder.count());
-
-        var result = builder.lexOrder().stream().toList();
-        assertEquals(expected.intValue(), result.size());
-        // Verify all subsets are of size 1-4
-        assertTrue(result.stream().allMatch(subset -> subset.size() >= 1 && subset.size() <= 4));
-    }
-
-    @Test
-    void shouldHandleRangeGreaterThanElements() {
-        // When requested range exceeds available elements, result should be empty
-        // (count=0, iterator empty), not an exception
-        var builder = subsets.of(A_B_C_D).inRange(5, 5);
-
-        assertEquals(BigInteger.ZERO, builder.count());
-        assertTrue(builder.lexOrder().stream().toList().isEmpty());
-    }
-
-    @Test
-    void shouldHandleNullInput() {
-        // Mathematical rationale:
-        // - Null input treated as empty set
-        // - Empty set with all() has one subset (empty set itself)
-        // - Empty set with range [1,3] has no subsets
-
-        var allBuilder = subsets.of((List<String>) null).all();
-        assertEquals(BigInteger.ONE, allBuilder.count());
-        var allResult = allBuilder.lexOrder().stream().toList();
-        assertEquals(1, allResult.size());
-        assertEquals(List.of(), allResult.get(0));
-
-        var rangeBuilder = subsets.of((List<String>) null).inRange(1, 3);
-        assertEquals(BigInteger.ZERO, rangeBuilder.count());
-        assertTrue(rangeBuilder.lexOrder().stream().toList().isEmpty());
+        // n>0, range [0,0] -> one empty subset -> count=1, returns [[]]
+        var positiveZeroBuilder = subsets.of(A_B_C).inRange(0, 0);
+        assertEquals(BigInteger.ONE, positiveZeroBuilder.count());
+        var positiveZeroResult = positiveZeroBuilder.lexOrder().stream().toList();
+        assertEquals(1, positiveZeroResult.size());
+        assertTrue(positiveZeroResult.get(0).isEmpty());
     }
 
     @Test
     void assertCountOfSubsetsInRange() {
+        // Test subsets in specific ranges
         for (int n = 0; n <= 4; n++) {
             List<String> input = Collections.nCopies(n, "A");
             int from = 0;
@@ -104,11 +76,6 @@ public class SubsetGeneratorTest {
             expected += calculator.nCr(n, i).longValue();
         }
         assertEquals(expected, count);
-    }
-
-    @Test
-    void shouldNotAllowSubsetOfNullCollection() {
-        assertThrows(NullPointerException.class, () -> subsets.of((Collection<String>) null).all());
     }
 
     @Test

@@ -14,6 +14,26 @@ public class SimpleCartesianProductByRanksTest {
 
     @Nested
     class Mth {
+
+        @Test
+        void assertCountAndContentForSpecialCase() {
+            // Case 1: Single empty dimension -> count=1, mth(1,0) should return [[]]
+            var singleEmpty = cartesianProduct.simpleProductOf(Collections.emptyList());
+            var singleEmptyResult = singleEmpty.lexOrderMth(1, 0).stream().toList();
+            assertEquals(1, singleEmptyResult.size());
+            assertEquals(List.of(), singleEmptyResult.get(0));
+
+            // Case 2: Multiple dimensions with any empty -> count=0, mth should return []
+            var multiWithEmpty = cartesianProduct.simpleProductOf(A_B)
+                    .and(Collections.emptyList());
+            assertTrue(multiWithEmpty.lexOrderMth(1, 0).stream().toList().isEmpty());
+
+            // Case 3: All dimensions empty -> count=0, mth should return []
+            var allEmpty = cartesianProduct.simpleProductOf(Collections.emptyList())
+                    .and(Collections.emptyList());
+            assertTrue(allEmpty.lexOrderMth(1, 0).stream().toList().isEmpty());
+        }
+
         @Test
         void shouldGenerateOutputSimilarToRepetitivePermMthWhenProductIsWithSameListMultipleTimes() {
             var decimalDigits = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);

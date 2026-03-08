@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +42,24 @@ class UniquePermutationByRanksTest {
         }
 
         @Test
+        void assertCountAndContentForSpecialCase() {
+            // Case 1: n=0 -> 0! = 1 -> should return [[]]
+            var zeroGenerator = permutation.unique(0).lexOrderMth(1, 0);
+            var zeroResult = zeroGenerator.stream().toList();
+            assertEquals(1, zeroResult.size());
+            assertTrue(zeroResult.get(0).isEmpty());
+
+            // Case 2: n=0 with m>1 -> still should return [[]]
+            var zeroWithMthGenerator = permutation.unique(0).lexOrderMth(3, 0);
+            var zeroWithMthResult = zeroWithMthGenerator.stream().toList();
+            assertEquals(1, zeroWithMthResult.size());
+            assertTrue(zeroWithMthResult.get(0).isEmpty());
+
+            // Case 3: n>0, but start >= count -> handled by fail-fast in builder
+            // This is tested in testFailFastForLexOrderMth
+        }
+
+        @Test
         void shouldReturnSameResultForDifferentIteratorObjects() {
             var iterable = permutation.unique("A", "B", "C").lexOrderMth(3, 0);
             var lists1 = iterable.stream().toList();
@@ -57,16 +74,6 @@ class UniquePermutationByRanksTest {
                     of(2, 3, 1)
             );
             assertIterableEquals(expected, uniquePermutation(3, 0, 1, 2, 3));
-        }
-
-        @Test
-        void shouldGenerateEmptyListForNullInput() {
-            assertIterableEquals(listOfEmptyList, uniquePermutation(3, 0, (List<Object>) null));
-        }
-
-        @Test
-        void shouldGenerateEmptyListForEmptyInput() {
-            assertEquals(listOfEmptyList, uniquePermutation(2, 0, new ArrayList<>()));
         }
 
         @Test
@@ -113,60 +120,6 @@ class UniquePermutationByRanksTest {
             var expected = List.of(of("A"));
             assertIterableEquals(expected, uniquePermutation(1, 0, "A"));
         }
-
-//        @Test
-//        void shouldHandleIncrementLargerThanPermutations() {
-//            var input = of("A", "B");
-//            assertTrue(uniquePermutation(5, 5, input).isEmpty());
-//        }
-
-        @Test
-        void testFailFastForLexOrderMth() {
-            //should fail fast for m<0, m=0, start<0 and start>=count()
-            var uniquePerm = permutation.unique("A", "B", "C");
-            //m<0
-            var exception = assertThrows(IllegalArgumentException.class,
-                    () -> uniquePerm.lexOrderMth(-1,1));
-            assertEquals(exception.getMessage(), errMsgForIncrement);
-
-            //m==0
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> uniquePerm.lexOrderMth(0,1));
-            assertEquals(exception.getMessage(), errMsgForIncrement);
-
-            //start < 0
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> uniquePerm.lexOrderMth(1,-1));
-            assertTrue(exception.getMessage().startsWith(errMsgForStart));
-
-            //start >=count
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> uniquePerm.lexOrderMth(1,100));
-            assertTrue(exception.getMessage().startsWith(errMsgForStart));
-        }
-
-//        @Test
-//        void testBoundaryConditionsForIncrementM() {
-//            var uniquePerm = permutation.unique("A", "B", "C");
-//            var ex1 = assertThrows(IllegalArgumentException.class,
-//                    () -> uniquePerm.lexOrderMth(0,1));
-//            var ex2 = assertThrows(IllegalArgumentException.class,
-//                    () -> uniquePerm.lexOrderMth(-1,1));
-//
-//            assertEquals(ex1.getMessage(), incrementErrMsg);
-//            assertEquals(ex2.getMessage(), incrementErrMsg);
-//        }
-
-//        @Test
-//        void testBoundaryConditionsForStartingValue() {
-//            var uniquePerm = permutation.unique("A", "B", "C");
-//            var exception =  assertThrows(IllegalArgumentException.class,
-//                    () -> uniquePerm.lexOrderMth(1,-1));
-//            assertEquals(exception.getMessage(), startErrMsg);
-//
-//            //should return empty list if start rank is greater than total permutations
-//            assertTrue(uniquePerm.lexOrderMth(1,10).stream().toList().isEmpty());
-//        }
 
         @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
         @Test

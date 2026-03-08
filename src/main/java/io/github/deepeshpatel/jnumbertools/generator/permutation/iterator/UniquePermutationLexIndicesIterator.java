@@ -35,7 +35,6 @@ public final class UniquePermutationLexIndicesIterator implements Iterator<int[]
      * </p>
      *
      * @param size the number of indices to permute (n); must be non-negative
-     * @return a new UniquePermutationLexIndicesIterator instance
      * @throws IllegalArgumentException if size is negative
      */
     UniquePermutationLexIndicesIterator(int size) {
@@ -46,7 +45,6 @@ public final class UniquePermutationLexIndicesIterator implements Iterator<int[]
      * Constructs an iterator with a specified starting permutation.
      *
      * @param startingPermutation the initial permutation of indices; must be a valid permutation of {0, 1, ..., n−1}
-     * @return a new UniquePermutationLexIndicesIterator instance
      * @throws IllegalArgumentException if startingPermutation is invalid
      */
     public UniquePermutationLexIndicesIterator(int[] startingPermutation) {

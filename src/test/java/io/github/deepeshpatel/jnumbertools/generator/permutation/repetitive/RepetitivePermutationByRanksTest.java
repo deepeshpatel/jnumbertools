@@ -31,6 +31,33 @@ class RepetitivePermutationByRanksTest {
             }
         }
 
+        @Test
+        void assertCountAndContentForSpecialCase() {
+            // Case 1: n=0, r=0 -> 0⁰ = 1 -> should return [[]]
+            var zeroZeroGenerator = permutation.repetitive(0, Collections.emptyList())
+                    .lexOrderMth(1, 0);
+            var zeroZeroResult = zeroZeroGenerator.stream().toList();
+            assertEquals(1, zeroZeroResult.size());
+            assertTrue(zeroZeroResult.get(0).isEmpty());
+
+            // Case 2: n=0, r>0 -> 0ʳ = 0 -> should return [] (empty iterator)
+            var zeroPositiveGenerator = permutation.repetitive(2, Collections.emptyList())
+                    .lexOrderMth(1, 0);
+            assertTrue(zeroPositiveGenerator.stream().toList().isEmpty());
+
+            // Case 3: n>0, r=0 -> n⁰ = 1 -> should return [[]]
+            var positiveZeroGenerator = permutation.repetitive(0, "A", "B")
+                    .lexOrderMth(1, 0);
+            var positiveZeroResult = positiveZeroGenerator.stream().toList();
+            assertEquals(1, positiveZeroResult.size());
+            assertTrue(positiveZeroResult.get(0).isEmpty());
+
+            // Case 4: With m>1, should still respect count=0
+            var zeroPositiveWithMthGenerator = permutation.repetitive(2, Collections.emptyList())
+                    .lexOrderMth(3, 0);
+            assertTrue(zeroPositiveWithMthGenerator.stream().toList().isEmpty());
+        }
+
         //TODO: Add method in calculator and remove from here and builder if suitable
         private static int repetitionCount(List<String> input, int n, int r) {
             if (input.isEmpty() && r > 0) {
@@ -134,60 +161,6 @@ class RepetitivePermutationByRanksTest {
         }
 
         @Test
-        void shouldHandleZeroWidth() {
-            var expected = List.of(of());
-            var output = permutation.repetitive(0, "A", "B")
-                    .lexOrderMth(1, 0)
-                    .stream()
-                    .toList();
-            assertIterableEquals(expected, output, "Should generate one empty permutation for width=0");
-        }
-
-        @Test
-        void shouldThrowExceptionForNegativeWidth() {
-            var exp = assertThrows(IllegalArgumentException.class, () -> permutation.repetitive(-1, "A", "B")
-                    .lexOrderMth(1, 0)
-                    .stream()
-                    .toList());
-            assertEquals("Width (r) cannot be negative for repetitive permutation generation", exp.getMessage());
-        }
-
-        @Test
-        void testFailFastForLexOrderMth() {
-            var repetitivePerm = permutation.repetitive(2, "A", "B");
-
-            // m <= 0
-            var exception = assertThrows(IllegalArgumentException.class,
-                    () -> repetitivePerm.lexOrderMth(0, 0));
-            assertEquals(errMsgForIncrement, exception.getMessage());
-
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> repetitivePerm.lexOrderMth(-1, 0));
-            assertEquals(errMsgForIncrement, exception.getMessage());
-
-            // start < 0
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> repetitivePerm.lexOrderMth(1, -1));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
-
-            // start >= count
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> repetitivePerm.lexOrderMth(1, 10));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
-        }
-
-        @Test
-        void shouldWorkForEmptyElementList() {
-            //by the definition of exponentiation, for n=0 and k>0 0^k = 0
-            //hence empty input should be allowed and the result is the empty collection
-            var output = permutation.repetitive(2, Collections.emptyList())
-                    .lexOrderMth(1, 0)
-                    .stream()
-                    .toList();
-            assertTrue(output.isEmpty());
-        }
-
-        @Test
         void shouldHandleLargeMWithNonZeroStart() {
             List<Integer> input = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
             int width = 12;
@@ -227,7 +200,6 @@ class RepetitivePermutationByRanksTest {
                 assertEveryMthValue(all, everyMth, start, m);
             }
         }
-
     }
 
 

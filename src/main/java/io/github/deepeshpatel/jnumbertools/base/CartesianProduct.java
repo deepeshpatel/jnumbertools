@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder;
 
@@ -56,7 +57,7 @@ import java.util.List;
  * // - 2 sauces (with repetition allowed) from [Tomato, White, Green]
  * // - 1 to 5 toppings from [tomato, capsicum, onion, paneer, corn]
  *
- * cp.constrainedProductOf(1, "Small", "Medium", "Large")
+ * cp.constrainedProductOfDistinct(1, "Small", "Medium", "Large")
  *   .andDistinct(2, "Ricotta", "Mozzarella", "Cheddar")
  *   .andMultiSelect(2, "Tomato", "White", "Green")
  *   .andInRange(1, 5, "tomato", "capsicum", "onion", "paneer", "corn")
@@ -64,7 +65,7 @@ import java.util.List;
  *   .forEach(System.out::println);
  *
  * // Get specific rank in constrained product space
- * cp.constrainedProductOf(1, "A", "B")
+ * cp.constrainedProductOfDistinct(1, "A", "B")
  *   .andDistinct(1, "X", "Y", "Z")
  *   .byRanks(List.of(BigInteger.valueOf(3)))
  *   .forEach(System.out::println);
@@ -115,22 +116,8 @@ public final class CartesianProduct {
      * @return a SimpleProductBuilder for configuring additional dimensions
      */
     public SimpleProductBuilder simpleProductOf(List<?> elements) {
+        Util.validateInput(elements);
         return new SimpleProductBuilder(elements);
-    }
-
-    /**
-     * Creates a builder for simple Cartesian products over a varargs set of elements.
-     * <p>
-     * Convenience method for {@link #simpleProductOf(List)}.
-     * </p>
-     *
-     * @param elements the varargs list of elements forming the first set
-     * @param <E> the type of elements
-     * @return a SimpleProductBuilder for configuring additional dimensions
-     */
-    @SafeVarargs
-    public final <E> SimpleProductBuilder simpleProductOf(E... elements) {
-        return simpleProductOf(List.of(elements));
     }
 
     /**
@@ -148,24 +135,65 @@ public final class CartesianProduct {
      * @param quantity the size of combinations for the first dimension (must be ≥ 0)
      * @param elements the list of elements for the first dimension
      * @return a ConstrainedProductBuilder for configuring additional constrained dimensions
+     * @deprecated Use {@link #constrainedProductOfDistinct(int, List)} instead for clearer intent
      */
+    @Deprecated(since = "3.0.2", forRemoval = true)
     public ConstrainedProductBuilder constrainedProductOf(int quantity, List<?> elements) {
-        return new ConstrainedProductBuilder(quantity, elements, calculator);
+        return new ConstrainedProductBuilder(quantity, elements, false, calculator);
     }
 
     /**
-     * Creates a builder for constrained Cartesian products with a specified tuple length.
+     * Creates a builder for constrained Cartesian products with distinct combinations in the first dimension.
      * <p>
-     * Convenience method for {@link #constrainedProductOf(int, List)}.
+     * The first dimension consists of distinct combinations of size {@code quantity} from the input set.
+     * Subsequent dimensions can be configured using {@code andDistinct()}, {@code andMultiSelect()}, 
+     * or {@code andInRange()} methods.
      * </p>
      *
-     * @param quantity the size of combinations for the first dimension (must be ≥ 0)
-     * @param elements the varargs list of elements for the first dimension
-     * @param <E> the type of elements
+     * @param quantity the size of distinct combinations for the first dimension (must be ≥ 0)
+     * @param elements the list of elements for the first dimension
      * @return a ConstrainedProductBuilder for configuring additional constrained dimensions
      */
-    @SafeVarargs
-    public final <E> ConstrainedProductBuilder constrainedProductOf(int quantity, E... elements) {
-        return constrainedProductOf(quantity, List.of(elements));
+    public ConstrainedProductBuilder constrainedProductOfDistinct(int quantity, List<?> elements) {
+        Util.validateInput(elements);
+        Util.validateNotNegative(quantity, "quantity");
+        return new ConstrainedProductBuilder(quantity, elements, false, calculator);
+    }
+
+    /**
+     * Creates a builder for constrained Cartesian products with multi-select combinations in the first dimension.
+     * <p>
+     * The first dimension consists of combinations with repetition allowed of size {@code quantity} 
+     * from the input set. Subsequent dimensions can be configured using {@code andDistinct()}, 
+     * {@code andMultiSelect()}, or {@code andInRange()} methods.
+     * </p>
+     *
+     * @param quantity the size of multi-select combinations for the first dimension (must be ≥ 0)
+     * @param elements the list of elements for the first dimension
+     * @return a ConstrainedProductBuilder for configuring additional constrained dimensions
+     */
+    public ConstrainedProductBuilder constrainedProductOfMultiSelect(int quantity, List<?> elements) {
+        Util.validateInput(elements);
+        Util.validateNotNegative(quantity, "quantity");
+        return new ConstrainedProductBuilder(quantity, elements, true, calculator);
+    }
+
+    /**
+     * Creates a builder for constrained Cartesian products with subset range in the first dimension.
+     * <p>
+     * The first dimension consists of all subsets of the input set with sizes between {@code from} 
+     * and {@code to} (inclusive). Subsequent dimensions can be configured using {@code andDistinct()}, 
+     * {@code andMultiSelect()}, or {@code andInRange()} methods.
+     * </p>
+     *
+     * @param from     the minimum subset size (inclusive, must be ≥ 0)
+     * @param to       the maximum subset size (inclusive, must be ≥ from)
+     * @param elements the list of elements for the first dimension
+     * @return a ConstrainedProductBuilder for configuring additional constrained dimensions
+     * @throws IllegalArgumentException if from < 0, to < from, or from > elements.size()
+     */
+    public ConstrainedProductBuilder constrainedProductOfInRange(int from, int to, List<?> elements) {
+        Util.validateInput(elements);
+        return new ConstrainedProductBuilder(from, to, elements, calculator);
     }
 }

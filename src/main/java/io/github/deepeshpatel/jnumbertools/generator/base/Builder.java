@@ -78,4 +78,6 @@ public interface Builder<E> {
      * @return the total count as a BigInteger
      */
     BigInteger count();
+
+    boolean isEmpty();
 }

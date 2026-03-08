@@ -37,22 +37,6 @@ public abstract class AbstractKPermutation<T> extends AbstractGenerator<T> {
     protected AbstractKPermutation(List<T> elements, int k) {
         super(elements);
         this.k = k;
-        checkBoundsOfK(elements.size(), k);
     }
 
-    /**
-     * Validates the subset size kₖ against the input list size.
-     *
-     * @param inputSize the size of the input list (nₙ)
-     * @param k the size of the subset to permute (kₖ)
-     * @throws IllegalArgumentException if kₖ is negative or exceeds nₙ
-     */
-    protected void checkBoundsOfK(int inputSize, int k) {
-        if (k > inputSize) {
-            throw new IllegalArgumentException("kₖ must be ≤ nₙ to generate permutation");
-        }
-        if (k < 0) {
-            throw new IllegalArgumentException("kₖ must be ≥ 0 to generate permutation");
-        }
-    }
 }

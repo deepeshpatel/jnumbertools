@@ -96,12 +96,6 @@ public final class Combinadic implements Serializable {
         return new Combinadic(IntStream.of(next).boxed().toList(), decimalValue.add(BigInteger.ONE));
     }
 
-//    public Combinadic nextKthCombinadic(long k, NumericCalculator calculator) {
-//        //TODO: Find the algorithm for nextKthCombinadic without converting to decimal
-//        // You need to define "addition operation" rules for this number system
-//        return Combinadic.of(decimalValue.add(BigInteger.valueOf(k)), combinadicValues.size(), calculator);
-//    }
-
     @Override
     public String toString() {
         return combinadicValues.toString();

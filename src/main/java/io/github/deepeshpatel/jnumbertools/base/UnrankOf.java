@@ -14,14 +14,14 @@ import java.math.BigInteger;
 /**
  * Determines the permutation or combination at a given lexicographical rank.
  * <p>
- * Unranking finds the permutation or combination corresponding to a rank in its
+ * Un-ranking finds the permutation or combination corresponding to a rank in its
  * lexicographical order. Permutations are order-dependent arrangements, while
  * combinations are order-independent selections. Outputs are arrays of indices.
  * This class supports:
  * <p>
- * - Unique Permutation (`n!`): Unranks a full permutation of n distinct elements.
- * - k-Permutation (`ⁿPₖ`): Unranks a k-permutation from n distinct elements.
- * - Unique Combination (`ⁿCᵣ`): Unranks a combination of r elements from n distinct elements.
+ * - Unique Permutation (`n!`): Un-ranks a full permutation of n distinct elements.
+ * - k-Permutation (`ⁿPₖ`): Un-ranks a k-permutation from n distinct elements.
+ * - Unique Combination (`ⁿCᵣ`): Un-ranks a combination of r elements from n distinct elements.
  * </p>
  * <p>
  * This class is immutable and thread-safe. All methods are stateless and can be safely shared across threads.
@@ -61,7 +61,7 @@ public final class UnrankOf {
     /**
      * Determines the unique permutation (`n!`) at a given rank.
      * <p>
-     * Unranks a full permutation of n distinct elements, returning an array of n
+     * Un-ranks a full permutation of n distinct elements, returning an array of n
      * distinct indices from {0, 1, ..., n-1} in lexicographical order.
      * </p>
      *
@@ -76,7 +76,7 @@ public final class UnrankOf {
     /**
      * Determines the unique permutation (`n!`) at a given rank with minimal size.
      * <p>
-     * Unranks a full permutation, determining the smallest n where rank < n!, and
+     * Un-ranks a full permutation, determining the smallest n where rank < n!, and
      * returns an array of n distinct indices from {0, 1, ..., n-1} in lexicographical order.
      * </p>
      *
@@ -91,7 +91,7 @@ public final class UnrankOf {
     /**
      * Determines the k-permutation (`ⁿPₖ`) at a given rank.
      * <p>
-     * Unranks a k-permutation of k distinct elements from {0, 1, ..., n-1}, returning
+     * Un-ranks a k-permutation of k distinct elements from {0, 1, ..., n-1}, returning
      * an array of k distinct indices in lexicographical order.
      * </p>
      *
@@ -107,7 +107,7 @@ public final class UnrankOf {
     /**
      * Determines the unique combination (`ⁿCᵣ`) at a given rank.
      * <p>
-     * Unranks a combination of r distinct elements from {0, 1, ..., n-1} without
+     * Un-ranks a combination of r distinct elements from {0, 1, ..., n-1} without
      * repetition, returning an array of r distinct indices in lexicographical order.
      * </p>
      *

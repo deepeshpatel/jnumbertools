@@ -15,9 +15,9 @@ public class KPermutationCombinationOrderTest {
     @Test
     void assertCount() {
         // nPk: n!/(n−k)!
-        for (int n = 0; n <= 4; n++) {
+        for (int n = 1; n <= 4; n++) {
             var input = Collections.nCopies(n, "A");
-            for (int k = 0; k < n; k++) {
+            for (int k = 1; k < n; k++) {
                 long size = permutation.nPk(k, input)
                         .combinationOrder()
                         .stream().count();
@@ -27,23 +27,30 @@ public class KPermutationCombinationOrderTest {
     }
 
     @Test
-    void shouldThrowExceptionForKGreaterThanN() {
-        assertThrows(IllegalArgumentException.class, () ->
-                permutation.nPk(4, List.of('A', 'B', 'C')).combinationOrder());
-    }
+    void assertCountAndContentForSpecialCase() {
+        // n=0, k=0 -> ⁰P₀ = 1 -> count=1, returns [[]]
+        var zeroZeroBuilder = permutation.nPk(0, Collections.emptyList());
+        assertEquals(calculator.nPr(0, 0), zeroZeroBuilder.count());
+        var zeroZeroResult = zeroZeroBuilder.combinationOrder().stream().toList();
+        assertEquals(1, zeroZeroResult.size());
+        assertTrue(zeroZeroResult.get(0).isEmpty());
 
-    @Test
-    void shouldHandleEmptyInput() {
-        var result = permutation.nPk(0, Collections.emptyList()).combinationOrder().stream().toList();
-        assertEquals(1, result.size());
-        assertTrue(result.get(0).isEmpty());
-    }
+        // n=0, k>0 -> ⁰Pₖ = 0 -> count=0, returns [] (empty iterator)
+        var zeroPositiveBuilder = permutation.nPk(2, Collections.emptyList());
+        assertEquals(calculator.nPr(0, 2), zeroPositiveBuilder.count());
+        assertTrue(zeroPositiveBuilder.combinationOrder().stream().toList().isEmpty());
 
-    @Test
-    void shouldHandleKEqualsZero() {
-        var result = permutation.nPk(0, List.of("A", "B", "C")).combinationOrder().stream().toList();
-        assertEquals(1, result.size());
-        assertTrue(result.get(0).isEmpty());
+        // n>0, k=0 -> ⁿP₀ = 1 -> count=1, returns [[]]
+        var positiveZeroBuilder = permutation.nPk(0, List.of("A", "B", "C"));
+        assertEquals(calculator.nPr(3, 0), positiveZeroBuilder.count());
+        var positiveZeroResult = positiveZeroBuilder.combinationOrder().stream().toList();
+        assertEquals(1, positiveZeroResult.size());
+        assertTrue(positiveZeroResult.get(0).isEmpty());
+
+        // n>0, k>n -> ⁿPₖ = 0 -> count=0, returns [] (empty iterator)
+        var greaterKBuilder = permutation.nPk(4, List.of('A', 'B', 'C'));
+        assertEquals(calculator.nPr(3, 4), greaterKBuilder.count());
+        assertTrue(greaterKBuilder.combinationOrder().stream().toList().isEmpty());
     }
 
     @Test
@@ -111,11 +118,5 @@ public class KPermutationCombinationOrderTest {
                 .stream()
                 .toList();
         assertIterableEquals(listOfEmptyList, output);
-    }
-
-    @Test
-    void shouldGenerateEmptyListForKGreaterThanInputSize() {
-        assertThrows(IllegalArgumentException.class, () ->
-                permutation.nPk(4, 'A', 'B', 'C').combinationOrder());
     }
 }

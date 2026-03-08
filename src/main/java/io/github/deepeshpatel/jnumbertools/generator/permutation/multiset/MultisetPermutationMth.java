@@ -5,13 +5,10 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * Generates every mᵗʰ multiset permutation in lexicographical order, starting from a specified rank.
@@ -51,11 +48,18 @@ public final class MultisetPermutationMth<T> extends AbstractMultisetPermutation
     /**
      * Constructs a generator for every mᵗʰ multiset permutation.
      *
-     * @param multiset   the multiset with element multiplicities (must not be null)
-     * @param increment  the step size between permutations (must be positive)
-     * @param start      the starting rank (must be non-negative)
-     * @param calculator the calculator for combinatorial computations (must not be null)
-     * @throws IllegalArgumentException if multiset or calculator is null, increment ≤ 0, or start < 0
+     * <p>
+     * <strong>Note:</strong> This constructor is intended for internal use only.
+     * Instances should be created via
+     * {@link io.github.deepeshpatel.jnumbertools.generator.permutation.multiset.MultisetPermutationBuilder#lexOrderMth(BigInteger, BigInteger)}.
+     * All parameter validation (null checks, increment > 0, start ≥ 0, start < total when count > 0)
+     * is handled by the builder.
+     * </p>
+     *
+     * @param multiset   the multiset with element multiplicities (assumes zero frequencies filtered, map non-null)
+     * @param increment  the step size between permutations (assumed > 0)
+     * @param start      the starting rank (assumed ≥ 0)
+     * @param calculator the calculator for combinatorial computations (assumed non-null)
      */
     MultisetPermutationMth(LinkedHashMap<T, Integer> multiset, BigInteger increment, BigInteger start, Calculator calculator) {
         super(multiset, calculator);
@@ -69,6 +73,10 @@ public final class MultisetPermutationMth<T> extends AbstractMultisetPermutation
 
     @Override
     public Iterator<List<T>> iterator() {
+        // Handle empty map case: 0! = 1 -> returns [[]]
+        if (elements.isEmpty()) {
+            return Util.emptyListIterator();
+        }
         return new Itr();
     }
 

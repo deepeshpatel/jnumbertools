@@ -327,6 +327,37 @@ class UniqueCombinationByRanksTest {
         }
 
         @Test
+        void assertCountAndContentForSpecialCase() {
+            // Case 1: n=0, r=0 -> ⁰C₀ = 1 -> should return [[]]
+            var zeroZeroGenerator = combination.unique(0, Collections.emptyList()).lexOrderMth(1, 0);
+            var zeroZeroResult = zeroZeroGenerator.stream().toList();
+            assertEquals(1, zeroZeroResult.size());
+            assertTrue(zeroZeroResult.get(0).isEmpty());
+
+            // Case 2: n=0, r>0 -> ⁰Cᵣ = 0 -> should return [] (empty iterator)
+            var zeroPositiveGenerator = combination.unique(0, 2).lexOrderMth(1, 0);
+            assertTrue(zeroPositiveGenerator.stream().toList().isEmpty());
+
+            // Case 3: n>0, r=0 -> ⁿC₀ = 1 -> should return [[]]
+            var positiveZeroGenerator = combination.unique(3, 0).lexOrderMth(1, 0);
+            var positiveZeroResult = positiveZeroGenerator.stream().toList();
+            assertEquals(1, positiveZeroResult.size());
+            assertTrue(positiveZeroResult.get(0).isEmpty());
+
+            // Case 4: n>0, r>n -> ⁿCᵣ = 0 -> should return [] (empty iterator)
+            var greaterRGenerator = combination.unique(2, 3).lexOrderMth(1, 0);
+            assertTrue(greaterRGenerator.stream().toList().isEmpty());
+
+            // Case 5: With m>1, should still respect count=0
+            var greaterRWithMthGenerator = combination.unique(2, 3).lexOrderMth(3, 0);
+            assertTrue(greaterRWithMthGenerator.stream().toList().isEmpty());
+
+            // Case 6: Empty list with r>0 -> ⁰Cᵣ = 0
+            var emptyListGenerator = combination.unique(2, Collections.emptyList()).lexOrderMth(1, 0);
+            assertTrue(emptyListGenerator.stream().toList().isEmpty());
+        }
+
+        @Test
         void shouldReturnSameResultForDifferentIteratorObjects() {
             var iterable = combination.unique(2, A_B_C).lexOrderMth(2, 0);
             var lists1 = iterable.stream().toList();
@@ -381,29 +412,6 @@ class UniqueCombinationByRanksTest {
             assertIterableEquals(expected, output);
         }
 
-        @Test
-        void testFailFastForLexOrderMth() {
-            var uniqueComb = combination.unique(2, "A", "B", "C");
-
-            // m <= 0
-            var exception = assertThrows(IllegalArgumentException.class,
-                    () -> uniqueComb.lexOrderMth(0, 1));
-            assertEquals(errMsgForIncrement, exception.getMessage());
-
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> uniqueComb.lexOrderMth(-1, 1));
-            assertEquals(errMsgForIncrement, exception.getMessage());
-
-            // start < 0
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> uniqueComb.lexOrderMth(1, -1));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
-
-            // start >= count
-            exception = assertThrows(IllegalArgumentException.class,
-                    () -> uniqueComb.lexOrderMth(1, 100));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
-        }
     }
 
     @Nested

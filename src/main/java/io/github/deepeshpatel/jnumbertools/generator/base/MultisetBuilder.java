@@ -44,9 +44,9 @@ public interface MultisetBuilder<T> {
      * Generates every mᵗʰ multiset combination in lexicographical order, starting from a given rank.
      *
      * @param m     the increment (m > 0)
-     * @param start the starting rank (start >= 0)
+     * @param start the starting rank (start ≥ 0)
      * @return a generator producing every mᵗʰ combination
-     * @throws IllegalArgumentException if m <= 0 or start < 0
+     * @throws IllegalArgumentException if m ≤ 0 or start < 0
      */
     Iterable<Map<T, Integer>> lexOrderMth(BigInteger m, BigInteger start);
 
@@ -56,7 +56,7 @@ public interface MultisetBuilder<T> {
      * Ranks are 0-based in lexicographical order.
      * </p>
      *
-     * @param ranks the sequence of ranks (each must be >= 0 and < total)
+     * @param ranks the sequence of ranks (each must be ≥ 0 and < total)
      * @return a generator producing combinations at the given ranks
      */
     Iterable<Map<T, Integer>> byRanks(Iterable<BigInteger> ranks);
@@ -66,16 +66,16 @@ public interface MultisetBuilder<T> {
      *
      * @param sampleSize number of combinations to generate (must be > 0)
      * @return a generator producing random combinations (duplicates allowed)
-     * @throws IllegalArgumentException if sampleSize <= 0
+     * @throws IllegalArgumentException if sampleSize ≤ 0
      */
     Iterable<Map<T, Integer>> choice(int sampleSize);
 
     /**
      * Generates a random sample of unique multiset combinations without replacement.
      *
-     * @param sampleSize number of combinations to generate (must be > 0 and <= total)
+     * @param sampleSize number of combinations to generate (must be > 0 and ≤ total)
      * @return a generator producing unique random combinations
-     * @throws IllegalArgumentException if sampleSize <= 0 or exceeds total
+     * @throws IllegalArgumentException if sampleSize ≤ 0 or exceeds total
      */
     Iterable<Map<T, Integer>> sample(int sampleSize);
 
