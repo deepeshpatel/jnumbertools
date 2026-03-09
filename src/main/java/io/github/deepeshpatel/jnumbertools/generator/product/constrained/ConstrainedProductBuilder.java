@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Builder for generating constrained Cartesian products where each dimension can have
@@ -147,9 +148,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
             newBuilder = new Combinations(calculator).repetitive(quantity, elements);
         }
         newBuilders.add(newBuilder);
-
-        boolean newIsEmptyProduct = isEmptyProduct || newBuilder.isEmpty();
-        return new ConstrainedProductBuilder(newBuilders, calculator, newIsEmptyProduct);
+        return new ConstrainedProductBuilder(newBuilders, calculator, newBuilder.isEmpty());
     }
 
     /**
@@ -225,8 +224,16 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         return isEmptyProduct;
     }
 
+    /**
+     * Generates a random sample of products with replacement using custom random generator.
+     *
+     * @param sampleSize the number of products to generate
+     * @param random the random generator to use
+     * @return a StreamableIterable for the sampled products
+     * @throws IllegalArgumentException if sampleSize is negative or random is null
+     */
     @Override
-    public CartesianProductByRanks<Object> choice(int sampleSize) {
+    public CartesianProductByRanks<Object> choice(int sampleSize, Random random) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
@@ -241,12 +248,20 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         BigInteger maxCount = count();
         return new CartesianProductByRanks(
                 (List<Builder<Object>>) (List) builders,
-                new BigIntegerChoice(maxCount, sampleSize)
+                new BigIntegerChoice(maxCount, sampleSize, random)
         );
     }
 
+    /**
+     * Generates a random sample of unique products without replacement using custom random generator.
+     *
+     * @param sampleSize the number of unique products to generate
+     * @param random the random generator to use
+     * @return a StreamableIterable for the sampled products
+     * @throws IllegalArgumentException if sampleSize is negative, exceeds total products, or random is null
+     */
     @Override
-    public CartesianProductByRanks<Object> sample(int sampleSize) {
+    public CartesianProductByRanks<Object> sample(int sampleSize, Random random) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
@@ -267,7 +282,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
 
         return new CartesianProductByRanks(
                 (List<Builder<Object>>) (List) builders,
-                new BigIntegerSample(maxCount, sampleSize)
+                new BigIntegerSample(maxCount, sampleSize, random)
         );
     }
 
@@ -341,12 +356,12 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         }
 
         @Override
-        public StreamableIterable<Object> choice(int sampleSize) {
+        public StreamableIterable<Object> choice(int sampleSize, Random random) {
             return new StreamableIteratorImpl<>(Collections.emptyIterator());
         }
 
         @Override
-        public StreamableIterable<Object> sample(int sampleSize) {
+        public StreamableIterable<Object> sample(int sampleSize, Random random) {
             return new StreamableIteratorImpl<>(Collections.emptyIterator());
         }
     }

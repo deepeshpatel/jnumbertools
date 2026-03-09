@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
+import io.github.deepeshpatel.jnumbertools.TestBase;
 import io.github.deepeshpatel.jnumbertools.base.CartesianProduct;
 import org.junit.jupiter.api.Test;
 
@@ -170,13 +171,13 @@ class ConstrainedProductBuilderTest {
                 .andMultiSelect(2, setB);
 
         // Test returns generator for valid sample size
-        assertNotNull(builder.choice(5));
+        assertNotNull(builder.choice(5, TestBase.random));
 
         // Test negative sample size throws
-        assertThrows(IllegalArgumentException.class, () -> builder.choice(-1));
+        assertThrows(IllegalArgumentException.class, () -> builder.choice(-1, TestBase.random));
 
         // Test zero sample size? (check implementation)
-        // assertThrows(IllegalArgumentException.class, () -> builder.choice(0));
+        // assertThrows(IllegalArgumentException.class, () -> builder.choice(0, TestBase.random));
     }
 
     @Test
@@ -187,12 +188,12 @@ class ConstrainedProductBuilderTest {
         BigInteger total = builder.count();
 
         // Test returns generator for valid sample size
-        assertNotNull(builder.sample(5));
+        assertNotNull(builder.sample(5, TestBase.random));
 
         // Test negative sample size throws
-        assertThrows(IllegalArgumentException.class, () -> builder.sample(-1));
+        assertThrows(IllegalArgumentException.class, () -> builder.sample(-1, TestBase.random));
 
         // Test sample size > total throws
-        assertThrows(IllegalArgumentException.class, () -> builder.sample(total.intValue() + 1));
+        assertThrows(IllegalArgumentException.class, () -> builder.sample(total.intValue() + 1, TestBase.random));
     }
 }

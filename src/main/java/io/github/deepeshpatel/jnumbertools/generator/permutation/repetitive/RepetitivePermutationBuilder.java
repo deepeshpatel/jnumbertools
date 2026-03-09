@@ -14,6 +14,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Builder for generating repetitive permutations (permutations with repetition allowed).
@@ -155,7 +156,7 @@ public final class RepetitivePermutationBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Generates a random sample of unique repetitive permutations without replacement.
+     * Generates a random sample of unique repetitive permutations without replacement using custom random generator.
      * <p>
      * All returned permutations are distinct and chosen uniformly at random from all possible
      * nʳ permutations. The order is random (not lexicographical).
@@ -166,24 +167,28 @@ public final class RepetitivePermutationBuilder<T> implements Builder<T> {
      * </p>
      *
      * @param sampleSize the number of unique permutations to generate (must be > 0 and ≤ nʳ)
+     * @param random the random generator to use
      * @return a generator producing unique random permutations without replacement
-     * @throws IllegalArgumentException if sampleSize ≤ 0 or sampleSize > total permutations
+     * @throws IllegalArgumentException if sampleSize ≤ 0 or sampleSize > total permutations or random is null
      */
-    public RepetitivePermutationByRanks<T> sample(int sampleSize) {
+    @Override
+    public RepetitivePermutationByRanks<T> sample(int sampleSize, Random random) {
         BigInteger total = calculator.power(elements.size(), width);
-        return new RepetitivePermutationByRanks<>(elements, width, new BigIntegerSample(total, sampleSize), calculator);
+        return new RepetitivePermutationByRanks<>(elements, width, new BigIntegerSample(total, sampleSize, random), calculator);
     }
 
     /**
-     * Generates a sample of repetitive permutations with replacement.
+     * Generates a sample of repetitive permutations with replacement using custom random generator.
      *
      * @param sampleSize the number of permutations to sample; must be positive
+     * @param random the random generator to use
      * @return a {@link RepetitivePermutationByRanks} instance for sampled permutations
-     * @throws IllegalArgumentException if sampleSize is invalid
+     * @throws IllegalArgumentException if sampleSize is invalid or random is null
      */
-    public RepetitivePermutationByRanks<T> choice(int sampleSize) {
+    @Override
+    public RepetitivePermutationByRanks<T> choice(int sampleSize, Random random) {
         BigInteger total = calculator.power(elements.size(), width);
-        return new RepetitivePermutationByRanks<>(elements, width, new BigIntegerChoice(total, sampleSize), calculator);
+        return new RepetitivePermutationByRanks<>(elements, width, new BigIntegerChoice(total, sampleSize, random), calculator);
     }
 
     /**

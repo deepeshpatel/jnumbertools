@@ -13,6 +13,7 @@ import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Builder for generating repetitive combinations (combinations with repetition allowed).
@@ -182,33 +183,37 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Creates a generator that samples repetitive combinations randomly without replacement.
+     * Creates a generator that samples repetitive combinations randomly without replacement using custom random generator.
      * <p>
      * Uses {@link BigIntegerSample} to ensure each combination in the sample is distinct.
      * </p>
      *
      * @param sampleSize the number of combinations to sample (1 ≤ sampleSize ≤ ⁿ⁺ᵣ⁻¹Cᵣ)
+     * @param random the random generator to use
      * @return a {@link RepetitiveCombinationByRanks} for random sampling without replacement
-     * @throws IllegalArgumentException if sampleSize ≤ 0 or sampleSize > ⁿ⁺ᵣ⁻¹Cᵣ
+     * @throws IllegalArgumentException if sampleSize ≤ 0 or sampleSize > ⁿ⁺ᵣ⁻¹Cᵣ or random is null
      */
-    public RepetitiveCombinationByRanks<T> sample(int sampleSize) {
+    @Override
+    public RepetitiveCombinationByRanks<T> sample(int sampleSize, Random random) {
         BigInteger nCrRepetitive = calculator.nCrRepetitive(elements.size(), size);
-        return new RepetitiveCombinationByRanks<>(elements, size, new BigIntegerSample(nCrRepetitive, sampleSize), calculator);
+        return new RepetitiveCombinationByRanks<>(elements, size, new BigIntegerSample(nCrRepetitive, sampleSize, random), calculator);
     }
 
     /**
-     * Creates a generator that samples repetitive combinations randomly with replacement.
+     * Creates a generator that samples repetitive combinations randomly with replacement using custom random generator.
      * <p>
      * Uses {@link BigIntegerChoice} to allow duplicate combinations in the sample.
      * </p>
      *
      * @param sampleSize the number of combinations to sample (sampleSize ≥ 1)
+     * @param random the random generator to use
      * @return a {@link RepetitiveCombinationByRanks} for random sampling with replacement
-     * @throws IllegalArgumentException if sampleSize ≤ 0
+     * @throws IllegalArgumentException if sampleSize ≤ 0 or random is null
      */
-    public RepetitiveCombinationByRanks<T> choice(int sampleSize) {
+    @Override
+    public RepetitiveCombinationByRanks<T> choice(int sampleSize, Random random) {
         BigInteger nCrRepetitive = calculator.nCrRepetitive(elements.size(), size);
-        return new RepetitiveCombinationByRanks<>(elements, size, new BigIntegerChoice(nCrRepetitive, sampleSize), calculator);
+        return new RepetitiveCombinationByRanks<>(elements, size, new BigIntegerChoice(nCrRepetitive, sampleSize, random), calculator);
     }
 
     /**

@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.examples.realworld.lottery;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -30,7 +31,7 @@ public class PowerBallGenerator {
                 .forEach(ticket -> System.out.println(formatTicket(ticket)));
 
         System.out.println("\nRandom PowerBall ticket:");
-        var random = tickets.choice(1).stream().findFirst().orElseThrow();
+        var random = tickets.choice(1 ,new Random()).stream().findFirst().orElseThrow();
         System.out.println(formatTicket(random));
     }
 

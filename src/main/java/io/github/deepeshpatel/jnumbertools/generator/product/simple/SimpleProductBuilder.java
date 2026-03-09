@@ -139,7 +139,7 @@ public final class SimpleProductBuilder implements Builder<Object> {
 
         // Determine if product becomes empty:
         // - If we already had a dimension and this new one is empty, product becomes empty
-        // - If this is the first dimension and it's empty, product is NOT empty (handled in constructor)
+        // - If this is the first dimension, and it's empty, product is NOT empty (handled in constructor)
         boolean newIsEmptyProduct = (!builders.isEmpty() && newDimEmpty);
 
         List<Builder<Object>> newBuilders = new ArrayList<>(builders);
@@ -223,14 +223,15 @@ public final class SimpleProductBuilder implements Builder<Object> {
     }
 
     /**
-     * Generates a random sample of products with replacement.
+     * Generates a random sample of products with replacement using custom random generator.
      *
      * @param sampleSize the number of products to generate
+     * @param random the random generator to use
      * @return a StreamableIterable for the sampled products
-     * @throws IllegalArgumentException if sampleSize is negative
+     * @throws IllegalArgumentException if sampleSize is negative or random is null
      */
     @Override
-    public StreamableIterable<Object> choice(int sampleSize) {
+    public StreamableIterable<Object> choice(int sampleSize, Random random) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
@@ -242,19 +243,20 @@ public final class SimpleProductBuilder implements Builder<Object> {
 
         BigInteger maxCount = count();
         return new StreamableIteratorImpl<>(
-                new CartesianProductByRanks<>(builders, new BigIntegerChoice(maxCount, sampleSize)).iterator()
+                new CartesianProductByRanks<>(builders, new BigIntegerChoice(maxCount, sampleSize, random)).iterator()
         );
     }
 
     /**
-     * Generates a random sample of unique products.
+     * Generates a random sample of unique products without replacement using custom random generator.
      *
      * @param sampleSize the number of unique products to generate
+     * @param random the random generator to use
      * @return a StreamableIterable for the sampled products
-     * @throws IllegalArgumentException if sampleSize is negative or exceeds total products
+     * @throws IllegalArgumentException if sampleSize is negative, exceeds total products, or random is null
      */
     @Override
-    public StreamableIterable<Object> sample(int sampleSize) {
+    public StreamableIterable<Object> sample(int sampleSize, Random random) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
@@ -272,7 +274,7 @@ public final class SimpleProductBuilder implements Builder<Object> {
         }
 
         return new StreamableIteratorImpl<>(
-                new CartesianProductByRanks<>(builders, new BigIntegerSample(maxCount, sampleSize)).iterator()
+                new CartesianProductByRanks<>(builders, new BigIntegerSample(maxCount, sampleSize, random)).iterator()
         );
     }
 
@@ -427,12 +429,12 @@ public final class SimpleProductBuilder implements Builder<Object> {
         }
 
         @Override
-        public StreamableIterable<Object> choice(int sampleSize) {
+        public StreamableIterable<Object> choice(int sampleSize, Random random) {
             throw new UnsupportedOperationException("Single dimension does not support choice");
         }
 
         @Override
-        public StreamableIterable<Object> sample(int sampleSize) {
+        public StreamableIterable<Object> sample(int sampleSize, Random random) {
             throw new UnsupportedOperationException("Single dimension does not support sample");
         }
     }

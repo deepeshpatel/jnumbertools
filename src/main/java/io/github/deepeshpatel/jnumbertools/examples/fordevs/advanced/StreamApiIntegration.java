@@ -2,6 +2,7 @@ package io.github.deepeshpatel.jnumbertools.examples.fordevs.advanced;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -135,7 +136,7 @@ public class StreamApiIntegration {
         System.out.println("   10 random lottery tickets:");
         JNumberTools.combinations()
                 .unique(49, 6)
-                .choice(Integer.MAX_VALUE)  // Effectively infinite
+                .choice(Integer.MAX_VALUE,new Random())  // Effectively infinite
                 .stream()
                 .limit(10)
                 .forEach(ticket -> {

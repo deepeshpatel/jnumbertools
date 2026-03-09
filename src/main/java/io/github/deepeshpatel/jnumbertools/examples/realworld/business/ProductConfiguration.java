@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.examples.realworld.business;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Demonstrates product configuration management for e-commerce
@@ -85,7 +86,7 @@ public class ProductConfiguration {
 
         System.out.println("Total office furniture sets: " + configurations.count());
         System.out.println("\nRandom furniture sets for office design:");
-        configurations.choice(5)
+        configurations.choice(5, new Random())
                 .stream()
                 .forEach(ProductConfiguration::formatFurnitureConfig);
     }

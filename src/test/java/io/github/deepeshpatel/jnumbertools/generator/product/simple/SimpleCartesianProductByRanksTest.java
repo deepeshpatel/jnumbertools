@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
+import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -136,7 +137,7 @@ public class SimpleCartesianProductByRanksTest {
         void shouldGenerateRandomChoice() {
             var product = cartesianProduct.simpleProductOf(List.of("A", "B"))
                     .and(List.of("X", "Y"))
-                    .choice(3);
+                    .choice(3, TestBase.random);
             var list = product.stream().toList();
             assertEquals(3, list.size());
             for (var item : list) {
@@ -148,7 +149,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateSingleListChoice() {
-            var product = cartesianProduct.simpleProductOf(List.of(0, 1, 2)).choice(2);
+            var product = cartesianProduct.simpleProductOf(List.of(0, 1, 2)).choice(2, TestBase.random);
             var list = product.stream().toList();
             assertEquals(2, list.size());
             for (var item : list) {
@@ -159,7 +160,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void choice_withSingleCombination() {
-            var product = cartesianProduct.simpleProductOf(List.of("A")).choice(5);
+            var product = cartesianProduct.simpleProductOf(List.of("A")).choice(5, TestBase.random);
             var list = product.stream().toList();
             assertEquals(5, list.size());
             assertEquals(List.of("A"), list.get(0));
@@ -172,7 +173,7 @@ public class SimpleCartesianProductByRanksTest {
         void shouldGenerateRandomSample() {
             var product = cartesianProduct.simpleProductOf(List.of("A", "B"))
                     .and(List.of("X", "Y"))
-                    .sample(2);
+                    .sample(2, TestBase.random);
             var list = product.stream().toList();
             assertEquals(2, list.size());
             assertEquals(2, list.stream().distinct().count()); // Ensure uniqueness
@@ -185,7 +186,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateSingleListSample() {
-            var product = cartesianProduct.simpleProductOf(List.of(0, 1, 2)).sample(2);
+            var product = cartesianProduct.simpleProductOf(List.of(0, 1, 2)).sample(2, TestBase.random);
             var list = product.stream().toList();
             assertEquals(2, list.size());
             assertEquals(2, list.stream().distinct().count());

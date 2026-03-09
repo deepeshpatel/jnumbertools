@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.base;
 
+import io.github.deepeshpatel.jnumbertools.TestBase;
+
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
@@ -87,13 +89,13 @@ public final class BuilderTestHelper {
      */
     public static void testChoice(Builder<?> builder) {
         // Valid sample size
-        assertNotNull(builder.choice(3));
+        assertNotNull(builder.choice(3, TestBase.random));
 
         // sampleSize <= 0
         assertThrows(IllegalArgumentException.class, () ->
-                builder.choice(0));
+                builder.choice(0, TestBase.random));
         assertThrows(IllegalArgumentException.class, () ->
-                builder.choice(-1));
+                builder.choice(-1, TestBase.random));
 
         // Note: sampleSize > total is allowed for choice (with replacement)
         // This is not tested here as it depends on the specific builder's total
@@ -106,18 +108,18 @@ public final class BuilderTestHelper {
      */
     public static void testSample(Builder<?> builder) {
         // Valid sample size
-        assertNotNull(builder.sample(3));
+        assertNotNull(builder.sample(3, TestBase.random));
 
         // sampleSize <= 0
         assertThrows(IllegalArgumentException.class, () ->
-                builder.sample(0));
+                builder.sample(0, TestBase.random));
         assertThrows(IllegalArgumentException.class, () ->
-                builder.sample(-1));
+                builder.sample(-1, TestBase.random));
 
         // sampleSize > total
         int tooLarge = builder.count().intValue() + 1;
         assertThrows(IllegalArgumentException.class, () ->
-                builder.sample(tooLarge));
+                builder.sample(tooLarge, TestBase.random));
     }
 
     /**

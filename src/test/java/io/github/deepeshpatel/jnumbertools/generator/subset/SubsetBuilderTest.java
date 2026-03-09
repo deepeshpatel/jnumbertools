@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
+import io.github.deepeshpatel.jnumbertools.TestBase;
 import io.github.deepeshpatel.jnumbertools.base.Subsets;
 import org.junit.jupiter.api.Test;
 
@@ -172,14 +173,14 @@ class SubsetBuilderTest {
         var builder = subsets.of(elements).inRange(1, 2);
 
         // Valid sample size
-        assertNotNull(builder.choice(3));
+        assertNotNull(builder.choice(3, TestBase.random));
 
         // Invalid: negative sample size
         assertThrows(IllegalArgumentException.class, () ->
-                builder.choice(-1));
+                builder.choice(-1, TestBase.random));
 
         // Note: sampleSize=0? Check your implementation
-        // assertThrows(IllegalArgumentException.class, () -> builder.choice(0));
+        // assertThrows(IllegalArgumentException.class, () -> builder.choice(0, TestBase.random));
     }
 
     @Test
@@ -188,15 +189,15 @@ class SubsetBuilderTest {
         BigInteger total = builder.count(); // 6
 
         // Valid sample size
-        assertNotNull(builder.sample(3));
+        assertNotNull(builder.sample(3, TestBase.random));
 
         // Invalid: negative sample size
         assertThrows(IllegalArgumentException.class, () ->
-                builder.sample(-1));
+                builder.sample(-1, TestBase.random));
 
         // Invalid: sample size > total
         assertThrows(IllegalArgumentException.class, () ->
-                builder.sample(total.intValue() + 1));
+                builder.sample(total.intValue() + 1, TestBase.random));
     }
 
     @Test
@@ -239,23 +240,23 @@ class SubsetBuilderTest {
         assertEquals(List.of(), result.get(0), "That element should be empty list");
     }
 
-    //TODO: add only if we keep isEmpty method in builders
-//    @Test
-//    void isEmpty() {
-//        // Non-empty builder with valid range
-//        var builder = subsets.of(elements).inRange(1, 2);
-//        assertFalse(builder.isEmpty());
-//
-//        // Builder that will produce one element ([[]])
-//        var emptyZeroBuilder = subsets.of(Collections.emptyList()).inRange(0, 0);
-//        assertFalse(emptyZeroBuilder.isEmpty()); // Actually produces 1 element
-//
-//        // Builder that produces zero elements
-//        var zeroBuilder = subsets.of(Collections.emptyList()).inRange(1, 2);
-//        assertTrue(zeroBuilder.isEmpty());
-//
-//        // Unconfigured builder
-//        var unconfigured = subsets.of(elements);
-//        assertTrue(unconfigured.isEmpty()); // Should be empty until range specified
-//    }
+
+    @Test
+    void isEmpty() {
+        // Non-empty builder with valid range
+        var builder = subsets.of(elements).inRange(1, 2);
+        assertFalse(builder.isEmpty());
+
+        // Builder that will produce one element ([[]])
+        var emptyZeroBuilder = subsets.of(Collections.emptyList()).inRange(0, 0);
+        assertFalse(emptyZeroBuilder.isEmpty()); // Actually produces 1 element
+
+        // Builder that produces zero elements
+        var zeroBuilder = subsets.of(Collections.emptyList()).inRange(1, 2);
+        assertTrue(zeroBuilder.isEmpty());
+
+        // Unconfigured builder
+        var unconfigured = subsets.of(elements);
+        assertTrue(unconfigured.isEmpty()); // Should be empty until range specified
+    }
 }

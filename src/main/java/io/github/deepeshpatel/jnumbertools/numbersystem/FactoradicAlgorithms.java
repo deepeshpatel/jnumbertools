@@ -40,7 +40,6 @@ public final class FactoradicAlgorithms {
      * @return the decimal value corresponding to the given Factoradic representation.
      */
     public static int factoradicToInt(int[] factoradic) {
-        // TODO: remove calculator dependency and make this method non-static.
         Calculator calculator = new Calculator();
         int value = 0;
         for (int i = 0; i < factoradic.length; i++) {

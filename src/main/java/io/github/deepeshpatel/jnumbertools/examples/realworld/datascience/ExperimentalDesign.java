@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.examples.realworld.datascience;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Demonstrates experimental design for scientific research
@@ -79,7 +80,7 @@ public class ExperimentalDesign {
 
         System.out.println("Total treatment combinations: " + combinations.count());
         System.out.println("\nSample treatment protocols:");
-        combinations.choice(8)
+        combinations.choice(8,new Random())
                 .stream()
                 .forEach(ExperimentalDesign::formatTreatmentCombo);
     }

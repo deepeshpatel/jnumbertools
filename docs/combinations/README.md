@@ -46,13 +46,13 @@ Selection of r distinct items out of n elements, also known as n-Choose-r. Gener
 JNumberTools.combinations()
     .unique(5, 3)
     .lexOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 
 // All possible combinations of 3 elements from ["A","B","C","D","E"] in lex order
 JNumberTools.combinations()
     .unique(3, "A", "B", "C", "D", "E")
     .lexOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 1.2 Every m-th unique combination in lex order
@@ -63,13 +63,13 @@ Generates every m<sup>th</sup> combination in lexicographical order, starting fr
 JNumberTools.combinations()
     .unique(5, 3)
     .lexOrderMth(2, 5)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 
 // 5th, 7th, 9th... combinations of 3 elements from ["A","B","C","D","E"] in lex order
 JNumberTools.combinations()
     .unique(3, "A", "B", "C", "D", "E")
     .lexOrderMth(2, 5)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 1.3 Unique combination random choice
@@ -111,11 +111,15 @@ Generates combinations at indices specified by a custom sequence.
 
 ```java
 // Generates combinations of 100 items from 200 at specified indices
-var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
+var iterable = List.of(
+                BigInteger.valueOf(10),
+                BigInteger.valueOf(20),
+                BigInteger.valueOf(1_000_000_000L),
+                new BigInteger("1000000000000000000000"));
 JNumberTools.combinations()
     .unique(200, 100)
     .byRanks(iterable)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 ### 2. Multiset Combinations
@@ -129,19 +133,25 @@ var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1));
 JNumberTools.combinations()
     .multiset(elements, 3)
     .lexOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 2.2 Every m-th multiset combination
 Generates every m<sup>th</sup> multiset combination in lexicographical order, starting from a given index, without computing preceding combinations.
 
 ```java
-// Every 3rd combination of 3 items from a multiset with 2 Apples and 1 Banana, starting from 5th
-var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1));
-JNumberTools.combinations()
-    .multiset(elements, 3)
-    .lexOrderMth(3, 5)
-    .stream().toList();
+// Every 3rd combination from multiset [Apple=3, Banana=2, Cherry=1], starting from 5th
+var elements = new LinkedHashMap<String, Integer>();
+elements.put("Apple", 3);
+elements.put("Banana", 2);
+elements.put("Cherry", 1);
+
+// Count should be > 1, so start=5 is valid
+var result = JNumberTools.combinations()
+        .multiset(elements, 3)
+        .lexOrderMth(3, 5)  // Every 3rd combination starting from rank 5
+        .stream()
+        .toList();
 ```
 
 #### 2.3 Multiset combination random choice
@@ -160,11 +170,11 @@ JNumberTools.combinations()
 Generates n random multiset combinations without duplicates.
 
 ```java
-// Generate 5 random combinations of 3 items from a multiset with 2 Apples and 1 Banana, without duplicates
-var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1));
-JNumberTools.combinations()
+// Generate 4 random combinations of 3 items from a multiset- [Apples:2, Banana:1, Guava 5], without duplicates
+var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1,  "Guava" ,5));
+        JNumberTools.combinations()
     .multiset(elements, 3)
-    .sample(5)
+    .sample(4)
     .stream().forEach(System.out::println);
 ```
 
@@ -174,11 +184,11 @@ Generates multiset combinations at indices specified by a custom sequence.
 ```java
 // Generates combinations of 3 items from a multiset with 50 Apples and 50 Bananas at specified indices
 var elements = new LinkedHashMap<>(Map.of("Apple", 50, "Banana", 50));
-var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
+var iterable = List.of(BigInteger.valueOf(3),BigInteger.ZERO);
 JNumberTools.combinations()
     .multiset(elements, 3)
     .byRanks(iterable)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 ### 3. Repetitive Combinations
@@ -191,13 +201,13 @@ Generates all combinations of r items from n elements with repetition allowed, a
 JNumberTools.combinations()
     .repetitive(5, 3)
     .lexOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 
 // All combinations of 3 elements with repetition from ["A","B","C","D","E"] in lex order
 JNumberTools.combinations()
     .repetitive(3, "A", "B", "C", "D", "E")
     .lexOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 3.2 Every m-th repetitive combination
@@ -208,13 +218,13 @@ Generates every m<sup>th</sup> repetitive combination in lexicographical order, 
 JNumberTools.combinations()
     .repetitive(5, 3)
     .lexOrderMth(2, 5)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 
 // 5th, 7th, 9th... combinations of 3 elements with repetition from ["A","B","C","D","E"] in lex order
 JNumberTools.combinations()
     .repetitive(3, "A", "B", "C", "D", "E")
     .lexOrderMth(2, 5)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 3.3 Repetitive combination random choice
@@ -244,11 +254,11 @@ Generates repetitive combinations at indices specified by a custom sequence.
 
 ```java
 // Generates combinations of 100 items with repetition from 200 at specified indices
-var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
+var iterable = List.of(BigInteger.valueOf(10), BigInteger.valueOf(1_000_000_000L));
 JNumberTools.combinations()
     .repetitive(200, 100)
     .byRanks(iterable)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 [Home](../../README.md)
 </br>[Permutation Generators](../permutations/README.md)

@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
+import io.github.deepeshpatel.jnumbertools.TestBase;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -162,7 +163,7 @@ class KPermutationByRanksTest {
             int k = 3;
             int sampleSize = 4;
             var permutations = permutation.nPk(k, input)
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size(), "Should generate exactly sampleSize permutations");
@@ -174,7 +175,7 @@ class KPermutationByRanksTest {
             int k = 2;
             int sampleSize = 6;
             var permutations = permutation.nPk(k, input)
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size(), "Should generate sampleSize permutations");
@@ -187,7 +188,7 @@ class KPermutationByRanksTest {
             int k = 3;
             int sampleSize = 3;
             var permutations = permutation.nPk(k, input)
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
 
@@ -208,7 +209,7 @@ class KPermutationByRanksTest {
             int k = 2;
             int totalPermutations = 6; // 3P2 = 6
             assertThrows(IllegalArgumentException.class, () -> permutation.nPk(k, input)
-                    .sample(totalPermutations + 1)
+                    .sample(totalPermutations + 1, random)
                     .stream()
                     .toList(), "Sample size exceeding total permutations should throw exception");
         }
@@ -218,7 +219,7 @@ class KPermutationByRanksTest {
             var input = List.of(0, 1, 2);
             int k = 2;
             assertThrows(IllegalArgumentException.class, () -> permutation.nPk(k, input)
-                    .sample(-1)
+                    .sample(-1, random)
                     .stream()
                     .toList(), "Negative sampleSize should throw exception");
         }
@@ -228,7 +229,7 @@ class KPermutationByRanksTest {
             var input = List.of(0, 1, 2);
             int k = 0;
             var permutations = permutation.nPk(k, input)
-                    .sample(1)
+                    .sample(1, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(1, permutations.size(), "Should generate 1 permutation when k=0");
@@ -241,7 +242,7 @@ class KPermutationByRanksTest {
         void shouldGenerateConsistentResultsAcrossIterators() {
             var input = List.of(0, 1, 2, 3);
             int k = 2;
-            var iterable = permutation.nPk(k, input).sample(3);
+            var iterable = permutation.nPk(k, input).sample(3, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
 
@@ -261,7 +262,7 @@ class KPermutationByRanksTest {
             int k = 2;
             int choiceSize = 5;
             var permutations = permutation.nPk(k, input)
-                    .choice(choiceSize)
+                    .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(choiceSize, permutations.size(), "Should generate exactly choiceSize permutations");
@@ -273,7 +274,7 @@ class KPermutationByRanksTest {
             int k = 2;
             int choiceSize = 8; // > 3P2 = 6 to ensure duplicates
             var permutations = permutation.nPk(k, input)
-                    .choice(choiceSize)
+                    .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(choiceSize, permutations.size(), "Should generate choiceSize permutations");
@@ -286,7 +287,7 @@ class KPermutationByRanksTest {
             int k = 3;
             int choiceSize = 4;
             var permutations = permutation.nPk(k, input)
-                    .choice(choiceSize)
+                    .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
 
@@ -307,7 +308,7 @@ class KPermutationByRanksTest {
             int k = 2;
             int choiceSize = 10; // > 3P2 = 6
             var permutations = permutation.nPk(k, input)
-                    .choice(choiceSize)
+                    .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(choiceSize, permutations.size(), "Should generate choiceSize permutations even if > total permutations");
@@ -318,7 +319,7 @@ class KPermutationByRanksTest {
             var input = List.of(0, 1, 2);
             int k = 2;
             assertThrows(IllegalArgumentException.class, () -> permutation.nPk(k, input)
-                    .choice(-1)
+                    .choice(-1, TestBase.random)
                     .stream()
                     .toList(), "Negative choiceSize should throw exception");
         }
@@ -328,7 +329,7 @@ class KPermutationByRanksTest {
             var input = List.of(0, 1, 2);
             int k = 0;
             var permutations = permutation.nPk(k, input)
-                    .choice(3)
+                    .choice(3, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(3, permutations.size(), "Should generate choiceSize permutations");
@@ -341,7 +342,7 @@ class KPermutationByRanksTest {
         void shouldGenerateConsistentResultsAcrossIterators() {
             var input = List.of(0, 1, 2, 3);
             int k = 2;
-            var iterable = permutation.nPk(k, input).choice(4);
+            var iterable = permutation.nPk(k, input).choice(4, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
 

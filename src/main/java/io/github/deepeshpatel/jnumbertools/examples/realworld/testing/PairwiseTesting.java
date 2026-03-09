@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.examples.realworld.testing;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Generates pairwise combinations for combinatorial testing
@@ -58,7 +59,7 @@ public class PairwiseTesting {
                 .and(isolationLevels)
                 .and(poolSizes)
                 .and(sslModes)
-                .sample(15)  // Random sample of 15 configurations
+                .sample(15,new Random())  // Random sample of 15 configurations
                 .stream()
                 .forEach(System.out::println);
     }

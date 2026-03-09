@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.examples.realworld.datascience;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Demonstrates A/B testing experimental design
@@ -81,7 +82,7 @@ public class ABTesting {
 
         System.out.println("Total allocation strategies: " + allocations.count());
         System.out.println("\nSample traffic allocation plans:");
-        allocations.choice(6)
+        allocations.choice(6,new Random())
                 .stream()
                 .forEach(ABTesting::formatTrafficAllocation);
     }

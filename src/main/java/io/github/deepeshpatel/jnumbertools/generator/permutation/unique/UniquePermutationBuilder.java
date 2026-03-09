@@ -15,6 +15,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Builder for generating unique permutations of input elements.
@@ -186,27 +187,31 @@ public final class UniquePermutationBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Generates a sample of unique permutations without replacement.
+     * Generates a sample of unique permutations without replacement using custom random generator.
      *
      * @param sampleSize the number of permutations to sample; must be positive and ≤ n!
+     * @param random the random generator to use
      * @return a {@link UniquePermutationByRanks} instance for sampled permutations
-     * @throws IllegalArgumentException if sampleSize is invalid
+     * @throws IllegalArgumentException if sampleSize is invalid or random is null
      */
-    public UniquePermutationByRanks<T> sample(int sampleSize) {
+    @Override
+    public UniquePermutationByRanks<T> sample(int sampleSize, Random random) {
         BigInteger total = calculator.factorial(elements.size());
-        return new UniquePermutationByRanks<>(elements, new BigIntegerSample(total, sampleSize), calculator);
+        return new UniquePermutationByRanks<>(elements, new BigIntegerSample(total, sampleSize, random), calculator);
     }
 
     /**
-     * Generates a sample of unique permutations with replacement.
+     * Generates a sample of unique permutations with replacement using custom random generator.
      *
      * @param sampleSize the number of permutations to sample; must be positive
+     * @param random the random generator to use
      * @return a {@link UniquePermutationByRanks} instance for sampled permutations
-     * @throws IllegalArgumentException if sampleSize is invalid
+     * @throws IllegalArgumentException if sampleSize is invalid or random is null
      */
-    public UniquePermutationByRanks<T> choice(int sampleSize) {
+    @Override
+    public UniquePermutationByRanks<T> choice(int sampleSize, Random random) {
         BigInteger total = calculator.factorial(elements.size());
-        return new UniquePermutationByRanks<>(elements, new BigIntegerChoice(total, sampleSize), calculator);
+        return new UniquePermutationByRanks<>(elements, new BigIntegerChoice(total, sampleSize, random), calculator);
     }
 
     /**

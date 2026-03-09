@@ -32,7 +32,7 @@ JNumberTools.subsets()
     .of("Apple", "Banana", "Guava")
     .all()
     .lexOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 ### 2. Every m-th subsets in lex order
@@ -44,7 +44,7 @@ JNumberTools.subsets()
     .of(40)
     .all()
     .lexOrderMth(1_000_000_000, 0)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 ### 3. All subsets of given size range in lex order
@@ -56,7 +56,7 @@ JNumberTools.subsets()
     .of("Apple", "Banana", "Guava")
     .inRange(2, 3)
     .lexOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 ### 4. Every m-th subsets in range in lex order
@@ -68,7 +68,7 @@ JNumberTools.subsets()
     .of(40)
     .inRange(10, 39)
     .lexOrderMth(1_000_000_000, 0)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 ### 5. Random subset choice
@@ -119,7 +119,7 @@ JNumberTools.subsets()
     .of(100)
     .all()
     .byRanks(iterable)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 [Home](../../README.md)

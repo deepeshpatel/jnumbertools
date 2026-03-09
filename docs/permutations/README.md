@@ -56,13 +56,13 @@ Used to generate all n! unique permutations of n elements in lexicographical ord
 JNumberTools.permutations()
     .unique(3)
     .lexOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 
 // Generates all permutations of "Red", "Green", and "Blue" in lex order
 JNumberTools.permutations()
     .unique("Red", "Green", "Blue")
     .lexOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 1.2 Every m-th unique permutation
@@ -76,13 +76,13 @@ int start = 5;
 JNumberTools.permutations()
     .unique(5)
     .lexOrderMth(m, start)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 
 // Generates 5th, 7th, 9th... permutations of elements in lex order
 JNumberTools.permutations()
     .unique("A", "B", "C", "D", "E")
     .lexOrderMth(m, start)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 1.3 Unique permutation with minimum change
@@ -93,13 +93,13 @@ Generates all unique permutations such that each permutation is a single swap aw
 JNumberTools.permutations()
     .unique(5)
     .singleSwap()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 
 // Generates all permutations of input with minimum change
 JNumberTools.permutations()
     .unique("A", "B", "C", "D", "E")
     .singleSwap()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 1.4 Unique permutation random choice
@@ -110,13 +110,13 @@ Generates random unique permutations with duplicates allowed.
 JNumberTools.permutations()
     .unique(5)
     .choice(10)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 
 // Generates exactly 10 permutations of input which may contain duplicates
 JNumberTools.permutations()
     .unique("A", "B", "C", "D", "E")
     .choice(10)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 1.5 Unique permutation random sample
@@ -127,13 +127,13 @@ Generates random unique permutations without duplicates.
 JNumberTools.permutations()
     .unique(5)
     .sample(10)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 
 // Generates exactly 10 permutations of input without duplicates
 JNumberTools.permutations()
     .unique("A", "B", "C", "D", "E")
     .sample(10)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 1.6 Unique permutation of ranks
@@ -145,7 +145,7 @@ var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("10000000000000000
 JNumberTools.permutations()
     .unique(100)
     .byRanks(iterable)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 ### 2. Multiset Permutation Generators
@@ -160,7 +160,7 @@ var elements = new LinkedHashMap<>(Map.of("Red", 2, "Green", 1, "Blue", 3));
 JNumberTools.permutations()
     .multiset(elements)
     .lexOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 2.2 Every m-th multiset permutation
@@ -185,7 +185,7 @@ var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1, "Guava", 3));
 JNumberTools.permutations()
     .multiset(elements)
     .choice(10)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 2.4 Multiset permutation random sample
@@ -197,7 +197,7 @@ var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1, "Guava", 3));
 JNumberTools.permutations()
     .multiset(elements)
     .sample(10)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 2.5 Multiset permutation of ranks
@@ -223,13 +223,13 @@ Generates all unique permutations of size k where 0 ≤ k ≤ n and n is the num
 JNumberTools.permutations()
     .nPk(5, 2)
     .lexOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 
 // Generates all permutations of 2 elements out of a list of elements
 JNumberTools.permutations()
     .nPk(2, "A", "B", "C", "D", "E")
     .lexOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 3.2 Every m-th k-permutation
@@ -242,13 +242,13 @@ To achieve this, a concept called Permutational Number System (Permutadic, a gen
 JNumberTools.permutations()
     .nPk(10, 5)
     .lexOrderMth(3, 0)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 
 // Generates every 3rd permutation starting from 0th of size 3 out of a list of n elements
 JNumberTools.permutations()
     .nPk(2, "A", "B", "C", "D", "E")
     .lexOrderMth(3, 0)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 3.3 k-Permutation in combination order
@@ -259,13 +259,13 @@ Generates all k-permutations in the lexicographical order of combinations. For e
 JNumberTools.permutations()
     .nPk(5, 2)
     .combinationOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 
 // Generates all k-permutations for a list of elements
 JNumberTools.permutations()
     .nPk(2, "A", "B", "C", "D", "E")
     .combinationOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 3.4 Every m-th k-permutation in combination order
@@ -276,13 +276,13 @@ Generates every m<sup>th</sup> k-permutation in the lexicographical order of com
 JNumberTools.permutations()
     .nPk(5, 2)
     .combinationOrderMth(3, 0)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 
 // Generates every 3rd k-permutation for a list of elements
 JNumberTools.permutations()
     .nPk(2, "A", "B", "C", "D", "E")
     .combinationOrderMth(3, 0)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 3.5 k-Permutation random choice
@@ -312,8 +312,7 @@ Generates all k-permutations at indices specified by a custom sequence.
 
 ```java
 // Generates all k-permutations of n=200 and k=100 at indices specified by Iterable<Number>
-var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
-var elements = new LinkedHashMap<>(Map.of("Apple", 50, "Banana", 200, "Guava", 50));
+var iterable = List.of(BigInteger.valueOf(10), BigInteger.valueOf(1_000_000_000), new BigInteger("1000000000000000000000"));
 JNumberTools.permutations()
     .nPk(200, 100)
     .byRanks(iterable)
@@ -330,13 +329,13 @@ This is equivalent to generating base-n numbers of max size r-digits with given 
 JNumberTools.permutations()
     .repetitive(3, 5)
     .lexOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 
 // Generates all permutations of 3 elements out of given elements with repetition allowed
 JNumberTools.permutations()
     .repetitive(3, "A", "B", "C", "D", "E")
     .lexOrder()
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 4.2 Every m-th repetitive permutation
@@ -349,13 +348,13 @@ int start = 5;
 JNumberTools.permutations()
     .repetitive(3, 5)
     .lexOrderMth(m, start)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 
 // Generates every 2nd repetitive permutation of 3 elements out of given elements, starting from 5th
 JNumberTools.permutations()
     .repetitive(3, "A", "B", "C", "D", "E")
     .lexOrderMth(m, start)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 4.3 Repetitive permutation random choice
@@ -366,7 +365,7 @@ Generates random repetitive permutations with duplicates allowed.
 JNumberTools.permutations()
     .repetitive(3, 5)
     .choice(4)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 4.4 Repetitive permutation random sample
@@ -377,7 +376,7 @@ Generates random repetitive permutations without duplicates.
 JNumberTools.permutations()
     .repetitive(3, 5)
     .sample(4)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 #### 4.5 Repetitive permutation of ranks
@@ -389,7 +388,7 @@ var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("10000000000000000
 JNumberTools.permutations()
     .repetitive(300, 500)
     .byRanks(iterable)
-    .stream().toList();
+    .stream().forEach(System.out::println);
 ```
 
 [Home](../../README.md)

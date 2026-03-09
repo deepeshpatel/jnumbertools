@@ -7,6 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.base;
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 
 import java.math.BigInteger;
+import java.util.Random;
 
 /**
  * Interface for building generators of combinatorial structures.
@@ -43,13 +44,15 @@ public interface Builder<E> {
 
     /**
      * Convenience method for lexOrderMth using long values.
-     * @param m     the interval to select every mᵗʰ product
-     * @param start the starting position
-     * @return a CartesianProductByRanks for the specified intervals
+     *
+     * @param m     the interval to select every mᵗʰ element (must be > 0)
+     * @param start the starting rank (must be ≥ 0 and < total count when count > 0)
+     * @return a generator for every mᵗʰ element in lexicographical order
+     * @throws IllegalArgumentException if m ≤ 0, start < 0, or start ≥ count() when count() > 0
      */
-     default StreamableIterable<E> lexOrderMth(long m, long start) {
+    default StreamableIterable<E> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
-     }
+    }
 
     /**
      * Creates a generator for every mᵗʰ element in lexicographical order, starting from a given rank.
@@ -68,9 +71,25 @@ public interface Builder<E> {
      */
     StreamableIterable<E> byRanks(Iterable<BigInteger> ranks);
 
-    StreamableIterable<E> choice(int sampleSize);
+    /**
+     * Generates a random sample of elements with replacement using custom random generator.
+     *
+     * @param sampleSize the number of elements to generate
+     * @param random the random generator to use
+     * @return a generator producing random elements (duplicates allowed)
+     * @throws IllegalArgumentException if sampleSize is negative or random is null
+     */
+    StreamableIterable<E> choice(int sampleSize, Random random);
 
-    StreamableIterable<E> sample(int sampleSize);
+    /**
+     * Generates a random sample of unique elements without replacement using custom random generator.
+     *
+     * @param sampleSize the number of unique elements to generate
+     * @param random the random generator to use
+     * @return a generator producing unique random elements
+     * @throws IllegalArgumentException if sampleSize is negative, exceeds total count, or random is null
+     */
+    StreamableIterable<E> sample(int sampleSize, Random random);
 
     /**
      * Returns the total number of generatable structures.

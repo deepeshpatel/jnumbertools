@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.examples.realworld.business;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Demonstrates inventory management scenarios
@@ -79,7 +80,7 @@ public class InventoryManagement {
 
         System.out.println("Total distribution plans: " + plans.count());
         System.out.println("\nSample distribution plans:");
-        plans.choice(8)
+        plans.choice(8,new Random())
                 .stream()
                 .forEach(InventoryManagement::formatDistributionPlan);
     }

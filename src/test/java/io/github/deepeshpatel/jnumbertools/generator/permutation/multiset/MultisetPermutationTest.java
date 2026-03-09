@@ -15,7 +15,6 @@ public class MultisetPermutationTest {
     @Test
     void assertCount() {
         // Multiset permutations: n!/(n₁!·n₂!·...·nₖ!)
-        Random random = new Random(System.currentTimeMillis());
         for (int n = 2; n <= 5; n++) {
             var input = IntStream.range(0,n).boxed().toList();
             int[] frequency = getRandomMultisetFreqArray(random, input.size());

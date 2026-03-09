@@ -13,6 +13,7 @@ import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Builder for generating unique combinations (ⁿCᵣ) of elements.
@@ -197,33 +198,37 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Creates a generator that samples unique combinations randomly without replacement.
+     * Creates a generator that samples unique combinations randomly without replacement using custom random generator.
      * <p>
      * Uses {@link BigIntegerSample} to ensure each combination in the sample is distinct.
      * </p>
      *
      * @param sampleSize the number of combinations to sample (1 ≤ sampleSize ≤ ⁿCᵣ)
+     * @param random the random generator to use
      * @return a {@link UniqueCombinationByRanks} for random sampling without replacement
-     * @throws IllegalArgumentException if sampleSize ≤ 0 or sampleSize > ⁿCᵣ
+     * @throws IllegalArgumentException if sampleSize ≤ 0 or sampleSize > ⁿCᵣ or random is null
      */
-    public UniqueCombinationByRanks<T> sample(int sampleSize) {
+    @Override
+    public UniqueCombinationByRanks<T> sample(int sampleSize, Random random) {
         BigInteger nCr = calculator.nCr(elements.size(), size);
-        return new UniqueCombinationByRanks<>(elements, size, new BigIntegerSample(nCr, sampleSize), calculator);
+        return new UniqueCombinationByRanks<>(elements, size, new BigIntegerSample(nCr, sampleSize, random), calculator);
     }
 
     /**
-     * Creates a generator that samples unique combinations randomly with replacement.
+     * Creates a generator that samples unique combinations randomly with replacement using custom random generator.
      * <p>
      * Uses {@link BigIntegerChoice} to allow duplicate combinations in the sample.
      * </p>
      *
      * @param sampleSize the number of combinations to sample (sampleSize ≥ 1)
+     * @param random the random generator to use
      * @return a {@link UniqueCombinationByRanks} for random sampling with replacement
-     * @throws IllegalArgumentException if sampleSize ≤ 0
+     * @throws IllegalArgumentException if sampleSize ≤ 0 or random is null
      */
-    public UniqueCombinationByRanks<T> choice(int sampleSize) {
+    @Override
+    public UniqueCombinationByRanks<T> choice(int sampleSize, Random random) {
         BigInteger nCr = calculator.nCr(elements.size(), size);
-        return new UniqueCombinationByRanks<>(elements, size, new BigIntegerChoice(nCr, sampleSize), calculator);
+        return new UniqueCombinationByRanks<>(elements, size, new BigIntegerChoice(nCr, sampleSize, random), calculator);
     }
 
     /**

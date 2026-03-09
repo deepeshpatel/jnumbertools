@@ -38,6 +38,8 @@ public class TestBase {
     public static final String errMsgNK = "n and k must be ≥ 0";
     public static final String errMsgOptions = "Options must be non-null, and contain frequencies ≥ 0";
 
+    public static final Random random = new Random();
+
     private static List<?> everyMthValue(Stream<?> stream, int start, long m) {
         final int[] j = {0};
         return stream.filter(e -> {

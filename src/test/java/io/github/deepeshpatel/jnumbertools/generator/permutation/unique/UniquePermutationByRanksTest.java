@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
+import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -148,7 +149,7 @@ class UniquePermutationByRanksTest {
         void shouldGenerateExactSampleSize() {
             int sampleSize = 4;
             var permutations = permutation.unique("A", "B", "C")
-                    .choice(sampleSize)
+                    .choice(sampleSize, random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size(), "Should generate exactly sampleSize permutations");
@@ -158,7 +159,7 @@ class UniquePermutationByRanksTest {
         void shouldAllowDuplicatePermutations() {
             int sampleSize = 4; // > 3! = 6 for small input to ensure duplicates
             var permutations = permutation.unique("A", "B")
-                    .choice(sampleSize)
+                    .choice(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size());
@@ -171,7 +172,7 @@ class UniquePermutationByRanksTest {
             List<String> elements = of("A", "B", "C");
             int sampleSize = 3;
             var permutations = permutation.unique(elements)
-                    .choice(sampleSize)
+                    .choice(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size());
@@ -187,7 +188,7 @@ class UniquePermutationByRanksTest {
             List<String> elements = of("A", "B");
             int sampleSize = 5; // > 2! = 2
             var permutations = permutation.unique(elements)
-                    .choice(sampleSize)
+                    .choice(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size(), "Should generate sampleSize permutations even if > n!");
@@ -196,7 +197,7 @@ class UniquePermutationByRanksTest {
         @Test
         void shouldThrowExceptionForNegativeSampleSize() {
             assertThrows(IllegalArgumentException.class, () -> permutation.unique("A", "B")
-                    .choice(-1)
+                    .choice(-1, TestBase.random)
                     .stream()
                     .toList(), "Negative sampleSize should throw exception");
         }
@@ -204,7 +205,7 @@ class UniquePermutationByRanksTest {
         @Test
         void shouldHandleEmptyInput() {
             var permutations = permutation.unique(Collections.emptyList())
-                    .choice(1)
+                    .choice(1, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(1, permutations.size());
@@ -213,7 +214,7 @@ class UniquePermutationByRanksTest {
 
         @Test
         void shouldGenerateConsistentResultsAcrossIterators() {
-            var iterable = permutation.unique("A", "B", "C").choice(3);
+            var iterable = permutation.unique("A", "B", "C").choice(3, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertEquals(3, list1.size(), "First iterator should produce sampleSize permutations");
@@ -232,7 +233,7 @@ class UniquePermutationByRanksTest {
         void shouldGenerateExactSampleSize() {
             int sampleSize = 3;
             var permutations = permutation.unique("A", "B", "C")
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size(), "Should generate exactly sampleSize permutations");
@@ -242,7 +243,7 @@ class UniquePermutationByRanksTest {
         void shouldGenerateUniquePermutations() {
             int sampleSize = 4;
             var permutations = permutation.unique("A", "B", "C", "D")
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size());
@@ -254,7 +255,7 @@ class UniquePermutationByRanksTest {
             List<String> elements = of("A", "B", "C", "D");
             int sampleSize = 3;
             var permutations = permutation.unique(elements)
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size());
@@ -270,7 +271,7 @@ class UniquePermutationByRanksTest {
             List<String> elements = of("A", "B");
             int total = calculator.nPr(2, 2).intValue(); // 2! = 2
             assertThrows(IllegalArgumentException.class, () -> permutation.unique(elements)
-                    .sample(total + 1)
+                    .sample(total + 1, TestBase.random)
                     .stream()
                     .toList(), "Sample size exceeding n! should throw exception");
         }
@@ -278,7 +279,7 @@ class UniquePermutationByRanksTest {
         @Test
         void shouldThrowExceptionForNegativeSampleSize() {
             assertThrows(IllegalArgumentException.class, () -> permutation.unique("A", "B")
-                    .sample(-1)
+                    .sample(-1, TestBase.random)
                     .stream()
                     .toList(), "Negative sampleSize should throw exception");
         }
@@ -286,7 +287,7 @@ class UniquePermutationByRanksTest {
         @Test
         void shouldHandleEmptyInput() {
             var permutations = permutation.unique(Collections.emptyList())
-                    .sample(1)
+                    .sample(1, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(1, permutations.size());
@@ -295,7 +296,7 @@ class UniquePermutationByRanksTest {
 
         @Test
         void shouldGenerateConsistentResultsAcrossIterators() {
-            var iterable = permutation.unique("A", "B", "C").sample(2);
+            var iterable = permutation.unique("A", "B", "C").sample(2, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertEquals(2, list1.size(), "First iterator should produce sampleSize permutations");

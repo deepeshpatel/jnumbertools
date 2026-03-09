@@ -22,26 +22,35 @@ public class BigIntegerSample implements Iterable<BigInteger> {
 
     private final BigInteger max;
     private final int sampleSize;
+    private final Random random;
 
     /**
      * Constructs a BigIntegerSample instance.
      *
      * @param max        the upper bound (exclusive) of the range [0, max); must be positive
      * @param sampleSize the number of unique random values to generate; must be positive and ≤ max
+     * @param random the random generator to use
      * @throws IllegalArgumentException if max is not positive, sampleSize is not positive, or sampleSize > max
      */
-    public BigIntegerSample(BigInteger max, int sampleSize) {
+    public BigIntegerSample(BigInteger max, int sampleSize, Random random) {
+        parameterValidationForChoiceAndSample(max, sampleSize, random);
+
+        if (BigInteger.valueOf(sampleSize).compareTo(max) > 0) {
+            throw new IllegalArgumentException("Sample size (" + sampleSize + ") cannot exceed max (" + max + ")");
+        }
+        this.max = max;
+        this.sampleSize = sampleSize;
+        this.random = random;
+    }
+
+    static void parameterValidationForChoiceAndSample(BigInteger max, int sampleSize, Random random) {
         if (max.signum() <= 0) {
             throw new IllegalArgumentException("Max must be positive");
         }
         if (sampleSize <= 0) {
             throw new IllegalArgumentException("Sample size must be positive");
         }
-        if (BigInteger.valueOf(sampleSize).compareTo(max) > 0) {
-            throw new IllegalArgumentException("Sample size (" + sampleSize + ") cannot exceed max (" + max + ")");
-        }
-        this.max = max;
-        this.sampleSize = sampleSize;
+        if(random == null) throw new NullPointerException("Random should be not null for sampling");
     }
 
     /**
@@ -52,9 +61,9 @@ public class BigIntegerSample implements Iterable<BigInteger> {
     @Override
     public Iterator<BigInteger> iterator() {
         if (max.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0) {
-            return new FisherYatesIterator(max.intValueExact(), sampleSize);
+            return new FisherYatesIterator(max.intValueExact(), sampleSize, random);
         } else {
-            return new RetryBasedIterator(max, sampleSize);
+            return new RetryBasedIterator(max, sampleSize, random);
         }
     }
 }
@@ -67,23 +76,22 @@ class FisherYatesIterator implements Iterator<BigInteger> {
     private int currentIndex;
     private final int sampleSize;
 
-    public FisherYatesIterator(int max, int sampleSize) {
+    public FisherYatesIterator(int max, int sampleSize, Random random) {
         this.sampleSize = sampleSize;
-        Random random = new Random();
         this.numbers = new int[sampleSize];
         this.currentIndex = 0;
 
-        // Initialize with unique values from [0, max)
-        Set<Integer> used = new HashSet<>();
+        // Create full array [0, max-1] and shuffle first sampleSize elements
+        int[] all = new int[max];
+        for (int i = 0; i < max; i++) all[i] = i;
         for (int i = 0; i < sampleSize; i++) {
-            int value;
-            do {
-                value = random.nextInt(max);
-            } while (!used.add(value));
-            numbers[i] = value;
+            int j = i + random.nextInt(max - i);
+            int temp = all[i];
+            all[i] = all[j];
+            all[j] = temp;
+            numbers[i] = all[i];
         }
     }
-
     @Override
     public boolean hasNext() {
         return currentIndex < sampleSize;
@@ -115,10 +123,10 @@ class RetryBasedIterator implements Iterator<BigInteger> {
      * @param max        the upper bound (exclusive)
      * @param sampleSize the number of unique values to generate
      */
-    public RetryBasedIterator(BigInteger max, int sampleSize) {
+    public RetryBasedIterator(BigInteger max, int sampleSize, Random random) {
         this.max = max;
         this.sampleSize = sampleSize;
-        this.random = new Random();
+        this.random = random;
         this.usedValues = new HashSet<>();
         this.generatedCount = 0;
     }
@@ -159,24 +167,5 @@ class RetryBasedIterator implements Iterator<BigInteger> {
             return BigInteger.valueOf(random.nextLong(0, bound.longValueExact()));
         }
         return BigInteger.valueOf(random.nextLong()).abs().mod(bound);
-    }
-
-
-    public static void main(String[] args) {
-        // Small range (uses Fisher-Yates)
-        BigIntegerSample smallSampler = new BigIntegerSample(BigInteger.valueOf(10), 4);
-        Iterator<BigInteger> smallIterator = smallSampler.iterator();
-        System.out.println("Small range:");
-        while (smallIterator.hasNext()) {
-            System.out.println(smallIterator.next());
-        }
-
-        // Large range (uses retry-based)
-        BigIntegerSample largeSampler = new BigIntegerSample(BigInteger.valueOf(Integer.MAX_VALUE).add(BigInteger.ONE), 4);
-        Iterator<BigInteger> largeIterator = largeSampler.iterator();
-        System.out.println("\nLarge range:");
-        while (largeIterator.hasNext()) {
-            System.out.println(largeIterator.next());
-        }
     }
 }

@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.examples.realworld.operations;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Demonstrates resource optimization for operations management
@@ -81,7 +82,7 @@ public class ResourceOptimization {
 
         System.out.println("Total shift plan combinations: " + shiftPlans.count());
         System.out.println("\nSample shift plans:");
-        shiftPlans.choice(6)
+        shiftPlans.choice(6,new Random())
                 .stream()
                 .forEach(ResourceOptimization::formatShiftPlan);
     }

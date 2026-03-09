@@ -4,6 +4,7 @@ import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -46,7 +47,7 @@ public class WorkingWithComplexProduct {
 
         // Sample some random pizzas
         System.out.println("\n   Sample pizza configurations:");
-        pizzaBuilder.choice(5)
+        pizzaBuilder.choice(5,new Random())
                 .stream()
                 .forEach(pizza -> {
                     System.out.print("   Pizza: ");

@@ -13,6 +13,7 @@ import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Builder for generating k-permutations of a list of elements.
@@ -140,7 +141,7 @@ public final class KPermutationBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Generates a random sample of k-permutations with replacement.
+     * Generates a random sample of k-permutations with replacement using custom random generator.
      * <p>
      * Each permutation is chosen independently and uniformly at random from all possible
      * ⁿPₖ permutations. The same permutation may appear multiple times in the result.
@@ -148,28 +149,32 @@ public final class KPermutationBuilder<T> implements Builder<T> {
      * </p>
      *
      * @param sampleSize the number of permutations to generate (must be > 0)
+     * @param random the random generator to use
      * @return a generator producing random k-permutations (duplicates allowed)
-     * @throws IllegalArgumentException if sampleSize ≤ 0
+     * @throws IllegalArgumentException if sampleSize ≤ 0 or random is null
      */
-    public KPermutationByRanks<T> choice(int sampleSize) {
+    @Override
+    public KPermutationByRanks<T> choice(int sampleSize, Random random) {
         BigInteger max = calculator.nPr(elements.size(), k);
-        var choice = new BigIntegerChoice(max, sampleSize);
+        var choice = new BigIntegerChoice(max, sampleSize, random);
         return new KPermutationByRanks<>(elements, k, choice, calculator);
     }
 
     /**
-     * Generates k-permutations randomly without replacement.
+     * Generates k-permutations randomly without replacement using custom random generator.
      * <p>
      * The total number of k-permutations is Pₙ,ₖ = n!/(n−kₖ)!.
      * </p>
      *
      * @param sampleSize the number of permutations to generate; must be positive and ≤ Pₙ,ₖ
+     * @param random the random generator to use
      * @return a {@link KPermutationByRanks} instance for random sampling without replacement
-     * @throws IllegalArgumentException if sampleSize is not positive or exceeds Pₙ,ₖ
+     * @throws IllegalArgumentException if sampleSize is not positive or exceeds Pₙ,ₖ or random is null
      */
-    public KPermutationByRanks<T> sample(int sampleSize) {
+    @Override
+    public KPermutationByRanks<T> sample(int sampleSize, Random random) {
         BigInteger max = calculator.nPr(elements.size(), k);
-        var sample = new BigIntegerSample(max, sampleSize);
+        var sample = new BigIntegerSample(max, sampleSize, random);
         return new KPermutationByRanks<>(elements, k, sample, calculator);
     }
 
@@ -192,18 +197,6 @@ public final class KPermutationBuilder<T> implements Builder<T> {
      */
     public KPermutationCombinationOrder<T> combinationOrder() {
         return new KPermutationCombinationOrder<>(elements, k);
-    }
-
-    /**
-     * Generates every mᵗʰ k-permutation in lexicographical order, using long values.
-     *
-     * @param m the step size for selecting every mᵗʰ permutation; must be positive
-     * @param start the starting rank (0-based); must be non-negative
-     * @return a {@link KPermutationByRanks} instance for mᵗʰ permutations in lex order
-     * @throws IllegalArgumentException if m or start is invalid
-     */
-    public KPermutationByRanks<T> lexOrderMth(long m, long start) {
-        return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
     }
 
     /**

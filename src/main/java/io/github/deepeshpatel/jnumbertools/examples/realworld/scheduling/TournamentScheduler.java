@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.examples.realworld.scheduling;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Generates tournament schedules and match pairings
@@ -85,7 +86,7 @@ public class TournamentScheduler {
         // Generate random order of all matches
         var randomOrder = JNumberTools.permutations()
                 .unique(matches)
-                .choice(1)
+                .choice(1,new Random())
                 .stream()
                 .findFirst()
                 .orElseThrow();

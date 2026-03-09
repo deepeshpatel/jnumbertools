@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.examples.realworld.security;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * PIN code generator with various constraints
@@ -71,7 +72,7 @@ public class PinCodeGenerator {
 
         JNumberTools.permutations()
                 .repetitive(4, DIGITS)
-                .choice(10)
+                .choice(10,new Random())
                 .stream()
                 .forEach(PinCodeGenerator::formatPin);
     }

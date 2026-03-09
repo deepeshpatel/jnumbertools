@@ -54,7 +54,7 @@ public class MonteCarloSimulation {
 
         JNumberTools.permutations()
                 .repetitive(2, dice)
-                .choice(numRolls)
+                .choice(numRolls,new Random())
                 .stream()
                 .forEach(roll -> {
                     int sum = roll.get(0) + roll.get(1);
@@ -93,7 +93,7 @@ public class MonteCarloSimulation {
         for (int i = 0; i < numSimulations; i++) {
             var hand = JNumberTools.combinations()
                     .unique(5, deck)
-                    .choice(1)
+                    .choice(1,new Random())
                     .stream()
                     .findFirst()
                     .orElseThrow();

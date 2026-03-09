@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
+import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -165,7 +166,7 @@ public class SubsetGeneratorByRanksTest {
     class Choice {
         @Test
         void shouldGenerateRandomChoice() {
-            var builder = subsets.of(A_B_C_D).inRange(2, 3).choice(5);
+            var builder = subsets.of(A_B_C_D).inRange(2, 3).choice(5, TestBase.random);
             var result = builder.stream().toList();
             assertEquals(5, result.size());
             for (var subset : result) {
@@ -177,27 +178,27 @@ public class SubsetGeneratorByRanksTest {
         @Test
         void shouldGenerateZeroChoice() {
             Exception exception = assertThrows(IllegalArgumentException.class,
-                    () -> subsets.of(A_B_C_D).inRange(1, 3).choice(0).stream().toList());
+                    () -> subsets.of(A_B_C_D).inRange(1, 3).choice(0, TestBase.random).stream().toList());
             assertTrue(exception.getMessage().contains("Sample size must be positive"));
         }
 
         @Test
         void shouldThrowOnNegativeChoice() {
             var builder = subsets.of(A_B_C_D).all();
-            assertThrows(IllegalArgumentException.class, () -> builder.choice(-1));
+            assertThrows(IllegalArgumentException.class, () -> builder.choice(-1, TestBase.random));
         }
 
         @Test
         void shouldAllowDuplicatesInChoice() {
             var builder = subsets.of(List.of('A', 'B')).all();
-            var result = builder.choice(10).stream().toList();
+            var result = builder.choice(10, TestBase.random).stream().toList();
             assertEquals(10, result.size());
         }
 
         @Test
         void shouldWorkForEmptyElements() {
             var builder = subsets.of(List.of()).all();
-            var result = builder.choice(3).stream().toList();
+            var result = builder.choice(3, TestBase.random).stream().toList();
             assertEquals(3, result.size());
             for (var subset : result) {
                 assertTrue(subset.isEmpty());
@@ -210,7 +211,7 @@ public class SubsetGeneratorByRanksTest {
         @Test
         void shouldGenerateUniqueRandomSample() {
             var builder = subsets.of(A_B_C_D).inRange(2, 3);
-            var result = builder.sample(5).stream().toList();
+            var result = builder.sample(5, TestBase.random).stream().toList();
             assertEquals(5, result.size());
             assertEquals(5, new HashSet<>(result).size());  // unique subsets
             for (var subset : result) {
@@ -221,27 +222,27 @@ public class SubsetGeneratorByRanksTest {
         @Test
         void shouldGenerateZeroSample() {
             Exception exception = assertThrows(IllegalArgumentException.class,
-                    () -> subsets.of(A_B_C_D).inRange(1, 3).sample(0).stream().toList());
+                    () -> subsets.of(A_B_C_D).inRange(1, 3).sample(0, TestBase.random).stream().toList());
             assertTrue(exception.getMessage().contains("Sample size must be positive"));
         }
 
         @Test
         void shouldThrowOnNegativeSample() {
             var builder = subsets.of(A_B_C_D).all();
-            assertThrows(IllegalArgumentException.class, () -> builder.sample(-1));
+            assertThrows(IllegalArgumentException.class, () -> builder.sample(-1, random));
         }
 
         @Test
         void shouldThrowWhenSampleSizeExceedsTotal() {
             var builder = subsets.of(A_B_C_D).inRange(3, 3);
             assertEquals(BigInteger.valueOf(4), builder.count());
-            assertThrows(IllegalArgumentException.class, () -> builder.sample(5));
+            assertThrows(IllegalArgumentException.class, () -> builder.sample(5, TestBase.random));
         }
 
         @Test
         void shouldGenerateAllWhenSampleSizeEqualsTotal() {
             var builder = subsets.of(A_B_C_D).inRange(3, 3);
-            var result = builder.sample(4).stream().toList();
+            var result = builder.sample(4, TestBase.random).stream().toList();
             assertEquals(4, result.size());
             assertEquals(4, new HashSet<>(result).size());
             assertTrue(result.contains(List.of('A', 'B', 'C')));
@@ -254,7 +255,7 @@ public class SubsetGeneratorByRanksTest {
         void shouldWorkForEmptyElements() {
             var builder = subsets.of(List.of()).all();
             assertEquals(BigInteger.ONE, builder.count());
-            var result = builder.sample(1).stream().toList();
+            var result = builder.sample(1, TestBase.random).stream().toList();
             assertEquals(1, result.size());
             assertTrue(result.get(0).isEmpty());
         }

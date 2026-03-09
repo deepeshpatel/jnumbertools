@@ -12,7 +12,7 @@ import java.util.NoSuchElementException;
 /**
  * Generates the constrained Cartesian product of multiple dimensions in lexicographical order.
  * <p>
- * This class takes a list of lists of lists, where each inner list represents a set of elements
+ * This class takes a list of, lists of lists, where each inner list represents a set of elements
  * (e.g., combinations or subsets), and generates the Cartesian product of these sets.
  * </p>
  *
@@ -93,20 +93,20 @@ public class ConstrainedProduct implements Iterable<List<Object>> {
                 throw new NoSuchElementException("No more tuples available");
             }
 
-            // Handle no dimensions case
+            // no dimensions
             if (all.isEmpty()) {
                 hasNext = false;
                 return List.of();
             }
 
-            // Handle single dimension case
+            // single dimension
             if (all.size() == 1) {
                 List<Object> result = all.get(0).get(indices[0]);
                 hasNext = ++indices[0] < maxIndices[0];
                 return result;
             }
 
-            // Handle multiple dimensions case
+            // multiple dimensions
             List<Object> result = new ArrayList<>();
             for (int i = 0; i < indices.length; i++) {
                 result.addAll(all.get(i).get(indices[i]));

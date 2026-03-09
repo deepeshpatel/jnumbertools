@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
+import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -129,7 +130,7 @@ public class ConstrainedCartesianProductByRanksTest {
                     .andDistinct(2, cheese);
 
             int sampleSize = 5;
-            var result = product.choice(sampleSize).stream().toList();
+            var result = product.choice(sampleSize, TestBase.random).stream().toList();
 
             assertEquals(sampleSize, result.size());
             // Duplicates are allowed, so we don't check uniqueness
@@ -141,7 +142,7 @@ public class ConstrainedCartesianProductByRanksTest {
                     .andDistinct(2, cheese);
 
             assertThrows(IllegalArgumentException.class, () ->
-                    product.choice(-1)
+                    product.choice(-1, TestBase.random)
             );
         }
 
@@ -150,7 +151,7 @@ public class ConstrainedCartesianProductByRanksTest {
             var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
                     .andDistinct(2, Collections.emptyList());
 
-            var result = product.choice(3).stream().toList();
+            var result = product.choice(3, TestBase.random).stream().toList();
             assertEquals(0, result.size());
         }
 
@@ -159,7 +160,7 @@ public class ConstrainedCartesianProductByRanksTest {
             var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
-            var result = product.choice(3).stream().toList();
+            var result = product.choice(3, TestBase.random).stream().toList();
 
             assertEquals(3, result.size());
             for (var tuple : result) {
@@ -183,7 +184,7 @@ public class ConstrainedCartesianProductByRanksTest {
                     .andDistinct(2, cheese);
 
             int sampleSize = 4;
-            var result = product.sample(sampleSize).stream().toList();
+            var result = product.sample(sampleSize, TestBase.random).stream().toList();
 
             assertEquals(sampleSize, result.size());
             assertEquals(sampleSize, result.stream().distinct().count());
@@ -196,7 +197,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
             BigInteger total = product.count();
             assertThrows(IllegalArgumentException.class, () ->
-                    product.sample(total.intValue() + 1)
+                    product.sample(total.intValue() + 1, TestBase.random)
             );
         }
 
@@ -206,7 +207,7 @@ public class ConstrainedCartesianProductByRanksTest {
                     .andDistinct(2, cheese);
 
             assertThrows(IllegalArgumentException.class, () ->
-                    product.sample(-1)
+                    product.sample(-1, TestBase.random)
             );
         }
 
@@ -216,7 +217,7 @@ public class ConstrainedCartesianProductByRanksTest {
                     .andDistinct(2, cheese);
 
             int sampleSize = 5;
-            var result = product.sample(sampleSize).stream().toList();
+            var result = product.sample(sampleSize, TestBase.random).stream().toList();
 
             assertEquals(sampleSize, result.size());
             assertEquals(sampleSize, result.stream().distinct().count());

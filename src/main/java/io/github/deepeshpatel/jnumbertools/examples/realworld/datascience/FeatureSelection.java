@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.examples.realworld.datascience;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Demonstrates feature selection for machine learning
@@ -81,7 +82,7 @@ public class FeatureSelection {
 
         System.out.println("Total CV split strategies: " + splits.count());
         System.out.println("\nSample cross-validation strategies:");
-        splits.choice(6)
+        splits.choice(6,new Random())
                 .stream()
                 .forEach(FeatureSelection::formatCVSplit);
     }

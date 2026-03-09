@@ -8,6 +8,7 @@ import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -52,7 +53,7 @@ public class LotteryNumberGenerator {
         System.out.println("\n   One random ticket:");
         var randomTicket = JNumberTools.combinations()
                 .unique(mainNumbers, pick)
-                .choice(1)
+                .choice(1,new Random())
                 .stream()
                 .findFirst()
                 .map(LotteryNumberGenerator::formatTicket)
@@ -84,7 +85,7 @@ public class LotteryNumberGenerator {
         var ticket = JNumberTools.cartesianProduct()
                 .constrainedProductOfDistinct(whitePick, range(1, whiteBalls + 1))
                 .andDistinct(powerPick, range(1, powerBalls + 1))
-                .choice(1)
+                .choice(1,new Random())
                 .stream()
                 .findFirst()
                 .map(LotteryNumberGenerator::formatPowerBall)   // ← Fix 2: method accepts List<?>
@@ -111,7 +112,7 @@ public class LotteryNumberGenerator {
         var ticket = JNumberTools.cartesianProduct()
                 .constrainedProductOfDistinct(mainPick, range(1, main + 1))
                 .andDistinct(starsPick, range(1, stars + 1))
-                .choice(1)
+                .choice(1,new Random())
                 .stream()
                 .findFirst()
                 .map(LotteryNumberGenerator::formatEuroMillions)   // ← Fix 2: method accepts List<?>
@@ -130,7 +131,7 @@ public class LotteryNumberGenerator {
         System.out.println("   Random ticket:");
         var random = JNumberTools.combinations()
                 .unique(n, r)
-                .choice(1)
+                .choice(1,new Random())
                 .stream()
                 .findFirst()
                 .map(LotteryNumberGenerator::formatTicket)

@@ -6,6 +6,7 @@ package io.github.deepeshpatel.jnumbertools.generator.base;
 
 import java.math.BigInteger;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Interface for builders that generate multiset combinations (frequency maps).
@@ -65,19 +66,21 @@ public interface MultisetBuilder<T> {
      * Generates a random sample of multiset combinations with replacement.
      *
      * @param sampleSize number of combinations to generate (must be > 0)
+     * @param random the random generator to use
      * @return a generator producing random combinations (duplicates allowed)
      * @throws IllegalArgumentException if sampleSize ≤ 0
      */
-    Iterable<Map<T, Integer>> choice(int sampleSize);
+    Iterable<Map<T, Integer>> choice(int sampleSize, Random random);
 
     /**
      * Generates a random sample of unique multiset combinations without replacement.
      *
      * @param sampleSize number of combinations to generate (must be > 0 and ≤ total)
+     * @param random the random generator to use
      * @return a generator producing unique random combinations
      * @throws IllegalArgumentException if sampleSize ≤ 0 or exceeds total
      */
-    Iterable<Map<T, Integer>> sample(int sampleSize);
+    Iterable<Map<T, Integer>> sample(int sampleSize, Random random);
 
     /**
      * Returns the total number of possible multiset combinations.

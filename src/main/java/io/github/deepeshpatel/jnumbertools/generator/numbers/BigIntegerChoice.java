@@ -23,23 +23,22 @@ public class BigIntegerChoice implements Iterable<BigInteger> {
 
     private final BigInteger max;
     private final int sampleSize;
+    private final Random random;
 
     /**
      * Constructs a BigIntegerChoice instance.
      *
      * @param max        the upper bound (exclusive) of the range [0, max); must be positive
      * @param sampleSize the number of random values to generate; must be positive
+     * @param random the random generator to use
      * @throws IllegalArgumentException if max is not positive or sampleSize is not positive
      */
-    public BigIntegerChoice(BigInteger max, int sampleSize) {
-        if (max.signum() <= 0) {
-            throw new IllegalArgumentException("Max must be positive");
-        }
-        if (sampleSize <= 0) {
-            throw new IllegalArgumentException("Sample size must be positive");
-        }
+    public BigIntegerChoice(BigInteger max, int sampleSize, Random random) {
+        BigIntegerSample.parameterValidationForChoiceAndSample(max, sampleSize, random);
+
         this.max = max;
         this.sampleSize = sampleSize;
+        this.random = random;
     }
 
     /**
@@ -49,7 +48,7 @@ public class BigIntegerChoice implements Iterable<BigInteger> {
      */
     @Override
     public Iterator<BigInteger> iterator() {
-        return new BigIntegerChoiceIterator(max, sampleSize);
+        return new BigIntegerChoiceIterator(max, sampleSize, random);
     }
 }
 
@@ -63,16 +62,11 @@ class BigIntegerChoiceIterator implements Iterator<BigInteger> {
     private final Random random;
     private int generatedCount;
 
-    /**
-     * Constructs a BigIntegerChoiceIterator with minimal initialization.
-     *
-     * @param max        the upper bound (exclusive) of the range [0, max)
-     * @param sampleSize the number of values to generate
-     */
-    public BigIntegerChoiceIterator(BigInteger max, int sampleSize) {
+
+    public BigIntegerChoiceIterator(BigInteger max, int sampleSize, Random random) {
         this.max = max;
         this.sampleSize = sampleSize;
-        this.random = new Random();
+        this.random = random;
         this.generatedCount = 0;
     }
 

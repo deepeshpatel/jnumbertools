@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
+import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -82,13 +83,13 @@ class SimpleProductBuilderTest {
         var builder = cartesianProduct.simpleProductOf(setA).and(setB);
 
         // Test returns generator for valid sample size
-        assertNotNull(builder.choice(5));
+        assertNotNull(builder.choice(5, TestBase.random));
 
         // Test negative sample size throws
-        assertThrows(IllegalArgumentException.class, () -> builder.choice(-1));
+        assertThrows(IllegalArgumentException.class, () -> builder.choice(-1, TestBase.random));
 
         // Test zero sample size? (check your implementation)
-        assertThrows(IllegalArgumentException.class, () -> builder.choice(0));
+        assertThrows(IllegalArgumentException.class, () -> builder.choice(0, TestBase.random));
     }
 
     @Test
@@ -96,14 +97,14 @@ class SimpleProductBuilderTest {
         var builder = cartesianProduct.simpleProductOf(setA).and(setB);
 
         // Test returns generator for valid sample size
-        assertNotNull(builder.sample(4));
+        assertNotNull(builder.sample(4, TestBase.random));
 
         // Test negative sample size throws
-        assertThrows(IllegalArgumentException.class, () -> builder.sample(-1));
+        assertThrows(IllegalArgumentException.class, () -> builder.sample(-1, TestBase.random));
 
         // Test sample size > count throws
         BigInteger total = builder.count();
-        assertThrows(IllegalArgumentException.class, () -> builder.sample(total.intValue() + 1));
+        assertThrows(IllegalArgumentException.class, () -> builder.sample(total.intValue() + 1, TestBase.random));
     }
 
     @Test

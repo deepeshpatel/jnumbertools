@@ -7,6 +7,7 @@ package io.github.deepeshpatel.jnumbertools.examples.realworld.security;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,7 +44,7 @@ public class PasswordGenerator {
                 .andInRange(2, 3, SYMBOLS)  // at least 2 and at most 3 symbols
                 .andDistinct (5, combine(LOWERCASE, UPPERCASE, DIGITS, SYMBOLS)); // rest to fill
 
-        builder.choice(5)   // 5 random passwords (no duplicates)
+        builder.choice(5,new Random())   // 5 random passwords (no duplicates)
                 .stream()
                 .map(PasswordGenerator::formatPassword)
                 .forEach(pw -> System.out.println("   → " + pw + "   (length: " + pw.length() + ")"));

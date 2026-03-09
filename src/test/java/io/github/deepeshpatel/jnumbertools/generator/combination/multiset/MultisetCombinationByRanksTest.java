@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
+import io.github.deepeshpatel.jnumbertools.TestBase;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -109,7 +110,7 @@ class MultisetCombinationByRanksTest {
             int combinationSize = 2;
             int sampleSize = 3;
             var combinations = combination.multiset(options, combinationSize)
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, combinations.size(), "Should generate exactly sampleSize combinations");
@@ -121,7 +122,7 @@ class MultisetCombinationByRanksTest {
             int combinationSize = 2;
             int sampleSize = 4;
             var combinations = combination.multiset(options, combinationSize)
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, combinations.size(), "Should generate sampleSize combinations");
@@ -134,7 +135,7 @@ class MultisetCombinationByRanksTest {
             int combinationSize = 3;
             int sampleSize = 3;
             var combinations = combination.multiset(options, combinationSize)
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
 
@@ -157,7 +158,7 @@ class MultisetCombinationByRanksTest {
             int combinationSize = 2;
             int totalCombinations = 1; // Only {A=1, B=1} possible
             assertThrows(IllegalArgumentException.class, () -> combination.multiset(options, combinationSize)
-                    .sample(totalCombinations + 1)
+                    .sample(totalCombinations + 1, TestBase.random)
                     .stream()
                     .toList(), "Sample size exceeding total combinations should throw exception");
         }
@@ -166,7 +167,7 @@ class MultisetCombinationByRanksTest {
         void shouldThrowExceptionForNegativeSampleSize() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1));
             assertThrows(IllegalArgumentException.class, () -> combination.multiset(options, 1)
-                    .sample(-1)
+                    .sample(-1, TestBase.random)
                     .stream()
                     .toList(), "Negative sampleSize should throw exception");
         }
@@ -175,7 +176,7 @@ class MultisetCombinationByRanksTest {
         void shouldHandleEmptyInputWithZeroSize() {
             var options = new LinkedHashMap<String, Integer>();
             var combinations = combination.multiset(options, 0)
-                    .sample(1)
+                    .sample(1, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(1, combinations.size(), "Should generate one empty combination");
@@ -185,7 +186,7 @@ class MultisetCombinationByRanksTest {
         @Test
         void shouldGenerateConsistentResultsAcrossIterators() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1, "C", 1));
-            var iterable = combination.multiset(options, 2).sample(3);
+            var iterable = combination.multiset(options, 2).sample(3, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
 
@@ -205,7 +206,7 @@ class MultisetCombinationByRanksTest {
             int combinationSize = 2;
             int choiceSize = 4;
             var combinations = combination.multiset(options, combinationSize)
-                    .choice(choiceSize)
+                    .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(choiceSize, combinations.size(), "Should generate exactly choiceSize combinations");
@@ -217,7 +218,7 @@ class MultisetCombinationByRanksTest {
             int combinationSize = 2;
             int choiceSize = 4; // > total combinations to ensure duplicates
             var combinations = combination.multiset(options, combinationSize)
-                    .choice(choiceSize)
+                    .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(choiceSize, combinations.size(), "Should generate choiceSize combinations");
@@ -230,7 +231,7 @@ class MultisetCombinationByRanksTest {
             int combinationSize = 3;
             int choiceSize = 3;
             var combinations = combination.multiset(options, combinationSize)
-                    .choice(choiceSize)
+                    .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
 
@@ -253,7 +254,7 @@ class MultisetCombinationByRanksTest {
             int combinationSize = 2;
             int choiceSize = 5; // > total combinations
             var combinations = combination.multiset(options, combinationSize)
-                    .choice(choiceSize)
+                    .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(choiceSize, combinations.size(), "Should generate choiceSize combinations even if > total combinations");
@@ -263,7 +264,7 @@ class MultisetCombinationByRanksTest {
         void shouldThrowExceptionForNegativeChoiceSize() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1));
             assertThrows(IllegalArgumentException.class, () -> combination.multiset(options, 1)
-                    .choice(-1)
+                    .choice(-1, TestBase.random)
                     .stream()
                     .toList(), "Negative choiceSize should throw exception");
         }
@@ -272,7 +273,7 @@ class MultisetCombinationByRanksTest {
         void shouldHandleEmptyInputWithZeroSize() {
             var options = new LinkedHashMap<String, Integer>();
             var combinations = combination.multiset(options, 0)
-                    .choice(1)
+                    .choice(1, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(1, combinations.size(), "Should generate one empty combination");
@@ -282,7 +283,7 @@ class MultisetCombinationByRanksTest {
         @Test
         void shouldGenerateConsistentResultsAcrossIterators() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1, "C", 1));
-            var iterable = combination.multiset(options, 2).choice(3);
+            var iterable = combination.multiset(options, 2).choice(3, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
 

@@ -13,6 +13,7 @@ import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Builder for generating subsets of elements within a specified size range.
@@ -281,7 +282,7 @@ public class SubsetBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Generates a random sample of subsets with replacement.
+     * Generates a random sample of subsets with replacement using custom random generator.
      * <p>
      * Each subset is chosen independently and uniformly at random from all possible subsets
      * in the configured range. The same subset may appear multiple times in the result.
@@ -292,22 +293,24 @@ public class SubsetBuilder<T> implements Builder<T> {
      * </p>
      *
      * @param sampleSize the number of subsets to generate
+     * @param random the random generator to use
      * @return a {@code SubsetGeneratorByRanks} producing the random subsets
-     * @throws IllegalArgumentException if {@code sampleSize} is negative
-     * @see #sample(int)
+     * @throws IllegalArgumentException if {@code sampleSize} is negative or random is null
+     * @see #sample(int, Random)
      * @see BigIntegerChoice
      */
-    public SubsetGeneratorByRanks<T> choice(int sampleSize) {
+    @Override
+    public SubsetGeneratorByRanks<T> choice(int sampleSize, Random random) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
         BigInteger total = count();
-        Iterable<BigInteger> ranks = new BigIntegerChoice(total, sampleSize);
+        Iterable<BigInteger> ranks = new BigIntegerChoice(total, sampleSize, random);
         return byRanks(ranks);
     }
 
     /**
-     * Generates a random sample of unique subsets without replacement.
+     * Generates a random sample of unique subsets without replacement using custom random generator.
      * <p>
      * All returned subsets are distinct and chosen uniformly at random from all possible
      * subsets in the configured range. The order is random (not lexicographical).
@@ -318,21 +321,24 @@ public class SubsetBuilder<T> implements Builder<T> {
      * </p>
      *
      * @param sampleSize the number of unique subsets to generate
+     * @param random the random generator to use
      * @return a {@code SubsetGeneratorByRanks} producing the random unique subsets
-     * @throws IllegalArgumentException if {@code sampleSize} is negative or exceeds the total number of subsets in range
-     * @see #choice(int)
+     * @throws IllegalArgumentException if {@code sampleSize} is negative, exceeds the total number of subsets in range, or random is null
+     * @see #choice(int, Random)
      * @see BigIntegerSample
      */
-    public SubsetGeneratorByRanks<T> sample(int sampleSize) {
+    @Override
+    public SubsetGeneratorByRanks<T> sample(int sampleSize, Random random) {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
+
         BigInteger total = count();
         if (BigInteger.valueOf(sampleSize).compareTo(total) > 0) {
             throw new IllegalArgumentException(
                     "Sample size cannot exceed total subsets in range: " + total);
         }
-        Iterable<BigInteger> ranks = new BigIntegerSample(total, sampleSize);
+        Iterable<BigInteger> ranks = new BigIntegerSample(total, sampleSize, random);
         return byRanks(ranks);
     }
 

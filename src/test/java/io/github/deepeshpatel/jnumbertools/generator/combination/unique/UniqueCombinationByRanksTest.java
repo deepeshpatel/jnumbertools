@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 
+import io.github.deepeshpatel.jnumbertools.TestBase;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ class UniqueCombinationByRanksTest {
             int sampleSize = 4;
             var combinations = JNumberTools.combinations()
                     .unique(n, r)
-                    .choice(sampleSize)
+                    .choice(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, combinations.size(), "Should generate exactly sampleSize combinations");
@@ -39,7 +40,7 @@ class UniqueCombinationByRanksTest {
             int sampleSize = 4; // Larger than nCr=3 to increase duplicate chance
             var combinations = JNumberTools.combinations()
                     .unique(n, r)
-                    .choice(sampleSize)
+                    .choice(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, combinations.size(), "Should generate sampleSize combinations");
@@ -55,7 +56,7 @@ class UniqueCombinationByRanksTest {
             int sampleSize = 3;
             var combinations = JNumberTools.combinations()
                     .unique(r, elements)
-                    .choice(sampleSize)
+                    .choice(sampleSize, TestBase.random)
                     .stream()
                     .toList();
 
@@ -74,7 +75,7 @@ class UniqueCombinationByRanksTest {
             int sampleSize = 5; // nCr = 3C2 = 3, sampleSize > nCr
             var combinations = JNumberTools.combinations()
                     .unique(n, r)
-                    .choice(sampleSize)
+                    .choice(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, combinations.size(), "Should generate sampleSize combinations even if > nCr");
@@ -84,7 +85,7 @@ class UniqueCombinationByRanksTest {
         void shouldThrowExceptionForNegativeSampleSize() {
             assertThrows(IllegalArgumentException.class, () -> JNumberTools.combinations()
                     .unique(2, "A", "B", "C")
-                    .choice(-1)
+                    .choice(-1, TestBase.random)
                     .stream()
                     .toList(), "Negative sampleSize should throw exception");
         }
@@ -93,7 +94,7 @@ class UniqueCombinationByRanksTest {
         void shouldHandleEmptyInputWithZeroSize() {
             var combinations = JNumberTools.combinations()
                     .unique(0, Collections.emptyList())
-                    .choice(1)
+                    .choice(1, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(1, combinations.size(), "Should generate one empty combination");
@@ -104,7 +105,7 @@ class UniqueCombinationByRanksTest {
         void shouldThrowExceptionForEmptyInputWithNonZeroSize() {
             assertThrows(IllegalArgumentException.class, () -> JNumberTools.combinations()
                     .unique(1, Collections.emptyList())
-                    .choice(1)
+                    .choice(1, TestBase.random)
                     .stream()
                     .toList(), "Non-zero size with empty input should throw exception");
         }
@@ -116,7 +117,7 @@ class UniqueCombinationByRanksTest {
             int sampleSize = 10;
             var combinations = JNumberTools.combinations()
                     .unique(r, largeInput)
-                    .choice(sampleSize)
+                    .choice(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, combinations.size(), "Should generate sampleSize combinations for large input");
@@ -131,7 +132,7 @@ class UniqueCombinationByRanksTest {
         void shouldGenerateConsistentPropertiesAcrossIterators() {
             var iterable = JNumberTools.combinations()
                     .unique(2, "A", "B", "C")
-                    .choice(3);
+                    .choice(3, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
 
@@ -167,7 +168,7 @@ class UniqueCombinationByRanksTest {
         void shouldThrowExceptionForSampleSizeZero() {
             assertThrows(IllegalArgumentException.class, () -> combination
                     .unique(2, "A", "B", "C")
-                    .sample(0)
+                    .sample(0, TestBase.random)
                     .stream()
                     .toList(), "Sample size of 0 should throw IllegalArgumentException");
         }
@@ -176,7 +177,7 @@ class UniqueCombinationByRanksTest {
         void shouldGenerateConsistentPropertiesAcrossIterators() {
             var iterable = combination
                     .unique(2, "A", "B", "C")
-                    .sample(2);
+                    .sample(2, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
 
@@ -201,7 +202,7 @@ class UniqueCombinationByRanksTest {
             int sampleSize = 4;
             var combinations = combination
                     .unique(n, r)
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, combinations.size(), "Should generate exactly sampleSize combinations");
@@ -214,7 +215,7 @@ class UniqueCombinationByRanksTest {
             int sampleSize = 3;
             var combinations = combination
                     .unique(n, r)
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .collect(Collectors.toSet()); // Use Set to check uniqueness
             assertEquals(sampleSize, combinations.size(), "All generated combinations should be unique");
@@ -227,7 +228,7 @@ class UniqueCombinationByRanksTest {
             int sampleSize = 2;
             var combinations = combination
                     .unique(r, elements)
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
 
@@ -246,7 +247,7 @@ class UniqueCombinationByRanksTest {
             int sampleSize = calculator.nCr(n, r).intValueExact(); // 4C2 = 6
             var combinations = combination
                     .unique(n, r)
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, combinations.size(), "Should generate all possible combinations when sampleSize equals nCr");
@@ -257,7 +258,7 @@ class UniqueCombinationByRanksTest {
         void shouldThrowExceptionForNegativeSampleSize() {
             assertThrows(IllegalArgumentException.class, () -> combination
                     .unique(2, "A", "B", "C")
-                    .sample(-1)
+                    .sample(-1, TestBase.random)
                     .stream()
                     .toList(), "Negative sampleSize should throw exception");
         }
@@ -269,7 +270,7 @@ class UniqueCombinationByRanksTest {
             int nCr = calculator.nCr(n, r).intValueExact(); // 3C2 = 3
             assertThrows(IllegalArgumentException.class, () -> combination
                     .unique(n, r)
-                    .sample(nCr + 1)
+                    .sample(nCr + 1, TestBase.random)
                     .stream()
                     .toList(), "Sample size exceeding nCr should throw exception");
         }
@@ -278,7 +279,7 @@ class UniqueCombinationByRanksTest {
         void shouldHandleEmptyInputWithZeroSize() {
             var combinations = combination
                     .unique(0, Collections.emptyList())
-                    .sample(1)
+                    .sample(1, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(1, combinations.size(), "Should generate one empty combination");
@@ -289,7 +290,7 @@ class UniqueCombinationByRanksTest {
         void shouldThrowExceptionForEmptyInputWithNonZeroSize() {
             assertThrows(IllegalArgumentException.class, () -> combination
                     .unique(1, Collections.emptyList())
-                    .sample(1)
+                    .sample(1, TestBase.random)
                     .stream()
                     .toList(), "Non-zero size with empty input should throw exception");
         }
@@ -301,7 +302,7 @@ class UniqueCombinationByRanksTest {
             int sampleSize = 5;
             var combinations = combination
                     .unique(r, largeInput)
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, combinations.size(), "Should generate sampleSize combinations for large input");

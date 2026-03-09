@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.examples.realworld.testing;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 /**
@@ -108,7 +109,7 @@ public class TestDataGenerator {
                 .simpleProductOf(names)
                 .and(ages)
                 .and(scores)
-                .choice(10)
+                .choice(10,new Random())
                 .stream()
                 .forEach(tuple -> System.out.println("  Name=" + tuple.get(0) +
                         ", Age=" + tuple.get(1) +

@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
+import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -211,7 +212,7 @@ class RepetitivePermutationByRanksTest {
             int width = 3;
             int sampleSize = 4;
             var permutations = permutation.repetitive(width, "A", "B")
-                    .choice(sampleSize)
+                    .choice(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size(), "Should generate exactly sampleSize permutations");
@@ -222,7 +223,7 @@ class RepetitivePermutationByRanksTest {
             int width = 2;
             int sampleSize = 5; // > 2^2 = 4 to ensure possible duplicates
             var permutations = permutation.repetitive(width, "A", "B")
-                    .choice(sampleSize)
+                    .choice(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size());
@@ -237,7 +238,7 @@ class RepetitivePermutationByRanksTest {
             int width = 2;
             int sampleSize = 3;
             var permutations = permutation.repetitive(width, elements)
-                    .choice(sampleSize)
+                    .choice(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size());
@@ -253,7 +254,7 @@ class RepetitivePermutationByRanksTest {
             int width = 2;
             int sampleSize = 5; // > 2^2 = 4
             var permutations = permutation.repetitive(width, elements)
-                    .choice(sampleSize)
+                    .choice(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size(), "Should generate sampleSize permutations even if > n^width");
@@ -262,7 +263,7 @@ class RepetitivePermutationByRanksTest {
         @Test
         void shouldThrowExceptionForNegativeSampleSize() {
             assertThrows(IllegalArgumentException.class, () -> permutation.repetitive(2, "A", "B")
-                    .choice(-1)
+                    .choice(-1, TestBase.random)
                     .stream()
                     .toList(), "Negative sampleSize should throw exception");
         }
@@ -270,7 +271,7 @@ class RepetitivePermutationByRanksTest {
         @Test
         void shouldHandleEmptyInput() {
             var permutations = permutation.repetitive(0, Collections.emptyList())
-                    .choice(1)
+                    .choice(1, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(1, permutations.size());
@@ -279,7 +280,7 @@ class RepetitivePermutationByRanksTest {
 
         @Test
         void shouldGenerateConsistentResultsAcrossIterators() {
-            var iterable = permutation.repetitive(2, "A", "B").choice(3);
+            var iterable = permutation.repetitive(2, "A", "B").choice(3, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertEquals(3, list1.size(), "First iterator should produce sampleSize permutations");
@@ -299,7 +300,7 @@ class RepetitivePermutationByRanksTest {
             int width = 3;
             int sampleSize = 4;
             var permutations = permutation.repetitive(width, "A", "B")
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size(), "Should generate exactly sampleSize permutations");
@@ -310,7 +311,7 @@ class RepetitivePermutationByRanksTest {
             int width = 2;
             int sampleSize = 3; // < 2^2 = 4 to ensure uniqueness possible
             var permutations = permutation.repetitive(width, "A", "B")
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size());
@@ -323,7 +324,7 @@ class RepetitivePermutationByRanksTest {
             int width = 2;
             int sampleSize = 3;
             var permutations = permutation.repetitive(width, elements)
-                    .sample(sampleSize)
+                    .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(sampleSize, permutations.size());
@@ -339,7 +340,7 @@ class RepetitivePermutationByRanksTest {
             int width = 2;
             int total = calculator.power(2, width).intValue(); // 2^2 = 4
             assertThrows(IllegalArgumentException.class, () -> permutation.repetitive(width, elements)
-                    .sample(total + 1)
+                    .sample(total + 1, TestBase.random)
                     .stream()
                     .toList(), "Sample size exceeding n^width should throw exception");
         }
@@ -347,7 +348,7 @@ class RepetitivePermutationByRanksTest {
         @Test
         void shouldThrowExceptionForNegativeSampleSize() {
             assertThrows(IllegalArgumentException.class, () -> permutation.repetitive(2, "A", "B")
-                    .sample(-1)
+                    .sample(-1, TestBase.random)
                     .stream()
                     .toList(), "Negative sampleSize should throw exception");
         }
@@ -355,7 +356,7 @@ class RepetitivePermutationByRanksTest {
         @Test
         void shouldHandleEmptyInput() {
             var permutations = permutation.repetitive(0, Collections.emptyList())
-                    .sample(1)
+                    .sample(1, TestBase.random)
                     .stream()
                     .toList();
             assertEquals(1, permutations.size());
@@ -364,7 +365,7 @@ class RepetitivePermutationByRanksTest {
 
         @Test
         void shouldGenerateConsistentResultsAcrossIterators() {
-            var iterable = permutation.repetitive(2, "A", "B").sample(3);
+            var iterable = permutation.repetitive(2, "A", "B").sample(3, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertEquals(3, list1.size(), "First iterator should produce sampleSize permutations");

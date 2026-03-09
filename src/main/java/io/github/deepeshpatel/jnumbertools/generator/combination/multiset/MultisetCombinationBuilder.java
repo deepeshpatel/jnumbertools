@@ -13,6 +13,7 @@ import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
 import java.math.BigInteger;
 import java.util.LinkedHashMap;
+import java.util.Random;
 
 /**
  * Builder for generating combinations from a multiset.
@@ -195,15 +196,16 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
      * </p>
      *
      * @param sampleSize the number of combinations to sample (1 ≤ sampleSize ≤ total combinations)
+     * @param random the random generator to use
      * @return a {@link MultisetCombinationByRanks} for random sampling without replacement
      * @throws IllegalArgumentException if sampleSize ≤ 0 or exceeds total combinations
      */
-    public MultisetCombinationByRanks<T> sample(int sampleSize) {
+    public MultisetCombinationByRanks<T> sample(int sampleSize, Random random) {
         BigInteger total = Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
         if (sampleSize <= 0 || BigInteger.valueOf(sampleSize).compareTo(total) > 0) {
             throw new IllegalArgumentException("Sample size must be positive and not exceed total combinations");
         }
-        return new MultisetCombinationByRanks<>(options, r, new BigIntegerSample(total, sampleSize), count());
+        return new MultisetCombinationByRanks<>(options, r, new BigIntegerSample(total, sampleSize, random), count());
     }
 
     /**
@@ -214,15 +216,16 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
      * </p>
      *
      * @param sampleSize the number of combinations to sample (sampleSize ≥ 1)
+     * @param random the random generator to use
      * @return a {@link MultisetCombinationByRanks} for random sampling with replacement
      * @throws IllegalArgumentException if sampleSize ≤ 0
      */
-    public MultisetCombinationByRanks<T> choice(int sampleSize) {
+    public MultisetCombinationByRanks<T> choice(int sampleSize, Random random) {
         if (sampleSize <= 0) {
             throw new IllegalArgumentException("Sample size must be positive");
         }
         BigInteger total = Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
-        return new MultisetCombinationByRanks<>(options, r, new BigIntegerChoice(total, sampleSize), count());
+        return new MultisetCombinationByRanks<>(options, r, new BigIntegerChoice(total, sampleSize, random), count());
     }
 
     /**

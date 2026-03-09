@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.examples.realworld.statistics;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 /**
@@ -44,7 +45,7 @@ public class SurveySampling {
         // Select 50 random respondents
         var sample = JNumberTools.combinations()
                 .unique(50, population)
-                .choice(1)
+                .choice(1,new Random())
                 .stream()
                 .findFirst()
                 .orElseThrow();
@@ -77,7 +78,7 @@ public class SurveySampling {
             int sampleSize = list.size() / 10;
             var sample = JNumberTools.combinations()
                     .unique(sampleSize, list)
-                    .choice(1)
+                    .choice(1,new Random())
                     .stream()
                     .findFirst()
                     .orElseThrow();

@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
+import io.github.deepeshpatel.jnumbertools.TestBase;
 import io.github.deepeshpatel.jnumbertools.base.Combinations;
 import org.junit.jupiter.api.Test;
 
@@ -87,13 +88,13 @@ class MultisetCombinationBuilderTest {
     @Test
     void choice() {
         // Valid sample size
-        assertNotNull(builder.choice(3));
+        assertNotNull(builder.choice(3, TestBase.random));
 
         // sampleSize <= 0
         assertThrows(IllegalArgumentException.class, () ->
-                builder.choice(0));
+                builder.choice(0, TestBase.random));
         assertThrows(IllegalArgumentException.class, () ->
-                builder.choice(-1));
+                builder.choice(-1, TestBase.random));
 
         // Note: sampleSize > total is allowed for choice (with replacement)
     }
@@ -101,18 +102,18 @@ class MultisetCombinationBuilderTest {
     @Test
     void sample() {
         // Valid sample size
-        assertNotNull(builder.sample(3));
+        assertNotNull(builder.sample(3, TestBase.random));
 
         // sampleSize <= 0
         assertThrows(IllegalArgumentException.class, () ->
-                builder.sample(0));
+                builder.sample(0, TestBase.random));
         assertThrows(IllegalArgumentException.class, () ->
-                builder.sample(-1));
+                builder.sample(-1, TestBase.random));
 
         // sampleSize > total
         int tooLarge = builder.count().intValue() + 1;
         assertThrows(IllegalArgumentException.class, () ->
-                builder.sample(tooLarge));
+                builder.sample(tooLarge, TestBase.random));
     }
 
     @Test

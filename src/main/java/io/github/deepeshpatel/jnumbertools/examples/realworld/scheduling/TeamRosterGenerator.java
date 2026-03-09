@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.examples.realworld.scheduling;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 /**
@@ -74,7 +75,7 @@ public class TeamRosterGenerator {
         var players = createPlayerPool();
         var lineup = JNumberTools.combinations()
                 .unique(5, players)
-                .choice(1)
+                .choice(1,new Random())
                 .stream()
                 .findFirst()
                 .orElseThrow();

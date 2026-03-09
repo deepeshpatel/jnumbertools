@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.examples.realworld.business;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Demonstrates marketing campaign optimization
@@ -81,7 +82,7 @@ public class MarketingCampaigns {
 
         System.out.println("Total channel mix combinations: " + channelMix.count());
         System.out.println("\nSample channel mixes:");
-        channelMix.choice(6)
+        channelMix.choice(6,new Random())
                 .stream()
                 .forEach(MarketingCampaigns::formatChannelMix);
     }

@@ -40,7 +40,7 @@ JNumberTools.cartesianProduct()
    .and(pizzaCrust)
    .and(cheese)
    .lexOrder()
-   .stream().toList();
+   .stream().forEach(System.out::println);
 ```
 
 #### 1.2 m-th simple Cartesian product
@@ -59,7 +59,7 @@ JNumberTools.cartesianProduct()
    .and(pizzaCrust)
    .and(cheese)
    .lexOrderMth(10, 5)
-   .stream().toList();
+   .stream().forEach(System.out::println);
 ```
 
 ### 2. Constrained Cartesian Product
@@ -87,7 +87,7 @@ JNumberTools.cartesianProduct()
    .andMultiSelect(2, sauce)
    .andInRange(1, 5, toppings)
    .lexOrder()
-   .stream().toList();
+   .stream().forEach(System.out::println);
 ```
 
 #### 2.2 m-th constrained Cartesian product
@@ -106,12 +106,12 @@ var symbols = List.of('~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')');
 var numbers = IntStream.rangeClosed(0, 20).boxed().toList();
 
 JNumberTools.cartesianProduct()
-   .constrainedProductOf(10, smallAlphabets) // distinct
+   .constrainedProductOfDistinct(10, smallAlphabets) // distinct
    .andDistinct(12, capitalAlphabets) // distinct
    .andMultiSelect(3, symbols) // repetition allowed
    .andInRange(10, 20, numbers) // all subsets in size range
    .lexOrderMth(1_000_000_000_000_000_000L, 0)
-   .stream().toList();
+   .stream().forEach(System.out::println);
 ```
 [Home](../../README.md)
 </br>[Permutation Generators](../permutations/README.md)
