@@ -58,14 +58,19 @@ public final class Calculator {
      */
     public BigInteger nCr(int n, int r) {
         if (r == n || r == 0) return BigInteger.ONE;
-        if (n < r || r < 0 ) return BigInteger.ZERO;
+        if (n < r || r < 0) return BigInteger.ZERO;
 
         r = Math.min(r, n - r);
 
         BigInteger value = nCrMemo.get(n, r);
         if (value != null) return value;
 
-        value = nCr(n - 1, r - 1).add(nCr(n - 1, r));
+        value = BigInteger.ONE;
+        for (int i = 1; i <= r; i++) {
+            value = value.multiply(BigInteger.valueOf(n - r + i))
+                    .divide(BigInteger.valueOf(i));
+        }
+
         nCrMemo.put(n, r, value);
         return value;
     }
@@ -95,14 +100,18 @@ public final class Calculator {
     public BigInteger nPr(int n, int r) {
         if (r < 0 || n < r) return BigInteger.ZERO;
         if (r == 0) return BigInteger.ONE;
-        if (r == 1) return BigInteger.valueOf(n);
 
-        BigInteger value = nPrMemo.get(n, r);
-        if (value != null) return value;
+        BigInteger cached = nPrMemo.get(n, r);
+        if (cached != null) return cached;
 
-        value = nPr(n - 1, r - 1).multiply(BigInteger.valueOf(n));
-        nPrMemo.put(n, r, value);
-        return value;
+        // Calculate iteratively
+        BigInteger result = BigInteger.ONE;
+        for (int i = 0; i < r; i++) {
+            result = result.multiply(BigInteger.valueOf(n - i));
+        }
+
+        nPrMemo.put(n, r, result);
+        return result;
     }
 
     /**

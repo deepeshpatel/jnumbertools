@@ -101,7 +101,7 @@ public final class UnrankOf {
      * @return an array of k distinct indices
      */
     public int[] kPermutation(BigInteger rank, int n, int k) {
-        return new PermutadicAlgorithms(calculator).unRankWithBoundCheck(rank, n, k);
+        return PermutadicAlgorithms.unRankWithBoundCheck(rank, n, k, calculator);
     }
 
     /**
