@@ -4,10 +4,11 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.base.Combinations;
-import io.github.deepeshpatel.jnumbertools.base.Permutations;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
+import io.github.deepeshpatel.jnumbertools.generator.combination.unique.UniqueCombinationBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.unique.UniquePermutation;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.unique.UniquePermutationBuilder;
 
 import java.math.BigInteger;
 import java.util.Collections;
@@ -134,14 +135,13 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
             currentIncrement = currentIncrement.add(increment);
 
             List<T> nextCombination = combinationListNumber.equals(BigInteger.ZERO)
-                    ? new Combinations(calculator).unique(k, elements).lexOrder().iterator().next()
-                    : new Combinations(calculator).unique(k, elements)
+                    ? new UniqueCombinationBuilder<>(elements, k, calculator).lexOrder().iterator().next()
+                    : new UniqueCombinationBuilder<>(elements, k, calculator)
                     .lexOrderMth(combinationListNumber, combinationListNumber).iterator().next();
 
             return permutationIncrement == 0
-                    ? new Permutations(calculator).unique(nextCombination).lexOrder().iterator().next()
-                    : new Permutations(calculator).unique(nextCombination)
-                    .lexOrderMth(permutationIncrement, permutationIncrement).iterator().next();
+                    ? new UniquePermutation<>(nextCombination).iterator().next()
+                    : new UniquePermutationBuilder<>(calculator, nextCombination).lexOrderMth(permutationIncrement, permutationIncrement).iterator().next();
         }
     }
 }

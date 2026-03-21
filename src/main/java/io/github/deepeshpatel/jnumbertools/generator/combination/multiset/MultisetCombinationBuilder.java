@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.base.MultisetBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
@@ -161,6 +161,7 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
 
     private final LinkedHashMap<T, Integer> options;
     private final int r;
+    private final Calculator calculator;
 
     /**
      * Constructs a builder for multiset combinations.
@@ -170,9 +171,10 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
      * @throws IllegalArgumentException if options is null, empty, contains non-positive multiplicities,
      *         or if r < 0
      */
-    public MultisetCombinationBuilder(LinkedHashMap<T, Integer> options, int r) {
+    public MultisetCombinationBuilder(LinkedHashMap<T, Integer> options, int r, Calculator calculator) {
         this.options = options;
         this.r = r;
+        this.calculator = calculator;
     }
 
     /**
@@ -201,11 +203,11 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
      * @throws IllegalArgumentException if sampleSize ≤ 0 or exceeds total combinations
      */
     public MultisetCombinationByRanks<T> sample(int sampleSize, Random random) {
-        BigInteger total = Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
+        BigInteger total = calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
         if (sampleSize <= 0 || BigInteger.valueOf(sampleSize).compareTo(total) > 0) {
             throw new IllegalArgumentException("Sample size must be positive and not exceed total combinations");
         }
-        return new MultisetCombinationByRanks<>(options, r, new BigIntegerSample(total, sampleSize, random), count());
+        return new MultisetCombinationByRanks<>(options, r, new BigIntegerSample(total, sampleSize, random), calculator);
     }
 
     /**
@@ -224,8 +226,8 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
         if (sampleSize <= 0) {
             throw new IllegalArgumentException("Sample size must be positive");
         }
-        BigInteger total = Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
-        return new MultisetCombinationByRanks<>(options, r, new BigIntegerChoice(total, sampleSize, random), count());
+        BigInteger total = calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
+        return new MultisetCombinationByRanks<>(options, r, new BigIntegerChoice(total, sampleSize, random), calculator);
     }
 
     /**
@@ -260,9 +262,9 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
      */
     public MultisetCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
         Util.validateLexOrderMthParams(m, start, count());
-        BigInteger total = Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
+        BigInteger total = calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
         Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, total);
-        return new MultisetCombinationByRanks<>(options, r, mthIterable, count());
+        return new MultisetCombinationByRanks<>(options, r, mthIterable, calculator);
     }
 
     /**
@@ -279,12 +281,12 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
      */
     public MultisetCombinationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
         Util.validateByRanksParams(ranks);
-        return new MultisetCombinationByRanks<>(options, r, ranks, count());
+        return new MultisetCombinationByRanks<>(options, r, ranks, calculator);
     }
 
     @Override
     public BigInteger count() {
-        return Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
+        return calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
     }
 
     @Override

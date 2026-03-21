@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -38,6 +38,7 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
      */
     private final Iterable<BigInteger> ranks;
     private final BigInteger totalCombinations;
+    private final Calculator calculator;
 
     /**
      * Constructs a new MultisetCombinationByRanks instance.
@@ -54,12 +55,13 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
      * @param options a {@code LinkedHashMap} of distinct elements and their frequencies (assumes zero frequencies filtered)
      * @param r the size of each combination (assumed r ≥ 0)
      * @param ranks an iterable of 0-based rank numbers
-     * @param totalCombinations pre-computed total for validation (assumed correct)
+     * @param calculator A Calculator instance used for computations
      */
-    public MultisetCombinationByRanks(LinkedHashMap<T, Integer> options, int r, Iterable<BigInteger> ranks, BigInteger totalCombinations) {
+    public MultisetCombinationByRanks(LinkedHashMap<T, Integer> options, int r, Iterable<BigInteger> ranks, Calculator calculator) {
         super(options, r);
         this.ranks = ranks;
-        this.totalCombinations = totalCombinations;
+        this.calculator = calculator;
+        this.totalCombinations = calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
     }
 
     /**
@@ -117,7 +119,7 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
             if (m.signum() < 0) {
                 throw new IllegalArgumentException("Rank " + m + " cannot be negative. Valid range is [0, " + totalCombinations + ")");
             }
-            if (m.signum() >= 0 && m.compareTo(totalCombinations) >= 0) {
+            if (m.compareTo(totalCombinations) >= 0) {
                 throw new IllegalArgumentException("Rank " + m + " exceeds total multiset combinations " + totalCombinations);
             }
             int[] countVector = unrankMultisetCombination(r, m.intValue());
@@ -145,7 +147,7 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
             for (int i = 0; i < frequencies.length; i++) {
                 int maxForThisType = Math.min(frequencies[i], remainingR);
                 for (int x = maxForThisType; x >= 0; x--) {
-                    long ways = Calculator.multisetCombinationsCountStartingFromIndex(remainingR - x, i + 1, frequencies).longValue();
+                    long ways = calculator.multisetCombinationsCountStartingFromIndex(remainingR - x, i + 1, frequencies).longValue();
                     if (remainingRank < ways) {
                         combination[i] = x;
                         remainingR -= x;

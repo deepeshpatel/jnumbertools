@@ -1,10 +1,12 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,7 +19,7 @@ public class MultisetCombinationTest {
     void assertCount() {
         // Multiset combinations: Σₖ Πᵢ C(nᵢ, kᵢ)
         int[] frequencies = {5, 4, 7, 3};
-        int[] expectedCounts = Calculator.multisetCombinationsCountAll(frequencies);
+        int[] expectedCounts = calculator.multisetCombinationsCountAll(frequencies);
         int maxSize = Arrays.stream(frequencies).sum();
 
         LinkedHashMap<Character, Integer> options = new LinkedHashMap<>();
@@ -77,7 +79,7 @@ public class MultisetCombinationTest {
         String expected = "[{C=3}, {C=2, B=1}, {C=2, A=1}, {C=2, D=1}, {C=1, B=2}, {C=1, B=1, A=1}," +
                 " {C=1, B=1, D=1}, {C=1, A=1, D=1}, {B=2, A=1}, {B=2, D=1}, {B=1, A=1, D=1}]";
 
-        LinkedHashMap<String, Integer> options = new LinkedHashMap<String, Integer>();
+        LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
         options.put("C", 3);
         options.put("B", 2);
         options.put("A", 1);
@@ -140,11 +142,9 @@ public class MultisetCombinationTest {
                 // Case: r exceeds total available → empty iterator
                 assertFalse(iterator.hasNext());
             } else if (r < CROSSOVER_THRESHOLD) {
-                assertTrue(iterator instanceof MultisetCombination.ArrayIterator,
-                        "Expected ArrayIterator for r=" + r);
+                assertInstanceOf(MultisetCombination.ArrayIterator.class, iterator, "Expected ArrayIterator for r=" + r);
             } else {
-                assertTrue(iterator instanceof MultisetCombination.FreqVectorIterator,
-                        "Expected FreqVectorIterator for r=" + r);
+                assertInstanceOf(MultisetCombination.FreqVectorIterator.class, iterator, "Expected FreqVectorIterator for r=" + r);
             }
         }
     }

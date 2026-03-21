@@ -3,7 +3,8 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
@@ -18,7 +19,7 @@ public class MultisetPermutationTest {
         for (int n = 2; n <= 5; n++) {
             var input = IntStream.range(0,n).boxed().toList();
             int[] frequency = getRandomMultisetFreqArray(random, input.size());
-            LinkedHashMap<Character, Integer> options = createMap(input, frequency);
+            var  options = createMap(input, frequency);
             long count = permutation.multiset(options).lexOrder().stream().count();
             assertEquals(calculator.multinomial(frequency).longValue(), count);
         }
@@ -35,8 +36,6 @@ public class MultisetPermutationTest {
         // Map with all zero frequencies -> should be treated as empty -> count = 1, returns [[]]
         // But we don't put zero-frequency entries in the map at all!
         var zeroFreqMap = new LinkedHashMap<String, Integer>();
-        // zeroFreqMap.put("A", 0);  // Don't include zero frequencies
-        // zeroFreqMap.put("B", 0);  // Don't include zero frequencies
         var zeroFreqBuilder = permutation.multiset(zeroFreqMap);
         assertEquals(calculator.factorial(0), zeroFreqBuilder.count());
         var result = zeroFreqBuilder.lexOrder().stream().toList();
@@ -76,7 +75,7 @@ public class MultisetPermutationTest {
 
         var elements = of("A", "B", "C");
         int[] frequencies = {3, 2, 2};
-        LinkedHashMap<Character, Integer> options = createMap(elements, frequencies);
+        var options = createMap(elements, frequencies);
 
         var iterable = permutation.multiset(options).lexOrder();
 
@@ -101,9 +100,6 @@ public class MultisetPermutationTest {
                 of("Blue", "Red", "Green", "Red"),
                 of("Blue", "Green", "Red", "Red")
         );
-
-        var elements = of("Red", "Green", "Blue");
-        int[] frequencies = {2, 1, 1};
 
         LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
 
@@ -139,7 +135,7 @@ public class MultisetPermutationTest {
         var elements = of("A", "B", "C");
         int[] frequencies = {2, 1, 1};
 
-        LinkedHashMap<Character, Integer> options = createMap(elements, frequencies);
+        var options = createMap(elements, frequencies);
 
         var output = permutation.multiset(options)
                 .lexOrder()

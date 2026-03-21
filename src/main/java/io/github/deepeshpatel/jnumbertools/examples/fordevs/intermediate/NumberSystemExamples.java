@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.examples.fordevs.intermediate;
 
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.api.JNumberTools;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Combinadic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Factoradic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;

@@ -4,9 +4,10 @@
  */
 package io.github.deepeshpatel.jnumbertools.examples.fordevs.advanced;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.base.Combinations;
-import io.github.deepeshpatel.jnumbertools.base.Permutations;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Combinations;
+import io.github.deepeshpatel.jnumbertools.api.Permutations;
+import io.github.deepeshpatel.jnumbertools.base.CalculatorImpl;
 
 import java.math.BigInteger;
 import java.util.LinkedHashMap;
@@ -23,8 +24,8 @@ public class PerformanceBenchmark {
 
     private static final Runtime runtime = Runtime.getRuntime();
 
-    // Shared Calculator instance — reused across all benchmarks for maximum cache efficiency
-    private static final Calculator CALC = new Calculator();
+    // Shared CalculatorImpl instance — reused across all benchmarks for maximum cache efficiency
+    private static final Calculator CALC = new CalculatorImpl();
 
     public static void main(String[] args) {
         System.out.println("=== Performance Benchmarks ===\n");
@@ -168,7 +169,7 @@ public class PerformanceBenchmark {
         var msetSamples = msetBuilder.lexOrderMth(BigInteger.valueOf(1_000_000_000), BigInteger.ZERO)
                 .stream()
                 .limit(20)
-                .collect(Collectors.toList());
+                .toList();
         long msetTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - msetStart);
 
         System.out.printf("   Total combinations: %,d%n", msetTotal);
@@ -198,7 +199,7 @@ public class PerformanceBenchmark {
         gc();
         memStart = usedMemory();
 
-        var list = new Combinations(CALC).unique(n, r).lexOrder()
+        new Combinations(CALC).unique(n, r).lexOrder()
                 .stream().limit(limit).toList();
         long memList = usedMemory() - memStart;
 

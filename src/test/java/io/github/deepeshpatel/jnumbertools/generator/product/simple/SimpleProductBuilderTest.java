@@ -27,7 +27,7 @@ class SimpleProductBuilderTest {
 
         // Test null input
         var exp = assertThrows(NullPointerException.class, ()-> builder.and((List<?>) null));
-        assertTrue(exp.getMessage().startsWith(errMsgNullInput));
+        assertEquals(errMsgNullInput, exp.getMessage());
 
         // Test empty list - A × ∅ = ∅, so count should be 0
         var builderWithEmpty = builder.and(Collections.emptyList());
@@ -117,7 +117,10 @@ class SimpleProductBuilderTest {
                 .and(Collections.emptyList());
         assertEquals(BigInteger.ZERO, builderWithEmpty.count());  // Changed from ONE to ZERO
 
-        var emptyBuilder = cartesianProduct.simpleProductOf(Collections.emptyList());
-        assertEquals(BigInteger.ONE, emptyBuilder.count());  // This one is correct - single empty dim
+        var emptyListBuilder = cartesianProduct.simpleProductOf(Collections.emptyList());
+        assertEquals(BigInteger.ZERO, emptyListBuilder.count());  // Since 1 empty list implies 0 results
+
+        var nullaryBuilder = cartesianProduct.simpleProductOf();
+        assertEquals(BigInteger.ONE, nullaryBuilder.count());  // 0-ary product returns 1 empty tuple
     }
 }

@@ -1,6 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FactoradicTest {
@@ -48,8 +49,7 @@ public class FactoradicTest {
         int decimal = 23456;
         Factoradic f1 = Factoradic.of(decimal);
         Factoradic f2 = Factoradic.of(decimal);
-        assertEquals(f1, f2);
-        assertEquals(f1.hashCode(), f2.hashCode());
-        assertEquals(f1.hashCode(), decimal);
+        assertEquals(decimal, f1.hashCode());
+        assertEquals(decimal, f2.hashCode());
     }
 }

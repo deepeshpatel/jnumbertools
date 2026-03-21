@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
@@ -95,7 +95,7 @@ public final class RepetitivePermutationByRanks<T> extends AbstractGenerator<T> 
             if (rank.signum() < 0) {
                 throw new IllegalArgumentException("Rank " + rank + " cannot be negative. Valid range is [0, " + totalPermutations + ")");
             }
-            if (rank.signum() >= 0 && rank.compareTo(totalPermutations) >= 0) {
+            if (rank.compareTo(totalPermutations) >= 0) {
                 throw new IllegalArgumentException("Rank " + rank + " exceeds total permutations " + totalPermutations);
             }
             int[] indices = unrankRepetitivePermutation(rank, elements.size(), width);

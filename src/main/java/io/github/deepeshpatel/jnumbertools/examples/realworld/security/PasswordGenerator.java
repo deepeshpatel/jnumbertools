@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.examples.realworld.security;
 
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.api.JNumberTools;
 
 import java.util.List;
 import java.util.Random;
@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 /**
  * Simple example showing how to generate passwords with constraints using Cartesian Product.
  */
+@SuppressWarnings("unchecked")
 public class PasswordGenerator {
 
     // Common character sets

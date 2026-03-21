@@ -4,8 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.base.Subsets;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Subsets;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
 import java.math.BigInteger;

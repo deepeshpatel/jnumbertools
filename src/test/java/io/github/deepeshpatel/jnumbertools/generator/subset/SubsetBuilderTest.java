@@ -1,7 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import io.github.deepeshpatel.jnumbertools.base.Subsets;
+import io.github.deepeshpatel.jnumbertools.api.Subsets;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -109,8 +109,7 @@ class SubsetBuilderTest {
         var builder = subsets.of(elements);
 
         // Should throw if range not specified
-        assertThrows(IllegalArgumentException.class, () ->
-                builder.lexOrder());
+        assertThrows(IllegalArgumentException.class, builder::lexOrder);
 
         // Should return generator when range is specified
         var rangeBuilder = builder.inRange(1, 2);

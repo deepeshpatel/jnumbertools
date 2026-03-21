@@ -3,18 +3,18 @@ package io.github.deepeshpatel.jnumbertools.base;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
-import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CartesianProductTest {
 
     @Test
     void simpleProductOf() {
         //null input
-        var exp = assertThrows(NullPointerException.class, ()-> cartesianProduct.simpleProductOf((List<?>)null));
-        assertTrue(exp.getMessage().startsWith(errMsgNullInput));
+        var expNullInput = assertThrows(NullPointerException.class, ()-> cartesianProduct.simpleProductOf(null));
+        assertEquals(errMsgNullInput, expNullInput.getMessage());
 
         //empty input: Empty list is allowed and will be treated as empty-set(∅)
         cartesianProduct.simpleProductOf(Collections.emptyList());
@@ -23,9 +23,9 @@ class CartesianProductTest {
     @Test
     void constrainedProductOfDistinct() {
         //null input
-        var exp1 = assertThrows(NullPointerException.class, ()->
-                cartesianProduct.constrainedProductOfDistinct(1, (List<?>)null));
-        assertTrue(exp1.getMessage().startsWith(errMsgNullInput));
+        var expNullInput = assertThrows(NullPointerException.class, ()->
+                cartesianProduct.constrainedProductOfDistinct(1, null));
+        assertEquals(errMsgNullInput, expNullInput.getMessage());
 
         //empty input: Empty list is allowed and will be treated as empty-set(∅)
         cartesianProduct.constrainedProductOfDistinct(10, Collections.emptyList());
@@ -40,8 +40,8 @@ class CartesianProductTest {
     void constrainedProductOfMultiSelect() {
         //null input
         var exp = assertThrows(NullPointerException.class, ()->
-                cartesianProduct.constrainedProductOfMultiSelect(1, (List<?>)null));
-        assertTrue(exp.getMessage().startsWith(errMsgNullInput));
+                cartesianProduct.constrainedProductOfMultiSelect(1, null));
+        assertEquals(errMsgNullInput, exp.getMessage());
 
         //empty input: Empty list is allowed and will be treated as empty-set(∅)
         cartesianProduct.constrainedProductOfMultiSelect(3, Collections.emptyList());
@@ -56,8 +56,8 @@ class CartesianProductTest {
     void constrainedProductOfInRange() {
         //null input
         var exp1 = assertThrows(NullPointerException.class, ()->
-                cartesianProduct.constrainedProductOfInRange(1, 2, (List<?>)null));
-        assertTrue(exp1.getMessage().startsWith(errMsgNullInput));
+                cartesianProduct.constrainedProductOfInRange(1, 2, null));
+        assertEquals(errMsgNullInput, exp1.getMessage());
 
         //invalid range
         var exp2 = assertThrows(IllegalArgumentException.class, ()->
@@ -72,8 +72,8 @@ class CartesianProductTest {
     void testConstrainedProductOfDistinct() {
         //null input
         var exp1 = assertThrows(NullPointerException.class, () ->
-                cartesianProduct.constrainedProductOfDistinct(1, (List<?>)null));
-        assertTrue(exp1.getMessage().startsWith(errMsgNullInput));
+                cartesianProduct.constrainedProductOfDistinct(1, null));
+        assertEquals(errMsgNullInput, exp1.getMessage());
 
         //empty input: Empty list is allowed and will be treated as empty-set(∅)
         cartesianProduct.constrainedProductOfDistinct(5,  Collections.emptyList());
@@ -88,8 +88,8 @@ class CartesianProductTest {
     void testConstrainedProductOfMultiSelect() {
         //null input
         var exp1 = assertThrows(NullPointerException.class, () ->
-                cartesianProduct.constrainedProductOfMultiSelect(1, (List<?>)null));
-        assertTrue(exp1.getMessage().startsWith(errMsgNullInput));
+                cartesianProduct.constrainedProductOfMultiSelect(1, null));
+        assertEquals(errMsgNullInput, exp1.getMessage());
 
         //empty input: Empty list is allowed and will be treated as empty-set(∅)
         cartesianProduct.constrainedProductOfMultiSelect(0, Collections.emptyList());
@@ -104,8 +104,8 @@ class CartesianProductTest {
     void testConstrainedProductOfInRange() {
         //null input
         var exp1 = assertThrows(NullPointerException.class, () ->
-                cartesianProduct.constrainedProductOfInRange(1, 2, (List<?>)null));
-        assertTrue(exp1.getMessage().startsWith(errMsgNullInput));
+                cartesianProduct.constrainedProductOfInRange(1, 2, null));
+        assertEquals(errMsgNullInput, exp1.getMessage());
 
         //invalid range
         var exp2 = assertThrows(IllegalArgumentException.class, () ->

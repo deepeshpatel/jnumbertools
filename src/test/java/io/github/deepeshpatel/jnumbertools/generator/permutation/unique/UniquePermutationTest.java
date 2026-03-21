@@ -92,12 +92,6 @@ public class UniquePermutationTest {
         assertIterableEquals(listOfEmptyList, permutationsOf(new ArrayList<>()));
     }
 
-//    @Test
-//    @DisplayName("Null input is treated as empty input (API contract)")
-//    void shouldConsiderNullAsEmpty() {
-//        assertIterableEquals(listOfEmptyList, permutationsOf((List<String>) null));
-//    }
-
     @Test
     void shouldHandleMixedTypes() {
         var expected = List.of(

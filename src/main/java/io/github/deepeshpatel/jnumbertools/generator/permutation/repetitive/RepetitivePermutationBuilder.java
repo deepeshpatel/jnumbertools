@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;

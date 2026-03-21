@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.base;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -63,10 +63,10 @@ public class Util {
         }
     }
 
-    public static void validateMapOptions(LinkedHashMap<?, Integer> options, int r) {
+    public static void validateMapOptions(LinkedHashMap<?, Integer> options, int r, Calculator calculator) {
         validateMapOptions(options);
         int[] frequencies = options.values().stream().mapToInt(Integer::intValue).toArray();
-        Calculator.multisetCombinationsCount(r, frequencies);
+        calculator.multisetCombinationsCount(r, frequencies);
     }
 
     public static boolean isEmptyList(List<List<Object>> list) {
@@ -126,13 +126,14 @@ public class Util {
 
     public static void validateLexOrderMthParams(BigInteger m, BigInteger start, BigInteger count) {
         if (m == null || m.signum() <= 0) {
-            throw new IllegalArgumentException("Increment 'm' must be positive (m > 0)");
+            throw new IllegalArgumentException(String.format("Increment 'm' must be positive (m > 0). Found " + m));
         }
 
         if (start == null ||
                 start.signum() < 0 ||
                 (start.compareTo(count) >= 0 && count.signum()> 0 )) {
-            throw new IllegalArgumentException("Element should be in range [0, " + count + ")");
+            var msg = String.format("Element should be in range [0,%s). Found %s", count, start);
+            throw new IllegalArgumentException(msg);
         }
     }
 

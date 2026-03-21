@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
-import io.github.deepeshpatel.jnumbertools.base.Permutations;
+import io.github.deepeshpatel.jnumbertools.api.Permutations;
 import io.github.deepeshpatel.jnumbertools.generator.base.BuilderTestHelper;
 import org.junit.jupiter.api.Test;
 
@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RepetitivePermutationBuilderTest {
 

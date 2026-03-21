@@ -2,8 +2,9 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.api;
 
+import io.github.deepeshpatel.jnumbertools.base.CalculatorImpl;
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder;
@@ -89,7 +90,7 @@ public final class CartesianProduct {
      * Constructs a new CartesianProduct instance with a default Calculator.
      */
     public CartesianProduct() {
-        this(new Calculator());
+        this(new CalculatorImpl());
     }
 
     /**
@@ -99,6 +100,18 @@ public final class CartesianProduct {
      */
     public CartesianProduct(Calculator calculator) {
         this.calculator = calculator;
+    }
+
+    /**
+     * Creates a builder for a 0-dimensional simple Cartesian product (nullary product).
+     * <p>
+     * Generates a single empty tuple [[]]. This represents the mathematical product of zero sets.
+     * </p>
+     *
+     * @return a SimpleProductBuilder initialized with no dimensions
+     */
+    public SimpleProductBuilder simpleProductOf() {
+        return new SimpleProductBuilder();
     }
 
     /**
@@ -146,7 +159,7 @@ public final class CartesianProduct {
      * Creates a builder for constrained Cartesian products with distinct combinations in the first dimension.
      * <p>
      * The first dimension consists of distinct combinations of size {@code quantity} from the input set.
-     * Subsequent dimensions can be configured using {@code andDistinct()}, {@code andMultiSelect()}, 
+     * Subsequent dimensions can be configured using {@code andDistinct()}, {@code andMultiSelect()},
      * or {@code andInRange()} methods.
      * </p>
      *
@@ -163,8 +176,8 @@ public final class CartesianProduct {
     /**
      * Creates a builder for constrained Cartesian products with multi-select combinations in the first dimension.
      * <p>
-     * The first dimension consists of combinations with repetition allowed of size {@code quantity} 
-     * from the input set. Subsequent dimensions can be configured using {@code andDistinct()}, 
+     * The first dimension consists of combinations with repetition allowed of size {@code quantity}
+     * from the input set. Subsequent dimensions can be configured using {@code andDistinct()},
      * {@code andMultiSelect()}, or {@code andInRange()} methods.
      * </p>
      *
@@ -181,8 +194,8 @@ public final class CartesianProduct {
     /**
      * Creates a builder for constrained Cartesian products with subset range in the first dimension.
      * <p>
-     * The first dimension consists of all subsets of the input set with sizes between {@code from} 
-     * and {@code to} (inclusive). Subsequent dimensions can be configured using {@code andDistinct()}, 
+     * The first dimension consists of all subsets of the input set with sizes between {@code from}
+     * and {@code to} (inclusive). Subsequent dimensions can be configured using {@code andDistinct()},
      * {@code andMultiSelect()}, or {@code andInRange()} methods.
      * </p>
      *

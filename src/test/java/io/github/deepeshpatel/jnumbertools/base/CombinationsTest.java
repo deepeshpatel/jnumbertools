@@ -1,12 +1,14 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.api.Combinations;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CombinationsTest {
 
@@ -27,57 +29,28 @@ class CombinationsTest {
     */
 
     private final Combinations combinations = new Combinations(calculator);
-    private final List<String> elements = List.of("A", "B", "C", "D");
 
     @Test
     void unique() {
         // Test null input - should throw NPE (outside rules)
         var nullExp = assertThrows(NullPointerException.class, () ->
                 combinations.unique(2, (List<String>) null));
-        assertTrue(nullExp.getMessage().startsWith(errMsgNullInput));
+        assertEquals(errMsgNullInput, nullExp.getMessage());
 
         // Test negative n - should throw IAE (outside rules)
         var negativeNExp = assertThrows(IllegalArgumentException.class, () ->
                 combinations.unique(-1, 2));
-        assertTrue(negativeNExp.getMessage().startsWith(errMsgNK));
-
+        assertEquals(errMsgNK(-1,2),negativeNExp.getMessage());
         // Test negative r - should throw IAE (outside rules)
         var negativeRExp = assertThrows(IllegalArgumentException.class, () ->
                 combinations.unique(5, -2));
-        assertTrue(negativeRExp.getMessage().startsWith(errMsgNK));
+        assertEquals(errMsgNK(5,-2),negativeRExp.getMessage());
 
         // Note: r > n is mathematically valid (count=0, tested in UniqueCombinationTest)
         // n=0, r=0 is mathematically valid (count=1, tested in UniqueCombinationTest)
         // n=0, r>0 is mathematically valid (count=0, tested in UniqueCombinationTest)
     }
 
-    @Test
-    void testUnique() {
-        // Test with varargs - only exception paths
-        // Test null varargs? varargs cannot be null, but array can be null
-        String[] nullArray = null;
-        assertThrows(NullPointerException.class, () ->
-                combinations.unique(2, nullArray));
-
-        // Note: empty varargs with r=0 is valid (tested in UniqueCombinationTest)
-        // empty varargs with r>0 is valid (count=0, tested in UniqueCombinationTest)
-    }
-
-    @Test
-    void testUnique1() {
-        // Test with integer range only - only exception paths
-        // Test negative n
-        assertThrows(IllegalArgumentException.class, () ->
-                combinations.unique(-1, 2));
-
-        // Test negative r
-        assertThrows(IllegalArgumentException.class, () ->
-                combinations.unique(5, -2));
-
-        // Note: n=0, r=0 is valid (tested in UniqueCombinationTest)
-        // n=0, r>0 is valid (tested in UniqueCombinationTest)
-        // r>n is valid (tested in UniqueCombinationTest)
-    }
 
     /*
     -------------------------------------------------------------------------------
@@ -99,17 +72,17 @@ class CombinationsTest {
         // Test null input - should throw NPE (outside rules)
         var nullExp = assertThrows(NullPointerException.class, () ->
                 combinations.repetitive(2, (List<String>) null));
-        assertTrue(nullExp.getMessage().startsWith(errMsgNullInput));
+        assertEquals(errMsgNullInput, nullExp.getMessage());
 
         // Test negative n - should throw IAE (outside rules)
         var negativeNExp = assertThrows(IllegalArgumentException.class, () ->
                 combinations.repetitive(-1, 2));
-        assertTrue(negativeNExp.getMessage().startsWith(errMsgNK));
+        assertEquals(errMsgNK(-1,2),negativeNExp.getMessage());
 
         // Test negative r - should throw IAE (outside rules)
         var negativeRExp = assertThrows(IllegalArgumentException.class, () ->
                 combinations.repetitive(3, -2));
-        assertTrue(negativeRExp.getMessage().startsWith(errMsgNK));
+        assertEquals(errMsgNK(3,-2),negativeRExp.getMessage());
 
         // Note: n=0, r=0 is valid (tested in RepetitiveCombinationTest)
         // n=0, r>0 is valid (tested in RepetitiveCombinationTest)

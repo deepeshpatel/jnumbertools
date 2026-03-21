@@ -225,13 +225,4 @@ public class FreqVector {
     public String toString() {
         return Arrays.toString(frequencies) + " " + Arrays.toString(cumulativeFreq);
     }
-
-    /**
-     * Returns the current total number of elements in the frequency vector.
-     *
-     * @return the total sum of frequencies
-     */
-    public int getTotal() {
-        return total;
-    }
 }

@@ -4,7 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.CalculatorImpl;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
@@ -153,7 +154,7 @@ public final class MultisetPermutationBuilder<T> implements Builder<T> {
      * Constructs a builder for generating multiset permutations.
      *
      * @param options a {@link LinkedHashMap} containing elements as keys and their frequencies as values
-     * @param calculator an instance of {@link Calculator} for performing combinatorial computations
+     * @param calculator an instance of {@link CalculatorImpl} for performing combinatorial computations
      * @throws IllegalArgumentException if {@code options} is null, empty, or contains non-positive frequencies
      */
     public MultisetPermutationBuilder(LinkedHashMap<T, Integer> options, Calculator calculator) {

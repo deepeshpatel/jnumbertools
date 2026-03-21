@@ -1,7 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import io.github.deepeshpatel.jnumbertools.base.CartesianProduct;
+import io.github.deepeshpatel.jnumbertools.api.CartesianProduct;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -29,8 +29,8 @@ class ConstrainedProductBuilderTest {
         assertEquals(calculator.nCr(3,2).multiply(calculator.nCr(4,2)), builderWithB.count());
 
         // Test null input
-        var exp = assertThrows(NullPointerException.class, () -> builder.andDistinct(2, (List<?>) null));
-        assertTrue(exp.getMessage().startsWith(errMsgNullInput));
+        var exp = assertThrows(NullPointerException.class, () -> builder.andDistinct(2, null));
+        assertEquals(errMsgNullInput, exp.getMessage());
 
         // Test empty list with quantity > 0 - results in zero count
         var builderWithEmpty = builder.andDistinct(2, Collections.emptyList());
@@ -51,8 +51,8 @@ class ConstrainedProductBuilderTest {
         assertEquals(calculator.nCrRepetitive(3,2).multiply(calculator.nCrRepetitive(4,2)), builderWithB.count());
 
         // Test null input
-        var exp = assertThrows(NullPointerException.class, () -> builder.andMultiSelect(2, (List<?>) null));
-        assertTrue(exp.getMessage().startsWith(errMsgNullInput));
+        var exp = assertThrows(NullPointerException.class, () -> builder.andMultiSelect(2, null));
+        assertEquals(errMsgNullInput, exp.getMessage());
 
         // Test empty list with quantity > 0 - results in zero count
         var builderWithEmpty = builder.andMultiSelect(2, Collections.emptyList());
@@ -76,8 +76,8 @@ class ConstrainedProductBuilderTest {
         assertEquals(expectedFirst.multiply(expectedSecond), builderWithB.count());
 
         // Test null input
-        var exp = assertThrows(NullPointerException.class, () -> builder.andInRange(1, 2, (List<?>) null));
-        assertTrue(exp.getMessage().startsWith(errMsgNullInput));
+        var exp = assertThrows(NullPointerException.class, () -> builder.andInRange(1, 2, null));
+        assertEquals(errMsgNullInput, exp.getMessage());
 
         // Test invalid range (from > to)
         assertThrows(IllegalArgumentException.class, () -> builder.andInRange(3, 1, setB));

@@ -1,7 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.api.JNumberTools;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -95,7 +95,7 @@ class KPermutationByRanksTest {
             assertEquals(8, result.size(), "Should generate correct number of permutations"); // 4! / 3 = 8
             for (List<Integer> perm : result) {
                 assertEquals(4, perm.size(), "Each permutation should have size 4");
-                assertEquals(new HashSet<>(perm).size(), 4, "Permutation should contain all unique elements");
+                assertEquals(4, new HashSet<>(perm).size(), "Permutation should contain all unique elements");
             }
         }
 
@@ -116,7 +116,7 @@ class KPermutationByRanksTest {
             var result = permutation.nPk(k, input).lexOrderMth(3, 0).stream().toList();
             for (List<Integer> perm : result) {
                 assertEquals(k, perm.size(), "Each permutation should have size k");
-                assertEquals(new HashSet<>(perm).size(), k, "Permutation should contain unique elements");
+                assertEquals(k, new HashSet<>(perm).size(), "Permutation should contain unique elements");
                 // Verify all elements are within bounds [0, input.size()-1]
                 for (Integer element : perm) {
                     assertTrue(element >= 0 && element < input.size(), "Element should be in range [0, input.size()-1]: " + element);
@@ -195,7 +195,7 @@ class KPermutationByRanksTest {
             assertEquals(sampleSize, permutations.size());
             for (List<Integer> perm : permutations) {
                 assertEquals(k, perm.size(), "Each permutation should have size k");
-                assertEquals(new HashSet<>(perm).size(), k, "Permutation should contain unique elements");
+                assertEquals(k, new HashSet<>(perm).size(), "Permutation should contain unique elements");
                 // Verify all elements are within bounds [0, input.size()-1]
                 for (Integer element : perm) {
                     assertTrue(element >= 0 && element < input.size(), "Element should be in range [0, input.size()-1]: " + element);
@@ -294,7 +294,7 @@ class KPermutationByRanksTest {
             assertEquals(choiceSize, permutations.size());
             for (List<Integer> perm : permutations) {
                 assertEquals(k, perm.size(), "Each permutation should have size k");
-                assertEquals(new HashSet<>(perm).size(), k, "Permutation should contain unique elements");
+                assertEquals(k, new HashSet<>(perm).size(), "Permutation should contain unique elements");
                 // Verify all elements are within bounds [0, n-1]
                 for (Integer element : perm) {
                     assertTrue(element >= 0 && element < input.size(), "Element should be in range [0, n-1]: " + element);

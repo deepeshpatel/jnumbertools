@@ -4,7 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Permutations;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermutationLexElementIterator;
 
@@ -25,7 +26,7 @@ import java.util.List;
  *
  * <p>
  * <strong>Note:</strong> This class is intended for internal use only and should not be instantiated directly.
- * Use {@link io.github.deepeshpatel.jnumbertools.base.Permutations#multiset(LinkedHashMap)} to create instances.
+ * Use {@link Permutations#multiset(LinkedHashMap)} to create instances.
  * All parameter validation (null checks, non-negative frequencies, zero-frequency filtering) is handled by the builder.
  * </p>
  *
@@ -37,7 +38,7 @@ import java.util.List;
  *
  * @param <T> the type of elements, must implement {@code Comparable} for lexicographical ordering
  * @author Deepesh Patel
- * @see io.github.deepeshpatel.jnumbertools.base.Permutations#multiset(LinkedHashMap)
+ * @see Permutations#multiset(LinkedHashMap)
  */
 public final class MultisetPermutation<T> extends AbstractMultisetPermutation<T> {
 

@@ -221,7 +221,7 @@ class UniquePermutationByRanksTest {
             assertEquals(3, list2.size(), "Second iterator should produce sampleSize permutations");
             for (List<String> perm : list1) {
                 assertEquals(3, perm.size(), "Each permutation should have size n");
-                assertEquals(new HashSet<>(perm).size(), 3, "Permutations should be unique within themselves");
+                assertEquals(3, new HashSet<>(perm).size(), "Permutations should be unique within themselves");
             }
         }
     }
@@ -305,7 +305,7 @@ class UniquePermutationByRanksTest {
             assertEquals(2, new HashSet<>(list2).size(), "Second sample should be unique");
             for (List<String> perm : list1) {
                 assertEquals(3, perm.size(), "Each permutation should have size n");
-                assertEquals(new HashSet<>(perm).size(), 3, "Permutations should be unique within themselves");
+                assertEquals(3, new HashSet<>(perm).size(), "Permutations should be unique within themselves");
             }
         }
     }

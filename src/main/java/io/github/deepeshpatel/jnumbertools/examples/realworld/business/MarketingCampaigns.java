@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.examples.realworld.business;
 
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.api.JNumberTools;
 
 import java.util.List;
 import java.util.Random;
@@ -10,8 +10,6 @@ import java.util.Random;
  * Shows combinatorial approaches to marketing mix optimization
  */
 public class MarketingCampaigns {
-
-    record Campaign(String name, String channel, String segment, double budget) {}
 
     public static void main(String[] args) {
         System.out.println("=== Marketing Campaign Optimizer ===\n");

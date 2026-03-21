@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.examples.realworld.scheduling;
 
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.api.JNumberTools;
 
 import java.util.List;
 import java.util.Random;
@@ -10,8 +10,6 @@ import java.util.Random;
  * Demonstrates combinations for round-robin tournaments
  */
 public class TournamentScheduler {
-
-    record Match(String team1, String team2, int round) {}
 
     public static void main(String[] args) {
         System.out.println("=== Tournament Scheduler ===\n");

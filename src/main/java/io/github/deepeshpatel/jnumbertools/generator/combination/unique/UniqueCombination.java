@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 
+import io.github.deepeshpatel.jnumbertools.api.Combinations;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
@@ -34,7 +35,7 @@ public final class UniqueCombination<T> extends AbstractGenerator<T> {
      * <p>
      * <strong>Note:</strong> This constructor is intended for internal use only.
      * Instances should be created via
-     * {@link io.github.deepeshpatel.jnumbertools.base.Combinations#unique(int, List)}.
+     * {@link Combinations#unique(int, List)}.
      * All parameter validation (null check, 0 ≤ r ≤ n) is handled by the builder.
      * </p>
      *

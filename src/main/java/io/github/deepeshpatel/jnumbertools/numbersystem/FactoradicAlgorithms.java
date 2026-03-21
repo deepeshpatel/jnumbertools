@@ -4,7 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.CalculatorImpl;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -33,14 +34,14 @@ public final class FactoradicAlgorithms {
      * Converts a Factoradic representation to its decimal equivalent.
      * <p>
      * This method computes the decimal value by summing each digit multiplied by the factorial of its position.
-     * <em>Note:</em> A new {@link Calculator} instance is created internally; consider refactoring to remove the static dependency.
+     * <em>Note:</em> A new {@link CalculatorImpl} instance is created internally; consider refactoring to remove the static dependency.
      * </p>
      *
      * @param factoradic an array representing the Factoradic digits.
      * @return the decimal value corresponding to the given Factoradic representation.
      */
     public static int factoradicToInt(int[] factoradic) {
-        Calculator calculator = new Calculator();
+        Calculator calculator = new CalculatorImpl();
         int value = 0;
         for (int i = 0; i < factoradic.length; i++) {
             value += factoradic[i] * calculator.factorial(i).intValue();

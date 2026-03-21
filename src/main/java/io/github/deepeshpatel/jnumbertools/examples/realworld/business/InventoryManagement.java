@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.examples.realworld.business;
 
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.api.JNumberTools;
 
 import java.util.List;
 import java.util.Random;
@@ -10,8 +10,6 @@ import java.util.Random;
  * Shows combinatorial approaches to supply chain optimization
  */
 public class InventoryManagement {
-
-    record WarehouseItem(String product, String location, int quantity, double cost) {}
 
     public static void main(String[] args) {
         System.out.println("=== Inventory Management System ===\n");

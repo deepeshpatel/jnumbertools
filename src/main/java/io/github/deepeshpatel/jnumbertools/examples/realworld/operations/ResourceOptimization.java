@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.examples.realworld.operations;
 
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.api.JNumberTools;
 
 import java.util.List;
 import java.util.Random;
@@ -10,8 +10,6 @@ import java.util.Random;
  * Shows combinatorial approaches to scheduling and allocation problems
  */
 public class ResourceOptimization {
-
-    record ResourceAssignment(String resource, String task, int duration, double cost) {}
 
     public static void main(String[] args) {
         System.out.println("=== Resource Optimization System ===\n");

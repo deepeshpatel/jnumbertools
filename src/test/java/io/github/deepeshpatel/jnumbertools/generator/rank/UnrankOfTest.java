@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.rank;
 
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.api.JNumberTools;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;

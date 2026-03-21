@@ -18,11 +18,15 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void assertCountAndContentForSpecialCase() {
-            // Case 1: Single empty dimension -> count=1, mth(1,0) should return [[]]
+            // Case 1: 0-dimensional product -> count=1, mth(1,0) should return [[]]
+            var nullaryProduct = cartesianProduct.simpleProductOf();
+            var nullaryResult = nullaryProduct.lexOrderMth(1, 0).stream().toList();
+            assertEquals(1, nullaryResult.size());
+            assertEquals(List.of(), nullaryResult.get(0));
+
+            // Case 1b: Single empty dimension -> count=0, mth should return []
             var singleEmpty = cartesianProduct.simpleProductOf(Collections.emptyList());
-            var singleEmptyResult = singleEmpty.lexOrderMth(1, 0).stream().toList();
-            assertEquals(1, singleEmptyResult.size());
-            assertEquals(List.of(), singleEmptyResult.get(0));
+            assertTrue(singleEmpty.lexOrderMth(1, 0).stream().toList().isEmpty());
 
             // Case 2: Multiple dimensions with any empty -> count=0, mth should return []
             var multiWithEmpty = cartesianProduct.simpleProductOf(A_B)
@@ -111,23 +115,23 @@ public class SimpleCartesianProductByRanksTest {
             var builder = cartesianProduct.simpleProductOf(A_B_C).and(num_1_2_3);
 
             // m <= 0
-            var exception = assertThrows(IllegalArgumentException.class,
+            var errZeroIncrement = assertThrows(IllegalArgumentException.class,
                     () -> builder.lexOrderMth(0, 1));
-            assertEquals(errMsgForIncrement, exception.getMessage());
+            assertEquals(errMsgIncrement(0), errZeroIncrement.getMessage());
 
-            exception = assertThrows(IllegalArgumentException.class,
+            var errNegativeIncrement = assertThrows(IllegalArgumentException.class,
                     () -> builder.lexOrderMth(-1, 1));
-            assertEquals(errMsgForIncrement, exception.getMessage());
+            assertEquals(errMsgIncrement(-1), errNegativeIncrement.getMessage());
 
             // start < 0
-            exception = assertThrows(IllegalArgumentException.class,
+            var expNegativeStart = assertThrows(IllegalArgumentException.class,
                     () -> builder.lexOrderMth(1, -1));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
+            assertEquals("Element should be in range [0,9). Found -1", expNegativeStart.getMessage());
 
             // start >= count
-            exception = assertThrows(IllegalArgumentException.class,
+            var expLargeStart = assertThrows(IllegalArgumentException.class,
                     () -> builder.lexOrderMth(1, 100));
-            assertTrue(exception.getMessage().startsWith("Element should be in range"));
+            assertEquals("Element should be in range [0,9). Found 100", expLargeStart.getMessage());
         }
     }
 
@@ -318,12 +322,12 @@ public class SimpleCartesianProductByRanksTest {
 
 
         @Test
-        void shouldHandleEmptyProduct() {
-            var product = cartesianProduct.simpleProductOf(Collections.emptyList());
+        void shouldHandleNullaryProduct() {
+            var product = cartesianProduct.simpleProductOf();
 
             var result = product.byRanks(List.of(BigInteger.ZERO)).stream().toList();
 
-            // Empty product has one empty tuple at rank 0
+            // Nullary product has one empty tuple at rank 0
             assertEquals(1, result.size());
             assertEquals(List.of(), result.get(0));
         }
@@ -332,7 +336,8 @@ public class SimpleCartesianProductByRanksTest {
         void shouldThrowExceptionForEmptyProductWithNonZeroRank() {
             var product = cartesianProduct.simpleProductOf(Collections.emptyList());
 
-            var result = product.byRanks(List.of(BigInteger.ONE));
+            // Product is empty (count 0), so any rank request should throw
+            var result = product.byRanks(List.of(BigInteger.ZERO));
 
             assertThrows(IllegalArgumentException.class, () ->
                     result.stream().toList()

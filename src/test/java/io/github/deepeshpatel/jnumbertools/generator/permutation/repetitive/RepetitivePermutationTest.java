@@ -114,7 +114,7 @@ public class RepetitivePermutationTest {
         var exp = assertThrows(IllegalArgumentException.class, () ->
                 permutation.repetitive(-1, "A", "B").lexOrder()
         );
-        assertEquals(exp.getMessage(), "Width (r) cannot be negative for repetitive permutation generation");
+        assertEquals("Width (r) cannot be negative for repetitive permutation generation", exp.getMessage());
     }
 
 

@@ -80,6 +80,17 @@ public final class SimpleProductBuilder implements Builder<Object> {
     private final boolean isEmptyProduct;      // true if product yields no elements
 
     /**
+     * Constructs a SimpleProductBuilder for a 0-dimensional Cartesian product (nullary product).
+     * yields a single empty tuple [[]].
+     */
+    public SimpleProductBuilder() {
+        this.allLists = new ArrayList<>();
+        this.builders = new ArrayList<>();
+        this.hasEmptyDimension = false;
+        this.isEmptyProduct = false;
+    }
+
+    /**
      * Constructs a SimpleProductBuilder with an initial list of elements.
      *
      * @param elements the initial list of elements (null treated as empty)
@@ -93,9 +104,8 @@ public final class SimpleProductBuilder implements Builder<Object> {
 
         // Track empty dimensions
         this.hasEmptyDimension = elements.isEmpty();
-        // Product is empty only if we have a dimension AND it's empty? No.
-        // For single dimension, empty is valid (produces [[]])
-        this.isEmptyProduct = false;
+        // Product is empty if ANY dimension is empty
+        this.isEmptyProduct = elements.isEmpty();
     }
 
     /**
@@ -163,8 +173,8 @@ public final class SimpleProductBuilder implements Builder<Object> {
             return new StreamableIteratorImpl<>(Collections.emptyIterator());
         }
 
-        // Case 2: Single empty dimension -> return [[]]
-        if (builders.size() == 1 && allLists.get(0).isEmpty()) {
+        // Case 2: 0-dimensional product -> return [[]]
+        if (builders.isEmpty()) {
             return new StreamableIteratorImpl<>(Util.emptyListIterator());
         }
 
@@ -189,8 +199,8 @@ public final class SimpleProductBuilder implements Builder<Object> {
             return new StreamableIteratorImpl<>(Collections.emptyIterator());
         }
 
-        // Case 2: Single empty dimension (count=1) -> only rank 0 exists
-        if (count().equals(BigInteger.ONE) && builders.size() == 1 && allLists.get(0).isEmpty()) {
+        // Case 2: 0-dimensional product -> only rank 0 exists
+        if (builders.isEmpty()) {
             if (start.equals(BigInteger.ZERO) && m.equals(BigInteger.ONE)) {
                 return new StreamableIteratorImpl<>(Util.emptyListIterator());
             }
@@ -290,8 +300,8 @@ public final class SimpleProductBuilder implements Builder<Object> {
             return BigInteger.ZERO;
         }
 
-        // Case 2: Single empty dimension
-        if (builders.size() == 1 && allLists.get(0).isEmpty()) {
+        // Case 2: 0-dimensional product -> nullary product has 1 element ([[]])
+        if (builders.isEmpty()) {
             return BigInteger.ONE;
         }
 
@@ -353,13 +363,12 @@ public final class SimpleProductBuilder implements Builder<Object> {
 
         @Override
         public BigInteger count() {
-            // empty-set(∅) has one conceptual element (the empty tuple)
-            return elements.isEmpty() ? BigInteger.ONE : BigInteger.valueOf(elements.size());
+            return BigInteger.valueOf(elements.size());
         }
 
         @Override
         public boolean isEmpty() {
-            return false; // Single list always produces at least one element
+            return elements.isEmpty();
         }
 
         @Override
@@ -381,10 +390,6 @@ public final class SimpleProductBuilder implements Builder<Object> {
             Util.validateLexOrderMthParams(m, start, count());
 
             if (elements.isEmpty()) {
-                // Empty list: only rank 0 exists
-                if (start.equals(BigInteger.ZERO) && m.equals(BigInteger.ONE)) {
-                    return new StreamableIteratorImpl<>(Util.emptyListIterator());
-                }
                 return new StreamableIteratorImpl<>(Collections.emptyIterator());
             }
 

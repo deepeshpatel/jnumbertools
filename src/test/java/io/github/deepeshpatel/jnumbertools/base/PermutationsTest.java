@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.api.Permutations;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -30,7 +31,8 @@ class PermutationsTest {
         // Test null input - should throw NPE (outside rules)
         var nullInputExp = assertThrows(NullPointerException.class, () ->
                 permutations.unique((List<String>) null));
-        assertTrue(nullInputExp.getMessage().startsWith(errMsgNullInput));
+        assertEquals(errMsgNullInput, nullInputExp.getMessage());
+
 
         // Test negative n - should throw IAE (outside rules)
         var negativeNExp = assertThrows(IllegalArgumentException.class, ()-> permutations.unique(-2));
@@ -76,20 +78,20 @@ class PermutationsTest {
         // Test null input - should throw NPE (outside rules)
         var nullExp = assertThrows(NullPointerException.class, () ->
                 permutations.nPk(2, (List<String>) null));
-        assertTrue(nullExp.getMessage().startsWith(errMsgNullInput));
+        assertEquals(errMsgNullInput, nullExp.getMessage());
 
         // Test negative k - should throw IAE (outside rules)
         for(int n = 0; n <= 1; n++) {
             final int currentN = n;
             var negativeKExp = assertThrows(IllegalArgumentException.class, ()->
                     permutations.nPk(currentN, -3));
-            assertTrue(negativeKExp.getMessage().startsWith(errMsgNK));
+            assertEquals(errMsgNK(currentN, -3),negativeKExp.getMessage());
         }
 
         // Test negative n - should throw IAE (outside rules)
         var negativeNExp = assertThrows(IllegalArgumentException.class, () ->
                 permutations.nPk(-1, 2));
-        assertTrue(negativeNExp.getMessage().startsWith(errMsgNK));
+        assertEquals(errMsgNK(-1, 2),negativeNExp.getMessage());
 
         // Note: k > n is NOT tested here because it's mathematically valid
         // (returns count=0, empty iterator). This will be tested in KPermutationBuilderTest
@@ -166,7 +168,7 @@ class PermutationsTest {
         // Test null input - should throw NPE (outside rules)
         var nullExp = assertThrows(NullPointerException.class, () ->
                 permutations.repetitive(2, (List<String>) null));
-        assertTrue(nullExp.getMessage().startsWith(errMsgNullInput));
+        assertEquals(errMsgNullInput, nullExp.getMessage());
 
         // Test negative width - should throw IAE (outside rules)
         var negativeExp = assertThrows(IllegalArgumentException.class, () ->

@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
-import io.github.deepeshpatel.jnumbertools.base.Permutations;
+import io.github.deepeshpatel.jnumbertools.api.Permutations;
 import io.github.deepeshpatel.jnumbertools.generator.base.BuilderTestHelper;
 import org.junit.jupiter.api.Test;
 

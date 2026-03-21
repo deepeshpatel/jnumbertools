@@ -4,7 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.experiments.abstractalgebra;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.CalculatorImpl;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -76,7 +77,7 @@ public class ExperimentalCombinationAlgorithms {
         Algo adapted from research paper -
         https://www.researchgate.net/publication/220800601_Algorithms_for_Unranking_Combinations_and_their_Applications
         */
-        public static List<Integer> unRank(int n, int r, BigInteger rank, Calculator c){
+        public static List<Integer> unRank(int n, int r, BigInteger rank, CalculatorImpl c){
             List<Integer> result = new ArrayList<>(r);
             int t = n-r;
             int m = r-1;

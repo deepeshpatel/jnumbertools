@@ -2,8 +2,9 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.api;
 
+import io.github.deepeshpatel.jnumbertools.base.CalculatorImpl;
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.combination.multiset.MultisetCombinationBuilder;
@@ -99,7 +100,7 @@ public final class Combinations {
      * Constructs a new Combinations instance with a default Calculator.
      */
     public Combinations() {
-        this(new Calculator());
+        this(new CalculatorImpl());
     }
 
     /**
@@ -249,7 +250,7 @@ public final class Combinations {
      * @throws IllegalArgumentException if options is null, contains non-positive frequencies, or r < 0
      */
     public <T> MultisetCombinationBuilder<T> multiset(LinkedHashMap<T, Integer> options, int r) {
-        Util.validateMapOptions(options, r);
-        return new MultisetCombinationBuilder<>(options, r);
+        Util.validateMapOptions(options, r, calculator);
+        return new MultisetCombinationBuilder<>(options, r, calculator);
     }
 }

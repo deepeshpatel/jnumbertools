@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools;
 
-import io.github.deepeshpatel.jnumbertools.base.*;
+import io.github.deepeshpatel.jnumbertools.api.*;
 import org.junit.jupiter.api.Assertions;
 
 import java.util.Collections;
@@ -12,7 +12,8 @@ import java.util.stream.Stream;
 public class TestBase {
     static { System.getProperties().setProperty("stress.testing","false"); }
 
-    public static final Calculator calculator = new Calculator();
+
+    public static final Calculator calculator = JNumberTools.calculator();
     public static final Permutations permutation = new Permutations(calculator);
     public static final Combinations combination = new Combinations(calculator);
     public static final CartesianProduct cartesianProduct = new CartesianProduct(calculator);
@@ -32,13 +33,19 @@ public class TestBase {
     public static final List<Integer> num_1_to_4 = List.of(1, 2, 3, 4);
     public static final List<Integer> num_0_to_5 = List.of(0, 1, 2, 3, 4, 5);
 
-    public static final String errMsgForIncrement = "Increment 'm' must be positive (m > 0)";
-    public static final String errMsgForStart = "Element should be in range [0,";
-    public static final String errMsgNullInput = "elements should not be null for combinatorics generators to work";
-    public static final String errMsgNK = "n and k must be ≥ 0";
+    public static final String errMsgNullInput = "elements should not be null for combinatorics generators to work.\n" +
+            "Empty list is allowed and will be treated as empty-set(∅)";
     public static final String errMsgOptions = "Options must be non-null, and contain frequencies ≥ 0";
 
     public static final Random random = new Random();
+
+    public static String errMsgNK(int n, int k) {
+        return String.format("n and k must be ≥ 0 for ⁿPₖ/ⁿC. Found [n=%d, k=%d]", n, k);
+    }
+
+    public static String errMsgIncrement(int m) {
+        return String.format("Increment 'm' must be positive (m > 0). Found %d", m);
+    }
 
     private static List<?> everyMthValue(Stream<?> stream, int start, long m) {
         final int[] j = {0};
@@ -63,8 +70,8 @@ public class TestBase {
         return frequencies;
     }
 
-    public static <K, Integer> LinkedHashMap createMap(List<K> list, int[] freq) {
-        var options = new LinkedHashMap<>();
+    public static <K> LinkedHashMap<K, Integer> createMap(List<K> list, int[] freq) {
+        var options = new LinkedHashMap<K, Integer>();
         for(int i=0; i<freq.length; i++) {
             options.put(list.get(i), freq[i]);
         }

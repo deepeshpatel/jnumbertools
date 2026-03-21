@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.examples.fordevs.advanced;
 
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.api.JNumberTools;
 
 import java.math.BigInteger;
 import java.util.List;

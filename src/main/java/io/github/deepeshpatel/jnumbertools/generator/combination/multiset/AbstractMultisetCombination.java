@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
+import io.github.deepeshpatel.jnumbertools.api.Combinations;
+
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -37,7 +39,7 @@ public abstract class AbstractMultisetCombination<T> implements Iterable<Map<T, 
      * <p>
      * <strong>Note:</strong> This constructor is intended for internal use only.
      * Concrete instances should be created via
-     * {@link io.github.deepeshpatel.jnumbertools.base.Combinations#multiset(LinkedHashMap, int)}.
+     * {@link Combinations#multiset(LinkedHashMap, int)}.
      * All parameter validation (null check, non-negative frequencies, zero-frequency filtering, r ≥ 0)
      * is handled by the builder.
      * </p>

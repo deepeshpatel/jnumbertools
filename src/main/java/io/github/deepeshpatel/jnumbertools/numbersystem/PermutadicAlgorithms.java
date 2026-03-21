@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -253,7 +253,7 @@ public final class PermutadicAlgorithms {
      * @param rank the rank of the permutation to be un-ranked.
      * @param size the size of the set from which the permutation is selected.
      * @param k the number of items to be selected for the permutation.
-     * @param calculator the Calculator instance for combinatorial computations
+     * @param calculator the CalculatorImpl instance for combinatorial computations
      * @return an array representing the un-ranked permutation.
      * @throws ArithmeticException if the rank is out of the valid range.
      */

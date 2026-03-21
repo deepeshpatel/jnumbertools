@@ -1,7 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -9,8 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.assertEveryMthValue;
-import static io.github.deepeshpatel.jnumbertools.TestBase.combination;
+import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MultisetCombinationByRanksTest {
@@ -32,7 +30,7 @@ class MultisetCombinationByRanksTest {
                     .stream()
                     .count();
 
-            long totalCombinations = Calculator.multisetCombinationsCount(
+            long totalCombinations = calculator.multisetCombinationsCount(
                     combinationSize,
                     options.values().stream().mapToInt(Integer::intValue).toArray()
             ).longValue();

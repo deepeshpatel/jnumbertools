@@ -4,11 +4,11 @@
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
+
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Calculator for combinatorial computations with memoization.
@@ -17,7 +17,7 @@ import java.util.List;
  * Uses memoization to cache frequently computed values in thread-safe collections.
  * @author Deepesh Patel
  */
-public final class Calculator {
+public final class CalculatorImpl implements Calculator {
 
     private final TwoLevelMap<Integer, Integer, BigInteger> nCrMemo = new TwoLevelMap<>();
     private final TwoLevelMap<Integer, Integer, BigInteger> nPrMemo = new TwoLevelMap<>();
@@ -25,10 +25,10 @@ public final class Calculator {
     private final List<BigInteger> subFactorialCache = Collections.synchronizedList(new ArrayList<>());
 
     /**
-     * Constructs a new Calculator instance.
+     * Constructs a new CalculatorImpl instance.
      * Base cases (0!, !0, !1) are initialized automatically.
      */
-    public Calculator() {
+    public CalculatorImpl() {
         synchronized (factorialCache) {
             factorialCache.add(BigInteger.ONE); // 0! = 1
         }
@@ -253,7 +253,7 @@ public final class Calculator {
      * @param frequencies array of non-negative frequencies/multiplicities
      * @return array dp where dp[s] = number of ways to choose exactly s items (s ≤ total/2)
      */
-    public static int[] multisetCombinationsCountAll(int... frequencies) {
+    public int[] multisetCombinationsCountAll(int... frequencies) {
         int total = Arrays.stream(frequencies).sum();
         int k = total / 2;
         int[] dp = new int[k + 1];
@@ -279,7 +279,7 @@ public final class Calculator {
      * @return number of ways to choose exactly k items as a BigInteger
      * @throws IllegalArgumentException if k < 0 or any count < 0
      */
-    public static BigInteger multisetCombinationsCount(int k, int... counts) {
+    public BigInteger multisetCombinationsCount(int k, int... counts) {
         return multisetCombinationsCountStartingFromIndex(k, 0, counts);
     }
 
@@ -292,7 +292,7 @@ public final class Calculator {
      * @return the number of ways to select k items as a BigInteger
      * @throws IllegalArgumentException if k is negative, index is out of range, or any count is negative
      */
-    public static BigInteger multisetCombinationsCountStartingFromIndex(int k, int index, int... counts) {
+    public BigInteger multisetCombinationsCountStartingFromIndex(int k, int index, int... counts) {
         if (k < 0) {
             throw new IllegalArgumentException("k must be non-negative.");
         }
@@ -359,39 +359,6 @@ public final class Calculator {
     }
 
     /**
-     * Computes the greatest common divisor (GCD) of one or more BigInteger values.
-     * @param nums one or more BigInteger values (null values are ignored)
-     * @return the GCD of all non-null inputs, or ZERO if no valid inputs
-     * @throws IllegalArgumentException if the array is null or empty
-     */
-    public static BigInteger gcd(BigInteger... nums) {
-        if (nums == null || nums.length == 0) throw new IllegalArgumentException("At least one number required");
-        BigInteger res = nums[0] != null ? nums[0].abs() : BigInteger.ZERO;
-        for (int i = 1; i < nums.length; i++) {
-            if (nums[i] != null) {
-                res = res.gcd(nums[i].abs());
-            }
-        }
-        return res;
-    }
-
-    /**
-     * Computes the least common multiple (LCM) of one or more BigInteger values.
-     * @param nums one or more BigInteger values
-     * @return the LCM of all inputs, or ZERO if any input is zero
-     * @throws IllegalArgumentException if the array is null or empty
-     */
-    public static BigInteger lcm(BigInteger... nums) {
-        if (nums == null || nums.length == 0) throw new IllegalArgumentException("At least one number required");
-        BigInteger res = BigInteger.ONE;
-        for (BigInteger num : nums) {
-            if (num == null || num.signum() == 0) return BigInteger.ZERO;
-            res = res.multiply(num.abs()).divide(res.gcd(num.abs()));
-        }
-        return res;
-    }
-
-    /**
      * Clears all memoization caches (binomial, permutation, factorial, subfactorial).
      * Caches will rebuild lazily on next use.
      */
@@ -407,6 +374,36 @@ public final class Calculator {
             subFactorialCache.clear();
             subFactorialCache.add(BigInteger.ONE);  // !0
             subFactorialCache.add(BigInteger.ZERO); // !1
+        }
+    }
+
+    /**
+     * A thread-safe two-level map for memoization of two-key values.
+     * <p>
+     * This map stores values indexed by a primary key (K1) and secondary key (K2).
+     * It extends ConcurrentHashMap and uses nested ConcurrentHashMaps for thread safety.
+     * </p>
+     * <p>
+     * Primarily used internally by {@link CalculatorImpl} for caching combinatorial values
+     * like binomial coefficients C(n, k) where n is the primary key and k is the secondary key.
+     * </p>
+     *
+     * @param <K1> the type of the first-level key
+     * @param <K2> the type of the second-level key
+     * @param <V> the type of the stored value
+     * @author Deepesh Patel
+     * @see <a href="https://en.wikipedia.org/wiki/Memoization">Wikipedia: Memoization</a>
+     */
+    static class TwoLevelMap<K1, K2, V> extends ConcurrentHashMap<K1, Map<K2, V>> {
+
+        public V get(K1 key1, K2 key2) {
+            var map = get(key1);
+            return map == null ? null : map.get(key2);
+        }
+
+        public V put(K1 key1, K2 key2, V value) {
+            computeIfAbsent(key1, (e) -> new ConcurrentHashMap<>()).put(key2, value);
+            return value;
         }
     }
 }

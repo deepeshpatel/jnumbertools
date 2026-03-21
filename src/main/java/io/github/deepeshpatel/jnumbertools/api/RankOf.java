@@ -2,8 +2,9 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.api;
 
+import io.github.deepeshpatel.jnumbertools.base.CalculatorImpl;
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
 import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
@@ -73,7 +74,7 @@ public final class RankOf {
      * Constructs a new RankOf instance with a default Calculator.
      */
     public RankOf() {
-        this(new Calculator());
+        this(new CalculatorImpl());
     }
 
     /**

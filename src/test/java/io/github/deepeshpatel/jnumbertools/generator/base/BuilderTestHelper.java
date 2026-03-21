@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
 
+import static io.github.deepeshpatel.jnumbertools.TestBase.errMsgIncrement;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -46,10 +47,13 @@ public final class BuilderTestHelper {
         assertNotNull(builder.lexOrderMth(BigInteger.valueOf(2), BigInteger.ONE));
 
         // m <= 0
-        assertThrows(IllegalArgumentException.class, () ->
+        var errZeroM = assertThrows(IllegalArgumentException.class, () ->
                 builder.lexOrderMth(BigInteger.ZERO, BigInteger.ONE));
-        assertThrows(IllegalArgumentException.class, () ->
+        assertEquals(errMsgIncrement(0), errZeroM.getMessage());
+
+        var negativeM = assertThrows(IllegalArgumentException.class, () ->
                 builder.lexOrderMth(BigInteger.valueOf(-1), BigInteger.ONE));
+        assertEquals(errMsgIncrement(-1), negativeM.getMessage());
 
         // start < 0
         assertThrows(IllegalArgumentException.class, () ->
@@ -132,21 +136,5 @@ public final class BuilderTestHelper {
         var gen1 = builder.lexOrder();
         var gen2 = builder.lexOrder();
         assertNotSame(gen1, gen2);
-    }
-
-    /**
-     * Tests lexOrderMth method when count is zero - should throw immediately
-     * @param builder the builder instance being tested
-     */
-    public static void testLexOrderMthWithZeroCount(Builder<?> builder) {
-        assertEquals(BigInteger.ZERO, builder.count());
-
-        // Any call to lexOrderMth should throw immediately (fail fast)
-        assertThrows(IllegalArgumentException.class, () ->
-                builder.lexOrderMth(BigInteger.ONE, BigInteger.ZERO)
-        );
-        assertThrows(IllegalArgumentException.class, () ->
-                builder.lexOrderMth(BigInteger.ONE, BigInteger.valueOf(5))
-        );
     }
 }

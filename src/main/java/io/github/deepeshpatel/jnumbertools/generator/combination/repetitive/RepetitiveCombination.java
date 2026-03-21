@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 
+import io.github.deepeshpatel.jnumbertools.api.Combinations;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
@@ -36,7 +37,7 @@ public final class RepetitiveCombination<T> extends AbstractGenerator<T> {
      * <p>
      * <strong>Note:</strong> This constructor is intended for internal use only.
      * Instances should be created via
-     * {@link io.github.deepeshpatel.jnumbertools.base.Combinations#repetitive(int, List)}.
+     * {@link Combinations#repetitive(int, List)}.
      * All parameter validation (null check, r ≥ 0) is handled by the builder.
      * </p>
      *

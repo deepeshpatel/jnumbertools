@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
@@ -35,7 +35,7 @@ import java.util.Random;
  *       Heap's algorithm, where each successive permutation differs by a single swap.</li>
  *   <li><b>Every mᵗʰ Permutation</b> - {@link #lexOrderMth(BigInteger, BigInteger)}:
  *       Efficiently generates permutations at ranks start, start+m, start+2m, etc.</li>
- *   <li><b>Random Sampling</b> - {@link #sample(int)} and {@link #choice(int)}:
+ *   <li><b>Random Sampling</b> - {@link #sample(int, Random)} and {@link #choice(int, Random)}:
  *       Generate random samples with or without replacement.</li>
  *   <li><b>Rank-Based Access</b> - {@link #byRanks(Iterable)}: Generate permutations
  *       at specific lexicographical rank positions.</li>

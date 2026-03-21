@@ -2,8 +2,9 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.api;
 
+import io.github.deepeshpatel.jnumbertools.base.CalculatorImpl;
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder;
@@ -202,7 +203,7 @@ public final class JNumberTools {
      * @see ConstrainedProductBuilder
      */
     public static CartesianProduct cartesianProduct() {
-        return new CartesianProduct(new Calculator());
+        return new CartesianProduct(new CalculatorImpl());
     }
 
     /**
@@ -220,6 +221,40 @@ public final class JNumberTools {
      * @see Factoradic
      */
     public static NumberSystem numberSystem() {
-        return new NumberSystem(new Calculator());
+        return new NumberSystem(new CalculatorImpl());
+    }
+
+    /**
+     * Returns the default calculator instance for combinatorial computations.
+     * <p>
+     * The calculator provides fundamental mathematical operations used throughout the library,
+     * including factorials, binomial coefficients, permutations, multinomials, and more.
+     * All combinatorial generators internally use this calculator for counting and validation.
+     * </p>
+     * <p>
+     * This is the recommended way to obtain a calculator instance for standalone use,
+     * such as when you need to perform combinatorial calculations without generating
+     * full combinatorial structures.
+     * </p>
+     *
+     * <h3>Usage Examples</h3>
+     * <pre>
+     * // Calculate factorial
+     * BigInteger fact = JNumberTools.calculator().factorial(10);
+     *
+     * // Calculate binomial coefficient
+     * BigInteger combinations = JNumberTools.calculator().nCr(49, 6);
+     *
+     * // Calculate permutations
+     * BigInteger permutations = JNumberTools.calculator().nPr(10, 4);
+     * </pre>
+     *
+     * @return a new instance of the default calculator implementation
+     * @see Calculator
+     * @see #permutations()
+     * @see #combinations()
+     */
+    public static Calculator calculator() {
+        return new CalculatorImpl();
     }
 }

@@ -2,8 +2,9 @@
  * JNumberTools Library v3.0.1
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.api;
 
+import io.github.deepeshpatel.jnumbertools.base.CalculatorImpl;
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetBuilder;
@@ -109,7 +110,7 @@ public final class Subsets {
      * Constructs a new Subsets instance with a default Calculator.
      */
     public Subsets() {
-        this(new Calculator());
+        this(new CalculatorImpl());
     }
 
     /**

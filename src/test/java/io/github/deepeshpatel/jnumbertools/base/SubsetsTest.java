@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.api.Subsets;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -39,8 +40,7 @@ class SubsetsTest {
         // Test null input - should throw NPE (outside rules)
         var nullExp = assertThrows(NullPointerException.class, () ->
                 subsets.of((List<String>) null));
-        assertTrue(nullExp.getMessage().startsWith(errMsgNullInput));
-
+        assertEquals(errMsgNullInput, nullExp.getMessage());
         // Note: empty list is allowed (tested in SubsetBuilderTest)
     }
 
@@ -59,9 +59,8 @@ class SubsetsTest {
         assertNotNull(emptyBuilder);
 
         // Test null varargs array
-        String[] nullArray = null;
         assertThrows(NullPointerException.class, () ->
-                subsets.of(nullArray));
+                subsets.of((String[])null));
     }
 
     @Test

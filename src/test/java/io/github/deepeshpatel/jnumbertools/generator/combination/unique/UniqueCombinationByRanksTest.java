@@ -1,7 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.api.JNumberTools;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -63,7 +63,7 @@ class UniqueCombinationByRanksTest {
             assertEquals(sampleSize, combinations.size());
             for (List<String> combo : combinations) {
                 assertEquals(r, combo.size(), "Each combination should have size r");
-                assertEquals(new HashSet<>(combo).size(), r, "Each combination should have unique elements");
+                assertEquals(r, new HashSet<>(combo).size(), "Each combination should have unique elements");
                 assertTrue(elements.containsAll(combo), "All elements should come from the input list");
             }
         }
@@ -123,7 +123,7 @@ class UniqueCombinationByRanksTest {
             assertEquals(sampleSize, combinations.size(), "Should generate sampleSize combinations for large input");
             for (List<Integer> combo : combinations) {
                 assertEquals(r, combo.size(), "Each combination should have size r");
-                assertEquals(new HashSet<>(combo).size(), r, "Each combination should have unique elements");
+                assertEquals(r, new HashSet<>(combo).size(), "Each combination should have unique elements");
                 assertTrue(largeInput.containsAll(combo), "All elements should come from input");
             }
         }
@@ -235,7 +235,7 @@ class UniqueCombinationByRanksTest {
             assertEquals(sampleSize, combinations.size());
             for (List<String> combo : combinations) {
                 assertEquals(r, combo.size(), "Each combination should have size r");
-                assertEquals(new HashSet<>(combo).size() , r , "Each combination should have unique elements");
+                assertEquals(r, new HashSet<>(combo).size(), "Each combination should have unique elements");
                 assertTrue(elements.containsAll(combo), "All elements should come from the input list");
             }
         }
@@ -420,9 +420,7 @@ class UniqueCombinationByRanksTest {
 
         @Test
         void byRanks_withNullRanks_shouldThrowException() {
-            assertThrows(IllegalArgumentException.class, () -> {
-                combination.unique(3, 2, "A", "B", "C").byRanks(null);
-            }, "Null ranks should throw IllegalArgumentException");
+            assertThrows(IllegalArgumentException.class, () -> combination.unique(3, 2, "A", "B", "C").byRanks(null), "Null ranks should throw IllegalArgumentException");
         }
 
         @Test

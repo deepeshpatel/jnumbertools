@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.examples.realworld.security;
 
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.api.JNumberTools;
 
 import java.util.List;
 import java.util.Random;
@@ -64,7 +64,7 @@ public class PinCodeGenerator {
         System.out.println("First 10 PINs:");
         pins.lexOrder().stream()
                 .limit(10)
-                .forEach(tuple -> System.out.println(tuple));
+                .forEach(System.out::println);
     }
 
     private static void generateRandomPins() {

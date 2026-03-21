@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.*;
+import static io.github.deepeshpatel.jnumbertools.TestBase.rankOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RankOfTest {

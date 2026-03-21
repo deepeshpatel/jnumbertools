@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.examples.realworld.datascience;
 
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.api.JNumberTools;
 
 import java.util.List;
 import java.util.Random;
@@ -10,8 +10,6 @@ import java.util.Random;
  * Shows combinatorial approaches to factorial designs and parameter optimization
  */
 public class ExperimentalDesign {
-
-    record Experiment(String name, List<String> factors, List<String> levels) {}
 
     public static void main(String[] args) {
         System.out.println("=== Experimental Design Generator ===\n");

@@ -1,6 +1,5 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
-import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -28,12 +27,17 @@ public class SimpleCartesianProductTest {
         // Note: This scenario occurs when builder is created but no dimensions added?
         // Actually, builder always has at least one dimension from construction
 
-        // Case 2: Single empty dimension -> count=1, returns [[]]
+        // Case 1: 0-dimensional product -> count=1, returns [[]]
+        var nullaryBuilder = cartesianProduct.simpleProductOf();
+        assertEquals(BigInteger.ONE, nullaryBuilder.count());
+        var nullaryResult = nullaryBuilder.lexOrder().stream().toList();
+        assertEquals(1, nullaryResult.size());
+        assertTrue(nullaryResult.get(0).isEmpty());
+
+        // Case 2: Single empty dimension -> count=0, returns []
         var singleEmptyBuilder = cartesianProduct.simpleProductOf(Collections.emptyList());
-        assertEquals(BigInteger.ONE, singleEmptyBuilder.count());
-        var singleEmptyResult = singleEmptyBuilder.lexOrder().stream().toList();
-        assertEquals(1, singleEmptyResult.size());
-        assertTrue(singleEmptyResult.get(0).isEmpty());
+        assertEquals(BigInteger.ZERO, singleEmptyBuilder.count());
+        assertTrue(singleEmptyBuilder.lexOrder().stream().toList().isEmpty());
 
         // Case 3: Multiple dimensions, all non-empty -> normal product
         // (tested in other methods)
@@ -78,10 +82,10 @@ public class SimpleCartesianProductTest {
     }
 
     @Test
-    void shouldHandleEmptyProduct() {
-        var product = cartesianProduct.simpleProductOf(List.of()).lexOrder().stream().toList();
-        assertTrue(Util.isEmptyList(product));
-        //assertTrue(product.isEmpty());
+    void shouldHandleNullaryProduct() {
+        var product = cartesianProduct.simpleProductOf().lexOrder().stream().toList();
+        assertEquals(1, product.size());
+        assertTrue(product.get(0).isEmpty());
     }
 
     @Test
@@ -89,9 +93,8 @@ public class SimpleCartesianProductTest {
         var builder = cartesianProduct.simpleProductOf(Collections.emptyList());
         var generator = builder.lexOrder();
         var result = generator.stream().toList();
-        assertEquals(BigInteger.ONE, builder.count());
-        assertEquals(1, result.size());
-        assertEquals(List.of(), result.get(0));
+        assertEquals(BigInteger.ZERO, builder.count());
+        assertTrue(result.isEmpty());
     }
 
     @Test

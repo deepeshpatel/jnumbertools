@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.examples.realworld.datascience;
 
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.api.JNumberTools;
 
 import java.util.List;
 import java.util.Random;
@@ -10,8 +10,6 @@ import java.util.Random;
  * Shows combinatorial approaches to test design and analysis
  */
 public class ABTesting {
-
-    record TestVariant(String name, String description, double traffic) {}
 
     public static void main(String[] args) {
         System.out.println("=== A/B Testing Design Generator ===\n");

@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
 
 import java.math.BigInteger;
@@ -107,7 +107,7 @@ public class KPermutationByRanks<T> extends AbstractKPermutation<T> {
         /**
          * Returns the next k-permutation for the current rank.
          * <p>
-         * Uses permutadic unranking to convert the rank to a permutation of indices, then maps
+         * Uses permutadic un-ranking to convert the rank to a permutation of indices, then maps
          * the indices to the corresponding elements.
          * </p>
          *

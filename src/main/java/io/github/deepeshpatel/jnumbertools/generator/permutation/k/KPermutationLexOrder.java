@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
+import io.github.deepeshpatel.jnumbertools.api.Permutations;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermutationLexElementIterator;
 
@@ -39,7 +40,7 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
      * <p>
      * <strong>Note:</strong> This constructor is intended for internal use only.
      * Instances should be created via
-     * {@link io.github.deepeshpatel.jnumbertools.base.Permutations#nPk(int, List)}.
+     * {@link Permutations#nPk(int, List)}.
      * All parameter validation (null check, 0 ≤ k ≤ n) is handled by the builder.
      * </p>
      *
@@ -114,7 +115,7 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
          * <p>Algorithm:
          * <ol>
          *   <li>If remaining indices exist, appends next available index</li>
-         *   <li>Otherwise finds rightmost incrementable position</li>
+         *   <li>Otherwise finds rightmost increment-able position</li>
          *   <li>Updates it with next valid value and resets subsequent positions</li>
          * </ol>
          *

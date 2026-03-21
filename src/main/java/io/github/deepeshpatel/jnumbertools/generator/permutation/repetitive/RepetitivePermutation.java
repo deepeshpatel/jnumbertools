@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
+import io.github.deepeshpatel.jnumbertools.api.Permutations;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
@@ -40,7 +41,7 @@ public final class RepetitivePermutation<T> extends AbstractGenerator<T> {
      *
      * <p>
      * <strong>Note:</strong> This constructor is intended for internal use only.
-     * Instances should be created via {@link io.github.deepeshpatel.jnumbertools.base.Permutations#repetitive(int, List)}.
+     * Instances should be created via {@link Permutations#repetitive(int, List)}.
      * All parameter validation (null check, non-negative size) is handled by the builder.
      * </p>
      *

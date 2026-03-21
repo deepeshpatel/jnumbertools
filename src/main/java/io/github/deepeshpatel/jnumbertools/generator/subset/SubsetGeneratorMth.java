@@ -4,9 +4,9 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.base.Combinations;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.generator.combination.unique.UniqueCombinationBuilder;
 
 import java.math.BigInteger;
 import java.util.Iterator;
@@ -31,7 +31,6 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> {
 
     private final BigInteger increment;
     private final Calculator calculator;
-    private final Combinations combinations;
     private BigInteger limit;
     private final BigInteger initialM;
     private final int from;
@@ -64,7 +63,6 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> {
         this.to = to;
         this.increment = m;
         this.calculator = calculator;
-        combinations = new Combinations(calculator);
         initialM = start.add(totalSubsetsBeforeRange());
     }
 
@@ -100,11 +98,12 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> {
         }
 
         if (sum.equals(m)) {
-            return combinations.unique(size, r).lexOrder().iterator().next();
+            return UniqueCombinationBuilder.newInstance(size, r, calculator).lexOrder().iterator().next();
         }
 
         m = m.subtract(prev);
-        return new Combinations(calculator).unique(size, r - 1)
+
+        return UniqueCombinationBuilder.newInstance(size, r-1, calculator)
                 .lexOrderMth(m, m).iterator().next();
     }
 

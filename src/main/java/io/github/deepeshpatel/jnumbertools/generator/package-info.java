@@ -28,12 +28,12 @@
  * ```
  *
  * @see io.github.deepeshpatel.jnumbertools.base
- * @see io.github.deepeshpatel.jnumbertools.base.Permutations
- * @see io.github.deepeshpatel.jnumbertools.base.Combinations
- * @see io.github.deepeshpatel.jnumbertools.base.Subsets
- * @see io.github.deepeshpatel.jnumbertools.base.CartesianProduct
- * @see io.github.deepeshpatel.jnumbertools.base.RankOf
- * @see io.github.deepeshpatel.jnumbertools.base.UnrankOf
+ * @see io.github.deepeshpatel.jnumbertools.api.Permutations
+ * @see io.github.deepeshpatel.jnumbertools.api.Combinations
+ * @see io.github.deepeshpatel.jnumbertools.api.Subsets
+ * @see io.github.deepeshpatel.jnumbertools.api.CartesianProduct
+ * @see io.github.deepeshpatel.jnumbertools.api.RankOf
+ * @see io.github.deepeshpatel.jnumbertools.api.UnrankOf
  * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
  * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  */

@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.examples.fordevs.basics;
 
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.api.JNumberTools;
 
 import java.util.List;
 

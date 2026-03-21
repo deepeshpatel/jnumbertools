@@ -4,21 +4,18 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.base.Combinations;
-import io.github.deepeshpatel.jnumbertools.base.Subsets;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.*;
+import io.github.deepeshpatel.jnumbertools.generator.combination.repetitive.RepetitiveCombinationBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.combination.unique.UniqueCombinationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 import io.github.deepeshpatel.jnumbertools.generator.product.CartesianProductByRanks;
 import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetBuilder;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Builder for generating constrained Cartesian products where each dimension can have
@@ -66,8 +63,8 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
             firstBuilder = new EmptyBuilder(n);
         } else {
             firstBuilder = isMultiSelect
-                    ? new Combinations(calculator).repetitive(n, elements)
-                    : new Combinations(calculator).unique(n, elements);
+                    ? new RepetitiveCombinationBuilder<>(elements, n, calculator)
+                    : new UniqueCombinationBuilder<>(elements, n, calculator);
         }
 
         this.builders.add(firstBuilder);
@@ -80,7 +77,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
     public ConstrainedProductBuilder(int from, int to, List<?> elements, Calculator calculator) {
         this.calculator = calculator;
         this.builders = new ArrayList<>();
-        Builder<?> firstBuilder = new Subsets(calculator).of(elements).inRange(from, to);
+        Builder<?> firstBuilder = new SubsetBuilder<>(elements, calculator).inRange(from, to);
         this.builders.add(firstBuilder);
         this.isEmptyProduct = firstBuilder.isEmpty();
     }
@@ -114,7 +111,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         if (elements.isEmpty()) {
             newBuilder = new EmptyBuilder(quantity);
         } else {
-            newBuilder = new Combinations(calculator).unique(quantity, elements);
+            newBuilder = new UniqueCombinationBuilder<>(elements, quantity, calculator);
         }
         newBuilders.add(newBuilder);
 
@@ -145,7 +142,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         if (elements.isEmpty()) {
             newBuilder = new EmptyBuilder(quantity);
         } else {
-            newBuilder = new Combinations(calculator).repetitive(quantity, elements);
+            newBuilder = new RepetitiveCombinationBuilder<>(elements, quantity, calculator);
         }
         newBuilders.add(newBuilder);
         return new ConstrainedProductBuilder(newBuilders, calculator, newBuilder.isEmpty());
@@ -167,7 +164,8 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         }
 
         List<Builder<?>> newBuilders = new ArrayList<>(this.builders);
-        Builder<?> newBuilder = new Subsets(calculator).of(elements).inRange(from, to);
+        Builder<?> newBuilder = new SubsetBuilder<>(elements, calculator).inRange(from, to);
+
         newBuilders.add(newBuilder);
 
         // Product becomes empty only if the new builder is empty
@@ -194,7 +192,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         }
 
         BigInteger maxCount = count();
-        return new CartesianProductByRanks(
+        return new CartesianProductByRanks<>(
                 (List<Builder<Object>>) (List) builders,
                 new EveryMthIterable(start, m, maxCount)
         );
@@ -246,7 +244,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         }
 
         BigInteger maxCount = count();
-        return new CartesianProductByRanks(
+        return new CartesianProductByRanks<>(
                 (List<Builder<Object>>) (List) builders,
                 new BigIntegerChoice(maxCount, sampleSize, random)
         );
@@ -280,7 +278,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
             );
         }
 
-        return new CartesianProductByRanks(
+        return new CartesianProductByRanks<>(
                 (List<Builder<Object>>) (List) builders,
                 new BigIntegerSample(maxCount, sampleSize, random)
         );

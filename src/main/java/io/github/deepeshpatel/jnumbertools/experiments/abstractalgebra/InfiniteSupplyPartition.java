@@ -15,29 +15,25 @@ import java.util.NoSuchElementException;
  */
 public class InfiniteSupplyPartition implements Iterable<Map<String, Integer>> {
     private final int r;
-    private final boolean reverse;
     private final String[] elements;
 
     public InfiniteSupplyPartition(int r, boolean reverse, String[] elements) {
         this.r = r;
-        this.reverse = reverse;
         this.elements = elements;
     }
 
     @Override
     public Iterator<Map<String, Integer>> iterator() {
         //return new PartitionIterator(r, elements);
-        return reverse ? new PartitionIterator(r, elements) : new PartitionIterator(r, elements);
+        return new PartitionIterator(r, elements);
     }
 
     private static class PartitionIterator implements Iterator<Map<String, Integer>> {
-        protected final int r;
         protected final String[] elements;
         protected final int[] partition;
         protected int length;
 
         public PartitionIterator(int r, String[] elements) {
-            this.r = r;
             this.elements = elements;
             this.partition = new int[elements.length];
             this.partition[0] = r;

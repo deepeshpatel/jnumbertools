@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.api.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
@@ -14,6 +14,7 @@ import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 /**
  * Builder for generating unique combinations (ⁿCᵣ) of elements.
@@ -141,6 +142,12 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
         this.elements = elements;
         this.size = size;
         this.calculator = calculator;
+    }
+
+    public static UniqueCombinationBuilder<Integer> newInstance(int n, int r, Calculator calculator) {
+        Util.validateNK(n,r);
+        var elements = IntStream.range(0, n).boxed().toList();
+        return new UniqueCombinationBuilder<>(elements, r, calculator);
     }
 
     /**

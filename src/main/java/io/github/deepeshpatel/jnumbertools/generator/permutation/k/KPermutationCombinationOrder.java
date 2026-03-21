@@ -4,10 +4,11 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
-import io.github.deepeshpatel.jnumbertools.base.Combinations;
-import io.github.deepeshpatel.jnumbertools.base.Permutations;
+import io.github.deepeshpatel.jnumbertools.api.Permutations;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
+import io.github.deepeshpatel.jnumbertools.generator.combination.unique.UniqueCombinationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermutationLexElementIterator;
+import io.github.deepeshpatel.jnumbertools.generator.permutation.unique.UniquePermutation;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -41,7 +42,7 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
      * <p>
      * <strong>Note:</strong> This constructor is intended for internal use only.
      * Instances should be created via
-     * {@link io.github.deepeshpatel.jnumbertools.base.Permutations#nPk(int, List)} and then
+     * {@link Permutations#nPk(int, List)} and then
      * {@link io.github.deepeshpatel.jnumbertools.generator.permutation.k.KPermutationBuilder#combinationOrder()}.
      * All parameter validation (null check, 0 ≤ k ≤ n) is handled by the builder.
      * </p>
@@ -101,7 +102,7 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
          * library's implementation for default behavior.
          */
         public Itr() {
-            combinationIterator = new Combinations(null).unique(k, elements).lexOrder().iterator();
+            combinationIterator = new UniqueCombinationBuilder<>(elements, k, null).lexOrder().iterator();
             getNextIterator();
         }
 
@@ -127,10 +128,7 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
          * @return the iterator for permutations of the next combination
          */
         private Iterator<List<T>> getNextIterator() {
-            currentIterator = new Permutations(null)
-                    .unique(combinationIterator.next())
-                    .lexOrder()
-                    .iterator();
+            currentIterator = new UniquePermutation<>(combinationIterator.next()).iterator();
             return currentIterator;
         }
     }
