@@ -1,6 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 
 import io.github.deepeshpatel.jnumbertools.api.Combinations;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.combination.unique.UniqueCombinationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.BuilderTestHelper;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +11,7 @@ import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class UniqueCombinationBuilderTest {
 
@@ -83,5 +85,16 @@ class UniqueCombinationBuilderTest {
         // r > n -> mathematically valid, count = 0
         var greaterRBuilder = combinations.unique(5, elements);
         assertEquals(BigInteger.ZERO, greaterRBuilder.count());
+    }
+
+    @Test
+    void shouldReturnImmutableOuterAndInnerCollection() {
+        var results = builder.lexOrder().stream().toList();
+        assertThrows(UnsupportedOperationException.class, () -> results.add(List.of("X")));
+        assertThrows(UnsupportedOperationException.class, () -> results.remove(0));
+
+        var first = results.get(0);
+        assertThrows(UnsupportedOperationException.class, () -> first.add("X"));
+        assertThrows(UnsupportedOperationException.class, () -> first.set(0, "X"));
     }
 }

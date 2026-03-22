@@ -4,11 +4,12 @@
  */
 package io.github.deepeshpatel.jnumbertools.api;
 
-import io.github.deepeshpatel.jnumbertools.base.CalculatorImpl;
-import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
-import io.github.deepeshpatel.jnumbertools.generator.base.Util;
-import io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder;
+import io.github.deepeshpatel.jnumbertools.api.examples.AllExamples;
+import io.github.deepeshpatel.jnumbertools.core.external.Calculator;
+import io.github.deepeshpatel.jnumbertools.core.internal.CalculatorImpl;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.base.Util;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.product.constrained.ConstrainedProductBuilder;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.product.simple.SimpleProductBuilder;
 
 import java.util.List;
 
@@ -127,6 +128,7 @@ public final class CartesianProduct {
      *
      * @param elements the list of elements forming the first set (null treated as empty)
      * @return a SimpleProductBuilder for configuring additional dimensions
+     * @throws NullPointerException if elements is null
      */
     public SimpleProductBuilder simpleProductOf(List<?> elements) {
         Util.validateInput(elements);
@@ -166,10 +168,12 @@ public final class CartesianProduct {
      * @param quantity the size of distinct combinations for the first dimension (must be ≥ 0)
      * @param elements the list of elements for the first dimension
      * @return a ConstrainedProductBuilder for configuring additional constrained dimensions
+     * @throws NullPointerException if elements is null
+     * @throws IllegalArgumentException if quantity < 0
      */
     public ConstrainedProductBuilder constrainedProductOfDistinct(int quantity, List<?> elements) {
         Util.validateInput(elements);
-        Util.validateNotNegative(quantity, "quantity");
+        validateNotNegative(quantity);
         return new ConstrainedProductBuilder(quantity, elements, false, calculator);
     }
 
@@ -184,10 +188,12 @@ public final class CartesianProduct {
      * @param quantity the size of multi-select combinations for the first dimension (must be ≥ 0)
      * @param elements the list of elements for the first dimension
      * @return a ConstrainedProductBuilder for configuring additional constrained dimensions
+     * @throws NullPointerException if elements is null
+     * @throws IllegalArgumentException if quantity < 0
      */
     public ConstrainedProductBuilder constrainedProductOfMultiSelect(int quantity, List<?> elements) {
         Util.validateInput(elements);
-        Util.validateNotNegative(quantity, "quantity");
+        validateNotNegative(quantity);
         return new ConstrainedProductBuilder(quantity, elements, true, calculator);
     }
 
@@ -203,10 +209,15 @@ public final class CartesianProduct {
      * @param to       the maximum subset size (inclusive, must be ≥ from)
      * @param elements the list of elements for the first dimension
      * @return a ConstrainedProductBuilder for configuring additional constrained dimensions
+     * @throws NullPointerException if elements is null
      * @throws IllegalArgumentException if from < 0, to < from, or from > elements.size()
      */
     public ConstrainedProductBuilder constrainedProductOfInRange(int from, int to, List<?> elements) {
         Util.validateInput(elements);
         return new ConstrainedProductBuilder(from, to, elements, calculator);
+    }
+
+    private static void validateNotNegative(int n) {
+        if(n < 0)   throw new IllegalArgumentException("quantity must be ≥ 0");
     }
 }

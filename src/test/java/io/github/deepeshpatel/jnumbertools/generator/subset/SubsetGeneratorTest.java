@@ -128,4 +128,15 @@ public class SubsetGeneratorTest {
 
         assertEquals("[[], [0], [1], [2], [0, 1], [0, 2], [1, 2], [0, 1, 2]]", output);
     }
+
+    @Test
+    void shouldReturnImmutableOuterAndInnerCollection() {
+        var results = subsets.of("A", "B").all().lexOrder().stream().toList();
+        assertThrows(UnsupportedOperationException.class, () -> results.add(List.of("X")));
+        assertThrows(UnsupportedOperationException.class, () -> results.remove(0));
+
+        var first = results.get(0);
+        assertThrows(UnsupportedOperationException.class, () -> first.add("X"));
+        assertThrows(UnsupportedOperationException.class, () -> first.set(0, "X"));
+    }
 }

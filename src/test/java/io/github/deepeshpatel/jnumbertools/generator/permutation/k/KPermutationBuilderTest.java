@@ -1,6 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
 import io.github.deepeshpatel.jnumbertools.api.Permutations;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.permutation.k.KPermutationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.BuilderTestHelper;
 import org.junit.jupiter.api.Test;
 

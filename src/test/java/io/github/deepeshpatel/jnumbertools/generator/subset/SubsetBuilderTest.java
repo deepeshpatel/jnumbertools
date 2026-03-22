@@ -258,4 +258,16 @@ class SubsetBuilderTest {
         var unconfigured = subsets.of(elements);
         assertTrue(unconfigured.isEmpty()); // Should be empty until range specified
     }
+
+    @Test
+    void shouldReturnImmutableOuterAndInnerCollection() {
+        var builder = subsets.of(elements).inRange(1, 2);
+        var results = builder.lexOrder().stream().toList();
+        assertThrows(UnsupportedOperationException.class, () -> results.add(List.of("X")));
+        assertThrows(UnsupportedOperationException.class, () -> results.remove(0));
+
+        var first = results.get(0);
+        assertThrows(UnsupportedOperationException.class, () -> first.add("X"));
+        assertThrows(UnsupportedOperationException.class, () -> first.set(0, "X"));
+    }
 }

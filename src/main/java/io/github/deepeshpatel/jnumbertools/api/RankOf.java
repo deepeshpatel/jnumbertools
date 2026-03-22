@@ -4,10 +4,11 @@
  */
 package io.github.deepeshpatel.jnumbertools.api;
 
-import io.github.deepeshpatel.jnumbertools.base.CalculatorImpl;
-import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
-import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
-import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
+import io.github.deepeshpatel.jnumbertools.api.examples.AllExamples;
+import io.github.deepeshpatel.jnumbertools.core.external.Calculator;
+import io.github.deepeshpatel.jnumbertools.core.internal.CalculatorImpl;
+import io.github.deepeshpatel.jnumbertools.core.internal.numbersystem.CombinadicAlgorithms;
+import io.github.deepeshpatel.jnumbertools.core.internal.numbersystem.PermutadicAlgorithms;
 
 import java.math.BigInteger;
 

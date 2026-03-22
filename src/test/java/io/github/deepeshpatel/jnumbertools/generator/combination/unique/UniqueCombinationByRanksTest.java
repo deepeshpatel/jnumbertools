@@ -45,7 +45,8 @@ class UniqueCombinationByRanksTest {
                     .toList();
             assertEquals(sampleSize, combinations.size(), "Should generate sampleSize combinations");
             int uniqueCount = new HashSet<>(combinations).size();
-            assertTrue(uniqueCount <= calculator.nCr(n, r).intValueExact(), "Unique combinations should not exceed nCr");
+            assertTrue(uniqueCount <= calculator.nCr(n, r).intValueExact(),
+                    "Unique combinations should not exceed nCr");
             // Not asserting duplicates must occur (random), but allowing them
         }
 
@@ -153,7 +154,7 @@ class UniqueCombinationByRanksTest {
             int start = 3;
             int n = 8;
             int r = 4;
-            for(int m=1; m<=32; m+=2) {
+            for (int m = 1; m <= 32; m += 2) {
                 var all = combination.unique(n, r).lexOrder();
                 var mth = combination.unique(n, r).lexOrderMth(m, start);
                 assertEveryMthValue(all.stream(), mth.stream(), start, m);
@@ -250,7 +251,8 @@ class UniqueCombinationByRanksTest {
                     .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
-            assertEquals(sampleSize, combinations.size(), "Should generate all possible combinations when sampleSize equals nCr");
+            assertEquals(sampleSize, combinations.size(),
+                    "Should generate all possible combinations when sampleSize equals nCr");
             assertEquals(sampleSize, new HashSet<>(combinations).size(), "All combinations should be unique");
         }
 
@@ -379,8 +381,7 @@ class UniqueCombinationByRanksTest {
             var expected = List.of(
                     of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16),
                     of(0, 3, 6, 9, 10, 11, 13, 15, 16, 18, 20, 23, 24, 25, 27, 31, 33),
-                    of(2, 4, 10, 13, 14, 17, 18, 20, 22, 23, 26, 27, 29, 30, 31, 32, 33)
-            );
+                    of(2, 4, 10, 13, 14, 17, 18, 20, 22, 23, 26, 27, 29, 30, 31, 32, 33));
 
             int n = 34;
             int r = 17;
@@ -394,7 +395,7 @@ class UniqueCombinationByRanksTest {
             var input = of('A', 'B', 'C', 'D', 'E', 'F');
             int start = 1;
             for (int r = 1; r <= input.size() / 2; r++) {
-                for (int m = 1; m <= 10; m+=2) {
+                for (int m = 1; m <= 10; m += 2) {
                     var all = combination.unique(r, input).lexOrder().stream();
                     var mth = combination.unique(r, input).lexOrderMth(m, start).stream();
                     assertEveryMthValue(all, mth, start, m);
@@ -406,8 +407,7 @@ class UniqueCombinationByRanksTest {
         void testStartParameterGreaterThanZero() {
             var expected = List.of(
                     of('B', 'C'),
-                    of('C', 'D')
-            );
+                    of('C', 'D'));
             var output = combination.unique(2, 'A', 'B', 'C', 'D')
                     .lexOrderMth(2, 3).stream().toList();
             assertIterableEquals(expected, output);
@@ -420,7 +420,8 @@ class UniqueCombinationByRanksTest {
 
         @Test
         void byRanks_withNullRanks_shouldThrowException() {
-            assertThrows(IllegalArgumentException.class, () -> combination.unique(3, 2, "A", "B", "C").byRanks(null), "Null ranks should throw IllegalArgumentException");
+            assertThrows(IllegalArgumentException.class, () -> combination.unique(3, 2, "A", "B", "C").byRanks(null),
+                    "Null ranks should throw IllegalArgumentException");
         }
 
         @Test
@@ -450,15 +451,15 @@ class UniqueCombinationByRanksTest {
             // Note: This test demonstrates that mixed valid/invalid ranks pass validation
             // but cause exceptions during iteration when invalid ranks are encountered
             var result = combination.unique(3, 2, "A", "B", "C").byRanks(of(
-                    BigInteger.ZERO,        // valid
+                    BigInteger.ZERO, // valid
                     BigInteger.valueOf(10), // invalid - out of bounds
-                    BigInteger.valueOf(-1)   // invalid - negative
+                    BigInteger.valueOf(-1) // invalid - negative
             ));
 
             assertThrows(Exception.class, () -> {
                 result.stream().toList(); // Exception occurs during iteration
             }, "Mixed valid/invalid ranks should throw exception during iteration");
-            //ArrayIndexOutOfBoundsException instead of IllegalArgumentException
+            // ArrayIndexOutOfBoundsException instead of IllegalArgumentException
         }
 
         @Test
@@ -467,8 +468,7 @@ class UniqueCombinationByRanksTest {
                 var result = combination.unique(3, 2, "A", "B", "C").byRanks(of(
                         BigInteger.ZERO,
                         BigInteger.ONE,
-                        BigInteger.valueOf(2)
-                ));
+                        BigInteger.valueOf(2)));
                 var combinations = result.stream().toList();
                 assertEquals(3, combinations.size());
             });
@@ -482,8 +482,7 @@ class UniqueCombinationByRanksTest {
                         BigInteger.valueOf(3),
                         BigInteger.ZERO,
                         BigInteger.valueOf(4),
-                        BigInteger.ONE
-                ));
+                        BigInteger.ONE));
                 var combinations = result.stream().toList();
                 assertEquals(4, combinations.size());
             });

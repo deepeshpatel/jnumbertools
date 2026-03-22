@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.combination.multiset.MultisetCombination;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -162,5 +163,16 @@ public class MultisetCombinationTest {
 
         var output = combination.multiset(options,size).lexOrder().stream().toList();
         assertEquals(expected, output.toString());
+    }
+
+    @Test
+    void shouldReturnImmutableOuterAndInnerCollection() {
+        var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1));
+        var results = combination.multiset(options, 2).lexOrder().stream().toList();
+        assertThrows(UnsupportedOperationException.class, () -> results.add(Map.of("X", 1)));
+        assertThrows(UnsupportedOperationException.class, () -> results.remove(0));
+
+        var first = results.get(0);
+        assertThrows(UnsupportedOperationException.class, () -> first.put("X", 1));
     }
 }

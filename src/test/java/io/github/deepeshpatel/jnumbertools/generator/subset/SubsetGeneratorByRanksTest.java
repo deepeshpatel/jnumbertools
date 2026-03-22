@@ -260,5 +260,4 @@ public class SubsetGeneratorByRanksTest {
             assertTrue(result.get(0).isEmpty());
         }
     }
-
 }

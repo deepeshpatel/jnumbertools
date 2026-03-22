@@ -1,6 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.base;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.base.Builder;
 
 import java.math.BigInteger;
 import java.util.Collections;

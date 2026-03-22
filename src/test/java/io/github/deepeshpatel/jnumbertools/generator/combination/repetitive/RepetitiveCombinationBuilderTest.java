@@ -1,6 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.api.Combinations;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.combination.repetitive.RepetitiveCombinationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.BuilderTestHelper;
 import org.junit.jupiter.api.Test;
 
@@ -15,21 +16,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class RepetitiveCombinationBuilderTest {
 
     /*
-    -------------------------------------------------------------------------------
-    Repetitive Combination Builder Validation Rules
-    -------------------------------------------------------------------------------
-    Method        | Input Validation                                  | Throws
-    --------------|---------------------------------------------------|------------------
-    lexOrder()    | none                                              | -
-    lexOrderMth() | m ≤ 0                                             | IllegalArgumentException
-                  | start < 0                                         | IllegalArgumentException
-                  | start ≥ count()                                   | IllegalArgumentException
-    byRanks()     | null ranks                                        | IllegalArgumentException
-    choice()      | sampleSize ≤ 0                                    | IllegalArgumentException
-    sample()      | sampleSize ≤ 0                                    | IllegalArgumentException
-                  | sampleSize > count()                              | IllegalArgumentException
-    count()       | none (always valid)                               | -
-    */
+     * -----------------------------------------------------------------------------
+     * --
+     * Repetitive Combination Builder Validation Rules
+     * -----------------------------------------------------------------------------
+     * --
+     * Method | Input Validation | Throws
+     * --------------|---------------------------------------------------|----------
+     * --------
+     * lexOrder() | none | -
+     * lexOrderMth() | m ≤ 0 | IllegalArgumentException
+     * | start < 0 | IllegalArgumentException
+     * | start ≥ count() | IllegalArgumentException
+     * byRanks() | null ranks | IllegalArgumentException
+     * choice() | sampleSize ≤ 0 | IllegalArgumentException
+     * sample() | sampleSize ≤ 0 | IllegalArgumentException
+     * | sampleSize > count() | IllegalArgumentException
+     * count() | none (always valid) | -
+     */
 
     private final Combinations combinations = new Combinations(calculator);
     private final List<String> elements = List.of("A", "B", "C");

@@ -4,13 +4,14 @@
  */
 package io.github.deepeshpatel.jnumbertools.api;
 
-import io.github.deepeshpatel.jnumbertools.base.CalculatorImpl;
-import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
-import io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder;
-import io.github.deepeshpatel.jnumbertools.numbersystem.Combinadic;
-import io.github.deepeshpatel.jnumbertools.numbersystem.Factoradic;
-import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
+import io.github.deepeshpatel.jnumbertools.api.examples.AllExamples;
+import io.github.deepeshpatel.jnumbertools.core.external.Calculator;
+import io.github.deepeshpatel.jnumbertools.core.internal.CalculatorImpl;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.product.constrained.ConstrainedProductBuilder;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.product.simple.SimpleProductBuilder;
+import io.github.deepeshpatel.jnumbertools.core.internal.numbersystem.Combinadic;
+import io.github.deepeshpatel.jnumbertools.core.internal.numbersystem.Factoradic;
+import io.github.deepeshpatel.jnumbertools.core.internal.numbersystem.Permutadic;
 
 /**
  * Factory for generating permutations, combinations, subsets, and other combinatorial structures.

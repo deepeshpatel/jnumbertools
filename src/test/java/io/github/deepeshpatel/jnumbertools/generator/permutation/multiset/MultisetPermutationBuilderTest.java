@@ -1,14 +1,17 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import io.github.deepeshpatel.jnumbertools.api.Permutations;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.permutation.multiset.MultisetPermutationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.BuilderTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MultisetPermutationBuilderTest {
 
@@ -86,5 +89,16 @@ class MultisetPermutationBuilderTest {
         zeroFreqOptions.put("B", 0);
         var zeroFreqBuilder = permutations.multiset(zeroFreqOptions);
         assertEquals(BigInteger.ONE, zeroFreqBuilder.count());
+    }
+
+    @Test
+    void shouldReturnImmutableOuterAndInnerCollection() {
+        var results = builder.lexOrder().stream().toList();
+        assertThrows(UnsupportedOperationException.class, () -> results.add(List.of("X")));
+        assertThrows(UnsupportedOperationException.class, () -> results.remove(0));
+
+        var first = results.get(0);
+        assertThrows(UnsupportedOperationException.class, () -> first.add("X"));
+        assertThrows(UnsupportedOperationException.class, () -> first.set(0, "X"));
     }
 }

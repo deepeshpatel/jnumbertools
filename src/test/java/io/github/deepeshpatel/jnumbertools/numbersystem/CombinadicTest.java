@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
+import io.github.deepeshpatel.jnumbertools.core.internal.numbersystem.Combinadic;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;

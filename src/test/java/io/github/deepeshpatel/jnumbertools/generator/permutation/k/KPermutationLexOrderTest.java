@@ -105,4 +105,15 @@ public class KPermutationLexOrderTest {
         String expected = sorted.toString();
         assertEquals(expected, output);
     }
+
+    @Test
+    void shouldReturnImmutableOuterAndInnerCollection() {
+        var results = permutation.nPk(2, "A", "B", "C").lexOrder().stream().toList();
+        assertThrows(UnsupportedOperationException.class, () -> results.add(List.of("X")));
+        assertThrows(UnsupportedOperationException.class, () -> results.remove(0));
+
+        var first = results.get(0);
+        assertThrows(UnsupportedOperationException.class, () -> first.add("X"));
+        assertThrows(UnsupportedOperationException.class, () -> first.set(0, "X"));
+    }
 }

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
@@ -61,6 +62,28 @@ public class MultisetPermutationTest {
     }
 
     @Test
+    void shouldFilterOutZeroFrequencies() {
+        // Map with mixed zero and positive frequencies
+        var options = new LinkedHashMap<String, Integer>();
+        options.put("A", 2);
+        options.put("B", 0);  // Zero frequency - should be ignored
+        options.put("C", 1);
+
+        var builder = permutation.multiset(options);
+
+        // This should behave the same as {A=2, C=1}
+        var expectedBuilder = permutation.multiset(new LinkedHashMap<>(Map.of("A", 2, "C", 1)));
+
+        assertEquals(expectedBuilder.count(), builder.count());
+
+        // The permutations should not contain B
+        var result = builder.lexOrder().stream().toList();
+        for (var perm : result) {
+            assertFalse(perm.contains("B"), "B should not appear in any permutation");
+        }
+    }
+
+    @Test
     void shouldHandleSingleElementWithMultipleFrequencies() {
         LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
         options.put("A", 3);
@@ -113,6 +136,21 @@ public class MultisetPermutationTest {
                 .toList();
 
         assertIterableEquals(expected, output);
+    }
+
+    @Test
+    void shouldReturnImmutableOuterAndInnerCollection() {
+        LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
+        options.put("A", 1);
+        options.put("B", 1);
+        
+        var results = permutation.multiset(options).lexOrder().stream().toList();
+        assertThrows(UnsupportedOperationException.class, () -> results.add(List.of("X")));
+        assertThrows(UnsupportedOperationException.class, () -> results.remove(0));
+
+        var first = results.get(0);
+        assertThrows(UnsupportedOperationException.class, () -> first.add("X"));
+        assertThrows(UnsupportedOperationException.class, () -> first.set(0, "X"));
     }
 
     @Test

@@ -91,6 +91,17 @@ public class UniqueCombinationTest {
         assertIterableEquals(expected, output(2, input));
     }
 
+    @Test
+    void shouldReturnImmutableOuterAndInnerCollection() {
+        var results = combination.unique(2, "A", "B", "C").lexOrder().stream().toList();
+        assertThrows(UnsupportedOperationException.class, () -> results.add(List.of("X")));
+        assertThrows(UnsupportedOperationException.class, () -> results.remove(0));
+
+        var first = results.get(0);
+        assertThrows(UnsupportedOperationException.class, () -> first.add("X"));
+        assertThrows(UnsupportedOperationException.class, () -> first.set(0, "X"));
+    }
+
     private List<?> output(int size, List<?> elements) {
         return combination.unique(size, elements).lexOrder().stream().toList();
     }

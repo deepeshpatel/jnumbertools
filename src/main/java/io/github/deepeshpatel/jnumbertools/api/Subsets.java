@@ -4,13 +4,14 @@
  */
 package io.github.deepeshpatel.jnumbertools.api;
 
-import io.github.deepeshpatel.jnumbertools.base.CalculatorImpl;
-import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
-import io.github.deepeshpatel.jnumbertools.generator.base.Util;
-import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetGenerator;
-import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetGeneratorByRanks;
-import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetGeneratorMth;
+import io.github.deepeshpatel.jnumbertools.api.examples.AllExamples;
+import io.github.deepeshpatel.jnumbertools.core.external.Calculator;
+import io.github.deepeshpatel.jnumbertools.core.internal.CalculatorImpl;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.base.Util;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.subset.SubsetBuilder;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.subset.SubsetGenerator;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.subset.SubsetGeneratorByRanks;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.subset.SubsetGeneratorMth;
 
 import java.util.List;
 import java.util.stream.IntStream;
@@ -146,7 +147,8 @@ public final class Subsets {
      * </p>
      *
      * @param elements the list of elements to build subsets from
-     * @param <T> the type of the elements
+     * @param <T> the type of elements
+     * @throws NullPointerException if elements is null
      * @return a SubsetBuilder for the specified elements
      */
     public <T> SubsetBuilder<T> of(List<T> elements) {

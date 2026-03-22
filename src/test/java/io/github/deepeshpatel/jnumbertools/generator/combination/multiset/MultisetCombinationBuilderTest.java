@@ -2,6 +2,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
 import io.github.deepeshpatel.jnumbertools.api.Combinations;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.combination.multiset.MultisetCombinationBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;

@@ -4,12 +4,13 @@
  */
 package io.github.deepeshpatel.jnumbertools.api;
 
-import io.github.deepeshpatel.jnumbertools.base.CalculatorImpl;
-import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
-import io.github.deepeshpatel.jnumbertools.generator.base.Util;
-import io.github.deepeshpatel.jnumbertools.generator.combination.multiset.MultisetCombinationBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.combination.repetitive.RepetitiveCombinationBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.combination.unique.UniqueCombinationBuilder;
+import io.github.deepeshpatel.jnumbertools.api.examples.AllExamples;
+import io.github.deepeshpatel.jnumbertools.core.external.Calculator;
+import io.github.deepeshpatel.jnumbertools.core.internal.CalculatorImpl;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.base.Util;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.combination.multiset.MultisetCombinationBuilder;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.combination.repetitive.RepetitiveCombinationBuilder;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.combination.unique.UniqueCombinationBuilder;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -161,6 +162,8 @@ public final class Combinations {
      * @param r the size of each combination (0 ≤ r ≤ elements.size())
      * @param elements the list of elements to combine
      * @param <T> the type of elements
+     * @throws NullPointerException if elements is null
+     * @throws IllegalArgumentException if r < 0
      * @return a UniqueCombinationBuilder for the specified elements
      */
     public <T> UniqueCombinationBuilder<T> unique(int r, List<T> elements) {
@@ -220,6 +223,8 @@ public final class Combinations {
      * @param elements the list of elements to combine
      * @param <T> the type of elements
      * @return a RepetitiveCombinationBuilder for the specified elements
+     * @throws NullPointerException if elements is null
+     * @throws IllegalArgumentException if r < 0
      */
     public <T> RepetitiveCombinationBuilder<T> repetitive(int r, List<T> elements) {
         Util.validateInput(elements);
@@ -250,7 +255,13 @@ public final class Combinations {
      * @throws IllegalArgumentException if options is null, contains non-positive frequencies, or r < 0
      */
     public <T> MultisetCombinationBuilder<T> multiset(LinkedHashMap<T, Integer> options, int r) {
-        Util.validateMapOptions(options, r, calculator);
+        validateMapOptions(options, r, calculator);
         return new MultisetCombinationBuilder<>(options, r, calculator);
+    }
+
+    private static void validateMapOptions(LinkedHashMap<?, Integer> options, int r, Calculator calculator) {
+        Permutations.validateMapOptions(options);
+        int[] frequencies = options.values().stream().mapToInt(Integer::intValue).toArray();
+        calculator.multisetCombinationsCount(r, frequencies);
     }
 }

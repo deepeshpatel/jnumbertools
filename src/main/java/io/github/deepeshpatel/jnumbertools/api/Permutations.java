@@ -4,13 +4,14 @@
  */
 package io.github.deepeshpatel.jnumbertools.api;
 
-import io.github.deepeshpatel.jnumbertools.base.CalculatorImpl;
-import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
-import io.github.deepeshpatel.jnumbertools.generator.base.Util;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.k.KPermutationBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.multiset.MultisetPermutationBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive.RepetitivePermutationBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.permutation.unique.UniquePermutationBuilder;
+import io.github.deepeshpatel.jnumbertools.api.examples.AllExamples;
+import io.github.deepeshpatel.jnumbertools.core.external.Calculator;
+import io.github.deepeshpatel.jnumbertools.core.internal.CalculatorImpl;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.base.Util;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.permutation.k.KPermutationBuilder;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.permutation.multiset.MultisetPermutationBuilder;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.permutation.repetitive.RepetitivePermutationBuilder;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.permutation.unique.UniquePermutationBuilder;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -198,6 +199,8 @@ public final class Permutations {
      * @param k the size of each permutation (0 ≤ k ≤ elements.size())
      * @param elements the list of distinct elements
      * @param <T> the type of elements
+     * @throws NullPointerException if elements is null
+     * @throws IllegalArgumentException if k < 0
      * @return a KPermutationBuilder for the specified elements
      */
     public <T> KPermutationBuilder<T> nPk(int k, List<T> elements) {
@@ -242,7 +245,7 @@ public final class Permutations {
      * (empty map is allowed, treated as ∅)
      */
     public <T> MultisetPermutationBuilder<T> multiset(LinkedHashMap<T, Integer> options) {
-        Util.validateMapOptions(options);
+        validateMapOptions(options);
         return new MultisetPermutationBuilder<>(options, calculator);
     }
 
@@ -261,7 +264,8 @@ public final class Permutations {
      * @param elements the list of distinct elements to permute
      * @param <T> the type of elements
      * @return a RepetitivePermutationBuilder for the specified elements
-     * @throws IllegalArgumentException if r < 0 or elements is null
+     * @throws NullPointerException if elements is null
+     * @throws IllegalArgumentException if r < 0
      */
     public <T> RepetitivePermutationBuilder<T> repetitive(int r, List<T> elements) {
         Util.validateInput(elements);
@@ -306,5 +310,15 @@ public final class Permutations {
         }
         var symbols = IntStream.range(0, n).boxed().toList();
         return repetitive(r, symbols);
+    }
+
+    static void validateMapOptions(LinkedHashMap<?, Integer> options) {
+        String message = "Options must be non-null, and contain frequencies ≥ 0";
+        if(options == null) {
+            throw new NullPointerException(message);
+        }
+        if (options.values().stream().anyMatch(f -> f < 0)) {
+            throw new IllegalArgumentException(message);
+        }
     }
 }

@@ -1,6 +1,7 @@
 package io.github.deepeshpatel.jnumbertools;
 
 import io.github.deepeshpatel.jnumbertools.api.*;
+import io.github.deepeshpatel.jnumbertools.core.external.Calculator;
 import org.junit.jupiter.api.Assertions;
 
 import java.util.Collections;

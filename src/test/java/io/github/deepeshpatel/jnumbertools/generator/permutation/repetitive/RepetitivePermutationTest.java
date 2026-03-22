@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.permutation.repetitive.RepetitivePermutation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
@@ -138,5 +139,16 @@ public class RepetitivePermutationTest {
                 assertEquals(calculator.power(n, width).longValue(), count);
             }
         }
+    }
+
+    @Test
+    void shouldReturnImmutableOuterAndInnerCollection() {
+        var results = permutation.repetitive(2, "A", "B").lexOrder().stream().toList();
+        assertThrows(UnsupportedOperationException.class, () -> results.add(List.of("X")));
+        assertThrows(UnsupportedOperationException.class, () -> results.remove(0));
+
+        var first = results.get(0);
+        assertThrows(UnsupportedOperationException.class, () -> first.add("X"));
+        assertThrows(UnsupportedOperationException.class, () -> first.set(0, "X"));
     }
 }

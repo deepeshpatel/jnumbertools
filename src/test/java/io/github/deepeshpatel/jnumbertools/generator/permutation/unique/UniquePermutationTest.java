@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.permutation.unique.UniquePermutation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
@@ -45,15 +46,13 @@ public class UniquePermutationTest {
     }
 
     @Test
-    void shouldReturnImmutableOuterCollection() {
+    void shouldReturnImmutableOuterAndInnerCollection() {
+        //test for immutable inner list
         var results = permutation.unique("A", "B").lexOrder().stream().toList();
         assertThrows(UnsupportedOperationException.class, () -> results.add(List.of("X")));
         assertThrows(UnsupportedOperationException.class, () -> results.remove(0));
-    }
 
-    @Test
-    void shouldReturnImmutableInnerLists() {
-        var results = permutation.unique("A", "B").lexOrder().stream().toList();
+        //test for immutable inner list
         var first =  results.get(0);
         assertThrows(UnsupportedOperationException.class, () -> first.add("X"));
         assertThrows(UnsupportedOperationException.class, () -> first.set(0, "X"));

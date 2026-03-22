@@ -1,5 +1,8 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
+import io.github.deepeshpatel.jnumbertools.core.internal.numbersystem.Factoradic;
+import io.github.deepeshpatel.jnumbertools.core.internal.numbersystem.Permutadic;
+import io.github.deepeshpatel.jnumbertools.core.internal.numbersystem.PermutadicAlgorithms;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;

@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SimpleCartesianProductByRanksTest {
 
+    @SuppressWarnings("SequencedCollectionMethodCanBeUsed")
     @Nested
     class Mth {
 
@@ -22,6 +23,7 @@ public class SimpleCartesianProductByRanksTest {
             var nullaryProduct = cartesianProduct.simpleProductOf();
             var nullaryResult = nullaryProduct.lexOrderMth(1, 0).stream().toList();
             assertEquals(1, nullaryResult.size());
+            //noinspection SequencedCollectionMethodCanBeUsed
             assertEquals(List.of(), nullaryResult.get(0));
 
             // Case 1b: Single empty dimension -> count=0, mth should return []

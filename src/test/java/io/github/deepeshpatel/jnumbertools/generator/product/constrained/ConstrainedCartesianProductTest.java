@@ -9,8 +9,7 @@ import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static java.util.List.of;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ConstrainedCartesianProductTest {
 
@@ -107,5 +106,20 @@ public class ConstrainedCartesianProductTest {
                 .and(List.of(0,1,2,3,4,5,6,7,8,9));
         long count = builder.lexOrder().stream().count();
         assertEquals(1000, count);
+    }
+
+    @Test
+    void shouldReturnImmutableOuterAndInnerCollection() {
+        var product = cartesianProduct.constrainedProductOfDistinct(1, List.of("A", "B"))
+                .andDistinct(2, List.of("X", "Y"))
+                .lexOrder();
+        var results = product.stream().toList();
+
+        assertThrows(UnsupportedOperationException.class, () -> results.add(List.of("Z")));
+        assertThrows(UnsupportedOperationException.class, () -> results.remove(0));
+
+        var first = results.get(0);
+        assertThrows(UnsupportedOperationException.class, () -> first.add("Z"));
+        assertThrows(UnsupportedOperationException.class, () -> first.set(0, "Z"));
     }
 }

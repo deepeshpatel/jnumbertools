@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
+import io.github.deepeshpatel.jnumbertools.core.internal.generator.permutation.unique.UniquePermutationByRanks;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;

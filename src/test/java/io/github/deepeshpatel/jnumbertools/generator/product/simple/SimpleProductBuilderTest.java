@@ -26,7 +26,7 @@ class SimpleProductBuilderTest {
         assertEquals(BigInteger.valueOf(6), builderWithB.count());
 
         // Test null input
-        var exp = assertThrows(NullPointerException.class, ()-> builder.and((List<?>) null));
+        var exp = assertThrows(NullPointerException.class, ()-> builder.and(null));
         assertEquals(errMsgNullInput, exp.getMessage());
 
         // Test empty list - A × ∅ = ∅, so count should be 0
@@ -122,5 +122,17 @@ class SimpleProductBuilderTest {
 
         var nullaryBuilder = cartesianProduct.simpleProductOf();
         assertEquals(BigInteger.ONE, nullaryBuilder.count());  // 0-ary product returns 1 empty tuple
+    }
+
+    @Test
+    void shouldReturnImmutableOuterAndInnerCollection() {
+        var builder = cartesianProduct.simpleProductOf(setA).and(setB);
+        var results = builder.lexOrder().stream().toList();
+        assertThrows(UnsupportedOperationException.class, () -> results.add(List.of("X")));
+        assertThrows(UnsupportedOperationException.class, () -> results.remove(0));
+
+        var first = results.get(0);
+        assertThrows(UnsupportedOperationException.class, () -> first.add("X"));
+        assertThrows(UnsupportedOperationException.class, () -> first.set(0, "X"));
     }
 }
