@@ -2,7 +2,7 @@
 <!--
   ~ Copyright (c) 2020 Deepesh Patel
   ~
-  ~    This file is part of Data Number Tools. Number Tools is free software: you can redistribute it and/or modify
+  ~    This file is part of JNumberTools. JNumberTools is free software: you can redistribute it and/or modify
   ~    it under the terms of the GNU Lesser General Public License as published by
   ~    the Free Software Foundation, either version 3 of the License or any
   ~    later version.
@@ -23,7 +23,7 @@
 
     <groupId>io.github.deepeshpatel</groupId>
     <artifactId>jnumbertools</artifactId>
-    <version>3.0.1</version>
+    <version>3.0.1-SNAPSHOT</version>
 
     <packaging>jar</packaging>
 
@@ -37,7 +37,7 @@
     <licenses>
         <license>
             <name>GNU LESSER GENERAL PUBLIC LICENSE v3</name>
-            <url>http://www.gnu.org/licenses/lgpl.html</url>
+            <url>https://www.gnu.org/licenses/lgpl-3.0.html</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -46,6 +46,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
+        <central.plugin.version>0.9.0</central.plugin.version>
     </properties>
 
     <developers>
@@ -65,6 +66,7 @@
         <connection>scm:git:git://github.com/deepeshpatel/jnumbertools.git</connection>
         <developerConnection>scm:git:git@github.com:deepeshpatel/jnumbertools.git</developerConnection>
         <url>https://github.com/deepeshpatel/jnumbertools</url>
+        <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
@@ -101,11 +103,11 @@
 
     <build>
         <plugins>
-            <!-- Maven Compiler Plugin with UTF-8 encoding -->
+            <!-- Compiler with encoding -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.13.0</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
@@ -113,30 +115,24 @@
                 </configuration>
             </plugin>
 
+            <!-- Central Publishing Plugin (replaces nexus-staging) -->
             <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.13</version>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>${central.plugin.version}</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                    <publishingServerId>central</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                    <waitUntil>published</waitUntil> <!-- waits for sync to Central -->
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.0.0-M2</version>
-                <configuration>
-                </configuration>
-            </plugin>
-
+            <!-- Sources JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -147,13 +143,14 @@
                 </executions>
             </plugin>
 
-            <!-- Maven Javadoc Plugin with UTF-8 encoding -->
+            <!-- Javadoc JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.8.0</version>
                 <configuration>
                     <encoding>${project.build.sourceEncoding}</encoding>
+                    <doclint>none</doclint> <!-- modern default avoids old warnings -->
                     <excludePackageNames>
                         io.github.deepeshpatel.jnumbertools.examples,
                         io.github.deepeshpatel.jnumbertools.generator.permutation.unique,
@@ -173,10 +170,11 @@
                 </executions>
             </plugin>
 
+            <!-- GPG Signing -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.2.7</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -187,17 +185,28 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Optional: skip deploy if not wanted, but keep for mvn deploy -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
+        <!-- For releases (non-snapshot versions like 3.0.1) -->
         <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>central</id>
+            <url>https://central.sonatype.com/api/v1/publisher/upload</url>
+            <layout>default</layout>
         </repository>
+
+        <!-- For snapshots (e.g., 3.0.1-SNAPSHOT) -->
+        <snapshotRepository>
+            <id>central</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <layout>default</layout>
+        </snapshotRepository>
     </distributionManagement>
 </project>
