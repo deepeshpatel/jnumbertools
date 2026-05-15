@@ -7,8 +7,10 @@ package io.github.deepeshpatel.jnumbertools.base;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 
 /**
  * Calculator for combinatorial computations with memoization.
@@ -21,8 +23,9 @@ public final class Calculator {
 
     private final TwoLevelMap<Integer, Integer, BigInteger> nCrMemo = new TwoLevelMap<>();
     private final TwoLevelMap<Integer, Integer, BigInteger> nPrMemo = new TwoLevelMap<>();
-    private final List<BigInteger> factorialCache = Collections.synchronizedList(new ArrayList<>());
-    private final List<BigInteger> subFactorialCache = Collections.synchronizedList(new ArrayList<>());
+    private final TwoLevelMap<Integer, Integer, BigInteger> restrictedDerangementMemo = new TwoLevelMap<>();
+    private final List<BigInteger> factorialCache = new ArrayList<>();
+    private final List<BigInteger> subFactorialCache = new ArrayList<>();
 
     /**
      * Constructs a new Calculator instance.
@@ -59,20 +62,20 @@ public final class Calculator {
     public BigInteger nCr(int n, int r) {
         if (r == n || r == 0) return BigInteger.ONE;
         if (n < r || r < 0) return BigInteger.ZERO;
+        if (r == 1) return BigInteger.valueOf(n);
+        if (r == 2) return BigInteger.valueOf(n).multiply(BigInteger.valueOf(n-1)).divide(BigInteger.TWO);
+
 
         r = Math.min(r, n - r);
 
-        BigInteger value = nCrMemo.get(n, r);
-        if (value != null) return value;
-
-        value = BigInteger.ONE;
-        for (int i = 1; i <= r; i++) {
-            value = value.multiply(BigInteger.valueOf(n - r + i))
-                    .divide(BigInteger.valueOf(i));
-        }
-
-        nCrMemo.put(n, r, value);
-        return value;
+        return nCrMemo.computeIfAbsent(n, r, (nVal, rVal) -> {
+            BigInteger value = BigInteger.ONE;
+            for (int i = 1; i <= rVal; i++) {
+                value = value.multiply(BigInteger.valueOf(nVal - rVal + i))
+                        .divide(BigInteger.valueOf(i));
+            }
+            return value;
+        });
     }
 
     /**
@@ -100,18 +103,17 @@ public final class Calculator {
     public BigInteger nPr(int n, int r) {
         if (r < 0 || n < r) return BigInteger.ZERO;
         if (r == 0) return BigInteger.ONE;
+        if (r == 1) return BigInteger.valueOf(n);
+        if (r == 2) return BigInteger.valueOf(n).multiply(BigInteger.valueOf(n - 1));
 
-        BigInteger cached = nPrMemo.get(n, r);
-        if (cached != null) return cached;
 
-        // Calculate iteratively
-        BigInteger result = BigInteger.ONE;
-        for (int i = 0; i < r; i++) {
-            result = result.multiply(BigInteger.valueOf(n - i));
-        }
-
-        nPrMemo.put(n, r, result);
-        return result;
+        return nPrMemo.computeIfAbsent(n, r, (nVal, rVal) -> {
+            BigInteger result = BigInteger.ONE;
+            for (int i = nVal; i > nVal - rVal; i--) {
+                result = result.multiply(BigInteger.valueOf(i));
+            }
+            return result;
+        });
     }
 
     /**
@@ -181,17 +183,19 @@ public final class Calculator {
      * @return number of valid permutations
      */
     public BigInteger restrictedDerangements(int total, int restricted) {
-        BigInteger result = BigInteger.ZERO;
-        for (int j = 0; j <= restricted; j++) {
-            BigInteger term = nCr(restricted, j)
-                    .multiply(factorial(total - j));
-            if ((j & 1) == 0) {
-                result = result.add(term);
-            } else {
-                result = result.subtract(term);
+        if (restricted < 0) return BigInteger.ZERO;
+        if (total == 0) return BigInteger.ONE;
+        if (restricted == 0) return factorial(total);
+        if (restricted == total) return subFactorial(total); // is this optimization required?
+
+        return restrictedDerangementMemo.computeIfAbsent(total, restricted, (t, r) -> {
+            BigInteger result = BigInteger.ZERO;
+            for (int j = 0; j <= r; j++) {
+                BigInteger term = nCr(r, j).multiply(factorial(t - j));
+                result = (j & 1) == 0 ? result.add(term) : result.subtract(term);
             }
-        }
-        return result;
+            return result;
+        });
     }
 
     /**
@@ -349,17 +353,15 @@ public final class Calculator {
         if (index == counts.length || remain > suffixSum[index]) return BigInteger.ZERO;
         if (remain == suffixSum[index]) return BigInteger.ONE;
 
-        BigInteger cached = memo.get(index, remain);
-        if (cached != null) return cached;
-
-        BigInteger total = BigInteger.ZERO;
-        int max = Math.min(counts[index], remain);
-        for (int i = 0; i <= max; i++) {
-            total = total.add(multisetCombinationsHelper(counts, index + 1, remain - i, memo, suffixSum));
-        }
-
-        memo.put(index, remain, total);
-        return total;
+        // === FIXED: Use computeIfAbsent ===
+        return memo.computeIfAbsent(index, remain, (idx, rem) -> {
+            BigInteger total = BigInteger.ZERO;
+            int max = Math.min(counts[idx], rem);
+            for (int i = 0; i <= max; i++) {
+                total = total.add(multisetCombinationsHelper(counts, idx + 1, rem - i, memo, suffixSum));
+            }
+            return total;
+        });
     }
 
     /**
@@ -420,18 +422,54 @@ public final class Calculator {
      * Clears all memoization caches (binomial, permutation, factorial, subfactorial).
      * Caches will rebuild lazily on next use.
      */
-    public void clearCaches() {
+    public void     clearCaches() {
         nCrMemo.clear();
         nPrMemo.clear();
+        restrictedDerangementMemo.clear();   // ← Add this
 
         synchronized (factorialCache) {
             factorialCache.clear();
-            factorialCache.add(BigInteger.ONE); // restore 0!
+            factorialCache.add(BigInteger.ONE);
         }
         synchronized (subFactorialCache) {
             subFactorialCache.clear();
-            subFactorialCache.add(BigInteger.ONE);  // !0
-            subFactorialCache.add(BigInteger.ZERO); // !1
+            subFactorialCache.add(BigInteger.ONE);
+            subFactorialCache.add(BigInteger.ZERO);
+        }
+    }
+
+    /**
+     * A thread-safe two-level map for memoization of two-key values.
+     * <p>
+     * This map stores values indexed by a primary key (K1) and secondary key (K2).
+     * It extends ConcurrentHashMap and uses nested ConcurrentHashMaps for thread safety.
+     * </p>
+     * <p>
+     * Primarily used internally by {@link Calculator} for caching combinatorial values
+     * like binomial coefficients C(n, k) where n is the primary key and k is the secondary key.
+     * </p>
+     *
+     * @param <K1> the type of the first-level key
+     * @param <K2> the type of the second-level key
+     * @param <V> the type of the stored value
+     * @author Deepesh Patel
+     * @see <a href="https://en.wikipedia.org/wiki/Memoization">Wikipedia: Memoization</a>
+     */
+    public static class TwoLevelMap<K1, K2, V> extends ConcurrentHashMap<K1, Map<K2, V>> {
+
+        public V get(K1 key1, K2 key2) {
+            var map = get(key1);
+            return map == null ? null : map.get(key2);
+        }
+
+        public V put(K1 key1, K2 key2, V value) {
+            computeIfAbsent(key1, (e) -> new ConcurrentHashMap<>()).put(key2, value);
+            return value;
+        }
+
+        public V computeIfAbsent(K1 key1, K2 key2, BiFunction<? super K1, ? super K2, ? extends V> mappingFunction) {
+            return computeIfAbsent(key1, k1 -> new ConcurrentHashMap<>())
+                    .computeIfAbsent(key2, k2 -> mappingFunction.apply(key1, k2));
         }
     }
 }

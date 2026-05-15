@@ -61,99 +61,18 @@ import java.util.*;
  */
 public final class DerangadicAlgorithms {
 
-    // Precomputed derangement numbers: D[i] = !i
-    private BigInteger[] derangementCounts;
-    private Calculator calculator;
+    private final Calculator calculator;
 
-    // Cache for restricted derangements
-    private final Map<String, BigInteger> restrictedCache;
 
-    // Thresholds for array vs fenwick
     private static final int N_THRESHOLD = 100;
     private static final int DIGIT_THRESHOLD = 100;
 
-    /**
-     * Creates a DerangadicAlgorithms instance.
-     */
     public DerangadicAlgorithms(Calculator calculator) {
         this.calculator = calculator;
-        this.restrictedCache = new HashMap<>();
-        initialize(1); // Initialize with !0 and !1
     }
 
     public DerangadicAlgorithms() {
         this(new Calculator());
-    }
-    // ==================== Core Combinatorial Functions ====================
-
-    /**
-     * Computes subfactorial !n using recurrence: !0=1, !1=0, !n=(n-1)*(!(n-1)+!(n-2))
-     */
-    private BigInteger subFactorial(int n) {
-        if (n < 0) throw new IllegalArgumentException("n must be non-negative");
-        ensureDerangementCapacity(n);
-        return derangementCounts[n];
-    }
-
-    /**
-     * Ensures derangementCounts array has capacity for n.
-     */
-    private void ensureDerangementCapacity(int n) {
-        if (derangementCounts != null && derangementCounts.length > n) {
-            return;
-        }
-
-        int start = (derangementCounts == null) ? 0 : derangementCounts.length;
-        BigInteger[] newCache = new BigInteger[n + 1];
-
-        if (derangementCounts != null) {
-            System.arraycopy(derangementCounts, 0, newCache, 0, derangementCounts.length);
-        }
-
-        for (int i = start; i <= n; i++) {
-            if (i == 0) {
-                newCache[i] = BigInteger.ONE;
-            } else if (i == 1) {
-                newCache[i] = BigInteger.ZERO;
-            } else {
-                BigInteger prev1 = newCache[i - 1];
-                BigInteger prev2 = newCache[i - 2];
-                newCache[i] = BigInteger.valueOf(i - 1).multiply(prev1.add(prev2));
-            }
-        }
-
-        derangementCounts = newCache;
-    }
-
-    /**
-     * Precomputes derangement numbers up to {@code n}.
-     */
-    private void initialize(int n) {
-        ensureDerangementCapacity(n);
-    }
-
-    /**
-     * Computes restricted derangements using inclusion-exclusion:
-     * D(n, k) = sum_{j=0}^{k} (-1)^j * C(k, j) * (n-j)!
-     */
-    private BigInteger restrictedDerangements(int total, int restricted) {
-        if (restricted < 0) return BigInteger.ZERO;
-        if (total == 0) return BigInteger.ONE;
-
-        String key = total + "," + restricted;
-        return restrictedCache.computeIfAbsent(key, k -> {
-            BigInteger result = BigInteger.ZERO;
-            for (int j = 0; j <= restricted; j++) {
-                BigInteger term = calculator.nCr(restricted, j)
-                        .multiply(calculator.factorial(total - j));
-                if ((j & 1) == 0) {
-                    result = result.add(term);
-                } else {
-                    result = result.subtract(term);
-                }
-            }
-            return result;
-        });
     }
 
     // ==================== Core Public API ====================
@@ -165,7 +84,7 @@ public final class DerangadicAlgorithms {
      * @return !n (subfactorial of n)
      */
     public BigInteger derangementCount(int n) {
-        return subFactorial(n);
+        return calculator.subFactorial(n);
     }
 
     /**
@@ -180,7 +99,7 @@ public final class DerangadicAlgorithms {
                 restrictedCount++;
             }
         }
-        return restrictedDerangements(size, restrictedCount);
+        return calculator.restrictedDerangements(size, restrictedCount);
     }
 
     /**
@@ -197,7 +116,6 @@ public final class DerangadicAlgorithms {
      * @throws IllegalArgumentException if {@code m} is out of range
      */
     public int[] toDerangadic(BigInteger m, int n) {
-        initialize(n);
         BigInteger max = derangementCount(n);
         if (m.signum() < 0 || m.compareTo(max) >= 0) {
             throw new IllegalArgumentException("m out of range");
@@ -210,7 +128,6 @@ public final class DerangadicAlgorithms {
         BigInteger currentM = m;
 
         for (int step = 0; step < actualN; step++) {
-            int pos = step;
             int remainingSize = actualN - step;
 
             // Recalculate restrictedCount: How many i > step exist such that
@@ -226,10 +143,10 @@ public final class DerangadicAlgorithms {
             BigInteger cumulative = BigInteger.ZERO;
 
             for (int candidate = 0; candidate < actualN; candidate++) {
-                if (elementUsed[candidate] || candidate == pos) continue;
+                if (elementUsed[candidate] || candidate == step) continue;
 
                 boolean pickingRestricted = (candidate > step);
-                boolean currentPosWasRestricted = (!elementUsed[pos]);
+                boolean currentPosWasRestricted = (!elementUsed[step]);
 
                 int nextRestricted;
                 if (pickingRestricted && currentPosWasRestricted) {
@@ -241,7 +158,7 @@ public final class DerangadicAlgorithms {
                 }
 
                 nextRestricted = Math.max(0, nextRestricted);
-                BigInteger blockSize = restrictedDerangements(remainingSize - 1, nextRestricted);
+                BigInteger blockSize = calculator.restrictedDerangements(remainingSize - 1, nextRestricted);
 
                 if (currentM.compareTo(cumulative.add(blockSize)) < 0) {
                     digits[actualN - 1 - step] = legalFoundCount;
@@ -279,7 +196,6 @@ public final class DerangadicAlgorithms {
      * @return decimal rank
      */
     public BigInteger fromDerangadic(int[] digits, int n) {
-        initialize(n);
         ZeroPaddedList allDigits = new ZeroPaddedList(digits, n);
 
         Set<Integer> remainingElements = new HashSet<>();
@@ -436,10 +352,9 @@ public final class DerangadicAlgorithms {
             availableElements.update(chosenIdx, -1);
 
             if (chosenIdx == nextAvailable) {
-                nextAvailable++;
-                while (nextAvailable <= n && availableElements.rsq(nextAvailable) - availableElements.rsq(nextAvailable - 1) == 0) {
+                do {
                     nextAvailable++;
-                }
+                } while (nextAvailable <= n && availableElements.rsq(nextAvailable) - availableElements.rsq(nextAvailable - 1) == 0);
             }
         }
 
@@ -447,25 +362,30 @@ public final class DerangadicAlgorithms {
             int pos = offset + step;
             int digit = digits[actualN - 1 - step];
 
-            int chosen;
-            boolean posAvailable = (availableElements.rsq(pos + 1) - availableElements.rsq(pos)) == 1;
-
-            if (posAvailable) {
-                int posRank = availableElements.rsq(pos);
-                if (digit < posRank) {
-                    chosen = availableElements.findKth(digit + 1);
-                } else {
-                    chosen = availableElements.findKth(digit + 2);
-                }
-            } else {
-                chosen = availableElements.findKth(digit + 1);
-            }
+            int chosen = getChosen(availableElements, pos, digit);
 
             derangement[pos] = chosen - 1;
             availableElements.update(chosen, -1);
         }
 
         return derangement;
+    }
+
+    private static int getChosen(FenwickTree availableElements, int pos, int digit) {
+        int chosen;
+        boolean posAvailable = (availableElements.rsq(pos + 1) - availableElements.rsq(pos)) == 1;
+
+        if (posAvailable) {
+            int posRank = availableElements.rsq(pos);
+            if (digit < posRank) {
+                chosen = availableElements.findKth(digit + 1);
+            } else {
+                chosen = availableElements.findKth(digit + 2);
+            }
+        } else {
+            chosen = availableElements.findKth(digit + 1);
+        }
+        return chosen;
     }
 
     /**
@@ -475,23 +395,12 @@ public final class DerangadicAlgorithms {
      * trimming trailing zeros.
      * </p>
      *
-     * @param derangement derangement array (full size n)
+     * @param derangement derangement array (full size n). Does not validate correctness
      * @param n order
      * @return Derangadic digit array of minimal length
      * @throws IllegalArgumentException if {@code derangement} is not a valid derangement
      */
     public int[] fromDerangement(int[] derangement, int n) {
-        initialize(n);
-
-        // Validate derangement
-        for (int i = 0; i < n; i++) {
-            if (derangement[i] == i) {
-                throw new IllegalArgumentException(
-                        "Not a derangement: fixed point at position " + i
-                );
-            }
-        }
-
         // Compute full digits (length n)
         int[] fullDigits = new int[n];
         List<Integer> remainingElements = new ArrayList<>();
@@ -565,44 +474,28 @@ public final class DerangadicAlgorithms {
         return fromDerangadic(digits, n);
     }
 
-    // ==================== Private Helper Methods ====================
-
-    /**
-     * Finds the smallest {@code actualN} with the same parity as {@code n}
-     * such that {@code D[actualN] > m}.
-     *
-     * @param n original order
-     * @param m rank
-     * @return minimal effective size
-     */
     private int smallestN(int n, BigInteger m) {
+        //Finds the smallest actualN with the same parity as n such thatD[actualN] > m
         int actualN = n;
-        while (actualN > 2 && derangementCounts[actualN - 2].compareTo(m) > 0) {
+        while (actualN > 2 && calculator.subFactorial(actualN - 2).compareTo(m) > 0) {
             actualN -= 2;
         }
         return actualN;
     }
 
     /**
-     * A list view that pads zeros at the end for indices beyond the backing array.
-     */
-    private static final class ZeroPaddedList {
-        private final int[] digits;
-        private final int n;
-
-        ZeroPaddedList(int[] digits, int n) {
-            this.digits = digits;
-            this.n = n;
-        }
+         * A list view that pads zeros at the end for indices beyond the backing array.
+         */
+        private record ZeroPaddedList(int[] digits, int n) {
 
         public int get(int index) {
-            if (index < 0 || index >= n) {
-                throw new IndexOutOfBoundsException("Index: " + index);
+                if (index < 0 || index >= n) {
+                    throw new IndexOutOfBoundsException("Index: " + index);
+                }
+                if (index < digits.length) {
+                    return digits[index];
+                }
+                return 0;
             }
-            if (index < digits.length) {
-                return digits[index];
-            }
-            return 0;
         }
-    }
 }

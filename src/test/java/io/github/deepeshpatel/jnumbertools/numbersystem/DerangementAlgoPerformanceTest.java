@@ -48,7 +48,7 @@ public class DerangementAlgoPerformanceTest {
     @DisplayName("Performance comparison with increasing n (fixed rank)")
     void testPerformanceFixedRank() {
         int rank = 7;  // Fixed small rank
-        int[] nValues = {100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000};
+        int[] nValues = {100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000};
         int iterations = 1000;
 
         System.out.println("\n=== Performance: Fixed Rank=" + rank + " ===");

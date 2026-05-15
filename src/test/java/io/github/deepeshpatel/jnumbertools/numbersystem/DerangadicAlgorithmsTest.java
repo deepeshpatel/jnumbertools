@@ -16,17 +16,10 @@ import java.security.SecureRandom;
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * JUnit test class for Derangadic number system.
- *
- * @author Deepesh Patel & Aditya Patel
- */
 class DerangadicAlgorithmsTest {
 
     private static final DerangadicAlgorithms DERANGADIC = new DerangadicAlgorithms();
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-
-    // ==================== Round-Trip Tests ====================
 
     @Test
     @DisplayName("Round-trip conversion should work for n=4 (D_4=9)")
@@ -76,10 +69,6 @@ class DerangadicAlgorithmsTest {
         return Arrays.equals(trimmedA, trimmedB);
     }
 
-    /**
-     * Returns a new array with trailing zeros removed.
-     * If all elements are zero, returns array of length 1 with [0].
-     */
     private static int[] trimTrailingZeros(int[] arr) {
         if (arr.length == 0) return arr;
 
