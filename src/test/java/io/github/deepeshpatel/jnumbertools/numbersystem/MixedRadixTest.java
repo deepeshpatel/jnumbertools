@@ -19,6 +19,4 @@ public class MixedRadixTest {
         assertEquals(1, decimal);
 
     }
-
-
 }

@@ -56,5 +56,4 @@ public final class UniquePermutation<T> extends AbstractGenerator<T> {
         return elements.isEmpty() ? Util.emptyListIterator() :
                 new UniquePermutationLexElementIterator<>(elements.size(), this::indicesToValues);
     }
-
 }

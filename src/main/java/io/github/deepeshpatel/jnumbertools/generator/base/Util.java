@@ -152,5 +152,4 @@ public class Util {
             throw new IllegalArgumentException("Ranks sequence cannot be null");
         }
     }
-
 }

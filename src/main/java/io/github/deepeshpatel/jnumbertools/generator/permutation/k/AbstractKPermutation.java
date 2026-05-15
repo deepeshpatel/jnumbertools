@@ -38,5 +38,4 @@ public abstract class AbstractKPermutation<T> extends AbstractGenerator<T> {
         super(elements);
         this.k = k;
     }
-
 }

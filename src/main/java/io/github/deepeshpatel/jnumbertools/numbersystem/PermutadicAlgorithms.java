@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.generator.base.FenwickTree;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -151,29 +152,13 @@ public final class PermutadicAlgorithms {
         for (int i = k - 1; i >= 0; i--) {
             int rank = (i < permutadic.size() ? permutadic.get(i) : 0) + 1; // Convert to 1-indexed
 
-            int pos = findKth(ft, rank);
+            int pos = ft.findKth(rank);
             result[resultIdx++] = pos - 1; // Convert back to 0-indexed
 
             ft.update(pos, -1); // Mark as taken
         }
 
         return result;
-    }
-
-    /**
-     * Binary search on Fenwick tree to find position with cumulative sum = k.
-     */
-    private static int findKth(FenwickTree ft, int k) {
-        int low = 1, high = ft.size();
-        while (low < high) {
-            int mid = (low + high) >>> 1;
-            if (ft.rsq(mid) < k) {
-                low = mid + 1;
-            } else {
-                high = mid;
-            }
-        }
-        return low;
     }
 
     /**
@@ -266,39 +251,5 @@ public final class PermutadicAlgorithms {
             );
         }
         return unRankWithoutBoundCheck(rank, size, k);
-    }
-
-    /**
-     * Fenwick Tree (Binary Indexed Tree) implementation for efficient
-     * position tracking in large permutations.
-     */
-    private static final class FenwickTree {
-        private final int[] tree;
-        private final int n;
-
-        FenwickTree(int n) {
-            this.n = n;
-            this.tree = new int[n + 1];
-        }
-
-        void update(int index, int delta) {
-            while (index <= n) {
-                tree[index] += delta;
-                index += index & -index;
-            }
-        }
-
-        int rsq(int index) {
-            int sum = 0;
-            while (index > 0) {
-                sum += tree[index];
-                index -= index & -index;
-            }
-            return sum;
-        }
-
-        int size() {
-            return n;
-        }
     }
 }

@@ -170,6 +170,31 @@ public final class Calculator {
     }
 
     /**
+     * Counts permutations of {@code total} elements where a specific set of
+     * {@code restricted} positions cannot contain their matching element.
+     * <p>
+     * All other positions have no restrictions.
+     * </p>
+     *
+     * @param total total number of elements
+     * @param restricted number of specific forbidden positions
+     * @return number of valid permutations
+     */
+    public BigInteger restrictedDerangements(int total, int restricted) {
+        BigInteger result = BigInteger.ZERO;
+        for (int j = 0; j <= restricted; j++) {
+            BigInteger term = nCr(restricted, j)
+                    .multiply(factorial(total - j));
+            if ((j & 1) == 0) {
+                result = result.add(term);
+            } else {
+                result = result.subtract(term);
+            }
+        }
+        return result;
+    }
+
+    /**
      * Calculates base raised to the power of exponent (base^exponent).
      * @param base     the base number
      * @param exponent the non-negative exponent
