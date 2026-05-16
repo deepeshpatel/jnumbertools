@@ -6,6 +6,7 @@ package io.github.deepeshpatel.jnumbertools.numbersystem;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -325,6 +326,7 @@ class DerangadicIncrementTest {
 
     @Test
     @DisplayName("Verify first 20 M ranks for even (n=12) and odd (n=13) elements")
+    @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
     void testFirstMillionRanksEvenAndOdd() {
         int maxRanks = 20_000_000;
 

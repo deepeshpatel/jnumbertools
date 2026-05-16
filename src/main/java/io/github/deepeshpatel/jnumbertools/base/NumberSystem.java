@@ -6,6 +6,7 @@ package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Combinadic;
+import io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Factoradic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
 
@@ -205,5 +206,38 @@ public class NumberSystem {
      */
     public Factoradic factoradic(BigInteger positiveInt) {
         return Factoradic.of(positiveInt);
+    }
+
+    /**
+     * Converts a decimal rank to its derangadic representation for derangements
+     * (`!n`).
+     * <p>
+     * Derangadic numbers encode the lexicographical rank of a derangement of
+     * {@code n} distinct elements. The order specifies the derangement size
+     * ({@code n ≥ 2}).
+     * </p>
+     *
+     * @param rank  the decimal rank to convert ({@code 0 ≤ rank < D_n})
+     * @param order the order of the derangement ({@code n ≥ 2})
+     * @return a {@link Derangadic} object representing the derangadic number
+     * @see Derangadic
+     * @since 3.0.2
+     */
+    public Derangadic derangadic(long rank, int order) {
+        return Derangadic.of(rank, order, calculator);
+    }
+
+    /**
+     * Converts a decimal rank to its derangadic representation for derangements
+     * (`!n`).
+     *
+     * @param rank  the decimal rank to convert ({@code 0 ≤ rank < D_n})
+     * @param order the order of the derangement ({@code n ≥ 2})
+     * @return a {@link Derangadic} object representing the derangadic number
+     * @see Derangadic
+     * @since 3.0.2
+     */
+    public Derangadic derangadic(BigInteger rank, int order) {
+        return Derangadic.of(rank, order, calculator);
     }
 }

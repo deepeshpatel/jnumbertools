@@ -6,6 +6,7 @@ package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
+import io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.FactoradicAlgorithms;
 import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
 
@@ -118,5 +119,37 @@ public final class UnrankOf {
      */
     public int[] uniqueCombination(BigInteger rank, int n, int r) {
         return new CombinadicAlgorithms(calculator).unRank(rank, calculator.nCr(n, r), n, r);
+    }
+
+    /**
+     * Determines the derangement (`!n`) at a given rank.
+     * <p>
+     * Un-ranks a derangement of {@code n} distinct elements, returning an array
+     * of {@code n} distinct indices in {@code [0, n)} such that no index equals
+     * its position (i.e., a fixed-point-free permutation) in lexicographical
+     * order.
+     * </p>
+     *
+     * @param rank the lexicographical rank ({@code 0 ≤ rank < D_n})
+     * @param n    the order of the derangement ({@code n ≥ 0})
+     * @return an array of {@code n} distinct indices forming the derangement
+     * @throws IllegalArgumentException if {@code rank} is out of range
+     * @since 3.0.2
+     */
+    public int[] derangement(BigInteger rank, int n) {
+        return Derangadic.unrank(rank, n, calculator);
+    }
+
+    /**
+     * Convenience overload of {@link #derangement(BigInteger, int)} for
+     * {@code long} ranks.
+     *
+     * @param rank the lexicographical rank
+     * @param n    the order of the derangement
+     * @return an array of {@code n} distinct indices forming the derangement
+     * @since 3.0.2
+     */
+    public int[] derangement(long rank, int n) {
+        return Derangadic.unrank(rank, n, calculator);
     }
 }

@@ -133,6 +133,23 @@ public final class JNumberTools {
     }
 
     /**
+     * Creates a Derangements instance for generating derangements
+     * (fixed-point-free permutations).
+     * <p>
+     * Supports lexicographical enumeration, every-mᵗʰ traversal, sampling and
+     * ranked access for the {@code D_n = !n} derangements of {@code n} distinct
+     * elements.
+     * </p>
+     *
+     * @return a Derangements instance for derangement generation
+     * @see Derangements
+     * @since 3.0.2
+     */
+    public static Derangements derangements() {
+        return new Derangements();
+    }
+
+    /**
      * Creates a Combinations instance for generating combinations.
      * <p>
      * Supports unique combinations (ⁿCᵣ), repetitive combinations (ⁿ⁺ʳ⁻¹Cᵣ), and multiset

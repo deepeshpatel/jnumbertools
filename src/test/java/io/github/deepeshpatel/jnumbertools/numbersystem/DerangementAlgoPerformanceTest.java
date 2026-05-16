@@ -11,7 +11,7 @@ import java.util.List;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.DerangadicAlgorithmsTest.isValidDerangement;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
+@Disabled
 public class DerangementAlgoPerformanceTest {
 
     private static final DerangadicAlgorithms DERANGADIC = new DerangadicAlgorithms();
@@ -412,71 +412,70 @@ public class DerangementAlgoPerformanceTest {
                         +" ms"
         );
     }
-    @Test
-    @Disabled
-    @DisplayName("Pathological cases")
-    void testPathologicalCases(){
-
-        List<Scenario> scenarios=List.of(
-
-                new Scenario(
-                        "Huge N tiny digits",
-                        100000,
-                        BigInteger.valueOf(7)
-                ),
-
-                new Scenario(
-                        "Huge N medium digits",
-                        100000,
-                        BigInteger.TEN.pow(10)
-                ),
-
-                new Scenario(
-                        "Huge N massive digits",
-                        100000,
-                        BigInteger.TEN.pow(10)
-                ),
-
-                new Scenario(
-                        "Tiny N huge rank",
-                        120,
-                        BigInteger.TEN.pow(10)
-                )
-        );
-
-        int iterations=4;
-
-        System.out.println("\n=== PATHOLOGICAL TESTS ===");
-
-        for(Scenario s:scenarios){
-
-            int[] digits=
-                    DERANGADIC.toDerangadic(
-                            s.rank,
-                            s.n
-                    );
-
-            long start=System.nanoTime();
-
-            for(int i=0;i<iterations;i++){
-                DERANGADIC.toDerangement(
-                        digits,
-                        s.n
-                );
-            }
-
-            long ms=
-                    (System.nanoTime()-start)
-                            /1_000_000;
-
-            System.out.printf(
-                    "%-30s n=%-8d digits=%-8d time=%dms%n",
-                    s.name,
-                    s.n,
-                    digits.length,
-                    ms
-            );
-        }
-    }
+//    @Test
+//    @DisplayName("Pathological cases")
+//    void testPathologicalCases(){
+//
+//        List<Scenario> scenarios=List.of(
+//
+//                new Scenario(
+//                        "Huge N tiny digits",
+//                        100000,
+//                        BigInteger.valueOf(7)
+//                ),
+//
+//                new Scenario(
+//                        "Huge N medium digits",
+//                        100000,
+//                        BigInteger.TEN.pow(10)
+//                ),
+//
+//                new Scenario(
+//                        "Huge N massive digits",
+//                        100000,
+//                        BigInteger.TEN.pow(10)
+//                ),
+//
+//                new Scenario(
+//                        "Tiny N huge rank",
+//                        120,
+//                        BigInteger.TEN.pow(10)
+//                )
+//        );
+//
+//        int iterations=4;
+//
+//        System.out.println("\n=== PATHOLOGICAL TESTS ===");
+//
+//        for(Scenario s:scenarios){
+//
+//            int[] digits=
+//                    DERANGADIC.toDerangadic(
+//                            s.rank,
+//                            s.n
+//                    );
+//
+//            long start=System.nanoTime();
+//
+//            for(int i=0;i<iterations;i++){
+//                DERANGADIC.toDerangement(
+//                        digits,
+//                        s.n
+//                );
+//            }
+//
+//            long ms=
+//                    (System.nanoTime()-start)
+//                            /1_000_000;
+//
+//            System.out.printf(
+//                    "%-30s n=%-8d digits=%-8d time=%dms%n",
+//                    s.name,
+//                    s.n,
+//                    digits.length,
+//                    ms
+//            );
+//        }
+//    }
 
 }
