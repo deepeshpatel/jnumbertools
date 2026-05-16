@@ -295,13 +295,13 @@ public final class Permutations {
      * </p>
      *
      * @param r the length of each permutation (r ≥ 0)
-     * @param n the number of distinct elements (n ≥ 1)
+     * @param n the number of distinct elements (n ≥ 0)
      * @return a RepetitivePermutationBuilder for integer elements
-     * @throws IllegalArgumentException if n ≤ 0 or r < 0
+     * @throws IllegalArgumentException if n &lt; 0 or r &lt; 0
      */
     public RepetitivePermutationBuilder<Integer> repetitive(int r, int n) {
-        if (n <= 0) {
-            throw new IllegalArgumentException("Repetitive permutation generation requires at least 1 element/symbol");
+        if (n < 0) {
+            throw new IllegalArgumentException("n must be ≥ 0 for repetitive permutation generation");
         }
         var symbols = IntStream.range(0, n).boxed().toList();
         return repetitive(r, symbols);

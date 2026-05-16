@@ -41,7 +41,9 @@ Negative counts/ranges/frequencies throw **IllegalArgumentException**.
 | | n < 0 | IllegalArgumentException | | | n must be ≥ 0 |
 | | null input | NullPointerException | | | Elements list cannot be null |
 
-**Note**: Input elements must be distinct; duplicates cause undefined behavior or IllegalArgumentException.
+**Note**: Input elements are treated as distinct *by position*. Equal elements by
+`equals()` are still treated as distinct positionally; the iterator may emit
+visually identical permutations.
 
 ## K-PERMUTATION (ⁿPₖ)
 
@@ -70,6 +72,25 @@ Negative counts/ranges/frequencies throw **IllegalArgumentException**.
 | | r < 0 | IllegalArgumentException | | | r must be ≥ 0 |
 | | null input | NullPointerException | | | Elements list cannot be null |
 
+## DERANGEMENT (!n)
+
+A derangement is a permutation with no fixed point — no element appears at its
+original position. The count is the subfactorial `D_n = !n`
+(1, 0, 1, 2, 9, 44, 265, …).
+
+| n (set size) | Mathematical | Count | Iterator Returns | Interpretation                          |
+|--------------|--------------|-------|------------------|-----------------------------------------|
+| n = 0        | !0 = 1       | 1     | [[]]             | One empty derangement                   |
+| n = 1        | !1 = 0       | 0     | []               | No fixed-point-free permutation exists  |
+| n ≥ 2        | !n           | !n    | derangements     | Normal case                             |
+| **Exception** | **Condition** | **Throws** | | |
+| | n < 0 | IllegalArgumentException | | | n must be ≥ 0 |
+| | null input | NullPointerException | | | Elements list cannot be null |
+
+**Note**: As with unique permutations, elements are treated as distinct *by
+position*. Duplicates do not throw; they simply produce visually-identical
+derangements.
+
 ## MULTISET PERMUTATION
 
 | Map State          | Mathematical          | Count         | Iterator Returns | Interpretation                          |
@@ -82,6 +103,8 @@ Negative counts/ranges/frequencies throw **IllegalArgumentException**.
 | | null input | NullPointerException | | | Map cannot be null |
 
 **Note**: Frequencies must be non-negative integers; zero means element not available.
+Zero-frequency entries are filtered out before counting, so `{A:0, B:2}` is processed
+exactly like `{B:2}`.
 
 ## MULTISET COMBINATION
 
@@ -146,3 +169,24 @@ Negative counts/ranges/frequencies throw **IllegalArgumentException**.
 4. Zero frequency in multiset means element is not available (treated as absent).
 5. For zero selection (r=0, k=0, quantity=0): always count = 1, returns single empty result ([[]], [{}]).
 6. For positive selection with empty input: always count = 0, empty iterator ([]).
+
+## TRAVERSAL / SAMPLING RULES (shared by all builders)
+
+These apply uniformly to every `Builder<T>` (`Permutations`, `Combinations`,
+`Subsets`, `Derangements`, `CartesianProduct`, …). Validation is fail-fast at
+the builder call unless noted otherwise.
+
+| Method | Condition | Behavior |
+|---|---|---|
+| `lexOrderMth(m, start)` | `m ≤ 0` | IllegalArgumentException |
+| `lexOrderMth(m, start)` | `start < 0` | IllegalArgumentException |
+| `lexOrderMth(m, start)` | `start ≥ count` **and** `count > 0` | IllegalArgumentException |
+| `lexOrderMth(m, start)` | `count = 0` (e.g. derangement of n=1) and `start = 0` | Accepted; iteration yields nothing (`[]`) |
+| `byRanks(ranks)` | `ranks == null` | IllegalArgumentException |
+| `byRanks(ranks)` | individual rank `< 0` or `≥ count` | IllegalArgumentException, **thrown lazily during iteration** |
+| `sample(s, random)` | `s ≤ 0` | IllegalArgumentException |
+| `sample(s, random)` | `s > count` | IllegalArgumentException (sampling is **without replacement**) |
+| `choice(s, random)` | `s ≤ 0` | IllegalArgumentException |
+| `choice(s, random)` | `s > count` | Accepted (sampling is **with replacement**, duplicates allowed) |
+| `random == null` for `sample` / `choice` | — | IllegalArgumentException |
+| `count()` | — | Always returns a non-negative `BigInteger`; `0` is a valid count (empty domain) |

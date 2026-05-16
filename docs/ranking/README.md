@@ -1,5 +1,6 @@
 [Home](../../README.md)
 </br>[Permutation Generators](../permutations/README.md)
+</br>[Derangement Generators](../derangements/README.md)
 </br>[Combination Generators](../combinations/README.md)
 </br>[Set/Subset Generators](../sets/README.md)
 </br>[Cartesian Product Generators](../products/README.md)
@@ -66,6 +67,7 @@ This feature is currently in development and will be available in a future relea
 
 [Home](../../README.md)
 </br>[Permutation Generators](../permutations/README.md)
+</br>[Derangement Generators](../derangements/README.md)
 </br>[Combination Generators](../combinations/README.md)
 </br>[Set/Subset Generators](../sets/README.md)
 </br>[Cartesian Product Generators](../products/README.md)

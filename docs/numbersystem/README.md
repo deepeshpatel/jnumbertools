@@ -1,5 +1,6 @@
 [Home](../../README.md)
 </br>[Permutation Generators](../permutations/README.md)
+</br>[Derangement Generators](../derangements/README.md)
 </br>[Combination Generators](../combinations/README.md)
 </br>[Set/Subset Generators](../sets/README.md)
 </br>[Cartesian Product Generators](../products/README.md)
@@ -62,6 +63,7 @@ System.out.println(result); // Output: 35
 ```
 [Home](../../README.md)
 </br>[Permutation Generators](../permutations/README.md)
+</br>[Derangement Generators](../derangements/README.md)
 </br>[Combination Generators](../combinations/README.md)
 </br>[Set/Subset Generators](../sets/README.md)
 </br>[Cartesian Product Generators](../products/README.md)

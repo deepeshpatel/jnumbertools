@@ -23,6 +23,7 @@ public class MarkdownFilesTest {
             "README.md",
             "docs/calculator/README.md",
             "docs/combinations/README.md",
+            "docs/derangements/README.md",
             "docs/numbersystem/README.md",
             "docs/permutations/README.md",
             "docs/products/README.md",
