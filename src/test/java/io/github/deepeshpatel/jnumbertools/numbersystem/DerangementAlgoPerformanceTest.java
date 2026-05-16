@@ -12,7 +12,6 @@ import static io.github.deepeshpatel.jnumbertools.numbersystem.DerangadicAlgorit
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-@Disabled
 public class DerangementAlgoPerformanceTest {
 
     private static final DerangadicAlgorithms DERANGADIC = new DerangadicAlgorithms();
@@ -52,17 +51,17 @@ public class DerangementAlgoPerformanceTest {
         int iterations = 1000;
 
         System.out.println("\n=== Performance: Fixed Rank=" + rank + " ===");
-        System.out.printf("%-10s %-15s %-15s %-10s%n", "n", "Array (ms)", "Fenwick (ms)", "Winner");
-        System.out.println("-".repeat(55));
+        System.out.printf("%-10s %-12s %-14s %-12s %-10s%n", "n", "Array (ms)", "Fenwick (ms)", "Hybrid (ms)", "Routing Match?");
+        System.out.println("-".repeat(65));
 
         for (int n : nValues) {
-
             int[] digits = DERANGADIC.toDerangadic(rank, n);
 
             // Warmup
             for (int i = 0; i < 100; i++) {
                 DERANGADIC.toDerangementArray(digits, n);
                 DERANGADIC.toDerangementFenwick(digits, n);
+                DERANGADIC.toDerangement(digits, n);
             }
 
             // Test Array
@@ -79,11 +78,20 @@ public class DerangementAlgoPerformanceTest {
             }
             long timeFenwick = System.currentTimeMillis() - startFenwick;
 
-            String winner = (timeArray < timeFenwick) ? "Array" : "Fenwick";
-            System.out.printf("%-10d %-15d %-15d %-10s%n", n, timeArray, timeFenwick, winner);
+            // Test Hybrid Auto
+            long startHybrid = System.currentTimeMillis();
+            for (int i = 0; i < iterations; i++) {
+                DERANGADIC.toDerangement(digits, n);
+            }
+            long timeHybrid = System.currentTimeMillis() - startHybrid;
+
+            long bestEngTime = Math.min(timeArray, timeFenwick);
+            // Verify if Hybrid picked the absolute best choice (allowing a 2ms margin for minor JVM noise)
+            String matchStatus = (timeHybrid <= bestEngTime + 2) ? "OPTIMAL" : "SUBOPTIMAL";
+
+            System.out.printf("%-10d %-12d %-14d %-12d %-10s%n", n, timeArray, timeFenwick, timeHybrid, matchStatus);
         }
     }
-
 
     @Test
     @DisplayName("Performance comparison: Finding the Crossover Point (n=10000)")
@@ -93,7 +101,7 @@ public class DerangementAlgoPerformanceTest {
         List<NamedRank> testRanks = new ArrayList<>();
         testRanks.add(new NamedRank("Small (15 digits)", BigInteger.valueOf(1_000_000_000_000_000L)));
         testRanks.add(new NamedRank("Medium (100 digits)", BigInteger.TEN.pow(100)));
-        testRanks.add(new NamedRank("Large (00 digits)", BigInteger.TEN.pow(600)));
+        testRanks.add(new NamedRank("Large (600 digits)", BigInteger.TEN.pow(600)));
         testRanks.add(new NamedRank("Large (700 digits)", BigInteger.TEN.pow(700)));
         testRanks.add(new NamedRank("Large (800 digits)", BigInteger.TEN.pow(800)));
         testRanks.add(new NamedRank("Heavy (900 digits)", BigInteger.TEN.pow(900)));
@@ -105,8 +113,8 @@ public class DerangementAlgoPerformanceTest {
         int iterations = 100;
 
         System.out.println("\n=== Performance: Fixed n=" + n + " (Iterations: " + iterations + ") ===");
-        System.out.printf("%-20s %-15s %-15s %-10s%n", "Rank Magnitude", "Array (ms)", "Fenwick (ms)", "Winner");
-        System.out.println("-".repeat(70));
+        System.out.printf("%-22s %-12s %-14s %-12s %-10s%n", "Rank Magnitude", "Array (ms)", "Fenwick (ms)", "Hybrid (ms)", "Routing Match?");
+        System.out.println("-".repeat(78));
 
         for (NamedRank nr : testRanks) {
             int[] digits = DERANGADIC.toDerangadic(nr.value, n);
@@ -115,6 +123,7 @@ public class DerangementAlgoPerformanceTest {
             for (int i = 0; i < 5; i++) {
                 DERANGADIC.toDerangementArray(digits, n);
                 DERANGADIC.toDerangementFenwick(digits, n);
+                DERANGADIC.toDerangement(digits, n);
             }
 
             long startArray = System.currentTimeMillis();
@@ -129,24 +138,30 @@ public class DerangementAlgoPerformanceTest {
             }
             long timeFenwick = System.currentTimeMillis() - startFenwick;
 
-            String winner = (timeArray < timeFenwick) ? "Array" : "Fenwick";
-            System.out.printf("%-20s %-15d %-15d %-10s%n", nr.name, timeArray, timeFenwick, winner);
+            long startHybrid = System.currentTimeMillis();
+            for (int i = 0; i < iterations; i++) {
+                DERANGADIC.toDerangement(digits, n);
+            }
+            long timeHybrid = System.currentTimeMillis() - startHybrid;
+
+            long bestEngTime = Math.min(timeArray, timeFenwick);
+            String matchStatus = (timeHybrid <= bestEngTime + 2) ? "OPTIMAL" : "SUBOPTIMAL";
+
+            System.out.printf("%-22s %-12d %-14d %-12d %-10s%n", nr.name, timeArray, timeFenwick, timeHybrid, matchStatus);
         }
     }
 
     @Test
     @DisplayName("Find N_THRESHOLD: Fixed High Rank vs Variable N")
     void testFindNThreshold() {
-        // Constant high rank to ensure we are always testing against the 'digits' logic
         BigInteger highRank = BigInteger.TEN.pow(150);
 
-        // Vary N from very small to the current threshold area
         int[] nValues = {100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1500, 2000, 3000, 4000};
         int iterations = 1000;
 
         System.out.println("\n=== N_THRESHOLD Search (Rank fixed at 10^150) ===");
-        System.out.printf("%-10s %-15s %-15s %-10s%n", "N", "Array (ms)", "Fenwick (ms)", "Winner");
-        System.out.println("-".repeat(55));
+        System.out.printf("%-10s %-12s %-14s %-12s %-10s%n", "N", "Array (ms)", "Fenwick (ms)", "Hybrid (ms)", "Routing Match?");
+        System.out.println("-".repeat(65));
 
         for (int n : nValues) {
             int[] digits = DERANGADIC.toDerangadic(highRank, n);
@@ -155,73 +170,34 @@ public class DerangementAlgoPerformanceTest {
             for (int i = 0; i < 100; i++) {
                 DERANGADIC.toDerangementArray(digits, n);
                 DERANGADIC.toDerangementFenwick(digits, n);
+                DERANGADIC.toDerangement(digits, n);
             }
 
-            // Test Array
             long startArray = System.currentTimeMillis();
             for (int i = 0; i < iterations; i++) {
                 DERANGADIC.toDerangementArray(digits, n);
             }
             long timeArray = System.currentTimeMillis() - startArray;
 
-            // Test Fenwick
             long startFenwick = System.currentTimeMillis();
             for (int i = 0; i < iterations; i++) {
                 DERANGADIC.toDerangementFenwick(digits, n);
             }
             long timeFenwick = System.currentTimeMillis() - startFenwick;
 
-            String winner = (timeArray < timeFenwick) ? "Array" : "Fenwick";
-            System.out.printf("%-10d %-15d %-15d %-10s%n", n, timeArray, timeFenwick, winner);
-        }
-    }
-
-
-    @Test
-    @DisplayName("Final Performance Benchmark: Hybrid logic across scenarios")
-    void testToDerangementHybridScenarios() {
-        int iterations = 100;
-
-        // Scenarios designed to trigger different branches of your hybrid logic
-        List<Scenario> scenarios = List.of(
-                new Scenario("Small N / Low Rank", 50, BigInteger.valueOf(100)),
-                new Scenario("Small N / High Rank", 80, BigInteger.TEN.pow(20)),
-                new Scenario("Large N / Low Rank", 10000, BigInteger.valueOf(1000)),
-                new Scenario("Large N / Medium Rank", 10000, BigInteger.TEN.pow(50)),
-                new Scenario("Large N / High Rank (CROSSOVER)", 10000, BigInteger.TEN.pow(150)),
-                new Scenario("Massive N / Low Rank", 50000, BigInteger.valueOf(500)),
-                new Scenario("Massive N / High Rank", 50000, BigInteger.TEN.pow(500))
-        );
-
-        System.out.println("\n=== Final Performance Benchmark (Hybrid toDerangement) ===");
-        System.out.printf("%-35s %-10s %-12s %-15s %-10s%n", "Scenario", "N", "Rank Digits", "Avg Time (ms)", "Logic");
-        System.out.println("-".repeat(85));
-
-        for (Scenario s : scenarios) {
-            int[] digits = DERANGADIC.toDerangadic(s.rank, s.n);
-
-            // Warmup
-            for (int i = 0; i < 20; i++) {
-                DERANGADIC.toDerangement(digits, s.n);
-            }
-
-            long start = System.nanoTime();
+            long startHybrid = System.currentTimeMillis();
             for (int i = 0; i < iterations; i++) {
-                DERANGADIC.toDerangement(digits, s.n);
+                DERANGADIC.toDerangement(digits, n);
             }
-            long end = System.nanoTime();
+            long timeHybrid = System.currentTimeMillis() - startHybrid;
 
-            double avgTimeMs = (double)(end - start) / (iterations * 1_000_000.0);
+            long bestEngTime = Math.min(timeArray, timeFenwick);
+            String matchStatus = (timeHybrid <= bestEngTime + 2) ? "OPTIMAL" : "SUBOPTIMAL";
 
-            // Logic check (matching your thresholds)
-            String logic = (s.n < 100 || digits.length < 100) ? "Array" : "Fenwick";
-
-            System.out.printf("%-35s %-10d %-12d %-15.4f %-10s%n",
-                    s.name, s.n, digits.length, avgTimeMs, logic);
+            System.out.printf("%-10d %-12d %-14d %-12d %-10s%n", n, timeArray, timeFenwick, timeHybrid, matchStatus);
         }
     }
 
-    /** Helper class for Scenario definitions */
     private static class Scenario {
         String name;
         int n;
@@ -234,11 +210,6 @@ public class DerangementAlgoPerformanceTest {
         }
     }
 
-
-
-    /**
-     * Helper class for named test cases
-     */
     private static class NamedRank {
         String name;
         BigInteger value;
@@ -247,4 +218,265 @@ public class DerangementAlgoPerformanceTest {
             this.value = value;
         }
     }
+
+    @Test
+    @DisplayName("Hybrid routing matrix: exhaustive N × digit-length combinations")
+    void testRoutingMatrix() {
+
+        int[] nValues = {
+                50,100,200,500,1000,
+                2000,5000,10000,20000,50000
+        };
+
+        int[] digitLengths = {
+                5,10,20,50,100,
+                200,300,500,800,1200
+        };
+
+        int iterations = 500;
+
+        System.out.println("\n=== HYBRID ROUTING MATRIX ===");
+        System.out.printf(
+                "%-8s %-10s %-12s %-12s %-12s %-12s%n",
+                "n","digits","Array","Fenwick","Hybrid","Choice");
+
+        System.out.println("-".repeat(75));
+
+        for(int n : nValues){
+
+            for(int d : digitLengths){
+
+                if(d>=n) continue;
+
+                int[] digits=new int[d];
+
+                for(int i=0;i<d;i++){
+                    digits[i]=Math.min(i,2);
+                }
+
+                for(int i=0;i<20;i++){
+                    DERANGADIC.toDerangementArray(digits,n);
+                    DERANGADIC.toDerangementFenwick(digits,n);
+                    DERANGADIC.toDerangement(digits,n);
+                }
+
+                long start=System.nanoTime();
+                for(int i=0;i<iterations;i++){
+                    DERANGADIC.toDerangementArray(digits,n);
+                }
+                long arrayTime=(System.nanoTime()-start)/1_000_000;
+
+                start=System.nanoTime();
+                for(int i=0;i<iterations;i++){
+                    DERANGADIC.toDerangementFenwick(digits,n);
+                }
+                long fenwickTime=(System.nanoTime()-start)/1_000_000;
+
+                start=System.nanoTime();
+                for(int i=0;i<iterations;i++){
+                    DERANGADIC.toDerangement(digits,n);
+                }
+                long hybridTime=(System.nanoTime()-start)/1_000_000;
+
+                String best=
+                        arrayTime<=fenwickTime
+                                ?"Array"
+                                :"Fenwick";
+
+                System.out.printf(
+                        "%-8d %-10d %-12d %-12d %-12d %-12s%n",
+                        n,d,arrayTime,fenwickTime,hybridTime,best
+                );
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("Find exact digit crossover for fixed N")
+    void testDigitCrossoverSearch() {
+
+        int n=10000;
+        int iterations=200;
+
+        System.out.println("\n=== DIGIT CROSSOVER SEARCH n="+n+" ===");
+
+        System.out.printf(
+                "%-12s %-12s %-12s %-10s%n",
+                "digits",
+                "Array",
+                "Fenwick",
+                "Winner"
+        );
+
+        System.out.println("-".repeat(50));
+
+        for(int digitsLength=50;
+            digitsLength<=1500;
+            digitsLength+=50){
+
+            int[] digits=new int[digitsLength];
+
+            for(int i=0;i<digitsLength;i++){
+                digits[i]=Math.min(i,2);
+            }
+
+            for(int i=0;i<20;i++){
+                DERANGADIC.toDerangementArray(digits,n);
+                DERANGADIC.toDerangementFenwick(digits,n);
+            }
+
+            long start=System.nanoTime();
+
+            for(int i=0;i<iterations;i++){
+                DERANGADIC.toDerangementArray(digits,n);
+            }
+
+            long arrayTime=(System.nanoTime()-start)/1_000_000;
+
+            start=System.nanoTime();
+
+            for(int i=0;i<iterations;i++){
+                DERANGADIC.toDerangementFenwick(digits,n);
+            }
+
+            long fenwickTime=(System.nanoTime()-start)/1_000_000;
+
+            String winner=arrayTime<fenwickTime
+                    ?"Array"
+                    :"Fenwick";
+
+            System.out.printf(
+                    "%-12d %-12d %-12d %-10s%n",
+                    digitsLength,
+                    arrayTime,
+                    fenwickTime,
+                    winner
+            );
+        }
+    }
+
+    @Test
+    @DisplayName("Measure routing overhead only")
+    void testRoutingOverhead() {
+
+        int n=10000;
+        int[] digits=DERANGADIC.toDerangadic(
+                BigInteger.TEN.pow(1000),
+                n);
+
+        int iterations=100000;
+
+        for(int i=0;i<1000;i++){
+            DERANGADIC.toDerangement(digits,n);
+        }
+
+        long start=System.nanoTime();
+
+        for(int i=0;i<iterations;i++){
+            DERANGADIC.toDerangement(digits,n);
+        }
+
+        long hybrid=System.nanoTime()-start;
+
+        start=System.nanoTime();
+
+        for(int i=0;i<iterations;i++){
+
+            if(n<100 || digits.length<100){
+
+            }else{
+
+                long arrayComplexity=
+                        (long)n*digits.length;
+
+                long fenwickComplexity=
+                        (long)digits.length*
+                                (long)(Math.log(n)/Math.log(2));
+
+                boolean useArray=
+                        arrayComplexity<=fenwickComplexity;
+            }
+        }
+
+        long routing=(System.nanoTime()-start);
+
+        System.out.println(
+                "\nRouting overhead="
+                        +(routing/1_000_000.0)
+                        +" ms"
+        );
+
+        System.out.println(
+                "Hybrid total="
+                        +(hybrid/1_000_000.0)
+                        +" ms"
+        );
+    }
+    @Test
+    @Disabled
+    @DisplayName("Pathological cases")
+    void testPathologicalCases(){
+
+        List<Scenario> scenarios=List.of(
+
+                new Scenario(
+                        "Huge N tiny digits",
+                        100000,
+                        BigInteger.valueOf(7)
+                ),
+
+                new Scenario(
+                        "Huge N medium digits",
+                        100000,
+                        BigInteger.TEN.pow(10)
+                ),
+
+                new Scenario(
+                        "Huge N massive digits",
+                        100000,
+                        BigInteger.TEN.pow(10)
+                ),
+
+                new Scenario(
+                        "Tiny N huge rank",
+                        120,
+                        BigInteger.TEN.pow(10)
+                )
+        );
+
+        int iterations=4;
+
+        System.out.println("\n=== PATHOLOGICAL TESTS ===");
+
+        for(Scenario s:scenarios){
+
+            int[] digits=
+                    DERANGADIC.toDerangadic(
+                            s.rank,
+                            s.n
+                    );
+
+            long start=System.nanoTime();
+
+            for(int i=0;i<iterations;i++){
+                DERANGADIC.toDerangement(
+                        digits,
+                        s.n
+                );
+            }
+
+            long ms=
+                    (System.nanoTime()-start)
+                            /1_000_000;
+
+            System.out.printf(
+                    "%-30s n=%-8d digits=%-8d time=%dms%n",
+                    s.name,
+                    s.n,
+                    digits.length,
+                    ms
+            );
+        }
+    }
+
 }
