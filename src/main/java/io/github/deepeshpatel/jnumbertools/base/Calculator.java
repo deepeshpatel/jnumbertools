@@ -186,7 +186,7 @@ public final class Calculator {
         if (restricted < 0) return BigInteger.ZERO;
         if (total == 0) return BigInteger.ONE;
         if (restricted == 0) return factorial(total);
-        if (restricted == total) return subFactorial(total); // is this optimization required?
+        //if (restricted == total) return subFactorial(total); // is this optimization required?
 
         return restrictedDerangementMemo.computeIfAbsent(total, restricted, (t, r) -> {
             BigInteger result = BigInteger.ZERO;

@@ -177,7 +177,6 @@ public final class DerangadicAlgorithms {
 
     /**
      * Converts a decimal rank to Derangadic digits (long version).
-     *
      * @param m decimal rank (0 ≤ m < D_n)
      * @param n order
      * @return Derangadic digit array
@@ -185,6 +184,8 @@ public final class DerangadicAlgorithms {
     public int[] toDerangadic(long m, int n) {
         return toDerangadic(BigInteger.valueOf(m), n);
     }
+
+
     /**
      * Converts variable-length Derangadic digits back to decimal rank.
      * <p>
@@ -255,9 +256,18 @@ public final class DerangadicAlgorithms {
     public int[] toDerangement(int[] digits, int n) {
         if (n < N_THRESHOLD || digits.length < DIGIT_THRESHOLD) {
             return toDerangementArray(digits, n);
-        } else {
-            return toDerangementFenwick(digits, n);
         }
+
+//        long arrayComplexity = (long) n * digits.length;
+//        long fenwickComplexity = (long) digits.length * (long)(Math.log(n) / Math.log(2));
+//
+//        if (arrayComplexity <= fenwickComplexity) {
+//            return toDerangementArray(digits, n);
+//        } else {
+//            return toDerangementFenwick(digits, n);
+//        }
+
+        return toDerangementFenwick(digits, n);
     }
 
     /**
