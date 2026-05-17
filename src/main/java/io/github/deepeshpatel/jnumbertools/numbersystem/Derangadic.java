@@ -9,7 +9,6 @@ import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -117,21 +116,21 @@ import java.util.Objects;
  */
 public final class Derangadic implements Serializable {
 
-    private final BigInteger decimalValue;
-    private final int[] derangadicValues;
+    private BigInteger decimalValue;
+    private int[] derangadicValues;
     private final int order;
 
-    /** Cached engine, reused by {@link #toDerangement()}. Marked transient because
-     *  {@link Calculator} is not guaranteed to be {@link Serializable}; after
-     *  deserialization a fresh engine must be reattached by the caller. */
-    private final transient DerangadicAlgorithms algorithms;
+    private final transient DerangadicIncrement incrementor;
+    private final transient DerangadicIncrement.DerangadicState state;
 
     private Derangadic(BigInteger decimalValue, int[] derangadicValues, int order,
-                       DerangadicAlgorithms algorithms) {
+                       DerangadicIncrement incrementor,
+                       DerangadicIncrement.DerangadicState state) {
         this.decimalValue = decimalValue;
         this.derangadicValues = derangadicValues; // already owned; not aliased to caller input
         this.order = order;
-        this.algorithms = algorithms;
+        this.incrementor = incrementor;
+        this.state = state;
     }
 
     // ==================== Factories ====================
@@ -149,9 +148,9 @@ public final class Derangadic implements Serializable {
      */
     public static Derangadic of(BigInteger rank, int n, Calculator calculator) {
         Objects.requireNonNull(calculator, "calculator");
-        DerangadicAlgorithms algo = new DerangadicAlgorithms(calculator);
-        int[] digits = algo.toDerangadic(rank, n);
-        return new Derangadic(rank, digits, n, algo);
+        DerangadicIncrement incrementor = new DerangadicIncrement(calculator);
+        DerangadicIncrement.DerangadicState state = incrementor.initialState(n, rank);
+        return new Derangadic(rank, state.getDigits(), n, incrementor, state);
     }
 
     /**
@@ -181,9 +180,10 @@ public final class Derangadic implements Serializable {
         Objects.requireNonNull(derangement, "derangement");
         Objects.requireNonNull(calculator, "calculator");
         DerangadicAlgorithms algo = new DerangadicAlgorithms(calculator);
-        int[] digits = algo.fromDerangement(derangement, n);
-        BigInteger rank = algo.fromDerangadic(digits, n);
-        return new Derangadic(rank, digits, n, algo);
+        BigInteger rank = algo.rank(derangement, n);
+        DerangadicIncrement incrementor = new DerangadicIncrement(calculator);
+        DerangadicIncrement.DerangadicState state = incrementor.initialState(n, rank);
+        return new Derangadic(rank, state.getDigits(), n, incrementor, state);
     }
 
     // ==================== Static rank / unrank shortcuts ====================
@@ -264,145 +264,30 @@ public final class Derangadic implements Serializable {
     // ==================== Sequential iteration ====================
 
     /**
-     * Returns a fast forward-only {@link Walker} positioned at rank 0 of order
-     * {@code n}. The walker uses the incremental digit-encoding engine and
-     * exposes the live derangement array on each step, so per-call cost is
-     * roughly O(log n) and is effectively independent of {@code n} for any
-     * practical rank.
+     * Advances this {@code Derangadic} in-place to the next lexicographical
+     * rank and returns this same instance.
      *
-     * <p>Typical usage:</p>
-     * <pre>
-     * Derangadic.Walker w = Derangadic.walker(n, calc);
-     * do {
-     *     int[] d = w.current();   // LIVE — do not retain
-     *     // ... use d ...
-     * } while (w.advance());
-     * </pre>
+     * <p><strong>Performance:</strong> this method delegates to the incremental
+     * Derangadic successor engine. It does not recompute from rank 0 and is the
+     * public entry point for fast consecutive derangement generation.</p>
      *
-     * <p>For safe iteration that yields {@code int[]} copies (so you can stash
-     * each result), the walker also implements {@link Iterable}:</p>
-     * <pre>
-     * for (int[] d : Derangadic.walker(n, calc)) { ... }
-     * </pre>
-     *
-     * @param n          the order ({@code n &ge; 2})
-     * @param calculator memoizing calculator (reuse across calls)
-     * @return a walker positioned at rank 0
-     * @throws IllegalArgumentException if {@code n &lt; 2}
-     * @throws NullPointerException     if {@code calculator} is {@code null}
-     */
-    public static Walker walker(int n, Calculator calculator) {
-        Objects.requireNonNull(calculator, "calculator");
-        return new Walker(n, calculator);
-    }
-
-    /**
-     * Returns the {@code Derangadic} representing the next lexicographical
-     * rank.
-     *
-     * <p><strong>Performance:</strong> this is a convenience method that
-     * reconstructs the digit encoding from scratch each call. If you need to
-     * walk through many consecutive derangements, use {@link #walker(int, Calculator)}
-     * — it is one to two orders of magnitude faster for any non-trivial
-     * {@code n}.</p>
-     *
-     * @return a new {@code Derangadic} at rank {@code decimalValue() + 1}
-     * @throws IllegalArgumentException if this is already the last rank (i.e.
-     *         {@code decimalValue() + 1 = D_n})
+     * @return this instance, after mutation to rank {@code decimalValue() + 1}
+     * @throws NoSuchElementException if this is already the last rank
      * @throws IllegalStateException if this instance was deserialized and has
      *         no attached engine
      */
     public Derangadic next() {
-        if (algorithms == null) {
+        if (incrementor == null || state == null) {
             throw new IllegalStateException(
-                "Derangadic was deserialized without an attached engine; " +
-                "rebuild it via Derangadic.of(decimalValue(), order(), calculator).");
+                    "Derangadic was deserialized without an attached engine; " +
+                            "rebuild it via Derangadic.of(decimalValue(), order(), calculator).");
         }
-        BigInteger nextRank = decimalValue.add(BigInteger.ONE);
-        int[] nextDigits = algorithms.toDerangadic(nextRank, order); // validates range
-        return new Derangadic(nextRank, nextDigits, order, algorithms);
-    }
-
-    /**
-     * Fast forward-only walker over derangements of a fixed order {@code n} in
-     * lexicographical order. Construct via {@link Derangadic#walker(int, Calculator)}.
-     *
-     * <h3>Thread safety</h3>
-     * <p>Walkers are <em>not</em> thread-safe. Each walker holds mutable state;
-     * one thread per walker.</p>
-     *
-     * <h3>Performance contract</h3>
-     * <p>{@link #advance()} runs in roughly O(log n) time, dominated by a
-     * Fenwick-tree update. The derangement returned by {@link #current()} is
-     * the live, internally-maintained array — do not retain or mutate it.
-     * Use {@link #currentCopy()} if you need a stable snapshot.</p>
-     */
-    public static final class Walker implements Iterable<int[]> {
-
-        private final DerangadicIncrement inc;
-        private final DerangadicIncrement.DerangadicState state;
-        private boolean exhausted;
-
-        Walker(int n, Calculator calculator) {
-            this.inc   = new DerangadicIncrement(calculator);
-            this.state = inc.initialState(n);
-            this.exhausted = false;
+        if (!incrementor.increment(state)) {
+            throw new NoSuchElementException("Already at the last derangement rank for order " + order);
         }
-
-        /**
-         * @return the current derangement as a <strong>live</strong> array of
-         *         length {@link #n()}. The contents are owned by the walker
-         *         and will be mutated on the next {@link #advance()}.
-         */
-        public int[] current() {
-            return state.currentDerangement();
-        }
-
-        /** @return a defensive copy of the current derangement (safe to retain). */
-        public int[] currentCopy() {
-            return state.currentDerangement().clone();
-        }
-
-        /** @return the order {@code n}. */
-        public int n() {
-            return state.getN();
-        }
-
-        /**
-         * Advances to the next derangement.
-         *
-         * @return {@code true} on success; {@code false} if the walker is
-         *         already at the last rank ({@code D_n - 1}). In the latter
-         *         case {@link #current()} is unchanged.
-         */
-        public boolean advance() {
-            if (exhausted) return false;
-            if (!inc.increment(state)) { exhausted = true; return false; }
-            return true;
-        }
-
-        /**
-         * Returns a standard {@link Iterator} that walks all remaining
-         * derangements starting from the current position. Each {@code next()}
-         * returns a fresh {@code int[]} clone (safe to retain).
-         * <p>The returned iterator consumes the walker; do not interleave with
-         * direct calls to {@link #advance()}.</p>
-         */
-        @Override
-        public Iterator<int[]> iterator() {
-            return new Iterator<int[]>() {
-                boolean done = exhausted;
-
-                @Override public boolean hasNext() { return !done; }
-
-                @Override public int[] next() {
-                    if (done) throw new NoSuchElementException();
-                    int[] copy = state.currentDerangement().clone();
-                    if (!advance()) done = true;
-                    return copy;
-                }
-            };
-        }
+        decimalValue = decimalValue.add(BigInteger.ONE);
+        derangadicValues = state.getDigits();
+        return this;
     }
 
     // ==================== Accessors ====================
@@ -415,12 +300,12 @@ public final class Derangadic implements Serializable {
      *         attached engine (the {@link Calculator} reference is transient)
      */
     public int[] toDerangement() {
-        if (algorithms == null) {
+        if (state == null) {
             throw new IllegalStateException(
-                "Derangadic was deserialized without an attached engine; " +
-                "rebuild it via Derangadic.of(decimalValue(), order(), calculator).");
+                    "Derangadic was deserialized without an attached engine; " +
+                            "rebuild it via Derangadic.of(decimalValue(), order(), calculator).");
         }
-        return algorithms.toDerangement(derangadicValues, order);
+        return state.currentDerangement();
     }
 
     /** @return the decimal rank as a {@link BigInteger} */
@@ -499,7 +384,7 @@ public final class Derangadic implements Serializable {
     public boolean digitsEqual(Derangadic other) {
         if (other == null) return false;
         return Arrays.equals(trimTrailingZeros(this.derangadicValues),
-                             trimTrailingZeros(other.derangadicValues));
+                trimTrailingZeros(other.derangadicValues));
     }
 
     private static int[] trimTrailingZeros(int[] a) {

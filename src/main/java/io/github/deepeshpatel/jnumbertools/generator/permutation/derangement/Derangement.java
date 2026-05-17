@@ -22,9 +22,8 @@ import java.util.NoSuchElementException;
  * is never the element originally at position {@code i} in the input list.
  * </p>
  * <p>
- * Backed by {@link Derangadic.Walker}, which makes each successor effectively
- * O(log n) — see the package-level documentation. Instances should be created
- * via {@link DerangementBuilder#lexOrder()} or
+ * Backed by {@link Derangadic#next()}, which uses the incremental Derangadic
+ * successor engine. Instances should be created via {@link DerangementBuilder#lexOrder()} or
  * {@code new Derangements().of(...).lexOrder()}.
  * </p>
  *
@@ -62,16 +61,16 @@ public final class Derangement<T> extends AbstractGenerator<T> {
         int n = elements.size();
         if (n == 0) return Util.emptyListIterator();
         if (n == 1) return Collections.emptyIterator();
-        return new WalkerIterator(n);
+        return new DerangadicIterator(n);
     }
 
-    private final class WalkerIterator implements Iterator<List<T>> {
+    private final class DerangadicIterator implements Iterator<List<T>> {
 
-        private final Derangadic.Walker walker;
+        private final Derangadic current;
         private boolean exhausted = false;
 
-        WalkerIterator(int n) {
-            this.walker = Derangadic.walker(n, calculator);
+        DerangadicIterator(int n) {
+            this.current = Derangadic.of(0, n, calculator);
         }
 
         @Override
@@ -82,10 +81,12 @@ public final class Derangement<T> extends AbstractGenerator<T> {
         @Override
         public List<T> next() {
             if (exhausted) throw new NoSuchElementException();
-            // indicesToValues() copies values out of the live array, so the
-            // subsequent advance() is safe.
-            List<T> result = indicesToValues(walker.current());
-            if (!walker.advance()) exhausted = true;
+            List<T> result = indicesToValues(current.toDerangement());
+            try {
+                current.next();
+            } catch (NoSuchElementException end) {
+                exhausted = true;
+            }
             return result;
         }
     }

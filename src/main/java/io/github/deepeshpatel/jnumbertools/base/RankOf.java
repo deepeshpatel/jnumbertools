@@ -6,6 +6,7 @@ package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
+import io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
 
 import java.math.BigInteger;
@@ -149,5 +150,17 @@ public final class RankOf {
      */
     public BigInteger uniqueCombination(int n, int... combination) {
         return new CombinadicAlgorithms(calculator).rank(n, combination);
+    }
+
+    /**
+     * Calculates the lexicographical rank of a derangement (`!n`).
+     *
+     * @param derangement the derangement array (full size n, no fixed points)
+     * @return the 0-based lexicographical rank of the derangement
+     * @throws IllegalArgumentException if {@code derangement} is not a valid derangement
+     * @since 3.0.2
+     */
+    public BigInteger derangement(int... derangement) {
+        return Derangadic.rank(derangement, derangement.length, calculator);
     }
 }

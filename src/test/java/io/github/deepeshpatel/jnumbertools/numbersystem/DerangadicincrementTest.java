@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -13,12 +14,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.DerangadicAlgorithmsTest.isValidDerangement;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DerangadicIncrementTest {
 
-    private static final DerangadicIncrement  INC = new DerangadicIncrement();
     private static final DerangadicAlgorithms ALG = new DerangadicAlgorithms();
 
     // =========================================================================
@@ -51,24 +52,25 @@ class DerangadicIncrementTest {
 
     private void assertDigitSequenceMatches(int n) {
         BigInteger total = ALG.derangementCount(n);
-        DerangadicIncrement.DerangadicState state = INC.initialState(n);
+        DerangadicIncrement inc = new DerangadicIncrement(new Calculator());
+        DerangadicIncrement.DerangadicState state = inc.initialState(n);
 
         for (long rank = 0; rank < total.longValue(); rank++) {
             int[] expected = ALG.toDerangadic(rank, n);
-            int[] actual   = state.getDigits();
+            int[] actual = state.getDigits();
 
             assertTrue(arraysEqualIgnoringTrailingZeros(expected, actual),
                     String.format("Digit mismatch at n=%d rank=%d%n  expected: %s%n  actual:   %s",
                             n, rank, Arrays.toString(expected), Arrays.toString(actual)));
 
             if (rank < total.longValue() - 1) {
-                assertTrue(INC.increment(state),
-                        "increment() returned false before last rank at n=" + n + ", rank=" + rank);
+                assertTrue(inc.increment(state),
+                        "next() returned false before last rank at n=" + n + ", rank=" + rank);
             }
         }
 
-        assertFalse(INC.increment(state),
-                "increment() should return false after last rank for n=" + n);
+        assertFalse(inc.increment(state),
+                "next() should return false after last rank for n=" + n);
     }
 
     // =========================================================================
@@ -80,11 +82,12 @@ class DerangadicIncrementTest {
     void testDerangementsValidAndOrdered() {
         for (int n = 4; n <= 9; n++) {
             BigInteger total = ALG.derangementCount(n);
-            DerangadicIncrement.DerangadicState state = INC.initialState(n);
+            DerangadicIncrement inc = new DerangadicIncrement(new Calculator());
+            DerangadicIncrement.DerangadicState state = inc.initialState(n);
 
             int[] previous = null;
             for (long rank = 0; rank < total.longValue(); rank++) {
-                int[] d = ALG.toDerangement(state.getDigits(), n);
+                int[] d = state.currentDerangement().clone();
 
                 assertTrue(isValidDerangement(d),
                         String.format("Invalid derangement at n=%d rank=%d: %s",
@@ -96,7 +99,7 @@ class DerangadicIncrementTest {
                 }
 
                 previous = d;
-                if (rank < total.longValue() - 1) INC.increment(state);
+                if (rank < total.longValue() - 1) inc.increment(state);
             }
         }
     }
@@ -109,47 +112,50 @@ class DerangadicIncrementTest {
     @DisplayName("Length boundary crossings for even n=8: at ranks 1, 9, 265")
     void testBoundaryCrossingsEvenN8() {
         int n = 8;
-        DerangadicIncrement.DerangadicState state = INC.initialState(n);
-        assertEquals(2, state.getActualN(), "rank 0: actualN should be 2");
+        DerangadicIncrement inc = new DerangadicIncrement(new Calculator());
+        DerangadicIncrement.DerangadicState state = inc.initialState(n);
+        assertEquals(2, state.getDigits().length, "rank 0: digit length should be 2");
 
-        INC.increment(state);
-        assertEquals(4, state.getActualN(), "rank 1: actualN should be 4");
+        inc.increment(state);
+        assertEquals(4, state.getDigits().length, "rank 1: digit length should be 4");
 
-        for (int i = 0; i < 8; i++) INC.increment(state);
-        assertEquals(6, state.getActualN(), "rank 9: actualN should be 6");
+        for (int i = 0; i < 8; i++) inc.increment(state);
+        assertEquals(6, state.getDigits().length, "rank 9: digit length should be 6");
 
-        for (int i = 0; i < 256; i++) INC.increment(state);
-        assertEquals(8, state.getActualN(), "rank 265: actualN should be 8");
+        for (int i = 0; i < 256; i++) inc.increment(state);
+        assertEquals(8, state.getDigits().length, "rank 265: digit length should be 8");
     }
 
     @Test
     @DisplayName("Length boundary crossings for odd n=7: at ranks 2, 44")
     void testBoundaryCrossingsOddN7() {
         int n = 7;
-        DerangadicIncrement.DerangadicState state = INC.initialState(n);
-        assertEquals(3, state.getActualN(), "rank 0: actualN should be 3");
+        DerangadicIncrement inc = new DerangadicIncrement(new Calculator());
+        DerangadicIncrement.DerangadicState state = inc.initialState(n);
+        assertEquals(3, state.getDigits().length, "rank 0: digit length should be 3");
 
-        INC.increment(state);
-        assertEquals(3, state.getActualN(), "rank 1: actualN should still be 3");
+        inc.increment(state);
+        assertEquals(3, state.getDigits().length, "rank 1: digit length should still be 3");
 
-        INC.increment(state);
-        assertEquals(5, state.getActualN(), "rank 2: actualN should be 5");
+        inc.increment(state);
+        assertEquals(5, state.getDigits().length, "rank 2: digit length should be 5");
 
-        for (int i = 0; i < 42; i++) INC.increment(state);
-        assertEquals(7, state.getActualN(), "rank 44: actualN should be 7");
+        for (int i = 0; i < 42; i++) inc.increment(state);
+        assertEquals(7, state.getDigits().length, "rank 44: digit length should be 7");
     }
 
     // =========================================================================
-    // 4. getDigits() returns an independent copy
+    // 4. current() returns a defensive copy
     // =========================================================================
 
     @Test
-    @DisplayName("getDigits() mutation does not affect internal state")
-    void testGetDigitsReturnsCopy() {
-        DerangadicIncrement.DerangadicState state = INC.initialState(4);
+    @DisplayName("current() mutation does not affect internal state")
+    void testCurrentReturnsCopy() {
+        DerangadicIncrement inc = new DerangadicIncrement(new Calculator());
+        DerangadicIncrement.DerangadicState state = inc.initialState(4);
         int[] copy = state.getDigits();
         copy[0] = 99;
-        assertNotEquals(99, state.getDigits()[0], "getDigits() must return a defensive copy");
+        assertNotEquals(99, state.getDigits()[0], "current() must return a defensive copy");
     }
 
     // =========================================================================
@@ -162,11 +168,12 @@ class DerangadicIncrementTest {
         for (int n = 4; n <= 7; n++) {
             BigInteger total = ALG.derangementCount(n);
             List<int[]> byIncrement = new ArrayList<>();
-            DerangadicIncrement.DerangadicState state = INC.initialState(n);
+            DerangadicIncrement inc = new DerangadicIncrement(new Calculator());
+            DerangadicIncrement.DerangadicState state = inc.initialState(n);
 
             for (long rank = 0; rank < total.longValue(); rank++) {
-                byIncrement.add(ALG.toDerangement(state.getDigits(), n));
-                if (rank < total.longValue() - 1) INC.increment(state);
+                byIncrement.add(state.currentDerangement().clone());
+                if (rank < total.longValue() - 1) inc.increment(state);
             }
 
             for (long rank = 0; rank < total.longValue(); rank++) {
@@ -177,25 +184,57 @@ class DerangadicIncrementTest {
         }
     }
 
+    @Test
+    @DisplayName("Constructor with rank seeds digits and live derangement at non-zero ranks")
+    void testConstructorWithNonZeroRank() {
+        int[] sizes = {6, 7, 12, 13, 1000};
+        long[] starts = {1, 2, 8, 9, 20, 1_000, 50_000};
+
+        for (int n : sizes) {
+            BigInteger total = ALG.derangementCount(n);
+            for (long start : starts) {
+                if (BigInteger.valueOf(start + 10).compareTo(total) >= 0) continue;
+
+                DerangadicIncrement inc = new DerangadicIncrement(new Calculator());
+                DerangadicIncrement.DerangadicState state = inc.initialState(n, BigInteger.valueOf(start));
+                for (long rank = start; rank < start + 10; rank++) {
+                    assertTrue(arraysEqualIgnoringTrailingZeros(ALG.toDerangadic(rank, n), state.getDigits()),
+                            String.format("Digit mismatch at seeded n=%d rank=%d", n, rank));
+                    assertArrayEquals(ALG.unrank(rank, n), state.currentDerangement(),
+                            String.format("Live derangement mismatch at seeded n=%d rank=%d", n, rank));
+                    if (rank < start + 9) inc.increment(state);
+                }
+            }
+        }
+    }
+
     // =========================================================================
-    // 6. No digit ever exceeds its maxDigit
+    // 6. Reset functionality
     // =========================================================================
 
     @Test
-    @DisplayName("No digit exceeds maxDigit for n=6 (all 265 ranks)")
-    void testNoDigitExceedsMax() {
-        int n = 6;
-        BigInteger total = ALG.derangementCount(n);
-        DerangadicIncrement.DerangadicState state = INC.initialState(n);
+    @DisplayName("Reset should correctly reposition the incrementor")
+    void testReset() {
+        int n = 8;
+        DerangadicIncrement inc = new DerangadicIncrement(new Calculator());
+        DerangadicIncrement.DerangadicState state = inc.initialState(n);
 
-        for (long rank = 0; rank < total.longValue(); rank++) {
-            for (int i = 0; i < state.getActualN(); i++) {
-                assertTrue(state.digits[i] <= state.maxDigit[i],
-                        String.format("digits[%d]=%d > maxDigit[%d]=%d at n=%d rank=%d",
-                                i, state.digits[i], i, state.maxDigit[i], n, rank));
-            }
-            if (rank < total.longValue() - 1) INC.increment(state);
-        }
+        // Advance to rank 5
+        for (int i = 0; i < 5; i++) inc.increment(state);
+        int[] after5 = state.getDigits();
+
+        // Reset to rank 0 and advance to rank 5 again
+        state = inc.initialState(n);
+        for (int i = 0; i < 5; i++) inc.increment(state);
+        int[] afterReset = state.getDigits();
+
+        assertArrayEquals(after5, afterReset, "Reset should produce same state");
+
+        // Reset to rank 10 directly
+        state = inc.initialState(n, BigInteger.TEN);
+        int[] at10 = state.getDigits();
+        assertTrue(arraysEqualIgnoringTrailingZeros(ALG.toDerangadic(10, n), at10),
+                "Reset to specific rank should match direct toDerangadic");
     }
 
     // =========================================================================
@@ -228,12 +267,13 @@ class DerangadicIncrementTest {
                 {0, 1, 1, 3, 1, 0},   // rank 19
                 {0, 0, 0, 0, 2, 0},   // rank 20
         };
-        DerangadicIncrement.DerangadicState state = INC.initialState(12);
+        DerangadicIncrement inc = new DerangadicIncrement(new Calculator());
+        DerangadicIncrement.DerangadicState state = inc.initialState(12);
         for (int rank = 0; rank <= 20; rank++) {
             assertTrue(arraysEqualIgnoringTrailingZeros(expected[rank], state.getDigits()),
                     String.format("n=12 rank=%d%n  expected: %s%n  actual:   %s",
                             rank, Arrays.toString(expected[rank]), Arrays.toString(state.getDigits())));
-            if (rank < 20) INC.increment(state);
+            if (rank < 20) inc.increment(state);
         }
     }
 
@@ -263,12 +303,13 @@ class DerangadicIncrementTest {
                 {0, 0, 1, 2, 1},       // rank 19
                 {0, 0, 2, 2, 1},       // rank 20
         };
-        DerangadicIncrement.DerangadicState state = INC.initialState(13);
+        DerangadicIncrement inc = new DerangadicIncrement(new Calculator());
+        DerangadicIncrement.DerangadicState state = inc.initialState(13);
         for (int rank = 0; rank <= 20; rank++) {
             assertTrue(arraysEqualIgnoringTrailingZeros(expected[rank], state.getDigits()),
                     String.format("n=13 rank=%d%n  expected: %s%n  actual:   %s",
                             rank, Arrays.toString(expected[rank]), Arrays.toString(state.getDigits())));
-            if (rank < 20) INC.increment(state);
+            if (rank < 20) inc.increment(state);
         }
     }
 
@@ -280,12 +321,13 @@ class DerangadicIncrementTest {
     @DisplayName("First 10 000 increments for n=100 produce valid derangements")
     void testSmokeTestN100() {
         int n = 100;
-        DerangadicIncrement.DerangadicState state = INC.initialState(n);
+        DerangadicIncrement inc = new DerangadicIncrement(new Calculator());
+        DerangadicIncrement.DerangadicState state = inc.initialState(n);
         for (int i = 0; i < 10_000; i++) {
-            int[] d = ALG.toDerangement(state.getDigits(), n);
+            int[] d = state.currentDerangement();
             assertTrue(isValidDerangement(d),
                     "Invalid derangement at n=100 iteration " + i);
-            INC.increment(state);
+            inc.increment(state);
         }
     }
 
@@ -293,12 +335,13 @@ class DerangadicIncrementTest {
     @DisplayName("First 500 increments for n=5000 produce valid derangements")
     void testSmokeTestN5000() {
         int n = 5000;
-        DerangadicIncrement.DerangadicState state = INC.initialState(n);
+        DerangadicIncrement inc = new DerangadicIncrement(new Calculator());
+        DerangadicIncrement.DerangadicState state = inc.initialState(n);
         for (int i = 0; i < 500; i++) {
-            int[] d = ALG.toDerangement(state.getDigits(), n);
+            int[] d = state.currentDerangement();
             assertTrue(isValidDerangement(d),
                     "Invalid derangement at n=5000 iteration " + i);
-            INC.increment(state);
+            inc.increment(state);
         }
     }
 
@@ -332,10 +375,11 @@ class DerangadicIncrementTest {
 
         // 1. Test Even N (n=12)
         int nEven = 12;
-        DerangadicIncrement.DerangadicState stateEven = INC.initialState(nEven);
-        System.out.println("Starting " + maxRanks + "  increment verifications for even n=" + nEven + "...");
+        DerangadicIncrement incEven = new DerangadicIncrement(new Calculator());
+        DerangadicIncrement.DerangadicState stateEven = incEven.initialState(nEven);
+        System.out.println("Starting " + maxRanks + " increment verifications for even n=" + nEven + "...");
 
-        java.util.stream.LongStream.range(0, maxRanks).forEach(rank -> {
+        for (long rank = 0; rank < maxRanks; rank++) {
             int[] expectedDigits = ALG.toDerangadic(rank, nEven);
             int[] actualDigits = stateEven.getDigits();
 
@@ -344,22 +388,22 @@ class DerangadicIncrementTest {
                         nEven, rank, Arrays.toString(expectedDigits), Arrays.toString(actualDigits)));
             }
 
-            // Validate that the produced derangement remains sound
-            int[] derangement = ALG.toDerangement(actualDigits, nEven);
+            int[] derangement = stateEven.currentDerangement();
             if (!isValidDerangement(derangement)) {
                 fail(String.format("Invalid derangement structurally broken at even n=%d rank=%d: %s",
                         nEven, rank, Arrays.toString(derangement)));
             }
 
-            INC.increment(stateEven);
-        });
+            incEven.increment(stateEven);
+        }
 
         // 2. Test Odd N (n=13)
         int nOdd = 13;
-        DerangadicIncrement.DerangadicState stateOdd = INC.initialState(nOdd);
-        System.out.println("Starting " + maxRanks + "  increment verifications for odd n=" + nOdd + "...");
+        DerangadicIncrement incOdd = new DerangadicIncrement(calculator);
+        DerangadicIncrement.DerangadicState stateOdd = incOdd.initialState(nOdd);
+        System.out.println("Starting " + maxRanks + " increment verifications for odd n=" + nOdd + "...");
 
-        java.util.stream.LongStream.range(0, maxRanks).forEach(rank -> {
+        for (long rank = 0; rank < maxRanks; rank++) {
             int[] expectedDigits = ALG.toDerangadic(rank, nOdd);
             int[] actualDigits = stateOdd.getDigits();
 
@@ -368,14 +412,14 @@ class DerangadicIncrementTest {
                         nOdd, rank, Arrays.toString(expectedDigits), Arrays.toString(actualDigits)));
             }
 
-            int[] derangement = ALG.toDerangement(actualDigits, nOdd);
+            int[] derangement = stateOdd.currentDerangement();
             if (!isValidDerangement(derangement)) {
                 fail(String.format("Invalid derangement structurally broken at odd n=%d rank=%d: %s",
                         nOdd, rank, Arrays.toString(derangement)));
             }
 
-            INC.increment(stateOdd);
-        });
+            incOdd.increment(stateOdd);
+        }
 
         System.out.println("Successfully verified " + maxRanks + " unique states!");
     }

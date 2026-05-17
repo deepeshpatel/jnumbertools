@@ -49,10 +49,9 @@ import java.util.stream.IntStream;
  *
  * <h2>Performance</h2>
  * <p>
- * {@link DerangementBuilder#lexOrder()} is backed by
- * {@link io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic.Walker
- * Derangadic.Walker}, which advances to the next derangement in roughly
- * O(log n) time, effectively independent of {@code n} for any practical rank.
+ * {@link DerangementBuilder#lexOrder()} is backed by the incremental
+ * {@link io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic#next()
+ * Derangadic.next()} successor engine.
  * </p>
  *
  * <p>This class is immutable and thread-safe. All factory methods return new

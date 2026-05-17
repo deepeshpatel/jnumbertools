@@ -5,12 +5,12 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author Deepesh Patel & Aditya Patel
  */
-@Disabled
 class DerangadicTest {
 
     private static final Calculator CALC = new Calculator();
@@ -117,8 +116,8 @@ class DerangadicTest {
         assertEquals(d1.hashCode(), d2.hashCode());
         assertNotEquals(d1, d3);
         assertNotEquals(d1, d4);
-        assertNotEquals(d1, null);
-        assertNotEquals(d1, "some string");
+        assertNotEquals(null, d1);
+        assertNotEquals("some string", d1);
 
         // Cross-factory equality: of() and fromDerangement() must agree on equality
         // even if their digit arrays differ by trailing zeros.
@@ -195,40 +194,36 @@ class DerangadicTest {
     }
 
     @Test
-    @DisplayName("Instance next() walks rank+1 and rejects past-the-end")
+    @DisplayName("Instance next() advances the same instance to rank+1 and rejects past-the-end")
     void testInstanceNext() {
         for (int n = 3; n <= 6; n++) {
             BigInteger total = Derangadic.count(n, CALC);
             Derangadic d = Derangadic.of(0, n, CALC);
             for (long r = 1; r < total.longValue(); r++) {
-                Derangadic dn = d.next();
-                assertEquals(BigInteger.valueOf(r), dn.decimalValue(),
+                Derangadic next = d.next();
+                assertSame(d, next, "next() should return the same stateful instance");
+                assertEquals(BigInteger.valueOf(r), next.decimalValue(),
                         String.format("next() rank mismatch at n=%d, r=%d", n, r));
-                assertArrayEquals(Derangadic.unrank(r, n, CALC), dn.toDerangement(),
+                assertArrayEquals(Derangadic.unrank(r, n, CALC), next.toDerangement(),
                         String.format("next() derangement mismatch at n=%d, r=%d", n, r));
-                d = dn;
             }
-            // Past the end: rank == D_n is out of range.
-            Derangadic last = d; // currently at D_n - 1
-            assertThrows(IllegalArgumentException.class, last::next);
+            assertEquals(total.subtract(BigInteger.ONE), d.decimalValue(),
+                    "Stateful instance should now be at the last rank");
+            assertThrows(NoSuchElementException.class, d::next);
         }
-        // Null-calculator semantics inherited: not applicable (next() reuses
-        // the stored engine), but a deserialized instance must throw ISE; we
-        // cannot easily simulate that here.
     }
 
     @Test
-    @DisplayName("Walker yields D_n distinct derangements in lexicographical order")
-    void testWalker() {
+    @DisplayName("Stateful next() yields D_n distinct derangements in lexicographical order")
+    void testStatefulNextSequence() {
         for (int n = 3; n <= 6; n++) {
-            Derangadic.Walker w = Derangadic.walker(n, CALC);
+            Derangadic d = Derangadic.of(0, n, CALC);
             BigInteger total = Derangadic.count(n, CALC);
 
-            // Sequence via advance() + current()
             int count = 0;
             int[] prev = null;
-            do {
-                int[] cur = w.currentCopy(); // we WILL retain → copy
+            while (true) {
+                int[] cur = d.toDerangement().clone();
                 assertTrue(isValidDerangement(cur), "invalid at n=" + n + " count=" + count);
                 if (prev != null) {
                     assertTrue(lexLess(prev, cur),
@@ -236,53 +231,37 @@ class DerangadicTest {
                 }
                 // Cross-check against static unrank
                 assertArrayEquals(Derangadic.unrank(count, n, CALC), cur,
-                        String.format("walker disagrees with unrank at n=%d rank=%d", n, count));
+                        String.format("next() disagrees with unrank at n=%d rank=%d", n, count));
                 prev = cur;
                 count++;
-            } while (w.advance());
+                try {
+                    d.next();
+                } catch (NoSuchElementException end) {
+                    break;
+                }
+            }
 
             assertEquals(total.longValue(), count,
-                    "walker yielded wrong number of derangements at n=" + n);
-            // After exhaustion, further advance must return false.
-            assertFalse(w.advance());
+                    "next() yielded wrong number of derangements at n=" + n);
+
+            assertEquals(total.subtract(BigInteger.ONE), d.decimalValue());
+            assertThrows(NoSuchElementException.class, d::next);
         }
     }
 
     @Test
-    @DisplayName("Walker.iterator() returns clones (safe to retain)")
-    void testWalkerIterator() {
+    @DisplayName("Factory can seed next() from a non-zero rank")
+    void testNextFromNonZeroRank() {
         int n = 5;
-        Derangadic.Walker w = Derangadic.walker(n, CALC);
-        java.util.List<int[]> collected = new java.util.ArrayList<>();
-        for (int[] d : w) collected.add(d);
+        for (long start = 0; start < Derangadic.count(n, CALC).longValue() - 1; start++) {
+            Derangadic d = Derangadic.of(start, n, CALC);
+            assertArrayEquals(Derangadic.unrank(start, n, CALC), d.toDerangement());
 
-        assertEquals(Derangadic.count(n, CALC).longValue(), collected.size());
-        // The retained arrays must NOT alias each other (clones, not live).
-        for (int i = 1; i < collected.size(); i++) {
-            assertNotSame(collected.get(i - 1), collected.get(i));
+            Derangadic next = d.next();
+            assertSame(d, next);
+            assertEquals(BigInteger.valueOf(start + 1), next.decimalValue());
+            assertArrayEquals(Derangadic.unrank(start + 1, n, CALC), next.toDerangement());
         }
-        // Each retained array must still equal the corresponding unrank.
-        for (int r = 0; r < collected.size(); r++) {
-            assertArrayEquals(Derangadic.unrank(r, n, CALC), collected.get(r));
-        }
-    }
-
-    @Test
-    @DisplayName("Walker.current() returns the same live array across calls")
-    void testWalkerLiveArrayIdentity() {
-        Derangadic.Walker w = Derangadic.walker(5, CALC);
-        int[] a = w.current();
-        w.advance();
-        int[] b = w.current();
-        // Live array — same backing storage, but contents updated.
-        assertSame(a, b);
-    }
-
-    @Test
-    @DisplayName("Walker rejects invalid construction")
-    void testWalkerInvalid() {
-        assertThrows(NullPointerException.class, () -> Derangadic.walker(5, null));
-        assertThrows(IllegalArgumentException.class, () -> Derangadic.walker(1, CALC));
     }
 
     @Test
@@ -306,6 +285,12 @@ class DerangadicTest {
                 .numberSystem().derangadic(0L, 4);
         assertEquals(BigInteger.ZERO, d3.decimalValue());
         assertArrayEquals(new int[]{1, 0, 3, 2}, d3.toDerangement());
+
+        int[] rankFive = io.github.deepeshpatel.jnumbertools.base.JNumberTools
+                .unrankOf().derangement(5L, 4);
+        assertArrayEquals(Derangadic.unrank(5L, 4, CALC), rankFive);
+        assertEquals(BigInteger.valueOf(5), io.github.deepeshpatel.jnumbertools.base.JNumberTools
+                .rankOf().derangement(rankFive));
     }
 
     // ==================== Utility Methods ====================

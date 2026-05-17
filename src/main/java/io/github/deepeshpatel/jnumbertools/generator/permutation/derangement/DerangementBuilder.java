@@ -30,9 +30,9 @@ import java.util.Random;
  * <h2>Generation Strategies</h2>
  * <ul>
  *   <li><b>Lexicographical Order</b> — {@link #lexOrder()}: yields all
- *       {@code D_n} derangements, backed by the high-performance
- *       {@link io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic.Walker
- *       Derangadic.Walker} (effectively O(log n) per successor).</li>
+ *       {@code D_n} derangements, backed by the high-performance incremental
+ *       {@link io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic#next()
+ *       Derangadic.next()} successor engine.</li>
  *   <li><b>Every m<sup>th</sup></b> — {@link #lexOrderMth(BigInteger, BigInteger)}:
  *       yields derangements at ranks {@code start, start+m, start+2m, …}.</li>
  *   <li><b>By explicit ranks</b> — {@link #byRanks(Iterable)}.</li>
