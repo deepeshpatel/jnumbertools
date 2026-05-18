@@ -423,4 +423,90 @@ class DerangadicIncrementTest {
 
         System.out.println("Successfully verified " + maxRanks + " unique states!");
     }
+
+    @Test
+    @DisplayName("Three-level API: incrementEncoded + encodedToDerangement works correctly")
+    void testThreeLevelApi() {
+        int n = 6;
+        DerangadicIncrement inc = new DerangadicIncrement(new Calculator());
+        DerangadicIncrement.DerangadicState state = inc.initialState(n);
+
+        for (long rank = 0; rank < 265; rank++) {
+            // Get derangement via encodedToDerangement (should be current)
+            int[] derFromEncoded = inc.encodedToDerangement(state);
+            int[] expected = ALG.unrank(rank, n);
+            assertArrayEquals(expected, derFromEncoded,
+                    "encodedToDerangement should return current derangement at rank " + rank);
+
+            // Advance using incrementEncoded (not increment)
+            if (rank < 264) {
+                assertTrue(inc.incrementEncoded(state),
+                        "incrementEncoded should succeed at rank " + rank);
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("increment() and incrementEncoded() produce identical results")
+    void testIncrementAndIncrementEncodedAreEquivalent() {
+        int n = 6;
+        DerangadicIncrement inc1 = new DerangadicIncrement(new Calculator());
+        DerangadicIncrement.DerangadicState state1 = inc1.initialState(n);
+
+        DerangadicIncrement inc2 = new DerangadicIncrement(new Calculator());
+        DerangadicIncrement.DerangadicState state2 = inc2.initialState(n);
+
+        for (int i = 0; i < 100; i++) {
+            assertArrayEquals(state1.getDigits(), state2.getDigits(),
+                    "States should be equal before increment");
+            assertArrayEquals(state1.currentDerangement(), state2.currentDerangement(),
+                    "Derangements should be equal before increment");
+
+            inc1.increment(state1);
+            inc2.incrementEncoded(state2);
+
+            assertArrayEquals(state1.getDigits(), state2.getDigits(),
+                    "Digits should be equal after increment " + i);
+            assertArrayEquals(state1.currentDerangement(), state2.currentDerangement(),
+                    "Derangements should be equal after increment " + i);
+        }
+    }
+
+    @Test
+    @DisplayName("encodedToDerangement returns the live array (same reference)")
+    void testEncodedToDerangementReturnsLiveArray() {
+        int n = 6;
+        DerangadicIncrement inc = new DerangadicIncrement(new Calculator());
+        DerangadicIncrement.DerangadicState state = inc.initialState(n);
+
+        int[] der1 = inc.encodedToDerangement(state);
+        int[] der2 = inc.encodedToDerangement(state);
+
+        assertSame(der1, der2, "encodedToDerangement should return the same array reference");
+        assertSame(state.currentDerangement(), der1,
+                "Should match state.currentDerangement()");
+    }
+
+    @Test
+    @DisplayName("incrementEncoded keeps derangement current without calling encodedToDerangement")
+    void testIncrementEncodedKeepsDerangementCurrent() {
+        int n = 6;
+        DerangadicIncrement inc = new DerangadicIncrement(new Calculator());
+        DerangadicIncrement.DerangadicState state = inc.initialState(n);
+
+        for (long rank = 0; rank < 100; rank++) {
+            int[] derBefore = state.currentDerangement().clone();
+            int[] expected = ALG.unrank(rank, n);
+            assertArrayEquals(expected, derBefore, "Derangement at rank " + rank);
+
+            if (rank < 99) {
+                inc.incrementEncoded(state);
+                // derAfter should be rank+1 without calling encodedToDerangement
+                int[] derAfter = state.currentDerangement();
+                int[] expectedNext = ALG.unrank(rank + 1, n);
+                assertArrayEquals(expectedNext, derAfter,
+                        "incrementEncoded should update derangement to rank " + (rank + 1));
+            }
+        }
+    }
 }
