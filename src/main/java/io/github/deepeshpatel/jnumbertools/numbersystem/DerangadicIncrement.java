@@ -458,6 +458,41 @@ public final class DerangadicIncrement {
         return 0;
     }
 
+    /**
+     * Advances the state and returns the carry length (number of digits modified).
+     * @return carry length (>0) if successful, 0 if enumeration is complete.
+     */
+    public int incrementAndGetCarryLength(DerangadicState state) {
+        int actualN = state.actualN;
+
+        // Scan from index 1 (LSD at index 0 never carries)
+        int p = -1;
+        for (int i = 1; i < actualN; i++) {
+            if (state.digits[i] < state.maxDigit[i]) {
+                p = i;
+                break;
+            }
+        }
+
+        if (p != -1) {
+            state.digits[p]++;
+            rollbackAndRebuild(state, actualN - 1 - p);
+            return p + 1; // Carry length = pivot index + 1
+        }
+
+        // All digits maximal: cross parity-band boundary
+        if (actualN < state.n) {
+            int newActualN = actualN + 2;
+            BigInteger firstRank = calculator.subFactorial(actualN);
+            int[] firstDigits = alg.toDerangadic(firstRank, state.n);
+            state.resizeActualN(newActualN, firstDigits);
+            rebuildAllFromDigits(state);
+            return newActualN; // Expansion counts as full-length carry
+        }
+
+        return 0; // Enumeration complete
+    }
+
     // =========================================================================
     // Inner state class — package-private
     // =========================================================================
