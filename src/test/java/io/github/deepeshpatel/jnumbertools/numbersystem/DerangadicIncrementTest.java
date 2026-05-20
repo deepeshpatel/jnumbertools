@@ -18,7 +18,7 @@ import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static io.github.deepeshpatel.jnumbertools.numbersystem.DerangadicAlgorithmsTest.isValidDerangement;
 import static org.junit.jupiter.api.Assertions.*;
 
-class DerangadicIncrementTest {
+public class DerangadicIncrementTest {
 
     private static final DerangadicAlgorithms ALG = new DerangadicAlgorithms();
 
