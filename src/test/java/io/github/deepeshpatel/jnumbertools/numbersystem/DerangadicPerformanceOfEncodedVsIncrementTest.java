@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>This test is disabled by default. Enable with -Dstress.testing=true</p>
  */
 @Disabled
-public class TestPerformanceOfEncodedToDErangement {
+public class DerangadicPerformanceOfEncodedVsIncrementTest {
 
     private static final Calculator CALC = new Calculator();
     private static final DerangadicAlgorithms ALG = new DerangadicAlgorithms(CALC);
