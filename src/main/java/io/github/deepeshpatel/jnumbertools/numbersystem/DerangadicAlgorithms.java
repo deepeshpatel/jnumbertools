@@ -11,52 +11,78 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * Derangadic Number System for Derangements.
+ * Algorithms for the Derangadic Number System.
  * <p>
- * A combinatorial number system for fixed-point-free permutations (derangements).
- * Provides a bijective mapping between integers {@code [0, D_n - 1]} and derangements
- * of {@code n} elements in lexicographical order, where {@code D_n} is the number
- * of derangements (subfactorial !n).
- * </p>
+ * The Derangadic system establishes a canonical bijection between ranks {@code [0, !n - 1]}
+ * and lexicographically ordered derangements of {@code n} elements, where {@code !n} is the
+ * subfactorial (number of derangements). Unlike the Factoradic system, Derangadic intrinsically
+ * enforces the fixed-point-free constraint ({@code π(i) ≠ i}) through dynamic restricted
+ * derangement counts.
  * <p>
- * The name "Derangadic" combines "Derangement" with "Combinadic" (combinatorial number system).
- * </p>
- *
- * <h3>Digit Array Representation and Trailing Zeros</h3>
- * <p>
- * The implementation uses variable-length encoding where the returned digit array has
- * length equal to the minimal effective size (actualN). This is the smallest number
- * with the same parity as {@code n} such that {@code D_actualN > rank}.
- * </p>
- * <p>
- * <strong>Important:</strong> Trailing zeros are preserved in the digit array to maintain
- * consistent length based on the minimal effective size calculation. When comparing
- * digit arrays for equality, trailing zeros should be ignored as they don't affect
- * the rank value. Use {@code arraysEqualIgnoringTrailingZeros()} for comparison.
- * </p>
- *
- * <h3>Example: n=4, D₄=9</h3>
- * <p>
- * For n=4, the minimal effective size (actualN) varies by rank:
- * </p>
+ * <b>Mathematical Definition:</b>
+ * A rank {@code r < !n} is represented as a mixed-radix expansion:
  * <pre>
- * Rank 0 → actualN = 2 → digits [0, 0]           → derangement [1, 0, 3, 2]
- * Rank 1 → actualN = 4 → digits [0, 1, 1, 0]     → derangement [1, 2, 3, 0]
- * Rank 2 → actualN = 4 → digits [0, 0, 2, 0]     → derangement [1, 3, 0, 2]
- * Rank 3 → actualN = 4 → digits [0, 2, 1, 0]     → derangement [2, 0, 3, 1]
- * Rank 4 → actualN = 4 → digits [0, 2, 3, 1]     → derangement [2, 3, 0, 1]
- * Rank 5 → actualN = 4 → digits [1, 0, 1, 0]     → derangement [2, 3, 1, 0]
- * Rank 6 → actualN = 4 → digits [1, 0, 2, 1]     → derangement [3, 0, 1, 2]
- * Rank 7 → actualN = 4 → digits [1, 1, 1, 0]     → derangement [3, 2, 0, 1]
- * Rank 8 → actualN = 4 → digits [0, 1, 1, 2]     → derangement [3, 2, 1, 0]
+ *   r = Σ_{s=0}^{k-1} D_s · B_s
+ * </pre>
+ * where {@code k = actualN(n,r)} is the minimal active length with {@code k ≡ n (mod 2)} and
+ * {@code !k > r}, {@code D_s} are digits satisfying {@code 0 ≤ D_s ≤ maxDigit(s)}, and
+ * {@code B_s = RD(remaining-1, nextRestricted)} are block sizes computed via restricted
+ * derangement counts.
+ * <p>
+ * <b>Restricted Derangements:</b>
+ * {@code RD(m, r)} denotes permutations of {@code m} elements avoiding fixed points at
+ * {@code r} specified positions:
+ * <pre>
+ *   RD(m, r) = Σ_{j=0}^{r} (-1)^j · C(r, j) · (m - j)!
  * </pre>
  * <p>
- * Note that trailing zeros are preserved (e.g., rank 1 has {@code [0,1,1,0]} not {@code [0,1,1]}).
- * When comparing digits, {@code [0,1,1,0]} is considered equal to {@code [0,1,1]} since
- * trailing zeros don't affect the rank value.
- * </p>
+ * <b>Key Structural Invariants:</b>
+ * <ul>
+ *   <li><b>LSD is always 0:</b> {@code digits[0]} (least-significant digit) is strictly 0 for all valid encodings.
+ *       This follows from the derangement constraint forcing a unique completion when only two positions remain.</li>
+ *   <li><b>Parity-Locked Stabilisation:</b> Active length {@code actualN} preserves the parity of {@code n}.
+ *       Encodings depend only on rank and parity, not on the global universe size.</li>
+ *   <li><b>Dead-End Avoidance:</b> When exactly two positions remain, candidates that would force the final element
+ *       to map to its own index are skipped, effectively shifting {@code minDigit} by +1 for that step.</li>
+ *   <li><b>Dynamic Restricted Count:</b> {@code c_s} is recomputed at each step by counting unfilled positions
+ *       {@code j ≥ s} where element {@code j} is still unused.</li>
+ * </ul>
+ * <p>
+ * <b>Digit Array Convention:</b>
+ * <ul>
+ *   <li>Arrays are stored <strong>LSD-first</strong> in the implementation: {@code digits[0]} = {@code D_0}
+ *       (least significant), {@code digits[k-1]} = {@code D_{k-1}} (most significant).</li>
+ *   <li>For display/paper notation, digits are shown <strong>MSD-first</strong>: {@code [D_{k-1}, ..., D_0]}.</li>
+ *   <li>Length equals {@code actualN} (minimal carrier length), not necessarily {@code n}.</li>
+ *   <li>Trailing zeros beyond the last non-zero digit do not affect the rank value.</li>
+ * </ul>
+ * <p>
+ * <b>Example (n=4, !4=9):</b>
+ * <pre>
+ *   Rank 0 → digits [0, 0] (actualN=2) → derangement [1, 0, 3, 2]
+ *   Rank 1 → digits [0, 1, 1, 0] (actualN=4) → derangement [1, 2, 3, 0]
+ *   Rank 2 → digits [0, 2, 0, 0] (actualN=4) → derangement [1, 3, 0, 2]
+ *   Rank 3 → digits [1, 0, 1, 0] (actualN=4) → derangement [2, 0, 3, 1]
+ *   Rank 4 → digits [1, 1, 0, 0] (actualN=4) → derangement [2, 3, 0, 1]
+ *   Rank 5 → digits [1, 1, 1, 0] (actualN=4) → derangement [2, 3, 1, 0]
+ *   Rank 6 → digits [2, 0, 0, 0] (actualN=4) → derangement [3, 0, 1, 2]
+ *   Rank 7 → digits [2, 1, 0, 0] (actualN=4) → derangement [3, 2, 0, 1]
+ *   Rank 8 → digits [2, 1, 1, 0] (actualN=4) → derangement [3, 2, 1, 0]
+ * </pre>
+ * <p>
+ * <b>Relationship to Other Systems:</b>
+ * <ul>
+ *   <li><b>Factoradic:</b> The unrestricted limit of Derangadic when restricted count {@code c_s = 0} at all steps,
+ *       collapsing {@code RD(m,0) = m!} and recovering factorial place values.</li>
+ *   <li><b>Permutadic:</b> Derangadic encodes permutations with zero fixed points; Permutadic encodes
+ *       k-permutations of s elements with degree {@code d = s - k}.</li>
+ * </ul>
  *
  * @author Deepesh Patel & Aditya Patel
+ * @version 3.0.2
+ * @see <a href="https://ssrn.com/abstract=4174035">Derangadic: A Combinatorial Number System for Derangements</a>
+ * @see FactoradicAlgorithms
+ * @see DerangadicIncrement
  * @since 3.0.2
  */
 public final class DerangadicAlgorithms {
@@ -78,10 +104,11 @@ public final class DerangadicAlgorithms {
     // ==================== Core Public API ====================
 
     /**
-     * Returns the number of derangements for {@code n} elements.
+     * Returns the number of derangements of {@code n} elements (subfactorial {@code !n}).
      *
-     * @param n number of elements
-     * @return !n (subfactorial of n)
+     * @param n number of elements ({@code n ≥ 0})
+     * @return {@code !n}, the count of fixed-point-free permutations
+     * @implNote Delegates to {@link Calculator#subFactorial(int)}
      */
     public BigInteger derangementCount(int n) {
         return calculator.subFactorial(n);
@@ -103,29 +130,49 @@ public final class DerangadicAlgorithms {
     }
 
     /**
-     * Converts a decimal rank to Derangadic digits (variable-length array).
+     * Encodes a rank into its Derangadic digit representation.
      * <p>
-     * The returned array has length equal to the minimal effective size
-     * (the smallest number with same parity as {@code n} where {@code D_len > rank}).
-     * Missing positions (the first {@code n - actualN} positions) are implicitly zero.
-     * </p>
+     * <b>Algorithm:</b>
+     * <ol>
+     *   <li>Compute {@code k = actualN(n, rank)}</li>
+     *   <li>For each position {@code s = 0..k-1} (MSD to LSD):
+     *     <ul>
+     *       <li>Recompute restricted count {@code c_s} dynamically by counting unfilled positions j ≥ s where element j is unused</li>
+     *       <li>Iterate legal candidates, compute block sizes via {@code RD(remaining-1, nextRestricted)}</li>
+     *       <li>Select candidate whose cumulative block covers current remainder</li>
+     *       <li>Handle dead-end avoidance when {@code remaining == 2}</li>
+     *     </ul>
+     *   </li>
+     *   <li>Store digits LSD-first ({@code digits[0]} = last position)</li>
+     * </ol>
+     * <p>
+     * <b>Digit Ordering:</b> Result array is LSD-first: {@code result[0]} = {@code D_0} (least significant).
+     * <p>
+     * <b>Complexity:</b> O(k²) where {@code k = actualN}, due to dynamic restricted count recomputation.
      *
-     * @param m decimal rank (0 ≤ m < D_n)
-     * @param n order (number of elements)
-     * @return Derangadic digit array of length actualN (≤ n)
-     * @throws IllegalArgumentException if {@code m} is out of range
+     * @param rank the rank to encode ({@code 0 ≤ rank < !n})
+     * @param n    universe size ({@code n ≥ 2})
+     * @return Derangadic digit array in LSD-first order, length = {@code actualN}
+     * @throws IllegalArgumentException if {@code rank} out of bounds or {@code n < 2}
+     *
+     * @apiNote
+     * <ul>
+     *   <li>{@code digits[0]} is guaranteed to be 0 (LSD Invariant)</li>
+     *   <li>Max digit at step {@code s}: {@code max = unused - 1} if position {@code s} is available, else {@code unused}</li>
+     *   <li>Dead-end avoidance skips candidates that would force a fixed point when {@code remaining == 2}</li>
+     * </ul>
      */
-    public int[] toDerangadic(BigInteger m, int n) {
+    public int[] toDerangadic(BigInteger rank, int n) {
         BigInteger max = derangementCount(n);
-        if (m.signum() < 0 || m.compareTo(max) >= 0) {
+        if (rank.signum() < 0 || rank.compareTo(max) >= 0) {
             throw new IllegalArgumentException("m out of range");
         }
 
-        int actualN = smallestN(n, m);
+        int actualN = smallestN(n, rank);
         int[] digits = new int[actualN];
 
         boolean[] elementUsed = new boolean[actualN];
-        BigInteger currentM = m;
+        BigInteger currentM = rank;
 
         for (int step = 0; step < actualN; step++) {
             int remainingSize = actualN - step;
@@ -176,25 +223,32 @@ public final class DerangadicAlgorithms {
     }
 
     /**
-     * Converts a decimal rank to Derangadic digits (long version).
-     * @param m decimal rank (0 ≤ m < D_n)
-     * @param n order
-     * @return Derangadic digit array
+     * Convenience overload for long ranks.
+     *
+     * @param rank the rank to encode ({@code 0 ≤ rank < !n})
+     * @param n    universe size ({@code n ≥ 2})
+     * @return Derangadic digit array in LSD-first order
+     * @see #toDerangadic(BigInteger, int)
      */
-    public int[] toDerangadic(long m, int n) {
-        return toDerangadic(BigInteger.valueOf(m), n);
+    public int[] toDerangadic(long rank, int n) {
+        return toDerangadic(BigInteger.valueOf(rank), n);
     }
 
 
     /**
-     * Converts variable-length Derangadic digits back to decimal rank.
+     * Decodes a Derangadic digit tuple back to its decimal rank.
      * <p>
-     * The input array is treated as having implicit zeros padded at the end.
-     * </p>
+     * Computes {@code rank = Σ D_i · B_i} where {@code B_i} are block sizes at each step.
+     * Uses the same dynamic restricted count logic as {@link #toDerangadic}.
+     * <p>
+     * <b>Digit Ordering:</b> Input array is LSD-first: {@code digits[0]} = {@code D_0}.
+     * <p>
+     * <b>Complexity:</b> O(k²) where {@code k = digits.length}.
      *
-     * @param digits Derangadic digit array (length = actualN)
-     * @param n full order
-     * @return decimal rank
+     * @param digits Derangadic digits in LSD-first order
+     * @param n      universe size ({@code n ≥ digits.length})
+     * @return the decoded rank as {@link BigInteger}
+     * @throws IllegalArgumentException if any digit violates constraints
      */
     public BigInteger fromDerangadic(int[] digits, int n) {
         ZeroPaddedList allDigits = new ZeroPaddedList(digits, n);
@@ -244,20 +298,28 @@ public final class DerangadicAlgorithms {
     }
 
     /**
-     * Converts variable-length Derangadic digits to a derangement.
+     * Converts Derangadic digits (LSD-first) to a full derangement array.
      * <p>
-     * The input array is treated as having implicit zeros padded at the end.
-     * </p>
+     * Handles the greedy prefix for positions {@code 0..(n-k-1)} and uses digits
+     * to select elements for the active window {@code [n-k..n-1]}.
+     * <p>
+     * The active window operates on the set of elements that were NOT used in the prefix.
+     * We maintain a mapping: active index {@code c ∈ [0..k-1]} → global element {@code elem ∈ [0..n-1]}.
+     * <p>
+     * <b>Implementation Dispatch:</b> Uses array-based method for {@code n < 100}, Fenwick-tree for larger.
+     * <p>
+     * <b>Complexity:</b> O(n²) array-based, O(n + k log n) Fenwick-based.
      *
-     * @param digits Derangadic digit array (length = actualN)
-     * @param n full order
-     * @return derangement array of length n
+     * @param digits Derangadic digits in LSD-first order, length = {@code actualN}
+     * @param n      universe size
+     * @return derangement array of length {@code n}
+     * @throws IllegalArgumentException if {@code digits.length > n}
      */
     public int[] toDerangement(int[] digits, int n) {
         if (n < N_THRESHOLD || digits.length < DIGIT_THRESHOLD) {
             return toDerangementArray(digits, n);
         }
-
+//some how fixed values of N_THRESHOLD and DIGIT_THRESHOLD provided better optimization than math below
 //        long arrayComplexity = (long) n * digits.length;
 //        long fenwickComplexity = (long) digits.length * (long)(Math.log(n) / Math.log(2));
 //
@@ -398,16 +460,21 @@ public final class DerangadicAlgorithms {
         return chosen;
     }
 
+
     /**
-     * Converts a derangement back to variable-length Derangadic digits.
+     * Converts a derangement back to its Derangadic digit representation.
      * <p>
-     * Returns the minimal encoding by computing the full digit array and
-     * trimming trailing zeros.
-     * </p>
+     * Computes digits directly in a single O(n) pass by simulating the encoding process.
+     * Returns the minimal-length array with trailing zeros trimmed.
+     * <p>
+     * <b>Optimization:</b> Does NOT compute rank first or delegate to toDerangadic.
+     * Generates digits on-the-fly using identical candidate selection & dead-end logic.
+     * <p>
+     * <b>Complexity:</b> O(n²) due to dynamic restricted count recomputation.
      *
-     * @param derangement derangement array (full size n). Does not validate correctness
-     * @param n order
-     * @return Derangadic digit array of minimal length
+     * @param derangement derangement array of length {@code n}
+     * @param n           order (must equal {@code derangement.length})
+     * @return Derangadic digit array of minimal length (LSD-first)
      * @throws IllegalArgumentException if {@code derangement} is not a valid derangement
      */
     public int[] fromDerangement(int[] derangement, int n) {
@@ -454,17 +521,24 @@ public final class DerangadicAlgorithms {
     }
 
     /**
-     * Direct conversion: rank → derangement (without intermediate digits).
-     *
-     * @param rank the 0-based lexicographical rank (0 ≤ rank < D_n)
-     * @param n the order (number of elements)
-     * @return the derangement as an array of length n
-     * @throws IllegalArgumentException if rank is out of range
+     * @see #unrank(long, int)
      */
     public int[] unrank(BigInteger rank, int n) {
         int[] digits = toDerangadic(rank, n);
         return toDerangement(digits, n);
     }
+
+    /**
+     * Direct conversion: rank → derangement (without intermediate digits).
+     * <p>
+     * Equivalent to {@code toDerangement(toDerangadic(rank, n), n)}.
+     *
+     * @param rank the 0-based lexicographical rank ({@code 0 ≤ rank < !n})
+     * @param n    order
+     * @return derangement array of length {@code n}
+     * @throws IllegalArgumentException if rank is out of range
+     */
+
 
     public int[] unrank(long rank, int n) {
         int[] digits = toDerangadic(rank, n);
@@ -473,10 +547,12 @@ public final class DerangadicAlgorithms {
 
     /**
      * Direct conversion: derangement → rank (without intermediate digits).
+     * <p>
+     * Equivalent to {@code fromDerangadic(fromDerangement(derangement, n), n)}.
      *
-     * @param derangement the derangement array (full size n, no fixed points)
-     * @param n the order (number of elements)
-     * @return the 0-based lexicographical rank of the derangement
+     * @param derangement derangement array of length {@code n}
+     * @param n           order
+     * @return the 0-based lexicographical rank
      * @throws IllegalArgumentException if derangement is not a valid derangement
      */
     public BigInteger rank(int[] derangement, int n) {
@@ -494,18 +570,18 @@ public final class DerangadicAlgorithms {
     }
 
     /**
-         * A list view that pads zeros at the end for indices beyond the backing array.
-         */
-        private record ZeroPaddedList(int[] digits, int n) {
+     *  A list view that pads zeros at the end for indices beyond the backing array.
+     */
+    private record ZeroPaddedList(int[] digits, int n) {
 
-        public int get(int index) {
-                if (index < 0 || index >= n) {
-                    throw new IndexOutOfBoundsException("Index: " + index);
-                }
-                if (index < digits.length) {
-                    return digits[index];
-                }
-                return 0;
+    public int get(int index) {
+            if (index < 0 || index >= n) {
+                throw new IndexOutOfBoundsException("Index: " + index);
             }
+            if (index < digits.length) {
+                return digits[index];
+            }
+            return 0;
         }
+    }
 }
