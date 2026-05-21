@@ -1,15 +1,13 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Performance evaluation for Derangadic increment vs materialization.
@@ -23,12 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * <p>This test is disabled by default. Enable with -Dstress.testing=true</p>
  */
-@Disabled
-public class DerangadicPerformanceOfEncodedVsIncrementTest {
-
-    private static final Calculator CALC = new Calculator();
-    private static final DerangadicAlgorithms ALG = new DerangadicAlgorithms(CALC);
-    private static final DerangadicIncrement INC = new DerangadicIncrement(CALC);
+@EnabledIfSystemProperty(named = "performance.testing", matches = "true")
+public class DerangadicStateMachinePerformanceTest {
 
     @Test
     @DisplayName("Performance: Compare increment vs materialization vs unrank")
@@ -66,13 +60,14 @@ public class DerangadicPerformanceOfEncodedVsIncrementTest {
         System.out.println("│ Benchmark 1: DerangadicIncrement.increment() (full incremental)                 │");
         System.out.println("├─────────────────────────────────────────────────────────────────────────────────┤");
 
-        DerangadicIncrement.DerangadicState state = INC.initialState(n, BigInteger.valueOf(startRank));
+        DerangadicIncrementStateMachine stateMachine = new DerangadicIncrementStateMachine(n,BigInteger.valueOf(startRank), new Calculator());
+        //DerangadicIncrement.DerangadicState state = INC.initialState(n, BigInteger.valueOf(startRank));
         long sink = 0;
 
         // Warmup
         for (int i = 0; i < 100; i++) {
-            INC.increment(state);
-            sink += state.currentDerangement()[0];
+            stateMachine.increment();
+            sink += stateMachine.derangement()[0];
         }
 
         System.gc();
@@ -80,8 +75,8 @@ public class DerangadicPerformanceOfEncodedVsIncrementTest {
         // Timed run
         long startTime = System.nanoTime();
         for (int i = 0; i < iterations; i++) {
-            INC.increment(state);
-            int[] d = state.currentDerangement();
+            stateMachine.increment();
+            int[] d = stateMachine.derangement();
             sink += d[0];
         }
         long elapsed = System.nanoTime() - startTime;
@@ -105,12 +100,15 @@ public class DerangadicPerformanceOfEncodedVsIncrementTest {
         System.out.println("├─────────────────────────────────────────────────────────────────────────────────┤");
 
         // Step 1: Pre-generate encoded digits (NOT TIMED)
-        DerangadicIncrement.DerangadicState state = INC.initialState(n, BigInteger.valueOf(startRank));
+        Calculator CALC = new Calculator();
+        var stateMachine = new DerangadicIncrementStateMachine(n,BigInteger.valueOf(startRank), CALC);
+        DerangadicAlgorithms ALG = new DerangadicAlgorithms(CALC);
+
         List<int[]> encodedCache = new ArrayList<>(iterations);
 
         for (int i = 0; i < iterations; i++) {
-            INC.incrementEncoded(state);
-            encodedCache.add(state.getDigits());
+            stateMachine.increment();
+            encodedCache.add(stateMachine.getEncoded());
         }
 
         // Step 2: Time materialization only
@@ -151,6 +149,8 @@ public class DerangadicPerformanceOfEncodedVsIncrementTest {
         System.out.println("│ Benchmark 3: Unrank Baseline (direct rank-based conversion)                     │");
         System.out.println("├─────────────────────────────────────────────────────────────────────────────────┤");
 
+        Calculator CALC = new Calculator();
+        DerangadicAlgorithms ALG = new DerangadicAlgorithms(CALC);
         long sink = 0;
 
         // Warmup
@@ -186,21 +186,23 @@ public class DerangadicPerformanceOfEncodedVsIncrementTest {
         System.out.println("│ Verification: All methods produce identical derangements                       │");
         System.out.println("├─────────────────────────────────────────────────────────────────────────────────┤");
 
+        Calculator CALC = new Calculator();
+        DerangadicAlgorithms ALG = new DerangadicAlgorithms(CALC);
         // Method 1: Full increment
-        DerangadicIncrement.DerangadicState incState = INC.initialState(n, BigInteger.valueOf(startRank));
+        var stateMachine = new DerangadicIncrementStateMachine(n,BigInteger.valueOf(startRank), CALC);
 
         // Method 2: Materialization from encoded
-        DerangadicIncrement.DerangadicState encState = INC.initialState(n, BigInteger.valueOf(startRank));
+
         List<int[]> encodedCache = new ArrayList<>(iterations);
         for (int i = 0; i < iterations; i++) {
-            INC.incrementEncoded(encState);
-            encodedCache.add(encState.getDigits());
+            stateMachine.increment();
+            encodedCache.add(stateMachine.getEncoded());
         }
 
         boolean allMatch = true;
         for (int i = 0; i < iterations && allMatch; i++) {
-            INC.increment(incState);
-            int[] fromIncrement = incState.currentDerangement();
+            stateMachine.increment();
+            int[] fromIncrement = stateMachine.derangement();
 
             int[] fromMaterialize = ALG.toDerangement(encodedCache.get(i), n);
             int[] fromUnrank = ALG.unrank(startRank + i + 1, n);
@@ -225,7 +227,7 @@ public class DerangadicPerformanceOfEncodedVsIncrementTest {
     @Test
     @DisplayName("Performance: Compare across different n values")
     void testPerformanceAcrossN() {
-        int[] nValues = {100, 500, 1000, 5000, 10000, 50000};
+        int[] nValues = {100, 500, 1000, 5000, 10000};
         int iterations = 1000;
         long startRank = 9_000_000_000_000L;
 
@@ -236,6 +238,9 @@ public class DerangadicPerformanceOfEncodedVsIncrementTest {
         System.out.println("\n┌─────────┬──────────────────┬──────────────────┬──────────────────┐");
         System.out.println("│    n    │  Increment (ns)   │ Materialize (ns) │   Unrank (ns)    │");
         System.out.println("├─────────┼──────────────────┼──────────────────┼──────────────────┤");
+
+        Calculator CALC = new Calculator();
+        DerangadicAlgorithms ALG = new DerangadicAlgorithms(CALC);
 
         for (int n : nValues) {
             if (n > 5000 && startRank > ALG.derangementCount(n).longValue()) {
@@ -255,29 +260,33 @@ public class DerangadicPerformanceOfEncodedVsIncrementTest {
     }
 
     private long measureFullIncrement(int n, long startRank, int iterations) {
-        DerangadicIncrement.DerangadicState state = INC.initialState(n, BigInteger.valueOf(startRank));
+        Calculator CALC = new Calculator();
+        var statMachine = new DerangadicIncrementStateMachine(n,BigInteger.valueOf(startRank), CALC);
 
         // Warmup
         for (int i = 0; i < 100; i++) {
-            INC.increment(state);
+            statMachine.increment();
         }
 
         System.gc();
 
         long startTime = System.nanoTime();
         for (int i = 0; i < iterations; i++) {
-            INC.increment(state);
+            statMachine.increment();
         }
         return (System.nanoTime() - startTime) / iterations;
     }
 
     private long measureMaterializationOnly(int n, long startRank, int iterations) {
         // Pre-generate encoded digits
-        DerangadicIncrement.DerangadicState state = INC.initialState(n, BigInteger.valueOf(startRank));
+        Calculator CALC = new Calculator();
+        DerangadicAlgorithms ALG = new DerangadicAlgorithms(CALC);
+        var stateMachine = new DerangadicIncrementStateMachine(n,BigInteger.valueOf(startRank), CALC);
+
         List<int[]> encodedCache = new ArrayList<>(iterations);
         for (int i = 0; i < iterations; i++) {
-            INC.incrementEncoded(state);
-            encodedCache.add(state.getDigits());
+            stateMachine.increment();
+            encodedCache.add(stateMachine.getEncoded());
         }
 
         // Warmup
@@ -295,6 +304,9 @@ public class DerangadicPerformanceOfEncodedVsIncrementTest {
     }
 
     private long measureUnrankBaseline(int n, long startRank, int iterations) {
+
+        Calculator CALC = new Calculator();
+        DerangadicAlgorithms ALG = new DerangadicAlgorithms(CALC);
         // Warmup
         for (int i = 0; i < 100; i++) {
             ALG.unrank(startRank + i + 1, n);

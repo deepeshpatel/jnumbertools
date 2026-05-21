@@ -96,8 +96,8 @@ public final class DerangementByRanks<T> extends AbstractGenerator<T> {
                 return Collections.emptyList();
             }
             // n >= 2 here: n=1 has total=0 so the rank check above always rejects.
-            int[] indices = Derangadic.unrank(rank, n, calculator);
-            return indicesToValues(indices);
+            var derangadic = new Derangadic(n, rank, calculator);
+            return indicesToValues(derangadic.derangement());
         }
     }
 }

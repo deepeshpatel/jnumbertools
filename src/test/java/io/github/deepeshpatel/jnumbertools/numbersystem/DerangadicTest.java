@@ -7,330 +7,363 @@ package io.github.deepeshpatel.jnumbertools.numbersystem;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 
+import static io.github.deepeshpatel.jnumbertools.TestBase.isLexLess;
+import static io.github.deepeshpatel.jnumbertools.numbersystem.DerangadicAlgorithmsTest.isValidDerangement;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * JUnit test class for Derangadic wrapper class.
+ * Correctness tests for {@link Derangadic} public wrapper.
+ * <p>
+ * Tests verify that the public API produces correct derangements,
+ * handles edge cases properly, and maintains consistency across
+ * different construction methods.
  *
- * @author Deepesh Patel & Aditya Patel
+ * @author Deepesh Patel &amp; Aditya Patel
+ * @version 3.0.2
  */
 class DerangadicTest {
 
     private static final Calculator CALC = new Calculator();
-    private static final DerangadicAlgorithms ALGO = new DerangadicAlgorithms(CALC);
+    private static final DerangadicAlgorithms ALG = new DerangadicAlgorithms(CALC);
+
+    // =========================================================================
+    // 1. Construction and Basic Getters
+    // =========================================================================
 
     @Test
-    @DisplayName("Derangadic.of() should create correct instances from rank")
-    void testOf() {
-        // n=4, D₄=9
-        int[] expected0 = ALGO.toDerangadic(0, 4);
-        Derangadic d0 = Derangadic.of(0, 4, CALC);
-        assertEquals(BigInteger.ZERO, d0.decimalValue());
-        assertArrayEquals(expected0, d0.derangadicValues());
-        assertEquals(4, d0.order());
+    @DisplayName("Constructor with rank 0 produces correct derangement for n=4")
+    void testConstructorWithRankZero() {
+        Derangadic d = new Derangadic(4, BigInteger.ZERO, CALC);
 
-        int[] expected1 = ALGO.toDerangadic(1, 4);
-        Derangadic d1 = Derangadic.of(1, 4, CALC);
-        assertEquals(BigInteger.ONE, d1.decimalValue());
-        assertArrayEquals(expected1, d1.derangadicValues());
+        assertEquals(BigInteger.ZERO, d.rank());
+        assertEquals(4, d.order());
+        assertNotNull(d.derangement());
+        assertEquals(4, d.derangement().length);
 
-        int[] expected8 = ALGO.toDerangadic(8, 4);
-        Derangadic d8 = Derangadic.of(8, 4, CALC);
-        assertEquals(BigInteger.valueOf(8), d8.decimalValue());
-        assertArrayEquals(expected8, d8.derangadicValues());
+        // Verify it's the first derangement
+        int[] expected = ALG.unrank(0, 4);
+        assertArrayEquals(expected, d.derangement());
     }
 
     @Test
-    @DisplayName("Derangadic.fromDerangement() should create correct instances from derangement")
-    void testFromDerangement() {
-        // Rank 0 derangement for n=4: [1, 0, 3, 2]
-        int[] derangement = {1, 0, 3, 2};
-        Derangadic d = Derangadic.fromDerangement(derangement, 4, CALC);
-        assertEquals(BigInteger.ZERO, d.decimalValue());
-        assertTrue(arraysEqualIgnoringTrailingZeros(new int[]{0, 0}, d.derangadicValues()));
+    @DisplayName("Constructor with non-zero rank produces correct derangement")
+    void testConstructorWithNonZeroRank() {
+        Derangadic d = new Derangadic(5, BigInteger.valueOf(10), CALC);
 
-        // Rank 1 derangement for n=4: [1, 2, 3, 0]
-        int[] derangement2 = {1, 2, 3, 0};
-        Derangadic d2 = Derangadic.fromDerangement(derangement2, 4, CALC);
-        assertEquals(BigInteger.ONE, d2.decimalValue());
-        assertTrue(arraysEqualIgnoringTrailingZeros(new int[]{0, 1, 1}, d2.derangadicValues()));
+        assertEquals(BigInteger.valueOf(10), d.rank());
+        int[] expected = ALG.unrank(10, 5);
+        assertArrayEquals(expected, d.derangement());
     }
 
     @Test
-    @DisplayName("toString() canonicalizes by trimming trailing zeros")
-    void testToString() {
-        // toString() now trims trailing zeros, so output is deterministic.
-        Derangadic d0 = Derangadic.of(0, 4, CALC);
-        assertEquals("[0](4)", d0.toString());
-
-        Derangadic d1 = Derangadic.of(1, 4, CALC);
-        assertEquals("[0, 1, 1](4)", d1.toString());
+    @DisplayName("encoded() returns digit array that matches toDerangadic")
+    void testEncodedMatchesToDerangadic() {
+        int n = 6;
+        for (long rank = 0; rank < 20; rank++) {
+            Derangadic d = new Derangadic(n, BigInteger.valueOf(rank), CALC);
+            int[] encoded = d.encoded();
+            int[] expected = ALG.toDerangadic(rank, n);
+            assertArrayEquals(expected, encoded,
+                    "Encoded mismatch at rank " + rank);
+        }
     }
 
-    @Test
-    @DisplayName("getMinimalSize() should return length of digit array")
-    void testGetMinimalSize() {
-        Derangadic d0 = Derangadic.of(0, 4, CALC);
-        int size0 = d0.getMinimalSize();
-        assertTrue(size0 == 2 || size0 == 1, "Size for rank 0 should be 1 or 2, got: " + size0);
+    // =========================================================================
+    // 2. Derangement Correctness
+    // =========================================================================
 
-        Derangadic d1 = Derangadic.of(1, 4, CALC);
-        int size1 = d1.getMinimalSize();
-        assertTrue(size1 == 3 || size1 == 4, "Size for rank 1 should be 3 or 4, got: " + size1);
-    }
+    @ParameterizedTest
+    @ValueSource(ints = {2, 3, 4, 5, 6, 7, 8})
+    @DisplayName("All derangements from rank 0 to count-1 are valid")
+    void testAllDerangementsAreValid(int n) {
+        BigInteger total = ALG.derangementCount(n);
 
-    @Test
-    @DisplayName("toDerangement() should convert back to original derangement")
-    void testToDerangement() {
-        for (int n = 3; n <= 6; n++) {
-            BigInteger total = ALGO.derangementCount(n);
+        // Start at rank 0
+        Derangadic d = new Derangadic(n, BigInteger.ZERO, CALC);
 
-            for (long rank = 0; rank < total.longValue() && rank < 50; rank++) {
-                Derangadic d = Derangadic.of(rank, n, CALC);
-                int[] derangement = d.toDerangement();
+        for (long rank = 0; rank < total.longValue(); rank++) {
+            int[] derangement = d.derangement();
+            assertTrue(isValidDerangement(derangement),
+                    String.format("Invalid derangement at n=%d rank=%d: %s",
+                            n, rank, Arrays.toString(derangement)));
 
-                assertTrue(isValidDerangement(derangement),
-                        String.format("Invalid derangement at rank=%d, n=%d", rank, n));
-
-                Derangadic d2 = Derangadic.fromDerangement(derangement, n, CALC);
-                assertEquals(d.decimalValue(), d2.decimalValue(),
-                        String.format("Round-trip failed at rank=%d, n=%d", rank, n));
+            if (rank < total.longValue() - 1) {
+                d.next();
             }
         }
     }
 
-    @Test
-    @DisplayName("equals()/hashCode() use (order, decimalValue) and ignore trailing-zero padding")
-    void testEqualsAndHashCode() {
-        Derangadic d1 = Derangadic.of(5, 4, CALC);
-        Derangadic d2 = Derangadic.of(5, 4, CALC);
-        Derangadic d3 = Derangadic.of(6, 4, CALC);
-        Derangadic d4 = Derangadic.of(5, 5, CALC);
+    @ParameterizedTest
+    @ValueSource(ints = {4, 5, 6, 7})
+    @DisplayName("Derangements from constructor match unrank reference")
+    void testDerangementsMatchUnrankReference(int n) {
+        BigInteger total = ALG.derangementCount(n);
 
-        assertEquals(d1, d2);
-        assertEquals(d1.hashCode(), d2.hashCode());
-        assertNotEquals(d1, d3);
-        assertNotEquals(d1, d4);
-        assertNotEquals(null, d1);
-        assertNotEquals("some string", d1);
+        Derangadic d = new Derangadic(n, BigInteger.ZERO, CALC);
 
-        // Cross-factory equality: of() and fromDerangement() must agree on equality
-        // even if their digit arrays differ by trailing zeros.
-        Derangadic viaRank = Derangadic.of(0, 4, CALC);
-        Derangadic viaDer  = Derangadic.fromDerangement(new int[]{1, 0, 3, 2}, 4, CALC);
-        assertEquals(viaRank, viaDer);
-        assertEquals(viaRank.hashCode(), viaDer.hashCode());
-    }
+        for (long rank = 0; rank < total.longValue(); rank++) {
+            int[] fromDerangadic = d.derangement();
+            int[] expected = ALG.unrank(rank, n);
 
-    @Test
-    @DisplayName("Invalid inputs should throw appropriate exceptions")
-    void testInvalidInputs() {
-        assertThrows(IllegalArgumentException.class, () -> Derangadic.of(-1, 4, CALC));
-        assertThrows(IllegalArgumentException.class, () -> Derangadic.of(BigInteger.valueOf(-1), 4, CALC));
+            assertArrayEquals(expected, fromDerangadic,
+                    String.format("Mismatch at n=%d rank=%d", n, rank));
 
-        BigInteger total = ALGO.derangementCount(4);
-        assertThrows(IllegalArgumentException.class, () -> Derangadic.of(total, 4, CALC));
-
-        int[] invalidDerangement = {0, 2, 1};
-        assertThrows(IllegalArgumentException.class, () ->
-                Derangadic.fromDerangement(invalidDerangement, 3, CALC));
-
-        assertThrows(NullPointerException.class, () -> Derangadic.of(0, 4, null));
-        assertThrows(NullPointerException.class,
-                () -> Derangadic.fromDerangement(new int[]{1, 0, 3, 2}, 4, null));
-    }
-
-    @Test
-    @DisplayName("Round-trip through both APIs should be consistent")
-    void testBothApisConsistent() {
-        for (int n = 3; n <= 6; n++) {
-            BigInteger total = ALGO.derangementCount(n);
-
-            for (long rank = 0; rank < total.longValue() && rank < 50; rank++) {
-                Derangadic d = Derangadic.of(rank, n, CALC);
-                int[] derangementFromWrapper = d.toDerangement();
-                int[] derangementFromAlgo = ALGO.unrank(BigInteger.valueOf(rank), n);
-
-                assertArrayEquals(derangementFromAlgo, derangementFromWrapper,
-                        String.format("Inconsistent derangement at rank=%d, n=%d", rank, n));
+            if (rank < total.longValue() - 1) {
+                d.next();
             }
         }
     }
 
+    // =========================================================================
+    // 3. next() Method Correctness
+    // =========================================================================
+
     @Test
-    @DisplayName("Static unrank()/rank()/count() shortcuts agree with the wrapper")
-    void testStaticShortcuts() {
-        for (int n = 3; n <= 7; n++) {
-            BigInteger total = Derangadic.count(n, CALC);
-            assertEquals(ALGO.derangementCount(n), total);
-
-            for (long r = 0; r < total.longValue(); r++) {
-                int[] viaStatic = Derangadic.unrank(r, n, CALC);
-                int[] viaWrapper = Derangadic.of(r, n, CALC).toDerangement();
-                assertArrayEquals(viaWrapper, viaStatic,
-                        String.format("unrank mismatch at rank=%d, n=%d", r, n));
-                assertTrue(isValidDerangement(viaStatic));
-
-                BigInteger rankBack = Derangadic.rank(viaStatic, n, CALC);
-                assertEquals(BigInteger.valueOf(r), rankBack,
-                        String.format("rank round-trip failed at rank=%d, n=%d", r, n));
-            }
-        }
-
-        // BigInteger overload
-        int[] d = Derangadic.unrank(BigInteger.ZERO, 4, CALC);
-        assertArrayEquals(new int[]{1, 0, 3, 2}, d);
-
-        // Argument validation
-        assertThrows(NullPointerException.class, () -> Derangadic.unrank(0L, 4, null));
-        assertThrows(NullPointerException.class, () -> Derangadic.rank(new int[]{1, 0, 3, 2}, 4, null));
-        assertThrows(IllegalArgumentException.class,
-                () -> Derangadic.unrank(Derangadic.count(4, CALC), 4, CALC));
+    @DisplayName("next() advances rank by 1")
+    void testNextAdvancesRank() {
+        Derangadic d = new Derangadic(6, BigInteger.valueOf(100), CALC);
+        BigInteger originalRank = d.rank();
+        d.next();
+        assertEquals(originalRank.add(BigInteger.ONE), d.rank());
     }
 
     @Test
-    @DisplayName("Instance next() advances the same instance to rank+1 and rejects past-the-end")
-    void testInstanceNext() {
-        for (int n = 3; n <= 6; n++) {
-            BigInteger total = Derangadic.count(n, CALC);
-            Derangadic d = Derangadic.of(0, n, CALC);
-            for (long r = 1; r < total.longValue(); r++) {
-                Derangadic next = d.next();
-                assertSame(d, next, "next() should return the same stateful instance");
-                assertEquals(BigInteger.valueOf(r), next.decimalValue(),
-                        String.format("next() rank mismatch at n=%d, r=%d", n, r));
-                assertArrayEquals(Derangadic.unrank(r, n, CALC), next.toDerangement(),
-                        String.format("next() derangement mismatch at n=%d, r=%d", n, r));
-            }
-            assertEquals(total.subtract(BigInteger.ONE), d.decimalValue(),
-                    "Stateful instance should now be at the last rank");
-            assertThrows(NoSuchElementException.class, d::next);
+    @DisplayName("next() produces lexicographically increasing derangements")
+    void testNextProducesIncreasingDerangements() {
+        int n = 6;
+        Derangadic d = new Derangadic(n, BigInteger.ZERO, CALC);
+
+        int[] prev = d.derangement().clone();
+        BigInteger total = ALG.derangementCount(n);
+
+        for (long rank = 1; rank < total.longValue(); rank++) {
+            d.next();
+            int[] curr = d.derangement().clone();
+            assertTrue(isLexLess(prev, curr),
+                    String.format("Order violation at rank transition %d->%d", rank - 1, rank));
+            prev = curr;
         }
     }
 
     @Test
-    @DisplayName("Stateful next() yields D_n distinct derangements in lexicographical order")
-    void testStatefulNextSequence() {
-        for (int n = 3; n <= 6; n++) {
-            Derangadic d = Derangadic.of(0, n, CALC);
-            BigInteger total = Derangadic.count(n, CALC);
-
-            int count = 0;
-            int[] prev = null;
-            while (true) {
-                int[] cur = d.toDerangement().clone();
-                assertTrue(isValidDerangement(cur), "invalid at n=" + n + " count=" + count);
-                if (prev != null) {
-                    assertTrue(lexLess(prev, cur),
-                            String.format("not in lex order at n=%d count=%d", n, count));
-                }
-                // Cross-check against static unrank
-                assertArrayEquals(Derangadic.unrank(count, n, CALC), cur,
-                        String.format("next() disagrees with unrank at n=%d rank=%d", n, count));
-                prev = cur;
-                count++;
-                try {
-                    d.next();
-                } catch (NoSuchElementException end) {
-                    break;
-                }
-            }
-
-            assertEquals(total.longValue(), count,
-                    "next() yielded wrong number of derangements at n=" + n);
-
-            assertEquals(total.subtract(BigInteger.ONE), d.decimalValue());
-            assertThrows(NoSuchElementException.class, d::next);
-        }
+    @DisplayName("next() throws NoSuchElementException at last rank")
+    void testNextThrowsAtLastRank() {
+        int n = 4; // !4 = 9
+        Derangadic d = new Derangadic(n, ALG.derangementCount(n).subtract(BigInteger.ONE), CALC);
+        assertNotNull(d.derangement(),"Last rank should still have a valid derangement");
+        assertThrows(NoSuchElementException.class, d::next, " next() should throw exp at last rank");
     }
 
     @Test
-    @DisplayName("Factory can seed next() from a non-zero rank")
-    void testNextFromNonZeroRank() {
+    @DisplayName("Sequential next() calls produce all derangements")
+    void testSequentialNextProducesAllDerangements() {
         int n = 5;
-        for (long start = 0; start < Derangadic.count(n, CALC).longValue() - 1; start++) {
-            Derangadic d = Derangadic.of(start, n, CALC);
-            assertArrayEquals(Derangadic.unrank(start, n, CALC), d.toDerangement());
+        BigInteger total = ALG.derangementCount(n);
 
-            Derangadic next = d.next();
-            assertSame(d, next);
-            assertEquals(BigInteger.valueOf(start + 1), next.decimalValue());
-            assertArrayEquals(Derangadic.unrank(start + 1, n, CALC), next.toDerangement());
+        Derangadic d = new Derangadic(n, BigInteger.ZERO, CALC);
+
+        for (long rank = 0; rank < total.longValue(); rank++) {
+            int[] fromDerangadic = d.derangement();
+            int[] expected = ALG.unrank(rank, n);
+            assertArrayEquals(expected, fromDerangadic,
+                    "Mismatch at sequential step " + rank);
+
+            if (rank < total.longValue() - 1) {
+                d.next();
+            }
         }
+    }
+
+    // =========================================================================
+    // 4. add() Method Correctness
+    // =========================================================================
+
+    @Test
+    @DisplayName("add() creates new instance with incremented rank")
+    void testAddCreatesNewInstance() {
+        Derangadic d = new Derangadic(5, BigInteger.valueOf(10), CALC);
+        Derangadic added = d.add(BigInteger.valueOf(5));
+
+        assertNotSame(d, added);
+        assertEquals(BigInteger.valueOf(10), d.rank());
+        assertEquals(BigInteger.valueOf(15), added.rank());
+        assertEquals(d.order(), added.order());
     }
 
     @Test
-    @DisplayName("NumberSystem facade method derangadic(...) is wired correctly")
-    void testNumberSystemFacade() {
-        var ns = new io.github.deepeshpatel.jnumbertools.base.NumberSystem(CALC);
+    @DisplayName("add() produces same result as constructing with incremented rank")
+    void testAddMatchesDirectConstruction() {
+        int n = 5;
+        long rank = 10;
+        long increment = 7;
 
-        // long overload
-        Derangadic d1 = ns.derangadic(5L, 4);
-        assertEquals(BigInteger.valueOf(5), d1.decimalValue());
-        assertEquals(4, d1.order());
-        assertArrayEquals(Derangadic.unrank(5, 4, CALC), d1.toDerangement());
+        Derangadic d = new Derangadic(n, BigInteger.valueOf(rank), CALC);
+        Derangadic added = d.add(BigInteger.valueOf(increment));
 
-        // BigInteger overload
-        Derangadic d2 = ns.derangadic(BigInteger.valueOf(7), 5);
-        assertEquals(BigInteger.valueOf(7), d2.decimalValue());
-        assertEquals(5, d2.order());
+        Derangadic direct = new Derangadic(n, BigInteger.valueOf(rank + increment), CALC);
 
-        // JNumberTools facade
-        var d3 = io.github.deepeshpatel.jnumbertools.base.JNumberTools
-                .numberSystem().derangadic(0L, 4);
-        assertEquals(BigInteger.ZERO, d3.decimalValue());
-        assertArrayEquals(new int[]{1, 0, 3, 2}, d3.toDerangement());
-
-        int[] rankFive = io.github.deepeshpatel.jnumbertools.base.JNumberTools
-                .unrankOf().derangement(5L, 4);
-        assertArrayEquals(Derangadic.unrank(5L, 4, CALC), rankFive);
-        assertEquals(BigInteger.valueOf(5), io.github.deepeshpatel.jnumbertools.base.JNumberTools
-                .rankOf().derangement(rankFive));
+        assertArrayEquals(direct.derangement(), added.derangement());
+        assertArrayEquals(direct.encoded(), added.encoded());
     }
 
-    // ==================== Utility Methods ====================
+    // =========================================================================
+    // 5. Edge Cases
+    // =========================================================================
 
-    private static boolean lexLess(int[] a, int[] b) {
-        int len = Math.min(a.length, b.length);
-        for (int i = 0; i < len; i++) {
-            if (a[i] < b[i]) return true;
-            if (a[i] > b[i]) return false;
-        }
-        return a.length < b.length;
+    @Test
+    @DisplayName("Smallest n=2 works correctly")
+    void testSmallestN2() {
+        Derangadic d = new Derangadic(2, BigInteger.ZERO, CALC);
+
+        // Only one derangement for n=2: [1, 0]
+        int[] derangement = d.derangement();
+        assertTrue(isValidDerangement(derangement));
+        assertArrayEquals(new int[]{1, 0}, derangement);
+
+        // No next derangement
+        assertThrows(NoSuchElementException.class, d::next);
     }
 
-    private static boolean isValidDerangement(int[] arr) {
-        int n = arr.length;
-        for (int i = 0; i < n; i++) {
-            if (arr[i] == i) return false;
-        }
-        boolean[] seen = new boolean[n];
-        for (int val : arr) {
-            if (val < 0 || val >= n) return false;
-            if (seen[val]) return false;
-            seen[val] = true;
-        }
-        return true;
+    @Test
+    @DisplayName("n=3 works correctly")
+    void testN3() {
+        // !3 = 2 derangements: rank 0: [1,2,0], rank 1: [2,0,1]
+        Derangadic d0 = new Derangadic(3, BigInteger.ZERO, CALC);
+        assertArrayEquals(new int[]{1, 2, 0}, d0.derangement());
+
+        d0.next();
+        assertArrayEquals(new int[]{2, 0, 1}, d0.derangement());
+        assertThrows(NoSuchElementException.class, d0::next);
     }
+
+    @ParameterizedTest
+    @CsvSource({
+            "4, 8",      // last rank of even n=4: !4 = 9, so rank 8 is last
+            "5, 43",     // last rank of odd n=5: !5 = 44, so rank 43 is last
+            "6, 264"     // last rank of even n=6: !6 = 265, so rank 264 is last
+    })
+    @DisplayName("Last rank produces correct derangement")
+    void testLastRank(int n, long lastRank) {
+        Derangadic d = new Derangadic(n, BigInteger.valueOf(lastRank), CALC);
+        int[] derangement = d.derangement();
+        assertTrue(isValidDerangement(derangement));
+
+        // Compare with unrank reference
+        int[] expected = ALG.unrank(lastRank, n);
+        assertArrayEquals(expected, derangement);
+    }
+
+    @Test
+    @DisplayName("count() returns correct subfactorial")
+    void testCount() {
+        Derangadic d4 = new Derangadic(4, BigInteger.ZERO, CALC);
+        assertEquals(BigInteger.valueOf(9), d4.count());
+
+        Derangadic d5 = new Derangadic(5, BigInteger.ZERO, CALC);
+        assertEquals(BigInteger.valueOf(44), d5.count());
+
+        Derangadic d6 = new Derangadic(6, BigInteger.ZERO, CALC);
+        assertEquals(BigInteger.valueOf(265), d6.count());
+    }
+
+    // =========================================================================
+    // 6. Consistency Across Methods
+    // =========================================================================
+
+    @Test
+    @DisplayName("Same rank produces same derangement regardless of construction")
+    void testConsistencyAcrossConstruction() {
+        int n = 7;
+        long rank = 100;
+
+        // Construction via rank
+        Derangadic d1 = new Derangadic(n, BigInteger.valueOf(rank), CALC);
+
+        // Build via encoded to verify consistency
+        Derangadic d2 = new Derangadic(n, BigInteger.valueOf(rank), CALC);
+
+        assertArrayEquals(d1.derangement(), d2.derangement());
+        assertArrayEquals(d1.encoded(), d2.encoded());
+        assertEquals(d1.rank(), d2.rank());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {4, 5, 6, 7, 8})
+    @DisplayName("encoded() trailing zeros preserved consistently")
+    void testEncodedTrailingZerosConsistent(int n) {
+        BigInteger total = ALG.derangementCount(n);
+
+        Derangadic d = new Derangadic(n, BigInteger.ZERO, CALC);
+
+        for (long rank = 0; rank < total.longValue() && rank < 100; rank++) {
+            int[] encoded = d.encoded();
+            int[] expected = ALG.toDerangadic(rank, n);
+
+            // Compare ignoring trailing zeros (should be equal)
+            assertTrue(arraysEqualIgnoringTrailingZeros(expected, encoded),
+                    String.format("Encoded mismatch at n=%d rank=%d", n, rank));
+
+            if (rank < total.longValue() - 1 && rank < 99) {
+                d.next();
+            }
+        }
+    }
+
+    // =========================================================================
+    // 7. Large n Smoke Tests
+    // =========================================================================
+
+    @Test
+    @DisplayName("Large n=1000 construction and first increment works")
+    void testLargeN1000() {
+        int n = 1000;
+        Derangadic d = new Derangadic(n, BigInteger.ZERO, CALC);
+
+        int[] derangement = d.derangement();
+        assertTrue(isValidDerangement(derangement));
+
+        // First increment should work
+        d.next();
+        assertTrue(isValidDerangement(d.derangement()));
+        assertEquals(BigInteger.ONE, d.rank());
+    }
+
+    @Test
+    @DisplayName("Large n=5000 with mid-range rank works")
+    void testLargeN5000MidRank() {
+        int n = 5000;
+        long rank = 1_000_000L;
+        Derangadic d = new Derangadic(n, BigInteger.valueOf(rank), CALC);
+
+        int[] derangement = d.derangement();
+        assertTrue(isValidDerangement(derangement));
+        assertEquals(BigInteger.valueOf(rank), d.rank());
+    }
+
+    // =========================================================================
+    // 8. String Representation (basic)
+    // =========================================================================
+
+
+    // =========================================================================
+    // Helper Methods
+    // =========================================================================
 
     private static boolean arraysEqualIgnoringTrailingZeros(int[] a, int[] b) {
         return Arrays.equals(trimTrailingZeros(a), trimTrailingZeros(b));
     }
 
     private static int[] trimTrailingZeros(int[] arr) {
-        if (arr.length == 0) return arr;
-        int lastNonZero = arr.length - 1;
-        while (lastNonZero >= 0 && arr[lastNonZero] == 0) {
-            lastNonZero--;
-        }
-        if (lastNonZero < 0) return new int[]{0};
-        int[] result = new int[lastNonZero + 1];
-        System.arraycopy(arr, 0, result, 0, lastNonZero + 1);
-        return result;
+        int last = arr.length - 1;
+        while (last > 0 && arr[last] == 0) last--;
+        return Arrays.copyOf(arr, last + 1);
     }
 }

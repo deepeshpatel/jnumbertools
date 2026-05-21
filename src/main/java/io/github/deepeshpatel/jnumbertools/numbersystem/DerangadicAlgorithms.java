@@ -82,7 +82,7 @@ import java.util.*;
  * @version 3.0.2
  * @see <a href="https://ssrn.com/abstract=4174035">Derangadic: A Combinatorial Number System for Derangements</a>
  * @see FactoradicAlgorithms
- * @see DerangadicIncrement
+ * @see DerangadicIncrementStateMachine
  * @since 3.0.2
  */
 public final class DerangadicAlgorithms {
@@ -95,10 +95,6 @@ public final class DerangadicAlgorithms {
 
     public DerangadicAlgorithms(Calculator calculator) {
         this.calculator = calculator;
-    }
-
-    public DerangadicAlgorithms() {
-        this(new Calculator());
     }
 
     // ==================== Core Public API ====================

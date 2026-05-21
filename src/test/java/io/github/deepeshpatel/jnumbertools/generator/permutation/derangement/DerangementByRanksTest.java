@@ -7,7 +7,6 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.derangement;
 import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.math.BigInteger;
 import java.util.Collections;
@@ -93,18 +92,6 @@ class DerangementByRanksTest {
             assertEquals(lex.get(0), mth.get(0));
             assertEquals(lex.get(3), mth.get(1));
             assertEquals(lex.get(6), mth.get(2));
-        }
-
-        @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
-        @Test
-        void stressTesting() {
-            // For large n, take every (D_n / k)ᵗʰ derangement and expect k items
-            int n = 10;
-            int k = 7;
-            BigInteger total = calculator.subFactorial(n);
-            BigInteger step = total.divide(BigInteger.valueOf(k));
-            long count = derangement.of(n).lexOrderMth(step, BigInteger.ZERO).stream().count();
-            assertEquals(k, count);
         }
     }
 

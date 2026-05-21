@@ -9,10 +9,8 @@ import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * Generates all {@code D_n} derangements (fixed-point-free permutations) of a
@@ -45,6 +43,7 @@ import java.util.NoSuchElementException;
 public final class Derangement<T> extends AbstractGenerator<T> {
 
     private final Calculator calculator;
+    private final BigInteger maxCount;
 
     /**
      * Constructs the generator.
@@ -54,6 +53,7 @@ public final class Derangement<T> extends AbstractGenerator<T> {
     Derangement(List<T> elements, Calculator calculator) {
         super(elements);
         this.calculator = calculator;
+        this.maxCount = calculator.subFactorial(elements.size());
     }
 
     @Override
@@ -67,27 +67,22 @@ public final class Derangement<T> extends AbstractGenerator<T> {
     private final class DerangadicIterator implements Iterator<List<T>> {
 
         private final Derangadic current;
-        private boolean exhausted = false;
 
         DerangadicIterator(int n) {
-            this.current = Derangadic.of(0, n, calculator);
+            this.current = new Derangadic(n, BigInteger.ZERO, calculator);
         }
 
         @Override
         public boolean hasNext() {
-            return !exhausted;
+            return current.rank().compareTo(maxCount) < 0;
         }
 
         @Override
         public List<T> next() {
-            if (exhausted) throw new NoSuchElementException();
-            List<T> result = indicesToValues(current.toDerangement());
-            try {
-                current.next();
-            } catch (NoSuchElementException end) {
-                exhausted = true;
-            }
-            return result;
+            if (!hasNext()) throw new NoSuchElementException();
+            List<T> derangement= indicesToValues(current.derangement().clone());
+            current.nextWithoutBoundCheck();
+            return derangement;
         }
     }
 }

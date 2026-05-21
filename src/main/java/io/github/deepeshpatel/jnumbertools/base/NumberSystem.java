@@ -224,7 +224,7 @@ public class NumberSystem {
      * @since 3.0.2
      */
     public Derangadic derangadic(long rank, int order) {
-        return Derangadic.of(rank, order, calculator);
+        return derangadic(BigInteger.valueOf(rank), order);
     }
 
     /**
@@ -238,6 +238,6 @@ public class NumberSystem {
      * @since 3.0.2
      */
     public Derangadic derangadic(BigInteger rank, int order) {
-        return Derangadic.of(rank, order, calculator);
+        return new Derangadic(order, rank, calculator);
     }
 }

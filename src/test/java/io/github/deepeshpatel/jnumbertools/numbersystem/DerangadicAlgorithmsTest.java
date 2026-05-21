@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -13,13 +14,12 @@ import java.math.BigInteger;
 import java.util.*;
 import java.security.SecureRandom;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DerangadicAlgorithmsTest {
 
-    private static final DerangadicAlgorithms DERANGADIC = new DerangadicAlgorithms();
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private final DerangadicAlgorithms DERANGADIC = new DerangadicAlgorithms(new Calculator());
+    private final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @Test
     @DisplayName("Round-trip conversion should work for n=4 (D_4=9)")

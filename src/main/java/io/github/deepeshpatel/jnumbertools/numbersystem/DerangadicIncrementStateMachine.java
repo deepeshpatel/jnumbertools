@@ -12,28 +12,28 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * Incremental Derangadic successor engine.
+ * Incremental Derangadic successor engine with encapsulated state.
  * <p>
  * Provides amortized O(1) lexicographic traversal of derangements by maintaining
  * both encoded digits and materialized derangement array in a synchronized state.
- * Each call to {@link #increment(DerangadicState)} advances to the next rank
- * without recomputing from scratch.
+ * Each call to {@link #increment()} advances to the next rank without recomputing
+ * from scratch.
  * <p>
  * <b>Design Intent:</b>
  * <ul>
- *   <li>Advance the digit array to the next rank via {@link #incrementEncoded(DerangadicState)}.</li>
- *   <li>Return the current derangement in O(1) via {@link #encodedToDerangement(DerangadicState)}.</li>
- *   <li>Keep both representations synchronized incrementally during suffix rebuilds.</li>
+ *   <li>Encapsulates both the digit array and derangement state within a single object.</li>
+ *   <li>Returns the current derangement in O(1) via {@link #derangement()}.</li>
+ *   <li>Keeps both representations synchronized incrementally during suffix rebuilds.</li>
  * </ul>
  * <p>
  * <b>Key Structural Invariants:</b>
  * <ul>
  *   <li><b>LSD Never Carries:</b> {@code digits[0]} is always 0; pivot search starts at index 1.</li>
  *   <li><b>Dual-State Consistency:</b> Encoded digits and materialized {@code derangement[]} are
- *       kept synchronized at all times. {@code encodedToDerangement()} is O(1).</li>
+ *       kept synchronized at all times. {@link #derangement()} is O(1).</li>
  *   <li><b>Parity Expansion:</b> When all digits are maximal and {@code actualN < n}, the machine
  *       expands {@code actualN += 2} to cross parity-band boundaries, matching {@code !k} thresholds.</li>
- *   <li><b>Rollback & Rebuild:</b> Suffix updates are handled by returning elements to the availability
+ *   <li><b>Rollback &amp; Rebuild:</b> Suffix updates are handled by returning elements to the availability
  *       structure, incrementing the pivot digit, resetting lower digits to {@code minDigit}, and
  *       greedily re-filling using order-statistic queries.</li>
  * </ul>
@@ -50,142 +50,100 @@ import java.util.Objects;
  *   <li>Arrays are stored <strong>LSD-first</strong>: {@code digits[0]} = {@code D_0} (least significant),
  *       {@code digits[k-1]} = {@code D_{k-1}} (most significant).</li>
  *   <li>For display/paper notation, digits are shown <strong>MSD-first</strong>: {@code [D_{k-1}, ..., D_0]}.</li>
+ *   <li>{@link #getEncoded()} returns the live internal array for performance; callers must not modify it.</li>
  * </ul>
  *
- * @author Deepesh Patel & Aditya Patel
+ * @author Deepesh Patel &amp; Aditya Patel
  * @version 3.0.2
  * @see DerangadicAlgorithms
  * @see Derangadic
  * @since 3.0.2
  */
-public final class DerangadicIncrement {
+public final class DerangadicIncrementStateMachine {
 
     private final Calculator calculator;
     private final DerangadicAlgorithms alg;
+    private DerangadicState state;
 
     /**
-     * Constructs a new instance with the given calculator.
+     * Constructs a new state machine for the given universe size and starting rank.
      *
+     * @param n         universe size ({@code n ≥ 2})
+     * @param rank      starting rank ({@code 0 ≤ rank < !n})
      * @param calculator memoizing calculator for factorial/subfactorial computations
-     * @throws NullPointerException if {@code calculator} is {@code null}
+     * @throws IllegalArgumentException if {@code n < 2} or {@code rank} out of bounds
+     * @throws NullPointerException if {@code rank} or {@code calculator} is {@code null}
      */
-    public DerangadicIncrement(Calculator calculator) {
+    public DerangadicIncrementStateMachine(int n, long rank, Calculator calculator) {
+        this(n, BigInteger.valueOf(rank), calculator);
+    }
+
+    /**
+     * Constructs a new state machine for the given universe size and starting rank.
+     *
+     * @param n         universe size ({@code n ≥ 2})
+     * @param rank      starting rank ({@code 0 ≤ rank < !n})
+     * @param calculator memoizing calculator for factorial/subfactorial computations
+     * @throws IllegalArgumentException if {@code n < 2} or {@code rank} out of bounds
+     * @throws NullPointerException if {@code rank} or {@code calculator} is {@code null}
+     */
+    public DerangadicIncrementStateMachine(int n, BigInteger rank, Calculator calculator) {
         this.calculator = Objects.requireNonNull(calculator, "calculator");
         this.alg = new DerangadicAlgorithms(calculator);
+        this.state = initialState(n, rank);
     }
 
     /**
-     * Constructs a new instance with a default calculator.
-     * <p>
-     * <b>Note:</b> For repeated calls, prefer reusing a single {@link Calculator} instance
-     * externally to benefit from memoization of factorials and subfactorials.
-     */
-    public DerangadicIncrement() {
-        this(new Calculator());
-    }
-
-    // =========================================================================
-    // Factory
-    // =========================================================================
-
-    /**
-     * Creates state initialised at rank 0 for the given universe size.
-     *
-     * @param n universe size ({@code n ≥ 2})
-     * @return initialised {@link DerangadicState} ready for iteration
-     * @throws IllegalArgumentException if {@code n < 2}
-     * @see #initialState(int, BigInteger)
-     */
-    DerangadicState initialState(int n) {
-        return initialState(n, BigInteger.ZERO);
-    }
-
-    /**
-     * Creates state initialised at the given rank for the given universe size.
-     * <p>
-     * Both digits and the derangement array are ready immediately on return.
+     * Creates the initial state for the given universe size and rank.
      *
      * @param n    universe size ({@code n ≥ 2})
-     * @param rank starting rank ({@code 0 ≤ rank < !n})
-     * @return initialised {@link DerangadicState} ready for iteration
-     * @throws IllegalArgumentException if {@code n < 2} or {@code rank} out of bounds
-     * @throws NullPointerException     if {@code rank} is {@code null}
+     * @param rank starting rank
+     * @return initialised state ready for iteration
      */
-    DerangadicState initialState(int n, BigInteger rank) {
+    private DerangadicState initialState(int n, BigInteger rank) {
         if (n < 2) throw new IllegalArgumentException("n must be >= 2");
         Objects.requireNonNull(rank, "rank");
 
         int[] digits = alg.toDerangadic(rank, n);
-        DerangadicState state = new DerangadicState(n, digits.length, digits);
-        rebuildAllFromDigits(state);
+        this.state = new DerangadicState(n, digits.length, digits);
+        rebuildAllFromDigits();
         return state;
     }
 
-    // =========================================================================
-    // Three-level public API
-    // =========================================================================
+    /**
+     * Returns the current derangement array.
+     * <p>
+     * <b>Performance note:</b> Returns a live reference to the internal array
+     * for zero-copy performance. Callers must NOT modify the returned array.
+     * If mutation is needed, clone the array explicitly.
+     *
+     * @return live reference to the current derangement array of length {@code n}
+     */
+    public int[] derangement() {
+        return state.derangement;
+    }
 
     /**
-     * Advances the digit array to the next rank.
+     * Returns the current encoded digit array (LSD-first).
      * <p>
-     * As a zero-marginal-cost side effect of the incremental suffix rebuild,
-     * {@code derangement[]} is also kept current. Calling
-     * {@link #encodedToDerangement(DerangadicState)} afterwards is therefore O(1).
+     * <b>Performance note:</b> Returns a live reference to the internal array
+     * for zero-copy performance. Callers must NOT modify the returned array.
+     * If mutation is needed, clone the array explicitly.
      *
-     * @param state mutable state object to advance
+     * @return live reference to the digit array in LSD-first order
+     */
+    public int[] getEncoded() {
+        return state.digits;
+    }
+
+    /**
+     * Advances the state to the next derangement in lexicographic order.
+     * <p>
+     * After a successful call, {@link #derangement()} returns the next derangement.
+     *
      * @return {@code true} if advanced; {@code false} if already at the last rank
-     * @throws NullPointerException if {@code state} is {@code null}
-     * @see #increment(DerangadicState)
      */
-    public boolean incrementEncoded(DerangadicState state) {
-        return doIncrement(state);
-    }
-
-    /**
-     * Returns the derangement array for the current encoded state.
-     * <p>
-     * This is an O(1) operation: because {@link #incrementEncoded} keeps
-     * {@code derangement[]} current during its incremental suffix rebuild,
-     * no additional work is needed here.
-     *
-     * @param state current state object
-     * @return live reference to {@code state.derangement} — clone if stability needed
-     * @throws NullPointerException if {@code state} is {@code null}
-     */
-    public int[] encodedToDerangement(DerangadicState state) {
-        return state.derangement; // always current; see class-level Javadoc
-    }
-
-    /**
-     * Advances the state and returns {@code true} if successful.
-     * <p>
-     * Equivalent to {@link #incrementEncoded(DerangadicState)} — the derangement
-     * is available via {@link DerangadicState#currentDerangement()} immediately.
-     *
-     * @param state mutable state object to advance
-     * @return {@code true} if advanced; {@code false} if exhausted
-     * @throws NullPointerException if {@code state} is {@code null}
-     * @see #incrementEncoded(DerangadicState)
-     */
-    public boolean increment(DerangadicState state) {
-        return doIncrement(state);
-    }
-
-    // =========================================================================
-    // Single engine — shared by all three public entry points
-    // =========================================================================
-
-    /**
-     * The hot path. Finds the leftmost digit that has headroom, increments it,
-     * then calls {@link #rollbackAndRebuild} to restore consistency for the
-     * suffix. On a parity-band boundary, expands the carrier length and does a
-     * full rebuild (rare — O(n log n), but happens at most O(n/2) times total).
-     *
-     * @param state mutable state object to advance
-     * @return {@code true} if advanced; {@code false} if exhausted
-     * @implNote Pivot search starts at index 1 (LSD at index 0 never carries).
-     */
-    private boolean doIncrement(DerangadicState state) {
+    public boolean increment() {
         int actualN = state.actualN;
 
         // Scan from index 1 (index 0 = LSD, always forced to 0 by Derangadic invariant).
@@ -199,7 +157,7 @@ public final class DerangadicIncrement {
 
         if (p != -1) {
             state.digits[p]++;
-            rollbackAndRebuild(state, actualN - 1 - p);
+            rollbackAndRebuild(actualN - 1 - p);
             return true;
         }
 
@@ -210,12 +168,50 @@ public final class DerangadicIncrement {
         BigInteger firstRank = calculator.subFactorial(actualN);
         int[] firstDigits = alg.toDerangadic(firstRank, state.n);
         state.resizeActualN(newActualN, firstDigits);
-        rebuildAllFromDigits(state);
+        rebuildAllFromDigits();
         return true;
     }
 
+    /**
+     * Advances the state and returns the carry length (number of digits modified).
+     * <p>
+     * Useful for performance analysis and debugging.
+     *
+     * @return carry length (>0) if successful, 0 if enumeration is complete
+     */
+    public int incrementAndGetCarryLength() {
+        int actualN = state.actualN;
+
+        // Scan from index 1 (LSD at index 0 never carries)
+        int p = -1;
+        for (int i = 1; i < actualN; i++) {
+            if (state.digits[i] < state.maxDigit[i]) {
+                p = i;
+                break;
+            }
+        }
+
+        if (p != -1) {
+            state.digits[p]++;
+            rollbackAndRebuild(actualN - 1 - p);
+            return p + 1; // Carry length = pivot index + 1
+        }
+
+        // All digits maximal: cross parity-band boundary
+        if (actualN < state.n) {
+            int newActualN = actualN + 2;
+            BigInteger firstRank = calculator.subFactorial(actualN);
+            int[] firstDigits = alg.toDerangadic(firstRank, state.n);
+            state.resizeActualN(newActualN, firstDigits);
+            rebuildAllFromDigits();
+            return newActualN; // Expansion counts as full-length carry
+        }
+
+        return 0; // Enumeration complete
+    }
+
     // =========================================================================
-    // Full rebuild — initialisation and parity-band expansion only
+    // Core rebuild and rollback methods (private)
     // =========================================================================
 
     /**
@@ -225,11 +221,8 @@ public final class DerangadicIncrement {
      *   <li>initial state construction, and</li>
      *   <li>parity-band expansion (rare).</li>
      * </ul>
-     *
-     * @param state state object to rebuild
-     * @implNote Greedy prefix positions never change during normal increments.
      */
-    private void rebuildAllFromDigits(DerangadicState state) {
+    private void rebuildAllFromDigits() {
         int n = state.n;
         int actualN = state.actualN;
         int offset = n - actualN;
@@ -246,9 +239,6 @@ public final class DerangadicIncrement {
         }
 
         // Fill prefix [0, offset) with the greedy minimum derangement.
-        // These positions always receive digit 0 and never change during
-        // normal increments — their values are constant across all ranks
-        // in the current parity band.
         int nextCandidate = 0;
         for (int pos = 0; pos < offset; pos++) {
             while (nextCandidate < n && state.usedFull[nextCandidate]) nextCandidate++;
@@ -267,30 +257,19 @@ public final class DerangadicIncrement {
         // Fill suffix [offset, n) from the digit array.
         for (int step = 0; step < actualN; step++) {
             int di = actualN - 1 - step;
-            state.maxDigit[di] = computeMaxDigit(state, step);
-            consumeAtStep(state, step, state.digits[di], avail, offset);
+            state.maxDigit[di] = computeMaxDigit(step);
+            consumeAtStep(step, state.digits[di], avail, offset);
         }
     }
-
-    // =========================================================================
-    // Incremental suffix rollback — the hot path, O(suffix × log n)
-    // =========================================================================
 
     /**
      * Releases positions {@code [changedStep, actualN)} from both the encoded
      * state and the Fenwick tree, then re-consumes them using the updated digit
      * at {@code changedStep} and greedy-minimum digits for later steps.
-     * <p>
-     * Both encoded state ({@code eUsed[]}, {@code consumedAtStep[]},
-     * {@code digits[]}, {@code maxDigit[]}) and derangement state
-     * ({@code usedFull[]}, {@code availTree}, {@code derangement[]}) are
-     * updated in the same single pass — no separate second pass is needed.
      *
-     * @param state        mutable state object
-     * @param changedStep  MSD-first position where change begins
-     * @implNote {@code changedStep} is in MSD-first indexing; suffix is {@code [changedStep, actualN)}.
+     * @param changedStep MSD-first position where change begins
      */
-    private void rollbackAndRebuild(DerangadicState state, int changedStep) {
+    private void rollbackAndRebuild(int changedStep) {
         int actualN = state.actualN;
         int offset = state.n - actualN;
         FenwickTree avail = state.availTree;
@@ -306,29 +285,22 @@ public final class DerangadicIncrement {
         // ----- Rebuild suffix ----
         for (int step = changedStep; step < actualN; step++) {
             int di = actualN - 1 - step;
-            state.maxDigit[di] = computeMaxDigit(state, step);
+            state.maxDigit[di] = computeMaxDigit(step);
 
             int digit;
             if (step == changedStep) {
                 digit = state.digits[di]; // already incremented
             } else {
-                digit = computeMinDigit(state, step);
+                digit = computeMinDigit(step);
                 state.digits[di] = digit;
             }
-            consumeAtStep(state, step, digit, avail, offset);
+            consumeAtStep(step, digit, avail, offset);
         }
     }
 
-    // =========================================================================
-    // Per-step consume — single method that keeps both encoded and absolute
-    // state in sync
-    // =========================================================================
-
     /**
      * Selects the element for step {@code step} using relative digit {@code digit},
-     * and updates encoded state ({@code eUsed[]}, {@code consumedAtStep[]}) and
-     * derangement state ({@code derangement[]}, {@code usedFull[]}, Fenwick tree)
-     * atomically.
+     * and updates encoded state and derangement state atomically.
      * <p>
      * The relative digit indexes into the available relative candidates
      * (0..actualN-1 minus already-used and minus step itself). The absolute
@@ -336,15 +308,12 @@ public final class DerangadicIncrement {
      * when it is still available so as not to create a fixed point in the full
      * n-element permutation.
      *
-     * @param state   mutable state object
-     * @param step    current step index (0-based, MSD-first within active window)
-     * @param digit   target digit value for this step
-     * @param avail   Fenwick tree tracking available elements (1-based indexing)
-     * @param offset  global offset = {@code n - actualN}
-     * @implNote Dead-end avoidance is applied when {@code remainingSize == 2}.
+     * @param step   current step index (0-based, MSD-first within active window)
+     * @param digit  target digit value for this step
+     * @param avail  Fenwick tree tracking available elements (1-based indexing)
+     * @param offset global offset = {@code n - actualN}
      */
-    private static void consumeAtStep(DerangadicState state, int step, int digit,
-                                      FenwickTree avail, int offset) {
+    private void consumeAtStep(int step, int digit, FenwickTree avail, int offset) {
         int actualN = state.actualN;
 
         // ---- Encoded (relative) selection with dead-end avoidance ----
@@ -401,7 +370,7 @@ public final class DerangadicIncrement {
     }
 
     // =========================================================================
-    // Digit constraint helpers (pure functions on encoded state)
+    // Digit constraint helpers
     // =========================================================================
 
     /**
@@ -410,12 +379,10 @@ public final class DerangadicIncrement {
      * If the current position is still available as an element, it cannot be chosen
      * (would create a fixed point), reducing the legal candidate count by 1.
      *
-     * @param state current encoded state
-     * @param step  current step index (0-based, MSD-first within active window)
+     * @param step current step index (0-based, MSD-first within active window)
      * @return maximum valid digit value for this step
-     * @implNote Returns 0 if no legal candidates remain.
      */
-    private static int computeMaxDigit(DerangadicState state, int step) {
+    private int computeMaxDigit(int step) {
         int unused = state.actualN - step;
         // If position 'step' is still available as an element, it cannot be chosen (would be fixed point)
         int legalCount = state.eUsed[step] ? unused : unused - 1;
@@ -429,12 +396,10 @@ public final class DerangadicIncrement {
      * candidates that would force the final element to map to its own index
      * are skipped, potentially shifting the minimum digit by +1.
      *
-     * @param state current encoded state
-     * @param step  current step index (0-based, MSD-first within active window)
+     * @param step current step index (0-based, MSD-first within active window)
      * @return minimum valid digit value for this step (usually 0)
-     * @implNote Returns 0 if no candidates are valid (should not occur for valid states).
      */
-    private static int computeMinDigit(DerangadicState state, int step) {
+    private int computeMinDigit(int step) {
         int remainingSize = state.actualN - step;
         int seen = 0;
         for (int c = 0; c < state.actualN; c++) {
@@ -458,43 +423,8 @@ public final class DerangadicIncrement {
         return 0;
     }
 
-    /**
-     * Advances the state and returns the carry length (number of digits modified).
-     * @return carry length (>0) if successful, 0 if enumeration is complete.
-     */
-    public int incrementAndGetCarryLength(DerangadicState state) {
-        int actualN = state.actualN;
-
-        // Scan from index 1 (LSD at index 0 never carries)
-        int p = -1;
-        for (int i = 1; i < actualN; i++) {
-            if (state.digits[i] < state.maxDigit[i]) {
-                p = i;
-                break;
-            }
-        }
-
-        if (p != -1) {
-            state.digits[p]++;
-            rollbackAndRebuild(state, actualN - 1 - p);
-            return p + 1; // Carry length = pivot index + 1
-        }
-
-        // All digits maximal: cross parity-band boundary
-        if (actualN < state.n) {
-            int newActualN = actualN + 2;
-            BigInteger firstRank = calculator.subFactorial(actualN);
-            int[] firstDigits = alg.toDerangadic(firstRank, state.n);
-            state.resizeActualN(newActualN, firstDigits);
-            rebuildAllFromDigits(state);
-            return newActualN; // Expansion counts as full-length carry
-        }
-
-        return 0; // Enumeration complete
-    }
-
     // =========================================================================
-    // Inner state class — package-private
+    // Inner state class
     // =========================================================================
 
     /**
@@ -515,13 +445,13 @@ public final class DerangadicIncrement {
      *   availTree         Fenwick tree over [1, n] — always current.
      *
      * ── Invariant ────────────────────────────────────────────────────────────
-     *   After any call to incrementEncoded(), increment(), or initialState(),
-     *   BOTH groups are consistent and derangement[] is valid without further work.
+     *   After any call to increment(), BOTH groups are consistent and
+     *   derangement[] is valid without further work.
      * </pre>
      * <p>
      * <b>Digit Ordering:</b> {@code digits[]} is LSD-first: {@code digits[0]} = {@code D_0}.
      */
-    static final class DerangadicState {
+    public static final class DerangadicState {
 
         // encoded state
         int[] digits;
@@ -573,29 +503,6 @@ public final class DerangadicIncrement {
             this.eUsed = new boolean[newActualN];
             // derangement[], usedFull[], availTree stay at size n
         }
-
-        /**
-         * Returns a defensive copy of the current digit array.
-         *
-         * @return digit array in LSD-first order
-         */
-        int[] getDigits() { return digits.clone(); }
-
-        /**
-         * Returns the current derangement array.
-         * <p>
-         * <b>Note:</b> Returns live reference; clone if immutability is required.
-         *
-         * @return derangement array of length {@code n}
-         */
-        int[] currentDerangement() { return derangement; }
-
-        /**
-         * Returns the current active encoding length.
-         *
-         * @return {@code actualN}
-         */
-        int getActualN() { return actualN; }
 
         @Override
         public String toString() {

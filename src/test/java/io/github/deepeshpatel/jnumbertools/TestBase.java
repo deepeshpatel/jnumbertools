@@ -10,7 +10,11 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 public class TestBase {
-    static { System.getProperties().setProperty("stress.testing","false"); }
+
+    static {
+        System.getProperties().setProperty("stress.testing","true");
+        System.getProperties().setProperty("performance.testing","true");
+    }
 
     public static final Calculator calculator = new Calculator();
     public static final Permutations permutation = new Permutations(calculator);
@@ -34,7 +38,6 @@ public class TestBase {
     public static final List<Integer> num_0_to_5 = List.of(0, 1, 2, 3, 4, 5);
 
     public static final String errMsgForIncrement = "Increment 'm' must be positive (m > 0)";
-    public static final String errMsgForStart = "Element should be in range [0,";
     public static final String errMsgNullInput = "elements should not be null for combinatorics generators to work";
     public static final String errMsgNK = "n and k must be ≥ 0";
     public static final String errMsgOptions = "Options must be non-null, and contain frequencies ≥ 0";
@@ -70,5 +73,14 @@ public class TestBase {
             options.put(list.get(i), freq[i]);
         }
         return options;
+    }
+
+    public static boolean isLexLess(int[] a, int[] b) {
+        if(a.length != b.length) return a.length < b.length;
+        int len = a.length;
+        for (int i = len-1; i >=0; i--) {
+            if (b[i] > a[i]) return true;
+        }
+        return false;
     }
 }

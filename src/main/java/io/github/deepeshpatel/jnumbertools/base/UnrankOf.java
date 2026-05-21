@@ -5,10 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
-import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
-import io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic;
-import io.github.deepeshpatel.jnumbertools.numbersystem.FactoradicAlgorithms;
-import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
+import io.github.deepeshpatel.jnumbertools.numbersystem.*;
 
 import java.math.BigInteger;
 
@@ -137,7 +134,7 @@ public final class UnrankOf {
      * @since 3.0.2
      */
     public int[] derangement(BigInteger rank, int n) {
-        return Derangadic.unrank(rank, n, calculator);
+        return new DerangadicAlgorithms(calculator).unrank(rank, n);
     }
 
     /**
@@ -150,6 +147,6 @@ public final class UnrankOf {
      * @since 3.0.2
      */
     public int[] derangement(long rank, int n) {
-        return Derangadic.unrank(rank, n, calculator);
+        return derangement(BigInteger.valueOf(rank), n);
     }
 }

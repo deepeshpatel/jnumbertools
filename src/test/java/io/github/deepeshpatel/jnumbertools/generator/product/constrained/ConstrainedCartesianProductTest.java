@@ -14,10 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ConstrainedCartesianProductTest {
 
-    static final List<String> pizzaBase = of("Small ", "Medium", "Large");
-    static final List<String> sauce = of("Tomato Ketchup", "White Sauce", "Green Chutney");
-    static final List<String> cheese = of("Ricotta", "Mozzarella", "Cheddar");
-    static final List<String> toppings = of("tomato", "capsicum", "onion", "paneer", "corn");
+    final List<String> pizzaBase = of("Small ", "Medium", "Large");
+    final List<String> sauce = of("Tomato Ketchup", "White Sauce", "Green Chutney");
+    final List<String> cheese = of("Ricotta", "Mozzarella", "Cheddar");
+    final List<String> toppings = of("tomato", "capsicum", "onion", "paneer", "corn");
 
     @Test
     void assertCount() {
