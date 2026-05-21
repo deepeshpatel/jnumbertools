@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 public class TestBase {
 
     static {
-        System.getProperties().setProperty("stress.testing","true");
+        System.getProperties().setProperty("stress.testing","false");
         System.getProperties().setProperty("performance.testing","true");
     }
 

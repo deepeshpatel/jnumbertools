@@ -108,7 +108,7 @@ public class DerangadicStateMachinePerformanceTest {
 
         for (int i = 0; i < iterations; i++) {
             stateMachine.increment();
-            encodedCache.add(stateMachine.getEncoded());
+            encodedCache.add(stateMachine.encoded());
         }
 
         // Step 2: Time materialization only
@@ -196,7 +196,7 @@ public class DerangadicStateMachinePerformanceTest {
         List<int[]> encodedCache = new ArrayList<>(iterations);
         for (int i = 0; i < iterations; i++) {
             stateMachine.increment();
-            encodedCache.add(stateMachine.getEncoded());
+            encodedCache.add(stateMachine.encoded());
         }
 
         boolean allMatch = true;
@@ -286,7 +286,7 @@ public class DerangadicStateMachinePerformanceTest {
         List<int[]> encodedCache = new ArrayList<>(iterations);
         for (int i = 0; i < iterations; i++) {
             stateMachine.increment();
-            encodedCache.add(stateMachine.getEncoded());
+            encodedCache.add(stateMachine.encoded());
         }
 
         // Warmup

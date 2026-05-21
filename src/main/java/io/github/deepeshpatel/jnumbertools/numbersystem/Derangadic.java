@@ -48,7 +48,7 @@ public final class Derangadic  {
     }
 
     public int[] encoded() {
-        return stateMachine.getEncoded();
+        return stateMachine.encoded();
     }
 
     public BigInteger rank() {

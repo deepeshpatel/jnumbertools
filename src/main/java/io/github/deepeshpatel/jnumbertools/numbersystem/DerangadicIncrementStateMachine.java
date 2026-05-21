@@ -50,7 +50,7 @@ import java.util.Objects;
  *   <li>Arrays are stored <strong>LSD-first</strong>: {@code digits[0]} = {@code D_0} (least significant),
  *       {@code digits[k-1]} = {@code D_{k-1}} (most significant).</li>
  *   <li>For display/paper notation, digits are shown <strong>MSD-first</strong>: {@code [D_{k-1}, ..., D_0]}.</li>
- *   <li>{@link #getEncoded()} returns the live internal array for performance; callers must not modify it.</li>
+ *   <li>{@link #encoded()} returns the live internal array for performance; callers must not modify it.</li>
  * </ul>
  *
  * @author Deepesh Patel &amp; Aditya Patel
@@ -116,7 +116,6 @@ public final class DerangadicIncrementStateMachine {
      * <b>Performance note:</b> Returns a live reference to the internal array
      * for zero-copy performance. Callers must NOT modify the returned array.
      * If mutation is needed, clone the array explicitly.
-     *
      * @return live reference to the current derangement array of length {@code n}
      */
     public int[] derangement() {
@@ -129,10 +128,9 @@ public final class DerangadicIncrementStateMachine {
      * <b>Performance note:</b> Returns a live reference to the internal array
      * for zero-copy performance. Callers must NOT modify the returned array.
      * If mutation is needed, clone the array explicitly.
-     *
      * @return live reference to the digit array in LSD-first order
      */
-    public int[] getEncoded() {
+    public int[] encoded() {
         return state.digits;
     }
 
@@ -144,32 +142,8 @@ public final class DerangadicIncrementStateMachine {
      * @return {@code true} if advanced; {@code false} if already at the last rank
      */
     public boolean increment() {
-        int actualN = state.actualN;
-
-        // Scan from index 1 (index 0 = LSD, always forced to 0 by Derangadic invariant).
-        int p = -1;
-        for (int i = 1; i < actualN; i++) {
-            if (state.digits[i] < state.maxDigit[i]) {
-                p = i;
-                break;
-            }
-        }
-
-        if (p != -1) {
-            state.digits[p]++;
-            rollbackAndRebuild(actualN - 1 - p);
-            return true;
-        }
-
-        // All digits at maximum — cross the parity-band boundary.
-        if (actualN >= state.n) return false;
-
-        int newActualN = actualN + 2;
-        BigInteger firstRank = calculator.subFactorial(actualN);
-        int[] firstDigits = alg.toDerangadic(firstRank, state.n);
-        state.resizeActualN(newActualN, firstDigits);
-        rebuildAllFromDigits();
-        return true;
+        int carry = incrementAndGetCarryLength();
+        return carry > 0;
     }
 
     /**
@@ -183,13 +157,7 @@ public final class DerangadicIncrementStateMachine {
         int actualN = state.actualN;
 
         // Scan from index 1 (LSD at index 0 never carries)
-        int p = -1;
-        for (int i = 1; i < actualN; i++) {
-            if (state.digits[i] < state.maxDigit[i]) {
-                p = i;
-                break;
-            }
-        }
+        int p = findPivot();
 
         if (p != -1) {
             state.digits[p]++;
@@ -324,18 +292,9 @@ public final class DerangadicIncrementStateMachine {
             if (state.eUsed[c] || c == step) continue;
 
             // Dead-end avoidance: when remaining == 2, skip candidate that forces fixed point
-            if (remainingSize == 2) {
-                int otherElem = -1;
-                for (int x = 0; x < actualN; x++) {
-                    if (!state.eUsed[x] && x != c) {
-                        otherElem = x;
-                        break;
-                    }
-                }
-                if (otherElem == step + 1) {
-                    seenRel++; // Skip this candidate but count it
-                    continue;
-                }
+            if (isDeadEndCandidate(step, c, remainingSize)) {
+                seenRel++;
+                continue;
             }
 
             if (seenRel == digit) {
@@ -406,21 +365,46 @@ public final class DerangadicIncrementStateMachine {
             if (state.eUsed[c] || c == step) continue;
 
             // Dead-end avoidance: when remaining == 2, skip candidate that forces fixed point
-            boolean deadEnd = false;
-            if (remainingSize == 2) {
-                int otherElem = -1;
-                for (int x = 0; x < state.actualN; x++) {
-                    if (!state.eUsed[x] && x != c) {
-                        otherElem = x;
-                        break;
-                    }
-                }
-                deadEnd = (otherElem == step + 1);
+            boolean deadEnd = isDeadEndCandidate(step, c, remainingSize);
+            if (deadEnd) {
+                seen++;
+                continue;
             }
-            if (!deadEnd) return seen;
-            seen++;
+            return seen;
         }
         return 0;
+    }
+
+    /**
+     * Checks if choosing candidate {@code c} at current step would cause a dead-end
+     * when only 2 positions remain.
+     */
+    private boolean isDeadEndCandidate(int step, int c, int remainingSize) {
+        if (remainingSize != 2) {
+            return false;
+        }
+        int otherElem = -1;
+        for (int x = 0; x < state.actualN; x++) {
+            if (!state.eUsed[x] && x != c) {
+                otherElem = x;
+                break;
+            }
+        }
+        return otherElem == step + 1;
+    }
+
+    /**
+     * Finds the rightmost (highest significance) digit that can be incremented.
+     * Returns -1 if no such digit exists (full carry / expansion needed).
+     */
+    private int findPivot() {
+        int actualN = state.actualN;
+        for (int i = 1; i < actualN; i++) {   // start from 1, skip LSD
+            if (state.digits[i] < state.maxDigit[i]) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     // =========================================================================
