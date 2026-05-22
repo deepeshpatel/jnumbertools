@@ -102,9 +102,6 @@ public class MultisetPermutationTest {
                 of("Blue", "Green", "Red", "Red")
         );
 
-        var elements = of("Red", "Green", "Blue");
-        int[] frequencies = {2, 1, 1};
-
         LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
 
         options.put("Red",2);

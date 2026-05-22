@@ -6,7 +6,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.derangement;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic;
+import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic;
 
 import java.math.BigInteger;
 import java.util.Collections;
@@ -18,7 +18,7 @@ import java.util.NoSuchElementException;
  * Generates derangements at a sequence of lexicographical ranks.
  * <p>
  * Each rank in the supplied {@link Iterable} is converted to a derangement via
- * {@link Derangadic#unrank(BigInteger, int, Calculator)}. Used by
+ * {@link Derangadic#derangement()}  #unrank(BigInteger, int, Calculator)}. Used by
  * {@link DerangementBuilder} to implement {@code lexOrderMth},
  * {@code byRanks}, {@code sample} and {@code choice}.
  * </p>

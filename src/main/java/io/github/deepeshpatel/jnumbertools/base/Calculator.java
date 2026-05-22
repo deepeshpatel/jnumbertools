@@ -379,10 +379,21 @@ public final class Calculator {
      * @param k number of fixed points (0 ≤ k ≤ n)
      * @return the Rencontres number as a BigInteger;
      *         returns {@code BigInteger.ZERO} if k < 0 or k > n
+     * @see <a href="https://en.wikipedia.org/wiki/Rencontres_numbers">Rencontres numbers</a>
      */
     public BigInteger rencontresNumber(int n, int k) {
         if (k < 0 || k > n) return BigInteger.ZERO;
         return nCr(n, k).multiply(subFactorial(n - k));
+    }
+
+    /**
+     * @see <a href="https://en.wikipedia.org/wiki/Telephone_number_(mathematics)">Telephone Number(mathematics)</a>
+     */
+    //TODO: create cashing for this
+    public BigInteger telephoneNumber(int n) {
+        if (n == 0 || n == 1) return BigInteger.ONE;
+        return telephoneNumber(n-1).add(
+                BigInteger.valueOf(n-1).multiply(telephoneNumber(n-2)));
     }
 
     /**
@@ -422,7 +433,7 @@ public final class Calculator {
      * Clears all memoization caches (binomial, permutation, factorial, subfactorial).
      * Caches will rebuild lazily on next use.
      */
-    public void     clearCaches() {
+    public void  clearCaches() {
         nCrMemo.clear();
         nPrMemo.clear();
         restrictedDerangementMemo.clear();   // ← Add this

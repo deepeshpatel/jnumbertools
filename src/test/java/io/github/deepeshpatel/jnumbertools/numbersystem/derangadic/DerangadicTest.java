@@ -2,9 +2,11 @@
  * JNumberTools Library v3.0.2
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-package io.github.deepeshpatel.jnumbertools.numbersystem;
+package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic;
+import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithms;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,7 +18,7 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.isLexLess;
-import static io.github.deepeshpatel.jnumbertools.numbersystem.DerangadicAlgorithmsTest.isValidDerangement;
+import static io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithmsTest.isValidDerangement;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**

@@ -9,7 +9,7 @@ import java.util.Iterator;
 
 /**
  * Iterable for generating every mᵗʰ rank in lexicographical order.
- *
+ * <p>
  * Produces a sequence of ranks (BigInteger) starting from a given rank, incrementing by a step size,
  * up to an exclusive upper bound. Used by combinatorial generators (e.g., permutations, combinations)
  * to select every mᵗʰ element in lexicographical order. The iterator is not thread-safe; use separate
@@ -56,7 +56,7 @@ public class EveryMthIterable implements Iterable<BigInteger> {
 
     /**
      * Returns an iterator for every mᵗʰ rank.
-     *
+     * <p>
      * Generates ranks from start to upperBound (exclusive), incrementing by increment.
      * The iterator is not thread-safe and should not be shared across threads.
      *

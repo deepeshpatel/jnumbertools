@@ -6,7 +6,7 @@ package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Combinadic;
-import io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic;
+import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Factoradic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
 

@@ -13,7 +13,7 @@ public class TestBase {
 
     static {
         System.getProperties().setProperty("stress.testing","false");
-        System.getProperties().setProperty("performance.testing","true");
+        System.getProperties().setProperty("performance.testing","false");
     }
 
     public static final Calculator calculator = new Calculator();

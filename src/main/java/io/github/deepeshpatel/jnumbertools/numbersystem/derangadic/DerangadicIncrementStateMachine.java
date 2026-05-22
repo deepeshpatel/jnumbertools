@@ -2,7 +2,7 @@
  * JNumberTools Library v3.0.2
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-package io.github.deepeshpatel.jnumbertools.numbersystem;
+package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.FenwickTree;
@@ -445,9 +445,9 @@ public final class DerangadicIncrementStateMachine {
         int actualN;
 
         // derangement state
-        int[] derangement;
-        boolean[] usedFull;
-        FenwickTree availTree;
+        final int[] derangement;
+        final boolean[] usedFull;
+        final FenwickTree availTree;
 
         // immutable
         final int n;

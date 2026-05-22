@@ -31,7 +31,7 @@ import java.util.Random;
  * <ul>
  *   <li><b>Lexicographical Order</b> — {@link #lexOrder()}: yields all
  *       {@code D_n} derangements, backed by the high-performance incremental
- *       {@link io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic#next()
+ *       {@link io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic#next()
  *       Derangadic.next()} successor engine.</li>
  *   <li><b>Every m<sup>th</sup></b> — {@link #lexOrderMth(BigInteger, BigInteger)}:
  *       yields derangements at ranks {@code start, start+m, start+2m, …}.</li>
@@ -76,7 +76,7 @@ import java.util.Random;
  * @author Deepesh Patel &amp; Aditya Patel
  * @see Derangement
  * @see DerangementByRanks
- * @see io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic
+ * @see io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic
  * @since 3.0.2
  */
 public final class DerangementBuilder<T> implements Builder<T> {

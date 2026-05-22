@@ -6,8 +6,7 @@ package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
-import io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic;
-import io.github.deepeshpatel.jnumbertools.numbersystem.DerangadicAlgorithms;
+import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithms;
 import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
 
 import java.math.BigInteger;

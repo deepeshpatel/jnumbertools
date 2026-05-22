@@ -8,7 +8,6 @@ import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SubsetGeneratorTest {
 

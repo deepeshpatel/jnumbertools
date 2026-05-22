@@ -7,7 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.derangement;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
-import io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic;
+import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic;
 
 import java.math.BigInteger;
 import java.util.*;

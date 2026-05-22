@@ -50,7 +50,7 @@ import java.util.stream.IntStream;
  * <h2>Performance</h2>
  * <p>
  * {@link DerangementBuilder#lexOrder()} is backed by the incremental
- * {@link io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic#next()
+ * {@link io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic#next()
  * Derangadic.next()} successor engine.
  * </p>
  *
@@ -60,7 +60,7 @@ import java.util.stream.IntStream;
  * @see AllExamples
  * @see Permutations
  * @see Combinations
- * @see io.github.deepeshpatel.jnumbertools.numbersystem.Derangadic
+ * @see io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic
  * @author Deepesh Patel &amp; Aditya Patel
  * @since 3.0.2
  */

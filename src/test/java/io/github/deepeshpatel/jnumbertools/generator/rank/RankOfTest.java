@@ -42,4 +42,11 @@ public class RankOfTest {
         BigInteger rank = rankOf.uniqueCombination(5, 2, 1, 0);
         assertEquals(2, rank.intValue());
     }
+
+    @Test
+    void shouldGenerateCorrectRankOfDerangement() {
+        int[] derangementAtRank5ForN4 = unrankOf.derangement(5, 4);
+        BigInteger rank = rankOf.derangement(derangementAtRank5ForN4);
+        assertEquals(BigInteger.valueOf(5), rank);
+    }
 }

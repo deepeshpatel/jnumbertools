@@ -2,12 +2,16 @@
  * JNumberTools Library v3.0.2
  * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
  */
-package io.github.deepeshpatel.jnumbertools.numbersystem;
+package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithms;
+import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicIncrementStateMachine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -15,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.isLexLess;
-import static io.github.deepeshpatel.jnumbertools.numbersystem.DerangadicAlgorithmsTest.isValidDerangement;
+import static io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithmsTest.isValidDerangement;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -37,29 +41,20 @@ public class DerangadicIncrementStateMachineTest {
     // 1. Digit sequence matches toDerangadic exactly for every rank
     // =========================================================================
 
-    @Test
-    @DisplayName("Digit sequence matches toDerangadic for even n=4 (all 9 ranks)")
-    void testDigitSequenceN4() { assertDigitSequenceMatches(4); }
-
-    @Test
-    @DisplayName("Digit sequence matches toDerangadic for odd n=5 (all 44 ranks)")
-    void testDigitSequenceN5() { assertDigitSequenceMatches(5); }
-
-    @Test
-    @DisplayName("Digit sequence matches toDerangadic for even n=6 (all 265 ranks)")
-    void testDigitSequenceN6() { assertDigitSequenceMatches(6); }
-
-    @Test
-    @DisplayName("Digit sequence matches toDerangadic for odd n=7 (all 1854 ranks)")
-    void testDigitSequenceN7() { assertDigitSequenceMatches(7); }
-
-    @Test
-    @DisplayName("Digit sequence matches toDerangadic for even n=8 (all 14833 ranks)")
-    void testDigitSequenceN8() { assertDigitSequenceMatches(8); }
-
-    @Test
-    @DisplayName("Digit sequence matches toDerangadic for odd n=9 (all 133496 ranks)")
-    void testDigitSequenceN9() { assertDigitSequenceMatches(9); }
+    @ParameterizedTest(name = "n={0}, all {1} ranks")
+    @CsvSource({
+            "4, 9",
+            "5, 44",
+            "6, 265",
+            "7, 1854",
+            "8, 14833",
+            "9, 133496"
+    })
+    @DisplayName("Digit sequence matches toDerangadic for complete small domains")
+    void testDigitSequenceMatchesReference(int n, long expectedCount) {
+        assertEquals(expectedCount, ALG.derangementCount(n).longValue(), "Unexpected derangement count for n=" + n);
+        assertDigitSequenceMatches(n);
+    }
 
     private void assertDigitSequenceMatches(int n) {
         BigInteger total = ALG.derangementCount(n);
@@ -201,12 +196,12 @@ public class DerangadicIncrementStateMachineTest {
     }
 
     // =========================================================================
-    // 6. Reset functionality (via new instance)
+    // 6. Seeded construction equivalence
     // =========================================================================
 
     @Test
-    @DisplayName("Reset should correctly reposition the incrementor")
-    void testReset() {
+    @DisplayName("New machine seeded at a rank matches an incremented machine at that same rank")
+    void testSeededMachineMatchesIncrementedMachine() {
         int n = 8;
         DerangadicIncrementStateMachine machine = new DerangadicIncrementStateMachine(n, BigInteger.ZERO, CALC);
 
@@ -219,13 +214,13 @@ public class DerangadicIncrementStateMachineTest {
         for (int i = 0; i < 5; i++) resetMachine.increment();
         int[] afterReset = resetMachine.encoded();
 
-        assertArrayEquals(after5, afterReset, "Reset should produce same state");
+        assertArrayEquals(after5, afterReset, "Fresh machine advanced to rank 5 should produce same encoded state");
 
         // Reset to rank 10 directly
         DerangadicIncrementStateMachine rank10Machine = new DerangadicIncrementStateMachine(n, BigInteger.TEN, CALC);
         int[] at10 = rank10Machine.encoded();
         assertTrue(arraysEqualIgnoringTrailingZeros(ALG.toDerangadic(10, n), at10),
-                "Reset to specific rank should match direct toDerangadic");
+                "Direct construction at rank 10 should match direct toDerangadic");
     }
 
     // =========================================================================
@@ -336,30 +331,24 @@ public class DerangadicIncrementStateMachineTest {
     // 9. incrementAndGetCarryLength tests (new for state machine)
     // =========================================================================
 
-//    @Test
-//    @DisplayName("incrementAndGetCarryLength returns correct carry lengths")
-//    void testIncrementAndGetCarryLength() {
-//        int n = 6;
-//        DerangadicIncrementStateMachine machine = new DerangadicIncrementStateMachine(n, BigInteger.ZERO, CALC);
-//        BigInteger total = ALG.derangementCount(n);
-//
-//        int steps = 0;
-//        int totalCarry = 0;
-//
-//        while (steps < total.intValue() - 1) {
-//            int carry = machine.incrementAndGetCarryLength();
-//            assertTrue(carry > 0, "Carry length should be positive");
-//            totalCarry += carry;
-//            steps++;
-//        }
-//
-//        // Last call should return 0
-//        assertEquals(0, machine.incrementAndGetCarryLength(), "Final carry length should be 0");
-//
-//        // Average carry length should be bounded (e² ≈ 7.4)
-//        double avgCarry = (double) totalCarry / steps;
-//        assertTrue(avgCarry <= 10.0, "Average carry length " + avgCarry + " exceeds expected bound");
-//    }
+    @Test
+    @DisplayName("incrementAndGetCarryLength advances full state and returns 0 after last rank")
+    void testIncrementAndGetCarryLength() {
+        int n = 6;
+        DerangadicIncrementStateMachine machine = new DerangadicIncrementStateMachine(n, BigInteger.ZERO, CALC);
+        int lastRank = ALG.derangementCount(n).intValue() - 1;
+
+        for (int rank = 1; rank <= lastRank; rank++) {
+            int carry = machine.incrementAndGetCarryLength();
+            assertTrue(carry > 0, "Carry length should be positive at rank " + rank);
+            assertTrue(arraysEqualIgnoringTrailingZeros(ALG.toDerangadic(rank, n), machine.encoded()),
+                    "Encoded mismatch at rank " + rank);
+            assertArrayEquals(ALG.unrank(rank, n), machine.derangement(),
+                    "Derangement mismatch at rank " + rank);
+        }
+
+        assertEquals(0, machine.incrementAndGetCarryLength(), "Final carry length should be 0");
+    }
 
 //    @Test
 //    @DisplayName("incrementAndGetCarryLength matches manual carry counting")
@@ -470,24 +459,61 @@ public class DerangadicIncrementStateMachineTest {
 
 
     @Test
-    @DisplayName("Consecutive increments produce non-decreasing digits at each position")
-    void testConsecutiveIncrementsProduceIncreasingDigits() {
+    @DisplayName("Consecutive encoded states decode to consecutive ranks")
+    void testConsecutiveEncodedStatesDecodeToConsecutiveRanks() {
         int[] evenAndOddN = { 12,13 };
 
-        // Test even n values
         for (int n : evenAndOddN) {
             DerangadicIncrementStateMachine machine = new DerangadicIncrementStateMachine(n, BigInteger.ZERO, CALC);
-            int[] prevDigits = machine.encoded().clone();
-            for (int i = 2; i < 500; i++) {
-                machine.increment();
-                int[] currDigits = machine.encoded().clone();
-                if(!isLexLess(prevDigits, currDigits)) {
-                    System.out.println("Previous: " + Arrays.toString(prevDigits));
-                    System.out.println("Current:  " + Arrays.toString(currDigits));
-                    fail();
+            for (int rank = 0; rank < 500; rank++) {
+                assertEquals(BigInteger.valueOf(rank), ALG.fromDerangadic(machine.encoded(), n),
+                        "Encoded state should decode to current rank for n=" + n + ", rank=" + rank);
+                if (rank < 499) {
+                    assertTrue(machine.increment());
                 }
-                prevDigits = currDigits;
             }
         }
+    }
+
+
+    @Test
+    @DisplayName("In-place increment keeps sub-microsecond average step time for representative n values")
+    void testPerformanceOfInPlaceDerangement() {
+        int[] nValues = {50, 100, 500, 1000, 5000, 8000};
+        int iterations = 1000;
+        long startRank = 0;//9_000_000_000L;
+
+        long totalTime = 0;
+
+        Calculator CALC = new Calculator();
+
+        for (int n : nValues) {
+            long incTime = measureFullIncrement(n, startRank, iterations ,CALC);
+            totalTime+= incTime;
+        }
+        long averageNanos = totalTime/nValues.length;
+        assertTrue(averageNanos < 1_000,
+                "Average time per increment across tested n values should be under 1 microsecond, but was "
+                        + averageNanos + " ns");
+    }
+
+    private long measureFullIncrement(int n, long startRank, int iterations, Calculator calculator) {
+
+        var statMachine = new DerangadicIncrementStateMachine(n,BigInteger.valueOf(startRank), calculator);
+        int sink = 0;
+        // Warmup
+        for (int i = 0; i < 200000; i++) {
+            statMachine.increment();
+            sink+= statMachine.derangement()[0]; // Prevent dead code elimination
+        }
+
+        //System.gc();
+
+        long startTime = System.nanoTime();
+        for (int i = 0; i < iterations; i++) {
+            statMachine.increment();
+            sink+= statMachine.derangement()[0]; // Prevent dead code elimination
+        }
+        return (System.nanoTime() - startTime) / iterations;
     }
 }
