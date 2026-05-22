@@ -27,63 +27,66 @@ import java.util.*;
  * <strong>Least-Significant-Digit-first (LSD-first)</strong> order:
  * </p>
  * <pre>
- *   a[0]          = D_0   = Least Significant Digit  (LSD)
+ *   a[0]          = D_0          — Least Significant Digit (LSD)
  *   a[1]          = D_1
  *   ...
- *   a[a.length-1] = D_{k-1} = Most Significant Digit (MSD)
+ *   a[a.length-1] = D_{k-1}     — Most Significant Digit (MSD)
  * </pre>
  * <p>
  * This matches the paper's positional notation, which defines the Derangadic
- * representation as {@code (D_{k-1}, D_{k-2}, …, D_1, D_0)} — MSD written first,
- * LSD written last. The in-memory array simply reverses that left-to-right order:
- * index 0 holds the last (least-significant) digit of the paper notation.
+ * representation as {@code (D_{k-1}, D_{k-2}, …, D_1, D_0)} — MSD written first
+ * (on the left), LSD written last (on the right). The in-memory array simply reverses
+ * that written order: index&nbsp;0 holds the rightmost (least-significant) digit of the
+ * paper notation.
  * </p>
  * <p>
- * When printing in human-readable (MSD-first) form, reverse the array:
- * print {@code a[a.length-1], a[a.length-2], …, a[0]}.
+ * When printing in human-readable (MSD-first) form, iterate the array from
+ * {@code a[a.length-1]} down to {@code a[0]}.
  * </p>
  *
  * <h2>Variable-length encoding and the parity invariant</h2>
  * <p>
  * The digit array has length equal to the <em>minimal carrier length</em>
  * {@code actualN}: the smallest integer with the same parity as {@code n} for
- * which {@code D_actualN > rank}. Positions {@code [0, n − actualN)} of the
- * full {@code n}-element encoding are implicitly zero (they do not appear in
- * the array, but logically exist as trailing zeros when the array is read
- * MSD-first).
+ * which {@code D_actualN > rank}. Positions logically corresponding to indices
+ * {@code actualN} through {@code n-1} in the full {@code n}-element encoding are
+ * implicitly zero — they appear as leading zeros in MSD-first (paper) notation and
+ * are not stored in the array.
  * </p>
  * <p>
  * Because {@code D_k} grows super-exponentially, the carrier length increases
  * in steps of two (parity-preserving jumps), reflecting the fact that the
  * Derangadic encoding of a rank depends on the parity of {@code n} but not
- * on {@code n} itself.
+ * on {@code n} itself beyond parity.
  * </p>
  *
- * <h2>Example: n = 4, D₄ = 9</h2>
+ * <h2>Example: n = 12 (even), ranks 0–8</h2>
  * <p>
- * The table below shows rank, the digit array as stored in memory (LSD at index 0),
- * and the same digits printed MSD-first as in the paper. The corresponding
- * derangement is also shown.
+ * The table below shows rank, the digit array as returned by
+ * {@link #toDerangadic(BigInteger, int)} (LSD at index 0, MSD at the last index),
+ * and the same digits displayed MSD-first as in the paper.
+ * The MSD-first form is obtained by reversing the array before printing.
  * </p>
  * <pre>
- * Rank  array (LSD→MSD, i.e. a[0]…a[k-1])   MSD-first display   Derangement
- *   0   [0, 0]                                D_1 D_0 = 0 0       [1, 0, 3, 2]
- *   1   [0, 1, 1, 0]                          0 1 1 0             [1, 2, 3, 0]
- *   2   [0, 0, 2, 0]                          0 2 0 0             [1, 3, 0, 2]
- *   3   [0, 1, 2, 0]  ← note: a[0]=0, a[1]=1, a[2]=2, a[3]=0
- *                                             0 2 1 0             [2, 0, 3, 1]
- *   4   [1, 3, 2, 0]                          0 2 3 1             [2, 3, 0, 1]
- *   5   [0, 1, 0, 1]                          1 0 1 0             [2, 3, 1, 0]
- *   6   [1, 2, 0, 1]                          1 0 2 1             [3, 0, 1, 2]
- *   7   [0, 1, 1, 1]                          1 1 1 0             [3, 2, 0, 1]
- *   8   [2, 1, 1, 0]                          0 1 1 2             [3, 2, 1, 0]
+ *  Rank  array stored LSD-first (a[0]=D_0 … a[k-1]=D_{k-1})   MSD-first display
+ *  0     [0, 0]                                                  [0, 0]
+ *  1     [0, 1, 1, 0]                                            [0, 1, 1, 0]
+ *  2     [0, 0, 2, 0]                                            [0, 2, 0, 0]
+ *  3     [0, 1, 0, 1]                                            [1, 0, 1, 0]
+ *  4     [0, 0, 1, 1]                                            [1, 1, 0, 0]
+ *  5     [0, 1, 1, 1]                                            [1, 1, 1, 0]
+ *  6     [0, 0, 0, 2]                                            [2, 0, 0, 0]
+ *  7     [0, 0, 1, 2]                                            [2, 1, 0, 0]
+ *  8     [0, 1, 1, 2]                                            [2, 1, 1, 0]
  * </pre>
  * <p>
- * <strong>Trailing zeros</strong> (at the MSD end, i.e. high indices) are preserved
- * in the returned array to maintain consistent length based on {@code actualN}. When
- * comparing digit arrays for equality, trailing zeros (at high indices) should be
- * ignored, since they do not affect the rank. Use
- * {@code arraysEqualIgnoringTrailingZeros()} for such comparison.
+ * <strong>Trailing zeros</strong> in the stored (LSD-first) array appear at low indices
+ * (e.g. {@code a[0] = 0} for ranks 0–8 with n=12). They represent the LSD digits
+ * {@code D_0, D_1, …} and are structurally meaningful — they must not be stripped
+ * from the low end.  MSD-side leading zeros (at the high-index end) arise when
+ * {@code actualN < n}: those positions are trimmed by {@link #fromDerangement}.
+ * Use {@code arraysEqualIgnoringTrailingZeros()} only when comparing arrays that
+ * may differ in MSD-side padding.
  * </p>
  *
  * @author Deepesh Patel &amp; Aditya Patel
@@ -93,7 +96,7 @@ public final class DerangadicAlgorithms {
 
     private final Calculator calculator;
 
-    private static final int N_THRESHOLD     = 100;
+    private static final int N_THRESHOLD = 100;
     private static final int DIGIT_THRESHOLD = 100;
 
     public DerangadicAlgorithms(Calculator calculator) {
@@ -140,16 +143,17 @@ public final class DerangadicAlgorithms {
      * The returned array is <strong>LSD-first</strong>:
      * </p>
      * <pre>
-     *   result[0]              = D_0   (Least Significant Digit)
-     *   result[1]              = D_1
+     *   result[0]            = D_0       (Least Significant Digit)
+     *   result[1]            = D_1
      *   ...
      *   result[result.length-1] = D_{k-1}  (Most Significant Digit)
      * </pre>
      * <p>
      * The array length equals the minimal carrier length {@code actualN}: the
      * smallest integer with the same parity as {@code n} such that
-     * {@code D_actualN > rank}. The first {@code n − actualN} positions of the
-     * full {@code n}-element encoding are implicitly zero and are not stored.
+     * {@code D_actualN > rank}. Digits for positions logically above {@code actualN-1}
+     * in the full {@code n}-element encoding are implicitly zero and are not stored
+     * (they would appear as leading zeros in MSD-first paper notation).
      * </p>
      * <p>
      * To display in MSD-first (paper) order, iterate the array from
@@ -175,7 +179,6 @@ public final class DerangadicAlgorithms {
 
         for (int step = 0; step < actualN; step++) {
             int remainingSize = actualN - step;
-
             int restrictedCount = 0;
             for (int i = step; i < actualN; i++) {
                 if (!elementUsed[i]) {
@@ -189,7 +192,7 @@ public final class DerangadicAlgorithms {
             for (int candidate = 0; candidate < actualN; candidate++) {
                 if (elementUsed[candidate] || candidate == step) continue;
 
-                boolean pickingRestricted    = (candidate > step);
+                boolean pickingRestricted = (candidate > step);
                 boolean currentPosWasRestricted = (!elementUsed[step]);
 
                 int nextRestricted;
@@ -205,8 +208,7 @@ public final class DerangadicAlgorithms {
                 BigInteger blockSize = calculator.restrictedDerangements(remainingSize - 1, nextRestricted);
 
                 if (currentM.compareTo(cumulative.add(blockSize)) < 0) {
-                    // Store at the MSD-side of the array for this step:
-                    // step 0 → highest index (MSD), step k-1 → index 0 (LSD)
+                    // step 0 → index actualN-1 (MSD), step actualN-1 → index 0 (LSD = D_0)
                     digits[actualN - 1 - step] = legalFoundCount;
                     elementUsed[candidate] = true;
                     currentM = currentM.subtract(cumulative);
@@ -240,8 +242,9 @@ public final class DerangadicAlgorithms {
      * The input array must be <strong>LSD-first</strong>:
      * {@code digits[0] = D_0} (Least Significant Digit) and
      * {@code digits[digits.length-1] = D_{k-1}} (Most Significant Digit).
-     * Positions beyond {@code digits.length} are treated as implicit zeros
-     * (i.e. the MSD-end of the full encoding is zero-padded as needed).
+     * Any logical digit positions beyond {@code digits.length-1} up to {@code n-1}
+     * are treated as implicit zeros (i.e. the MSD end of the full encoding is
+     * zero-padded as needed).
      * </p>
      *
      * @param digits Derangadic digit array of length {@code actualN ≤ n},
@@ -252,7 +255,7 @@ public final class DerangadicAlgorithms {
     public BigInteger fromDerangadic(int[] digits, int n) {
         ZeroPaddedList allDigits = new ZeroPaddedList(digits, n);
 
-        Set<Integer> remainingElements  = new HashSet<>();
+        Set<Integer> remainingElements = new HashSet<>();
         Set<Integer> remainingPositions = new HashSet<>();
         for (int i = 0; i < n; i++) {
             remainingElements.add(i);
@@ -272,15 +275,16 @@ public final class DerangadicAlgorithms {
             }
             Collections.sort(legal);
 
-            // Digit for this step is at index (n-1-step), which in LSD-first storage
-            // means the high-index (MSD) end for early steps.
+            // Digit for this step: step 0 → index n-1 (MSD = D_{n-1}),
+            // step n-1 → index 0 (LSD = D_0).
             int digit = allDigits.get(n - 1 - step);
 
             for (int idx = 0; idx < digit; idx++) {
                 int candidate = legal.get(idx);
 
-                Set<Integer> newRemainingElements  = new HashSet<>(remainingElements);
+                Set<Integer> newRemainingElements = new HashSet<>(remainingElements);
                 newRemainingElements.remove(candidate);
+
                 Set<Integer> newRemainingPositions = new HashSet<>(remainingPositions);
                 newRemainingPositions.remove(pos);
 
@@ -305,7 +309,7 @@ public final class DerangadicAlgorithms {
      * The input array must be <strong>LSD-first</strong>:
      * {@code digits[0] = D_0} (Least Significant Digit) and
      * {@code digits[digits.length-1] = D_{k-1}} (Most Significant Digit).
-     * Positions beyond {@code digits.length} are treated as implicit zeros.
+     * Logical digit positions beyond {@code digits.length-1} are treated as implicit zeros.
      * </p>
      *
      * @param digits Derangadic digit array of length {@code actualN ≤ n},
@@ -324,15 +328,18 @@ public final class DerangadicAlgorithms {
      * Array-based implementation for small {@code n}.
      * O(n²) with a low constant factor — preferred when {@code n ≤ 100}.
      *
-     * <p>The {@code digits} array is LSD-first: {@code digits[0] = D_0},
-     * {@code digits[digits.length-1] = D_{k-1}}.</p>
+     * <p>The {@code digits} array must be LSD-first: {@code digits[0] = D_0} (Least
+     * Significant Digit) and {@code digits[digits.length-1] = D_{k-1}} (Most
+     * Significant Digit). Step {@code k} within the active window reads digit
+     * {@code digits[actualN-1-k]}, where step 0 reads the MSD and step
+     * {@code actualN-1} reads the LSD.</p>
      */
     int[] toDerangementArray(int[] digits, int n) {
-        int actualN  = digits.length;
-        int offset   = n - actualN;
+        int actualN = digits.length;
+        int offset = n - actualN;
 
         int[] derangement = new int[n];
-        boolean[] used    = new boolean[n];
+        boolean[] used = new boolean[n];
 
         // Fill the prefix [0, offset) with the greedy minimum derangement.
         int nextCandidate = 0;
@@ -341,7 +348,7 @@ public final class DerangadicAlgorithms {
                 nextCandidate++;
             }
             int chosen = nextCandidate;
-            if (chosen == pos) {          // would be a fixed point
+            if (chosen == pos) { // would be a fixed point
                 int temp = nextCandidate + 1;
                 while (temp < n && used[temp]) {
                     temp++;
@@ -356,12 +363,14 @@ public final class DerangadicAlgorithms {
         }
 
         // Fill suffix [offset, n) from the digit array.
-        // Step k reads digit at digits[actualN-1-k] (the MSD-side for small k).
+        // Step k within the active window reads digits[actualN-1-k]:
+        //   step 0  → digits[actualN-1] = D_{actualN-1} (MSD of active window)
+        //   step actualN-1 → digits[0] = D_0 (LSD)
         for (int step = 0; step < actualN; step++) {
-            int pos   = offset + step;
+            int pos = offset + step;
             int digit = digits[actualN - 1 - step];
 
-            int count  = 0;
+            int count = 0;
             int chosen = -1;
             for (int e = 0; e < n; e++) {
                 if (used[e]) continue;
@@ -384,12 +393,15 @@ public final class DerangadicAlgorithms {
      * Fenwick-tree-based implementation for large {@code n}.
      * O(n + actualN × log n) — preferred when {@code n > 100}.
      *
-     * <p>The {@code digits} array is LSD-first: {@code digits[0] = D_0},
-     * {@code digits[digits.length-1] = D_{k-1}}.</p>
+     * <p>The {@code digits} array must be LSD-first: {@code digits[0] = D_0} (Least
+     * Significant Digit) and {@code digits[digits.length-1] = D_{k-1}} (Most
+     * Significant Digit). Step {@code k} within the active window reads digit
+     * {@code digits[actualN-1-k]}, where step 0 reads the MSD and step
+     * {@code actualN-1} reads the LSD.</p>
      */
     int[] toDerangementFenwick(int[] digits, int n) {
         int actualN = digits.length;
-        int offset  = n - actualN;
+        int offset = n - actualN;
 
         int[] derangement = new int[n];
         FenwickTree availableElements = new FenwickTree(n);
@@ -403,7 +415,6 @@ public final class DerangadicAlgorithms {
                     availableElements.rsq(nextAvailable) - availableElements.rsq(nextAvailable - 1) == 0) {
                 nextAvailable++;
             }
-
             int chosenIdx = nextAvailable;
             if (chosenIdx == pos + 1) {
                 if (nextAvailable + 1 <= n) {
@@ -414,7 +425,6 @@ public final class DerangadicAlgorithms {
                     }
                 }
             }
-
             derangement[pos] = chosenIdx - 1;
             availableElements.update(chosenIdx, -1);
             if (chosenIdx == nextAvailable) {
@@ -426,7 +436,7 @@ public final class DerangadicAlgorithms {
         }
 
         for (int step = 0; step < actualN; step++) {
-            int pos   = offset + step;
+            int pos = offset + step;
             int digit = digits[actualN - 1 - step];
 
             int chosen = getChosen(availableElements, pos, digit);
@@ -458,8 +468,8 @@ public final class DerangadicAlgorithms {
      * The returned array is <strong>LSD-first</strong>:
      * {@code result[0] = D_0} (Least Significant Digit) and
      * {@code result[result.length-1] = D_{k-1}} (Most Significant Digit).
-     * Trailing zeros at the MSD end (high indices) are trimmed so the
-     * returned length equals the minimal carrier length.
+     * MSD-side leading zeros (at high indices) are trimmed so the returned length
+     * equals the minimal carrier length {@code actualN}.
      * </p>
      * <p>
      * To display in MSD-first (paper) order, iterate from
@@ -478,7 +488,7 @@ public final class DerangadicAlgorithms {
     public int[] fromDerangement(int[] derangement, int n) {
         int[] fullDigits = new int[n];
 
-        List<Integer> remainingElements  = new ArrayList<>();
+        List<Integer> remainingElements = new ArrayList<>();
         List<Integer> remainingPositions = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             remainingElements.add(i);
@@ -495,26 +505,28 @@ public final class DerangadicAlgorithms {
             Collections.sort(legal);
 
             int chosen = derangement[pos];
-            int digit  = legal.indexOf(chosen);
+            int digit = legal.indexOf(chosen);
             if (digit == -1) {
                 throw new IllegalArgumentException("Invalid derangement at position " + pos);
             }
 
-            // Store at MSD-side for early steps: step 0 → index n-1 (MSD),
-            // step n-1 → index 0 (LSD).
+            // step 0 → index n-1 (MSD = D_{n-1}), step n-1 → index 0 (LSD = D_0).
             fullDigits[n - 1 - step] = digit;
+
             remainingElements.remove(Integer.valueOf(chosen));
             remainingPositions.remove(0);
         }
 
-        // Trim trailing zeros at the MSD end (high indices).
+        // Trim MSD-side leading zeros (high indices) to produce minimal carrier length.
         int lastNonZero = fullDigits.length - 1;
         while (lastNonZero >= 0 && fullDigits[lastNonZero] == 0) {
             lastNonZero--;
         }
+
         if (lastNonZero < 0) {
             return new int[]{0};
         }
+
         int[] result = new int[lastNonZero + 1];
         System.arraycopy(fullDigits, 0, result, 0, lastNonZero + 1);
         return result;
@@ -535,6 +547,10 @@ public final class DerangadicAlgorithms {
 
     /**
      * Convenience overload of {@link #unrank(BigInteger, int)} for {@code long} ranks.
+     *
+     * @param rank the 0-based lexicographical rank ({@code 0 ≤ rank < D_n})
+     * @param n    the order (number of elements, {@code n ≥ 2})
+     * @return the derangement as an array of length {@code n}
      */
     public int[] unrank(long rank, int n) {
         int[] digits = toDerangadic(rank, n);
@@ -559,9 +575,16 @@ public final class DerangadicAlgorithms {
      * Returns the smallest integer {@code actualN} with the same parity as {@code n}
      * such that {@code D_actualN > m}.
      * <p>
-     * This is the minimal carrier length: the length of the Derangadic array needed
-     * to encode rank {@code m} within a universe of size {@code n}.
+     * This is the minimal carrier length: the minimum number of digits needed to
+     * encode rank {@code m} within a universe of size {@code n}. Because the encoding
+     * depends only on the parity of {@code n} (not on {@code n} itself beyond parity),
+     * {@code actualN} may be strictly less than {@code n}.
      * </p>
+     *
+     * @param n the universe size
+     * @param m the rank to encode
+     * @return minimal carrier length {@code actualN ≤ n} with {@code actualN ≡ n (mod 2)}
+     *         and {@code D_actualN > m}
      */
     private int smallestN(int n, BigInteger m) {
         int actualN = n;
@@ -572,11 +595,13 @@ public final class DerangadicAlgorithms {
     }
 
     /**
-     * A virtual list view over a digit array that returns 0 for any index beyond
-     * the backing array's length (zero-padding the MSD end).
+     * A virtual list view over a digit array that returns {@code 0} for any index beyond
+     * the backing array's length, effectively zero-padding the MSD end.
+     *
      * <p>
-     * Because the array is LSD-first, "padding the MSD end" means padding at
-     * high indices — {@code get(i)} returns 0 whenever {@code i ≥ digits.length}.
+     * Because the backing array is LSD-first, "padding the MSD end" means padding at
+     * high indices: {@code get(i)} returns {@code 0} whenever {@code i ≥ digits.length}.
+     * Low indices ({@code 0 … digits.length-1}) are served directly from the array.
      * </p>
      */
     private record ZeroPaddedList(int[] digits, int n) {
