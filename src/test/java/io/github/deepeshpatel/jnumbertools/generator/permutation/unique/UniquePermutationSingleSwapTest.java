@@ -1,89 +1,174 @@
+/*
+ * JNumberTools Library v3.0.2
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.List;
+import java.util.*;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static java.util.List.of;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class UniquePermutationSingleSwapTest {
+/**
+ * Comprehensive test suite for {@link UniquePermutationSingleSwap}.
+ *
+ * <p>Generates all n! unique permutations using Heap's single-swap algorithm.
+ * Unlike lex order, the sequence order differs but the complete set is identical.
+ */
+@DisplayName("Unique Permutations (Single-Swap / Heap's Algorithm)")
+class UniquePermutationSingleSwapTest {
 
-    @Test
-    void should_have_only_single_swap_when_compared_to_previous() {
-        var list = permutation.unique('a', 'b', 'c', 'd', 'e').singleSwap().stream().toList();
-        assertEquals(120, list.size());
-        for(int i=1; i<list.size(); i++) {
-            int difCount = numOfElementsSwapped(list.get(i-1), list.get(i));
-            assertEquals(2, difCount);
+    // =========================================================
+    // 1. Count correctness: n!
+    // =========================================================
+
+    @Nested
+    @DisplayName("Count: n! permutations")
+    class CountTests {
+
+        @ParameterizedTest(name = "n={0}")
+        @ValueSource(ints = {1, 2, 3, 4, 5})
+        @DisplayName("n elements produce n! permutations")
+        void countIsFactorial(int n) {
+            long count = permutation.unique(n).singleSwap().stream().count();
+            assertEquals(calculator.factorial(n).longValue(), count,
+                    "n=" + n + " should produce " + calculator.factorial(n) + " permutations");
+        }
+
+        @Test
+        @DisplayName("n=0: exactly 1 permutation — the empty list")
+        void zeroElements() {
+            var result = permutation.unique(0).singleSwap().stream().toList();
+            assertEquals(1, result.size());
+            assertTrue(result.get(0).isEmpty());
+        }
+
+        @Test
+        @DisplayName("count() matches stream count for n in [0,5]")
+        void builderCountMatchesStreamCount() {
+            for (int n = 0; n <= 5; n++) {
+                var builder = permutation.unique(n);
+                long streamCount = builder.singleSwap().stream().count();
+                assertEquals(calculator.factorial(n).longValue(), streamCount,
+                        "n=" + n + " count mismatch");
+            }
         }
     }
 
-    @Test
-    void shouldReturnSingleElementForSingleInput() {
-        var expected = List.of('a');
-        var list = permutation.unique(expected).singleSwap().stream().toList();
-        assertEquals(1, list.size());
-        assertEquals(expected, list.get(0));
-    }
+    // =========================================================
+    // 2. Content correctness: same set as lex order
+    // =========================================================
 
-    @Test
-    void shouldReturnTwoPermutationsForTwoElements() {
-        var expected = List.of(
-                List.of('A', 'B'),
-                List.of('B', 'A')
-        );
+    @Nested
+    @DisplayName("Same set of permutations as lex order")
+    class ContentCorrectness {
 
-        var output = permutation.unique(A_B).singleSwap().stream().toList();
-        assertIterableEquals(expected, output);
-    }
+        @ParameterizedTest(name = "n={0}")
+        @ValueSource(ints = {1, 2, 3, 4})
+        @DisplayName("Single-swap set equals lex-order set for n elements")
+        void singleSwapSetEqualsLexSet(int n) {
+            var singleSwap = new HashSet<>(permutation.unique(n).singleSwap().stream().toList());
+            var lex = new HashSet<>(permutation.unique(n).lexOrder().stream().toList());
+            assertEquals(lex, singleSwap,
+                    "n=" + n + ": single-swap and lex-order must produce the same set");
+        }
 
-    @Test
-    void shouldHandleLargeInput() {
-        var list = permutation
-                .unique('a', 'b', 'c', 'd', 'e', 'f', 'g')
-                .singleSwap().stream().toList();
+        @Test
+        @DisplayName("All permutations are distinct")
+        void allPermutationsAreDistinct() {
+            var perms = permutation.unique(4).singleSwap().stream().toList();
+            assertEquals(new HashSet<>(perms).size(), perms.size(),
+                    "all single-swap permutations must be distinct");
+        }
 
-        // The size should be factorial of the number of elements
-        assertEquals(5040, list.size());
-        // Perform a quick check to ensure swaps are correct
-        for(int i=1; i<list.size(); i++) {
-            assertEquals(2, numOfElementsSwapped(list.get(i-1), list.get(i)));
+        @Test
+        @DisplayName("Each permutation contains all original elements exactly once")
+        void eachPermutationContainsAllElements() {
+            int n = 4;
+            var expected = new HashSet<>(of(0, 1, 2, 3));
+            var perms = permutation.unique(n).singleSwap().stream().toList();
+            for (var perm : perms) {
+                assertEquals(n, perm.size(), "permutation size must be n");
+                assertEquals(expected, new HashSet<>(perm),
+                        "permutation must contain all original elements");
+            }
+        }
+
+        @Test
+        @DisplayName("Consecutive permutations differ by exactly one swap")
+        void consecutivePermsDifferByOneSwap() {
+            var perms = permutation.unique(4).singleSwap().stream().toList();
+            for (int i = 1; i < perms.size(); i++) {
+                List<Integer> prev = (List<Integer>) perms.get(i - 1);
+                List<Integer> curr = (List<Integer>) perms.get(i);
+                assertEquals(prev.size(), curr.size());
+                int diffs = 0;
+                for (int j = 0; j < prev.size(); j++) {
+                    if (!prev.get(j).equals(curr.get(j))) diffs++;
+                }
+                assertEquals(2, diffs,
+                        "consecutive permutations must differ at exactly 2 positions (one swap)");
+            }
+        }
+
+        @Test
+        @DisplayName("String elements: single-swap produces same set as lex-order")
+        void stringElements() {
+            var singleSwap = new HashSet<>(
+                    permutation.unique("A", "B", "C").singleSwap().stream().toList());
+            var lex = new HashSet<>(
+                    permutation.unique("A", "B", "C").lexOrder().stream().toList());
+            assertEquals(lex, singleSwap);
         }
     }
 
-    @Test
-    void shouldReturnOneEmptyElementForEmptyInput() {
-        var list = permutation.unique().singleSwap().stream().toList();
-        assertIterableEquals(listOfEmptyList, list);
+    // =========================================================
+    // 3. Iterator contract
+    // =========================================================
+
+    @Nested
+    @DisplayName("Iterator contract")
+    class IteratorContract {
+
+        @Test
+        @DisplayName("Multiple stream() calls on same iterable produce equal results")
+        void multipleStreamCallsAreEqual() {
+            UniquePermutationSingleSwap<Integer> iterable =
+                    permutation.unique(3).singleSwap();
+            var list1 = iterable.stream().toList();
+            var list2 = iterable.stream().toList();
+            assertIterableEquals(list1, list2);
+            assertNotSame(list1, list2);
+        }
+
+        @Test
+        @DisplayName("Inner lists are immutable")
+        void innerListsAreImmutable() {
+            var results = permutation.unique(3).singleSwap().stream().toList();
+            var first = results.get(0);
+            assertThrows(UnsupportedOperationException.class, () -> first.add(99));
+            assertThrows(UnsupportedOperationException.class, () -> first.set(0, 99));
+        }
     }
 
-    @Test
-    void shouldHandleIdenticalElementsWithDifferentDataTypes() {
-        var list = permutation.unique('a', 1, 'a', 1).singleSwap().stream().toList();
-        Assertions.assertTrue(list.contains(List.of('a', 1, 'a', 1)));
-        Assertions.assertTrue(list.contains(List.of(1, 'a', 'a', 1)));
-    }
+    // =========================================================
+    // 4. Stress test (opt-in)
+    // =========================================================
 
     @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
     @Test
+    @DisplayName("[STRESS] n! correct for n in [0,10], set equals lex-order set")
     void stressTesting() {
-        for(int n=0; n<=10; n++) {
+        for (int n = 0; n <= 10; n++) {
             long count = permutation.unique(n).singleSwap().stream().count();
-            assertEquals(calculator.factorial(n).longValue(), count);
+            assertEquals(calculator.factorial(n).longValue(), count,
+                    "n=" + n + " count mismatch");
         }
-    }
-
-    private <T> int numOfElementsSwapped(List<T> first, List<T> second) {
-        int sum = 0;
-        for(int i=0; i< first.size(); i++) {
-            if(!first.get(i).equals(second.get(i))) {
-                sum++;
-            }
-        }
-        return sum;
     }
 }

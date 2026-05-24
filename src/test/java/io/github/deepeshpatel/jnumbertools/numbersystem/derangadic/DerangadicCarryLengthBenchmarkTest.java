@@ -21,8 +21,8 @@ import java.util.Arrays;
 public class DerangadicCarryLengthBenchmarkTest {
 
     // Configure benchmark parameters here
-    private static final int[] N_VALUES = {20, 30, 40, 50, 100, 200, 300, 400, 1000, 2000, 5000, 10000, 20000};
-    private static final long ITERATIONS = 100_000; // Per n value
+    private static final int[] N_VALUES = {20, 30, 40, 50, 100, 200, 300, 400, 1000, 2000, 5000, 10000, 20000, 50000};
+    private static final long ITERATIONS = 100_000_000; // Per n value
     private static final int MAX_CARRY = 15; // Track carries up to this length
 
     @Test @EnabledIfSystemProperty(named = "performance.testing", matches = "true")
