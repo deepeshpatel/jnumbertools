@@ -1,17 +1,18 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 
+import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("Calculator Number Theory Methods")
 public class CalculatorTest {
-    private final Calculator calculator = new Calculator();
 
     @Test
+    @DisplayName("nCrRepetitive: combinations with repetition C(n+r-1, r)")
     public void testNCrRepetitive() {
 
         // Case 1: r = 0. Choosing 0 objects should always result in 1 way.
@@ -48,6 +49,7 @@ public class CalculatorTest {
 
 
     @Test
+    @DisplayName("nCr: binomial coefficient")
     void testNCr() {
         assertEquals(BigInteger.ONE, calculator.nCr(5, 0));
         assertEquals(BigInteger.valueOf(10), calculator.nCr(5, 2));
@@ -55,6 +57,7 @@ public class CalculatorTest {
     }
 
     @Test
+    @DisplayName("nCrUpperBound: smallest n where nCr(n,r) > max")
     public void testNCrUpperBound() {
 
         // Case 1:
@@ -86,6 +89,7 @@ public class CalculatorTest {
 
 
     @Test
+    @DisplayName("nPr: permutation coefficient")
     void testNPr() {
         assertEquals(BigInteger.valueOf(20), calculator.nPr(5, 2)); // 5P2 = 5!/(5-2)! = 20
         assertEquals(BigInteger.ONE, calculator.nPr(5, 0)); // nP0 = 1
@@ -94,6 +98,7 @@ public class CalculatorTest {
     }
 
     @Test
+    @DisplayName("factorialUpperBound: smallest n where n! > threshold")
     public void testFactorialUpperBound() {
 
         // Case 1: Threshold = 0
@@ -129,6 +134,7 @@ public class CalculatorTest {
 
 
     @Test
+    @DisplayName("factorial: n!")
     void testFactorial() {
         assertEquals(BigInteger.ONE, calculator.factorial(0)); // 0! = 1
         assertEquals(BigInteger.ONE, calculator.factorial(1)); // 1! = 1
@@ -137,6 +143,7 @@ public class CalculatorTest {
     }
 
     @Test
+    @DisplayName("power: a^b")
     void testPower() {
         assertEquals(BigInteger.valueOf(1), calculator.power(5, 0)); // Any number ^ 0 = 1
         assertEquals(BigInteger.valueOf(25), calculator.power(5, 2)); // 5^2 = 25
@@ -145,6 +152,7 @@ public class CalculatorTest {
     }
 
     @Test
+    @DisplayName("totalSubsetsInRange: sum of nCr(n,k) for k in [from, to]")
     public void testTotalSubsetsInRange() {
         // Case 1: from == 0 and to == noOfElements, should return 2^noOfElements.
         assertEquals(BigInteger.valueOf(8), calculator.totalSubsetsInRange(0, 3, 3));
@@ -164,6 +172,7 @@ public class CalculatorTest {
 
 
     @Test
+    @DisplayName("subFactorial: !n (derangements)")
     void testSubFactorial() {
         assertEquals(BigInteger.ONE, calculator.subFactorial(0)); // !0 = 1
         assertEquals(BigInteger.ZERO, calculator.subFactorial(1)); // !1 = 0
@@ -173,6 +182,7 @@ public class CalculatorTest {
     }
 
     @Test
+    @DisplayName("rencontresNumber: partial derangements")
     public void testRencontresNumber() {
 
         // Case 1: n = 0, k = 0.
@@ -213,6 +223,7 @@ public class CalculatorTest {
     }
 
     @Test
+    @DisplayName("multisetCombinationsAll: all subset sizes")
     void testMultisetCombinationsAll() {
         // For frequencies {2, 2, 3}, total = 2+2+3 = 7.
         // The method returns coefficients for s = 0, 1, 2, 3.
@@ -230,6 +241,7 @@ public class CalculatorTest {
     }
 
     @Test
+    @DisplayName("multisetCombinationsCount: exact count for specific size")
     void testMultisetCombinationsExact() {
         // Using frequencies {2, 3, 2} (total = 7)
         // k = 0 → only one way (empty selection)
@@ -249,6 +261,7 @@ public class CalculatorTest {
     }
 
     @Test
+    @DisplayName("multisetCombinationsCount: invalid inputs throw exceptions")
     void testMultisetCombinationsExactInvalidInput() {
         // Negative k should throw an exception.
         assertThrows(IllegalArgumentException.class, () -> calculator.multisetCombinationsCount(-1, 2, 3, 2));
@@ -257,19 +270,23 @@ public class CalculatorTest {
     }
 
     @Nested
+    @DisplayName("LCM (Least Common Multiple)")
     class LCMTest {
 
         @Test
+        @DisplayName("Single element LCM")
         void testSingleElement() {
             assertEquals(BigInteger.valueOf(42), Calculator.lcm(BigInteger.valueOf(42)));
         }
 
         @Test
+        @DisplayName("Two elements LCM")
         void testTwoElements() {
             assertEquals(BigInteger.valueOf(36), Calculator.lcm(BigInteger.valueOf(12), BigInteger.valueOf(18)));
         }
 
         @Test
+        @DisplayName("Multiple elements LCM")
         void testMultipleElements() {
             assertEquals(BigInteger.valueOf(2520), Calculator.lcm(
                     BigInteger.valueOf(5), BigInteger.valueOf(7),
@@ -277,16 +294,19 @@ public class CalculatorTest {
         }
 
         @Test
+        @DisplayName("LCM with zero")
         void testWithZero() {
             assertEquals(BigInteger.ZERO, Calculator.lcm(BigInteger.valueOf(12), BigInteger.ZERO, BigInteger.valueOf(18)));
         }
 
         @Test
+        @DisplayName("LCM with one")
         void testWithOne() {
             assertEquals(BigInteger.valueOf(18), Calculator.lcm(BigInteger.ONE, BigInteger.valueOf(18)));
         }
 
         @Test
+        @DisplayName("LCM for large numbers")
         void testLargeNumbers() {
             BigInteger a = new BigInteger("12345678901234567890");
             BigInteger b = new BigInteger("98765432109876543210");
@@ -295,6 +315,7 @@ public class CalculatorTest {
         }
 
         @Test
+        @DisplayName("LCM for large array")
         void testLargeArray() {
             BigInteger[] array = new BigInteger[100];
             for (int i = 0; i < array.length; i++) {
@@ -308,22 +329,26 @@ public class CalculatorTest {
         }
 
         @Test
+        @DisplayName("LCM with negative numbers")
         void testNegativeNumbers() {
             assertEquals(BigInteger.valueOf(36), Calculator.lcm(BigInteger.valueOf(-12), BigInteger.valueOf(18)));
         }
 
         @Test
+        @DisplayName("LCM of all ones")
         void testAllOnes() {
             assertEquals(BigInteger.ONE, Calculator.lcm(BigInteger.ONE, BigInteger.ONE, BigInteger.ONE));
         }
 
         @Test
+        @DisplayName("LCM with empty array throws exception")
         void testInvalidInputEmptyArray() {
             var exception = assertThrows(IllegalArgumentException.class, () -> Calculator.lcm());
             assertEquals("At least one number required",exception.getMessage());
         }
 
         @Test
+        @DisplayName("LCM performance test")
         void testPerformance() {
             BigInteger[] largeArray = new BigInteger[5000];
             for (int i = 0; i < largeArray.length; i++) {

@@ -1,14 +1,29 @@
+/*
+ * JNumberTools Library v3.0.2
+ * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ */
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
-import io.github.deepeshpatel.jnumbertools.generator.combination.multiset.FreqVector;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Tests for {@link FreqVector}, the internal compact representation used by
+ * MultisetCombination for very large multisets. Maintains two parallel arrays:
+ * <ul>
+ *   <li>{@code freq[i]}    — current count of key {@code i}</li>
+ *   <li>{@code prefix[i]}  — running sum over {@code freq[0..i]}</li>
+ * </ul>
+ * The {@code toString()} format is {@code "[freq...] [prefix...]"}.
+ */
+@DisplayName("FreqVector — backing store for large multisets")
 class FreqVectorTest {
 
     @Test
-    void generalTestForMapList() {
+    @DisplayName("add/remove/set roundtrip + asList mirrors expanded form")
+    void addRemoveSetRoundtrip() {
         FreqVector freqVector = new FreqVector(5, 3);
 
         // Empty at beginning
@@ -35,7 +50,8 @@ class FreqVectorTest {
         assertEquals("[1, 2, 2] [1, 3, 5]", freqVector.toString());
         assertEquals("[0, 1, 1, 2, 2]", freqVector.asList().toString());
 
-        assertThrows(IndexOutOfBoundsException.class, () -> freqVector.add(1));
+        assertThrows(IndexOutOfBoundsException.class, () -> freqVector.add(1),
+                "adding beyond declared capacity must fail");
 
         freqVector.remove(1);
         assertEquals("[1, 1, 2] [1, 2, 4]", freqVector.toString());
@@ -47,16 +63,18 @@ class FreqVectorTest {
     }
 
     @Test
-    void testEmptyKeyCount() {
+    @DisplayName("Zero keys + zero capacity: empty, fixed")
+    void emptyKeyCount() {
         FreqVector freqVector = new FreqVector(0, 0);
         assertEquals("[] []", freqVector.toString());
         assertTrue(freqVector.isEmpty());
-        assertEquals(-1, freqVector.findValueAtIndex(0)); // Beyond empty list
+        assertEquals(-1, freqVector.findValueAtIndex(0));
         assertThrows(IndexOutOfBoundsException.class, () -> freqVector.add(0));
     }
 
     @Test
-    void testSizeZero() {
+    @DisplayName("Zero capacity but positive key count: cannot add")
+    void sizeZero() {
         FreqVector freqVector = new FreqVector(0, 3);
         assertEquals("[0, 0, 0] [0, 0, 0]", freqVector.toString());
         assertThrows(IndexOutOfBoundsException.class, () -> freqVector.add(0));
@@ -64,7 +82,8 @@ class FreqVectorTest {
     }
 
     @Test
-    void testFullCapacity() {
+    @DisplayName("Full capacity: refuses additional adds")
+    void fullCapacity() {
         FreqVector freqVector = new FreqVector(3, 2);
         freqVector.add(0);
         freqVector.add(0);
@@ -75,24 +94,27 @@ class FreqVectorTest {
     }
 
     @Test
-    void testRemoveAll() {
+    @DisplayName("Removing more than present returns false; never throws")
+    void removeAll() {
         FreqVector freqVector = new FreqVector(3, 2);
         freqVector.add(0);
         freqVector.add(1);
         freqVector.add(0);
         assertEquals("[2, 1] [2, 3]", freqVector.toString());
+
         assertTrue(freqVector.remove(0));
         assertEquals("[1, 1] [1, 2]", freqVector.toString());
         assertTrue(freqVector.remove(0));
         assertEquals("[0, 1] [0, 1]", freqVector.toString());
         assertTrue(freqVector.remove(1));
         assertEquals("[0, 0] [0, 0]", freqVector.toString());
-        assertFalse(freqVector.remove(1)); // Already zero
+        assertFalse(freqVector.remove(1), "already zero — returns false");
         assertTrue(freqVector.isEmpty());
     }
 
     @Test
-    void testFindValueAtIndex() {
+    @DisplayName("findValueAtIndex returns -1 out of range, never throws")
+    void findValueAtIndex() {
         FreqVector freqVector = new FreqVector(5, 3);
         freqVector.add(0);
         freqVector.add(1);
@@ -100,24 +122,26 @@ class FreqVectorTest {
         assertEquals(0, freqVector.findValueAtIndex(0));
         assertEquals(1, freqVector.findValueAtIndex(1));
         assertEquals(2, freqVector.findValueAtIndex(2));
-        assertEquals(-1, freqVector.findValueAtIndex(3)); // Beyond current size
-        assertEquals(-1, freqVector.findValueAtIndex(-1)); // Negative index
+        assertEquals(-1, freqVector.findValueAtIndex(3));
+        assertEquals(-1, freqVector.findValueAtIndex(-1));
     }
 
     @Test
-    void testSetBeyondCurrentSize() {
+    @DisplayName("set beyond current size acts as add")
+    void setBeyondCurrentSize() {
         FreqVector freqVector = new FreqVector(3, 2);
         freqVector.add(0);
-        freqVector.set(1, 1); // Should add 1 since index 1 is beyond current size
+        freqVector.set(1, 1);
         assertEquals("[1, 1] [1, 2]", freqVector.toString());
         assertEquals("[0, 1]", freqVector.asList().toString());
     }
 
     @Test
-    void testInvalidKey() {
+    @DisplayName("Invalid key index throws on add, returns false on remove")
+    void invalidKey() {
         FreqVector freqVector = new FreqVector(3, 2);
         assertThrows(IllegalArgumentException.class, () -> freqVector.add(-1));
         assertThrows(IllegalArgumentException.class, () -> freqVector.add(2));
-        assertFalse(freqVector.remove(2)); // Invalid key
+        assertFalse(freqVector.remove(2));
     }
 }

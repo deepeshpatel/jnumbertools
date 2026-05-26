@@ -162,10 +162,33 @@ class RetryBasedIterator implements Iterator<BigInteger> {
      * @param bound the upper bound (exclusive)
      * @return a random BigInteger in [0, bound)
      */
+    /**
+     * Generates a random BigInteger in [0, bound).
+     * Uses rejection sampling to ensure uniform distribution.
+     *
+     * @param bound the upper bound (exclusive); must be positive
+     * @return a random BigInteger in [0, bound)
+     */
     private BigInteger randomBigInteger(BigInteger bound) {
         if (bound.compareTo(BigInteger.valueOf(Long.MAX_VALUE)) <= 0) {
             return BigInteger.valueOf(random.nextLong(0, bound.longValueExact()));
         }
-        return BigInteger.valueOf(random.nextLong()).abs().mod(bound);
+
+        // For bounds > Long.MAX_VALUE, use rejection sampling with a mask
+        // Generate enough random bits to cover the bound
+        int bitLength = bound.bitLength();
+
+        // Create a mask with all bits set up to bitLength
+        BigInteger mask = BigInteger.ONE.shiftLeft(bitLength).subtract(BigInteger.ONE);
+
+        BigInteger candidate;
+        do {
+            // Generate a random BigInteger with the required number of bits
+            byte[] bytes = new byte[(bitLength + 7) / 8];
+            random.nextBytes(bytes);
+            candidate = new BigInteger(1, bytes);  // Positive sign
+        } while (candidate.compareTo(bound) >= 0);
+
+        return candidate;
     }
 }

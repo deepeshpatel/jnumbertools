@@ -479,9 +479,9 @@ public class DerangadicIncrementStateMachineTest {
     @Test
     @DisplayName("In-place increment keeps sub-microsecond average step time for representative n values")
     void testPerformanceOfInPlaceDerangement() {
-        int[] nValues = {50, 100, 500, 1000, 5000, 8000};
-        int iterations = 1000;
-        long startRank = 0;//9_000_000_000L;
+        int[] nValues = {1000,10000, 50000};
+        long iterations = 1000_000l;
+        long startRank = 9_000_000_000L;
 
         long totalTime = 0;
 
@@ -492,12 +492,13 @@ public class DerangadicIncrementStateMachineTest {
             totalTime+= incTime;
         }
         long averageNanos = totalTime/nValues.length;
-        assertTrue(averageNanos < 1_000,
+        System.out.println("Average time per increment across tested n values: " + averageNanos + " ns");
+            assertTrue(averageNanos < 100,
                 "Average time per increment across tested n values should be under 1 microsecond, but was "
                         + averageNanos + " ns");
     }
 
-    private long measureFullIncrement(int n, long startRank, int iterations, Calculator calculator) {
+    private long measureFullIncrement(int n, long startRank, long iterations, Calculator calculator) {
 
         var statMachine = new DerangadicIncrementStateMachine(n,BigInteger.valueOf(startRank), calculator);
         int sink = 0;

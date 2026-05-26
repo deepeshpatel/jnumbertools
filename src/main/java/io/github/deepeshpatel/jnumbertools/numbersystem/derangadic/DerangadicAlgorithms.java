@@ -10,6 +10,8 @@ import io.github.deepeshpatel.jnumbertools.generator.base.FenwickTree;
 import java.math.BigInteger;
 import java.util.*;
 
+import static javax.management.openmbean.SimpleType.BIGINTEGER;
+
 /**
  * Core algorithms for the <strong>Derangadic</strong> number system — a combinatorial
  * number system for fixed-point-free permutations (derangements).
@@ -177,9 +179,14 @@ public final class DerangadicAlgorithms {
         boolean[] elementUsed = new boolean[actualN];
         BigInteger currentM = m;
 
+        // Pre-calculate actualNMinus1 for array index calculations
+        int actualNMinus1 = actualN - 1;
+
         for (int step = 0; step < actualN; step++) {
             int remainingSize = actualN - step;
             int restrictedCount = 0;
+
+            // Optimized loop: count unused elements
             for (int i = step; i < actualN; i++) {
                 if (!elementUsed[i]) {
                     restrictedCount++;
@@ -189,27 +196,20 @@ public final class DerangadicAlgorithms {
             int legalFoundCount = 0;
             BigInteger cumulative = BigInteger.ZERO;
 
+            boolean stepNotUsed = !elementUsed[step];
+
             for (int candidate = 0; candidate < actualN; candidate++) {
                 if (elementUsed[candidate] || candidate == step) continue;
 
                 boolean pickingRestricted = (candidate > step);
-                boolean currentPosWasRestricted = (!elementUsed[step]);
-
-                int nextRestricted;
-                if (pickingRestricted && currentPosWasRestricted) {
-                    nextRestricted = restrictedCount - 2;
-                } else if (pickingRestricted || currentPosWasRestricted) {
-                    nextRestricted = restrictedCount - 1;
-                } else {
-                    nextRestricted = restrictedCount;
-                }
-                nextRestricted = Math.max(0, nextRestricted);
+                int decrement = (pickingRestricted ? 1 : 0) + (stepNotUsed ? 1 : 0);
+                int nextRestricted = restrictedCount > decrement ? restrictedCount - decrement : 0;
 
                 BigInteger blockSize = calculator.restrictedDerangements(remainingSize - 1, nextRestricted);
 
                 if (currentM.compareTo(cumulative.add(blockSize)) < 0) {
                     // step 0 → index actualN-1 (MSD), step actualN-1 → index 0 (LSD = D_0)
-                    digits[actualN - 1 - step] = legalFoundCount;
+                    digits[actualNMinus1 - step] = legalFoundCount;
                     elementUsed[candidate] = true;
                     currentM = currentM.subtract(cumulative);
                     break;
@@ -266,6 +266,7 @@ public final class DerangadicAlgorithms {
         List<Integer> positionsList = new ArrayList<>(remainingPositions);
         Collections.sort(positionsList);
 
+        int nMinus1 = n - 1;
         for (int step = 0; step < n; step++) {
             int pos = positionsList.get(0);
 
@@ -277,7 +278,7 @@ public final class DerangadicAlgorithms {
 
             // Digit for this step: step 0 → index n-1 (MSD = D_{n-1}),
             // step n-1 → index 0 (LSD = D_0).
-            int digit = allDigits.get(n - 1 - step);
+            int digit = allDigits.get(nMinus1 - step);
 
             for (int idx = 0; idx < digit; idx++) {
                 int candidate = legal.get(idx);
@@ -340,6 +341,7 @@ public final class DerangadicAlgorithms {
 
         int[] derangement = new int[n];
         boolean[] used = new boolean[n];
+        int actualNMinus1 = actualN - 1;
 
         // Fill the prefix [0, offset) with the greedy minimum derangement.
         int nextCandidate = 0;
@@ -368,7 +370,7 @@ public final class DerangadicAlgorithms {
         //   step actualN-1 → digits[0] = D_0 (LSD)
         for (int step = 0; step < actualN; step++) {
             int pos = offset + step;
-            int digit = digits[actualN - 1 - step];
+            int digit = digits[actualNMinus1 - step];
 
             int count = 0;
             int chosen = -1;
@@ -409,6 +411,7 @@ public final class DerangadicAlgorithms {
             availableElements.update(i, 1);
         }
 
+        int actualNMinus1 = actualN - 1;
         int nextAvailable = 1;
         for (int pos = 0; pos < offset; pos++) {
             while (nextAvailable <= n &&
@@ -437,7 +440,7 @@ public final class DerangadicAlgorithms {
 
         for (int step = 0; step < actualN; step++) {
             int pos = offset + step;
-            int digit = digits[actualN - 1 - step];
+            int digit = digits[actualNMinus1 - step];
 
             int chosen = getChosen(availableElements, pos, digit);
             derangement[pos] = chosen - 1;
@@ -448,13 +451,14 @@ public final class DerangadicAlgorithms {
     }
 
     private static int getChosen(FenwickTree availableElements, int pos, int digit) {
-        boolean posAvailable =
-                (availableElements.rsq(pos + 1) - availableElements.rsq(pos)) == 1;
+        int pos1 = pos + 1;
+        int posRank = availableElements.rsq(pos);
+        boolean posAvailable = (availableElements.rsq(pos1) - posRank) == 1;
+
         if (posAvailable) {
-            int posRank = availableElements.rsq(pos);
-            return (digit < posRank)
-                    ? availableElements.findKth(digit + 1)
-                    : availableElements.findKth(digit + 2);
+            return (digit < posRank) ?
+                    availableElements.findKth(digit + 1) :
+                    availableElements.findKth(digit + 2);
         } else {
             return availableElements.findKth(digit + 1);
         }
@@ -495,6 +499,7 @@ public final class DerangadicAlgorithms {
             remainingPositions.add(i);
         }
 
+        int nMinus1 = n - 1;
         for (int step = 0; step < n; step++) {
             int pos = remainingPositions.get(0);
 
@@ -511,7 +516,7 @@ public final class DerangadicAlgorithms {
             }
 
             // step 0 → index n-1 (MSD = D_{n-1}), step n-1 → index 0 (LSD = D_0).
-            fullDigits[n - 1 - step] = digit;
+            fullDigits[nMinus1 - step] = digit;
 
             remainingElements.remove(Integer.valueOf(chosen));
             remainingPositions.remove(0);

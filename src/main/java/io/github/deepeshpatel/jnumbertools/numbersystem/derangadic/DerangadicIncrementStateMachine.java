@@ -71,7 +71,7 @@ import java.util.Objects;
  * <h2>Performance characteristics</h2>
  * <ul>
  *   <li>Expected carry length converges to {@code ≈ e² ≈ 7.389} due to
- *       super-exponential decay of {@code k / !k}.</li>
+ *       factorial decay of {@code k / !k}.</li>
  *   <li>Worst-case step: O(actualN log n) with Fenwick tree; amortised O(1) per step.</li>
  *   <li>Thread-unsafe: state mutations are not synchronised.</li>
  * </ul>
@@ -178,6 +178,11 @@ public final class DerangadicIncrementStateMachine {
         return carry > 0;
     }
 
+    public int actualN() {
+        return state.actualN;
+    }
+
+
     /**
      * Advances the state and returns the carry length (number of digit positions modified).
      *
@@ -243,28 +248,32 @@ public final class DerangadicIncrementStateMachine {
         int offset = n - actualN;
 
         // Reset encoded state
-        Arrays.fill(state.eUsed, 0, actualN, false);
+        boolean[] eUsed = state.eUsed;
+        Arrays.fill(eUsed, 0, actualN, false);
 
         // Reset derangement state
-        Arrays.fill(state.usedFull, false);
+        boolean[] usedFull = state.usedFull;
+        Arrays.fill(usedFull, false);
         FenwickTree avail = state.availTree;
         for (int i = 1; i <= n; i++) {
             int v = avail.get(i);
             if (v != 1) avail.update(i, 1 - v);
         }
 
+        int[] derangement = state.derangement;
+
         // Fill prefix [0, offset) with the greedy minimum derangement.
         int nextCandidate = 0;
         for (int pos = 0; pos < offset; pos++) {
-            while (nextCandidate < n && state.usedFull[nextCandidate]) nextCandidate++;
+            while (nextCandidate < n && usedFull[nextCandidate]) nextCandidate++;
             int chosen = nextCandidate;
             if (chosen == pos) { // would be fixed point
                 int temp = nextCandidate + 1;
-                while (temp < n && state.usedFull[temp]) temp++;
+                while (temp < n && usedFull[temp]) temp++;
                 chosen = temp;
             }
-            state.derangement[pos] = chosen;
-            state.usedFull[chosen] = true;
+            derangement[pos] = chosen;
+            usedFull[chosen] = true;
             avail.update(chosen + 1, -1);
             if (chosen == nextCandidate) nextCandidate++;
         }
@@ -272,12 +281,14 @@ public final class DerangadicIncrementStateMachine {
         // Fill suffix [offset, n) from the digit array.
         // Step k reads digits[actualN-1-k]: step 0 → MSD (D_{actualN-1}),
         // step actualN-1 → LSD (D_0).
+
         for (int step = 0; step < actualN; step++) {
             int di = actualN - 1 - step;
             state.maxDigit[di] = computeMaxDigit(step);
             consumeAtStep(step, state.digits[di], avail, offset);
         }
     }
+
 
     /**
      * Releases all digit positions from {@code changedStep} onward (i.e. the suffix of

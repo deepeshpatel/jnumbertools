@@ -1,201 +1,120 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicIncrementStateMachine;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 
 /**
- * Benchmark for analyzing carry length distribution in the Derangadic increment state machine.
- * <p>
- * This class measures the empirical distribution of carry lengths during lexicographic
- * traversal of derangements. The results validate the theoretical O(1) amortized complexity
- * and the $e^2 \approx 7.389$ expected carry length bound.
+ * Long-running benchmark for Derangadic carry length distribution.
  *
- * @author Deepesh Patel &amp; Aditya Patel
- * @version 3.0.2
+ * For each (n, startRank) configuration, runs ITERATIONS increments and records
+ * the carry-length histogram, mean, and alpha = P(L=2).
+ *
+ * Start ranks per n: rank 0, maxRank/4, maxRank/2, maxRank*3/4.
  */
 public class DerangadicCarryLengthBenchmarkTest {
 
-    // Configure benchmark parameters here
-    private static final int[] N_VALUES = {20, 30, 40, 50, 100, 200, 300, 400, 1000, 2000, 5000, 10000, 20000, 50000};
-    private static final long ITERATIONS = 100_000_000; // Per n value
-    private static final int MAX_CARRY = 15; // Track carries up to this length
+    //private static final int[]  N_VALUES   = {200, 500, 800, 1000, 2000};
+    private static final int[]  N_VALUES   = {201, 501, 699 };//1001};,
+    private static final long   ITERATIONS = 1_000_000L;
+    private static final int    NUM_RANDOM_STARTS = 20;
+    private static final long   SEED = 42L;  // for reproducibility
+    private static final int MAX_CARRY = 10;  // max carry length to track in histogram
 
-    @Test @EnabledIfSystemProperty(named = "performance.testing", matches = "true")
-    public  void carryLengthBenchmarkTest() {
-
+    @Test
+    @EnabledIfSystemProperty(named = "performance.testing", matches = "true")
+    public void carryLengthBenchmarkTest() {
         Calculator calc = new Calculator();
+
         System.out.println("=== Derangadic Carry Length Benchmark ===");
-        System.out.printf("Iterations per n: %,d%n", ITERATIONS);
-        System.out.printf("Test n values: %s%n%n", Arrays.toString(N_VALUES));
+        System.out.printf("Iterations : %,d%n", ITERATIONS);
+        System.out.printf("N values   : %s%n%n", Arrays.toString(N_VALUES));
+
+
+        Random rng = new Random(SEED);
+        int total = N_VALUES.length * NUM_RANDOM_STARTS;
+
+        int completed = 0;
 
         for (int n : N_VALUES) {
-            runBenchmark(n, calc);
+            Set<BigInteger> usedRanks = new HashSet<>();
+            BigInteger maxRank = calc.subFactorial(n);
+            int bitLen = maxRank.bitLength();
+
+            for (int k = 0; k < NUM_RANDOM_STARTS; k++) {
+                BigInteger rank;
+                do{
+                    do {
+                        rank = new BigInteger(bitLen, rng);
+                    } while (rank.compareTo(maxRank) >= 0);
+                }while (!usedRanks.add(rank)); // add() returns false if duplicate
+
+                String label = "rand_" + k;
+                runBenchmark(++completed, total, n, label, rank, calc);
+            }
         }
 
-        System.out.println("\n=== LaTeX Coordinates for Figure 2 ===");
-        System.out.println("// Replace placeholder in Figure 2 with actual data below:");
-        for (int n : N_VALUES) {
-            System.out.printf("// n=%d: %s%n", n, getCoordinatesForN(calc, n));
-        }
-        System.out.println("==========================================");
+        System.out.println("\n=== ALL CONFIGURATIONS COMPLETED ===");
     }
 
-    //Runs the carry length benchmark for a specific n value.
-    private static void runBenchmark(int n, Calculator calc) {
-        // Create state machine starting from rank 0
-        DerangadicIncrementStateMachine machine = new DerangadicIncrementStateMachine(n, BigInteger.ZERO, calc);
+    private static void runBenchmark(int completed, int totalConfigs, int n, String rankLabel, BigInteger startRank, Calculator calc) {
 
-        long[] carryCounts = new long[MAX_CARRY];
-        long start = System.currentTimeMillis();
+        System.out.printf("%n=== [%d/%d] n=%-6d startRank=%-14s ===%n", completed, totalConfigs, n, rankLabel);
+        DerangadicIncrementStateMachine machine = new DerangadicIncrementStateMachine(n, startRank, calc);
+        System.out.println("actualN = " + machine.actualN());
 
-        for (long i = 0; i < ITERATIONS; i++) {
-            int carryLen = machine.incrementAndGetCarryLength();
-            if (carryLen == 0) break; // End of enumeration
-            if (carryLen <= MAX_CARRY) {
-                carryCounts[carryLen - 1]++;
-            }
-        }
+        long[] carryCounts    = new long[MAX_CARRY + 1];
+        long   actualIter     = 0;
+        long   startTime      = System.currentTimeMillis();
 
-        long duration = System.currentTimeMillis() - start;
-
-        // Calculate statistics
-        double total = 0, weightedSum = 0;
-        for (int i = 0; i < MAX_CARRY; i++) {
-            if (carryCounts[i] > 0) {
-                total += carryCounts[i];
-                weightedSum += (i + 1) * carryCounts[i];
-            }
-        }
-        double mean = total > 0 ? weightedSum / total : 0;
-
-        // Print results
-        System.out.printf("n=%4d | Mean: %.4f | Time: %4d ms | Distribution:%n", n, mean, duration);
-        for (int i = 0; i < MAX_CARRY; i++) {
-            if (carryCounts[i] > 0) {
-                double pct = 100.0 * carryCounts[i] / ITERATIONS;
-                System.out.printf("  Carry %2d: %,6d (%.2f%%)%n", i + 1, carryCounts[i], pct);
-            }
-        }
-        System.out.println();
-    }
-
-    private static void runDetailedBenchmark(int n, long iterations, Calculator calc) {
-        System.out.printf("%n=== Detailed Carry Length Benchmark for n=%d ===%n", n);
-        System.out.printf("Iterations: %,d%n%n", iterations);
-
-        DerangadicIncrementStateMachine machine = new DerangadicIncrementStateMachine(n, BigInteger.ZERO, calc);
-
-        long[] carryCounts = new long[MAX_CARRY];
-        long start = System.nanoTime();
-
-        for (long i = 0; i < iterations; i++) {
-            int carryLen = machine.incrementAndGetCarryLength();
-            if (carryLen == 0) {
-                System.out.printf("Reached end of enumeration after %,d steps%n", i);
-                break;
-            }
-            if (carryLen <= MAX_CARRY) {
-                carryCounts[carryLen - 1]++;
-            }
-        }
-
-        long duration = System.nanoTime() - start;
-        double nsPerIter = (double) duration / iterations;
-
-        // Calculate statistics
-        double total = 0, weightedSum = 0;
-        for (int i = 0; i < MAX_CARRY; i++) {
-            total += carryCounts[i];
-            weightedSum += (i + 1) * carryCounts[i];
-        }
-        double mean = total > 0 ? weightedSum / total : 0;
-        double variance = 0;
-        for (int i = 0; i < MAX_CARRY; i++) {
-            double diff = (i + 1) - mean;
-            variance += carryCounts[i] * diff * diff;
-        }
-        variance = total > 0 ? variance / total : 0;
-        double stdDev = Math.sqrt(variance);
-
-        System.out.println("┌─────────────────────────────────────────────────────────────────┐");
-        System.out.println("│                    Carry Length Distribution                    │");
-        System.out.println("├─────────────────────────────────────────────────────────────────┤");
-        for (int i = 0; i < MAX_CARRY; i++) {
-            if (carryCounts[i] > 0) {
-                double pct = 100.0 * carryCounts[i] / iterations;
-                System.out.printf("│ Carry %2d: %,10d (%.2f%%)%n", i + 1, carryCounts[i], pct);
-            }
-        }
-        System.out.println("├─────────────────────────────────────────────────────────────────┤");
-        System.out.printf("│ Mean: %.4f%n", mean);
-        System.out.printf("│ Std Dev: %.4f%n", stdDev);
-        System.out.printf("│ Time per iteration: %,.1f ns%n", nsPerIter);
-        System.out.println("└─────────────────────────────────────────────────────────────────┘");
-    }
-
-    /**
-     * Compares carry length distribution across different n values.
-     * Demonstrates parity-locked stabilisation (distribution independent of n).
-     */
-    private static void compareAcrossN(Calculator calc) {
-        int[] testValues = {20, 50, 100, 200};
-        long iterations = 50_000;
-
-        System.out.println("\n=== Cross-n Carry Length Comparison ===");
-        System.out.println("Demonstrates parity-locked stabilisation:");
-        System.out.println("Distribution should be identical across n values for same parity\n");
-
-        for (int n : testValues) {
-            DerangadicIncrementStateMachine machine = new DerangadicIncrementStateMachine(n, BigInteger.ZERO, calc);
-
-            long[] carryCounts = new long[MAX_CARRY];
-            for (long i = 0; i < iterations; i++) {
-                int carryLen = machine.incrementAndGetCarryLength();
-                if (carryLen == 0) break;
-                if (carryLen <= MAX_CARRY) {
-                    carryCounts[carryLen - 1]++;
-                }
-            }
-
-            System.out.printf("n=%d distribution: ", n);
-            for (int i = 0; i < Math.min(8, MAX_CARRY); i++) {
-                System.out.printf("%d:%-4d ", i + 1, carryCounts[i]);
-            }
-            System.out.println();
-        }
-    }
-
-    /**
-     * Generates LaTeX coordinate pairs for plotting the carry length distribution.
-     *
-     * @param calc Calculator instance for subfactorial computations
-     * @param n    universe size
-     * @return String of coordinate pairs in format (x, y)
-     */
-    private static String getCoordinatesForN(Calculator calc, int n) {
-        DerangadicIncrementStateMachine machine = new DerangadicIncrementStateMachine(n, BigInteger.ZERO, calc);
-
-        long[] carryCounts = new long[MAX_CARRY];
         for (long i = 0; i < ITERATIONS; i++) {
             int carryLen = machine.incrementAndGetCarryLength();
             if (carryLen == 0) break;
-            if (carryLen <= MAX_CARRY) {
-                carryCounts[carryLen - 1]++;
-            }
+            actualIter++;
+            if (carryLen <= MAX_CARRY) carryCounts[carryLen]++;
         }
 
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < MAX_CARRY; i++) {
-            if (carryCounts[i] > 0) {
-                if (!sb.isEmpty()) sb.append(" ");
-                sb.append(String.format("(%d, %d)", i + 1, carryCounts[i]));
-            }
+        long duration = System.currentTimeMillis() - startTime;
+
+        // --- statistics ---
+        double weightedSum = 0, total = 0;
+        for (int i = 1; i <= MAX_CARRY; i++) {
+            weightedSum += (double) i * carryCounts[i];
+            total       += carryCounts[i];
         }
-        return sb.toString();
+
+        double mean          = total > 0 ? weightedSum / total : 0;
+        double alpha         = total > 0 ? (double) carryCounts[2] / total : 0;
+        double predictedMean = 2 * (Math.E - 1) - 2 * (Math.E - 2) * alpha;
+
+        // --- print ---
+        System.out.printf("iterations     : %,d%n",   actualIter);
+        System.out.printf("time           : %,d ms%n", duration);
+        System.out.printf("mean carry     : %.8f%n",   mean);
+        System.out.printf("alpha=P(L=2)   : %.8f%n",   alpha);
+        System.out.printf("predicted mean : %.8f%n%n", predictedMean);
+
+        for (int i = 1; i <= MAX_CARRY; i++) {
+            if (carryCounts[i] == 0) continue;
+            System.out.printf("  L=%2d : %,12d  (%9.6f%%)%n",
+                    i, carryCounts[i], 100.0 * carryCounts[i] / total);
+        }
+
+        System.out.println("\n  Ratios P(L=k)/P(L=k+1):");
+        for (int k = 2; k < Math.min(MAX_CARRY, 11); k++) {
+            if (carryCounts[k] == 0 || carryCounts[k + 1] == 0) continue;
+            double empirical  = (double) carryCounts[k] / carryCounts[k + 1];
+            double predicted  = (double) (k * k - 1) / k;
+            System.out.printf("    k=%2d | empirical=%8.4f | predicted=%8.4f%n",
+                    k, empirical, predicted);
+        }
+
+        System.out.printf("%n=== COMPLETED [%d/%d] ===%n", completed, totalConfigs);
     }
 }
