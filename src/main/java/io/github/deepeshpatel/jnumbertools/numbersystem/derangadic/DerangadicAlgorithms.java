@@ -10,8 +10,6 @@ import io.github.deepeshpatel.jnumbertools.generator.base.FenwickTree;
 import java.math.BigInteger;
 import java.util.*;
 
-import static javax.management.openmbean.SimpleType.BIGINTEGER;
-
 /**
  * Core algorithms for the <strong>Derangadic</strong> number system — a combinatorial
  * number system for fixed-point-free permutations (derangements).

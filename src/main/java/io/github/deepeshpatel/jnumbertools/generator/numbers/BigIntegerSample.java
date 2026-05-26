@@ -158,12 +158,6 @@ class RetryBasedIterator implements Iterator<BigInteger> {
 
     /**
      * Generates a random BigInteger in [0, bound).
-     *
-     * @param bound the upper bound (exclusive)
-     * @return a random BigInteger in [0, bound)
-     */
-    /**
-     * Generates a random BigInteger in [0, bound).
      * Uses rejection sampling to ensure uniform distribution.
      *
      * @param bound the upper bound (exclusive); must be positive

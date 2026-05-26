@@ -211,11 +211,9 @@ class MultisetCombinationTest {
                 if (r > totalAvailable) {
                     assertFalse(iterator.hasNext(), "r=" + r + " should be empty");
                 } else if (r < CROSSOVER_THRESHOLD) {
-                    assertTrue(iterator instanceof MultisetCombination.ArrayIterator,
-                            "expected ArrayIterator for r=" + r);
+                    assertInstanceOf(MultisetCombination.ArrayIterator.class, iterator, "expected ArrayIterator for r=" + r);
                 } else {
-                    assertTrue(iterator instanceof MultisetCombination.FreqVectorIterator,
-                            "expected FreqVectorIterator for r=" + r);
+                    assertInstanceOf(MultisetCombination.FreqVectorIterator.class, iterator, "expected FreqVectorIterator for r=" + r);
                 }
             }
         }

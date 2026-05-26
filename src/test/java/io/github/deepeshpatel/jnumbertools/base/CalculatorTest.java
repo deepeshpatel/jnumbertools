@@ -235,7 +235,7 @@ public class CalculatorTest {
         //test for large values
         int[] freq = {1000, 1000, 1000};
         int total = Arrays.stream(freq).sum();
-        int[] result = calculator.multisetCombinationsCountAll(freq);
+        int[] result = Calculator.multisetCombinationsCountAll(freq);
         assertEquals(501501, result[total-2000]);
         assertEquals(501501, result[1000]);
     }
@@ -245,28 +245,28 @@ public class CalculatorTest {
     void testMultisetCombinationsExact() {
         // Using frequencies {2, 3, 2} (total = 7)
         // k = 0 → only one way (empty selection)
-        assertEquals(1, calculator.multisetCombinationsCount(0, 2, 3, 2).intValue());
+        assertEquals(1, Calculator.multisetCombinationsCount(0, 2, 3, 2).intValue());
         // k = 2 → expected 6 ways (e.g., [A,A], [A,G], [A,B], [G,G], [G,B], [B,B])
-        assertEquals(6, calculator.multisetCombinationsCount(2, 2, 3, 2).intValue());
+        assertEquals(6, Calculator.multisetCombinationsCount(2, 2, 3, 2).intValue());
         // k = 3 → expected 8 ways as described in the documentation
-        assertEquals(8, calculator.multisetCombinationsCount(3, 2, 3, 2).intValue());
+        assertEquals(8, Calculator.multisetCombinationsCount(3, 2, 3, 2).intValue());
         // k = 7 (select all items) → 1 way
-        assertEquals(1, calculator.multisetCombinationsCount(7, 2, 3, 2).intValue());
+        assertEquals(1, Calculator.multisetCombinationsCount(7, 2, 3, 2).intValue());
         // k = 8 (more than available items) → 0 ways
-        assertEquals(0, calculator.multisetCombinationsCount(8, 2, 3, 2).intValue());
+        assertEquals(0, Calculator.multisetCombinationsCount(8, 2, 3, 2).intValue());
 
         //Test for large values
-        assertEquals(501501, calculator.multisetCombinationsCount(2000, 1000, 1000, 1000).intValue());
-        assertEquals(501501, calculator.multisetCombinationsCount(1000, 1000, 1000, 1000).intValue());
+        assertEquals(501501, Calculator.multisetCombinationsCount(2000, 1000, 1000, 1000).intValue());
+        assertEquals(501501, Calculator.multisetCombinationsCount(1000, 1000, 1000, 1000).intValue());
     }
 
     @Test
     @DisplayName("multisetCombinationsCount: invalid inputs throw exceptions")
     void testMultisetCombinationsExactInvalidInput() {
         // Negative k should throw an exception.
-        assertThrows(IllegalArgumentException.class, () -> calculator.multisetCombinationsCount(-1, 2, 3, 2));
+        assertThrows(IllegalArgumentException.class, () -> Calculator.multisetCombinationsCount(-1, 2, 3, 2));
         // Negative frequency should throw an exception.
-        assertThrows(IllegalArgumentException.class, () -> calculator.multisetCombinationsCount(2, -1, 3, 2));
+        assertThrows(IllegalArgumentException.class, () -> Calculator.multisetCombinationsCount(2, -1, 3, 2));
     }
 
     @Nested
