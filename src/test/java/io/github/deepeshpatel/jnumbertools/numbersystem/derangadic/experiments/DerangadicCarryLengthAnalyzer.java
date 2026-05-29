@@ -1,6 +1,8 @@
-package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
+package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.experiments;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicIncrementStateMachine;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
@@ -11,14 +13,14 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * Long-running benchmark for Derangadic carry length distribution.
- *
- * For each (n, startRank) configuration, runs ITERATIONS increments and records
- * the carry-length histogram, mean, and alpha = P(L=2).
- *
- * Start ranks per n: rank 0, maxRank/4, maxRank/2, maxRank*3/4.
+ * R&D / Data Generation Harness (NOT a standard unit test).
+ * This class is used for large-scale empirical analysis, statistics collection,
+ * and pattern discovery (carry-length distribution, tail polynomials, convergence, etc.).
+ * It is kept under src/test for convenience of execution, but it is not a
+ * traditional JUnit test.
  */
-public class DerangadicCarryLengthBenchmarkTest {
+@Disabled("Not a test but a data feneration harness")
+public class DerangadicCarryLengthAnalyzer {
 
     //private static final int[]  N_VALUES   = {200, 500, 800, 1000, 2000};
     private static final int[]  N_VALUES   = {201, 501, 699 };//1001};,

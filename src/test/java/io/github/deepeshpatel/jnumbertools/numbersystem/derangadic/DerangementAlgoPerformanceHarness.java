@@ -1,7 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithms;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,39 +10,12 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithmsTest.isValidDerangement;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @EnabledIfSystemProperty(named = "performance.testing", matches = "true")
-public class DerangementAlgoPerformanceTest {
+public class DerangementAlgoPerformanceHarness {
 
     private static final DerangadicAlgorithms DERANGADIC = new DerangadicAlgorithms(new Calculator());
-
-    @Test
-    @DisplayName("Performance test - should generate 10,000 derangements quickly")
-    void testPerformance() {
-        int n = 8;
-        int iterations = 10000;
-        BigInteger total = DERANGADIC.derangementCount(n);
-        assertTrue(total.longValue() >= iterations,
-                String.format("D_%d should be at least %d", n, iterations));
-
-        long startTime = System.currentTimeMillis();
-
-        for (long m = 0; m < iterations; m++) {
-            int[] derangement = DERANGADIC.unrank(BigInteger.valueOf(m), n);
-            assertTrue(isValidDerangement(derangement),
-                    String.format("Invalid derangement at rank %d", m));
-        }
-
-        long endTime = System.currentTimeMillis();
-        long duration = endTime - startTime;
-
-        assertTrue(duration < 500,
-                String.format("Performance too slow: %d ms for %d derangements", duration, iterations));
-        System.out.printf("Performance: %d ms for %d derangements (%.3f µs each)%n",
-                duration, iterations, duration * 1000.0 / iterations);
-    }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
@@ -62,7 +34,7 @@ public class DerangementAlgoPerformanceTest {
 
             // Warmup
             for (int i = 0; i < 100; i++) {
-                DERANGADIC.toDerangementArray(digits, n);
+                DERANGADIC. toDerangementArray(digits, n);
                 DERANGADIC.toDerangementFenwick(digits, n);
                 DERANGADIC.toDerangement(digits, n);
             }

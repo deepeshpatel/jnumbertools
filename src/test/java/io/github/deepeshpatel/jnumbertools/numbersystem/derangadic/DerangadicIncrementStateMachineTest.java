@@ -348,27 +348,32 @@ public class DerangadicIncrementStateMachineTest {
         assertEquals(0, machine.incrementAndGetCarryLength(), "Final carry length should be 0");
     }
 
-//    @Test
-//    @DisplayName("incrementAndGetCarryLength matches manual carry counting")
-//    void testIncrementAndGetCarryLengthMatchesManualCount() {
-//        int n = 8;
-//        DerangadicIncrementStateMachine machine = new DerangadicIncrementStateMachine(n, BigInteger.ZERO, CALC);
-//
-//        for (int i = 0; i < 500; i++) {
-//            int[] digitsBefore = machine.getEncoded();
-//            int reportedCarry = machine.incrementAndGetCarryLength();
-//
-//            // Manually compute carry length by finding pivot
-//            int actualCarry = 1;
-//            for (int idx = 1; idx < digitsBefore.length; idx++) {
-//                if (digitsBefore[idx] == 0) break;
-//                actualCarry++;
-//            }
-//            // Adjust for LSD-encoding vs pivot logic
-//            // The reported carry should be >= 2
-//            assertTrue(reportedCarry >= 2, "Reported carry too small");
-//        }
-//    }
+    @Test
+    @DisplayName("Performance test - should generate 10,000 derangements quickly")
+    void testPerformance() {
+        int n = 8;
+        int iterations = 10000;
+        DerangadicAlgorithms DERANGADIC = new DerangadicAlgorithms(new Calculator());
+        BigInteger total = DERANGADIC.derangementCount(n);
+        assertTrue(total.longValue() >= iterations,
+                String.format("D_%d should be at least %d", n, iterations));
+
+        long startTime = System.currentTimeMillis();
+
+        for (long m = 0; m < iterations; m++) {
+            int[] derangement = DERANGADIC.unrank(BigInteger.valueOf(m), n);
+            assertTrue(isValidDerangement(derangement),
+                    String.format("Invalid derangement at rank %d", m));
+        }
+
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+
+        assertTrue(duration < 500,
+                String.format("Performance too slow: %d ms for %d derangements", duration, iterations));
+        System.out.printf("Performance: %d ms for %d derangements (%.3f µs each)%n",
+                duration, iterations, duration * 1000.0 / iterations);
+    }
 
     // =========================================================================
     // Helpers

@@ -1,8 +1,9 @@
-package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
+package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.experiments;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithms;
 import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicIncrementStateMachine;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -12,19 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Performance evaluation for Derangadic increment vs materialization.
- *
- * <p>Compares three approaches:</p>
- * <ul>
- *   <li><b>Full Increment</b> - DerangadicIncrement.increment() which maintains derangement</li>
- *   <li><b>Materialization Only</b> - Pre-generate encoded digits, then materialize via Algo.toDerangement()</li>
- *   <li><b>Unrank Baseline</b> - Direct rank-based conversion for comparison</li>
- * </ul>
- *
- * <p>This test is disabled by default. Enable with -Dstress.testing=true</p>
+ * R&D / Data Generation Harness (NOT a standard unit test).
+ * This class is used for large-scale empirical analysis, statistics collection,
+ * and pattern discovery (carry-length distribution, tail polynomials, convergence, etc.).
+ * It is kept under src/test for convenience of execution, but it is not a
+ * traditional JUnit test.
  */
-@EnabledIfSystemProperty(named = "performance.testing", matches = "true")
-public class DerangadicStateMachinePerformanceTest {
+@Disabled("Not a test but a data feneration harness")
+public class DerangadicStateMachinePerformanceHarness {
 
     @Test
     @DisplayName("Performance: Compare increment vs materialization vs unrank")
