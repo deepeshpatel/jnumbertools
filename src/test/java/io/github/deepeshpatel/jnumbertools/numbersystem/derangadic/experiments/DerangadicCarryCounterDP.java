@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library
- * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2025 Deepesh Patel
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.experiments;
 
@@ -10,107 +10,39 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Fast bitmask-DP counter for Derangadic carry-length frequencies over a
- * full lexicographic enumeration of universe-{@code n} derangements.
- *
- * <p>Produces the same counts as the increment machine iterated from rank
- * 0 to rank {@code !n - 1}. Where the simpler enumeration-based counter
- * runs in {@code O(!n)}, this one uses memoisation on a bitmask of placed
- * elements, reducing complexity to {@code O(2^n * n^3)}.</p>
- *
- * <h2>Algorithm</h2>
- * <p>The carry-length count {@code C_n(L)} decomposes as a sum over the
- * parity-matched layers visited during the full enumeration:</p>
- * <pre>
- *   C_n(L) = sum over m in {startLayer, startLayer+2, ..., n} of
- *              [ W(m, L) - shadows(m, L) ]
- *            + (1 if L is an expansion target)
- *            - (1 if L+1 is an expansion target)
- * </pre>
- * <p>where {@code W(m, L)} is the within-layer-{@code m} count of digit
- * tuples whose pivot lands at LSD-first array index {@code L - 1}.</p>
- *
- * <p>The crucial speedup is in computing {@code W(m, L)}. Instead of
- * enumerating each of the {@code m!} orderings, the DP memoises on
- * {@code (usedMask, step)}: many orderings reach the same partial
- * configuration and have identical completion counts. State space is
- * {@code O(2^m * m)} per target {@code L}, transitions are {@code O(m)}.</p>
- *
- * <h2>Complexity</h2>
- * <ul>
- *   <li><b>Time:</b> {@code O(2^n * n^3)} total to build the full
- *       distribution for universe {@code n}.</li>
- *   <li><b>Space:</b> {@code O(2^n * n)} for the memoisation table per
- *       target {@code L}; cleared between {@code L} iterations to keep
- *       peak memory bounded.</li>
- * </ul>
- *
- * <h2>Recommended use</h2>
- * <p>For tail values ({@code L = n, n-1, n-2, n-3, n-4, n-5}) the known
- * polynomial formulas {@code P_j(n)} from the paper are faster
- * (constant-time) and equally exact; use them in preference. This DP is
- * the right tool for the bulk values {@code L = 2, 3, ..., n-6} where no
- * closed-form polynomial is known.</p>
- *
- * <h2>Example</h2>
- * <pre>{@code
- * DerangadicCarryCounterDP c = new DerangadicCarryCounterDP(new Calculator());
- * c.carryCount(15, 9);     // returns 17,762,792 in well under a second
- * c.carryDistribution(15); // full distribution for n=15
- * }</pre>
- *
- * @author Deepesh Patel &amp; Aditya Patel
+ * Memory-optimized Derangadic Carry Counter using flattened legal table + bottom-up DP.
  */
 public final class DerangadicCarryCounterDP {
 
+    private static final Map<Integer, LegalTable> legalCache = new HashMap<>();
 
-    /**
-     * Exact count of carry-length-{@code L} events during the full
-     * lexicographic enumeration of derangements of {@code n} elements.
-     *
-     * @param n universe size, {@code n >= 2}
-     * @param L carry length, {@code 2 <= L <= n}
-     * @return count of such events; zero outside the valid range
-     */
+    // ===================================================================
+    // Public API
+    // ===================================================================
+
     public BigInteger carryCount(int n, int L) {
         if (n < 2 || L < 2 || L > n) return BigInteger.ZERO;
 
         int startLayer = (n % 2 == 0) ? 2 : 3;
         BigInteger total = BigInteger.ZERO;
 
-        // Sum (within-layer minus shadow) contributions per parity-matched layer.
         for (int m = startLayer; m <= n; m += 2) {
             if (m < L) continue;
             BigInteger raw = withinLayerCount(m, L);
-            BigInteger shadows = (m >= startLayer + 2)
-                    ? withinLayerCount(m - 2, L)
-                    : BigInteger.ZERO;
+            BigInteger shadows = (m >= startLayer + 2) ? withinLayerCount(m - 2, L) : BigInteger.ZERO;
             total = total.add(raw).subtract(shadows);
         }
 
-        // Layer-expansion events: each expansion (m-2 -> m) contributes
-        // one carry of length exactly m, for m of the right parity, m >= startLayer + 2.
-        if (L >= startLayer + 2 && L <= n && (L - n) % 2 == 0) {
+        if (L >= startLayer + 2 && L <= n && (L - n) % 2 == 0)
             total = total.add(BigInteger.ONE);
-        }
 
-        // All-maxed shadow correction: subtract one for L = m - 1 where m
-        // is a parity-matched layer >= startLayer + 2.
         int candidateM = L + 1;
-        if (candidateM >= startLayer + 2 && candidateM <= n
-                && (candidateM - n) % 2 == 0) {
+        if (candidateM >= startLayer + 2 && candidateM <= n && (candidateM - n) % 2 == 0)
             total = total.subtract(BigInteger.ONE);
-        }
 
         return total;
     }
 
-    /**
-     * Full carry-length distribution for universe {@code n}.
-     *
-     * @return array of length {@code n + 1} where {@code dist[L]} is the
-     *         count for that carry length; indices 0 and 1 are zero.
-     */
     public BigInteger[] carryDistribution(int n) {
         BigInteger[] dist = new BigInteger[n + 1];
         Arrays.fill(dist, BigInteger.ZERO);
@@ -120,106 +52,150 @@ public final class DerangadicCarryCounterDP {
         return dist;
     }
 
-    // ----------------------------------------------------------------
-    // Within-layer DP
-    // ----------------------------------------------------------------
+    // ===================================================================
+    // Core Computation
+    // ===================================================================
 
-    /**
-     * Counts the layer-{@code m} digit tuples whose pivot would land at
-     * LSD-first array index {@code L - 1}. Uses bitmask DP keyed on
-     * {@code (usedMask, step)}.
-     */
     private BigInteger withinLayerCount(int m, int L) {
         if (L < 2 || L > m) return BigInteger.ZERO;
 
-        // Cache cleared per (m, L) call to bound peak memory.
-        Map<Long, BigInteger> memo = new HashMap<>();
-        return countCompletions(0, 0, m, L - 1, memo);
+        LegalTable legal = getLegalTable(m);
+        int pivotIdx = L - 1;
+        int maxMask = 1 << m;
+
+        BigInteger[] memo = new BigInteger[maxMask];
+        memo[maxMask - 1] = BigInteger.ONE;
+
+        for (int mask = maxMask - 2; mask >= 0; mask--) {
+            int step = Integer.bitCount(mask);
+            int arrayIdx = m - 1 - step;
+
+            int off = legal.offset[mask];
+            int len = legal.length[mask];
+
+            if (len == 0) {
+                memo[mask] = BigInteger.ZERO;
+                continue;
+            }
+
+            int maxD = len - 1;
+            int dStart = 0, dEnd = maxD;
+
+            if (arrayIdx < pivotIdx) {
+                dStart = dEnd = maxD;
+            } else if (arrayIdx == pivotIdx) {
+                dEnd = maxD - 1;
+            }
+
+            BigInteger sum = BigInteger.ZERO;
+            for (int d = dStart; d <= dEnd; d++) {
+                int chosen = legal.candidates[off + d];
+                int nextMask = mask | (1 << chosen);
+                sum = sum.add(memo[nextMask]);
+            }
+            memo[mask] = sum;
+        }
+
+        return memo[0];
     }
 
-    /**
-     * DP node value: number of ways to complete the layer-m enumeration
-     * from the given state, respecting the pivot constraint at
-     * {@code pivotArrayIdx} (LSD-first).
-     */
-    private BigInteger countCompletions(int usedMask, int step, int m,
-                                        int pivotArrayIdx,
-                                        Map<Long, BigInteger> memo) {
-        if (step == m) return BigInteger.ONE;
+    private LegalTable getLegalTable(int m) {
+        return legalCache.computeIfAbsent(m, LegalTable::new);
+    }
 
-        long key = ((long) usedMask << 6) | step;  // step fits in 6 bits for m <= 63
-        BigInteger cached = memo.get(key);
-        if (cached != null) return cached;
+    // ===================================================================
+    // Flattened Legal Table (Major Memory Saver)
+    // ===================================================================
 
-        int position = step;
-        int arrayIdx = m - 1 - step;
-        int remaining = m - step;
+    private static class LegalTable {
+        final int[] candidates;
+        final int[] offset;
+        final int[] length;
 
-        // Build legal-candidate list (sorted ascending by element value),
-        // applying dead-end avoidance when remaining == 2.
-        int[] legal = new int[m];
-        int legalCount = 0;
+        LegalTable(int m) {
+            System.out.println("Building legal table for m=" + m + " (2^" + m + " states)...");
+            long start = System.currentTimeMillis();
 
-        if (remaining == 2) {
-            int e1 = -1, e2 = -1;
-            for (int e = 0; e < m; e++) {
-                if ((usedMask & (1 << e)) == 0) {
-                    if (e1 < 0) e1 = e;
-                    else { e2 = e; break; }
+            int states = 1 << m;
+            offset = new int[states];
+            length = new int[states];
+
+            long totalCandidates = 0;
+            for (int mask = 0; mask < states; mask++) {
+                length[mask] = countLegal(mask, m);
+                totalCandidates += length[mask];
+            }
+
+            candidates = new int[(int) totalCandidates];
+            int pos = 0;
+
+            for (int mask = 0; mask < states; mask++) {
+                offset[mask] = pos;
+                pos += fillLegal(mask, m, candidates, pos);
+            }
+
+            System.out.printf("Legal table m=%d built in %d ms (%,d candidates)%n",
+                    m, System.currentTimeMillis() - start, totalCandidates);
+        }
+
+        private int countLegal(int mask, int m) {
+            int step = Integer.bitCount(mask);
+            int rem = m - step;
+            int cnt = 0;
+            if (rem == 2) {
+                int e1 = -1, e2 = -1;
+                for (int e = 0; e < m; e++) {
+                    if ((mask >> e & 1) == 0) {
+                        if (e1 < 0) e1 = e;
+                        else { e2 = e; break; }
+                    }
+                }
+                for (int e : new int[]{e1, e2}) {
+                    if (e < 0 || e == step) continue;
+                    int other = (e == e1) ? e2 : e1;
+                    if (other != step + 1) cnt++;
+                }
+            } else {
+                for (int e = 0; e < m; e++) {
+                    if ((mask >> e & 1) == 0 && e != step) cnt++;
                 }
             }
-            for (int e : new int[] {e1, e2}) {
-                if (e == position) continue;
-                int other = (e == e1) ? e2 : e1;
-                if (other == position + 1) continue;  // dead end
-                legal[legalCount++] = e;
-            }
-        } else {
-            for (int e = 0; e < m; e++) {
-                if ((usedMask & (1 << e)) != 0) continue;
-                if (e == position) continue;
-                legal[legalCount++] = e;
-            }
+            return cnt;
         }
 
-        BigInteger result;
-        if (legalCount == 0) {
-            result = BigInteger.ZERO;
-        } else {
-            int maxDigit = legalCount - 1;
-
-            int dStart, dEnd;
-            if (arrayIdx < pivotArrayIdx) {
-                dStart = maxDigit;        // below pivot: forced max
-                dEnd = maxDigit;
-            } else if (arrayIdx == pivotArrayIdx) {
-                dStart = 0;               // at pivot: non-max
-                dEnd = maxDigit - 1;
+        private int fillLegal(int mask, int m, int[] buf, int start) {
+            int step = Integer.bitCount(mask);
+            int rem = m - step;
+            int pos = start;
+            if (rem == 2) {
+                int e1 = -1, e2 = -1;
+                for (int e = 0; e < m; e++) {
+                    if ((mask >> e & 1) == 0) {
+                        if (e1 < 0) e1 = e;
+                        else { e2 = e; break; }
+                    }
+                }
+                for (int e : new int[]{e1, e2}) {
+                    if (e < 0 || e == step) continue;
+                    int other = (e == e1) ? e2 : e1;
+                    if (other != step + 1) buf[pos++] = e;
+                }
             } else {
-                dStart = 0;               // above pivot: free
-                dEnd = maxDigit;
+                for (int e = 0; e < m; e++) {
+                    if ((mask >> e & 1) == 0 && e != step) buf[pos++] = e;
+                }
             }
-
-            result = BigInteger.ZERO;
-            for (int d = dStart; d <= dEnd; d++) {
-                int chosen = legal[d];
-                result = result.add(countCompletions(
-                        usedMask | (1 << chosen), step + 1, m, pivotArrayIdx, memo));
-            }
+            return pos - start;
         }
-
-        memo.put(key, result);
-        return result;
     }
 
-    // ----------------------------------------------------------------
-    // Self-test
-    // ----------------------------------------------------------------
+    // ===================================================================
+    // Exact Main Method as requested
+    // ===================================================================
 
     public static void main(String[] args) {
         var counter = new DerangadicCarryCounterDP();
 
-        // Ground-truth data from your full-enumeration runs (n = 4..14)
         long[][] expected = {
                 {4, 2, 2}, {4, 3, 3}, {4, 4, 3},
                 {5, 2, 12}, {5, 3, 19}, {5, 4, 8}, {5, 5, 4},
@@ -249,15 +225,14 @@ public final class DerangadicCarryCounterDP {
         System.out.printf("Self-test: %s in %d ms%n%n",
                 allOk ? "all pass" : "FAILED", System.currentTimeMillis() - t0);
 
-        // Extend the table: compute full distributions for n = 15, 16
-        for (int n : new int[] {21,22,23,24}) {
+        // Extended table
+        for (int n = 4; n <= 24; n++) {
             t0 = System.currentTimeMillis();
             BigInteger[] dist = counter.carryDistribution(n);
             long elapsed = System.currentTimeMillis() - t0;
-            System.out.printf("=== n=%d   (computed in %d ms) ===%n", n, elapsed);
-            for (int L = 2; L <= n; L++) {
-                System.out.printf("  L=%2d : %,18d%n", L, dist[L]);
-            }
+            System.out.printf("=== n=%d (computed in %d ms) ===%n", n, elapsed);
+            for (int L = 2; L <= n; L++)
+                System.out.printf("  L=%2d : %,22d%n", L, dist[L]);
             System.out.println();
         }
     }

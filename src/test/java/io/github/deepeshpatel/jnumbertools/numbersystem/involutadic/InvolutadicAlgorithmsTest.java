@@ -36,14 +36,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Involutadic Number System")
 class InvolutadicAlgorithmsTest {
 
+    private Calculator calculator;
     private InvolutadicAlgorithms alg;
-    private InvolutadicIncrementStateMachine inc;
 
     @BeforeEach
     void setUp() {
-        Calculator calculator = new Calculator();
+        calculator = new Calculator();
         alg = new InvolutadicAlgorithms(calculator);
-        inc = new InvolutadicIncrementStateMachine(calculator);
     }
 
     // =========================================================
@@ -101,7 +100,6 @@ class InvolutadicAlgorithmsTest {
         void largeN() {
             int n = 15;
             BigInteger total = alg.involutionCount(n);
-            // Test rank 0, T(n)-1, T(n)/2
             for (BigInteger rank : List.of(
                     BigInteger.ZERO,
                     total.subtract(BigInteger.ONE),
@@ -123,9 +121,7 @@ class InvolutadicAlgorithmsTest {
             int total = alg.involutionCount(n).intValueExact();
             for (int rank = 0; rank < total; rank++) {
                 int[] inv = alg.unrank(rank, n);
-                // Verify it is a valid involution
                 assertTrue(isValidInvolution(inv), "n=" + n + " rank=" + rank + " invalid involution");
-                // Verify rank recovery
                 BigInteger recovered = alg.rank(inv, n);
                 assertEquals(BigInteger.valueOf(rank), recovered,
                         "n=" + n + " rank=" + rank);
@@ -136,49 +132,30 @@ class InvolutadicAlgorithmsTest {
         @DisplayName("Known involutions for n=4")
         void knownN4() {
             int[][] expected = {
-                    {0, 1, 2, 3},  // rank 0
-                    {0, 1, 3, 2},  // rank 1
-                    {0, 2, 1, 3},  // rank 2
-                    {0, 3, 2, 1},  // rank 3
-                    {1, 0, 2, 3},  // rank 4
-                    {1, 0, 3, 2},  // rank 5
-                    {2, 1, 0, 3},  // rank 6
-                    {2, 3, 0, 1},  // rank 7
-                    {3, 1, 2, 0},  // rank 8
-                    {3, 2, 1, 0},  // rank 9
+                    {0, 1, 2, 3}, {0, 1, 3, 2}, {0, 2, 1, 3}, {0, 3, 2, 1},
+                    {1, 0, 2, 3}, {1, 0, 3, 2}, {2, 1, 0, 3}, {2, 3, 0, 1},
+                    {3, 1, 2, 0}, {3, 2, 1, 0},
             };
             for (int rank = 0; rank < expected.length; rank++) {
-                int[] inv = alg.unrank(rank, 4);
-                assertArrayEquals(expected[rank], inv,
-                        "n=4 rank=" + rank);
+                assertArrayEquals(expected[rank], alg.unrank(rank, 4), "n=4 rank=" + rank);
             }
         }
 
         @Test
         @DisplayName("Known involutions for n=5")
         void knownN5() {
-            // First and last 5 involutions
             int[][] expectedFirst = {
-                    {0, 1, 2, 3, 4},  // rank 0
-                    {0, 1, 2, 4, 3},  // rank 1
-                    {0, 1, 3, 2, 4},  // rank 2
-                    {0, 1, 4, 3, 2},  // rank 3
-                    {0, 2, 1, 3, 4},  // rank 4
+                    {0, 1, 2, 3, 4}, {0, 1, 2, 4, 3}, {0, 1, 3, 2, 4},
+                    {0, 1, 4, 3, 2}, {0, 2, 1, 3, 4},
             };
             int[][] expectedLast = {
-                    {4, 1, 2, 3, 0},  // rank 22
-                    {4, 1, 3, 2, 0},  // rank 23
-                    {4, 2, 1, 3, 0},  // rank 24
-                    {4, 3, 2, 1, 0},  // rank 25
+                    {4, 1, 2, 3, 0}, {4, 1, 3, 2, 0}, {4, 2, 1, 3, 0}, {4, 3, 2, 1, 0},
             };
             for (int rank = 0; rank < expectedFirst.length; rank++) {
-                assertArrayEquals(expectedFirst[rank], alg.unrank(rank, 5),
-                        "n=5 rank=" + rank);
+                assertArrayEquals(expectedFirst[rank], alg.unrank(rank, 5), "n=5 rank=" + rank);
             }
             for (int i = 0; i < expectedLast.length; i++) {
-                int rank = 22 + i;
-                assertArrayEquals(expectedLast[i], alg.unrank(rank, 5),
-                        "n=5 rank=" + rank);
+                assertArrayEquals(expectedLast[i], alg.unrank(22 + i, 5), "n=5 rank=" + (22 + i));
             }
         }
     }
@@ -217,22 +194,20 @@ class InvolutadicAlgorithmsTest {
         @Test
         @DisplayName("Digit arrays for n=4 (LSD-first)")
         void digitsN4() {
-            // Ground-truth from verified Python computation
             int[][] expectedDigits = {
-                    {0, 0, 0, 0},  // rank 0: [0,1,2,3] -> all fixed
-                    {1, 0, 0},     // rank 1: [0,1,3,2] -> last 2-cycle
-                    {0, 1, 0},     // rank 2: [0,2,1,3]
-                    {0, 2, 0},     // rank 3: [0,3,2,1]
-                    {0, 0, 1},     // rank 4: [1,0,2,3]
-                    {1, 1},        // rank 5: [1,0,3,2]
-                    {0, 0, 2},     // rank 6: [2,1,0,3]
-                    {1, 2},        // rank 7: [2,3,0,1]
-                    {0, 0, 3},     // rank 8: [3,1,2,0]
-                    {1, 3},        // rank 9: [3,2,1,0]
+                    {0, 0, 0, 0}, // rank 0
+                    {1, 0, 0},    // rank 1
+                    {0, 1, 0},    // rank 2
+                    {0, 2, 0},    // rank 3
+                    {0, 0, 1},    // rank 4
+                    {1, 1},       // rank 5
+                    {0, 0, 2},    // rank 6
+                    {1, 2},       // rank 7
+                    {0, 0, 3},    // rank 8
+                    {1, 3},       // rank 9
             };
             for (int rank = 0; rank < expectedDigits.length; rank++) {
-                int[] digits = alg.toInvolutadic(rank, 4);
-                assertArrayEquals(expectedDigits[rank], digits,
+                assertArrayEquals(expectedDigits[rank], alg.toInvolutadic(rank, 4),
                         "n=4 rank=" + rank);
             }
         }
@@ -240,7 +215,6 @@ class InvolutadicAlgorithmsTest {
         @Test
         @DisplayName("Digit array lengths for n=4")
         void digitLengthsN4() {
-            // Length = number of decisions; varies with structure
             int[] expectedLengths = {4, 3, 3, 3, 3, 2, 3, 2, 3, 2};
             for (int rank = 0; rank < expectedLengths.length; rank++) {
                 int[] digits = alg.toInvolutadic(rank, 4);
@@ -265,17 +239,16 @@ class InvolutadicAlgorithmsTest {
             int total = expected.size();
             assertEquals(alg.involutionCount(n).intValue(), total);
 
-            InvolutadicIncrementStateMachine.InvolutadicState state = inc.initialState(n);
+            var engine = new InvolutadicIncrementStateMachine(n, 0L, calculator);
             int step = 0;
-
             do {
-                int[] actual = state.currentInvolution();
+                int[] actual = engine.involution();
                 assertArrayEquals(expected.get(step), actual,
                         "n=" + n + " step=" + step
                                 + " expected=" + Arrays.toString(expected.get(step))
-                                + " actual=" + Arrays.toString(actual));
+                                + " actual="  + Arrays.toString(actual));
                 step++;
-            } while (inc.increment(state));
+            } while (engine.increment());
 
             assertEquals(total, step, "n=" + n + " total steps mismatch");
         }
@@ -285,30 +258,27 @@ class InvolutadicAlgorithmsTest {
         void startFromMidRank() {
             int n = 6;
             int startRank = 30;
-            BigInteger totalBig = alg.involutionCount(n);
-            int total = totalBig.intValue();
-
+            int total = alg.involutionCount(n).intValue();
             List<int[]> all = allInvolutionsLex(n);
-            InvolutadicIncrementStateMachine.InvolutadicState state =
-                    inc.initialState(n, BigInteger.valueOf(startRank));
 
+            var engine = new InvolutadicIncrementStateMachine(n, startRank, calculator);
             for (int rank = startRank; rank < total; rank++) {
-                assertArrayEquals(all.get(rank), state.currentInvolution(),
+                assertArrayEquals(all.get(rank), engine.involution(),
                         "n=" + n + " rank=" + rank);
                 if (rank < total - 1) {
-                    assertTrue(inc.increment(state), "increment returned false early");
+                    assertTrue(engine.increment(), "increment returned false early at rank=" + rank);
                 }
             }
-            assertFalse(inc.increment(state), "increment should return false after last");
+            assertFalse(engine.increment(), "increment should return false after last");
         }
 
         @Test
         @DisplayName("Increment returns false exactly once after last involution")
         void returnsFalseAtEnd() {
             int n = 4;
-            InvolutadicIncrementStateMachine.InvolutadicState state = inc.initialState(n);
+            var engine = new InvolutadicIncrementStateMachine(n, 0L, calculator);
             int steps = 0;
-            while (inc.increment(state)) steps++;
+            while (engine.increment()) steps++;
             assertEquals(alg.involutionCount(n).intValue() - 1, steps,
                     "n=4: should take T(4)-1=9 successful increments");
         }
@@ -317,21 +287,20 @@ class InvolutadicAlgorithmsTest {
         @DisplayName("Each produced array is a valid involution")
         void allProducedAreValidInvolutions() {
             int n = 7;
-            InvolutadicIncrementStateMachine.InvolutadicState state = inc.initialState(n);
+            var engine = new InvolutadicIncrementStateMachine(n, 0L, calculator);
             int count = 0;
             do {
-                int[] inv = state.currentInvolution();
+                int[] inv = engine.involution();
                 assertTrue(isValidInvolution(inv),
-                        "step " + count + " produced invalid involution: "
-                                + Arrays.toString(inv));
+                        "step " + count + " produced invalid involution: " + Arrays.toString(inv));
                 count++;
-            } while (inc.increment(state));
+            } while (engine.increment());
             assertEquals(alg.involutionCount(n).intValue(), count);
         }
     }
 
     // =========================================================
-    // 6. Increment machine: digit-array structural consistency
+    // 6. Increment machine: structural consistency
     // =========================================================
 
     @Nested
@@ -342,34 +311,26 @@ class InvolutadicAlgorithmsTest {
         @DisplayName("Digit array length is consistent with involution structure")
         void digitLengthConsistency() {
             int n = 6;
-            InvolutadicIncrementStateMachine.InvolutadicState state = inc.initialState(n);
+            var engine = new InvolutadicIncrementStateMachine(n, 0L, calculator);
             do {
-                int[] inv = state.currentInvolution();
-                int[] digits = state.getDigits();
-                // Recompute expected digit count independently
-                int expectedDecisions = countDecisions(inv, n);
-                assertEquals(expectedDecisions, digits.length,
+                int[] inv    = engine.involution();
+                int[] digits = engine.getDigits();
+                assertEquals(countDecisions(inv, n), digits.length,
                         "involution=" + Arrays.toString(inv)
                                 + " digits=" + Arrays.toString(digits));
-            } while (inc.increment(state));
+            } while (engine.increment());
         }
 
         @Test
         @DisplayName("decisionCount matches expected number of decisions for each involution")
         void decisionCountMatchesInvolution() {
-            // In the involutadic system, neither digits[0] nor maxDigit[0] is always 0.
-            // When the last decision is a 2-cycle (e.g. [0,1,2,4,3] for n=5: 2c(3,4)),
-            // digits[0]=1 and maxDigit[0]=1 are both valid and correct.
-            // The true structural invariant is that decisionCount() always equals the
-            // number of active positions in the involution (fixed points + 2-cycle leaders).
             int n = 5;
-            InvolutadicIncrementStateMachine.InvolutadicState state = inc.initialState(n);
+            var engine = new InvolutadicIncrementStateMachine(n, 0L, calculator);
             do {
-                int[] inv = state.currentInvolution();
-                int expected = countDecisions(inv, n);
-                assertEquals(expected, state.decisionCount(),
+                int[] inv = engine.involution();
+                assertEquals(countDecisions(inv, n), engine.decisionCount(),
                         "decisionCount mismatch at involution " + Arrays.toString(inv));
-            } while (inc.increment(state));
+            } while (engine.increment());
         }
     }
 
@@ -393,33 +354,27 @@ class InvolutadicAlgorithmsTest {
         }
 
         @Test
-        @DisplayName("Rank T(n)-1 produces the reverse involution")
+        @DisplayName("Rank T(n)-1 produces the reverse involution for even n")
         void lastRankIsReverse() {
-            // For even n, the last involution in lex order is (n-1, n-2, ..., 1, 0)
-            // Verified via brute-force for n=2,4,6
             for (int n : new int[]{2, 4, 6}) {
                 BigInteger lastRank = alg.involutionCount(n).subtract(BigInteger.ONE);
                 int[] inv = alg.unrank(lastRank, n);
                 int[] expected = new int[n];
                 for (int i = 0; i < n; i++) expected[i] = n - 1 - i;
-                assertArrayEquals(expected, inv,
-                        "n=" + n + " last rank should be reverse");
+                assertArrayEquals(expected, inv, "n=" + n + " last rank should be reverse");
             }
         }
 
         @Test
         @DisplayName("Rank out of range throws IllegalArgumentException")
         void rankOutOfRange() {
-            assertThrows(IllegalArgumentException.class,
-                    () -> alg.toInvolutadic(-1L, 4));
-            assertThrows(IllegalArgumentException.class,
-                    () -> alg.toInvolutadic(10L, 4)); // T(4)=10, valid ranks 0-9
+            assertThrows(IllegalArgumentException.class, () -> alg.toInvolutadic(-1L, 4));
+            assertThrows(IllegalArgumentException.class, () -> alg.toInvolutadic(10L, 4));
         }
 
         @Test
         @DisplayName("Invalid involution throws IllegalArgumentException")
         void invalidInvolution() {
-            // Not an involution: π(0)=1 but π(1)=0 is missing
             assertThrows(IllegalArgumentException.class,
                     () -> alg.fromInvolution(new int[]{1, 2, 0}, 3));
         }
@@ -442,7 +397,7 @@ class InvolutadicAlgorithmsTest {
     }
 
     // =========================================================
-    // 8. Involution validity helper (independent oracle)
+    // 8. Involution structure properties
     // =========================================================
 
     @Nested
@@ -455,28 +410,22 @@ class InvolutadicAlgorithmsTest {
             int total = alg.involutionCount(n).intValueExact();
             for (int rank = 0; rank < total; rank++) {
                 int[] inv = alg.unrank(rank, n);
-                assertTrue(isValidInvolution(inv),
-                        "rank=" + rank + " produced invalid involution");
+                assertTrue(isValidInvolution(inv), "rank=" + rank + " produced invalid involution");
             }
         }
 
         @Test
-        @DisplayName("Fixed-point count matches digit array structure")
+        @DisplayName("Fixed-point count matches zero-digit count in digit array")
         void fixedPointCountMatchesDigits() {
             int n = 6;
             int total = alg.involutionCount(n).intValueExact();
             for (int rank = 0; rank < total; rank++) {
-                int[] inv = alg.unrank(rank, n);
+                int[] inv    = alg.unrank(rank, n);
                 int[] digits = alg.toInvolutadic(rank, n);
-
-                // Count fixed points in involution
                 int fps = 0;
                 for (int i = 0; i < n; i++) if (inv[i] == i) fps++;
-
-                // Count zero-digits in digit array (each 0 = fixed point decision)
                 int zeroDigits = 0;
                 for (int d : digits) if (d == 0) zeroDigits++;
-
                 assertEquals(fps, zeroDigits,
                         "rank=" + rank + " inv=" + Arrays.toString(inv)
                                 + " digits=" + Arrays.toString(digits));
@@ -488,7 +437,6 @@ class InvolutadicAlgorithmsTest {
     // Helper utilities
     // =========================================================
 
-    /** Returns true iff π(π(i)) = i for all i. */
     private static boolean isValidInvolution(int[] pi) {
         int n = pi.length;
         for (int i = 0; i < n; i++) {
@@ -498,7 +446,6 @@ class InvolutadicAlgorithmsTest {
         return true;
     }
 
-    /** Returns true iff a <_lex b. */
     private static boolean lexLessThan(int[] a, int[] b) {
         int len = Math.min(a.length, b.length);
         for (int i = 0; i < len; i++) {
@@ -508,10 +455,6 @@ class InvolutadicAlgorithmsTest {
         return a.length < b.length;
     }
 
-    /**
-     * Brute-force: generates all involutions of [n] in lex order.
-     * Used as an oracle; only practical for small n.
-     */
     private static List<int[]> allInvolutionsLex(int n) {
         List<int[]> result = new ArrayList<>();
         generateInvolutions(new int[n], new boolean[n], 0, n, result);
@@ -526,38 +469,25 @@ class InvolutadicAlgorithmsTest {
 
     private static void generateInvolutions(
             int[] perm, boolean[] used, int pos, int n, List<int[]> result) {
-        if (pos == n) {
-            result.add(perm.clone());
-            return;
-        }
-        if (used[pos]) {
-            generateInvolutions(perm, used, pos + 1, n, result);
-            return;
-        }
+        if (pos == n) { result.add(perm.clone()); return; }
+        if (used[pos]) { generateInvolutions(perm, used, pos + 1, n, result); return; }
+
         // Fixed point
-        perm[pos] = pos;
-        used[pos] = true;
+        perm[pos] = pos; used[pos] = true;
         generateInvolutions(perm, used, pos + 1, n, result);
         used[pos] = false;
 
         // 2-cycle with each j > pos not yet used
         for (int j = pos + 1; j < n; j++) {
             if (!used[j]) {
-                perm[pos] = j;
-                perm[j] = pos;
-                used[pos] = true;
-                used[j] = true;
+                perm[pos] = j; perm[j] = pos;
+                used[pos] = true; used[j] = true;
                 generateInvolutions(perm, used, pos + 1, n, result);
-                used[pos] = false;
-                used[j] = false;
+                used[pos] = false; used[j] = false;
             }
         }
     }
 
-    /**
-     * Returns the number of decisions made when encoding an involution.
-     * = number of active positions (positions not consumed as 2-cycle partners).
-     */
     private static int countDecisions(int[] pi, int n) {
         boolean[] placed = new boolean[n];
         int count = 0;

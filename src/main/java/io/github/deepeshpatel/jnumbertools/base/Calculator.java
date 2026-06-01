@@ -5,10 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
@@ -387,13 +384,32 @@ public final class Calculator {
     }
 
     /**
-     * @see <a href="https://en.wikipedia.org/wiki/Telephone_number_(mathematics)">Telephone Number(mathematics)</a>
+     * Returns the nth Telephone Number (number of involutions of size n).
+     *
+     * <p>Recurrence:
+     * T(0)=1, T(1)=1
+     * T(n)=T(n-1)+(n-1)T(n-2)
+     *
+     * @param n n >= 0
+     * @return T(n)
+     * @throws IllegalArgumentException if n < 0
+     * @see <a href="https://en.wikipedia.org/wiki/Telephone_number_(mathematics)">Telephone Number (mathematics)</a>
      */
-    //TODO: create cashing for this
     public BigInteger telephoneNumber(int n) {
-        if (n == 0 || n == 1) return BigInteger.ONE;
-        return telephoneNumber(n-1).add(
-                BigInteger.valueOf(n-1).multiply(telephoneNumber(n-2)));
+
+        //no cashing required. Iterative version is fast enough for n up to 500 or more, and it avoids synchronization overhead of memoization.
+        if (n < 0) { throw new IllegalArgumentException("n must be >= 0"); }
+        if (n <= 1) { return BigInteger.ONE; }
+
+        BigInteger t0 = BigInteger.ONE;
+        BigInteger t1 = BigInteger.ONE;
+
+        for (int i = 2; i <= n; i++) {
+            BigInteger current = t1.add(BigInteger.valueOf(i - 1).multiply(t0));
+            t0 = t1;
+            t1 = current;
+        }
+        return t1;
     }
 
     /**

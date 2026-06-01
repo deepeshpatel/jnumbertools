@@ -1,0 +1,22 @@
+==============================================
+Fixed-Point-Free Involutions (n = 4)
+I-code vs Involutadic
+==============================================
+ 0  [1, 0, 3, 2]     I-code=[0, 0]      Involutadic=[0, 0]      SAME=true
+ 1  [2, 3, 0, 1]     I-code=[1, 0]      Involutadic=[1, 0]      SAME=true
+ 2  [3, 2, 1, 0]     I-code=[2, 0]      Involutadic=[2, 0]      SAME=true
+
+==============================================
+General involutions (n = 4)
+Now they diverge because fixed points exist
+==============================================
+ 0  [0, 1, 2, 3]     Involutadic=[0, 0, 0, 0]
+ 1  [0, 1, 3, 2]     Involutadic=[0, 0, 1]
+ 2  [0, 2, 1, 3]     Involutadic=[0, 1, 0]
+ 3  [0, 3, 2, 1]     Involutadic=[0, 2, 0]
+ 4  [1, 0, 2, 3]     Involutadic=[1, 0, 0]
+ 5  [1, 0, 3, 2]     Involutadic=[1, 1]
+ 6  [2, 1, 0, 3]     Involutadic=[2, 0, 0]
+ 7  [2, 3, 0, 1]     Involutadic=[2, 1]
+ 8  [3, 1, 2, 0]     Involutadic=[3, 0, 0]
+ 9  [3, 2, 1, 0]     Involutadic=[3, 1]
