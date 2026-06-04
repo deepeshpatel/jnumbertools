@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +22,8 @@ public final class InvolutadicRatioLawChecker {
     private static final MathContext MC = new MathContext(15, RoundingMode.HALF_UP);
 
     private final InvolutadicCarryCounter counter;
+    private final InvolutadicCarryCounterFormula formula = new InvolutadicCarryCounterFormula();
+    private final InvolutadicCarryCounterDP dpCounter = new InvolutadicCarryCounterDP();
 
     public InvolutadicRatioLawChecker() {
         this.counter = new InvolutadicCarryCounter();
@@ -53,6 +56,12 @@ public final class InvolutadicRatioLawChecker {
         System.out.println("Computing distributions...");
         for (int n = 2; n <= maxN; n++) {
             long t0 = System.currentTimeMillis();
+            //System.out.println("Should match:");
+//            System.out.println("\nCurrent=" + Arrays.toString(checker.counter.carryDistribution(n)));
+//            System.out.println("Old    =" + Arrays.toString(checker.formula.carryDistribution(n)));
+            //System.out.println(Arrays.toString(checker.dpCounter.carryDistribution(n)));
+
+
             allDist[n] = checker.counter.carryDistribution(n);
             System.out.printf("  n=%d done (%d ms)%n", n, System.currentTimeMillis() - t0);
         }
