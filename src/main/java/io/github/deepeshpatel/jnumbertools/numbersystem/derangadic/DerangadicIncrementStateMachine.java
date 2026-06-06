@@ -5,7 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.generator.base.FenwickTree;
+import io.github.deepeshpatel.jnumbertools.datastructure.FenwickTree;
 
 import java.math.BigInteger;
 import java.util.Arrays;

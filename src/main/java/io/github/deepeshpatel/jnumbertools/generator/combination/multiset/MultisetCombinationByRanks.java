@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.datastructure.TwoLevelMap;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -84,22 +85,22 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
         private final Iterator<BigInteger> rankIterator;
         private final Map<T, Integer> outputMap = new HashMap<>();
 
-        /**
-         * Constructs an iterator for the given sequence of ranks.
-         */
+        private final int[] suffixSum;
+        private final TwoLevelMap<Integer, Integer, BigInteger> memo = new TwoLevelMap<>();
+
         public SequenceIterator() {
             this.rankIterator = ranks.iterator();
+
+            // Pre-compute suffixSum ONCE (frequencies never change)
+            int n = frequencies.length;
+            this.suffixSum = new int[n + 1];
+            for (int i = n - 1; i >= 0; i--) {
+                suffixSum[i] = suffixSum[i + 1] + frequencies[i];
+            }
         }
 
-        /**
-         * Checks if there are more combinations to generate.
-         *
-         * @return {@code true} if the sequence has more ranks; {@code false} otherwise
-         */
         @Override
-        public boolean hasNext() {
-            return rankIterator.hasNext();
-        }
+        public boolean hasNext() { return rankIterator.hasNext(); }
 
         /**
          * Returns the next multiset combination for the current rank.
@@ -114,48 +115,47 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
         @Override
         public Map<T, Integer> next() {
             BigInteger m = rankIterator.next();
-            if (m.signum() < 0) {
-                throw new IllegalArgumentException("Rank " + m + " cannot be negative. Valid range is [0, " + totalCombinations + ")");
+            if (m.signum() < 0 || m.compareTo(totalCombinations) >= 0) {
+                throw new IllegalArgumentException("Rank " + m + " out of bounds [0, " + totalCombinations + ")");
             }
-            if (m.signum() >= 0 && m.compareTo(totalCombinations) >= 0) {
-                throw new IllegalArgumentException("Rank " + m + " exceeds total multiset combinations " + totalCombinations);
-            }
-            int[] countVector = unrankMultisetCombination(r, m.intValue());
+
+            // Use BigInteger for remainingRank to support huge ranks safely
+            int[] combination = unrankMultisetCombination(r, m);
+
             outputMap.clear();
-            for (int i = 0; i < countVector.length; i++) {
-                if (countVector[i] > 0) {
-                    outputMap.put(options[i].getKey(), countVector[i]);
+            for (int i = 0; i < combination.length; i++) {
+                if (combination[i] > 0) {
+                    outputMap.put(options[i].getKey(), combination[i]);
                 }
             }
             return Map.copyOf(outputMap);
         }
 
-        /**
-         * Maps a rank to a multiset combination's frequency count vector.
-         *
-         * @param r the size of the combination (rᵣ)
-         * @param rank the 0-based rank of the combination
-         * @return an array representing the frequency count vector
-         */
-        private int[] unrankMultisetCombination(int r, int rank) {
+        private int[] unrankMultisetCombination(int r, BigInteger rank) {
             int[] combination = new int[frequencies.length];
             int remainingR = r;
-            int remainingRank = rank;
+            BigInteger remainingRank = rank; // Use BigInteger directly
 
             for (int i = 0; i < frequencies.length; i++) {
                 int maxForThisType = Math.min(frequencies[i], remainingR);
+
+                // Iterate x from MAX down to 0 (standard unranking)
                 for (int x = maxForThisType; x >= 0; x--) {
-                    long ways = Calculator.multisetCombinationsCountStartingFromIndex(remainingR - x, i + 1, frequencies).longValue();
-                    if (remainingRank < ways) {
+                    // --- HOT PATH: Reuses memo & suffixSum, zero allocation ---
+                    BigInteger ways = Calculator.multisetCombinationsCountWithMemo(remainingR - x, i + 1, frequencies, memo, suffixSum);
+
+                    // Compare BigIntegers
+                    if (remainingRank.compareTo(ways) < 0) {
                         combination[i] = x;
                         remainingR -= x;
-                        break;
+                        break; // Found the count for this type, move to next type
                     } else {
-                        remainingRank -= (int) ways;
+                        remainingRank = remainingRank.subtract(ways);
                     }
                 }
             }
             return combination;
         }
     }
+
 }

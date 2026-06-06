@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.FreqVector;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
 import java.util.*;

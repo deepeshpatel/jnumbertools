@@ -5,7 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.generator.base.FenwickTree;
+import io.github.deepeshpatel.jnumbertools.datastructure.FenwickTree;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -132,7 +132,7 @@ public final class DerangadicAlgorithms {
                 restrictedCount++;
             }
         }
-        return calculator.restrictedDerangements(size, restrictedCount);
+        return calculator.restrictedDerangementCount(size, restrictedCount);
     }
 
     /**
@@ -203,7 +203,7 @@ public final class DerangadicAlgorithms {
                 int decrement = (pickingRestricted ? 1 : 0) + (stepNotUsed ? 1 : 0);
                 int nextRestricted = restrictedCount > decrement ? restrictedCount - decrement : 0;
 
-                BigInteger blockSize = calculator.restrictedDerangements(remainingSize - 1, nextRestricted);
+                BigInteger blockSize = calculator.restrictedDerangementCount(remainingSize - 1, nextRestricted);
 
                 if (currentM.compareTo(cumulative.add(blockSize)) < 0) {
                     // step 0 → index actualN-1 (MSD), step actualN-1 → index 0 (LSD = D_0)

@@ -19,22 +19,21 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Comprehensive test suite for the Involutadic Number System.
  *
- * <p>Tests mirror the structure of {@code DerangadicAlgorithmsTest} and cover:
+ * <p>Tests cover:
  * <ul>
  *   <li>Telephone-number counts</li>
- *   <li>Round-trip: rank → digits → rank</li>
- *   <li>Round-trip: rank → involution → rank</li>
+ *   <li>Round-trip: rank ↔ digits (encode/decode)</li>
+ *   <li>Round-trip: rank ↔ involution (unrank/rank)</li>
+ *   <li>Round-trip: involution ↔ digits (fromInvolution/toInvolution)</li>
  *   <li>Exhaustive verification for small n (all T(n) involutions)</li>
  *   <li>Lexicographic order preservation</li>
- *   <li>Increment machine correctness</li>
- *   <li>Increment machine structural consistency (digit-array length varies)</li>
  *   <li>Boundary conditions (rank 0, rank T(n)-1)</li>
  * </ul>
  *
  * @author Deepesh Patel and Aditya Patel
  */
 @DisplayName("Involutadic Number System")
-class InvolutadicAlgorithmsTest {
+class InvolutadicAlgorithmsV2Test {
 
     private Calculator calculator;
     private InvolutadicAlgorithms alg;
@@ -46,7 +45,71 @@ class InvolutadicAlgorithmsTest {
     }
 
     // =========================================================
-    // 1. Telephone-number counts
+    // Helper Utilities
+    // =========================================================
+
+    private static boolean isValidInvolution(int[] pi) {
+        int n = pi.length;
+        for (int i = 0; i < n; i++) {
+            if (pi[i] < 0 || pi[i] >= n) return false;
+            if (pi[pi[i]] != i) return false;
+        }
+        return true;
+    }
+
+    private static boolean lexLessThan(int[] a, int[] b) {
+        for (int i = 0; i < Math.min(a.length, b.length); i++) {
+            if (a[i] < b[i]) return true;
+            if (a[i] > b[i]) return false;
+        }
+        return a.length < b.length;
+    }
+
+    private static List<int[]> allInvolutionsLex(int n) {
+        List<int[]> result = new ArrayList<>();
+        generateInvolutions(new int[n], new boolean[n], 0, n, result);
+        result.sort((a, b) -> {
+            for (int i = 0; i < n; i++) {
+                if (a[i] != b[i]) return Integer.compare(a[i], b[i]);
+            }
+            return 0;
+        });
+        return result;
+    }
+
+    private static void generateInvolutions(
+            int[] perm, boolean[] used, int pos, int n, List<int[]> result) {
+        if (pos == n) {
+            result.add(perm.clone());
+            return;
+        }
+        if (used[pos]) {
+            generateInvolutions(perm, used, pos + 1, n, result);
+            return;
+        }
+
+        // Fixed point
+        perm[pos] = pos;
+        used[pos] = true;
+        generateInvolutions(perm, used, pos + 1, n, result);
+        used[pos] = false;
+
+        // 2-cycle with each j > pos not yet used
+        for (int j = pos + 1; j < n; j++) {
+            if (!used[j]) {
+                perm[pos] = j;
+                perm[j] = pos;
+                used[pos] = true;
+                used[j] = true;
+                generateInvolutions(perm, used, pos + 1, n, result);
+                used[pos] = false;
+                used[j] = false;
+            }
+        }
+    }
+
+    // =========================================================
+    // 1. Telephone-number counts (using Calculator directly)
     // =========================================================
 
     @Nested
@@ -58,7 +121,7 @@ class InvolutadicAlgorithmsTest {
         void smallValues() {
             long[] expected = {1, 1, 2, 4, 10, 26, 76, 232, 764, 2620};
             for (int n = 0; n < expected.length; n++) {
-                assertEquals(BigInteger.valueOf(expected[n]), alg.involutionCount(n),
+                assertEquals(BigInteger.valueOf(expected[n]), calculator.telephoneNumber(n),
                         "T(" + n + ")");
             }
         }
@@ -67,16 +130,16 @@ class InvolutadicAlgorithmsTest {
         @DisplayName("Recurrence T(n) = T(n-1) + (n-1)*T(n-2)")
         void recurrenceSatisfied() {
             for (int n = 2; n <= 12; n++) {
-                BigInteger expected = alg.involutionCount(n - 1)
-                        .add(BigInteger.valueOf(n - 1).multiply(alg.involutionCount(n - 2)));
-                assertEquals(expected, alg.involutionCount(n),
+                BigInteger expected = calculator.telephoneNumber(n - 1)
+                        .add(BigInteger.valueOf(n - 1).multiply(calculator.telephoneNumber(n - 2)));
+                assertEquals(expected, calculator.telephoneNumber(n),
                         "recurrence at n=" + n);
             }
         }
     }
 
     // =========================================================
-    // 2. Round-trips: rank ↔ digits ↔ involution
+    // 2. Round-trip: rank ↔ digits (encode/decode)
     // =========================================================
 
     @Nested
@@ -85,12 +148,15 @@ class InvolutadicAlgorithmsTest {
 
         @ParameterizedTest(name = "n={0}")
         @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7})
-        void rankToDigitsAndBack(int n) {
-            int total = alg.involutionCount(n).intValueExact();
-            for (int rank = 0; rank < total; rank++) {
-                int[] digits = alg.toInvolutadic(rank, n);
-                BigInteger recovered = alg.fromInvolutadic(digits, n);
-                assertEquals(BigInteger.valueOf(rank), recovered,
+        void encodeDecodeRoundTrip(int n) {
+            BigInteger total = calculator.telephoneNumber(n);
+            for (BigInteger rank = BigInteger.ZERO;
+                 rank.compareTo(total) < 0;
+                 rank = rank.add(BigInteger.ONE)) {
+
+                int[] digits = alg.encode(rank, n);
+                BigInteger recovered = alg.decode(digits);
+                assertEquals(rank, recovered,
                         "n=" + n + " rank=" + rank + " digits=" + Arrays.toString(digits));
             }
         }
@@ -99,17 +165,21 @@ class InvolutadicAlgorithmsTest {
         @DisplayName("Large rank round-trip for n=15")
         void largeN() {
             int n = 15;
-            BigInteger total = alg.involutionCount(n);
+            BigInteger total = calculator.telephoneNumber(n);
             for (BigInteger rank : List.of(
                     BigInteger.ZERO,
                     total.subtract(BigInteger.ONE),
                     total.divide(BigInteger.TWO))) {
-                int[] digits = alg.toInvolutadic(rank, n);
-                BigInteger recovered = alg.fromInvolutadic(digits, n);
+                int[] digits = alg.encode(rank, n);
+                BigInteger recovered = alg.decode(digits);
                 assertEquals(rank, recovered, "n=" + n + " rank=" + rank);
             }
         }
     }
+
+    // =========================================================
+    // 3. Round-trip: rank ↔ involution (unrank/rank)
+    // =========================================================
 
     @Nested
     @DisplayName("Round-trip: rank ↔ involution")
@@ -117,13 +187,16 @@ class InvolutadicAlgorithmsTest {
 
         @ParameterizedTest(name = "n={0}")
         @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7})
-        void rankToInvolutionAndBack(int n) {
-            int total = alg.involutionCount(n).intValueExact();
-            for (int rank = 0; rank < total; rank++) {
+        void unrankRankRoundTrip(int n) {
+            BigInteger total = calculator.telephoneNumber(n);
+            for (BigInteger rank = BigInteger.ZERO;
+                 rank.compareTo(total) < 0;
+                 rank = rank.add(BigInteger.ONE)) {
+
                 int[] inv = alg.unrank(rank, n);
                 assertTrue(isValidInvolution(inv), "n=" + n + " rank=" + rank + " invalid involution");
-                BigInteger recovered = alg.rank(inv, n);
-                assertEquals(BigInteger.valueOf(rank), recovered,
+                BigInteger recovered = alg.rank(inv);
+                assertEquals(rank, recovered,
                         "n=" + n + " rank=" + rank);
             }
         }
@@ -161,7 +234,51 @@ class InvolutadicAlgorithmsTest {
     }
 
     // =========================================================
-    // 3. Lexicographic order preservation
+    // 4. Round-trip: involution ↔ digits (fromInvolution/toInvolution)
+    // =========================================================
+
+    @Nested
+    @DisplayName("Round-trip: involution ↔ digits")
+    class InvolutionDigitsRoundTrip {
+
+        @ParameterizedTest(name = "n={0}")
+        @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7})
+        void fromInvolutionToInvolutionRoundTrip(int n) {
+            BigInteger total = calculator.telephoneNumber(n);
+            for (BigInteger rank = BigInteger.ZERO;
+                 rank.compareTo(total) < 0;
+                 rank = rank.add(BigInteger.ONE)) {
+
+                int[] involution = alg.unrank(rank, n);
+                int[] digits = alg.fromInvolution(involution);
+                int[] recoveredInvolution = alg.toInvolution(digits);
+
+                assertArrayEquals(involution, recoveredInvolution,
+                        "n=" + n + " rank=" + rank + " involution mismatch");
+            }
+        }
+
+        @Test
+        @DisplayName("fromInvolution matches encode for same rank")
+        void fromInvolutionVsEncode() {
+            int n = 6;
+            BigInteger total = calculator.telephoneNumber(n);
+            for (BigInteger rank = BigInteger.ZERO;
+                 rank.compareTo(total) < 0;
+                 rank = rank.add(BigInteger.ONE)) {
+
+                int[] involution = alg.unrank(rank, n);
+                int[] digitsFromInv = alg.fromInvolution(involution);
+                int[] digitsFromRank = alg.encode(rank, n);
+
+                assertArrayEquals(digitsFromRank, digitsFromInv,
+                        "n=" + n + " rank=" + rank + " digits mismatch");
+            }
+        }
+    }
+
+    // =========================================================
+    // 5. Lexicographic order preservation
     // =========================================================
 
     @Nested
@@ -171,12 +288,15 @@ class InvolutadicAlgorithmsTest {
         @ParameterizedTest(name = "n={0}")
         @ValueSource(ints = {3, 4, 5, 6, 7})
         void allInvolutionsAreInLexOrder(int n) {
-            int total = alg.involutionCount(n).intValueExact();
+            BigInteger total = calculator.telephoneNumber(n);
             int[] prev = alg.unrank(0, n);
-            for (int rank = 1; rank < total; rank++) {
+            for (BigInteger rank = BigInteger.ONE;
+                 rank.compareTo(total) < 0;
+                 rank = rank.add(BigInteger.ONE)) {
+
                 int[] curr = alg.unrank(rank, n);
                 assertTrue(lexLessThan(prev, curr),
-                        "n=" + n + " rank " + (rank - 1) + " not lex-before rank " + rank
+                        "n=" + n + " rank " + (rank.subtract(BigInteger.ONE)) + " not lex-before rank " + rank
                                 + ": " + Arrays.toString(prev) + " vs " + Arrays.toString(curr));
                 prev = curr;
             }
@@ -184,158 +304,47 @@ class InvolutadicAlgorithmsTest {
     }
 
     // =========================================================
-    // 4. Known Involutadic digit arrays
+    // 6. Known Involutadic digit arrays (fixed-width format)
     // =========================================================
 
     @Nested
-    @DisplayName("Known digit arrays")
+    @DisplayName("Known digit arrays (fixed-width format)")
     class KnownDigits {
 
         @Test
-        @DisplayName("Digit arrays for n=4 (LSD-first)")
+        @DisplayName("Digit arrays for n=4")
         void digitsN4() {
             int[][] expectedDigits = {
-                    {0, 0, 0, 0}, // rank 0
-                    {1, 0, 0},    // rank 1
-                    {0, 1, 0},    // rank 2
-                    {0, 2, 0},    // rank 3
-                    {0, 0, 1},    // rank 4
-                    {1, 1},       // rank 5
-                    {0, 0, 2},    // rank 6
-                    {1, 2},       // rank 7
-                    {0, 0, 3},    // rank 8
-                    {1, 3},       // rank 9
+                    {0, 0, 0, 0},  // rank 0
+                    {0, 0, 1, -1}, // rank 1
+                    {0, 1, -1, 0}, // rank 2
+                    {0, 2, 0, -1}, // rank 3
+                    {1, -1, 0, 0}, // rank 4
+                    {1, -1, 1, -1},// rank 5
+                    {2, 0, -1, 0}, // rank 6
+                    {2, 1, -1, -1},// rank 7
+                    {3, 0, 0, -1}, // rank 8
+                    {3, 1, -1, -1},// rank 9
             };
             for (int rank = 0; rank < expectedDigits.length; rank++) {
-                assertArrayEquals(expectedDigits[rank], alg.toInvolutadic(rank, 4),
+                assertArrayEquals(expectedDigits[rank], alg.encode(rank, 4),
                         "n=4 rank=" + rank);
             }
         }
 
         @Test
-        @DisplayName("Digit array lengths for n=4")
+        @DisplayName("Digit arrays length is always n (fixed-width)")
         void digitLengthsN4() {
-            int[] expectedLengths = {4, 3, 3, 3, 3, 2, 3, 2, 3, 2};
-            for (int rank = 0; rank < expectedLengths.length; rank++) {
-                int[] digits = alg.toInvolutadic(rank, 4);
-                assertEquals(expectedLengths[rank], digits.length,
-                        "n=4 rank=" + rank + " length mismatch");
+            for (int rank = 0; rank < 10; rank++) {
+                int[] digits = alg.encode(rank, 4);
+                assertEquals(4, digits.length,
+                        "n=4 rank=" + rank + " length mismatch, expected 4 but got " + digits.length);
             }
         }
     }
 
     // =========================================================
-    // 5. Increment machine: correctness
-    // =========================================================
-
-    @Nested
-    @DisplayName("Increment machine: correctness")
-    class IncrementMachine {
-
-        @ParameterizedTest(name = "n={0}")
-        @ValueSource(ints = {2, 3, 4, 5, 6, 7})
-        void exhaustiveIncrementMatchesBruteForce(int n) {
-            List<int[]> expected = allInvolutionsLex(n);
-            int total = expected.size();
-            assertEquals(alg.involutionCount(n).intValue(), total);
-
-            var engine = new InvolutadicIncrementStateMachine(n, 0L, calculator);
-            int step = 0;
-            do {
-                int[] actual = engine.involution();
-                assertArrayEquals(expected.get(step), actual,
-                        "n=" + n + " step=" + step
-                                + " expected=" + Arrays.toString(expected.get(step))
-                                + " actual="  + Arrays.toString(actual));
-                step++;
-            } while (engine.increment());
-
-            assertEquals(total, step, "n=" + n + " total steps mismatch");
-        }
-
-        @Test
-        @DisplayName("Starting from mid-rank enumerates the correct suffix")
-        void startFromMidRank() {
-            int n = 6;
-            int startRank = 30;
-            int total = alg.involutionCount(n).intValue();
-            List<int[]> all = allInvolutionsLex(n);
-
-            var engine = new InvolutadicIncrementStateMachine(n, startRank, calculator);
-            for (int rank = startRank; rank < total; rank++) {
-                assertArrayEquals(all.get(rank), engine.involution(),
-                        "n=" + n + " rank=" + rank);
-                if (rank < total - 1) {
-                    assertTrue(engine.increment(), "increment returned false early at rank=" + rank);
-                }
-            }
-            assertFalse(engine.increment(), "increment should return false after last");
-        }
-
-        @Test
-        @DisplayName("Increment returns false exactly once after last involution")
-        void returnsFalseAtEnd() {
-            int n = 4;
-            var engine = new InvolutadicIncrementStateMachine(n, 0L, calculator);
-            int steps = 0;
-            while (engine.increment()) steps++;
-            assertEquals(alg.involutionCount(n).intValue() - 1, steps,
-                    "n=4: should take T(4)-1=9 successful increments");
-        }
-
-        @Test
-        @DisplayName("Each produced array is a valid involution")
-        void allProducedAreValidInvolutions() {
-            int n = 7;
-            var engine = new InvolutadicIncrementStateMachine(n, 0L, calculator);
-            int count = 0;
-            do {
-                int[] inv = engine.involution();
-                assertTrue(isValidInvolution(inv),
-                        "step " + count + " produced invalid involution: " + Arrays.toString(inv));
-                count++;
-            } while (engine.increment());
-            assertEquals(alg.involutionCount(n).intValue(), count);
-        }
-    }
-
-    // =========================================================
-    // 6. Increment machine: structural consistency
-    // =========================================================
-
-    @Nested
-    @DisplayName("Increment machine: structural consistency")
-    class IncrementStructure {
-
-        @Test
-        @DisplayName("Digit array length is consistent with involution structure")
-        void digitLengthConsistency() {
-            int n = 6;
-            var engine = new InvolutadicIncrementStateMachine(n, 0L, calculator);
-            do {
-                int[] inv    = engine.involution();
-                int[] digits = engine.getDigits();
-                assertEquals(countDecisions(inv, n), digits.length,
-                        "involution=" + Arrays.toString(inv)
-                                + " digits=" + Arrays.toString(digits));
-            } while (engine.increment());
-        }
-
-        @Test
-        @DisplayName("decisionCount matches expected number of decisions for each involution")
-        void decisionCountMatchesInvolution() {
-            int n = 5;
-            var engine = new InvolutadicIncrementStateMachine(n, 0L, calculator);
-            do {
-                int[] inv = engine.involution();
-                assertEquals(countDecisions(inv, n), engine.decisionCount(),
-                        "decisionCount mismatch at involution " + Arrays.toString(inv));
-            } while (engine.increment());
-        }
-    }
-
-    // =========================================================
-    // 7. Boundary and exception tests
+    // 10. Boundary and exception tests
     // =========================================================
 
     @Nested
@@ -357,7 +366,7 @@ class InvolutadicAlgorithmsTest {
         @DisplayName("Rank T(n)-1 produces the reverse involution for even n")
         void lastRankIsReverse() {
             for (int n : new int[]{2, 4, 6}) {
-                BigInteger lastRank = alg.involutionCount(n).subtract(BigInteger.ONE);
+                BigInteger lastRank = calculator.telephoneNumber(n).subtract(BigInteger.ONE);
                 int[] inv = alg.unrank(lastRank, n);
                 int[] expected = new int[n];
                 for (int i = 0; i < n; i++) expected[i] = n - 1 - i;
@@ -368,36 +377,62 @@ class InvolutadicAlgorithmsTest {
         @Test
         @DisplayName("Rank out of range throws IllegalArgumentException")
         void rankOutOfRange() {
-            assertThrows(IllegalArgumentException.class, () -> alg.toInvolutadic(-1L, 4));
-            assertThrows(IllegalArgumentException.class, () -> alg.toInvolutadic(10L, 4));
+            assertThrows(IllegalArgumentException.class, () -> alg.unrank(-1L, 4));
+            assertThrows(IllegalArgumentException.class, () -> alg.unrank(10L, 4));
+            assertThrows(IllegalArgumentException.class, () -> alg.encode(-1L, 4));
+            assertThrows(IllegalArgumentException.class, () -> alg.encode(10L, 4));
         }
 
         @Test
         @DisplayName("Invalid involution throws IllegalArgumentException")
         void invalidInvolution() {
             assertThrows(IllegalArgumentException.class,
-                    () -> alg.fromInvolution(new int[]{1, 2, 0}, 3));
+                    () -> alg.fromInvolution(new int[]{1, 2, 0}));
+            assertThrows(IllegalArgumentException.class,
+                    () -> alg.rank(new int[]{1, 2, 0}));
         }
 
         @Test
         @DisplayName("n=1: single involution (the identity)")
         void n1() {
-            assertEquals(BigInteger.ONE, alg.involutionCount(1));
+            assertEquals(BigInteger.ONE, calculator.telephoneNumber(1));
             assertArrayEquals(new int[]{0}, alg.unrank(0, 1));
-            assertEquals(BigInteger.ZERO, alg.rank(new int[]{0}, 1));
+            assertEquals(BigInteger.ZERO, alg.rank(new int[]{0}));
         }
 
         @Test
         @DisplayName("n=2: two involutions [0,1] and [1,0]")
         void n2() {
-            assertEquals(BigInteger.TWO, alg.involutionCount(2));
+            assertEquals(BigInteger.TWO, calculator.telephoneNumber(2));
             assertArrayEquals(new int[]{0, 1}, alg.unrank(0, 2));
             assertArrayEquals(new int[]{1, 0}, alg.unrank(1, 2));
+        }
+
+        @Test
+        @DisplayName("Invalid digits array throws IllegalArgumentException")
+        void invalidDigitsArray() {
+            // -1 but position not consumed
+            int[] invalidDigits1 = {-1, 0, 0, 0};
+            assertThrows(IllegalArgumentException.class,
+                    () -> alg.decode(invalidDigits1),
+                    "digit -1 at position 0 but position was not consumed");
+
+            // digit out of range (d > available positions)
+            int[] invalidDigits2 = {2, -1, 0};  // n=3, at pos0 only 1 position to the right
+            assertThrows(IllegalArgumentException.class,
+                    () -> alg.decode(invalidDigits2),
+                    "digit 2 exceeds available positions");
+
+            // invalid digit value
+            int[] invalidDigits3 = {-2, 0, 0};
+            assertThrows(IllegalArgumentException.class,
+                    () -> alg.decode(invalidDigits3),
+                    "Invalid digit: -2");
         }
     }
 
     // =========================================================
-    // 8. Involution structure properties
+    // 11. Involution structure properties
     // =========================================================
 
     @Nested
@@ -407,8 +442,11 @@ class InvolutadicAlgorithmsTest {
         @ParameterizedTest(name = "n={0}")
         @ValueSource(ints = {3, 4, 5, 6})
         void allUnrankedAreValidInvolutions(int n) {
-            int total = alg.involutionCount(n).intValueExact();
-            for (int rank = 0; rank < total; rank++) {
+            BigInteger total = calculator.telephoneNumber(n);
+            for (BigInteger rank = BigInteger.ZERO;
+                 rank.compareTo(total) < 0;
+                 rank = rank.add(BigInteger.ONE)) {
+
                 int[] inv = alg.unrank(rank, n);
                 assertTrue(isValidInvolution(inv), "rank=" + rank + " produced invalid involution");
             }
@@ -418,85 +456,54 @@ class InvolutadicAlgorithmsTest {
         @DisplayName("Fixed-point count matches zero-digit count in digit array")
         void fixedPointCountMatchesDigits() {
             int n = 6;
-            int total = alg.involutionCount(n).intValueExact();
-            for (int rank = 0; rank < total; rank++) {
-                int[] inv    = alg.unrank(rank, n);
-                int[] digits = alg.toInvolutadic(rank, n);
-                int fps = 0;
-                for (int i = 0; i < n; i++) if (inv[i] == i) fps++;
+            BigInteger total = calculator.telephoneNumber(n);
+            for (BigInteger rank = BigInteger.ZERO;
+                 rank.compareTo(total) < 0;
+                 rank = rank.add(BigInteger.ONE)) {
+
+                int[] inv = alg.unrank(rank, n);
+                int[] digits = alg.encode(rank, n);
+
+                int fixedPoints = 0;
+                for (int i = 0; i < n; i++) if (inv[i] == i) fixedPoints++;
+
                 int zeroDigits = 0;
                 for (int d : digits) if (d == 0) zeroDigits++;
-                assertEquals(fps, zeroDigits,
+
+                assertEquals(fixedPoints, zeroDigits,
                         "rank=" + rank + " inv=" + Arrays.toString(inv)
                                 + " digits=" + Arrays.toString(digits));
             }
         }
-    }
 
-    // =========================================================
-    // Helper utilities
-    // =========================================================
+        @Test
+        @DisplayName("Number of 2-cycles matches count of positive digits")
+        void cycleCountMatchesPositiveDigits() {
+            int n = 6;
+            BigInteger total = calculator.telephoneNumber(n);
+            for (BigInteger rank = BigInteger.ZERO;
+                 rank.compareTo(total) < 0;
+                 rank = rank.add(BigInteger.ONE)) {
 
-    private static boolean isValidInvolution(int[] pi) {
-        int n = pi.length;
-        for (int i = 0; i < n; i++) {
-            if (pi[i] < 0 || pi[i] >= n) return false;
-            if (pi[pi[i]] != i) return false;
-        }
-        return true;
-    }
+                int[] digits = alg.encode(rank, n);
 
-    private static boolean lexLessThan(int[] a, int[] b) {
-        int len = Math.min(a.length, b.length);
-        for (int i = 0; i < len; i++) {
-            if (a[i] < b[i]) return true;
-            if (a[i] > b[i]) return false;
-        }
-        return a.length < b.length;
-    }
+                int positiveDigits = 0;
+                for (int d : digits) if (d > 0) positiveDigits++;
 
-    private static List<int[]> allInvolutionsLex(int n) {
-        List<int[]> result = new ArrayList<>();
-        generateInvolutions(new int[n], new boolean[n], 0, n, result);
-        result.sort((a, b) -> {
-            for (int i = 0; i < n; i++) {
-                if (a[i] != b[i]) return Integer.compare(a[i], b[i]);
-            }
-            return 0;
-        });
-        return result;
-    }
+                int cycleCount = 0;
+                boolean[] visited = new boolean[n];
+                int[] inv = alg.unrank(rank, n);
+                for (int i = 0; i < n; i++) {
+                    if (!visited[i] && inv[i] != i) {
+                        cycleCount++;
+                        visited[i] = true;
+                        visited[inv[i]] = true;
+                    }
+                }
 
-    private static void generateInvolutions(
-            int[] perm, boolean[] used, int pos, int n, List<int[]> result) {
-        if (pos == n) { result.add(perm.clone()); return; }
-        if (used[pos]) { generateInvolutions(perm, used, pos + 1, n, result); return; }
-
-        // Fixed point
-        perm[pos] = pos; used[pos] = true;
-        generateInvolutions(perm, used, pos + 1, n, result);
-        used[pos] = false;
-
-        // 2-cycle with each j > pos not yet used
-        for (int j = pos + 1; j < n; j++) {
-            if (!used[j]) {
-                perm[pos] = j; perm[j] = pos;
-                used[pos] = true; used[j] = true;
-                generateInvolutions(perm, used, pos + 1, n, result);
-                used[pos] = false; used[j] = false;
+                assertEquals(cycleCount, positiveDigits,
+                        "rank=" + rank + " cycle count mismatch");
             }
         }
-    }
-
-    private static int countDecisions(int[] pi, int n) {
-        boolean[] placed = new boolean[n];
-        int count = 0;
-        for (int pos = 0; pos < n; pos++) {
-            if (placed[pos]) continue;
-            count++;
-            placed[pos] = true;
-            if (pi[pos] != pos) placed[pi[pos]] = true;
-        }
-        return count;
     }
 }

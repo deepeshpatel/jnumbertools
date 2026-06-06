@@ -4,10 +4,11 @@
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
+
+import io.github.deepeshpatel.jnumbertools.datastructure.TwoLevelMap;
+
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiFunction;
 
 /**
  * Calculator for combinatorial computations with memoization.
@@ -179,11 +180,13 @@ public final class Calculator {
      * @param restricted number of specific forbidden positions
      * @return number of valid permutations
      */
-    public BigInteger restrictedDerangements(int total, int restricted) {
+    public BigInteger restrictedDerangementCount(int total, int restricted) {
         if (restricted < 0) return BigInteger.ZERO;
         if (total == 0) return BigInteger.ONE;
         if (restricted == 0) return factorial(total);
-        //if (restricted == total) return subFactorial(total); // is this optimization required?
+        // do not apply below early optimization because it requires computing subFactorial(total) which is
+        // more expensive than the general case for small total, and the general case handles it efficiently anyway.
+        //if (restricted == total) return subFactorial(total);
 
         return restrictedDerangementMemo.computeIfAbsent(total, restricted, (t, r) -> {
             BigInteger result = BigInteger.ZERO;
@@ -310,13 +313,42 @@ public final class Calculator {
     }
 
     /**
+     * Hot-path for multiset unranking.
+     * Caller MUST ensure: k >= 0, index valid, counts non-negative, suffixSum correct.
+     * Caller owns the memo map lifecycle.
+     * @see #multisetCombinationsCountStartingFromIndex(int, int, int...)
+     */
+    public static BigInteger multisetCombinationsCountWithMemo(
+            int k, int index, int[] counts,
+            TwoLevelMap<Integer, Integer, BigInteger> memo,
+            int[] suffixSum) {
+
+        // Base cases (inlined from helper for speed)
+        if (k == 0) return BigInteger.ONE;
+        if (index == counts.length || k > suffixSum[index]) return BigInteger.ZERO;
+        if (k == suffixSum[index]) return BigInteger.ONE;
+
+        return memo.computeIfAbsent(index, k, (idx, rem) -> {
+            BigInteger total = BigInteger.ZERO;
+            int max = Math.min(counts[idx], rem);
+            for (int i = 0; i <= max; i++) {
+                total = total.add(multisetCombinationsCountWithMemo(rem - i, idx + 1, counts, memo, suffixSum));
+            }
+            return total;
+        });
+    }
+
+
+    /**
      * Calculates the number of ways to select exactly k items from a multiset, starting from a given index.
      * The multiset is defined by multiplicities, considering item types from the specified index onward.
+     * Use #multisetCombinationsCountWithMemo(int, int, int[], TwoLevelMap, int[]) for hot-path with caller-managed memoization and suffix sums.
      * @param k the number of items to select (k ≥ 0)
      * @param index the starting index of item types to consider (0 ≤ index ≤ counts.length)
      * @param counts an array of non-negative integers representing the multiplicities of item types
      * @return the number of ways to select k items as a BigInteger
      * @throws IllegalArgumentException if k is negative, index is out of range, or any count is negative
+     * @see #multisetCombinationsCountWithMemo(int, int, int[], TwoLevelMap, int[])
      */
     public static BigInteger multisetCombinationsCountStartingFromIndex(int k, int index, int... counts) {
         if (k < 0) {
@@ -462,41 +494,6 @@ public final class Calculator {
             subFactorialCache.clear();
             subFactorialCache.add(BigInteger.ONE);
             subFactorialCache.add(BigInteger.ZERO);
-        }
-    }
-
-    /**
-     * A thread-safe two-level map for memoization of two-key values.
-     * <p>
-     * This map stores values indexed by a primary key (K1) and secondary key (K2).
-     * It extends ConcurrentHashMap and uses nested ConcurrentHashMaps for thread safety.
-     * </p>
-     * <p>
-     * Primarily used internally by {@link Calculator} for caching combinatorial values
-     * like binomial coefficients C(n, k) where n is the primary key and k is the secondary key.
-     * </p>
-     *
-     * @param <K1> the type of the first-level key
-     * @param <K2> the type of the second-level key
-     * @param <V> the type of the stored value
-     * @author Deepesh Patel
-     * @see <a href="https://en.wikipedia.org/wiki/Memoization">Wikipedia: Memoization</a>
-     */
-    public static class TwoLevelMap<K1, K2, V> extends ConcurrentHashMap<K1, Map<K2, V>> {
-
-        public V get(K1 key1, K2 key2) {
-            var map = get(key1);
-            return map == null ? null : map.get(key2);
-        }
-
-        public V put(K1 key1, K2 key2, V value) {
-            computeIfAbsent(key1, (e) -> new ConcurrentHashMap<>()).put(key2, value);
-            return value;
-        }
-
-        public V computeIfAbsent(K1 key1, K2 key2, BiFunction<? super K1, ? super K2, ? extends V> mappingFunction) {
-            return computeIfAbsent(key1, k1 -> new ConcurrentHashMap<>())
-                    .computeIfAbsent(key2, k2 -> mappingFunction.apply(key1, k2));
         }
     }
 }
