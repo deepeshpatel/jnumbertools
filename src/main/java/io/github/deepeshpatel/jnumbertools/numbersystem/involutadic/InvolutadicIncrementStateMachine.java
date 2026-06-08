@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.datastructure.FenwickTree;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -185,32 +186,56 @@ public final class InvolutadicIncrementStateMachine {
     // Initialization & Helpers
     // =========================================================================
 
+    /**
+     * Cold-start build of the full state from {@link #digits}.
+     *
+     * <p>Uses a Fenwick (binary-indexed) tree for O(log n) order-statistic partner
+     * lookup, giving O(n log n) construction instead of the O(n²) cost of repeated
+     * linear partner scans. Element value {@code e} occupies 1-based Fenwick index
+     * {@code e+1}; the tree stores 1 while the element is unconsumed. The number of
+     * unconsumed positions in {@code [pos, n)} (the live {@code totalFree}) is
+     * {@code rsq(n) - rsq(pos)}, and the {@code d}-th unconsumed partner strictly
+     * greater than {@code pos} is {@code findKth(rsq(pos+1) + d) - 1}.
+     *
+     * <p>Produces {@code digits} (with {@code -1} in consumed slots), {@code maxDigit},
+     * {@code involution}, and {@code consumed} bit-identically to a left-to-right
+     * linear-scan build, so the subsequent {@link #increment()} behaviour is
+     * unchanged. The steady-state increment path ({@link #rebuildSuffix}) keeps its
+     * local scan, which is O(carry length) ≈ amortised O(1) and not a bottleneck.
+     */
     private void rebuildFromDigits() {
         for (int i = 0; i < n; i++) involution[i] = i;
         Arrays.fill(consumed, false);
 
-        int totalFree = n;
+        FenwickTree avail = new FenwickTree(n);
+        for (int i = 1; i <= n; i++) avail.update(i, 1);
+
         for (int pos = 0; pos < n; pos++) {
-            if (consumed[pos]) {
+            int uptoPrev = avail.rsq(pos);                 // available in [0, pos)
+            boolean posAvailable = (avail.rsq(pos + 1) - uptoPrev) == 1;
+            if (!posAvailable) {
                 digits[pos] = -1;
                 maxDigit[pos] = -1;
                 continue;
             }
 
+            int totalFree = avail.rsq(n) - uptoPrev;       // unconsumed in [pos, n)
             maxDigit[pos] = totalFree - 1;
             int d = digits[pos];
 
             if (d == 0) {
                 involution[pos] = pos;
                 consumed[pos] = true;
-                totalFree--;
+                avail.update(pos + 1, -1);
             } else {
-                int partner = findKthFree(pos, d);
+                int upto = avail.rsq(pos + 1);             // available in [0, pos]
+                int partner = avail.findKth(upto + d) - 1; // d-th unconsumed > pos
                 involution[pos] = partner;
                 involution[partner] = pos;
                 consumed[pos] = true;
                 consumed[partner] = true;
-                totalFree -= 2;
+                avail.update(pos + 1, -1);
+                avail.update(partner + 1, -1);
             }
         }
     }

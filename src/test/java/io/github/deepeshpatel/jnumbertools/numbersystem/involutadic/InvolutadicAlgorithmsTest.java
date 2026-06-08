@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Deepesh Patel and Aditya Patel
  */
 @DisplayName("Involutadic Number System")
-class InvolutadicAlgorithmsV2Test {
+class InvolutadicAlgorithmsTest {
 
     private Calculator calculator;
     private InvolutadicAlgorithms alg;

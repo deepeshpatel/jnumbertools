@@ -46,10 +46,10 @@ public final class InvolutadicTailPolynomialFinder {
     // =========================================================
 
     /** Universe size upper bound. Safe up to ~2000 with default heap. */
-    private static final int DEFAULT_MAX_N = 800;
+    private static final int DEFAULT_MAX_N = 2000;
 
     /** Maximum tail offset to analyse. */
-    private static final int DEFAULT_MAX_J = 20;
+    private static final int DEFAULT_MAX_J = 30;
 
     /**
      * For degree detection we need at least this many non-zero points

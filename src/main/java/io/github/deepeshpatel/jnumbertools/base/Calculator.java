@@ -445,6 +445,26 @@ public final class Calculator {
     }
 
     /**
+     * Builds the telephone-number table {@code T[0..n]} in a single O(n) pass.
+     *
+     * <p>Replaces per-iteration {@code calculator.telephoneNumber(free)} calls,
+     * each of which recomputes the whole recurrence in O(free) big-integer
+     * operations. Calling it inside the n-step encode/unrank loop costs O(n²)
+     * big-integer operations; precomputing the table once and indexing into it is
+     * O(n) and removes that dominant term. The remaining O(n) big-integer divisions
+     * on the Θ(n log n)-bit rank are unavoidable.
+     */
+    public BigInteger[] telephoneTable(int n) {
+        BigInteger[] T = new BigInteger[n + 1];
+        T[0] = BigInteger.ONE;
+        if (n >= 1) T[1] = BigInteger.ONE;
+        for (int i = 2; i <= n; i++) {
+            T[i] = T[i - 1].add(BigInteger.valueOf(i - 1).multiply(T[i - 2]));
+        }
+        return T;
+    }
+
+    /**
      * Computes the greatest common divisor (GCD) of one or more BigInteger values.
      * @param nums one or more BigInteger values (null values are ignored)
      * @return the GCD of all non-null inputs, or ZERO if no valid inputs

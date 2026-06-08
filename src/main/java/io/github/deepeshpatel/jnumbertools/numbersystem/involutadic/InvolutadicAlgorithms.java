@@ -6,6 +6,7 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.datastructure.FenwickTree;
 
 import java.math.BigInteger;
 import java.util.Objects;
@@ -44,10 +45,29 @@ import java.util.Objects;
  * <p>The {@code -1} entries are structurally determined — they are not free choices —
  * but they are included in the array so that every involution maps to an array of the
  * same length {@code n}, making position-by-position comparison well-defined.
+ *
+ * <h2>Complexity</h2>
+ * <p>Two implementations back every operation. For small {@code n}
+ * ({@code n < N_THRESHOLD}) the linear-scan version runs in O(n²) with a low
+ * constant. For large {@code n} a Fenwick (binary-indexed) tree provides
+ * order-statistic partner lookup and free-count queries in O(log n), reducing the
+ * element-placement work to O(n log n). Note that for an arbitrary rank near
+ * {@code T(n)} the rank itself is an Θ(n log n)-bit integer, so the O(n)
+ * big-integer divisions against telephone numbers dominate; the Fenwick tree
+ * removes the O(n²) scan term but the arbitrary-rank cost remains super-linear
+ * because of that unavoidable big-integer arithmetic.
  */
 public class InvolutadicAlgorithms{
 
     private final Calculator calculator;
+
+    /**
+     * Below this universe size the linear-scan implementation is used (low constant,
+     * O(n²)); at or above it the Fenwick-tree implementation (O(n log n) placement)
+     * is used. Both produce bit-identical output; the threshold is purely a
+     * performance switch.
+     */
+    static final int N_THRESHOLD = 100;
 
     /**
      * Constructs an {@code InvolutadicAlgorithms} instance backed by the given
@@ -75,12 +95,28 @@ public class InvolutadicAlgorithms{
         Objects.requireNonNull(rank, "rank");
         if (n < 1) throw new IllegalArgumentException("n must be >= 1, got " + n);
 
-        BigInteger total = calculator.telephoneNumber(n);
+        BigInteger[] T = calculator.telephoneTable(n);
+        BigInteger total = T[n];
         if (rank.signum() < 0 || rank.compareTo(total) >= 0) {
             throw new IllegalArgumentException(
                     "rank " + rank + " out of range [0, " + total + ")");
         }
+        return (n < N_THRESHOLD) ? encodeScan(rank, n, T) : encodeFenwick(rank, n, T);
+    }
 
+    /**
+     * Convenience overload.
+     *
+     * @param rank the 0-based lexicographic rank (0 ≤ rank &lt; T(n))
+     * @param n    the order (n ≥ 1)
+     * @return Involutadic digit array of length {@code n}, MSD-first
+     */
+    public int[] encode(long rank, int n) {
+        return encode(BigInteger.valueOf(rank), n);
+    }
+
+    /** Linear-scan encode (original; O(n²)). Preferred for small {@code n}. */
+    private int[] encodeScan(BigInteger rank, int n, BigInteger[] T) {
         int[] digits = new int[n];
         boolean[] used = new boolean[n];
         BigInteger rem = rank;
@@ -92,14 +128,14 @@ public class InvolutadicAlgorithms{
             }
 
             int free = countFree(used, pos + 1, n);
-            BigInteger tFixed = calculator.telephoneNumber(free);
+            BigInteger tFixed = T[free];
 
             if (rem.compareTo(tFixed) < 0) {
                 digits[pos] = 0;
                 used[pos] = true;
             } else {
                 rem = rem.subtract(tFixed);
-                BigInteger tPair = calculator.telephoneNumber(free - 1);
+                BigInteger tPair = T[free - 1];
                 BigInteger[] qr = rem.divideAndRemainder(tPair);
                 int partnerIndex = qr[0].intValueExact();
                 rem = qr[1];
@@ -114,15 +150,49 @@ public class InvolutadicAlgorithms{
     }
 
     /**
-     * Converts a decimal rank to its Involutadic digit representation.
+     * Fenwick-tree encode (O(n log n) placement). Preferred for large {@code n}.
      *
-     * @param rank the 0-based lexicographic rank (0 ≤ rank &lt; T(n))
-     * @param n    the order (n ≥ 1)
-     * @return Involutadic digit array of length {@code n}, MSD-first
-     * @throws IllegalArgumentException if {@code rank} is out of range
+     * <p>Element value {@code e} maps to 1-based Fenwick index {@code e+1}.
+     * The tree holds 1 at index {@code e+1} while element {@code e} is unconsumed.
+     * The number of unconsumed positions strictly greater than {@code pos} is
+     * {@code rsq(n) - rsq(pos+1)}, and the {@code k}-th such position is
+     * {@code findKth(rsq(pos+1) + k) - 1} (starting the cumulative rank at
+     * {@code rsq(pos+1)} automatically excludes {@code pos} and all smaller indices).
      */
-    public int[] encode(long rank, int n) {
-        return encode(BigInteger.valueOf(rank), n);
+    private int[] encodeFenwick(BigInteger rank, int n, BigInteger[] T) {
+        int[] digits = new int[n];
+        FenwickTree avail = new FenwickTree(n);
+        for (int i = 1; i <= n; i++) avail.update(i, 1);
+        BigInteger rem = rank;
+
+        for (int pos = 0; pos < n; pos++) {
+            int upto = avail.rsq(pos + 1);            // available elements in [0, pos]
+            boolean posAvailable = (upto - avail.rsq(pos)) == 1;
+            if (!posAvailable) {
+                digits[pos] = -1;
+                continue;
+            }
+
+            int free = avail.rsq(n) - upto;           // available elements > pos
+            BigInteger tFixed = T[free];
+
+            if (rem.compareTo(tFixed) < 0) {
+                digits[pos] = 0;
+                avail.update(pos + 1, -1);
+            } else {
+                rem = rem.subtract(tFixed);
+                BigInteger tPair = T[free - 1];
+                BigInteger[] qr = rem.divideAndRemainder(tPair);
+                int partnerIndex = qr[0].intValueExact();
+                rem = qr[1];
+
+                digits[pos] = partnerIndex + 1;       // 1-based partner index
+                int partner = avail.findKth(upto + partnerIndex + 1) - 1;
+                avail.update(pos + 1, -1);
+                avail.update(partner + 1, -1);
+            }
+        }
+        return digits;
     }
 
     /**
@@ -135,7 +205,12 @@ public class InvolutadicAlgorithms{
     public BigInteger decode(int[] digits) {
         Objects.requireNonNull(digits, "digits");
         int n = digits.length;
+        BigInteger[] T = calculator.telephoneTable(n);
+        return (n < N_THRESHOLD) ? decodeScan(digits, n, T) : decodeFenwick(digits, n, T);
+    }
 
+    /** Linear-scan decode (original; O(n²)). */
+    private BigInteger decodeScan(int[] digits, int n, BigInteger[] T) {
         BigInteger result = BigInteger.ZERO;
         boolean[] consumed = new boolean[n];
 
@@ -160,8 +235,8 @@ public class InvolutadicAlgorithms{
             if (d == 0) {
                 consumed[pos] = true;
             } else if (d > 0) {
-                BigInteger tFixed = calculator.telephoneNumber(free);
-                BigInteger tPair = calculator.telephoneNumber(free - 1);
+                BigInteger tFixed = T[free];
+                BigInteger tPair = T[free - 1];
                 result = result.add(tFixed);
                 result = result.add(BigInteger.valueOf(d - 1).multiply(tPair));
 
@@ -173,6 +248,50 @@ public class InvolutadicAlgorithms{
             }
         }
 
+        return result;
+    }
+
+    /** Fenwick-tree decode (O(n log n)). */
+    private BigInteger decodeFenwick(int[] digits, int n, BigInteger[] T) {
+        BigInteger result = BigInteger.ZERO;
+        FenwickTree avail = new FenwickTree(n);
+        for (int i = 1; i <= n; i++) avail.update(i, 1);
+
+        for (int pos = 0; pos < n; pos++) {
+            int d = digits[pos];
+            int upto = avail.rsq(pos + 1);
+            boolean posAvailable = (upto - avail.rsq(pos)) == 1;
+
+            if (d == -1) {
+                if (posAvailable) {
+                    throw new IllegalArgumentException(
+                            "digit -1 at position " + pos + " but position was not consumed");
+                }
+                continue;
+            }
+
+            if (!posAvailable) {
+                throw new IllegalArgumentException(
+                        "position " + pos + " is already consumed but digit is " + d);
+            }
+
+            int free = avail.rsq(n) - upto;
+
+            if (d == 0) {
+                avail.update(pos + 1, -1);
+            } else if (d > 0) {
+                BigInteger tFixed = T[free];
+                BigInteger tPair = T[free - 1];
+                result = result.add(tFixed);
+                result = result.add(BigInteger.valueOf(d - 1).multiply(tPair));
+
+                int partner = avail.findKth(upto + d) - 1;
+                avail.update(pos + 1, -1);
+                avail.update(partner + 1, -1);
+            } else {
+                throw new IllegalArgumentException("Invalid digit: " + d + " at position " + pos);
+            }
+        }
         return result;
     }
 
@@ -190,7 +309,11 @@ public class InvolutadicAlgorithms{
     public int[] toInvolution(int[] digits) {
         Objects.requireNonNull(digits, "digits");
         int n = digits.length;
+        return (n < N_THRESHOLD) ? toInvolutionScan(digits, n) : toInvolutionFenwick(digits, n);
+    }
 
+    /** Linear-scan digits→involution (original; O(n²)). */
+    private int[] toInvolutionScan(int[] digits, int n) {
         int[] involution = new int[n];
         boolean[] used = new boolean[n];
 
@@ -227,6 +350,46 @@ public class InvolutadicAlgorithms{
         return involution;
     }
 
+    /** Fenwick-tree digits→involution (O(n log n)). */
+    private int[] toInvolutionFenwick(int[] digits, int n) {
+        int[] involution = new int[n];
+        FenwickTree avail = new FenwickTree(n);
+        for (int i = 1; i <= n; i++) avail.update(i, 1);
+
+        for (int pos = 0; pos < n; pos++) {
+            int d = digits[pos];
+            int upto = avail.rsq(pos + 1);
+            boolean posAvailable = (upto - avail.rsq(pos)) == 1;
+
+            if (d == -1) {
+                if (posAvailable) {
+                    throw new IllegalArgumentException(
+                            "digit -1 at position " + pos + " but position was not consumed");
+                }
+            } else if (d == 0) {
+                if (!posAvailable) {
+                    throw new IllegalArgumentException(
+                            "digit 0 at position " + pos + " but position was already consumed");
+                }
+                involution[pos] = pos;
+                avail.update(pos + 1, -1);
+            } else if (d > 0) {
+                if (!posAvailable) {
+                    throw new IllegalArgumentException(
+                            "digit " + d + " at position " + pos + " but position was already consumed");
+                }
+                int partner = avail.findKth(upto + d) - 1;
+                involution[pos] = partner;
+                involution[partner] = pos;
+                avail.update(pos + 1, -1);
+                avail.update(partner + 1, -1);
+            } else {
+                throw new IllegalArgumentException("Invalid digit: " + d + " at position " + pos);
+            }
+        }
+        return involution;
+    }
+
     /**
      * Converts an involution to its Involutadic digit representation.
      *
@@ -238,7 +401,12 @@ public class InvolutadicAlgorithms{
         Objects.requireNonNull(involution, "involution");
         int n = involution.length;
         validateInvolution(involution, n);
+        return (n < N_THRESHOLD) ? fromInvolutionScan(involution, n)
+                : fromInvolutionFenwick(involution, n);
+    }
 
+    /** Linear-scan involution→digits (original; O(n²)). */
+    private int[] fromInvolutionScan(int[] involution, int n) {
         int[] digits = new int[n];
         boolean[] consumed = new boolean[n];
 
@@ -261,6 +429,34 @@ public class InvolutadicAlgorithms{
         return digits;
     }
 
+    /** Fenwick-tree involution→digits (O(n log n)). */
+    private int[] fromInvolutionFenwick(int[] involution, int n) {
+        int[] digits = new int[n];
+        FenwickTree avail = new FenwickTree(n);
+        for (int i = 1; i <= n; i++) avail.update(i, 1);
+
+        for (int pos = 0; pos < n; pos++) {
+            int upto = avail.rsq(pos + 1);
+            boolean posAvailable = (upto - avail.rsq(pos)) == 1;
+            if (!posAvailable) {
+                digits[pos] = -1;
+                continue;
+            }
+
+            int target = involution[pos];
+            if (target == pos) {
+                digits[pos] = 0;
+                avail.update(pos + 1, -1);
+            } else {
+                // 1-based rank of target among available elements > pos
+                digits[pos] = avail.rsq(target + 1) - upto;
+                avail.update(pos + 1, -1);
+                avail.update(target + 1, -1);
+            }
+        }
+        return digits;
+    }
+
     // =========================================================================
     // 3. Decimal (rank) ↔ Involution
     // =========================================================================
@@ -277,12 +473,28 @@ public class InvolutadicAlgorithms{
         Objects.requireNonNull(rank, "rank");
         if (n < 1) throw new IllegalArgumentException("n must be >= 1, got " + n);
 
-        BigInteger total = calculator.telephoneNumber(n);
+        BigInteger[] T = calculator.telephoneTable(n);
+        BigInteger total = T[n];
         if (rank.signum() < 0 || rank.compareTo(total) >= 0) {
             throw new IllegalArgumentException(
                     "rank " + rank + " out of range [0, " + total + ")");
         }
+        return (n < N_THRESHOLD) ? unrankScan(rank, n, T) : unrankFenwick(rank, n, T);
+    }
 
+    /**
+     * Convenience overload.
+     *
+     * @param rank the 0-based lexicographic rank (0 ≤ rank &lt; T(n))
+     * @param n    the order (n ≥ 1)
+     * @return the involution array of length {@code n}
+     */
+    public int[] unrank(long rank, int n) {
+        return unrank(BigInteger.valueOf(rank), n);
+    }
+
+    /** Linear-scan rank→involution (original; O(n²)). */
+    private int[] unrankScan(BigInteger rank, int n, BigInteger[] T) {
         int[] involution = new int[n];
         boolean[] used = new boolean[n];
         BigInteger rem = rank;
@@ -291,14 +503,14 @@ public class InvolutadicAlgorithms{
             if (used[pos]) continue;
 
             int free = countFree(used, pos + 1, n);
-            BigInteger tFixed = calculator.telephoneNumber(free);
+            BigInteger tFixed = T[free];
 
             if (rem.compareTo(tFixed) < 0) {
                 involution[pos] = pos;
                 used[pos] = true;
             } else {
                 rem = rem.subtract(tFixed);
-                BigInteger tPair = calculator.telephoneNumber(free - 1);
+                BigInteger tPair = T[free - 1];
                 BigInteger[] qr = rem.divideAndRemainder(tPair);
                 int partnerIndex = qr[0].intValueExact();
                 rem = qr[1];
@@ -313,16 +525,39 @@ public class InvolutadicAlgorithms{
         return involution;
     }
 
-    /**
-     * Converts a decimal rank to its corresponding involution.
-     *
-     * @param rank the 0-based lexicographic rank (0 ≤ rank &lt; T(n))
-     * @param n    the order (n ≥ 1)
-     * @return the involution array of length {@code n}
-     * @throws IllegalArgumentException if {@code rank} is out of range
-     */
-    public int[] unrank(long rank, int n) {
-        return unrank(BigInteger.valueOf(rank), n);
+    /** Fenwick-tree rank→involution (O(n log n) placement). */
+    private int[] unrankFenwick(BigInteger rank, int n, BigInteger[] T) {
+        int[] involution = new int[n];
+        FenwickTree avail = new FenwickTree(n);
+        for (int i = 1; i <= n; i++) avail.update(i, 1);
+        BigInteger rem = rank;
+
+        for (int pos = 0; pos < n; pos++) {
+            int upto = avail.rsq(pos + 1);
+            boolean posAvailable = (upto - avail.rsq(pos)) == 1;
+            if (!posAvailable) continue;
+
+            int free = avail.rsq(n) - upto;
+            BigInteger tFixed = T[free];
+
+            if (rem.compareTo(tFixed) < 0) {
+                involution[pos] = pos;
+                avail.update(pos + 1, -1);
+            } else {
+                rem = rem.subtract(tFixed);
+                BigInteger tPair = T[free - 1];
+                BigInteger[] qr = rem.divideAndRemainder(tPair);
+                int partnerIndex = qr[0].intValueExact();
+                rem = qr[1];
+
+                int partner = avail.findKth(upto + partnerIndex + 1) - 1;
+                involution[pos] = partner;
+                involution[partner] = pos;
+                avail.update(pos + 1, -1);
+                avail.update(partner + 1, -1);
+            }
+        }
+        return involution;
     }
 
     /**
@@ -336,7 +571,12 @@ public class InvolutadicAlgorithms{
         Objects.requireNonNull(involution, "involution");
         int n = involution.length;
         validateInvolution(involution, n);
+        BigInteger[] T = calculator.telephoneTable(n);
+        return (n < N_THRESHOLD) ? rankScan(involution, n, T) : rankFenwick(involution, n, T);
+    }
 
+    /** Linear-scan involution→rank (original; O(n²)). */
+    private BigInteger rankScan(int[] involution, int n, BigInteger[] T) {
         BigInteger result = BigInteger.ZERO;
         boolean[] consumed = new boolean[n];
 
@@ -350,8 +590,8 @@ public class InvolutadicAlgorithms{
                 consumed[pos] = true;
             } else {
                 int partnerRankValue = partnerRank(consumed, pos, target, n);
-                BigInteger tFixed = calculator.telephoneNumber(free);
-                BigInteger tPair = calculator.telephoneNumber(free - 1);
+                BigInteger tFixed = T[free];
+                BigInteger tPair = T[free - 1];
                 result = result.add(tFixed);
                 result = result.add(BigInteger.valueOf(partnerRankValue - 1).multiply(tPair));
 
@@ -362,8 +602,38 @@ public class InvolutadicAlgorithms{
         return result;
     }
 
+    /** Fenwick-tree involution→rank (O(n log n)). */
+    private BigInteger rankFenwick(int[] involution, int n, BigInteger[] T) {
+        BigInteger result = BigInteger.ZERO;
+        FenwickTree avail = new FenwickTree(n);
+        for (int i = 1; i <= n; i++) avail.update(i, 1);
+
+        for (int pos = 0; pos < n; pos++) {
+            int upto = avail.rsq(pos + 1);
+            boolean posAvailable = (upto - avail.rsq(pos)) == 1;
+            if (!posAvailable) continue;
+
+            int target = involution[pos];
+            int free = avail.rsq(n) - upto;
+
+            if (target == pos) {
+                avail.update(pos + 1, -1);
+            } else {
+                int partnerRankValue = avail.rsq(target + 1) - upto;  // 1-based rank > pos
+                BigInteger tFixed = T[free];
+                BigInteger tPair = T[free - 1];
+                result = result.add(tFixed);
+                result = result.add(BigInteger.valueOf(partnerRankValue - 1).multiply(tPair));
+
+                avail.update(pos + 1, -1);
+                avail.update(target + 1, -1);
+            }
+        }
+        return result;
+    }
+
     // =========================================================================
-    // Private helper methods
+    // Private helper methods (linear-scan path)
     // =========================================================================
 
     /**
