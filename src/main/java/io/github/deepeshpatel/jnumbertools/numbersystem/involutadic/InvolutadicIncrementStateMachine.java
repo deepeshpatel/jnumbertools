@@ -5,7 +5,6 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.datastructure.FenwickTree;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -90,18 +89,21 @@ public final class InvolutadicIncrementStateMachine {
     public int incrementAndGetCarryLength() {
         int pivot = findPivot();
         if (pivot == -1) return 0;
-
-        // Count BEFORE modifying anything — non-(-1) in [pivot, n) = decisions in suffix
-        // This is identical to the original definition; -1 entries are not decisions.
-        int carry = 0;
-        for (int i = pivot; i < n; i++) {
-            if (digits[i] != -1) carry++;
-        }
-
         digits[pivot]++;
         rollbackSuffix(pivot);
         rebuildSuffix(pivot);
+
+        //Note: below calculation is for benchmarking.
+        // We do not need it in actual implementaion. It just degrades the performance.
+        // use increment() method instead
+        int carry = 0;
+        for (int i = pivot; i < n; i++) {
+            if (digits[i] != -1) {
+                carry++;
+            }
+        }
         return carry;
+        //return n-pivot;
     }
 
     // =========================================================================
@@ -183,56 +185,32 @@ public final class InvolutadicIncrementStateMachine {
     // Initialization & Helpers
     // =========================================================================
 
-    /**
-     * Cold-start build of the full state from {@link #digits}.
-     *
-     * <p>Uses a Fenwick (binary-indexed) tree for O(log n) order-statistic partner
-     * lookup, giving O(n log n) construction instead of the O(n²) cost of repeated
-     * linear partner scans. Element value {@code e} occupies 1-based Fenwick index
-     * {@code e+1}; the tree stores 1 while the element is unconsumed. The number of
-     * unconsumed positions in {@code [pos, n)} (the live {@code totalFree}) is
-     * {@code rsq(n) - rsq(pos)}, and the {@code d}-th unconsumed partner strictly
-     * greater than {@code pos} is {@code findKth(rsq(pos+1) + d) - 1}.
-     *
-     * <p>Produces {@code digits} (with {@code -1} in consumed slots), {@code maxDigit},
-     * {@code involution}, and {@code consumed} bit-identically to a left-to-right
-     * linear-scan build, so the subsequent {@link #increment()} behaviour is
-     * unchanged. The steady-state increment path ({@link #rebuildSuffix}) keeps its
-     * local scan, which is O(carry length) ≈ amortised O(1) and not a bottleneck.
-     */
     private void rebuildFromDigits() {
         for (int i = 0; i < n; i++) involution[i] = i;
         Arrays.fill(consumed, false);
 
-        FenwickTree avail = new FenwickTree(n);
-        for (int i = 1; i <= n; i++) avail.update(i, 1);
-
+        int totalFree = n;
         for (int pos = 0; pos < n; pos++) {
-            int uptoPrev = avail.rsq(pos);                 // available in [0, pos)
-            boolean posAvailable = (avail.rsq(pos + 1) - uptoPrev) == 1;
-            if (!posAvailable) {
+            if (consumed[pos]) {
                 digits[pos] = -1;
                 maxDigit[pos] = -1;
                 continue;
             }
 
-            int totalFree = avail.rsq(n) - uptoPrev;       // unconsumed in [pos, n)
             maxDigit[pos] = totalFree - 1;
             int d = digits[pos];
 
             if (d == 0) {
                 involution[pos] = pos;
                 consumed[pos] = true;
-                avail.update(pos + 1, -1);
+                totalFree--;
             } else {
-                int upto = avail.rsq(pos + 1);             // available in [0, pos]
-                int partner = avail.findKth(upto + d) - 1; // d-th unconsumed > pos
+                int partner = findKthFree(pos, d);
                 involution[pos] = partner;
                 involution[partner] = pos;
                 consumed[pos] = true;
                 consumed[partner] = true;
-                avail.update(pos + 1, -1);
-                avail.update(partner + 1, -1);
+                totalFree -= 2;
             }
         }
     }

@@ -883,7 +883,7 @@ public class InvolutadicDataGenerator {
                         new InvolutadicIncrementStateMachine(n, startRank, calc);
                 long t0 = System.nanoTime();
                 for (int i = 0; i < MEASURE; i++) {
-                    if (!run2.increment()) run2 = new InvolutadicIncrementStateMachine(n, 0L, calc);
+                    run2.increment();
                     sink += run2.involution()[0];
                 }
                 nsA[idx] = (System.nanoTime() - t0) / MEASURE;
