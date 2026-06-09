@@ -22,9 +22,10 @@ public final class InvolutadicMeanConvergenceAnalysis {
 
     private final InvolutadicCarryCounter counter;
     private final InvolutadicAlgorithms alg;
+    private final Calculator calc = new Calculator();
 
     public InvolutadicMeanConvergenceAnalysis() {
-        Calculator calc = new Calculator();
+
         this.counter = new InvolutadicCarryCounter();
         this.alg     = new InvolutadicAlgorithms(calc);
     }
@@ -72,7 +73,7 @@ public final class InvolutadicMeanConvergenceAnalysis {
             BigDecimal mean = analysis.exactMean(n, dist);
             means[n] = mean.doubleValue();
 
-            BigInteger Tn = analysis.alg.involutionCount(n);
+            BigInteger Tn = analysis.calc.telephoneNumber(n);
             String ratioStr = "--";
             if (prevMean != null && prevMean.compareTo(BigDecimal.ZERO) != 0) {
                 String rs = mean.divide(prevMean, MC).toPlainString();

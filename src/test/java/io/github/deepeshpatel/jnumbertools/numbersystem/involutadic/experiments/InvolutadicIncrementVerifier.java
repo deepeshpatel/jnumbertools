@@ -39,7 +39,7 @@ public final class InvolutadicIncrementVerifier {
     // =========================================================
 
     public boolean verify(int n) {
-        System.out.printf("Verifying n=%d (T(%d)=%s)...%n", n, n, alg.involutionCount(n));
+        System.out.printf("Verifying n=%d (T(%d)=%s)...%n", n, n, calc.telephoneNumber(n));
         long t0 = System.currentTimeMillis();
         boolean passed = true;
 
@@ -88,7 +88,7 @@ public final class InvolutadicIncrementVerifier {
         } while (recordCarryAndIncrement(engine, carryDist, n));
 
         // Check 5: total count
-        long expectedTotal = alg.involutionCount(n).longValueExact();
+        long expectedTotal = calc.telephoneNumber(n).longValueExact();
         if (rank != expectedTotal) {
             System.out.printf("  FAIL: produced %d involutions, expected T(%d)=%d%n",
                     rank, n, expectedTotal);

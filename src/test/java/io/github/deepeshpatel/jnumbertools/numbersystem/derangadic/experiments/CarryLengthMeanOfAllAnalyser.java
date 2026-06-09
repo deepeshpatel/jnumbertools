@@ -19,7 +19,7 @@ import java.util.Set;
  * It is kept under src/test for convenience of execution, but it is not a
  * traditional JUnit test.
  */
-@Disabled("Not a test but a data feneration harness")
+@Disabled("Not a test but a data generation harness")
 public class CarryLengthMeanOfAllAnalyser {
 
 

@@ -90,21 +90,18 @@ public final class InvolutadicIncrementStateMachine {
     public int incrementAndGetCarryLength() {
         int pivot = findPivot();
         if (pivot == -1) return 0;
+
+        // Count BEFORE modifying anything — non-(-1) in [pivot, n) = decisions in suffix
+        // This is identical to the original definition; -1 entries are not decisions.
+        int carry = 0;
+        for (int i = pivot; i < n; i++) {
+            if (digits[i] != -1) carry++;
+        }
+
         digits[pivot]++;
         rollbackSuffix(pivot);
         rebuildSuffix(pivot);
-
-        //Note: below calculation is for benchmarking.
-        // We do not need it in actual implementaion. It just degrades the performance.
-        // use increment() method instead
-        int carry = 0;
-        for (int i = pivot; i < n; i++) {
-            if (digits[i] != -1) {
-                carry++;
-            }
-        }
         return carry;
-        //return n-pivot;
     }
 
     // =========================================================================

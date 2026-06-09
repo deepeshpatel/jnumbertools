@@ -30,7 +30,7 @@ public class DerangementAlgoPerformanceHarness {
         System.out.println("-".repeat(65));
 
         for (int n : nValues) {
-            int[] digits = DERANGADIC.toDerangadic(rank, n);
+            int[] digits = DERANGADIC.encode(rank, n);
 
             // Warmup
             for (int i = 0; i < 100; i++) {
@@ -92,7 +92,7 @@ public class DerangementAlgoPerformanceHarness {
         System.out.println("-".repeat(78));
 
         for (NamedRank nr : testRanks) {
-            int[] digits = DERANGADIC.toDerangadic(nr.value, n);
+            int[] digits = DERANGADIC.encode(nr.value, n);
 
             // Warmup
             for (int i = 0; i < 5; i++) {
@@ -139,7 +139,7 @@ public class DerangementAlgoPerformanceHarness {
         System.out.println("-".repeat(65));
 
         for (int n : nValues) {
-            int[] digits = DERANGADIC.toDerangadic(highRank, n);
+            int[] digits = DERANGADIC.encode(highRank, n);
 
             // Warmup
             for (int i = 0; i < 100; i++) {
@@ -297,7 +297,7 @@ public class DerangementAlgoPerformanceHarness {
 
         int n=10000;
         int iterations=10000;
-        int[] digits=DERANGADIC.toDerangadic(BigInteger.TEN.pow(100), n);
+        int[] digits=DERANGADIC.encode(BigInteger.TEN.pow(100), n);
 
         for(int i=0;i<1000;i++){
             DERANGADIC.toDerangement(digits,n);
@@ -364,7 +364,7 @@ public class DerangementAlgoPerformanceHarness {
         for(Scenario s:scenarios){
 
             int[] digits=
-                    DERANGADIC.toDerangadic(
+                    DERANGADIC.encode(
                             s.rank,
                             s.n
                     );

@@ -63,7 +63,7 @@ import java.util.*;
  * <h2>Example: n = 12 (even), ranks 0–8</h2>
  * <p>
  * The table below shows rank, the digit array as returned by
- * {@link #toDerangadic(BigInteger, int)} (LSD at index 0, MSD at the last index),
+ * {@link #encode(BigInteger, int)} (LSD at index 0, MSD at the last index),
  * and the same digits displayed MSD-first as in the paper.
  * The MSD-first form is obtained by reversing the array before printing.
  * </p>
@@ -166,7 +166,7 @@ public final class DerangadicAlgorithms {
      *         stored LSD-first (i.e. {@code result[0] = D_0})
      * @throws IllegalArgumentException if {@code m} is negative or {@code m ≥ D_n}
      */
-    public int[] toDerangadic(BigInteger m, int n) {
+    public int[] encode(BigInteger m, int n) {
         BigInteger max = derangementCount(n);
         if (m.signum() < 0 || m.compareTo(max) >= 0) {
             throw new IllegalArgumentException("m out of range");
@@ -222,14 +222,14 @@ public final class DerangadicAlgorithms {
     }
 
     /**
-     * Convenience overload of {@link #toDerangadic(BigInteger, int)} for {@code long} ranks.
+     * Convenience overload of {@link #encode(BigInteger, int)} for {@code long} ranks.
      *
      * @param m decimal rank ({@code 0 ≤ m < D_n})
      * @param n order (number of elements)
      * @return Derangadic digit array, LSD-first ({@code result[0] = D_0})
      */
-    public int[] toDerangadic(long m, int n) {
-        return toDerangadic(BigInteger.valueOf(m), n);
+    public int[] encode(long m, int n) {
+        return encode(BigInteger.valueOf(m), n);
     }
 
     /**
@@ -250,7 +250,7 @@ public final class DerangadicAlgorithms {
      * @param n      full order ({@code n ≥ 2})
      * @return decimal rank corresponding to the given digit array
      */
-    public BigInteger fromDerangadic(int[] digits, int n) {
+    public BigInteger decode(int[] digits, int n) {
         ZeroPaddedList allDigits = new ZeroPaddedList(digits, n);
 
         Set<Integer> remainingElements = new HashSet<>();
@@ -448,20 +448,6 @@ public final class DerangadicAlgorithms {
         return derangement;
     }
 
-    private static int getChosen(FenwickTree availableElements, int pos, int digit) {
-        int pos1 = pos + 1;
-        int posRank = availableElements.rsq(pos);
-        boolean posAvailable = (availableElements.rsq(pos1) - posRank) == 1;
-
-        if (posAvailable) {
-            return (digit < posRank) ?
-                    availableElements.findKth(digit + 1) :
-                    availableElements.findKth(digit + 2);
-        } else {
-            return availableElements.findKth(digit + 1);
-        }
-    }
-
     /**
      * Converts a derangement back to its minimal Derangadic digit array.
      *
@@ -544,7 +530,7 @@ public final class DerangadicAlgorithms {
      * @throws IllegalArgumentException if {@code rank} is out of range
      */
     public int[] unrank(BigInteger rank, int n) {
-        int[] digits = toDerangadic(rank, n);
+        int[] digits = encode(rank, n);
         return toDerangement(digits, n);
     }
 
@@ -556,7 +542,7 @@ public final class DerangadicAlgorithms {
      * @return the derangement as an array of length {@code n}
      */
     public int[] unrank(long rank, int n) {
-        int[] digits = toDerangadic(rank, n);
+        int[] digits = encode(rank, n);
         return toDerangement(digits, n);
     }
 
@@ -571,7 +557,7 @@ public final class DerangadicAlgorithms {
      */
     public BigInteger rank(int[] derangement, int n) {
         int[] digits = fromDerangement(derangement, n);
-        return fromDerangadic(digits, n);
+        return decode(digits, n);
     }
 
     /**
@@ -616,6 +602,20 @@ public final class DerangadicAlgorithms {
                 return digits[index];
             }
             return 0;
+        }
+    }
+
+    private static int getChosen(FenwickTree availableElements, int pos, int digit) {
+        int pos1 = pos + 1;
+        int posRank = availableElements.rsq(pos);
+        boolean posAvailable = (availableElements.rsq(pos1) - posRank) == 1;
+
+        if (posAvailable) {
+            return (digit < posRank) ?
+                    availableElements.findKth(digit + 1) :
+                    availableElements.findKth(digit + 2);
+        } else {
+            return availableElements.findKth(digit + 1);
         }
     }
 }

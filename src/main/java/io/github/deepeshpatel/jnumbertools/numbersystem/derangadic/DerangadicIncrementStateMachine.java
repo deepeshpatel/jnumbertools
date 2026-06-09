@@ -127,7 +127,7 @@ public final class DerangadicIncrementStateMachine {
     private DerangadicState initialState(int n, BigInteger rank) {
         if (n < 2) throw new IllegalArgumentException("n must be >= 2");
         Objects.requireNonNull(rank, "rank");
-        int[] digits = alg.toDerangadic(rank, n);
+        int[] digits = alg.encode(rank, n);
         this.state = new DerangadicState(n, digits.length, digits);
         rebuildAllFromDigits();
         return state;
@@ -215,7 +215,7 @@ public final class DerangadicIncrementStateMachine {
         if (actualN < state.n) {
             int newActualN = actualN + 2;
             BigInteger firstRank = calculator.subFactorial(actualN);
-            int[] firstDigits = alg.toDerangadic(firstRank, state.n);
+            int[] firstDigits = alg.encode(firstRank, state.n);
             state.resizeActualN(newActualN, firstDigits);
             rebuildAllFromDigits();
             return newActualN; // Expansion counts as full-length carry

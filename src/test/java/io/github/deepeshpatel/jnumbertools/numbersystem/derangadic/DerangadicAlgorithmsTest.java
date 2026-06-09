@@ -6,7 +6,6 @@ package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
-import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithms;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
@@ -40,10 +39,10 @@ class DerangadicAlgorithmsTest {
                 String.format("D_%d should be %d", n, expectedCount));
 
         for (long m = 0; m < total.longValue(); m++) {
-            int[] digits = DERANGADIC.toDerangadic(m, n);
+            int[] digits = DERANGADIC.encode(m, n);
             assertNotNull(digits);
 
-            BigInteger mBack = DERANGADIC.fromDerangadic(digits, n);
+            BigInteger mBack = DERANGADIC.decode(digits, n);
             assertEquals(BigInteger.valueOf(m), mBack,
                     String.format("Rank mismatch at m=%d", m));
 
@@ -174,8 +173,8 @@ class DerangadicAlgorithmsTest {
                         String.format("Invalid derangement at n=%d, random rank", n));
 
                 // Verify round-trip
-                int[] digits = DERANGADIC.toDerangadic(rank, n);
-                BigInteger rankBack = DERANGADIC.fromDerangadic(digits, n);
+                int[] digits = DERANGADIC.encode(rank, n);
+                BigInteger rankBack = DERANGADIC.decode(digits, n);
                 assertEquals(rank, rankBack,
                         String.format("Rank mismatch at n=%d", n));
             }
@@ -292,8 +291,8 @@ class DerangadicAlgorithmsTest {
             assertTrue(isValidDerangement(derangement));
 
             // Verify round-trip
-            int[] digits = DERANGADIC.toDerangadic(rank, n);
-            BigInteger rankBack = DERANGADIC.fromDerangadic(digits, n);
+            int[] digits = DERANGADIC.encode(rank, n);
+            BigInteger rankBack = DERANGADIC.decode(digits, n);
             assertEquals(rank, rankBack);
         }
     }
@@ -316,7 +315,7 @@ class DerangadicAlgorithmsTest {
 
             for (int rank = 0; rank < maxRank; rank++) {
                 // Get digits (same for both implementations)
-                int[] digits = DERANGADIC.toDerangadic(rank, n);
+                int[] digits = DERANGADIC.encode(rank, n);
 
                 // Force array implementation
                 int[] resultArray = DERANGADIC.toDerangementArray(digits, n);
@@ -348,7 +347,7 @@ class DerangadicAlgorithmsTest {
                 long randomRank = random.nextLong(50000, 1000000);
                 rank = BigInteger.valueOf(randomRank);// new BigInteger(total.bitLength(), random);
 
-                int[] digits = DERANGADIC.toDerangadic(rank, n);
+                int[] digits = DERANGADIC.encode(rank, n);
                 int[] resultArray = DERANGADIC.toDerangementArray(digits, n);
                 int[] resultFenwick = DERANGADIC.toDerangementFenwick(digits, n);
 
@@ -371,7 +370,7 @@ class DerangadicAlgorithmsTest {
 
             for(var startIndex: startIndices) {
                 for (int i = startIndex; i <= batchSize + startIndex ; i++) {
-                    int[] digits = DERANGADIC.toDerangadic(i, n);
+                    int[] digits = DERANGADIC.encode(i, n);
                     int[] array = DERANGADIC.toDerangementArray(digits, n);
                     int[] fenwick = DERANGADIC.toDerangementFenwick(digits, n);
                     assertArrayEquals(array, fenwick, "Mismatch at n=" + n + ", rank=0");
@@ -387,12 +386,12 @@ class DerangadicAlgorithmsTest {
     void testInvalidInputs() {
         // Test negative rank
         assertThrows(IllegalArgumentException.class, () ->
-                DERANGADIC.toDerangadic(BigInteger.valueOf(-1), 4));
+                DERANGADIC.encode(BigInteger.valueOf(-1), 4));
 
         // Test rank >= D_n
         BigInteger total = DERANGADIC.derangementCount(4);
         assertThrows(IllegalArgumentException.class, () ->
-                DERANGADIC.toDerangadic(total, 4));
+                DERANGADIC.encode(total, 4));
 
         // Test n=1 (no derangements - returns 0, not exception)
         BigInteger countForN1 = DERANGADIC.derangementCount(1);
@@ -417,11 +416,11 @@ class DerangadicAlgorithmsTest {
         for (int i = 0; i < 10; i++) {
             BigInteger rank = generateRandomBigIntegerRank(total);
 
-            int[] digits = DERANGADIC.toDerangadic(rank, n);
+            int[] digits = DERANGADIC.encode(rank, n);
             int[] derangement = DERANGADIC.toDerangement(digits, n);
             assertTrue(isValidDerangement(derangement));
 
-            BigInteger rankBack = DERANGADIC.fromDerangadic(digits, n);
+            BigInteger rankBack = DERANGADIC.decode(digits, n);
             assertEquals(rank, rankBack,
                     String.format("Rank mismatch for n=%d", n));
 

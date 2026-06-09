@@ -5,8 +5,6 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic;
-import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithms;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -72,7 +70,7 @@ class DerangadicTest {
         for (long rank = 0; rank < 20; rank++) {
             Derangadic d = new Derangadic(n, BigInteger.valueOf(rank), CALC);
             int[] encoded = d.encoded();
-            int[] expected = ALG.toDerangadic(rank, n);
+            int[] expected = ALG.encode(rank, n);
             assertArrayEquals(expected, encoded,
                     "Encoded mismatch at rank " + rank);
         }
@@ -307,7 +305,7 @@ class DerangadicTest {
 
         for (long rank = 0; rank < total.longValue() && rank < 100; rank++) {
             int[] encoded = d.encoded();
-            int[] expected = ALG.toDerangadic(rank, n);
+            int[] expected = ALG.encode(rank, n);
 
             // Compare ignoring trailing zeros (should be equal)
             assertTrue(arraysEqualIgnoringTrailingZeros(expected, encoded),
