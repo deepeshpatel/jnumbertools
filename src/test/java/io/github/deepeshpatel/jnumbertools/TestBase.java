@@ -52,7 +52,7 @@ public class TestBase {
         }).toList();
     }
 
-    public static void  assertEveryMthValue(Stream<?> completeStream, Stream<?> mthStream, int start, long m) {
+    public static void assertEveryMthValue(Stream<?> completeStream, Stream<?> mthStream, int start, long m) {
         var main = everyMthValue(completeStream, start, m);
         var mth = mthStream.toList();
         Assertions.assertIterableEquals(main, mth);
@@ -75,6 +75,31 @@ public class TestBase {
         return options;
     }
 
+    /**
+     * Returns true if list {@code a} is lexicographically less than or equal to list {@code b},
+     * using the natural ordering of each element (MSD-first, standard lex order).
+     *
+     * <p>All five permutation test classes previously carried identical private copies of
+     * this method under slightly different names. This single generic version replaces them
+     * all. Elements must implement {@link Comparable}.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static boolean isLexLessOrEqual(List<?> a, List<?> b) {
+        int len = Math.min(a.size(), b.size());
+        for (int i = 0; i < len; i++) {
+            int cmp = ((Comparable) a.get(i)).compareTo(b.get(i));
+            if (cmp < 0) return true;
+            if (cmp > 0) return false;
+        }
+        return a.size() <= b.size();
+    }
+
+    /**
+     * @deprecated Use {@link #isLexLessOrEqual(List, List)} for standard MSD-first lex comparison.
+     * This method iterates LSD-first (backwards) and is kept only for number-system tests
+     * that explicitly need reverse-lex ordering.
+     */
+    @Deprecated
     public static boolean isLexLess(int[] a, int[] b) {
         if(a.length != b.length) return a.length < b.length;
         int len = a.length;

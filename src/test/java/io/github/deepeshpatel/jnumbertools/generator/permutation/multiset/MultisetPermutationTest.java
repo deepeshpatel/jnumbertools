@@ -68,7 +68,6 @@ class MultisetPermutationTest {
         @Test
         @DisplayName("All-unique elements (freq=1 each): multinomial = n!, same as unique perm")
         void allUniqueFrequenciesGivesFactorial() {
-            // {A:1, B:1, C:1} → 3!/1!1!1! = 6
             LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
             options.put("A", 1); options.put("B", 1); options.put("C", 1);
             long count = permutation.multiset(options).lexOrder().stream().count();
@@ -136,7 +135,6 @@ class MultisetPermutationTest {
             LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
             options.put("A", 2); options.put("B", 2);
             var perms = permutation.multiset(options).lexOrder().stream().toList();
-            // Expected multiset: {A:2, B:2}
             Map<String, Long> expectedFreq = Map.of("A", 2L, "B", 2L);
             for (var perm : perms) {
                 Map<Object, Long> freq = new LinkedHashMap<>();
@@ -163,9 +161,7 @@ class MultisetPermutationTest {
             options.put("A", 2); options.put("B", 2);
             var perms = permutation.multiset(options).lexOrder().stream().toList();
             for (int i = 1; i < perms.size(); i++) {
-                List<String> prev = (List<String>) perms.get(i - 1);
-                List<String> curr = (List<String>) perms.get(i);
-                assertTrue(isLexLessOrEqual(prev, curr),
+                assertTrue(isLexLessOrEqual(perms.get(i - 1), perms.get(i)),
                         "rank " + (i-1) + " must be lex ≤ rank " + i);
             }
         }
@@ -233,18 +229,5 @@ class MultisetPermutationTest {
             assertEquals(calculator.multinomial(freq).longValue(), count,
                     "n=" + n + " multinomial mismatch");
         }
-    }
-
-    // =========================================================
-    // Helpers
-    // =========================================================
-
-    private boolean isLexLessOrEqual(List<String> a, List<String> b) {
-        for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
-            int cmp = a.get(i).compareTo(b.get(i));
-            if (cmp < 0) return true;
-            if (cmp > 0) return false;
-        }
-        return a.size() <= b.size();
     }
 }

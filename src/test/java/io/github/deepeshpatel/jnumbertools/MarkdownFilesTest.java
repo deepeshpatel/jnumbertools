@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
@@ -16,6 +17,7 @@ import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("Markdown documentation files")
 public class MarkdownFilesTest {
 
     // List all MD files to test (relative to project root)
@@ -32,6 +34,7 @@ public class MarkdownFilesTest {
     );
 
     @Test
+    @DisplayName("all markdown links (local and HTTP) are accessible")
     @EnabledIfSystemProperty(named = "stress.testing", matches = "true")
     void testAllMarkdownFiles() {
         Path projectRoot = Paths.get("").toAbsolutePath();
@@ -81,12 +84,12 @@ public class MarkdownFilesTest {
     private void testHttpLink(HttpClient client, String link) throws Exception {
 
          HttpRequest request = HttpRequest.newBuilder()
-                 .uri(URI.create(link))
-                 .method("HEAD", HttpRequest.BodyPublishers.noBody())
-                 .build();
-         HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
-         assertTrue(response.statusCode() < 400 || response.statusCode() == 403,
-                 "Unexpected status for known SSRN link: " + link + " (Status: " + response.statusCode() + ")");
+                  .uri(URI.create(link))
+                  .method("HEAD", HttpRequest.BodyPublishers.noBody())
+                  .build();
+          HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+          assertTrue(response.statusCode() < 400 || response.statusCode() == 403,
+                  "Unexpected status for known SSRN link: " + link + " (Status: " + response.statusCode() + ")");
     }
 
     private void testLocalLink(Path projectRoot, Path mdFilePath, String link) {

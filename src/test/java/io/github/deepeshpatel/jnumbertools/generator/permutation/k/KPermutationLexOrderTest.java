@@ -70,7 +70,7 @@ class KPermutationLexOrderTest {
         @Test
         @DisplayName("n=0, k>0: ⁰Pₖ = 0, empty stream")
         void nZeroKPositive() {
-            var b = permutation.nPk(0, 1);   // (n, k) = (0, 1)
+            var b = permutation.nPk(0, 1);
             assertEquals(BigInteger.ZERO, b.count());
             assertTrue(b.lexOrder().stream().toList().isEmpty());
         }
@@ -78,7 +78,7 @@ class KPermutationLexOrderTest {
         @Test
         @DisplayName("n>0, k>n: ⁿPₖ = 0, empty stream")
         void kGreaterThanN() {
-            var b = permutation.nPk(1, 2);   // (n, k) = (1, 2)
+            var b = permutation.nPk(1, 2);
             assertEquals(BigInteger.ZERO, b.count());
             assertTrue(b.lexOrder().stream().toList().isEmpty());
         }
@@ -86,7 +86,7 @@ class KPermutationLexOrderTest {
         @Test
         @DisplayName("n=0, k=0: ⁰P₀ = 1, single empty permutation")
         void nZeroKZero() {
-            var b = permutation.nPk(0, 0);   // (n, k) = (0, 0)
+            var b = permutation.nPk(0, 0);
             assertEquals(BigInteger.ONE, b.count());
             var result = b.lexOrder().stream().toList();
             assertEquals(1, result.size());
@@ -96,7 +96,7 @@ class KPermutationLexOrderTest {
         @Test
         @DisplayName("n>0, k=0: ⁿP₀ = 1, single empty permutation")
         void nPositiveKZero() {
-            var b = permutation.nPk(2, 0);   // (n, k) = (2, 0)
+            var b = permutation.nPk(2, 0);
             assertEquals(BigInteger.ONE, b.count());
             var result = b.lexOrder().stream().toList();
             assertEquals(1, result.size());
@@ -226,19 +226,5 @@ class KPermutationLexOrderTest {
                         "n=" + n + " k=" + k);
             }
         }
-    }
-
-    // ---------- helpers ----------
-
-    @SuppressWarnings("unchecked")
-    private static boolean isLexLessOrEqual(List<?> a, List<?> b) {
-        List<Comparable> ca = (List<Comparable>) a;
-        List<Comparable> cb = (List<Comparable>) b;
-        for (int i = 0; i < Math.min(ca.size(), cb.size()); i++) {
-            int cmp = ca.get(i).compareTo(cb.get(i));
-            if (cmp < 0) return true;
-            if (cmp > 0) return false;
-        }
-        return ca.size() <= cb.size();
     }
 }

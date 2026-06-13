@@ -65,6 +65,9 @@ public class Util {
 
     public static void validateMapOptions(LinkedHashMap<?, Integer> options, int r) {
         validateMapOptions(options);
+        if (r < 0) {
+            throw new IllegalArgumentException("r must be ≥ 0 for multiset combinations");
+        }
         int[] frequencies = options.values().stream().mapToInt(Integer::intValue).toArray();
         Calculator.multisetCombinationsCount(r, frequencies);
     }
@@ -97,9 +100,8 @@ public class Util {
         
         LinkedHashMap<T, Integer> filtered = new LinkedHashMap<>();
         for (Map.Entry<T, Integer> entry : multiset.entrySet()) {
-            Integer freq = entry.getValue();
-            if (freq != null && freq > 0) {  // Only keep positive frequencies
-                filtered.put(entry.getKey(), freq);
+            if (entry.getValue() > 0) {  // Only keep positive frequencies
+                filtered.put(entry.getKey(), entry.getValue());
             }
         }
         return filtered;
@@ -123,7 +125,6 @@ public class Util {
      *           <li>start is ≥ count (out of valid range)</li>
      *         </ul>
      */
-
     public static void validateLexOrderMthParams(BigInteger m, BigInteger start, BigInteger count) {
         if (m == null || m.signum() <= 0) {
             throw new IllegalArgumentException("Increment 'm' must be positive (m > 0)");
@@ -131,7 +132,7 @@ public class Util {
 
         if (start == null ||
                 start.signum() < 0 ||
-                (start.compareTo(count) >= 0 && count.signum()> 0 )) {
+                (count.signum() > 0 && start.compareTo(count) >= 0)) {
             throw new IllegalArgumentException("Element should be in range [0, " + count + ")");
         }
     }

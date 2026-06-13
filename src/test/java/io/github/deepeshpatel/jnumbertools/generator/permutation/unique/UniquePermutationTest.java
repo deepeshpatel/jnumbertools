@@ -146,9 +146,7 @@ class UniquePermutationTest {
         void permutationsInLexOrder() {
             var perms = permutation.unique(1, 2, 3, 4).lexOrder().stream().toList();
             for (int i = 1; i < perms.size(); i++) {
-                List<Integer> prev = (List<Integer>) perms.get(i - 1);
-                List<Integer> curr = (List<Integer>) perms.get(i);
-                assertTrue(isLexOrderedOrEqual(prev, curr),
+                assertTrue(isLexLessOrEqual(perms.get(i - 1), perms.get(i)),
                         "permutation at rank " + (i-1) + " must be lex ≤ rank " + i);
             }
         }
@@ -224,14 +222,5 @@ class UniquePermutationTest {
     @SuppressWarnings("unchecked")
     private List<?> permutationsOf(List<?> elements) {
         return permutation.unique(elements).lexOrder().stream().toList();
-    }
-
-    private boolean isLexOrderedOrEqual(List<Integer> a, List<Integer> b) {
-        for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
-            int cmp = Integer.compare(a.get(i), b.get(i));
-            if (cmp < 0) return true;
-            if (cmp > 0) return false;
-        }
-        return a.size() <= b.size();
     }
 }

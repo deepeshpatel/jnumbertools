@@ -28,15 +28,13 @@ public final class Calculator {
     /**
      * Constructs a new Calculator instance.
      * Base cases (0!, !0, !1) are initialized automatically.
+     * No synchronization is needed during construction since the instance
+     * is not accessible to other threads until construction completes.
      */
     public Calculator() {
-        synchronized (factorialCache) {
-            factorialCache.add(BigInteger.ONE); // 0! = 1
-        }
-        synchronized (subFactorialCache) {
-            subFactorialCache.add(BigInteger.ONE);  // !0 = 1
-            subFactorialCache.add(BigInteger.ZERO); // !1 = 0
-        }
+        factorialCache.add(BigInteger.ONE); // 0! = 1
+        subFactorialCache.add(BigInteger.ONE);  // !0 = 1
+        subFactorialCache.add(BigInteger.ZERO); // !1 = 0
     }
 
     /**
@@ -176,6 +174,11 @@ public final class Calculator {
      * All other positions have no restrictions.
      * </p>
      *
+     * Uses inclusion-exclusion principle: iterates over all possible fixed point counts
+     * and applies the complement rule. The direct subFactorial(total) optimization is
+     * only beneficial when restricted == total AND total is very large; for mixed values,
+     * the inclusion-exclusion approach with memoization is more efficient.
+     *
      * @param total total number of elements
      * @param restricted number of specific forbidden positions
      * @return number of valid permutations
@@ -184,9 +187,6 @@ public final class Calculator {
         if (restricted < 0) return BigInteger.ZERO;
         if (total == 0) return BigInteger.ONE;
         if (restricted == 0) return factorial(total);
-        // do not apply below early optimization because it requires computing subFactorial(total) which is
-        // more expensive than the general case for small total, and the general case handles it efficiently anyway.
-        //if (restricted == total) return subFactorial(total);
 
         return restrictedDerangementMemo.computeIfAbsent(total, restricted, (t, r) -> {
             BigInteger result = BigInteger.ZERO;
@@ -355,7 +355,9 @@ public final class Calculator {
             throw new IllegalArgumentException("k must be non-negative.");
         }
         if (index < 0 || index > counts.length) {
-            throw new IllegalArgumentException("index must be between 0 and counts.length inclusive.");
+            throw new IllegalArgumentException(String.format(
+                    "index must be between 0 and %d (counts.length), got %d",
+                    counts.length, index));
         }
 
         for (int count : counts) {
@@ -429,7 +431,7 @@ public final class Calculator {
      */
     public BigInteger telephoneNumber(int n) {
 
-        //no cashing required. Iterative version is fast enough for n up to 500 or more, and it avoids synchronization overhead of memoization.
+        // No caching required. Iterative version is fast enough for n up to 500 or more, and it avoids synchronization overhead of memoization.
         if (n < 0) { throw new IllegalArgumentException("n must be >= 0"); }
         if (n <= 1) { return BigInteger.ONE; }
 

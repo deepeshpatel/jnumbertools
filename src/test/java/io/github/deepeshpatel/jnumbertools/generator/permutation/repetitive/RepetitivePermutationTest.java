@@ -160,9 +160,7 @@ class RepetitivePermutationTest {
         void tuplesInLexOrder() {
             var output = permutation.repetitive(3, 0, 1, 2).lexOrder().stream().toList();
             for (int i = 1; i < output.size(); i++) {
-                List<Integer> prev = (List<Integer>) output.get(i - 1);
-                List<Integer> curr = (List<Integer>) output.get(i);
-                assertTrue(isLexLessOrEqual(prev, curr),
+                assertTrue(isLexLessOrEqual(output.get(i - 1), output.get(i)),
                         "rank " + (i-1) + " must be lex ≤ rank " + i);
             }
         }
@@ -258,18 +256,5 @@ class RepetitivePermutationTest {
                 assertEquals(calculator.power(n, r).longValue(), count);
             }
         }
-    }
-
-    // =========================================================
-    // Helpers
-    // =========================================================
-
-    private boolean isLexLessOrEqual(List<Integer> a, List<Integer> b) {
-        for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
-            int cmp = Integer.compare(a.get(i), b.get(i));
-            if (cmp < 0) return true;
-            if (cmp > 0) return false;
-        }
-        return a.size() <= b.size();
     }
 }

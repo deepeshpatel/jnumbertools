@@ -114,12 +114,10 @@ class DerangementTest {
             List<String> origin = List.of("A", "B", "C", "D");
             for (var d : actual) {
                 assertEquals(4, d.size(), "each derangement has n=4 elements");
-                // No fixed point
                 for (int i = 0; i < d.size(); i++) {
                     assertNotEquals(origin.get(i), d.get(i),
                             "fixed point at index " + i + " in " + d);
                 }
-                // Same multiset as input
                 var sorted = new ArrayList<>(d);
                 Collections.sort(sorted);
                 assertEquals(List.of("A", "B", "C", "D"), sorted,
@@ -148,9 +146,7 @@ class DerangementTest {
         void derangementsInLexOrder() {
             var actual = derangement.of(5).lexOrder().stream().toList();
             for (int i = 1; i < actual.size(); i++) {
-                List<Integer> prev = (List<Integer>) actual.get(i - 1);
-                List<Integer> curr = (List<Integer>) actual.get(i);
-                assertTrue(isLexLessOrEqual(prev, curr),
+                assertTrue(isLexLessOrEqual(actual.get(i - 1), actual.get(i)),
                         "rank " + (i-1) + " must be lex ≤ rank " + i);
             }
         }
@@ -166,6 +162,8 @@ class DerangementTest {
 
     // =========================================================
     // 3. Consistency with unrankOf
+    //    These tests verify the decode correctness of unrankOf.derangement(rank, n)
+    //    specifically — not just mth iteration order.
     // =========================================================
 
     @Nested
@@ -229,18 +227,5 @@ class DerangementTest {
             assertEquals(calculator.subFactorial(n).longValue(), count,
                     "n=" + n + " count mismatch");
         }
-    }
-
-    // =========================================================
-    // Helpers
-    // =========================================================
-
-    private boolean isLexLessOrEqual(List<Integer> a, List<Integer> b) {
-        for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
-            int cmp = Integer.compare(a.get(i), b.get(i));
-            if (cmp < 0) return true;
-            if (cmp > 0) return false;
-        }
-        return a.size() <= b.size();
     }
 }
