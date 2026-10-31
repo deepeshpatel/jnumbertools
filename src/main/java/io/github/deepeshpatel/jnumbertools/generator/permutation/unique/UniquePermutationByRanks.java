@@ -6,7 +6,6 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.numbersystem.FactoradicAlgorithms;
 
 import java.math.BigInteger;
@@ -70,7 +69,7 @@ public final class UniquePermutationByRanks<T> extends AbstractGenerator<T> {
      */
     @Override
     public Iterator<List<T>> iterator() {
-        return elements.isEmpty() ? Util.emptyListIterator() : new SequenceIterator();
+        return new SequenceIterator();
     }
 
     private class SequenceIterator implements Iterator<List<T>> {
@@ -96,6 +95,9 @@ public final class UniquePermutationByRanks<T> extends AbstractGenerator<T> {
             }
             if (rank.compareTo(totalPermutations) >= 0) {
                 throw new IllegalArgumentException("Rank " + rank + " exceeds total permutations " + totalPermutations);
+            }
+            if (elements.isEmpty()) {
+                return List.of(); // the single permutation of the empty set
             }
             int[] indices = FactoradicAlgorithms.unRank(rank, elements.size());
             return indicesToValues(indices);

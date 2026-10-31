@@ -33,7 +33,7 @@ import java.util.Random;
  * │ No dimensions                        │ 1         │ [[]]         │ false     │
  * │ Single dimension with count=0        │ 0         │ []           │ true      │
  * │ Multiple dims, all count>0           │ Π counts  │ products     │ false     │
- * │ Multiple dims, any count=0            │ 0         │ []           │ true      │
+ * │ Multiple dims, any count=0           │ 0         │ []           │ true      │
  * └──────────────────────────────────────┴───────────┴──────────────┴───────────┘
  * </pre>
  *
@@ -52,7 +52,8 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
 
     private final List<Builder<?>> builders;
     private final Calculator calculator;
-    private final boolean isEmptyProduct;  // Optimization flag
+    private final boolean isEmptyProduct;
+    private final BigInteger cachedCount; // pre-computed; count() is called frequently
 
     /**
      * Constructs a ConstrainedProductBuilder with an initial multi-select combination.
@@ -60,7 +61,6 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
     public ConstrainedProductBuilder(int n, List<?> elements, boolean isMultiSelect, Calculator calculator) {
         this.calculator = calculator;
         this.builders = new ArrayList<>();
-
         Builder<?> firstBuilder;
         if (elements.isEmpty()) {
             firstBuilder = new EmptyBuilder(n);
@@ -69,9 +69,9 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
                     ? new Combinations(calculator).repetitive(n, elements)
                     : new Combinations(calculator).unique(n, elements);
         }
-
         this.builders.add(firstBuilder);
         this.isEmptyProduct = firstBuilder.isEmpty();
+        this.cachedCount = computeCount(this.builders, this.isEmptyProduct);
     }
 
     /**
@@ -83,6 +83,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         Builder<?> firstBuilder = new Subsets(calculator).of(elements).inRange(from, to);
         this.builders.add(firstBuilder);
         this.isEmptyProduct = firstBuilder.isEmpty();
+        this.cachedCount = computeCount(this.builders, this.isEmptyProduct);
     }
 
     /**
@@ -92,7 +93,20 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         this.builders = builders;
         this.calculator = calculator;
         this.isEmptyProduct = isEmptyProduct;
+        this.cachedCount = computeCount(builders, isEmptyProduct);
     }
+
+    // ── count helper ────────────────────────────────────────────────────────
+
+    private static BigInteger computeCount(List<Builder<?>> builders, boolean isEmptyProduct) {
+        if (isEmptyProduct)      return BigInteger.ZERO;
+        if (builders.isEmpty())  return BigInteger.ONE;
+        return builders.stream()
+                .map(Builder::count)
+                .reduce(BigInteger.ONE, BigInteger::multiply);
+    }
+
+    // ── Dimension chaining ───────────────────────────────────────────────────
 
     /**
      * Adds a distinct combination dimension.
@@ -103,22 +117,14 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      */
     public ConstrainedProductBuilder andDistinct(int quantity, List<?> elements) {
         Util.validateInput(elements);
-
-        // Optimization: if already empty, return empty builder
         if (isEmptyProduct) {
             return new ConstrainedProductBuilder(builders, calculator, true);
         }
-
         List<Builder<?>> newBuilders = new ArrayList<>(this.builders);
-        Builder<?> newBuilder;
-        if (elements.isEmpty()) {
-            newBuilder = new EmptyBuilder(quantity);
-        } else {
-            newBuilder = new Combinations(calculator).unique(quantity, elements);
-        }
+        Builder<?> newBuilder = elements.isEmpty()
+                ? new EmptyBuilder(quantity)
+                : new Combinations(calculator).unique(quantity, elements);
         newBuilders.add(newBuilder);
-
-        // Product becomes empty only if the new builder is empty
         return new ConstrainedProductBuilder(newBuilders, calculator, newBuilder.isEmpty());
     }
 
@@ -134,19 +140,13 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         if (quantity < 0) {
             throw new IllegalArgumentException("Quantity must be >= 0: " + quantity);
         }
-
-        // Optimization: if already empty, return empty builder
         if (isEmptyProduct) {
             return new ConstrainedProductBuilder(builders, calculator, true);
         }
-
         List<Builder<?>> newBuilders = new ArrayList<>(this.builders);
-        Builder<?> newBuilder;
-        if (elements.isEmpty()) {
-            newBuilder = new EmptyBuilder(quantity);
-        } else {
-            newBuilder = new Combinations(calculator).repetitive(quantity, elements);
-        }
+        Builder<?> newBuilder = elements.isEmpty()
+                ? new EmptyBuilder(quantity)
+                : new Combinations(calculator).repetitive(quantity, elements);
         newBuilders.add(newBuilder);
         return new ConstrainedProductBuilder(newBuilders, calculator, newBuilder.isEmpty());
     }
@@ -160,19 +160,16 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      */
     public ConstrainedProductBuilder andInRange(int from, int to, List<?> elements) {
         Util.validateInput(elements);
-
-        // Optimization: if already empty, return empty builder
         if (isEmptyProduct) {
             return new ConstrainedProductBuilder(builders, calculator, true);
         }
-
         List<Builder<?>> newBuilders = new ArrayList<>(this.builders);
         Builder<?> newBuilder = new Subsets(calculator).of(elements).inRange(from, to);
         newBuilders.add(newBuilder);
-
-        // Product becomes empty only if the new builder is empty
         return new ConstrainedProductBuilder(newBuilders, calculator, newBuilder.isEmpty());
     }
+
+    // ── Builder interface ────────────────────────────────────────────────────
 
     @Override
     public StreamableIterable<Object> lexOrder() {
@@ -184,19 +181,16 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
 
     @Override
     public CartesianProductByRanks<Object> lexOrderMth(BigInteger m, BigInteger start) {
-        Util.validateLexOrderMthParams(m, start, count());
-
+        Util.validateLexOrderMthParams(m, start, cachedCount);
         if (isEmptyProduct) {
             return new CartesianProductByRanks<>(
                     (List<Builder<Object>>) (List) builders,
                     Collections.emptyList()
             );
         }
-
-        BigInteger maxCount = count();
         return new CartesianProductByRanks(
                 (List<Builder<Object>>) (List) builders,
-                new EveryMthIterable(start, m, maxCount)
+                new EveryMthIterable(start, m, cachedCount)
         );
     }
 
@@ -208,15 +202,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
 
     @Override
     public BigInteger count() {
-        if (isEmptyProduct) {
-            return BigInteger.ZERO;
-        }
-        if (builders.isEmpty()) {
-            return BigInteger.ONE;
-        }
-        return builders.stream()
-                .map(Builder::count)
-                .reduce(BigInteger.ONE, BigInteger::multiply);
+        return cachedCount;
     }
 
     @Override
@@ -228,7 +214,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      * Generates a random sample of products with replacement using custom random generator.
      *
      * @param sampleSize the number of products to generate
-     * @param random the random generator to use
+     * @param random     the random generator to use
      * @return a StreamableIterable for the sampled products
      * @throws IllegalArgumentException if sampleSize is negative or random is null
      */
@@ -237,18 +223,15 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
-
         if (isEmptyProduct) {
             return new CartesianProductByRanks<>(
                     (List<Builder<Object>>) (List) builders,
                     Collections.emptyList()
             );
         }
-
-        BigInteger maxCount = count();
         return new CartesianProductByRanks(
                 (List<Builder<Object>>) (List) builders,
-                new BigIntegerChoice(maxCount, sampleSize, random)
+                new BigIntegerChoice(cachedCount, sampleSize, random)
         );
     }
 
@@ -256,7 +239,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
      * Generates a random sample of unique products without replacement using custom random generator.
      *
      * @param sampleSize the number of unique products to generate
-     * @param random the random generator to use
+     * @param random     the random generator to use
      * @return a StreamableIterable for the sampled products
      * @throws IllegalArgumentException if sampleSize is negative, exceeds total products, or random is null
      */
@@ -265,31 +248,27 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         if (sampleSize < 0) {
             throw new IllegalArgumentException("Sample size cannot be negative");
         }
-
-        BigInteger maxCount = count();
-        if (BigInteger.valueOf(sampleSize).compareTo(maxCount) > 0) {
+        if (BigInteger.valueOf(sampleSize).compareTo(cachedCount) > 0) {
             throw new IllegalArgumentException(
-                    "Sample size cannot exceed total products: " + maxCount
+                    "Sample size cannot exceed total products: " + cachedCount
             );
         }
-
         if (isEmptyProduct) {
             return new CartesianProductByRanks<>(
                     (List<Builder<Object>>) (List) builders,
                     Collections.emptyList()
             );
         }
-
         return new CartesianProductByRanks(
                 (List<Builder<Object>>) (List) builders,
-                new BigIntegerSample(maxCount, sampleSize, random)
+                new BigIntegerSample(cachedCount, sampleSize, random)
         );
     }
 
-    /**
-     * A generator for constrained products.
-     */
+    // ── ConstrainedProductGenerator ─────────────────────────────────────────
+
     private class ConstrainedProductGenerator extends AbstractGenerator<Object> {
+
         ConstrainedProductGenerator() {
             super(Collections.emptyList());
         }
@@ -306,27 +285,23 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         }
     }
 
+    // ── EmptyBuilder ─────────────────────────────────────────────────────────
+
     /**
      * Empty builder for dimensions with no valid combinations.
      */
     private static class EmptyBuilder implements Builder<Object> {
+
         private final BigInteger count;
         private final boolean isEmpty;
 
         EmptyBuilder(int quantity) {
-            this.count = quantity > 0 ? BigInteger.ZERO : BigInteger.ONE;
+            this.count   = quantity > 0 ? BigInteger.ZERO : BigInteger.ONE;
             this.isEmpty = quantity > 0;
         }
 
-        @Override
-        public BigInteger count() {
-            return count;
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return isEmpty;
-        }
+        @Override public BigInteger count()  { return count; }
+        @Override public boolean   isEmpty() { return isEmpty; }
 
         @Override
         public AbstractGenerator<Object> lexOrder() {

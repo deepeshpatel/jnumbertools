@@ -104,9 +104,6 @@ class BigIntegerChoiceIterator implements Iterator<BigInteger> {
      * @return a random BigInteger in [0, bound)
      */
     private BigInteger randomBigInteger(BigInteger bound) {
-        if (bound.compareTo(BigInteger.valueOf(Long.MAX_VALUE)) <= 0) {
-            return BigInteger.valueOf(random.nextLong(0, bound.longValueExact()));
-        }
-        return BigInteger.valueOf(random.nextLong()).abs().mod(bound);
+        return BigIntegerSample.randomBelow(bound, random);
     }
 }

@@ -16,58 +16,25 @@ import java.util.stream.StreamSupport;
 
 /**
  * Generates Cartesian products based on a sequence of rank positions.
- * <p>
- * This class takes a list of builders (each representing a dimension) and an iterable of ranks,
- * and generates the corresponding tuples at those ranks. It supports both simple and constrained
- * Cartesian products.
- * </p>
  *
- * <h2>Mathematical Rules</h2>
- * <pre>
- * ┌────────────────────────────┬─────────────────────────────┐
- * │ Condition                  │ Behavior                    │
- * ├────────────────────────────┼─────────────────────────────┤
- * │ No builders                │ Only rank 0 is valid,       │
- * │                            │ returns [[]]                │
- * ├────────────────────────────┼─────────────────────────────┤
- * │ Any builder is empty       │ Product is empty,           │
- * │ (builder.isEmpty() true)   │ all rank access throws      │
- * ├────────────────────────────┼─────────────────────────────┤
- * │ All builders non-empty     │ Normal rank-based access    │
- * │                            │ with range [0, maxCount)    │
- * └────────────────────────────┴─────────────────────────────┘
- * </pre>
+ * <p>This class is the <em>generic</em> rank-based backend used by both
+ * {@link SimpleProductBuilder} and {@link ConstrainedProductBuilder} when their
+ * dimension lists are built from arbitrary {@link Builder} instances (e.g. from the
+ * public API surface that accepts a {@code List<Builder>} directly).
+ *
+ * <p><strong>Note:</strong> {@link SimpleProductBuilder} and
+ * {@link ConstrainedProductBuilder} now perform rank decomposition internally
+ * (with direct list access), so this class is mainly needed for external / API callers
+ * that compose their own {@link Builder} dimensions. The {@code getMth()} implementation
+ * here still uses {@code lexOrderMth(ONE, index)} per dimension as before, which is
+ * correct for the generic case.  If all your dimensions are simple lists, prefer the
+ * builder's own {@code byRanks()} method for better performance.
  *
  * <h2>Rank Ordering</h2>
- * <p>
  * Ranks follow row-major order (rightmost dimension varies fastest).
- * For dimensions with sizes [s₁, s₂, ..., sₖ], rank r decomposes as:
- * <pre>
- * r = d₁ × (s₂×s₃×...×sₖ) + d₂ × (s₃×...×sₖ) + ... + dₖ
- * where 0 ≤ dᵢ < sᵢ
- * </pre>
- * </p>
- *
- * <h2>Usage Examples</h2>
- * <pre>
- * // Create builders for dimensions
- * List<Builder<String>> builders = List.of(
- *     new SingleListBuilder(List.of("A", "B")),
- *     new SingleListBuilder(List.of("X", "Y"))
- * );
- *
- * // Generate tuples at ranks 0, 2, and 3
- * var ranks = List.of(BigInteger.ZERO, BigInteger.valueOf(2), BigInteger.valueOf(3));
- * var product = new CartesianProductByRanks<>(builders, ranks);
- *
- * product.stream().forEach(System.out::println);
- * // Output: [A,X], [B,X], [B,Y]
- * </pre>
  *
  * @param <T> the type of elements in the products
  * @author Deepesh Patel
- * @see SimpleProductBuilder
- * @see ConstrainedProductBuilder
  */
 public class CartesianProductByRanks<T> implements StreamableIterable<T> {
 
@@ -76,180 +43,87 @@ public class CartesianProductByRanks<T> implements StreamableIterable<T> {
     private final BigInteger maxCount;
     private final boolean isEmptyProduct;
 
-    /**
-     * Constructs a new CartesianProductByRanks instance.
-     *
-     * <p>
-     * <strong>Note:</strong> This constructor is intended for internal use only.
-     * Instances should be created via
-     * {@link io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder#byRanks(Iterable)}
-     * or {@link io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder#byRanks(Iterable)}.
-     * All parameter validation (null checks) is handled by the builder.
-     * Rank validation (non-negative, less than total) is deferred to iteration.
-     * </p>
-     *
-     * @param builders the list of builders for each dimension (assumed non-null)
-     * @param ranks    the iterable providing the sequence of ranks
-     */
     public CartesianProductByRanks(List<Builder<T>> builders, Iterable<BigInteger> ranks) {
         this.builders = builders != null ? builders : Collections.emptyList();
-        this.ranks = ranks;
-
-        // Compute product state
-        isEmptyProduct = this.builders.stream().anyMatch(Builder::isEmpty);
+        this.ranks    = ranks;
+        this.isEmptyProduct = this.builders.stream().anyMatch(Builder::isEmpty);
         this.maxCount = computeMaxCount();
     }
 
-    /**
-     * Computes the total number of possible products.
-     *
-     * @return the total number of products as a BigInteger
-     */
     private BigInteger computeMaxCount() {
-        // Case 1: No builders → one empty tuple
-        if (builders.isEmpty()) {
-            return BigInteger.ONE;
-        }
-
-        // Case 2: Any builder is empty → product is empty
-        if (isEmptyProduct) {
-            return BigInteger.ZERO;
-        }
-
-        // Case 3: Normal case - multiply all builder counts
+        if (builders.isEmpty()) return BigInteger.ONE;
+        if (isEmptyProduct)     return BigInteger.ZERO;
         return builders.stream()
                 .map(Builder::count)
                 .reduce(BigInteger.ONE, BigInteger::multiply);
     }
 
-    /**
-     * Returns a stream of products based on the provided rank sequence.
-     *
-     * @return a stream of product lists
-     */
     @Override
     public Stream<List<T>> stream() {
         return StreamSupport.stream(spliterator(), false);
     }
 
-    /**
-     * Generates the product at the specified rank.
-     *
-     * @param rank the rank of the product to generate (0 ≤ rank < maxCount when count > 0)
-     * @return the product as a list of elements
-     * @throws IllegalArgumentException if the product is empty, no builders exist with invalid rank,
-     *         or rank is out of bounds
-     */
-    private List<T> getMth(BigInteger rank) {
-        // Case 1: Empty product - always throw
-        if (isEmptyProduct) {
-            throw new IllegalArgumentException(
-                    "Product is empty - no ranks available"
-            );
-        }
-
-        // Case 2: No builders - only rank 0 is valid
-        if (builders.isEmpty()) {
-            if (rank.equals(BigInteger.ZERO)) {
-                return Collections.emptyList();
-            }
-            throw new IllegalArgumentException(
-                    "Rank " + rank + " is out of bounds for empty product [0, 1)"
-            );
-        }
-
-        // Case 3: Validate rank range
-        if (rank.signum() < 0 || rank.compareTo(maxCount) >= 0) {
-            throw new IllegalArgumentException(
-                    "Rank " + rank + " is out of bounds [0, " + maxCount + ")"
-            );
-        }
-
-        // Case 4: Normal rank decomposition
-        Deque<T> output = new ArrayDeque<>();
-        BigInteger remaining = rank;
-
-        for (int i = builders.size() - 1; i >= 0; i--) {
-            Builder<T> builder = builders.get(i);
-            BigInteger dimensionCount = builder.count();
-
-            // Decompose rank using mixed-radix system
-            BigInteger[] division = remaining.divideAndRemainder(dimensionCount);
-            remaining = division[0];
-
-            // Get the element(s) at this dimension's index
-            List<T> values = builder.lexOrderMth(BigInteger.ONE, division[1])
-                    .iterator()
-                    .next();
-
-            // Add elements to the front (maintaining original order)
-            for (int j = values.size() - 1; j >= 0; j--) {
-                output.addFirst(values.get(j));
-            }
-        }
-
-        return List.copyOf(output);
-    }
-
-    /**
-     * Returns an iterator over the products at specified ranks.
-     *
-     * @return an iterator over product lists
-     */
     @Override
     public Iterator<List<T>> iterator() {
         return new Itr();
     }
 
+    public BigInteger count()  { return maxCount; }
+    public boolean    isEmpty(){ return isEmptyProduct; }
+
     @Override
     public String toString() {
-        return String.format(
-                "CartesianProductByRanks{maxCount=%s, isEmpty=%s, dimensions=%d}",
-                maxCount, isEmptyProduct, builders.size()
-        );
+        return "CartesianProductByRanks{maxCount=" + maxCount
+                + ", isEmpty=" + isEmptyProduct
+                + ", dimensions=" + builders.size() + "}";
     }
 
-    /**
-     * Iterator implementation for rank-based product generation.
-     */
+    // ── Rank resolution ──────────────────────────────────────────────────────
+
+    private List<T> getMth(BigInteger rank) {
+        if (isEmptyProduct) {
+            throw new IllegalArgumentException("Product is empty - no ranks available");
+        }
+        if (builders.isEmpty()) {
+            if (rank.equals(BigInteger.ZERO)) return Collections.emptyList();
+            throw new IllegalArgumentException(
+                    "Rank " + rank + " out of bounds for empty product [0, 1)");
+        }
+        if (rank.signum() < 0 || rank.compareTo(maxCount) >= 0) {
+            throw new IllegalArgumentException(
+                    "Rank " + rank + " out of bounds [0, " + maxCount + ")");
+        }
+
+        // Mixed-radix decomposition: iterate dimensions right-to-left.
+        Deque<T> output = new ArrayDeque<>();
+        BigInteger remaining = rank;
+        for (int i = builders.size() - 1; i >= 0; i--) {
+            Builder<T> b = builders.get(i);
+            BigInteger dimCount = b.count();
+            BigInteger[] qr = remaining.divideAndRemainder(dimCount);
+            remaining = qr[0];
+
+            // Retrieve the single element at position qr[1] in this dimension.
+            // lexOrderMth(ONE, index) is the generic way when we only have a Builder.
+            List<T> values = b.lexOrderMth(BigInteger.ONE, qr[1]).iterator().next();
+            for (int j = values.size() - 1; j >= 0; j--) {
+                output.addFirst(values.get(j));
+            }
+        }
+        return List.copyOf(output);
+    }
+
+    // ── Iterator ─────────────────────────────────────────────────────────────
+
     private class Itr implements Iterator<List<T>> {
-        private final Iterator<BigInteger> rankIterator;
+        private final Iterator<BigInteger> rankIt = ranks.iterator();
 
-        Itr() {
-            this.rankIterator = ranks.iterator();
-        }
-
-        @Override
-        public boolean hasNext() {
-            return rankIterator.hasNext();
-        }
+        @Override public boolean hasNext() { return rankIt.hasNext(); }
 
         @Override
         public List<T> next() {
-            if (!hasNext()) {
-                throw new NoSuchElementException("No more ranks available");
-            }
-
-            BigInteger rank = rankIterator.next();
-            return getMth(rank);
+            if (!hasNext()) throw new NoSuchElementException();
+            return getMth(rankIt.next());
         }
-    }
-
-    /**
-     * Returns the total number of possible products.
-     *
-     * @return the total count as a BigInteger
-     */
-    public BigInteger count() {
-        return maxCount;
-    }
-
-    /**
-     * Indicates whether this product is empty (produces no tuples).
-     *
-     * @return {@code true} if the product is empty, {@code false} otherwise
-     */
-    public boolean isEmpty() {
-        return isEmptyProduct;
     }
 }

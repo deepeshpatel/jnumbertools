@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.base.Combinations;
 import io.github.deepeshpatel.jnumbertools.base.Permutations;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
@@ -12,6 +13,7 @@ import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.Unique
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Generates unique k-permutations in combination order from a list of elements.
@@ -35,6 +37,8 @@ import java.util.List;
  */
 public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<T> {
 
+    private final Calculator calculator;
+
     /**
      * Constructs an instance for generating k-permutations in combination order.
      *
@@ -48,9 +52,11 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
      *
      * @param elements the list of elements to permute (assumed non-null)
      * @param k the size of each permutation (assumed 0 ≤ k ≤ elements.size())
+     * @param calculator the shared calculator used by the underlying combination/permutation builders
      */
-    KPermutationCombinationOrder(List<T> elements, int k) {
+    KPermutationCombinationOrder(List<T> elements, int k, Calculator calculator) {
         super(elements, k);
+        this.calculator = calculator;
     }
 
     /**
@@ -89,45 +95,43 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
     }
 
     private class Itr implements Iterator<List<T>> {
+        private final Permutations permutations = new Permutations(calculator);
         private final Iterator<List<T>> combinationIterator;
         private Iterator<List<T>> currentIterator;
 
         /**
-         * Initializes the iterator by creating a combination iterator for C(n,k)
-         * and setting up the first permutation iterator.
-         *
-         * <p>Note: The {@code Combinations} and {@code Permutations} constructors
-         * are passed {@code null} as the first argument, which is specific to the
-         * library's implementation for default behavior.
+         * Initializes the iterator with the first combination's permutations.
+         * Only reached when 0 < k < n, so at least one combination exists.
          */
         public Itr() {
-            combinationIterator = new Combinations(null).unique(k, elements).lexOrder().iterator();
+            combinationIterator = new Combinations(calculator).unique(k, elements).lexOrder().iterator();
             getNextIterator();
         }
 
+        /** Side-effect free: true while the current group or any later combination remains. */
         @Override
         public boolean hasNext() {
-            if (currentIterator.hasNext()) {
-                return true;
-            }
-            if (!combinationIterator.hasNext()) {
-                return false;
-            }
-            return getNextIterator().hasNext();
+            return currentIterator.hasNext() || combinationIterator.hasNext();
         }
 
+        /** Works without a preceding hasNext(): moves to the next combination when needed. */
         @Override
         public List<T> next() {
+            if (!currentIterator.hasNext()) {
+                if (!combinationIterator.hasNext()) {
+                    throw new NoSuchElementException("No more permutations available");
+                }
+                getNextIterator();
+            }
             return currentIterator.next();
         }
 
         /**
-         * Retrieves the next permutation iterator for the next combination.
-         *
-         * @return the iterator for permutations of the next combination
+         * Advances to the next combination and returns an iterator over its k! permutations
+         * (never empty, because k! >= 1).
          */
         private Iterator<List<T>> getNextIterator() {
-            currentIterator = new Permutations(null)
+            currentIterator = permutations
                     .unique(combinationIterator.next())
                     .lexOrder()
                     .iterator();

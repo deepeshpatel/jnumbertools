@@ -244,9 +244,9 @@ public final class PermutadicAlgorithms {
      */
     public static int[] unRankWithBoundCheck(BigInteger rank, int size, int k, Calculator calculator) {
         BigInteger max = calculator.nPr(size, k);
-        if (rank.compareTo(max) >= 0) {
+        if (rank.signum() < 0 || rank.compareTo(max) >= 0) {
             throw new ArithmeticException(
-                    String.format("Out of range. Can't decode %d to mᵗʰ permutation as it is ≥ Permutation(%d,%d)",
+                    String.format("Out of range. Can't decode %d to mᵗʰ permutation as it is < 0 or ≥ Permutation(%d,%d)",
                             rank, size, k)
             );
         }

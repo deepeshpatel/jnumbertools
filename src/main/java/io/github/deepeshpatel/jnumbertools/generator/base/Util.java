@@ -97,9 +97,16 @@ public class Util {
         if (multiset == null) {
             throw new NullPointerException("Multiset map cannot be null");
         }
-        
+
         LinkedHashMap<T, Integer> filtered = new LinkedHashMap<>();
         for (Map.Entry<T, Integer> entry : multiset.entrySet()) {
+            // Same single pass: null elements/frequencies are rejected while copying, at no extra cost.
+            if (entry.getKey() == null) {
+                throw new NullPointerException("Multiset elements cannot contain null");
+            }
+            if (entry.getValue() == null) {
+                throw new NullPointerException("Frequency for element '" + entry.getKey() + "' cannot be null");
+            }
             if (entry.getValue() > 0) {  // Only keep positive frequencies
                 filtered.put(entry.getKey(), entry.getValue());
             }
@@ -152,5 +159,52 @@ public class Util {
         if (ranks == null) {
             throw new IllegalArgumentException("Ranks sequence cannot be null");
         }
+    }
+
+    /**
+     * Validates parameters for {@code choice()} and {@code sample()} calls.
+     *
+     * <p>Rules (matching the rule-book):
+     * <ul>
+     *   <li>{@code sampleSize ≤ 0} → {@code IllegalArgumentException} (both modes)</li>
+     *   <li>{@code random == null} → {@code IllegalArgumentException} (both modes)</li>
+     *   <li>{@code !withReplacement && sampleSize > count} → {@code IllegalArgumentException}
+     *       (sample is without replacement; choice allows duplicates so no upper bound)</li>
+     * </ul>
+     *
+     * @param sampleSize      number of elements requested
+     * @param random          RNG supplied by the caller
+     * @param withReplacement {@code true} for {@code choice()}, {@code false} for {@code sample()}
+     * @param count           total number of elements in the domain (used only when
+     *                        {@code withReplacement} is {@code false})
+     * @throws IllegalArgumentException if any parameter is invalid
+     */
+    public static void validateSampleParams(int sampleSize, Random random,
+                                            boolean withReplacement, BigInteger count) {
+        if (sampleSize <= 0) {
+            throw new IllegalArgumentException(
+                    "Sample size must be > 0, but was: " + sampleSize);
+        }
+        if (random == null) {
+            throw new IllegalArgumentException("Random generator must not be null");
+        }
+        if (!withReplacement && BigInteger.valueOf(sampleSize).compareTo(count) > 0) {
+            throw new IllegalArgumentException(
+                    "Sample size " + sampleSize + " exceeds total count " + count
+                            + ". sample() is without replacement.");
+        }
+    }
+
+    public static <T> List<T> copyOfNoNulls(List<T> elements) {
+        List<T> copy = new ArrayList<>(elements.size());
+        int index = 0;
+        for (T element : elements) {
+            if (element == null) {
+                throw new NullPointerException("Elements cannot contain null (null found at index " + index + ")");
+            }
+            copy.add(element);
+            index++;
+        }
+        return copy;
     }
 }

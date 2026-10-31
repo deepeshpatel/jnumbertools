@@ -157,8 +157,9 @@ public final class MultisetPermutationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if {@code options} is null, empty, or contains non-positive frequencies
      */
     public MultisetPermutationBuilder(LinkedHashMap<T, Integer> options, Calculator calculator) {
-        Util.filterZeroFrequencies(options);
-        this.options = options;
+        // filterZeroFrequencies returns a new filtered copy (it does not mutate its argument).
+        // Keeping the copy also protects this builder from later mutation of the caller's map.
+        this.options = Util.filterZeroFrequencies(options);
         this.calculator = calculator;
     }
 
@@ -192,7 +193,7 @@ public final class MultisetPermutationBuilder<T> implements Builder<T> {
         return new MultisetPermutationMth<>(options, m, start, calculator);
     }
 
-    
+
     /**
      * Creates an instance that samples multiset permutations randomly without replacement.
      * <p>
@@ -283,7 +284,7 @@ public final class MultisetPermutationBuilder<T> implements Builder<T> {
 
     @Override
     public boolean isEmpty() {
-        return options.isEmpty();
+        return false; // count = multinomial >= 1 always; an empty multiset has one permutation, []
     }
 
     @Override

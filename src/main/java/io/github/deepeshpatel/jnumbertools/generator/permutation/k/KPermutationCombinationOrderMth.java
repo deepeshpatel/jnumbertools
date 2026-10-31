@@ -37,7 +37,7 @@ import java.util.NoSuchElementException;
 public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutation<T> {
 
     final BigInteger totalPermutations;
-    final long permutationsPerList;
+    final BigInteger permutationsPerList;
     final BigInteger increment;
     final BigInteger start;
     private final Calculator calculator;
@@ -64,7 +64,9 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
         this.start = start;
         this.increment = increment;
         this.totalPermutations = calculator.nPr(elements.size(), k);
-        this.permutationsPerList = calculator.factorial(k).longValue();
+        // k! can exceed Long.MAX_VALUE (k >= 21), so it must stay a BigInteger.
+        // When k > n there is nothing to generate; avoid computing a pointless huge factorial.
+        this.permutationsPerList = k > elements.size() ? BigInteger.ONE : calculator.factorial(k);
         this.calculator = calculator;
     }
 
@@ -128,20 +130,20 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
             if (!hasNext()) {
                 throw new NoSuchElementException("No more permutations available");
             }
-            BigInteger[] divideAndRemainder = currentIncrement.divideAndRemainder(BigInteger.valueOf(permutationsPerList));
+            BigInteger[] divideAndRemainder = currentIncrement.divideAndRemainder(permutationsPerList);
             BigInteger combinationListNumber = divideAndRemainder[0];
-            long permutationIncrement = divideAndRemainder[1].longValue();
+            BigInteger permutationIncrement = divideAndRemainder[1];
             currentIncrement = currentIncrement.add(increment);
 
             List<T> nextCombination = combinationListNumber.equals(BigInteger.ZERO)
                     ? new Combinations(calculator).unique(k, elements).lexOrder().iterator().next()
                     : new Combinations(calculator).unique(k, elements)
-                    .lexOrderMth(combinationListNumber, combinationListNumber).iterator().next();
+                      .lexOrderMth(combinationListNumber, combinationListNumber).iterator().next();
 
-            return permutationIncrement == 0
+            return permutationIncrement.signum() == 0
                     ? new Permutations(calculator).unique(nextCombination).lexOrder().iterator().next()
                     : new Permutations(calculator).unique(nextCombination)
-                    .lexOrderMth(permutationIncrement, permutationIncrement).iterator().next();
+                      .lexOrderMth(permutationIncrement, permutationIncrement).iterator().next();
         }
     }
 }

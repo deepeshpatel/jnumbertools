@@ -112,7 +112,8 @@ public final class KPermutationBuilder<T> implements Builder<T> {
      * @throws IllegalArgumentException if kₖ is negative or exceeds nₙ
      */
     public KPermutationBuilder(List<T> elements, int k, Calculator calculator) {
-        this.elements = elements;
+        // Defensive copy: later changes to the caller's list must not alter this builder.
+        this.elements = elements == null ? List.of() : Util.copyOfNoNulls(elements);
         this.k = k;
         this.calculator = calculator;
     }
@@ -137,7 +138,7 @@ public final class KPermutationBuilder<T> implements Builder<T> {
 
     @Override
     public boolean isEmpty() {
-        return elements.isEmpty() || k == 0;
+        return k > elements.size(); // count = nPk is 0 exactly when k > n (k == 0 gives 1: [[]])
     }
 
     /**
@@ -196,7 +197,7 @@ public final class KPermutationBuilder<T> implements Builder<T> {
      * @return a {@link KPermutationCombinationOrder} instance for combination-order iteration
      */
     public KPermutationCombinationOrder<T> combinationOrder() {
-        return new KPermutationCombinationOrder<>(elements, k);
+        return new KPermutationCombinationOrder<>(elements, k, calculator);
     }
 
     /**

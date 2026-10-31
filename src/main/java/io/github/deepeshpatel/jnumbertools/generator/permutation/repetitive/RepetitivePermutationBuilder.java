@@ -11,7 +11,6 @@ import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -128,7 +127,7 @@ public final class RepetitivePermutationBuilder<T> implements Builder<T> {
      * @param calculator utility for permutation computations
      */
     public RepetitivePermutationBuilder(int width, List<T> elements, Calculator calculator) {
-        this.elements = (elements != null) ? new ArrayList<>(elements) : Collections.emptyList();
+        this.elements = (elements != null) ? Util.copyOfNoNulls(elements) : Collections.emptyList();
         this.width = width;
         this.calculator = calculator;
     }
@@ -239,7 +238,7 @@ public final class RepetitivePermutationBuilder<T> implements Builder<T> {
 
     @Override
     public boolean isEmpty() {
-        return elements.isEmpty() || width == 0;
+        return width > 0 && elements.isEmpty(); // count = n^width is 0 only for n = 0, width > 0 (width 0 gives 1: [[]])
     }
 
     @Override

@@ -12,7 +12,6 @@ import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -93,7 +92,7 @@ public final class DerangementBuilder<T> implements Builder<T> {
      */
     public DerangementBuilder(Calculator calculator, List<T> elements) {
         this.calculator = calculator;
-        this.elements = (elements != null) ? new ArrayList<>(elements) : Collections.emptyList();
+        this.elements = (elements != null) ? Util.copyOfNoNulls(elements) : Collections.emptyList();
     }
 
     /**
@@ -165,7 +164,7 @@ public final class DerangementBuilder<T> implements Builder<T> {
 
     @Override
     public boolean isEmpty() {
-        return elements.isEmpty();
+        return elements.size() == 1; // !n is 0 only for n = 1 (!0 = 1 gives [[]]; !n >= 1 for n >= 2)
     }
 
     @Override
@@ -173,4 +172,3 @@ public final class DerangementBuilder<T> implements Builder<T> {
         return "DerangementBuilder{elements=" + elements + ", count=" + count() + '}';
     }
 }
-

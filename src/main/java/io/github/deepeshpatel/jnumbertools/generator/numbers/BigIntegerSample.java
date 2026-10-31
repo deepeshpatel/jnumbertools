@@ -45,7 +45,7 @@ public class BigIntegerSample implements Iterable<BigInteger> {
 
     static void parameterValidationForChoiceAndSample(BigInteger max, int sampleSize, Random random) {
         if (max.signum() <= 0) {
-            throw new IllegalArgumentException("Max must be positive");
+            throw new IllegalArgumentException("Cannot choose or sample from an empty domain (count() is 0)");
         }
         if (sampleSize <= 0) {
             throw new IllegalArgumentException("Sample size must be positive");
@@ -58,6 +58,33 @@ public class BigIntegerSample implements Iterable<BigInteger> {
      *
      * @return an iterator over unique BigInteger values
      */
+    /**
+     * Returns a uniformly distributed value in [0, bound) for any positive bound.
+     * <p>
+     * Uses {@link Random#nextLong(long, long)} when the bound fits in a long, otherwise rejection
+     * sampling: random bytes are masked to {@code bound.bitLength()} bits so that at least half of
+     * all candidates are accepted, whatever the bit length.
+     * </p>
+     *
+     * @param bound  exclusive upper bound, must be positive
+     * @param random source of randomness
+     * @return a value v with 0 ≤ v &lt; bound
+     */
+    static BigInteger randomBelow(BigInteger bound, Random random) {
+        if (bound.compareTo(BigInteger.valueOf(Long.MAX_VALUE)) <= 0) {
+            return BigInteger.valueOf(random.nextLong(0, bound.longValueExact()));
+        }
+        int bitLength = bound.bitLength();
+        BigInteger mask = BigInteger.ONE.shiftLeft(bitLength).subtract(BigInteger.ONE);
+        byte[] bytes = new byte[(bitLength + 7) / 8];
+        BigInteger candidate;
+        do {
+            random.nextBytes(bytes);
+            candidate = new BigInteger(1, bytes).and(mask);
+        } while (candidate.compareTo(bound) >= 0);
+        return candidate;
+    }
+
     @Override
     public Iterator<BigInteger> iterator() {
         if (max.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0) {
@@ -81,17 +108,20 @@ class FisherYatesIterator implements Iterator<BigInteger> {
         this.numbers = new int[sampleSize];
         this.currentIndex = 0;
 
-        // Create full array [0, max-1] and shuffle first sampleSize elements
-        int[] all = new int[max];
-        for (int i = 0; i < max; i++) all[i] = i;
+        // Sparse (virtual-array) Fisher-Yates: only positions that have been swapped are stored,
+        // so memory is O(sampleSize) instead of O(max). It performs exactly the same
+        // random.nextInt(max - i) calls as the classic dense version, so output for a given
+        // seed is unchanged.
+        Map<Integer, Integer> swapped = new HashMap<>(Math.max(16, sampleSize * 2));
         for (int i = 0; i < sampleSize; i++) {
             int j = i + random.nextInt(max - i);
-            int temp = all[i];
-            all[i] = all[j];
-            all[j] = temp;
-            numbers[i] = all[i];
+            int valueAtJ = swapped.getOrDefault(j, j);
+            int valueAtI = swapped.getOrDefault(i, i);
+            swapped.put(j, valueAtI); // position i is never read again, so it needs no update
+            numbers[i] = valueAtJ;
         }
     }
+
     @Override
     public boolean hasNext() {
         return currentIndex < sampleSize;
@@ -164,25 +194,6 @@ class RetryBasedIterator implements Iterator<BigInteger> {
      * @return a random BigInteger in [0, bound)
      */
     private BigInteger randomBigInteger(BigInteger bound) {
-        if (bound.compareTo(BigInteger.valueOf(Long.MAX_VALUE)) <= 0) {
-            return BigInteger.valueOf(random.nextLong(0, bound.longValueExact()));
-        }
-
-        // For bounds > Long.MAX_VALUE, use rejection sampling with a mask
-        // Generate enough random bits to cover the bound
-        int bitLength = bound.bitLength();
-
-        // Create a mask with all bits set up to bitLength
-        BigInteger mask = BigInteger.ONE.shiftLeft(bitLength).subtract(BigInteger.ONE);
-
-        BigInteger candidate;
-        do {
-            // Generate a random BigInteger with the required number of bits
-            byte[] bytes = new byte[(bitLength + 7) / 8];
-            random.nextBytes(bytes);
-            candidate = new BigInteger(1, bytes);  // Positive sign
-        } while (candidate.compareTo(bound) >= 0);
-
-        return candidate;
+        return BigIntegerSample.randomBelow(bound, random);
     }
 }

@@ -6,7 +6,6 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
 import java.math.BigInteger;
 import java.util.Iterator;
@@ -71,7 +70,7 @@ public final class RepetitivePermutationByRanks<T> extends AbstractGenerator<T> 
      */
     @Override
     public Iterator<List<T>> iterator() {
-        return width == 0 ? Util.emptyListIterator() : new SequenceIterator();
+        return new SequenceIterator();
     }
 
     private class SequenceIterator implements Iterator<List<T>> {
@@ -95,8 +94,11 @@ public final class RepetitivePermutationByRanks<T> extends AbstractGenerator<T> 
             if (rank.signum() < 0) {
                 throw new IllegalArgumentException("Rank " + rank + " cannot be negative. Valid range is [0, " + totalPermutations + ")");
             }
-            if (rank.signum() >= 0 && rank.compareTo(totalPermutations) >= 0) {
+            if (rank.compareTo(totalPermutations) >= 0) {
                 throw new IllegalArgumentException("Rank " + rank + " exceeds total permutations " + totalPermutations);
+            }
+            if (width == 0) {
+                return List.of(); // the single empty permutation
             }
             int[] indices = unrankRepetitivePermutation(rank, elements.size(), width);
             return indicesToValues(indices);
@@ -116,11 +118,12 @@ public final class RepetitivePermutationByRanks<T> extends AbstractGenerator<T> 
          */
         private int[] unrankRepetitivePermutation(BigInteger rank, int n, int width) {
             int[] indices = new int[width];
+            BigInteger base = BigInteger.valueOf(n);
             BigInteger remaining = rank;
             for (int i = width - 1; i >= 0; i--) {
-                BigInteger divisor = calculator.power(n, i);
-                indices[width - 1 - i] = remaining.divide(divisor).intValue();
-                remaining = remaining.mod(divisor);
+                BigInteger[] qr = remaining.divideAndRemainder(base);
+                indices[i] = qr[1].intValue();
+                remaining = qr[0];
             }
             return indices;
         }

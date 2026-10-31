@@ -98,5 +98,16 @@ public interface Builder<E> {
      */
     BigInteger count();
 
+    /**
+     * Returns {@code true} if and only if this builder yields no results at all,
+     * i.e. {@code count().signum() == 0}.
+     * <p>
+     * A builder whose single result is the empty list ({@code [[]]}, e.g. the permutations of an
+     * empty set, or a selection of size 0) is <b>not</b> empty: it has {@code count() == 1}.
+     * See {@code ValidationRules.md}.
+     * </p>
+     *
+     * @return true if {@code count()} is zero
+     */
     boolean isEmpty();
 }

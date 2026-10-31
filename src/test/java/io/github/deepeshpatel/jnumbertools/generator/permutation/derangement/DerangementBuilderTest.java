@@ -55,7 +55,10 @@ class DerangementBuilderTest {
     @Test
     void isEmpty() {
         assertFalse(builder.isEmpty());
-        assertTrue(derangements.of(List.of()).isEmpty());
+        // !0 = 1: the empty set has one derangement ([]), so the builder is NOT empty
+        assertFalse(derangements.of(List.of()).isEmpty());
+        // !1 = 0: no derangement exists for a single element
+        assertTrue(derangements.of(List.of("X")).isEmpty());
     }
 
     @Test
@@ -65,4 +68,3 @@ class DerangementBuilderTest {
         assertTrue(s.contains("count=9"));
     }
 }
-

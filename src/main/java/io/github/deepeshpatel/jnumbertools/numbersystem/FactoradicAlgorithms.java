@@ -95,6 +95,12 @@ public final class FactoradicAlgorithms {
      * @return an array representing the Factoradic digits of the given integer.
      */
     public static int[] intToFactoradicKnownSize(BigInteger k, int sizeOfFactoradic) {
+        if (sizeOfFactoradic < 0) {
+            throw new IllegalArgumentException("size must be ≥ 0: " + sizeOfFactoradic);
+        }
+        if (k.signum() < 0) {
+            throw new IllegalArgumentException("value must be ≥ 0: " + k);
+        }
         int[] factoradic = new int[sizeOfFactoradic];
         if (k.equals(BigInteger.ZERO)) {
             return factoradic;
@@ -102,6 +108,11 @@ public final class FactoradicAlgorithms {
         long d = 1;
         int i = sizeOfFactoradic - 1;
         while (!k.equals(BigInteger.ZERO)) {
+            if (i < 0) {
+                // value needs more digits than allowed, i.e. value >= size!
+                throw new IllegalArgumentException(
+                        "value is too large to be represented with " + sizeOfFactoradic + " factoradic digits");
+            }
             BigInteger[] divideAndRemainder = k.divideAndRemainder(BigInteger.valueOf(d));
             factoradic[i--] = divideAndRemainder[1].intValue();
             k = divideAndRemainder[0];

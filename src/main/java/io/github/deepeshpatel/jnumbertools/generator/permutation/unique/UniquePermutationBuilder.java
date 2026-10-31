@@ -12,7 +12,6 @@ import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -128,7 +127,7 @@ public final class UniquePermutationBuilder<T> implements Builder<T> {
      * @param elements   the list of elements to permute; null results in an empty list
      */
     public UniquePermutationBuilder(Calculator calculator, List<T> elements) {
-        this.elements = (elements != null) ? new ArrayList<>(elements) : Collections.emptyList();
+        this.elements = (elements != null) ? Util.copyOfNoNulls(elements) : Collections.emptyList();
         this.calculator = calculator;
     }
 
@@ -229,7 +228,7 @@ public final class UniquePermutationBuilder<T> implements Builder<T> {
 
     @Override
     public boolean isEmpty() {
-        return elements.isEmpty();
+        return false; // count = n! >= 1 for every n >= 0 (0! = 1: the empty set has one permutation, [])
     }
 
     @Override
