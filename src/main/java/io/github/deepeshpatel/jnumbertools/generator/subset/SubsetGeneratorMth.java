@@ -47,9 +47,10 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> {
     private final int to;
     private final int n;
 
-    private final BigInteger[] pre;     // pre[k] = number of subsets of size < k, for k = 0..to+1
+    private final BigInteger[] pre;     // pre[k] = number of subsets of size < k, for k = 0..min(to,n)+1
     private final BigInteger initialM;  // absolute rank of the starting subset
     private final BigInteger limit;     // absolute rank one past the range's last subset
+    private final BigInteger total;     // number of subsets in the range, i.e. the builder's count()
 
     SubsetGeneratorMth(int from, int to, BigInteger m, BigInteger start, List<T> elements, Calculator calculator) {
         super(elements);
@@ -59,23 +60,63 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> {
         this.calculator = calculator;
         this.n = elements.size();
 
-        // Prefix sums of binomials give the block boundaries, the range offset, and the limit:
-        //   pre[from]   = #subsets of size < from  -> converts a relative rank to an absolute one
-        //   pre[to + 1] = #subsets of size <= to   -> the iteration limit
-        pre = new BigInteger[to + 2];
-        pre[0] = BigInteger.ZERO;
-        for (int i = 0; i <= to; i++) pre[i + 1] = pre[i].add(calculator.nCr(n, i));
-        initialM = start.add(pre[from]);
-        limit = pre[to + 1];
+        // Subsets larger than n do not exist, so the table stops at min(to, n). Besides saving work, this
+        // keeps the table small for the empty set, where the builder accepts any to ≥ from, e.g.
+        // inRange(0, Integer.MAX_VALUE) (a table of size to + 2 would overflow or exhaust memory).
+        int top = Math.min(to, n);
+
+        if (from > top) {
+            // Only possible for the empty set with from > 0: no subsets at all (count = 0).
+            pre = new BigInteger[]{BigInteger.ZERO};
+            initialM = BigInteger.ZERO;
+            limit = BigInteger.ZERO;
+            total = BigInteger.ZERO;
+        } else {
+            // Prefix sums of binomials give the block boundaries, the range offset, and the limit:
+            //   pre[from]    = #subsets of size < from  -> converts a relative rank to an absolute one
+            //   pre[top + 1] = #subsets of size <= top  -> the iteration limit
+            pre = new BigInteger[top + 2];
+            pre[0] = BigInteger.ZERO;
+            for (int i = 0; i <= top; i++) pre[i + 1] = pre[i].add(calculator.nCr(n, i));
+            initialM = start.add(pre[from]);
+            limit = pre[top + 1];
+            total = limit.subtract(pre[from]);
+        }
     }
 
     /**
      * Returns the subset at the starting position as a list of elements.
      *
      * @return the subset at {@code start} (within the configured range) in lexicographical order
+     * @throws NoSuchElementException if the range contains no subset at that position (empty range)
      */
     public List<T> build() {
+        if (initialM.compareTo(limit) >= 0) {
+            throw new NoSuchElementException("The configured range has no subset at the requested position");
+        }
         return indicesToValues(mth(initialM));
+    }
+
+    /** Number of subsets in the configured range (the builder's {@code count()}). */
+    BigInteger count() {
+        return total;
+    }
+
+    /**
+     * Returns the subset at the given rank, relative to the start of the configured range.
+     * <p>
+     * Validates the rank itself, so it can be fed with user-supplied ranks one at a time.
+     * </p>
+     *
+     * @param rank 0-based rank within the range, must satisfy {@code 0 ≤ rank < count()}
+     * @return the subset at that rank, as an immutable list
+     * @throws IllegalArgumentException if the rank is out of range (always the case when {@code count() == 0})
+     */
+    List<T> unrank(BigInteger rank) {
+        if (rank.signum() < 0 || rank.compareTo(total) >= 0) {
+            throw new IllegalArgumentException("Rank " + rank + " is out of bounds [0, " + total + ")");
+        }
+        return indicesToValues(mth(rank.add(pre[from])));
     }
 
     /** Absolute rank -> index array of the corresponding subset. */

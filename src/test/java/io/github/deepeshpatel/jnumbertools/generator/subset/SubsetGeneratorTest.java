@@ -10,9 +10,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -200,6 +202,59 @@ class SubsetGeneratorTest {
             assertIterableEquals(list1, list2);
             assertNotSame(list1, list2);
         }
+
+        @Test
+        @DisplayName("Every iterator() call starts a fresh, independent traversal")
+        void iteratorsAreIndependent() {
+            var generator = subsets.of(A_B_C).all().lexOrder();
+            var first = generator.iterator();
+            first.next();
+            first.next();
+            first.next();
+
+            // a second iterator is not affected by how far the first one has advanced
+            var second = generator.iterator();
+            assertEquals(List.of(), second.next());
+            assertEquals(List.of('A'), second.next());
+        }
+
+        @Test
+        @DisplayName("next() works without hasNext(), also across size blocks, and fails past the end")
+        void nextWorksWithoutHasNext() {
+            var expected = subsets.of(A_B_C).all().lexOrder().stream().toList();   // 8 subsets, sizes 0..3
+
+            var iterator = subsets.of(A_B_C).all().lexOrder().iterator();
+            List<List<Character>> actual = new ArrayList<>();
+            for (int i = 0; i < expected.size(); i++) {
+                actual.add(iterator.next());   // never calls hasNext(), crosses the block boundaries
+            }
+            assertEquals(expected, actual);
+
+            assertFalse(iterator.hasNext());
+            assertThrows(NoSuchElementException.class, iterator::next);
+        }
+
+        @Test
+        @DisplayName("Results are immutable")
+        void subsetsAreImmutable() {
+            // includes [], the whole set (r == n) and proper subsets
+            subsets.of(A_B_C).all().lexOrder().forEach(subset ->
+                    assertThrows(UnsupportedOperationException.class, () -> subset.add('Z'), "subset=" + subset));
+        }
+    }
+
+    // =========================================================
+    // 3b. Ranges on the empty set (any 0 ≤ from ≤ to is allowed)
+    // =========================================================
+
+    @Test
+    @DisplayName("Empty set with a huge range: [0, huge] -> [[]], [1, huge] -> []")
+    void emptySetWithHugeRange() {
+        var withEmptySubset = subsets.of(Collections.emptyList()).inRange(0, Integer.MAX_VALUE).lexOrder();
+        assertEquals(List.of(List.of()), withEmptySubset.stream().toList());
+
+        var withoutSubsets = subsets.of(Collections.emptyList()).inRange(1, Integer.MAX_VALUE).lexOrder();
+        assertTrue(withoutSubsets.stream().toList().isEmpty());
     }
 
     // =========================================================

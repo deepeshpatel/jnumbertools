@@ -11,7 +11,6 @@ import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
 import java.math.BigInteger;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -165,11 +164,18 @@ public class SubsetBuilder<T> implements Builder<T> {
     /**
      * Constructs a {@code SubsetBuilder} with the specified elements and calculator.
      *
-     * @param elements   the list of elements from which subsets will be generated
+     * @param elements   the list of elements from which subsets will be generated; copied, so later
+     *                   changes to the caller's list do not affect this builder. An empty list is
+     *                   allowed (see ValidationRules.md)
      * @param calculator a calculator used for computing subset counts
+     * @throws NullPointerException if {@code elements} is null or contains a null element
      */
     public SubsetBuilder(List<T> elements, Calculator calculator) {
-        this.elements = elements != null ? elements : Collections.emptyList();
+        // Null list is a programmer error (rule 1), not an empty set.
+        Util.validateInput(elements);
+        // Snapshot (rule 8): later changes to the caller's list must not alter this builder.
+        // Null elements are rejected here, during the copy, rather than later during iteration (rule 7).
+        this.elements = Util.copyOfNoNulls(elements);
         this.calculator = calculator;
         this.from = -1;
         this.to = -1;
@@ -201,17 +207,23 @@ public class SubsetBuilder<T> implements Builder<T> {
      * Subsets are produced in lexicographical order, first by size, then by combination order within each size.
      * </p>
      *
+     * <p>
+     * For an empty set the rows of the SUBSETS table in ValidationRules.md apply: every range with
+     * {@code 0 ≤ from ≤ to} is accepted ({@code from = 0} gives the single empty subset,
+     * {@code from > 0} gives none), however large {@code to} is.
+     * </p>
+     *
      * @param from the minimum subset size (inclusive, must be ≥ 0)
-     * @param to the maximum subset size (inclusive, must be ≥ from and ≤ elements.size())
+     * @param to the maximum subset size (inclusive, must be ≥ from, and ≤ elements.size() for a non-empty list)
      * @return a new SubsetBuilder configured for the specified size range
-     * @throws IllegalArgumentException if to < from, from < 0, or to > elements.size()
+     * @throws IllegalArgumentException if from &lt; 0, to &lt; from, or (non-empty list) to &gt; elements.size()
+     *         (which also covers from &gt; elements.size())
      */
     public SubsetBuilder<T> inRange(int from, int to) {
         if (from < 0 || to < from) {
             throw new IllegalArgumentException(
                     String.format("Invalid range: from=%d, to=%d - must satisfy 0 ≤ from ≤ to", from, to)
             );
-            //throw new IllegalArgumentException("Invalid range: from must be ≥ 0 and to must be ≥ from");
         }
 
         // Empty list special cases
@@ -222,7 +234,7 @@ public class SubsetBuilder<T> implements Builder<T> {
             return new SubsetBuilder<>(elements, calculator, from, to);
         }
 
-        // For non-empty list, validate bounds
+        // For non-empty list, validate bounds (to ≥ from, so to ≤ n also guarantees from ≤ n)
         if (to > elements.size()) {
             throw new IllegalArgumentException("Invalid range: to cannot exceed " + elements.size());
         }
@@ -246,22 +258,30 @@ public class SubsetBuilder<T> implements Builder<T> {
     /**
      * Creates a {@link SubsetGeneratorByRanks} that generates every mᵗʰ subset in lexicographical order, starting from the specified position.
      *
+     * <p>
+     * If the range contains no subsets ({@code count() == 0}, e.g. sizes 1..2 of an empty set) any
+     * {@code start ≥ 0} is accepted and the generator yields nothing.
+     * </p>
+     *
      * @param m     the interval for selecting subsets (every mᵗʰ subset) as a {@link BigInteger}
      * @param start the starting position for subsets as a {@link BigInteger}
      * @return a {@code SubsetGeneratorMth} instance
+     * @throws IllegalArgumentException if m ≤ 0, start &lt; 0, or start ≥ count() while count() &gt; 0
+     * @throws IllegalStateException if no range was set via {@link #inRange(int, int)} or {@link #all()}
      */
     public SubsetGeneratorMth<T> lexOrderMth(BigInteger m, BigInteger start) {
+        requireRange();
+        // Rules: m ≤ 0, start < 0, and (count > 0 and start ≥ count) are errors;
+        // count == 0 accepts any start ≥ 0 and the generator is simply empty.
         Util.validateLexOrderMthParams(m, start, count());
-
-        // When count is zero, any start should return empty generator
-        if (count().equals(BigInteger.ZERO)) {
-            return new SubsetGeneratorMth<>(from, to, m, start, elements, calculator);
-        }
-
-        if(start.compareTo(count()) >= 0 ) {
-            throw new IllegalArgumentException("start must be < total subsets in range (0-based)");
-        }
         return new SubsetGeneratorMth<>(from, to, m, start, elements, calculator);
+    }
+
+    /** Fails fast when neither {@link #all()} nor {@link #inRange(int, int)} was called. */
+    private void requireRange() {
+        if (from < 0 || to < 0) {
+            throw new IllegalStateException("Must specify range via inRange() or all()");
+        }
     }
 
     /**
@@ -269,14 +289,19 @@ public class SubsetBuilder<T> implements Builder<T> {
      * <p>
      * Ranks are 0-based in lexicographical order.
      * </p>
+     * <p>
+     * Only a null {@code ranks} is rejected up front. The sequence is consumed lazily, one rank at a
+     * time (it may be infinite or single-use), so a rank {@code < 0} or {@code ≥ count()} is reported
+     * as an {@link IllegalArgumentException} during iteration, when that rank is reached.
+     * </p>
      *
      * @param ranks the iterable of ranks (each rank must be ≥ 0 and < total subsets)
      * @return a generator producing subsets at the given ranks
+     * @throws IllegalArgumentException if {@code ranks} is null
+     * @throws IllegalStateException if no range was set via {@link #inRange(int, int)} or {@link #all()}
      */
     public SubsetGeneratorByRanks<T> byRanks(Iterable<BigInteger> ranks) {
-        if (from < 0 || to < 0) {
-            throw new IllegalStateException("Must specify range via inRange() or all()");
-        }
+        requireRange();
         Util.validateByRanksParams(ranks);
         return new SubsetGeneratorByRanks<>(from, to, ranks, elements, calculator);
     }
@@ -292,21 +317,24 @@ public class SubsetBuilder<T> implements Builder<T> {
      * with replacement and returning the corresponding subsets.
      * </p>
      *
-     * @param sampleSize the number of subsets to generate
+     * <p>
+     * Sampling is uniform over the whole range {@code [0, count())}, however large {@code count()} is.
+     * {@code sampleSize} may exceed {@code count()} (duplicates are then unavoidable), but the range
+     * must contain at least one subset.
+     * </p>
+     *
+     * @param sampleSize the number of subsets to generate (must be &gt; 0)
      * @param random the random generator to use
      * @return a {@code SubsetGeneratorByRanks} producing the random subsets
-     * @throws IllegalArgumentException if {@code sampleSize} is negative or random is null
+     * @throws IllegalArgumentException if {@code sampleSize ≤ 0} or {@code count() == 0}
+     * @throws NullPointerException if {@code random} is null
      * @see #sample(int, Random)
      * @see BigIntegerChoice
      */
     @Override
     public SubsetGeneratorByRanks<T> choice(int sampleSize, Random random) {
-        if (sampleSize < 0) {
-            throw new IllegalArgumentException("Sample size cannot be negative");
-        }
-        BigInteger total = count();
-        Iterable<BigInteger> ranks = new BigIntegerChoice(total, sampleSize, random);
-        return byRanks(ranks);
+        // BigIntegerChoice enforces: count > 0, sampleSize > 0, random != null
+        return byRanks(new BigIntegerChoice(count(), sampleSize, random));
     }
 
     /**
@@ -320,26 +348,19 @@ public class SubsetBuilder<T> implements Builder<T> {
      * and returning the corresponding subsets.
      * </p>
      *
-     * @param sampleSize the number of unique subsets to generate
+     * @param sampleSize the number of unique subsets to generate (must be &gt; 0 and ≤ count())
      * @param random the random generator to use
      * @return a {@code SubsetGeneratorByRanks} producing the random unique subsets
-     * @throws IllegalArgumentException if {@code sampleSize} is negative, exceeds the total number of subsets in range, or random is null
+     * @throws IllegalArgumentException if {@code sampleSize ≤ 0} or {@code sampleSize > count()}
+     *         (including {@code count() == 0}: sampling is without replacement)
+     * @throws NullPointerException if {@code random} is null
      * @see #choice(int, Random)
      * @see BigIntegerSample
      */
     @Override
     public SubsetGeneratorByRanks<T> sample(int sampleSize, Random random) {
-        if (sampleSize < 0) {
-            throw new IllegalArgumentException("Sample size cannot be negative");
-        }
-
-        BigInteger total = count();
-        if (BigInteger.valueOf(sampleSize).compareTo(total) > 0) {
-            throw new IllegalArgumentException(
-                    "Sample size cannot exceed total subsets in range: " + total);
-        }
-        Iterable<BigInteger> ranks = new BigIntegerSample(total, sampleSize, random);
-        return byRanks(ranks);
+        // BigIntegerSample enforces: count > 0, 0 < sampleSize ≤ count, random != null
+        return byRanks(new BigIntegerSample(count(), sampleSize, random));
     }
 
 
@@ -370,12 +391,10 @@ public class SubsetBuilder<T> implements Builder<T> {
 
     @Override
     public boolean isEmpty() {
-        // A builder is empty only if it produces NO elements
-        // For empty list with range [0,0], it produces one element ([[]]), so NOT empty
-        if (elements.isEmpty() && from == 0) {
-            return false;  // empty-set(∅) exists, produces [[]]
-        }
-        return count().equals(BigInteger.ZERO);
+        // Empty if and only if the builder yields no results at all (count() == 0).
+        // A builder whose only result is the empty subset ([[]]) has count() == 1 and is NOT empty.
+        // An unconfigured builder (no all()/inRange()) reports count() == 0 and is therefore empty.
+        return count().signum() == 0;
     }
 
     @Override

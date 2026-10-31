@@ -10,6 +10,7 @@ import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Generates all subsets of a given set within a specified size range.
@@ -46,8 +47,9 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
      * <p>
      * Mathematical behavior for edge cases:
      * <ul>
-     *   <li>If {@code fromSize} ≤ 0 and {@code toSize} ≥ 0, one empty subset is generated</li>
-     *   <li>If both {@code fromSize} and {@code toSize} are negative, no subsets are generated</li>
+     *   <li>If {@code fromSize} = 0, the single empty subset is generated first</li>
+     *   <li>Sizes above {@code elements.size()} do not exist, so {@code toSize} is effectively capped at
+     *       {@code elements.size()}; if {@code fromSize} is above it, nothing is generated</li>
      * </ul>
      * </p>
      *
@@ -72,6 +74,10 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
      * [A], [B], [C], [A,B], [A,C], [B,C]
      * </p>
      *
+     * <p>
+     * Every call starts a fresh, independent traversal, and every returned subset is immutable.
+     * </p>
+     *
      * @return an iterator over subsets in lexicographical order;
      *         returns an iterator with a single empty subset if fromSize = 0;
      *         returns an empty iterator if fromSize > toSize or fromSize > elements.size()
@@ -79,49 +85,35 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
      */
     @Override
     public Iterator<List<T>> iterator() {
-        return new OnDemandIterator(fromSize);
+        return new OnDemandIterator();
     }
 
     /**
-     * Iterator class for generating subsets on demand.
+     * Iterator class for generating subsets on demand, one size block at a time.
      */
     class OnDemandIterator implements Iterator<List<T>> {
-        int start;
-        Iterator<List<T>> current;
 
-        /**
-         * Constructs an {@code OnDemandIterator} starting from the specified subset size.
-         *
-         * @param start the initial subset size from which to begin generating subsets
-         */
-        public OnDemandIterator(int start) {
-            this.start = start;
-            if (start > elements.size()) {
-                current = Collections.emptyIterator();
-            } else {
-                current = new Combinations(null).unique(start, elements).lexOrder().iterator();
-            }
-        }
+        /** Largest size that can exist; also bounds the work when the empty set is given a huge toSize. */
+        private final int lastSize = Math.min(toSize, elements.size());
+        private int nextSize = fromSize;
+        private Iterator<List<T>> current = Collections.emptyIterator();
 
         @Override
         public boolean hasNext() {
-            if (current.hasNext()) {
-                return true;
+            // Advance past exhausted (or empty) size blocks. Iterative, so the number of blocks is not
+            // limited by stack depth.
+            while (!current.hasNext() && nextSize <= lastSize) {
+                current = new Combinations(null).unique(nextSize++, elements).lexOrder().iterator();
             }
-            if (start < toSize) {
-                start++;
-                if (start > elements.size()) {
-                    current = Collections.emptyIterator();
-                } else {
-                    current = new Combinations(null).unique(start, elements).lexOrder().iterator();
-                }
-                return hasNext();
-            }
-            return false;
+            return current.hasNext();
         }
 
         @Override
         public List<T> next() {
+            // hasNext() moves on to the next size block, so next() works without a prior hasNext() call.
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
             return current.next();
         }
     }

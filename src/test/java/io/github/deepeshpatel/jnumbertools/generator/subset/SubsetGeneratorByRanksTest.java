@@ -11,7 +11,11 @@ import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,7 +33,7 @@ public class SubsetGeneratorByRanksTest {
             // 2ⁿ with mᵗʰ: 2ⁿ/m
             int increment = 3;
             int start = 0;
-            
+
             // Test all subsets
             for (int n = 1; n <= 5; n++) {
                 var input = num_0_to_5.subList(0, n);
@@ -40,7 +44,7 @@ public class SubsetGeneratorByRanksTest {
                 double expected = Math.ceil(Math.pow(2, n) / increment);
                 assertEquals((long) expected, count);
             }
-            
+
             // Test range subsets using correct calculator method
             for (int from = 1; from <= 3; from++) {
                 for (int to = from; to <= 4; to++) {
@@ -258,6 +262,139 @@ public class SubsetGeneratorByRanksTest {
             var result = builder.sample(1, TestBase.random).stream().toList();
             assertEquals(1, result.size());
             assertTrue(result.get(0).isEmpty());
+        }
+    }
+
+    // ---- Rules from ValidationRules.md: byRanks / lexOrderMth traversal rules ----
+
+    @Nested
+    class RankRules {
+
+        private BigInteger big(long value) {
+            return BigInteger.valueOf(value);
+        }
+
+        @Test
+        void invalidRanksAreReportedLazilyWhenReached() {
+            var builder = subsets.of(A_B_C_D).inRange(2, 3);   // count = 6 + 4 = 10
+
+            // building the generator does not look at the ranks, only iterating does
+            var outOfRange = builder.byRanks(List.of(big(0), big(10)));
+            var iterator = outOfRange.iterator();
+            assertEquals(List.of('A', 'B'), iterator.next());
+            assertThrows(IllegalArgumentException.class, iterator::next);
+
+            var negative = builder.byRanks(List.of(big(1), big(-1))).iterator();
+            negative.next();
+            assertThrows(IllegalArgumentException.class, negative::next);
+        }
+
+        @Test
+        void rankSequenceIsConsumedLazilyOneRankAtATime() {
+            AtomicInteger pulled = new AtomicInteger();
+            Iterable<BigInteger> counting = () -> new Iterator<>() {
+                public boolean hasNext() { return true; }          // never ends
+                public BigInteger next() { pulled.incrementAndGet(); return BigInteger.ZERO; }
+            };
+
+            var generator = subsets.of(A_B_C_D).all().byRanks(counting);
+            assertEquals(0, pulled.get(), "ranks must not be scanned when the generator is created");
+
+            var iterator = generator.iterator();
+            assertEquals(0, pulled.get(), "ranks must not be scanned when iteration starts");
+            iterator.next();
+            iterator.next();
+            assertEquals(2, pulled.get());
+
+            // an endless rank source can be cut short by the caller
+            assertEquals(5, subsets.of(A_B_C_D).all().byRanks(counting).stream().limit(5).count());
+        }
+
+        @Test
+        void everyRankOfEveryRangeMatchesLexOrder() {
+            for (int n = 0; n <= 5; n++) {
+                List<Integer> list = IntStream.range(0, n).boxed().toList();
+                for (int from = 0; from <= 6; from++) {
+                    for (int to = from; to <= 6; to++) {
+                        if (n > 0 && to > n) continue;
+                        var builder = subsets.of(list).inRange(from, to);
+                        var expected = builder.lexOrder().stream().toList();
+                        var ranks = IntStream.range(0, expected.size()).mapToObj(BigInteger::valueOf).toList();
+
+                        String where = "n=" + n + ", range [" + from + "," + to + "]";
+                        assertEquals(builder.count().intValue(), expected.size(), where);
+                        assertEquals(expected, builder.byRanks(ranks).stream().toList(), where);
+                    }
+                }
+            }
+        }
+
+        @Test
+        void emptyDomainRejectsEveryRankButAcceptsNoRanks() {
+            var emptyDomain = subsets.of(Collections.emptyList()).inRange(1, 2);   // count = 0
+
+            assertTrue(emptyDomain.byRanks(List.of()).stream().toList().isEmpty());
+            var generator = emptyDomain.byRanks(List.of(BigInteger.ZERO));
+            assertThrows(IllegalArgumentException.class, () -> generator.stream().toList());
+        }
+
+        @Test
+        void domainWithOnlyTheEmptySubsetYieldsOneEmptyListPerRank() {
+            // n = 0 with [0, m], and n > 0 with [0, 0]: count = 1, [[]]
+            var domains = List.of(
+                    subsets.of(Collections.emptyList()).all(),
+                    subsets.of(Collections.emptyList()).inRange(0, 3),
+                    subsets.of(A_B_C_D).inRange(0, 0));
+
+            for (var domain : domains) {
+                var zeros = List.of(BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO);
+                assertEquals(List.of(List.of(), List.of(), List.of()), domain.byRanks(zeros).stream().toList());
+
+                // every rank must be 0
+                var withOne = domain.byRanks(List.of(BigInteger.ZERO, BigInteger.ONE));
+                assertThrows(IllegalArgumentException.class, () -> withOne.stream().toList());
+            }
+        }
+
+        @Test
+        void byRanksIsReIterable() {
+            var generator = subsets.of(A_B_C_D).all().byRanks(List.of(big(3), big(0), big(15)));
+            var first = generator.stream().toList();
+            assertEquals(first, generator.stream().toList());
+            assertEquals(List.of(List.of('C'), List.of(), List.of('A', 'B', 'C', 'D')), first);
+        }
+
+        @Test
+        void lexOrderMthOnByRanksGeneratorValidatesItsParameters() {
+            var generator = subsets.of(A_B_C_D).inRange(2, 3).byRanks(List.of());   // count = 10
+
+            assertThrows(IllegalArgumentException.class, () -> generator.lexOrderMth(BigInteger.ZERO, BigInteger.ZERO));
+            assertThrows(IllegalArgumentException.class, () -> generator.lexOrderMth(BigInteger.ONE, big(-1)));
+            assertThrows(IllegalArgumentException.class, () -> generator.lexOrderMth(BigInteger.ONE, big(10)));
+            assertEquals(10, generator.lexOrderMth(BigInteger.ONE, BigInteger.ZERO).stream().count());
+        }
+
+        @Test
+        void buildReturnsTheStartSubsetAndFailsOnAnEmptyRange() {
+            assertEquals(List.of('B', 'C'),
+                    subsets.of(A_B_C_D).inRange(2, 3).lexOrderMth(BigInteger.ONE, big(3)).build());
+
+            var emptyRange = subsets.of(Collections.emptyList()).inRange(1, 2).lexOrderMth(BigInteger.ONE, BigInteger.ZERO);
+            assertThrows(NoSuchElementException.class, emptyRange::build);
+        }
+
+        @Test
+        void nextAfterTheLastResultThrows() {
+            var mth = subsets.of(A_B).all().lexOrderMth(big(2), BigInteger.ZERO).iterator();   // ranks 0 and 2
+            assertEquals(List.of(), mth.next());
+            assertEquals(List.of('B'), mth.next());
+            assertFalse(mth.hasNext());
+            assertThrows(NoSuchElementException.class, mth::next);
+
+            var ranked = subsets.of(A_B).all().byRanks(List.of(BigInteger.ONE)).iterator();
+            ranked.next();
+            assertFalse(ranked.hasNext());
+            assertThrows(NoSuchElementException.class, ranked::next);
         }
     }
 

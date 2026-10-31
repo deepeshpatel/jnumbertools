@@ -241,8 +241,8 @@ the behavioral contract.
 
 | Rule | Current behavior | Needed change |
 |---|---|---|
-| `isEmpty()` ⇔ `count() == 0` | Permutation and derangement builders follow the rule. `UniqueCombinationBuilder` and `RepetitiveCombinationBuilder` still use `elements.isEmpty() \|\| size == 0` (so `n=3, r=0` reports empty while `count() == 1`). Other combination, subset and product builders not yet reviewed | Redefine as `count().signum() == 0`; add tests |
-| Null elements rejected during the copy (rule 7) | Permutation, k-permutation, repetitive, derangement and multiset-permutation builders follow the rule. Combination, subset and product builders not yet aligned | Use `Util.copyOfNoNulls` where each builder copies its list |
+| `isEmpty()` ⇔ `count() == 0` | Permutation, derangement and subset builders follow the rule. `UniqueCombinationBuilder` and `RepetitiveCombinationBuilder` still use `elements.isEmpty() \|\| size == 0` (so `n=3, r=0` reports empty while `count() == 1`). Other combination and product builders not yet reviewed | Redefine as `count().signum() == 0`; add tests |
+| Null elements rejected during the copy (rule 7) | Permutation, k-permutation, repetitive, derangement, multiset-permutation and subset builders follow the rule. Combination and product builders not yet aligned | Use `Util.copyOfNoNulls` where each builder copies its list |
 | `rank` validates its input | `PermutadicAlgorithms.rank(5, 1,1,2)` fails with a raw index error; `rank(5, 7,0,1)` silently returns 60 | Validate distinct values in `[0, n)` |
 | `FactoradicAlgorithms` digit order | `intToFactoradic` is little-endian but `intToFactoradicKnownSize` is big-endian, so `factoradicToInt(intToFactoradicKnownSize(100, 5))` returns 8 | Document the order on each method, or add a clearly named converter |
 | `EveryMthIterable` | A zero increment loops forever; `next()` past the end does not fail | Reject `increment ≤ 0`; fail past the end |
