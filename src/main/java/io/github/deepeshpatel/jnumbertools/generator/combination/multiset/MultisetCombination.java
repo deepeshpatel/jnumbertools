@@ -182,7 +182,7 @@ public final class MultisetCombination<T> extends AbstractMultisetCombination<T>
             var freqMap = new LinkedHashMap<T, Integer>();
 
             if (sortedArray.length == 0) {
-                return freqMap;
+                return Collections.unmodifiableMap(freqMap);
             }
 
             int currentNum = sortedArray[0];
@@ -200,7 +200,8 @@ public final class MultisetCombination<T> extends AbstractMultisetCombination<T>
 
             freqMap.put(options[currentNum].getKey(), currentCount);
 
-            return freqMap;
+            // Fresh map per result, so wrapping (not copying) is enough to make it immutable.
+            return Collections.unmodifiableMap(freqMap);
         }
     }
 

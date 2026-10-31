@@ -5,9 +5,12 @@ import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
@@ -399,7 +402,7 @@ class RepetitiveCombinationByRanksTest {
 
         @Test
         void byRanks_withNegativeRank_shouldThrowException() {
-            var result = combination.repetitive(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(-1)));
+            var result = combination.repetitive(2, "A", "B", "C").byRanks(of(BigInteger.valueOf(-1)));
 
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
@@ -408,7 +411,7 @@ class RepetitiveCombinationByRanksTest {
 
         @Test
         void byRanks_withOutOfBoundRank_shouldThrowException() {
-            var result = combination.repetitive(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(1000000000)));
+            var result = combination.repetitive(2, "A", "B", "C").byRanks(of(BigInteger.valueOf(1000000000)));
 
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
@@ -418,15 +421,115 @@ class RepetitiveCombinationByRanksTest {
         @Test
         void byRanks_withValidRanks_shouldWork() {
             var result = combination.repetitive(2, "A", "B", "C").byRanks(of(
-                    java.math.BigInteger.ZERO,
-                    java.math.BigInteger.ONE,
-                    java.math.BigInteger.valueOf(2)
+                    BigInteger.ZERO,
+                    BigInteger.ONE,
+                    BigInteger.valueOf(2)
             ));
 
             assertDoesNotThrow(() -> {
                 var combinations = result.stream().toList();
                 assertEquals(3, combinations.size());
             });
+        }
+    }
+
+    /**
+     * Domains whose size exceeds the range of a long (2^63). Ranks, samples and choices must work across the
+     * whole range, not just the part representable as a long.
+     */
+    @Nested
+    public class LargeDomainTests {
+
+        private static final int N = 100;
+        private static final int R = 100;   // C(199, 100): about 2^195 combinations
+        private final BigInteger two63 = BigInteger.ONE.shiftLeft(63);
+
+        /** Independent rank: number of combinations lexicographically smaller than the given indices. */
+        private BigInteger rankOf(List<Integer> combination) {
+            BigInteger rank = BigInteger.ZERO;
+            int previous = 0;
+            for (int i = 0; i < R; i++) {
+                for (int j = previous; j < combination.get(i); j++) {
+                    rank = rank.add(calculator.nCrRepetitive(N - j, R - i - 1));
+                }
+                previous = combination.get(i);
+            }
+            return rank;
+        }
+
+        private void assertValidCombination(List<Integer> combination) {
+            assertEquals(R, combination.size());
+            for (int i = 0; i < R; i++) {
+                assertTrue(combination.get(i) >= 0 && combination.get(i) < N, "value out of range: " + combination);
+                if (i > 0) {
+                    assertTrue(combination.get(i) >= combination.get(i - 1), "not non-decreasing: " + combination);
+                }
+            }
+        }
+
+        @Test
+        void domainIsLargerThanLong() {
+            assertTrue(combination.repetitive(N, R).count().bitLength() > 64);
+        }
+
+        @Test
+        void byRanks_firstAndLastRankOfLargeDomain() {
+            BigInteger last = combination.repetitive(N, R).count().subtract(BigInteger.ONE);
+
+            var result = combination.repetitive(N, R).byRanks(of(BigInteger.ZERO, last)).stream().toList();
+
+            assertEquals(Collections.nCopies(R, 0), result.get(0));
+            assertEquals(Collections.nCopies(R, N - 1), result.get(1));
+        }
+
+        @Test
+        void byRanks_ranksAroundAndBeyondLongRange_roundTrip() {
+            BigInteger count = combination.repetitive(N, R).count();
+            List<BigInteger> ranks = new ArrayList<>(List.of(
+                    two63.subtract(BigInteger.ONE),
+                    two63,
+                    two63.add(BigInteger.ONE),
+                    BigInteger.ONE.shiftLeft(64),
+                    BigInteger.ONE.shiftLeft(70),
+                    count.shiftRight(1),
+                    count.subtract(BigInteger.ONE)));
+            Random random = new Random(21);
+            for (int i = 0; i < 50; i++) {
+                ranks.add(new BigInteger(count.bitLength() + 4, random).mod(count));
+            }
+
+            var result = combination.repetitive(N, R).byRanks(ranks).stream().toList();
+
+            assertEquals(ranks.size(), result.size());
+            for (int i = 0; i < ranks.size(); i++) {
+                assertValidCombination(result.get(i));
+                assertEquals(ranks.get(i), rankOf(result.get(i)), "rank " + ranks.get(i));
+            }
+        }
+
+        @Test
+        void byRanks_rankEqualToCount_isStillRejected() {
+            BigInteger count = combination.repetitive(N, R).count();
+            var result = combination.repetitive(N, R).byRanks(of(count));
+
+            assertThrows(IllegalArgumentException.class, () -> result.stream().toList());
+        }
+
+        @Test
+        void sample_fromLargeDomain_returnsDistinctValidCombinations() {
+            var result = combination.repetitive(N, R).sample(25, new Random(7)).stream().toList();
+
+            assertEquals(25, result.size());
+            result.forEach(this::assertValidCombination);
+            assertEquals(25, new HashSet<>(result).size());
+        }
+
+        @Test
+        void choice_fromLargeDomain_returnsValidCombinations() {
+            var result = combination.repetitive(N, R).choice(25, new Random(7)).stream().toList();
+
+            assertEquals(25, result.size());
+            result.forEach(this::assertValidCombination);
         }
     }
 }

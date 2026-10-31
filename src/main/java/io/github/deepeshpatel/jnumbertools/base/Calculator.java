@@ -76,18 +76,59 @@ public final class Calculator {
 
     /**
      * Finds the smallest integer n such that ⁿCᵣ > max.
+     * <p>
+     * ⁿCᵣ is non-decreasing in n (for n ≥ r), so the answer is located by doubling an upper
+     * probe until ⁿCᵣ exceeds {@code max} and then bisecting. This needs O(log n) evaluations of
+     * ⁿCᵣ instead of the O(n) a linear scan would need, and avoids filling the memo with one
+     * entry per scanned n.
+     * </p>
+     *
      * @param r  the number of items to choose (r ≥ 0)
      * @param max the threshold value to exceed
      * @return the smallest n where binomial(n, r) > max
+     * @throws IllegalArgumentException if r &lt; 0, or if r == 0 and max ≥ 1 (ⁿC₀ = 1 for every n,
+     *                                  so no such n exists)
+     * @throws ArithmeticException      if the result does not fit in an {@code int}
      */
     public int nCrUpperBound(int r, BigInteger max) {
-        int n = r;
-        BigInteger current = nCr(n, r);
-        while (current.compareTo(max) <= 0) {
-            n++;
-            current = nCr(n, r);
+        if (r < 0) {
+            throw new IllegalArgumentException("r must be ≥ 0, found " + r);
         }
-        return n;
+        // Smallest possible n is r, where ʳCᵣ = 1.
+        if (BigInteger.ONE.compareTo(max) > 0) {
+            return r;
+        }
+        if (r == 0) {
+            throw new IllegalArgumentException("No n satisfies ⁿC₀ > " + max + " because ⁿC₀ = 1 for all n");
+        }
+
+        // Invariant: nCr(lo, r) <= max < nCr(hi, r)
+        // Probe in long arithmetic and cap at Integer.MAX_VALUE: doubling may overshoot the int range even
+        // when the answer itself fits (e.g. r = 2, answer ≈ 1.4·10⁹ while the last doubling reaches 2³¹).
+        long probe = Math.max(r + 1L, 2L * r);
+        int lo = r;
+        while (probe <= Integer.MAX_VALUE && nCr((int) probe, r).compareTo(max) <= 0) {
+            lo = (int) probe;
+            probe *= 2;
+        }
+        int hi;
+        if (probe <= Integer.MAX_VALUE) {
+            hi = (int) probe;
+        } else {
+            hi = Integer.MAX_VALUE;
+            if (nCr(hi, r).compareTo(max) <= 0) {
+                throw new ArithmeticException("nCrUpperBound(" + r + ", " + max + ") does not fit in an int");
+            }
+        }
+        while (hi - lo > 1) {
+            int mid = lo + ((hi - lo) >>> 1);
+            if (nCr(mid, r).compareTo(max) > 0) {
+                hi = mid;
+            } else {
+                lo = mid;
+            }
+        }
+        return hi;
     }
 
     /**

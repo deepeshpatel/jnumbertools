@@ -165,13 +165,15 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
     /**
      * Constructs a builder for multiset combinations.
      *
-     * @param options a map of n distinct elements to their multiplicities (must not be null or empty)
-     * @param r       the size of each combination (r ≥ 0)
-     * @throws IllegalArgumentException if options is null, empty, contains non-positive multiplicities,
-     *         or if r < 0
+     * @param options a map of distinct elements to their multiplicities; copied (zero multiplicities are
+     *                dropped), so later changes to the caller's map do not affect this builder.
+     *                An empty map is allowed (see ValidationRules.md)
+     * @param r       the size of each combination (r ≥ 0; r larger than the total multiplicity yields none)
+     * @throws NullPointerException if options is null, or contains a null element or null multiplicity
      */
     public MultisetCombinationBuilder(LinkedHashMap<T, Integer> options, int r) {
-        this.options = options;
+        // filterZeroFrequencies returns a new map: that is the snapshot, and the same pass rejects nulls.
+        this.options = Util.filterZeroFrequencies(options);
         this.r = r;
     }
 
@@ -280,6 +282,12 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
     public MultisetCombinationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
         Util.validateByRanksParams(ranks);
         return new MultisetCombinationByRanks<>(options, r, ranks, count());
+    }
+
+    @Override
+    public boolean isEmpty() {
+        // count is 0 exactly when r exceeds the total multiplicity (r == 0 gives 1: [{}])
+        return r < 0 || r > options.values().stream().mapToLong(Integer::longValue).sum();
     }
 
     @Override

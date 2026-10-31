@@ -144,13 +144,16 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
     /**
      * Constructs a builder for repetitive combinations.
      *
-     * @param elements   the list of n items to generate combinations from (must not be null or empty)
+     * @param elements   the list of n items to generate combinations from; copied, so later changes to the
+     *                   caller's list do not affect this builder. An empty list is allowed (see ValidationRules.md)
      * @param size       the size of each combination (r ≥ 0)
      * @param calculator the calculator for computing combinatorial values
-     * @throws IllegalArgumentException if r < 0 or elements is null/empty
+     * @throws NullPointerException if the list contains a null element
      */
     public RepetitiveCombinationBuilder(List<T> elements, int size, Calculator calculator) {
-        this.elements = elements;
+        // Snapshot: later changes to the caller's list must not alter this builder.
+        // Null elements are rejected here, during the copy, rather than later during iteration.
+        this.elements = elements == null ? List.of() : Util.copyOfNoNulls(elements);
         this.size = size;
         this.calculator = calculator;
     }
@@ -242,7 +245,8 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
 
     @Override
     public boolean isEmpty() {
-        return elements.isEmpty() || size == 0;
+        // count = C(n+r-1, r) is 0 only for n = 0 with r > 0 (r == 0 gives 1: [[]])
+        return size < 0 || (size > 0 && elements.isEmpty());
     }
 
     @Override

@@ -88,4 +88,16 @@ public interface MultisetBuilder<T> {
      * @return the multichoose value constrained by multiplicities
      */
     BigInteger count();
+
+    /**
+     * Returns {@code true} if and only if this builder yields no results at all,
+     * i.e. {@code count().signum() == 0}.
+     * <p>
+     * A builder whose single result is the empty multiset ({@code [{}]}, i.e. selection size 0)
+     * is <b>not</b> empty: it has {@code count() == 1}. See {@code ValidationRules.md}.
+     * </p>
+     *
+     * @return true if {@code count()} is zero
+     */
+    boolean isEmpty();
 }

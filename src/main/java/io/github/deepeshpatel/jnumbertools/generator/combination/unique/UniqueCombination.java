@@ -71,7 +71,7 @@ public final class UniqueCombination<T> extends AbstractGenerator<T> {
         if (r == 0) return Util.emptyListIterator();
 
         // Case 3: r = n -> one combination containing all elements (ⁿCₙ = 1)
-        if (r == elements.size()) return Collections.singletonList(elements).iterator();
+        if (r == elements.size()) return Collections.singletonList(List.copyOf(elements)).iterator(); // immutable copy, never the internal list
 
         // Case 4: Normal case (0 < r < n)
         return new Itr();

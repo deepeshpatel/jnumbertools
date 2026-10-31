@@ -40,7 +40,7 @@ public class RepetitiveCombinationByRanks<T> extends AbstractGenerator<T> {
      * <p>
      * <strong>Note:</strong> This constructor is intended for internal use only.
      * Instances should be created via
-     * {@link io.github.deepeshpatel.jnumbertools.generator.combination.repetitive.RepetitiveCombinationBuilder#byRanks(Iterable)}.
+     * {@link RepetitiveCombinationBuilder#byRanks(Iterable)}.
      * All parameter validation (null check, r ≥ 0) is handled by the builder.
      * Rank validation (non-negative, less than total) is deferred to iteration.
      * </p>
@@ -106,7 +106,7 @@ public class RepetitiveCombinationByRanks<T> extends AbstractGenerator<T> {
                 throw new IllegalArgumentException("Rank " + m + " is out of bounds [0, " + totalCombinations + ")");
             }
 
-            int[] indices = mthCombinationWithRepetition(m.longValueExact());
+            int[] indices = mthCombinationWithRepetition(m);
             return indicesToValues(indices);
         }
 
@@ -118,14 +118,13 @@ public class RepetitiveCombinationByRanks<T> extends AbstractGenerator<T> {
          * formula. It iteratively selects indices by comparing the remaining rank against the
          * number of combinations for each possible element.
          *
-         * @param m the rank of the combination (m ≥ 0)
+         * @param m the rank of the combination (m ≥ 0); may exceed the range of a {@code long}
          * @return an array of indices representing the combination
-         * @throws ArithmeticException if m cannot be converted to a long
          */
-        private int[] mthCombinationWithRepetition(long m) {
+        private int[] mthCombinationWithRepetition(BigInteger m) {
             int n = elements.size();
             int[] result = new int[r];
-            BigInteger remainingM = BigInteger.valueOf(m);
+            BigInteger remainingM = m;
             int currentValue = 0;
 
             for (int i = 0; i < r; i++) {

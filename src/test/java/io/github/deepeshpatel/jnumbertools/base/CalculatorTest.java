@@ -3,6 +3,7 @@ package io.github.deepeshpatel.jnumbertools.base;
 import org.junit.jupiter.api.*;
 
 import java.math.BigInteger;
+import java.time.Duration;
 import java.util.Arrays;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
@@ -44,6 +45,79 @@ public class CalculatorTest {
             assertEquals(6, calculator.nCrUpperBound(1, BigInteger.valueOf(5)));
             assertEquals(0, calculator.nCrUpperBound(0, BigInteger.ZERO));
             assertEquals(2, calculator.nCrUpperBound(2, BigInteger.ZERO));
+        }
+
+        @Test
+        @DisplayName("nCrUpperBound: exact boundaries around nCr(k, r)")
+        void testNCrUpperBoundBoundaries() {
+            for (int r = 1; r <= 30; r++) {
+                for (int k = r; k < r + 40; k++) {
+                    BigInteger c = calculator.nCr(k, r);
+                    assertEquals(k, calculator.nCrUpperBound(r, c.subtract(BigInteger.ONE)),
+                            "max = C(" + k + "," + r + ") - 1");
+                    assertEquals(k + 1, calculator.nCrUpperBound(r, c),
+                            "max = C(" + k + "," + r + ")");
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("nCrUpperBound: agrees with a linear scan")
+        void testNCrUpperBoundMatchesLinearScan() {
+            for (int r = 1; r <= 8; r++) {
+                for (int max = -2; max <= 2000; max++) {
+                    BigInteger bigMax = BigInteger.valueOf(max);
+                    assertEquals(linearUpperBound(r, bigMax), calculator.nCrUpperBound(r, bigMax),
+                            "r=" + r + ", max=" + max);
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("nCrUpperBound: large answers are found by bisection, not by scanning")
+        void testNCrUpperBoundWithHugeAnswers() {
+            // A linear scan would need ~1.0e9 and ~1.4e9 iterations here; bisection needs about 30.
+            assertTimeoutPreemptively(Duration.ofSeconds(5), () -> {
+                assertEquals(1_000_000_001, calculator.nCrUpperBound(1, BigInteger.valueOf(1_000_000_000L)));
+
+                BigInteger max = BigInteger.TEN.pow(18);
+                int n = calculator.nCrUpperBound(2, max);
+                assertTrue(calculator.nCr(n, 2).compareTo(max) > 0);
+                assertTrue(calculator.nCr(n - 1, 2).compareTo(max) <= 0);
+
+                BigInteger max3 = BigInteger.TEN.pow(27);
+                int n3 = calculator.nCrUpperBound(3, max3);
+                assertTrue(calculator.nCr(n3, 3).compareTo(max3) > 0);
+                assertTrue(calculator.nCr(n3 - 1, 3).compareTo(max3) <= 0);
+            });
+        }
+
+        @Test
+        @DisplayName("nCrUpperBound: answer at the int limit is found, beyond it fails")
+        void testNCrUpperBoundIntRangeLimit() {
+            assertEquals(Integer.MAX_VALUE,
+                    calculator.nCrUpperBound(1, BigInteger.valueOf(Integer.MAX_VALUE - 1L)));
+            assertThrows(ArithmeticException.class,
+                    () -> calculator.nCrUpperBound(1, BigInteger.valueOf(Integer.MAX_VALUE)));
+        }
+
+        @Test
+        @DisplayName("nCrUpperBound: r = 0 and r < 0 cannot loop forever")
+        void testNCrUpperBoundDegenerateR() {
+            // nC0 = 1 for every n, so nothing can exceed max >= 1
+            assertEquals(0, calculator.nCrUpperBound(0, BigInteger.ZERO));
+            assertEquals(0, calculator.nCrUpperBound(0, BigInteger.valueOf(-5)));
+            assertThrows(IllegalArgumentException.class, () -> calculator.nCrUpperBound(0, BigInteger.ONE));
+            assertThrows(IllegalArgumentException.class, () -> calculator.nCrUpperBound(0, BigInteger.TEN));
+            assertThrows(IllegalArgumentException.class, () -> calculator.nCrUpperBound(-1, BigInteger.TEN));
+        }
+
+        private int linearUpperBound(int r, BigInteger max) {
+            int n = r;
+            while (calculator.nCr(n, r).compareTo(max) <= 0) {
+                n++;
+            }
+            return n;
         }
 
         @Test

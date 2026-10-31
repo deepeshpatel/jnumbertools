@@ -132,13 +132,16 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
     /**
      * Constructs a builder for unique combinations.
      *
-     * @param elements   the list of items to generate combinations from (must not be null or empty)
-     * @param size       the size of each combination (0 ≤ r ≤ n)
+     * @param elements   the list of items to generate combinations from; copied, so later changes to the
+     *                   caller's list do not affect this builder. An empty list is allowed (see ValidationRules.md)
+     * @param size       the size of each combination (r ≥ 0; r &gt; n simply yields no combinations)
      * @param calculator the calculator for computing combination counts and ranks
-     * @throws IllegalArgumentException if size < 0, size > n, or elements is null/empty
+     * @throws NullPointerException if the list contains a null element
      */
     public UniqueCombinationBuilder(List<T> elements, int size, Calculator calculator) {
-        this.elements = elements;
+        // Snapshot: later changes to the caller's list must not alter this builder.
+        // Null elements are rejected here, during the copy, rather than later during iteration.
+        this.elements = elements == null ? List.of() : Util.copyOfNoNulls(elements);
         this.size = size;
         this.calculator = calculator;
     }
@@ -242,7 +245,7 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
 
     @Override
     public boolean isEmpty() {
-        return elements.isEmpty() || size == 0;
+        return size < 0 || size > elements.size(); // count = nCr is 0 exactly when r > n (r == 0 gives 1: [[]])
     }
 
     @Override
