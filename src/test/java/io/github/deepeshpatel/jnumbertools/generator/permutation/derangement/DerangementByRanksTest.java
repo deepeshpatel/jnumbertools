@@ -16,6 +16,7 @@ import java.util.List;
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 /**
  * Tests for {@link DerangementByRanks} covering mᵗʰ derangements, choice, sample
@@ -60,7 +61,7 @@ class DerangementByRanksTest {
             assertThrows(IllegalArgumentException.class,
                     () -> derangement.of(List.of("A"))
                             .lexOrderMth(java.math.BigInteger.ONE,
-                                         java.math.BigInteger.valueOf(-1)));
+                                    java.math.BigInteger.valueOf(-1)));
         }
 
         @Test
@@ -236,5 +237,25 @@ class DerangementByRanksTest {
             assertTrue(samples.get(0).isEmpty());
         }
     }
-}
 
+    @Nested
+    @DisplayName("Rank source rules (ValidationRules.md)")
+    class RankSourceRules {
+
+        @Test
+        @DisplayName("Empty set (!0 = 1): one empty derangement per rank supplied; only rank 0 is valid")
+        void emptySetHonoursTheRankSource() {
+            var empty = derangement.of(List.of());
+            assertEquals(List.of(List.of(), List.of(), List.of()),
+                    empty.byRanks(of(BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO)).stream().toList());
+            assertThrows(IllegalArgumentException.class, () -> empty.byRanks(of(BigInteger.ONE)).stream().toList());
+        }
+
+        @Test
+        @DisplayName("Single element (!1 = 0): every rank is out of range")
+        void singleElementRejectsEveryRank() {
+            var single = derangement.of(List.of("A"));
+            assertThrows(IllegalArgumentException.class, () -> single.byRanks(of(BigInteger.ZERO)).stream().toList());
+        }
+    }
+}

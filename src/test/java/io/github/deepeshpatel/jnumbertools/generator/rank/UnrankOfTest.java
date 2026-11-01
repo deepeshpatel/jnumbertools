@@ -10,6 +10,7 @@ import java.math.BigInteger;
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static io.github.deepeshpatel.jnumbertools.TestBase.unrankOf;
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
 
 @DisplayName("UnrankOf Factory")
 public class UnrankOfTest {
@@ -171,6 +172,39 @@ public class UnrankOfTest {
             int[] viaFacade = JNumberTools.unrankOf().derangement(BigInteger.ZERO, 4);
             int[] viaInstance = unrankOf.derangement(BigInteger.ZERO, 4);
             assertArrayEquals(viaInstance, viaFacade);
+        }
+    }
+
+    @Nested
+    @DisplayName("Invalid ranks (ValidationRules.md: rank / unrank helpers)")
+    class InvalidRanks {
+        // ValidationRules.md specifies the CONDITION (an error is signaled), not the exception type.
+
+
+        @Test
+        @DisplayName("uniquePermutation rejects a negative rank")
+        void uniquePermutationRejectsNegativeRank() {
+            assertThrows(RuntimeException.class, () -> unrankOf.uniquePermutation(BigInteger.valueOf(-1), 3));
+        }
+
+        @Test
+        @DisplayName("uniquePermutation rejects rank >= size!")
+        void uniquePermutationRejectsRankBeyondSizeFactorial() {
+            assertThrows(RuntimeException.class, () -> unrankOf.uniquePermutation(BigInteger.valueOf(6), 3));
+            assertThrows(RuntimeException.class, () -> unrankOf.uniquePermutation(BigInteger.ONE, 0));
+            assertDoesNotThrow(() -> unrankOf.uniquePermutation(BigInteger.valueOf(5), 3));
+        }
+
+        @Test
+        @DisplayName("uniquePermutation rejects a negative size")
+        void uniquePermutationRejectsNegativeSize() {
+            assertThrows(RuntimeException.class, () -> unrankOf.uniquePermutation(BigInteger.ZERO, -1));
+        }
+
+        @Test
+        @DisplayName("kPermutation rejects a negative rank")
+        void kPermutationRejectsNegativeRank() {
+            assertThrows(RuntimeException.class, () -> unrankOf.kPermutation(BigInteger.valueOf(-1), 5, 3));
         }
     }
 }

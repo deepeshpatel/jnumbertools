@@ -13,6 +13,12 @@ import java.math.BigInteger;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Comprehensive test suite for {@link Permutadic} and {@link PermutadicAlgorithms}.
@@ -298,6 +304,64 @@ class PermutadicTest {
             assertEquals(rank, calculatedRank,
                     "stress test failed at iteration " + i + " rank=" + rank);
             rank = rank.add(trillion);
+        }
+    }
+
+    @Nested
+    @DisplayName("Invalid input (ValidationRules.md: rank / unrank helpers)")
+    class InvalidInput {
+        // ValidationRules.md specifies the CONDITION (an error is signaled), not the exception type.
+
+
+        @Test
+        @DisplayName("unRankWithBoundCheck rejects rank < 0 and rank >= nPk")
+        void unRankRejectsOutOfRangeRanks() {
+            assertThrows(RuntimeException.class,
+                    () -> PermutadicAlgorithms.unRankWithBoundCheck(BigInteger.valueOf(-1), 5, 3, calculator));
+            assertThrows(RuntimeException.class,
+                    () -> PermutadicAlgorithms.unRankWithBoundCheck(BigInteger.valueOf(60), 5, 3, calculator));   // 5P3 = 60
+            assertDoesNotThrow(() -> PermutadicAlgorithms.unRankWithBoundCheck(BigInteger.valueOf(59), 5, 3, calculator));
+        }
+
+        @Test
+        @DisplayName("rank rejects an arrangement that has a duplicate value")
+        void rankRejectsDuplicates() {
+            assertThrows(RuntimeException.class, () -> PermutadicAlgorithms.rank(5, 1, 1, 2));
+        }
+
+        @Test
+        @DisplayName("rank rejects values outside [0, size)")
+        void rankRejectsValuesOutsideRange() {
+            assertThrows(RuntimeException.class, () -> PermutadicAlgorithms.rank(5, 7, 0, 1));
+            assertThrows(RuntimeException.class, () -> PermutadicAlgorithms.rank(5, -1, 0, 1));
+            assertThrows(RuntimeException.class, () -> PermutadicAlgorithms.rank(5, 5, 0, 1));
+        }
+
+        @Test
+        @DisplayName("rank rejects an arrangement longer than size, and a negative size")
+        void rankRejectsBadLengthOrSize() {
+            assertThrows(RuntimeException.class, () -> PermutadicAlgorithms.rank(2, 0, 1, 2));
+            assertThrows(RuntimeException.class, () -> PermutadicAlgorithms.rank(-1));
+        }
+
+        @Test
+        @DisplayName("rank of a null arrangement is a null-input error")
+        void rankRejectsNull() {
+            assertThrows(RuntimeException.class, () -> PermutadicAlgorithms.rank(5, (int[]) null));
+        }
+
+        @Test
+        @DisplayName("rank(unRank(r)) == r for every valid rank, n <= 5, k <= n")
+        void roundTripForEveryValidRank() {
+            for (int n = 0; n <= 5; n++) {
+                for (int k = 0; k <= n; k++) {
+                    BigInteger total = calculator.nPr(n, k);
+                    for (BigInteger r = BigInteger.ZERO; r.compareTo(total) < 0; r = r.add(BigInteger.ONE)) {
+                        int[] arrangement = PermutadicAlgorithms.unRankWithBoundCheck(r, n, k, calculator);
+                        assertEquals(r, PermutadicAlgorithms.rank(n, arrangement), "n=" + n + " k=" + k + " r=" + r);
+                    }
+                }
+            }
         }
     }
 }

@@ -10,6 +10,11 @@ import java.util.Map;
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
+import java.math.BigInteger;
+import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import java.util.ArrayList;
+import java.util.Collections;
 
 class MultisetPermutationByRanksTest {
 
@@ -200,6 +205,46 @@ class MultisetPermutationByRanksTest {
                 var permutations = result.stream().toList();
                 assertEquals(3, permutations.size());
             });
+        }
+    }
+
+    @Nested
+    @DisplayName("Rank source rules (ValidationRules.md)")
+    class RankSourceRules {
+
+        @Test
+        @DisplayName("Empty or all-zero map: one empty permutation per rank supplied; only rank 0 is valid")
+        void emptyAndAllZeroMapsHonourTheRankSource() {
+            LinkedHashMap<String, Integer> allZero = new LinkedHashMap<>();
+            allZero.put("A", 0);
+            for (var multiset : List.of(permutation.multiset(new LinkedHashMap<String, Integer>()), permutation.multiset(allZero))) {
+                assertEquals(List.of(List.of(), List.of()), multiset.byRanks(of(BigInteger.ZERO, BigInteger.ZERO)).stream().toList());
+                assertThrows(IllegalArgumentException.class, () -> multiset.byRanks(of(BigInteger.ONE)).stream().toList());
+            }
+        }
+
+        @Test
+        @DisplayName("Ranks beyond the 64-bit range (8 symbols x 5 copies: 40!/(5!)^8 ~ 1.9e31)")
+        void ranksBeyondLongRange() {
+            LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
+            List<String> ascending = new ArrayList<>();
+            for (char c = 'A'; c <= 'H'; c++) {
+                options.put(String.valueOf(c), 5);
+                for (int i = 0; i < 5; i++) ascending.add(String.valueOf(c));
+            }
+            List<String> descending = new ArrayList<>(ascending);
+            Collections.reverse(descending);
+
+            var builder = permutation.multiset(options);
+            BigInteger count = builder.count();
+            assertTrue(count.compareTo(BigInteger.ONE.shiftLeft(63)) > 0);
+
+            assertEquals(ascending, builder.byRanks(of(BigInteger.ZERO)).iterator().next());
+            assertEquals(descending, builder.byRanks(of(count.subtract(BigInteger.ONE))).iterator().next());
+
+            BigInteger middle = count.divide(BigInteger.valueOf(3));
+            assertEquals(builder.lexOrderMth(BigInteger.ONE, middle).iterator().next(),
+                    builder.byRanks(of(middle)).iterator().next());
         }
     }
 }

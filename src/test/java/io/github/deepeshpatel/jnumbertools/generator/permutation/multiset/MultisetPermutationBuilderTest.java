@@ -9,6 +9,10 @@ import java.util.LinkedHashMap;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.List;
+import java.util.Map;
+import java.util.Collections;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MultisetPermutationBuilderTest {
 
@@ -86,5 +90,98 @@ class MultisetPermutationBuilderTest {
         zeroFreqOptions.put("B", 0);
         var zeroFreqBuilder = permutations.multiset(zeroFreqOptions);
         assertEquals(BigInteger.ONE, zeroFreqBuilder.count());
+    }
+
+    private static LinkedHashMap<String, Integer> map(Object... keyValues) {
+        LinkedHashMap<String, Integer> m = new LinkedHashMap<>();
+        for (int i = 0; i < keyValues.length; i += 2) {
+            m.put((String) keyValues[i], (Integer) keyValues[i + 1]);
+        }
+        return m;
+    }
+
+    @Test
+    void isEmpty() {
+        assertFalse(builder.isEmpty());
+        assertFalse(permutations.multiset(map()).isEmpty());                // empty map: the only result is []
+        assertFalse(permutations.multiset(map("A", 0)).isEmpty());          // all zero: treated as empty map
+        for (LinkedHashMap<String, Integer> m : List.of(map(), map("A", 0), map("A", 1), map("A", 2), map("A", 0, "B", 2), map("A", 1, "B", 1))) {
+            BuilderTestHelper.testIsEmpty(permutations.multiset(m));
+        }
+    }
+
+    @Test
+    void emptyAndAllZeroMapsAreASingleEmptyResult() {
+        BuilderTestHelper.testSingleEmptyResultDomain(permutations.multiset(map()));
+        BuilderTestHelper.testSingleEmptyResultDomain(permutations.multiset(map("A", 0)));
+        BuilderTestHelper.testSingleEmptyResultDomain(permutations.multiset(map("A", 0, "B", 0)));
+    }
+
+    @Test
+    void zeroFrequencyEntriesAreIgnored() {
+        var withZeros = permutations.multiset(map("A", 2, "X", 0, "B", 1, "Y", 0));
+        var without = permutations.multiset(map("A", 2, "B", 1));
+        assertEquals(without.count(), withZeros.count());
+        assertEquals(without.lexOrder().stream().toList(), withZeros.lexOrder().stream().toList());
+        assertEquals(without.lexOrderMth(2, 1).stream().toList(), withZeros.lexOrderMth(2, 1).stream().toList());
+        assertEquals(without.byRanks(List.of(BigInteger.ZERO, BigInteger.TWO)).stream().toList(),
+                withZeros.byRanks(List.of(BigInteger.ZERO, BigInteger.TWO)).stream().toList());
+    }
+
+    @Test
+    void negativeFrequencyIsRejected() {
+        assertThrows(IllegalArgumentException.class, () -> permutations.multiset(map("A", -1)));
+        assertThrows(IllegalArgumentException.class, () -> permutations.multiset(map("A", 2, "B", -1)));
+    }
+
+    @Test
+    void nullInputIsRejected() {
+        assertThrows(NullPointerException.class, () -> permutations.multiset((LinkedHashMap<String, Integer>) null));
+    }
+
+    @Test
+    void nullElementsAndNullFrequenciesAreRejectedWhenBuilderIsCreated() {
+        LinkedHashMap<String, Integer> nullKey = map("A", 1);
+        nullKey.put(null, 1);
+        assertThrows(NullPointerException.class, () -> permutations.multiset(nullKey));
+
+        LinkedHashMap<String, Integer> nullKeyWithZeroFrequency = new LinkedHashMap<>();
+        nullKeyWithZeroFrequency.put(null, 0);          // must not be silently dropped by the zero-frequency filter
+        assertThrows(NullPointerException.class, () -> permutations.multiset(nullKeyWithZeroFrequency));
+
+        LinkedHashMap<String, Integer> nullFrequency = new LinkedHashMap<>();
+        nullFrequency.put("A", null);
+        assertThrows(NullPointerException.class, () -> permutations.multiset(nullFrequency));
+    }
+
+    @Test
+    void builderSnapshotsItsInput() {
+        LinkedHashMap<String, Integer> input = map("A", 1, "B", 1);
+        var snapshot = permutations.multiset(input);
+        var lexBefore = snapshot.lexOrder().stream().toList();
+        var generatorCreatedEarlier = snapshot.lexOrder();
+
+        input.put("C", 3);
+        input.put("A", 5);
+
+        assertEquals(BigInteger.TWO, snapshot.count());
+        assertEquals(lexBefore, snapshot.lexOrder().stream().toList());
+        assertEquals(lexBefore, generatorCreatedEarlier.stream().toList());
+    }
+
+    @Test
+    void resultsAreImmutableAndReIterable() {
+        BuilderTestHelper.testResultsAreImmutable(builder);
+        BuilderTestHelper.testReIterable(builder);
+    }
+
+    @Test
+    void byRanksIsLazy() {
+        BuilderTestHelper.testByRanksIsLazy(builder);
+    }
+
+    @Test
+    void choiceAndSampleLimits() {
+        BuilderTestHelper.testChoiceMayExceedCountAndNullRandomIsRejected(builder);
     }
 }

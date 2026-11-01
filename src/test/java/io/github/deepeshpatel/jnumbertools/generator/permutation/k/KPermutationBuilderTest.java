@@ -10,6 +10,11 @@ import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.stream.IntStream;
+import static io.github.deepeshpatel.jnumbertools.TestBase.rankOf;
 
 class KPermutationBuilderTest {
 
@@ -121,5 +126,109 @@ class KPermutationBuilderTest {
         // k > n -> mathematically valid, count = 0 (tested in generator)
         var greaterKBuilder = permutations.nPk(5, elements);
         assertEquals(BigInteger.ZERO, greaterKBuilder.count());
+    }
+
+    private static List<Integer> range(int n) {
+        return IntStream.range(0, n).boxed().toList();
+    }
+
+    @Test
+    void isEmpty() {
+        assertFalse(builder.isEmpty());
+        assertFalse(permutations.nPk(0, elements).isEmpty());                 // k = 0: the only result is []
+        assertFalse(permutations.nPk(0, Collections.emptyList()).isEmpty());  // n = 0, k = 0: the only result is []
+        assertTrue(permutations.nPk(5, elements).isEmpty());                  // k > n: nothing to generate
+        assertTrue(permutations.nPk(2, Collections.emptyList()).isEmpty());   // n = 0, k > 0: nothing to generate
+        for (int n = 0; n <= 5; n++) {
+            for (int k = 0; k <= 7; k++) {
+                BuilderTestHelper.testIsEmpty(permutations.nPk(k, range(n)));
+            }
+        }
+    }
+
+    @Test
+    void zeroSelectionIsASingleEmptyResult() {
+        BuilderTestHelper.testSingleEmptyResultDomain(permutations.nPk(0, elements));
+        BuilderTestHelper.testSingleEmptyResultDomain(permutations.nPk(0, Collections.emptyList()));
+    }
+
+    @Test
+    void selectionLargerThanTheSetIsAnEmptyDomain() {
+        BuilderTestHelper.testEmptyDomain(permutations.nPk(5, elements));
+        BuilderTestHelper.testEmptyDomain(permutations.nPk(2, Collections.emptyList()));
+    }
+
+    @Test
+    void combinationOrderMthOnAnEmptyDomainIsAcceptedAndYieldsNothing() {
+        var empty = permutations.nPk(5, elements);
+        assertFalse(empty.combinationOrderMth(1, 0).iterator().hasNext());
+        assertFalse(empty.combinationOrderMth(2, 5).iterator().hasNext());
+    }
+
+    @Test
+    void resultsAreImmutableAndReIterable() {
+        BuilderTestHelper.testResultsAreImmutable(builder);
+        BuilderTestHelper.testReIterable(builder);
+        for (List<String> result : builder.combinationOrder()) {
+            assertThrows(UnsupportedOperationException.class, () -> result.add("X"));
+        }
+    }
+
+    @Test
+    void byRanksIsLazy() {
+        BuilderTestHelper.testByRanksIsLazy(builder);
+    }
+
+    @Test
+    void choiceAndSampleLimits() {
+        BuilderTestHelper.testChoiceMayExceedCountAndNullRandomIsRejected(builder);
+    }
+
+    @Test
+    void nullInputIsRejected() {
+        assertThrows(NullPointerException.class, () -> permutations.nPk(2, (List<String>) null));
+    }
+
+    @Test
+    void nullElementsAreRejectedWhenBuilderIsCreated() {
+        for (List<String> list : List.of(Arrays.asList(null, "B", "C"), Arrays.asList("A", null, "C"), Arrays.asList("A", "B", null))) {
+            assertThrows(NullPointerException.class, () -> permutations.nPk(2, list), "nPk " + list);
+            assertThrows(NullPointerException.class, () -> new KPermutationBuilder<>(list, 2, calculator), "constructor " + list);
+        }
+        assertThrows(NullPointerException.class, () -> permutations.nPk(1, "A", null));
+    }
+
+    @Test
+    void builderSnapshotsItsInput() {
+        List<String> input = new ArrayList<>(List.of("A", "B", "C"));
+        var snapshot = permutations.nPk(2, input);
+        var lexBefore = snapshot.lexOrder().stream().toList();
+        var combinationBefore = snapshot.combinationOrder().stream().toList();
+        var generatorCreatedEarlier = snapshot.lexOrder();
+
+        input.add("D");
+        input.set(0, "Z");
+
+        assertEquals(BigInteger.valueOf(6), snapshot.count());                    // 3P2, not 4P2
+        assertEquals(lexBefore, snapshot.lexOrder().stream().toList());
+        assertEquals(combinationBefore, snapshot.combinationOrder().stream().toList());
+        assertEquals(lexBefore, generatorCreatedEarlier.stream().toList());
+    }
+
+    @Test
+    void choiceDrawsFromTheWholeRangeWhenCountExceedsLong() {
+        // 30P15 ~ 2.0e20 > Long.MAX_VALUE: ranks >= 2^63 must be reachable
+        BigInteger twoPow63 = BigInteger.ONE.shiftLeft(63);
+        var huge = permutations.nPk(15, range(30));
+        assertTrue(huge.count().compareTo(twoPow63) > 0);
+        int draws = 200, above = 0;
+        for (List<Integer> p : huge.choice(draws, new Random(1))) {
+            int[] indices = p.stream().mapToInt(Integer::intValue).toArray();
+            if (rankOf.kPermutation(30, indices).compareTo(twoPow63) >= 0) {
+                above++;
+            }
+        }
+        // ~95.5% of all 30P15 ranks are >= 2^63; the old sampler never produced any of them
+        assertTrue(above > draws * 0.85, "only " + above + " of " + draws + " draws had rank >= 2^63");
     }
 }

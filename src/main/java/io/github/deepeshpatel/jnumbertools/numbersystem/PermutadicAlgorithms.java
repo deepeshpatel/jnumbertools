@@ -202,11 +202,41 @@ public final class PermutadicAlgorithms {
      * @param size the size of the set from which the permutation is selected.
      * @param mth_kPermutation the mᵗʰ permutation to be ranked.
      * @return the rank of the given permutation.
+     * @throws NullPointerException     if the permutation is null
+     * @throws IllegalArgumentException if size is negative, the permutation is longer than size,
+     *                                  or it contains a value outside [0, size) or a duplicate value
      */
     public static BigInteger rank(int size, int... mth_kPermutation) {
+        validateArrangement(size, mth_kPermutation);
         int degree = size - mth_kPermutation.length;
         List<Integer> permutadic = mthPermutationToPermutadic(mth_kPermutation, degree);
         return toDecimal(permutadic, degree);
+    }
+
+    /**
+     * Rejects anything that is not a k-permutation of {0, ..., size-1}. Works on a sorted copy, so it costs
+     * O(k log k) time and O(k) memory whatever the size of the set.
+     */
+    private static void validateArrangement(int size, int[] arrangement) {
+        Objects.requireNonNull(arrangement, "arrangement must not be null");
+        if (size < 0) {
+            throw new IllegalArgumentException("size must be >= 0, found " + size);
+        }
+        if (arrangement.length > size) {
+            throw new IllegalArgumentException("An arrangement of " + arrangement.length
+                    + " values cannot be selected from a set of size " + size);
+        }
+        int[] sorted = arrangement.clone();
+        Arrays.sort(sorted);
+        if (sorted.length > 0 && (sorted[0] < 0 || sorted[sorted.length - 1] >= size)) {
+            throw new IllegalArgumentException("Every value must be in [0, " + size + "), found "
+                    + (sorted[0] < 0 ? sorted[0] : sorted[sorted.length - 1]));
+        }
+        for (int i = 1; i < sorted.length; i++) {
+            if (sorted[i] == sorted[i - 1]) {
+                throw new IllegalArgumentException("Duplicate value in arrangement: " + sorted[i]);
+            }
+        }
     }
 
     /**

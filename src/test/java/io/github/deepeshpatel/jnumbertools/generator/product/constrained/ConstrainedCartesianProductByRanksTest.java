@@ -175,12 +175,13 @@ public class ConstrainedCartesianProductByRanksTest {
         }
 
         @Test
-        void shouldHandleEmptyProduct() {
+        void shouldRejectChoiceFromAnEmptyProduct() {
+            // ValidationRules.md: choice with count = 0 is an invalid-argument error (nothing can be drawn)
             var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
                     .andDistinct(2, Collections.emptyList());
 
-            var result = product.choice(3, TestBase.random).stream().toList();
-            assertEquals(0, result.size());
+            assertEquals(java.math.BigInteger.ZERO, product.count());
+            assertThrows(IllegalArgumentException.class, () -> product.choice(3, TestBase.random));
         }
 
         @Test

@@ -13,6 +13,9 @@ import java.util.List;
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 class RepetitivePermutationByRanksTest {
 
@@ -412,6 +415,45 @@ class RepetitivePermutationByRanksTest {
                 var permutations = result.stream().toList();
                 assertEquals(3, permutations.size());
             });
+        }
+    }
+
+    @Nested
+    @DisplayName("Rank source rules (ValidationRules.md)")
+    class RankSourceRules {
+
+        @Test
+        @DisplayName("Zero width: one empty permutation per rank supplied; only rank 0 is valid")
+        void zeroWidthHonoursTheRankSource() {
+            var zeroWidth = permutation.repetitive(0, List.of("A", "B"));
+            assertEquals(List.of(List.of(), List.of(), List.of()),
+                    zeroWidth.byRanks(of(BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO)).stream().toList());
+            assertThrows(IllegalArgumentException.class, () -> zeroWidth.byRanks(of(BigInteger.ONE)).stream().toList());
+        }
+
+        @Test
+        @DisplayName("Empty set with positive width: every rank is out of range")
+        void emptySetWithPositiveWidthRejectsEveryRank() {
+            var none = permutation.repetitive(2, List.<String>of());
+            assertThrows(IllegalArgumentException.class, () -> none.byRanks(of(BigInteger.ZERO)).stream().toList());
+        }
+
+        @Test
+        @DisplayName("Ranks beyond the 64-bit range are decoded as base-n digits (10^80 results)")
+        void ranksBeyondLongRangeAreDecodedInBaseN() {
+            int width = 80;
+            var builder = permutation.repetitive(width, IntStream.range(0, 10).boxed().toList());
+
+            // for base 10 the decimal digits of the rank ARE the indices (independent oracle)
+            String sixtyDigits = "123456789012345678901234567890123456789012345678901234567890";
+            List<Integer> expected = new ArrayList<>();
+            for (int i = 0; i < width - sixtyDigits.length(); i++) expected.add(0);
+            for (char c : sixtyDigits.toCharArray()) expected.add(c - '0');
+
+            assertEquals(expected, builder.byRanks(of(new BigInteger(sixtyDigits))).iterator().next());
+            assertEquals(java.util.Collections.nCopies(width, 0), builder.byRanks(of(BigInteger.ZERO)).iterator().next());
+            assertEquals(java.util.Collections.nCopies(width, 9),
+                    builder.byRanks(of(BigInteger.TEN.pow(width).subtract(BigInteger.ONE))).iterator().next());
         }
     }
 }

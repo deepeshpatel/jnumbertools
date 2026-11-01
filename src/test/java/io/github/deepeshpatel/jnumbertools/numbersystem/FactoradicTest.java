@@ -12,6 +12,11 @@ import java.math.BigInteger;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Comprehensive test suite for {@link Factoradic}.
@@ -309,6 +314,50 @@ class FactoradicTest {
         void denseSequence() {
             for (int i = 0; i < 1000; i++) {
                 assertEquals(i, Factoradic.of(i).decimalValue.intValue());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("Invalid input (ValidationRules.md: rank / unrank helpers)")
+    class InvalidInput {
+        // ValidationRules.md specifies the CONDITION (an error is signaled), not the exception type.
+
+
+        @Test
+        @DisplayName("unRank rejects a negative rank")
+        void unRankRejectsNegativeRank() {
+            assertThrows(RuntimeException.class, () -> FactoradicAlgorithms.unRank(BigInteger.valueOf(-1), 3));
+            assertThrows(RuntimeException.class, () -> FactoradicAlgorithms.unRank(BigInteger.valueOf(-1), 0));
+        }
+
+        @Test
+        @DisplayName("unRank rejects rank >= size!")
+        void unRankRejectsRankBeyondSizeFactorial() {
+            assertThrows(RuntimeException.class, () -> FactoradicAlgorithms.unRank(BigInteger.valueOf(6), 3));    // 3! = 6
+            assertThrows(RuntimeException.class, () -> FactoradicAlgorithms.unRank(BigInteger.ONE, 0));           // 0! = 1
+            assertThrows(RuntimeException.class, () -> FactoradicAlgorithms.unRank(BigInteger.TEN.pow(30), 5));
+        }
+
+        @Test
+        @DisplayName("unRank rejects a negative size")
+        void unRankRejectsNegativeSize() {
+            assertThrows(RuntimeException.class, () -> FactoradicAlgorithms.unRank(BigInteger.ZERO, -1));
+        }
+
+        @Test
+        @DisplayName("unRank is valid for every rank in [0, size!) and produces distinct permutations")
+        void unRankAcceptsEveryValidRank() {
+            for (int size = 0; size <= 5; size++) {
+                BigInteger factorial = BigInteger.ONE;
+                for (int i = 2; i <= size; i++) factorial = factorial.multiply(BigInteger.valueOf(i));
+                Set<List<Integer>> seen = new HashSet<>();
+                for (BigInteger r = BigInteger.ZERO; r.compareTo(factorial) < 0; r = r.add(BigInteger.ONE)) {
+                    int[] permutation = FactoradicAlgorithms.unRank(r, size);
+                    assertEquals(size, permutation.length);
+                    seen.add(java.util.Arrays.stream(permutation).boxed().toList());
+                }
+                assertEquals(factorial.intValueExact(), seen.size(), "size " + size);
             }
         }
     }

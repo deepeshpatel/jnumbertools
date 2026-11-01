@@ -17,6 +17,8 @@ import java.util.List;
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+import java.util.stream.IntStream;
 
 /**
  * Test class for {@link UniquePermutationByRanks}, covering mᵗʰ permutations, choice, and sampling strategies.
@@ -316,7 +318,7 @@ class UniquePermutationByRanksTest {
         @Test
         void byRanks_withNegativeRank_shouldThrowException() {
             var result = permutation.unique("A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(-1)));
-            
+
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
             }, "Negative rank should throw IllegalArgumentException");
@@ -325,7 +327,7 @@ class UniquePermutationByRanksTest {
         @Test
         void byRanks_withOutOfBoundRank_shouldThrowException() {
             var result = permutation.unique("A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(1000000000)));
-            
+
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
             }, "Out-of-bounds rank should throw IllegalArgumentException");
@@ -334,15 +336,49 @@ class UniquePermutationByRanksTest {
         @Test
         void byRanks_withValidRanks_shouldWork() {
             var result = permutation.unique("A", "B", "C").byRanks(of(
-                java.math.BigInteger.ZERO,
-                java.math.BigInteger.ONE,
-                java.math.BigInteger.valueOf(2)
+                    java.math.BigInteger.ZERO,
+                    java.math.BigInteger.ONE,
+                    java.math.BigInteger.valueOf(2)
             ));
-            
+
             assertDoesNotThrow(() -> {
                 var permutations = result.stream().toList();
                 assertEquals(3, permutations.size());
             });
+        }
+    }
+
+    @Nested
+    @DisplayName("Rank source rules (ValidationRules.md)")
+    class RankSourceRules {
+
+        @Test
+        @DisplayName("Empty set: one empty permutation per rank supplied; only rank 0 is valid")
+        void emptySetHonoursTheRankSource() {
+            var empty = permutation.unique(List.of());
+            assertEquals(List.of(List.of(), List.of(), List.of()),
+                    empty.byRanks(of(BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO)).stream().toList());
+            assertThrows(IllegalArgumentException.class, () -> empty.byRanks(of(BigInteger.ONE)).stream().toList());
+            assertThrows(IllegalArgumentException.class, () -> empty.byRanks(of(BigInteger.valueOf(-1))).stream().toList());
+        }
+
+        @Test
+        @DisplayName("Ranks beyond the 64-bit range (25! > Long.MAX_VALUE)")
+        void ranksBeyondLongRange() {
+            int n = 25;
+            var builder = permutation.unique(n);
+            BigInteger last = calculator.factorial(n).subtract(BigInteger.ONE);
+            List<Integer> identity = IntStream.range(0, n).boxed().toList();
+            List<Integer> reversed = IntStream.range(0, n).map(i -> n - 1 - i).boxed().toList();
+
+            assertEquals(identity, builder.byRanks(of(BigInteger.ZERO)).iterator().next());
+            assertEquals(reversed, builder.byRanks(of(last)).iterator().next());
+
+            for (BigInteger rank : of(BigInteger.ONE.shiftLeft(64).add(BigInteger.valueOf(5)),
+                    BigInteger.ONE.shiftLeft(80).add(BigInteger.valueOf(123)), last.divide(BigInteger.TWO))) {
+                int[] permutationOfIndices = builder.byRanks(of(rank)).iterator().next().stream().mapToInt(Integer::intValue).toArray();
+                assertEquals(rank, rankOf.uniquePermutation(permutationOfIndices), "rank " + rank);
+            }
         }
     }
 }

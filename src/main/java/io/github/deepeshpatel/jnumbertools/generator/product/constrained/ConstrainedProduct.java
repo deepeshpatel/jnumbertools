@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -113,7 +114,7 @@ public class ConstrainedProduct implements Iterable<List<Object>> {
             }
 
             hasNext = advanceIndices();
-            return result;
+            return Collections.unmodifiableList(result);   // handed to the client: must not be modifiable
         }
 
         /**

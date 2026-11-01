@@ -13,6 +13,8 @@ import java.util.List;
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+import java.util.stream.IntStream;
 
 class KPermutationByRanksTest {
 
@@ -390,6 +392,45 @@ class KPermutationByRanksTest {
                 var permutations = result.stream().toList();
                 assertEquals(3, permutations.size());
             });
+        }
+    }
+
+    @Nested
+    @DisplayName("Rank source rules (ValidationRules.md)")
+    class RankSourceRules {
+
+        @Test
+        @DisplayName("Zero selection: one empty permutation per rank supplied; only rank 0 is valid")
+        void zeroSelectionHonoursTheRankSource() {
+            var zero = permutation.nPk(0, List.of("A", "B"));
+            assertEquals(List.of(List.of(), List.of()), zero.byRanks(of(BigInteger.ZERO, BigInteger.ZERO)).stream().toList());
+            assertThrows(IllegalArgumentException.class, () -> zero.byRanks(of(BigInteger.ONE)).stream().toList());
+        }
+
+        @Test
+        @DisplayName("Selection larger than the set: every rank is out of range")
+        void selectionLargerThanSetRejectsEveryRank() {
+            var none = permutation.nPk(5, List.of("A", "B"));
+            assertThrows(IllegalArgumentException.class, () -> none.byRanks(of(BigInteger.ZERO)).stream().toList());
+        }
+
+        @Test
+        @DisplayName("Ranks beyond the 64-bit range (30P15 ~ 2.0e20)")
+        void ranksBeyondLongRange() {
+            int n = 30, k = 15;
+            List<Integer> elements = IntStream.range(0, n).boxed().toList();
+            var builder = permutation.nPk(k, elements);
+            BigInteger count = builder.count();
+            assertTrue(count.compareTo(BigInteger.ONE.shiftLeft(63)) > 0);
+
+            assertEquals(IntStream.range(0, k).boxed().toList(), builder.byRanks(of(BigInteger.ZERO)).iterator().next());
+            assertEquals(IntStream.range(0, k).map(i -> n - 1 - i).boxed().toList(),
+                    builder.byRanks(of(count.subtract(BigInteger.ONE))).iterator().next());
+
+            for (BigInteger rank : of(BigInteger.ONE.shiftLeft(66).add(BigInteger.valueOf(777)), count.divide(BigInteger.TWO))) {
+                int[] arrangement = builder.byRanks(of(rank)).iterator().next().stream().mapToInt(Integer::intValue).toArray();
+                assertEquals(rank, rankOf.kPermutation(n, arrangement), "rank " + rank);
+            }
         }
     }
 }

@@ -19,6 +19,8 @@ import java.util.TreeSet;
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * Tests for k-permutations in combination order:
@@ -236,6 +238,52 @@ class KPermutationCombinationOrderTest {
                 assertEquals(calculator.nPr(n, k).longValue(), count,
                         "n=" + n + " k=" + k);
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("Iterator contract: next() does not depend on hasNext()")
+    class NextWithoutHasNext {
+
+        @Test
+        @DisplayName("next() called 12 times without hasNext() returns all of 4P2")
+        void nextWorksWithoutHasNext() {
+            var it = permutation.nPk(2, "A", "B", "C", "D").combinationOrder().iterator();
+            Set<List<String>> seen = new HashSet<>();
+            for (int i = 0; i < 12; i++) {
+                seen.add(it.next());                       // never calls hasNext()
+            }
+            assertEquals(12, seen.size());
+            assertFalse(it.hasNext());
+            assertThrows(NoSuchElementException.class, it::next);
+        }
+
+        @Test
+        @DisplayName("hasNext() has no side effects")
+        void hasNextHasNoSideEffects() {
+            var it = permutation.nPk(2, "A", "B", "C", "D").combinationOrder().iterator();
+            for (int i = 0; i < 20; i++) {
+                assertTrue(it.hasNext());
+            }
+            int count = 0;
+            while (it.hasNext()) {
+                it.next();
+                count++;
+            }
+            assertEquals(12, count);
+        }
+
+        @Test
+        @DisplayName("next()-only traversal gives the same sequence as for-each")
+        void nextOnlyTraversalMatchesForEach() {
+            var iterable = permutation.nPk(3, "A", "B", "C", "D", "E").combinationOrder();
+            List<List<String>> expected = iterable.stream().toList();
+            var it = iterable.iterator();
+            List<List<String>> viaNext = new ArrayList<>();
+            for (int i = 0; i < expected.size(); i++) {
+                viaNext.add(it.next());
+            }
+            assertEquals(expected, viaNext);
         }
     }
 }

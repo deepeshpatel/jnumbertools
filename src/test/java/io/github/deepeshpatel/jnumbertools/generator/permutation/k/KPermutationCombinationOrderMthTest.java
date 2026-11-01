@@ -17,6 +17,9 @@ import java.util.List;
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 /**
  * Tests for k-permutations skipping by m in combination order:
@@ -232,4 +235,43 @@ class KPermutationCombinationOrderMthTest {
         }
     }
 
+    @Nested
+    @DisplayName("k >= 21 (k! no longer fits in 64 bits)")
+    class LargeK {
+
+        @Test
+        @DisplayName("22C21 combinations x 21! permutations: m = 21! selects the first permutation of each combination")
+        void firstPermutationOfEachCombinationWhenKFactorialExceedsLong() {
+            var builder = permutation.nPk(21, IntStream.range(0, 22).boxed().toList());
+            BigInteger permutationsPerCombination = calculator.factorial(21);          // 5.1e19 > Long.MAX_VALUE
+            var results = builder.combinationOrderMth(permutationsPerCombination, BigInteger.ZERO).stream().toList();
+
+            assertEquals(22, results.size());
+            for (int j = 0; j < 22; j++) {
+                int omitted = 21 - j;                       // combinations in lexicographic order omit 21, 20, ..., 0
+                List<Integer> expected = new ArrayList<>(IntStream.range(0, 22).boxed().toList());
+                expected.remove(Integer.valueOf(omitted));
+                assertEquals(expected, results.get(j), "combination #" + j);
+            }
+        }
+
+        @Test
+        @DisplayName("k = n = 21 (one combination): agrees with lexOrderMth at ranks beyond 2^62")
+        void agreesWithLexOrderMthAtDeepRanks() {
+            var builder = permutation.nPk(21, IntStream.range(0, 21).boxed().toList());
+            for (String rank : List.of("5000000000000000000", "10000000000000000000", "40000000000000000000")) {
+                BigInteger start = new BigInteger(rank);
+                assertEquals(builder.lexOrderMth(BigInteger.ONE, start).iterator().next(),
+                        builder.combinationOrderMth(BigInteger.ONE, start).iterator().next(), "rank " + rank);
+            }
+        }
+
+        @Test
+        @DisplayName("k = n = 66 (66! has 64 trailing zero bits)")
+        void kFactorialWithZeroLowBits() {
+            var builder = permutation.nPk(66, IntStream.range(0, 66).boxed().toList());
+            assertEquals(IntStream.range(0, 66).boxed().toList(), builder.combinationOrderMth(1, 0).iterator().next());
+            assertEquals(builder.lexOrderMth(1, 1).iterator().next(), builder.combinationOrderMth(1, 1).iterator().next());
+        }
+    }
 }
