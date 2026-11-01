@@ -239,10 +239,21 @@ Known places where the current Java code does not yet follow the rules above. Re
 once the code and tests are aligned. This section tracks one implementation; it is not part of
 the behavioral contract.
 
+The combination (unique, repetitive, multiset), permutation (unique, k, repetitive, multiset),
+derangement, subset and constrained Cartesian product builders follow the builder rules
+(`isEmpty()`, null elements, snapshots, immutable results, traversal and sampling). The open
+items for builders are all in the simple Cartesian product.
+
 | Rule | Current behavior | Needed change |
 |---|---|---|
-| `isEmpty()` ⇔ `count() == 0` | Permutation, derangement and subset builders follow the rule. `UniqueCombinationBuilder` and `RepetitiveCombinationBuilder` still use `elements.isEmpty() \|\| size == 0` (so `n=3, r=0` reports empty while `count() == 1`). Other combination and product builders not yet reviewed | Redefine as `count().signum() == 0`; add tests |
-| Null elements rejected during the copy (rule 7) | Permutation, k-permutation, repetitive, derangement, multiset-permutation and subset builders follow the rule. Combination and product builders not yet aligned | Use `Util.copyOfNoNulls` where each builder copies its list |
-| `rank` validates its input | `PermutadicAlgorithms.rank(5, 1,1,2)` fails with a raw index error; `rank(5, 7,0,1)` silently returns 60 | Validate distinct values in `[0, n)` |
+| `isEmpty()` ⇔ `count() == 0` | `SimpleProductBuilder` does not follow it: `simpleProductOf([]).and([1, 2])` has `count() == 0` but `isEmpty()` is `false` | Define `isEmpty()` as `count().signum() == 0`; add tests |
+| Null elements rejected during the copy (rule 7) | `SimpleProductBuilder` accepts `null` elements in `simpleProductOf(list)` and in `and(list)` | Use `Util.copyOfNoNulls` where each dimension is copied; add tests |
+| Builders snapshot their input (rule 8) | `SimpleProductBuilder` keeps the caller's lists: `count()` is unchanged after the caller edits a list, but a later `lexOrder()` reflects the edit | Copy each dimension when it is added; add tests |
+| Returned lists are immutable (rule 9) | `SimpleProductBuilder.lexOrder()` returns modifiable tuples (`lexOrderMth` and `byRanks` already return immutable ones) | Return unmodifiable tuples from `lexOrder()`; add tests |
+| `choice` on an empty domain | `SimpleProductBuilder.choice(1, random)` on an empty product returns normally instead of signaling an invalid-argument error (`sample`, and `choice(0, …)`, are correct) | Reject `choice` when `count() == 0`; add tests |
+| Simple product with an empty first dimension | `simpleProductOf([])` has `count() == 1` and yields `[[]]`, while the table says any empty dimension gives count 0 (`simpleProductOf([]).and([1, 2])` already has count 0) | Decide which is intended, then align the code or the table |
+| `rank` validates its input | Validated: `uniquePermutation`, `kPermutation`, `derangement`. Not validated: `RankOf.uniqueCombination` (`(5, -1,0,1)` returns -10, `(5, 1,1,2)` returns 3, `(2, 0,1,2)` returns -1) and `RankOf.repeatedPermutation` (`(3, 0,3,1)` returns 10, `(3, 0,-1,1)` returns -2). Both also accept a negative `n` | Validate in `CombinadicAlgorithms.rank` and `RankOf.repeatedPermutation`: `n >= 0`, values in `[0, n)`, no duplicates for combinations, arrangement not longer than `n` for combinations; add tests |
+| `RankOf.kPermutation` parameter | The parameter and Javadoc call the first argument `k` ("size of the permutation"), but it is the size of the set `n` (`kPermutation(10, 0,1,7)` is rank 5) | Rename the parameter to `n` and fix the Javadoc |
 | `FactoradicAlgorithms` digit order | `intToFactoradic` is little-endian but `intToFactoradicKnownSize` is big-endian, so `factoradicToInt(intToFactoradicKnownSize(100, 5))` returns 8 | Document the order on each method, or add a clearly named converter |
-| `EveryMthIterable` | A zero increment loops forever; `next()` past the end does not fail | Reject `increment ≤ 0`; fail past the end |
+| `EveryMthIterable` | An increment of `0` or `-1` never terminates; `next()` past the end returns a value instead of failing | Reject `increment <= 0`; fail past the end |
+| Product table rows (rule text, not code) | Two rows cannot hold literally: simple product "All dimensions contribute 1 tuple" → `[[]]` (`[A] × [1]` yields `[[A, 1]]`) and constrained product "All dimensions have count = 1" → `[[]]` (`distinct(2, [A, B])` has count 1 and yields `[[A, B]]`). Only a quantity of 0 yields `[[]]` | Reword both rows, e.g. "every dimension selects nothing (quantity 0)" |
