@@ -19,55 +19,72 @@ import java.util.*;
  * chained calls like {@code b.and(x).and(y)} are safe and {@code b} remains a
  * valid single-dimension builder throughout.
  *
- * <h2>Key optimisations vs. previous version</h2>
+ * <h2>Rules (see {@code ValidationRules.md})</h2>
  * <ul>
- *   <li>No {@code SingleListBuilder} inner class — eliminates per-rank iterator
- *       allocation that the old design required to fetch one element per dimension.</li>
- *   <li>Rank decomposition uses direct {@code list.get(index)} — O(1) per dimension.</li>
- *   <li>{@code and()} copies only the one {@code allLists} ArrayList (O(dimensions),
- *       typically 2–5 elements) instead of the previous two-list copy.</li>
- *   <li>{@code count()} result is cached; recomputed only when a new dimension is added.</li>
+ *   <li>A {@code null} dimension is a programmer error: {@link NullPointerException}.
+ *       So is a {@code null} element inside a dimension; it is detected while the list is
+ *       copied, i.e. when the builder is created, not later during iteration.</li>
+ *   <li>Every dimension is copied (snapshot): changing the caller's list afterwards has no effect
+ *       on {@link #count()} or on any generator this builder returns.</li>
+ *   <li>Generators are re-iterable (each {@code iterator()} call is a fresh traversal) and every
+ *       tuple they return is immutable.</li>
+ *   <li>{@link #isEmpty()} is {@code true} if and only if {@link #count()} is {@code 0}.</li>
  * </ul>
  *
- * <h2>Mathematical Rules</h2>
+ * <h2>Count</h2>
  * <pre>
  * ┌──────────────────────────┬───────────┬──────────────┬───────────┐
  * │ Scenario                 │ count()   │ iterator     │ isEmpty() │
  * ├──────────────────────────┼───────────┼──────────────┼───────────┤
- * │ Single empty dim         │ 1         │ [[]]         │ false     │
- * │ Multiple dims, all > 0   │ Π sizes   │ products     │ false     │
- * │ Multiple dims, any empty │ 0         │ []           │ true      │
+ * │ Any dimension empty      │ 0         │ []           │ true      │
+ * │ All dimensions non-empty │ Π sizes   │ products     │ false     │
  * └──────────────────────────┴───────────┴──────────────┴───────────┘
  * </pre>
+ * <p>
+ * This includes a single empty dimension: {@code simpleProductOf([])} has no tuples.
+ * Each tuple is the concatenation of one element per dimension, so a non-empty product never
+ * contains the empty tuple.
+ * </p>
+ *
+ * <h2>Implementation notes</h2>
+ * <ul>
+ *   <li>Rank decomposition uses direct {@code list.get(index)}: O(1) per dimension.</li>
+ *   <li>{@code and()} copies only the new dimension plus the O(dimensions) list of lists.</li>
+ *   <li>{@code count()} is computed once, whenever a dimension is added.</li>
+ * </ul>
  *
  * @author Deepesh Patel
  */
-@SuppressWarnings("unchecked")
 public final class SimpleProductBuilder implements Builder<Object> {
 
-    private final List<List<?>> allLists;
-    private final boolean emptyProduct;
-    private final BigInteger cachedCount; // always pre-computed, never null
+    private final List<List<?>> allLists;   // private snapshots; unmodifiable
+    private final BigInteger cachedCount;   // always pre-computed, never null
+    private final BigInteger[] dimSizes;    // dimSizes[i] = allLists.get(i).size(), pre-computed for rank decomposition
 
     // ── Public constructors / factory ────────────────────────────────────────
 
     /**
      * Creates a builder with a single dimension.
      *
-     * @param elements first dimension; null treated as empty list
+     * @param elements first dimension; copied, so later changes to the caller's list have no effect.
+     *                 An empty list is allowed and makes the product empty.
+     * @throws NullPointerException if {@code elements} is null or contains a null element
      */
     public SimpleProductBuilder(List<?> elements) {
-        if (elements == null) elements = Collections.emptyList();
-        this.allLists     = new ArrayList<>(List.of(elements));
-        this.emptyProduct = false;          // single empty dim is NOT an empty product
-        this.cachedCount  = computeCount(this.allLists, false);
+        this(List.<List<?>>of(snapshot(elements)), null);
     }
 
-    /** Private copy constructor used by {@link #and(List)}. */
-    private SimpleProductBuilder(List<List<?>> allLists, boolean emptyProduct) {
-        this.allLists     = allLists;       // caller already made the defensive copy
-        this.emptyProduct = emptyProduct;
-        this.cachedCount  = computeCount(allLists, emptyProduct);
+    /**
+     * Private constructor shared by the public one and {@link #and(List)}; the caller has already made the
+     * defensive copies. The second parameter only distinguishes it from the public constructor (same erasure).
+     */
+    private SimpleProductBuilder(List<List<?>> allLists, Void unused) {
+        this.allLists = allLists;
+        this.cachedCount = computeCount(allLists);
+        this.dimSizes = new BigInteger[allLists.size()];
+        for (int i = 0; i < dimSizes.length; i++) {
+            dimSizes[i] = BigInteger.valueOf(allLists.get(i).size());
+        }
     }
 
     // ── Dimension chaining ───────────────────────────────────────────────────
@@ -76,74 +93,73 @@ public final class SimpleProductBuilder implements Builder<Object> {
      * Returns a <em>new</em> builder with {@code elements} appended as the next dimension.
      * This builder is not modified.
      *
-     * @param elements the new dimension (must not be null)
+     * @param elements the new dimension; copied. An empty list is allowed and makes the product empty.
      * @return new immutable builder
-     * @throws NullPointerException if elements is null
+     * @throws NullPointerException if {@code elements} is null or contains a null element
      */
     public SimpleProductBuilder and(List<?> elements) {
-        Util.validateInput(elements);
-        List<List<?>> newLists = new ArrayList<>(allLists); // shallow copy — O(dimensions)
-        newLists.add(elements);
-        boolean newEmpty = emptyProduct || elements.isEmpty();
-        return new SimpleProductBuilder(newLists, newEmpty);
+        List<?> copy = snapshot(elements);
+        List<List<?>> newLists = new ArrayList<>(allLists.size() + 1); // O(dimensions)
+        newLists.addAll(allLists);
+        newLists.add(copy);
+        return new SimpleProductBuilder(Collections.unmodifiableList(newLists), null);
     }
 
     // ── Builder interface ────────────────────────────────────────────────────
 
     @Override
     public StreamableIterable<Object> lexOrder() {
-        if (emptyProduct) {
-            return new StreamableIteratorImpl<>(Collections.emptyIterator());
-        }
-        if (isSingleEmptyDim()) {
-            return new StreamableIteratorImpl<>(Util.emptyListIterator());
-        }
         return new SimpleProductGenerator();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>If the product is empty ({@code count() == 0}) any {@code start ≥ 0} is accepted and the
+     * generator yields nothing.</p>
+     */
     @Override
     public StreamableIterable<Object> lexOrderMth(BigInteger m, BigInteger start) {
         Util.validateLexOrderMthParams(m, start, cachedCount);
-        if (emptyProduct) {
-            return new StreamableIteratorImpl<>(Collections.emptyIterator());
-        }
-        if (isSingleEmptyDim()) {
-            return new StreamableIteratorImpl<>(Util.emptyListIterator());
-        }
         return rankBased(new EveryMthIterable(start, m, cachedCount));
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>Only a null {@code ranks} is rejected up front. The sequence is consumed lazily, one rank at a
+     * time (it may be infinite or single-use); a rank {@code < 0} or {@code ≥ count()} is reported as an
+     * {@link IllegalArgumentException} during iteration, when that rank is reached.</p>
+     */
     @Override
     public StreamableIterable<Object> byRanks(Iterable<BigInteger> ranks) {
         Util.validateByRanksParams(ranks);
-        if (isSingleEmptyDim()) {
-            // count=1; only rank 0 is valid — validate lazily to match rule-book
-            return new StreamableIteratorImpl<>(new Iterator<>() {
-                private final Iterator<BigInteger> it = ranks.iterator();
-                @Override public boolean hasNext() { return it.hasNext(); }
-                @Override public List<Object> next() {
-                    BigInteger rank = it.next();
-                    if (!rank.equals(BigInteger.ZERO))
-                        throw new IllegalArgumentException(
-                                "Rank " + rank + " out of bounds [0, 1)");
-                    return List.of();
-                }
-            });
-        }
         return rankBased(ranks);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>Sampling is with replacement, so {@code sampleSize} may exceed {@code count()}, but the product
+     * must contain at least one tuple.</p>
+     *
+     * @throws IllegalArgumentException if {@code sampleSize ≤ 0} or {@code count() == 0}
+     * @throws NullPointerException if {@code random} is null
+     */
     @Override
     public StreamableIterable<Object> choice(int sampleSize, Random random) {
-        Util.validateSampleParams(sampleSize, random, true, cachedCount);
-        if (emptyProduct) return new StreamableIteratorImpl<>(Collections.emptyIterator());
+        // BigIntegerChoice enforces: count > 0, sampleSize > 0, random != null
         return rankBased(new BigIntegerChoice(cachedCount, sampleSize, random));
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>Sampling is without replacement: {@code sampleSize > count()} (including {@code count() == 0})
+     * is an error.</p>
+     *
+     * @throws IllegalArgumentException if {@code sampleSize ≤ 0} or {@code sampleSize > count()}
+     * @throws NullPointerException if {@code random} is null
+     */
     @Override
     public StreamableIterable<Object> sample(int sampleSize, Random random) {
-        Util.validateSampleParams(sampleSize, random, false, cachedCount);
-        if (emptyProduct) return new StreamableIteratorImpl<>(Collections.emptyIterator());
+        // BigIntegerSample enforces: count > 0, 0 < sampleSize ≤ count, random != null
         return rankBased(new BigIntegerSample(cachedCount, sampleSize, random));
     }
 
@@ -154,68 +170,33 @@ public final class SimpleProductBuilder implements Builder<Object> {
 
     @Override
     public boolean isEmpty() {
-        return emptyProduct;
+        return cachedCount.signum() == 0;
     }
 
     @Override
     public String toString() {
-        return "SimpleProductBuilder{allLists=" + allLists
-                + ", count=" + cachedCount + ", isEmpty=" + emptyProduct + '}';
+        return "SimpleProductBuilder{allLists=" + allLists + ", count=" + cachedCount + '}';
     }
 
     // ── Internal helpers ─────────────────────────────────────────────────────
 
-    private boolean isSingleEmptyDim() {
-        return allLists.size() == 1 && allLists.get(0).isEmpty();
+    /** Null check + snapshot + null-element check in one pass (rules 1, 7 and 8). */
+    private static List<?> snapshot(List<?> elements) {
+        Util.validateInput(elements);
+        return Util.copyOfNoNulls(elements);
     }
 
-    private static BigInteger computeCount(List<List<?>> lists, boolean emptyProduct) {
-        if (emptyProduct) return BigInteger.ZERO;
-        if (lists.size() == 1 && lists.get(0).isEmpty()) return BigInteger.ONE;
+    private static BigInteger computeCount(List<List<?>> lists) {
         BigInteger c = BigInteger.ONE;
-        for (List<?> l : lists) c = c.multiply(BigInteger.valueOf(l.size()));
+        for (List<?> l : lists) {
+            if (l.isEmpty()) return BigInteger.ZERO;
+            c = c.multiply(BigInteger.valueOf(l.size()));
+        }
         return c;
     }
 
-    /**
-     * Rank-based iteration via direct mixed-radix decomposition on the raw lists.
-     * No intermediate Builder or iterator objects are created per element — each
-     * rank resolves to a tuple via one {@code list.get(index)} call per dimension.
-     */
     private StreamableIterable<Object> rankBased(Iterable<BigInteger> ranks) {
-        @SuppressWarnings("rawtypes")
-        final List[] dims = allLists.toArray(new List[0]);
-        final BigInteger[] dimSizes = new BigInteger[dims.length];
-        for (int i = 0; i < dims.length; i++) {
-            dimSizes[i] = BigInteger.valueOf(dims[i].size());
-        }
-        final BigInteger total = cachedCount;
-
-        return new StreamableIteratorImpl<>(new Iterator<>() {
-            private final Iterator<BigInteger> rankIt = ranks.iterator();
-
-            @Override public boolean hasNext() { return rankIt.hasNext(); }
-
-            @Override
-            public List<Object> next() {
-                if (!hasNext()) throw new NoSuchElementException();
-                BigInteger rank = rankIt.next();
-
-                if (rank.signum() < 0 || rank.compareTo(total) >= 0) {
-                    throw new IllegalArgumentException(
-                            "Rank " + rank + " is out of bounds [0, " + total + ")");
-                }
-
-                Object[] result = new Object[dims.length];
-                BigInteger remaining = rank;
-                for (int i = dims.length - 1; i >= 0; i--) {
-                    BigInteger[] qr = remaining.divideAndRemainder(dimSizes[i]);
-                    remaining = qr[0];
-                    result[i] = dims[i].get(qr[1].intValue());
-                }
-                return Arrays.asList(result);
-            }
-        });
+        return new RankBasedGenerator(ranks);
     }
 
     // ── lexOrder generator ───────────────────────────────────────────────────
@@ -226,9 +207,63 @@ public final class SimpleProductBuilder implements Builder<Object> {
 
         @Override
         public Iterator<List<Object>> iterator() {
-            List<List<Object>> lists = new ArrayList<>(allLists.size());
-            for (List<?> l : allLists) lists.add((List<Object>) l);
-            return new SimpleProduct(lists).iterator();
+            return new SimpleProduct(allLists).iterator();
+        }
+    }
+
+    // ── rank based generator (byRanks, lexOrderMth, choice, sample) ──────────
+
+    /**
+     * Rank-based iteration via direct mixed-radix decomposition on the raw lists. No intermediate
+     * Builder or iterator objects are created per element: each rank resolves to a tuple with one
+     * {@code list.get(index)} call per dimension.
+     * <p>
+     * Re-iterable: every {@code iterator()} call asks the rank source for a fresh iterator. Ranks are
+     * consumed lazily and validated when reached.
+     * </p>
+     */
+    private final class RankBasedGenerator extends AbstractGenerator<Object> {
+
+        private final Iterable<BigInteger> ranks;
+
+        RankBasedGenerator(Iterable<BigInteger> ranks) {
+            super(Collections.emptyList());
+            this.ranks = ranks;
+        }
+
+        @Override
+        public Iterator<List<Object>> iterator() {
+            return new Itr(ranks.iterator());
+        }
+    }
+
+    private final class Itr implements Iterator<List<Object>> {
+
+        private final Iterator<BigInteger> rankIt;
+
+        Itr(Iterator<BigInteger> rankIt) { this.rankIt = rankIt; }
+
+        @Override public boolean hasNext() { return rankIt.hasNext(); }
+
+        @Override
+        public List<Object> next() {
+            if (!hasNext()) throw new NoSuchElementException();
+            BigInteger rank = rankIt.next();
+
+            if (rank.signum() < 0 || rank.compareTo(cachedCount) >= 0) {
+                throw new IllegalArgumentException(
+                        "Rank " + rank + " is out of bounds [0, " + cachedCount + ")");
+            }
+
+            Object[] result = new Object[allLists.size()];
+            BigInteger remaining = rank;
+            for (int i = result.length - 1; i >= 0; i--) {
+                List<?> dim = allLists.get(i);
+                BigInteger[] qr = remaining.divideAndRemainder(dimSizes[i]);
+                remaining = qr[0];
+                result[i] = dim.get(qr[1].intValue());
+            }
+            return Collections.unmodifiableList(Arrays.asList(result));
         }
     }
 }

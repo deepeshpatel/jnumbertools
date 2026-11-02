@@ -117,7 +117,9 @@ class SimpleProductBuilderTest {
                 .and(Collections.emptyList());
         assertEquals(BigInteger.ZERO, builderWithEmpty.count());  // Changed from ONE to ZERO
 
+        // ValidationRules.md: ANY dimension that is empty makes the product empty, a single one included
         var emptyBuilder = cartesianProduct.simpleProductOf(Collections.emptyList());
-        assertEquals(BigInteger.ONE, emptyBuilder.count());  // This one is correct - single empty dim
+        assertEquals(BigInteger.ZERO, emptyBuilder.count());
+        assertTrue(emptyBuilder.isEmpty());
     }
 }

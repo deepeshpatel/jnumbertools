@@ -15,7 +15,9 @@ import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProduc
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -49,6 +51,13 @@ import java.util.Random;
  */
 @SuppressWarnings({"unchecked"})
 public final class ConstrainedProductBuilder implements Builder<Object> {
+
+    /**
+     * Most tuples, over all dimensions together, that lexOrder() keeps in memory for fast restarts. Capped by the
+     * heap (a tuple needs roughly 200 bytes; 2048 per budgeted tuple leaves a wide margin), so a small JVM
+     * materializes less. Only speed depends on this value, never the results.
+     */
+    private static final long MATERIALIZE_BUDGET = Math.min(250_000L, Runtime.getRuntime().maxMemory() / 2048);
 
     private final List<Builder<?>> builders;
     private final Calculator calculator;
@@ -260,12 +269,31 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         @Override
         @SuppressWarnings("unchecked")
         public Iterator<List<Object>> iterator() {
-            List<List<List<Object>>> all = new ArrayList<>();
-            for (var e : builders) {
-                List<List<Object>> generated = (List<List<Object>>) (List) e.lexOrder().stream().toList();
-                all.add(generated);
+            // A dimension is restarted every time a dimension to its left moves. Restarting a dimension that is
+            // held in memory is a plain list iteration; restarting a lazy one regenerates its tuples, which costs
+            // about twice as much per product tuple. So the smallest dimensions are kept in memory, as long as
+            // all of them together stay within MATERIALIZE_BUDGET tuples, and every other dimension (for example
+            // C(34,17), which can never fit) is generated lazily and never materialized.
+            // The first dimension is never restarted - it is traversed once - so keeping it in memory would only
+            // cost time up front, and it is always lazy.
+            int n = builders.size();
+            Integer[] smallestFirst = new Integer[n];
+            for (int i = 0; i < n; i++) smallestFirst[i] = i;
+            Arrays.sort(smallestFirst, Comparator.comparing(i -> builders.get(i).count()));
+
+            Iterable<List<Object>>[] dimensions = new Iterable[n];
+            long remaining = MATERIALIZE_BUDGET;
+            for (int i : smallestFirst) {
+                Builder<?> dimension = builders.get(i);
+                BigInteger count = dimension.count();
+                if (i > 0 && count.compareTo(BigInteger.valueOf(remaining)) <= 0) {
+                    remaining -= count.longValue();
+                    dimensions[i] = (List<List<Object>>) (List<?>) dimension.lexOrder().stream().toList();
+                } else {
+                    dimensions[i] = () -> (Iterator<List<Object>>) (Iterator<?>) dimension.lexOrder().iterator();
+                }
             }
-            return new ConstrainedProduct(all).iterator();
+            return new ConstrainedProduct(Arrays.asList(dimensions)).iterator();
         }
     }
 

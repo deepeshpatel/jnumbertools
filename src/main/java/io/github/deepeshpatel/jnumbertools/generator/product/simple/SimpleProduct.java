@@ -4,34 +4,50 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Generates the Cartesian product of multiple lists in lexicographical order.
+ * Generates the Cartesian product of multiple lists in lexicographical order
+ * (the rightmost dimension varies fastest).
  *
  * <h2>Mathematical Rules</h2>
  * <pre>
  * ┌─────────────────────────────────┬─────────────────────────────┐
  * │ Input                           │ Output                      │
  * ├─────────────────────────────────┼─────────────────────────────┤
- * │ No lists (empty list)           │ [[]] (one empty tuple)      │
+ * │ No lists                        │ [[]] (one empty tuple)      │
  * │ One non-empty list [A,B]        │ [A], [B]                    │
- * │ One empty list []               │ [[]] (one empty tuple)      │
+ * │ Any list empty (one or many)    │ [] (empty iterator)         │
  * │ Multiple lists, all non-empty   │ Full Cartesian product      │
- * │ Multiple lists, any empty       │ [] (empty iterator)         │
  * └─────────────────────────────────┴─────────────────────────────┘
  * </pre>
+ * <p>
+ * A single empty list is an empty dimension like any other, so it yields no tuples
+ * (see "SIMPLE CARTESIAN PRODUCT" in {@code ValidationRules.md}).
+ * </p>
+ * <p>
+ * Every call to {@link #iterator()} starts a fresh, independent traversal and every tuple it returns
+ * is immutable. This class does not copy the lists it is given; the owning
+ * {@link SimpleProductBuilder} takes the snapshot.
+ * </p>
  *
  * @author Deepesh Patel
  */
 public class SimpleProduct implements Iterable<List<Object>> {
 
-    private final List<List<Object>> allLists;
+    private final List<? extends List<?>> allLists;
 
-    public SimpleProduct(List<List<Object>> allLists) {
+    /**
+     * Intended for internal use; create instances via
+     * {@link SimpleProductBuilder#lexOrder()}, which validates and snapshots the input.
+     *
+     * @param allLists the dimensions (assumed non-null, without null elements; may be empty lists)
+     */
+    public SimpleProduct(List<? extends List<?>> allLists) {
         this.allLists = allLists;
     }
 
@@ -42,21 +58,12 @@ public class SimpleProduct implements Iterable<List<Object>> {
 
     private class SimpleProductIterator implements Iterator<List<Object>> {
 
-        private final int[] indices;
+        private final int[] indices = new int[allLists.size()];
         private boolean hasNext;
 
         SimpleProductIterator() {
-            indices = new int[allLists.size()];
-
-            if (allLists.isEmpty()) {
-                hasNext = true;
-                return;
-            }
-            if (allLists.size() > 1 && allLists.stream().anyMatch(List::isEmpty)) {
-                hasNext = false;
-                return;
-            }
-            hasNext = true;
+            // No dimensions: one empty tuple. Any empty dimension: no tuples at all.
+            hasNext = allLists.stream().noneMatch(List::isEmpty);
         }
 
         @Override
@@ -68,17 +75,13 @@ public class SimpleProduct implements Iterable<List<Object>> {
         public List<Object> next() {
             if (!hasNext) throw new NoSuchElementException();
 
-            if (allLists.isEmpty() || (allLists.size() == 1 && allLists.get(0).isEmpty())) {
-                hasNext = false;
-                return List.of();
-            }
-
-            List<Object> result = new ArrayList<>(indices.length);
+            Object[] tuple = new Object[indices.length];
             for (int i = 0; i < indices.length; i++) {
-                result.add(allLists.get(i).get(indices[i]));
+                tuple[i] = allLists.get(i).get(indices[i]);
             }
             hasNext = advanceIndices();
-            return result;
+            // The array is private to this call, so wrapping it (no copy) is safe and immutable to callers.
+            return Collections.unmodifiableList(Arrays.asList(tuple));
         }
 
         private boolean advanceIndices() {

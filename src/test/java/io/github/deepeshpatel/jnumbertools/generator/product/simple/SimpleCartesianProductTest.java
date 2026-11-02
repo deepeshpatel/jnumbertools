@@ -63,13 +63,12 @@ class SimpleCartesianProductTest {
     class EmptyDimensions {
 
         @Test
-        @DisplayName("Single empty dimension: count=1, single empty tuple")
+        @DisplayName("Single empty dimension: any empty dimension makes the product empty (count=0, no tuples)")
         void singleEmpty() {
             var b = cartesianProduct.simpleProductOf(Collections.emptyList());
-            assertEquals(BigInteger.ONE, b.count());
-            var result = b.lexOrder().stream().toList();
-            assertEquals(1, result.size());
-            assertTrue(result.get(0).isEmpty());
+            assertEquals(BigInteger.ZERO, b.count());
+            assertTrue(b.isEmpty());
+            assertTrue(b.lexOrder().stream().toList().isEmpty());
         }
 
         @Test

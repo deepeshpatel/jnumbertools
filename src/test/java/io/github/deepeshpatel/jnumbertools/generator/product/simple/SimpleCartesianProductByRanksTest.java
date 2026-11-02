@@ -18,11 +18,11 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void assertCountAndContentForSpecialCase() {
-            // Case 1: Single empty dimension -> count=1, mth(1,0) should return [[]]
+            // Case 1: Single empty dimension -> count=0 like any empty dimension; any start >= 0 is
+            // accepted (ValidationRules.md) and the generator yields nothing
             var singleEmpty = cartesianProduct.simpleProductOf(Collections.emptyList());
-            var singleEmptyResult = singleEmpty.lexOrderMth(1, 0).stream().toList();
-            assertEquals(1, singleEmptyResult.size());
-            assertEquals(List.of(), singleEmptyResult.get(0));
+            assertTrue(singleEmpty.lexOrderMth(1, 0).stream().toList().isEmpty());
+            assertTrue(singleEmpty.lexOrderMth(3, 7).stream().toList().isEmpty());
 
             // Case 2: Multiple dimensions with any empty -> count=0, mth should return []
             var multiWithEmpty = cartesianProduct.simpleProductOf(A_B)
@@ -321,11 +321,12 @@ public class SimpleCartesianProductByRanksTest {
         void shouldHandleEmptyProduct() {
             var product = cartesianProduct.simpleProductOf(Collections.emptyList());
 
-            var result = product.byRanks(List.of(BigInteger.ZERO)).stream().toList();
-
-            // Empty product has one empty tuple at rank 0
-            assertEquals(1, result.size());
-            assertEquals(List.of(), result.get(0));
+            // An empty dimension makes count=0, so even rank 0 is out of range. This is reported lazily,
+            // when the rank is reached, not when byRanks() is called.
+            var generator = product.byRanks(List.of(BigInteger.ZERO));
+            assertThrows(IllegalArgumentException.class, () -> generator.stream().toList());
+            // an empty rank sequence is still fine
+            assertTrue(product.byRanks(List.of()).stream().toList().isEmpty());
         }
 
         @Test

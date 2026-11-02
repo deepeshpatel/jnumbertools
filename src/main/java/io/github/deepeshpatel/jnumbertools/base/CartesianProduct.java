@@ -112,8 +112,14 @@ public final class CartesianProduct {
      * Example: simpleProductOf([A, B]).and([1, 2]) generates A×B = {[A,1], [A,2], [B,1], [B,2]}
      * </p>
      *
-     * @param elements the list of elements forming the first set (null treated as empty)
+     * <p>
+     * Every dimension is copied, so later changes to the caller's list have no effect. An empty list is
+     * allowed, but an empty dimension makes the whole product empty (count 0, no tuples).
+     * </p>
+     *
+     * @param elements the list of elements forming the first set (must not be null or contain null)
      * @return a SimpleProductBuilder for configuring additional dimensions
+     * @throws NullPointerException if {@code elements} is null or contains a null element
      */
     public SimpleProductBuilder simpleProductOf(List<?> elements) {
         Util.validateInput(elements);

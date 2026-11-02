@@ -4,17 +4,18 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Generates the constrained Cartesian product of multiple dimensions in lexicographical order.
+ * Generates the constrained Cartesian product of multiple dimensions in lexicographical order
+ * (the rightmost dimension varies fastest).
  * <p>
- * This class takes a list of, lists of lists, where each inner list represents a set of elements
- * (e.g., combinations or subsets), and generates the Cartesian product of these sets.
+ * Each dimension is a re-iterable source of tuples (e.g., the combinations or subsets of one set), and
+ * the product concatenates one tuple from each dimension.
  * </p>
  *
  * <h2>Mathematical Rules</h2>
@@ -23,17 +24,29 @@ import java.util.NoSuchElementException;
  * │ Input                           │ Output                      │
  * ├─────────────────────────────────┼─────────────────────────────┤
  * │ No dimensions                   │ [[]] (one empty tuple)      │
- * │ One dimension (any content)      │ elements of that dimension  │
- * │ Multiple dims, all non-empty     │ Full Cartesian product      │
- * │ Multiple dims, any empty         │ [] (empty iterator)         │
+ * │ One dimension (any content)     │ elements of that dimension  │
+ * │ Multiple dims, all non-empty    │ Full Cartesian product      │
+ * │ Any dimension without tuples    │ [] (empty iterator)         │
  * └─────────────────────────────────┴─────────────────────────────┘
  * </pre>
+ *
+ * <h2>Laziness</h2>
+ * <p>
+ * Dimensions are <em>never</em> materialized. The iterator keeps one cursor per dimension (an odometer):
+ * advancing restarts only the dimensions to the right of the one that moved. Memory use is
+ * O(number of dimensions) however many tuples a dimension has, so the first tuples of a product with a
+ * dimension such as {@code C(40,20)} are available immediately.
+ * </p>
+ * <p>
+ * Every call to {@link #iterator()} starts a fresh, independent traversal, and every tuple returned is
+ * immutable.
+ * </p>
  *
  * @author Deepesh Patel
  */
 public class ConstrainedProduct implements Iterable<List<Object>> {
 
-    private final List<List<List<Object>>> all;
+    private final List<? extends Iterable<List<Object>>> dimensions;
 
     /**
      * Constructs a ConstrainedProduct with the given dimensions.
@@ -45,11 +58,12 @@ public class ConstrainedProduct implements Iterable<List<Object>> {
      * All parameter validation and dimension configuration is handled by the builder.
      * </p>
      *
-     * @param all the list of dimensions, each dimension being a list of possible values
-     *            (assumes all inner lists are non-null, may be empty)
+     * @param dimensions the dimensions; each must be re-iterable (every {@code iterator()} call starts over
+     *                   and yields the same tuples). A plain {@code List<List<Object>>} qualifies.
+     *                   Assumes non-null; a dimension may be empty.
      */
-    public ConstrainedProduct(List<List<List<Object>>> all) {
-        this.all = all;
+    public ConstrainedProduct(List<? extends Iterable<List<Object>>> dimensions) {
+        this.dimensions = dimensions;
     }
 
     @Override
@@ -58,29 +72,28 @@ public class ConstrainedProduct implements Iterable<List<Object>> {
     }
 
     private class ConstrainedProductIterator implements Iterator<List<Object>> {
-        private final int[] indices;
-        private final int[] maxIndices;
+
+        private final int n = dimensions.size();
+        private final Iterator<List<Object>>[] cursors;
+        private final List<Object>[] current;   // the tuple each dimension currently contributes
         private boolean hasNext;
 
+        @SuppressWarnings("unchecked")
         ConstrainedProductIterator() {
-            indices = new int[all.size()];
-            maxIndices = new int[all.size()];
+            cursors = (Iterator<List<Object>>[]) new Iterator<?>[n];
+            current = (List<Object>[]) new List<?>[n];
 
-            for (int i = 0; i < all.size(); i++) {
-                maxIndices[i] = all.get(i).size();
+            // No dimensions: one empty tuple. Any dimension without tuples: no tuples at all.
+            boolean ok = true;
+            for (int i = 0; i < n && ok; i++) {
+                cursors[i] = dimensions.get(i).iterator();
+                if (cursors[i].hasNext()) {
+                    current[i] = cursors[i].next();
+                } else {
+                    ok = false;
+                }
             }
-
-            // Determine if there are any elements to iterate
-            if (all.isEmpty()) {
-                // No dimensions → one empty tuple
-                hasNext = true;
-            } else if (all.size() == 1) {
-                // Single dimension → iterate its elements
-                hasNext = !all.get(0).isEmpty();
-            } else {
-                // Multiple dimensions → product is empty if any dimension is empty
-                hasNext = all.stream().noneMatch(List::isEmpty);
-            }
+            hasNext = ok;
         }
 
         @Override
@@ -94,49 +107,37 @@ public class ConstrainedProduct implements Iterable<List<Object>> {
                 throw new NoSuchElementException("No more tuples available");
             }
 
-            // no dimensions
-            if (all.isEmpty()) {
-                hasNext = false;
-                return List.of();
+            int size = 0;
+            for (List<Object> part : current) size += part.size();
+            Object[] tuple = new Object[size];
+            int pos = 0;
+            for (List<Object> part : current) {
+                for (Object element : part) tuple[pos++] = element;
             }
 
-            // single dimension
-            if (all.size() == 1) {
-                List<Object> result = all.get(0).get(indices[0]);
-                hasNext = ++indices[0] < maxIndices[0];
-                return result;
-            }
-
-            // multiple dimensions
-            List<Object> result = new ArrayList<>();
-            for (int i = 0; i < indices.length; i++) {
-                result.addAll(all.get(i).get(indices[i]));
-            }
-
-            hasNext = advanceIndices();
-            return Collections.unmodifiableList(result);   // handed to the client: must not be modifiable
+            advance();
+            // The array is private to this call, so wrapping it (no copy) is safe; clients cannot modify it.
+            return Collections.unmodifiableList(Arrays.asList(tuple));
         }
 
-        /**
-         * Advances indices to the next combination.
-         *
-         * @return true if there is a next combination, false otherwise
-         */
-        private boolean advanceIndices() {
-            for (int i = indices.length - 1; i >= 0; i--) {
-                if (indices[i] < maxIndices[i] - 1) {
-                    indices[i]++;
-                    return true;
-                } else {
-                    indices[i] = 0;
+        /** Moves the rightmost dimension that still has tuples and restarts every dimension to its right. */
+        private void advance() {
+            for (int i = n - 1; i >= 0; i--) {
+                if (cursors[i].hasNext()) {
+                    current[i] = cursors[i].next();
+                    for (int j = i + 1; j < n; j++) {
+                        cursors[j] = dimensions.get(j).iterator();
+                        current[j] = cursors[j].next();   // non-empty: it produced a tuple when first iterated
+                    }
+                    return;
                 }
             }
-            return false;
+            hasNext = false;
         }
     }
 
     @Override
     public String toString() {
-        return String.format("ConstrainedProduct{dimensions=%d}", all.size());
+        return String.format("ConstrainedProduct{dimensions=%d}", dimensions.size());
     }
 }
