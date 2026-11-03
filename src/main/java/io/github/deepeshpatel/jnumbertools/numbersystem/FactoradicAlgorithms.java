@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v3.0.1
- * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.2
+ * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
@@ -27,7 +27,6 @@ import java.util.stream.IntStream;
  * requested number of digits) and cost a single comparison.
  * </p>
  * @author Deepesh Patel
- * @version 3.0.1
  */
 public final class FactoradicAlgorithms {
 

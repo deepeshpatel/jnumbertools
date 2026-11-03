@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v3.0.2
- * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
 
@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * stateless DerangadicAlgorithms reference implementation.
  *
  * @author Deepesh Patel & Aditya Patel
- * @version 3.0.2
  */
 public class DerangadicIncrementStateMachineTest {
 

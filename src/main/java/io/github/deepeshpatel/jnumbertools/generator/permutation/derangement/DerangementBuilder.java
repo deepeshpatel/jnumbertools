@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v3.0.2
- * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.derangement;
 
@@ -76,7 +76,6 @@ import java.util.Random;
  * @see Derangement
  * @see DerangementByRanks
  * @see io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic
- * @since 3.0.2
  */
 public final class DerangementBuilder<T> implements Builder<T> {
 

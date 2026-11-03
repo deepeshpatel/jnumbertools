@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library
- * Copyright (c) 2025 Deepesh Patel
+ * Copyright (c) 2026 Deepesh Patel
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.experiments;
 

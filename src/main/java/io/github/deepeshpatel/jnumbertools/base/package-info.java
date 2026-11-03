@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v3.0.1
- * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.2
+ * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 /**
  * Contains builder classes for the major public APIs in JNumberTools.

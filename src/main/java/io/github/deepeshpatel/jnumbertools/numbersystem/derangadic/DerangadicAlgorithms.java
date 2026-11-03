@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v3.0.2
- * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
 
@@ -98,7 +98,6 @@ import java.util.*;
  * decoded) and cost a comparison.
  * </p>
  * @author Deepesh Patel &amp; Aditya Patel
- * @since 3.0.2
  */
 public final class DerangadicAlgorithms {
 

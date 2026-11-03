@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v3.0.2
- * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
 
@@ -46,7 +46,6 @@ import java.util.Objects;
  * @author Deepesh Patel &amp; Aditya Patel
  * @see DerangadicAlgorithms internal encoding/decoding engine (not part of the stable API)
  * @see DerangadicIncrementStateMachine internal incremental-successor engine (not part of the stable API)
- * @since 3.0.2
  */
 public final class Derangadic {
 

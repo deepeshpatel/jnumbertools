@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v3.0.1
- * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.2
+ * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
@@ -159,7 +159,6 @@ public final class UnrankOf {
      * @param n    the order of the derangement ({@code n ≥ 0})
      * @return an array of {@code n} distinct indices forming the derangement
      * @throws IllegalArgumentException if {@code rank} is out of range
-     * @since 3.0.2
      */
     public int[] derangement(BigInteger rank, int n) {
         return new DerangadicAlgorithms(calculator).unrank(rank, n);
@@ -172,7 +171,6 @@ public final class UnrankOf {
      * @param rank the lexicographical rank
      * @param n    the order of the derangement
      * @return an array of {@code n} distinct indices forming the derangement
-     * @since 3.0.2
      */
     public int[] derangement(long rank, int n) {
         return derangement(BigInteger.valueOf(rank), n);

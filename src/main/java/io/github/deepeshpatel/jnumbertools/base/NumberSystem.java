@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v3.0.1
- * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.2
+ * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
@@ -221,7 +221,6 @@ public class NumberSystem {
      * @param order the order of the derangement ({@code n ≥ 2})
      * @return a {@link Derangadic} object representing the derangadic number
      * @see Derangadic
-     * @since 3.0.2
      */
     public Derangadic derangadic(long rank, int order) {
         return derangadic(BigInteger.valueOf(rank), order);
@@ -235,7 +234,6 @@ public class NumberSystem {
      * @param order the order of the derangement ({@code n ≥ 2})
      * @return a {@link Derangadic} object representing the derangadic number
      * @see Derangadic
-     * @since 3.0.2
      */
     public Derangadic derangadic(BigInteger rank, int order) {
         return new Derangadic(order, rank, calculator);

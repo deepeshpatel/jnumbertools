@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v3.0.1
- * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.2
+ * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
@@ -42,7 +42,6 @@ import java.util.*;
  * @author Deepesh Patel
  * @see MultisetPermutation
  * @see MultisetPermutationBuilder
- * @since 1.0.0
  */
 public final class MultisetPermutationByRanks<T> extends AbstractMultisetPermutation<T> {
 

@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v3.0.1
- * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.2
+ * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
@@ -143,7 +143,6 @@ public final class JNumberTools {
      *
      * @return a Derangements instance for derangement generation
      * @see Derangements
-     * @since 3.0.2
      */
     public static Derangements derangements() {
         return new Derangements();

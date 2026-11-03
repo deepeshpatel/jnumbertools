@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v3.0.1
- * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ * JNumberTools Library v3.0.2
+ * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
@@ -184,7 +184,6 @@ public final class RankOf {
      * @param derangement the derangement array (full size n, no fixed points)
      * @return the 0-based lexicographical rank of the derangement
      * @throws IllegalArgumentException if {@code derangement} is not a valid derangement
-     * @since 3.0.2
      */
     public BigInteger derangement(int... derangement) {
         return new DerangadicAlgorithms(calculator).rank(derangement, derangement.length);

@@ -1,6 +1,6 @@
 /*
  * JNumberTools Library v3.0.2
- * Copyright (c) 2025 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.experiments;
 
@@ -68,7 +68,6 @@ import java.util.Arrays;
  * even-n approach from below, odd-n from above.
  *
  * @author Deepesh Patel and Aditya Patel
- * @since 3.0.2
  */
 public final class InvolutadicCarryCounterFormula {
 
