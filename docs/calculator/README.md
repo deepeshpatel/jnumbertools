@@ -101,7 +101,7 @@ Finds the smallest n such that nCr(n, r) exceeds a given value.
 ```java
 Calculator calc = new Calculator();
 int result = calc.nCrUpperBound(3, BigInteger.valueOf(100));
-System.out.println(result); // Output: 9
+System.out.println(result); // Output: 10
 ```
 
 #### 2.4 nPr (Permutation Coefficient)
@@ -124,24 +124,15 @@ BigInteger result = calc.multinomial(2, 1, 3);
 System.out.println(result); // Output: 60
 ```
 
-#### 3.2 Total m-th Multinomial
-Calculates the total number of m-th permutations for a multiset, given a start index and step m.
-
-```java
-Calculator calc = new Calculator();
-BigInteger result = calc.totalMthMultinomial(0, 2, 2, 1, 3);
-System.out.println(result); // Output: 30
-```
-
-#### 3.3 Multiset Combinations Count All
-Computes the number of ways to select exactly s items from a multiset for all s in the range [0, ⌊total⌋/2], where total is the sum of the frequencies. Returns an array of counts for selecting 0 to ⌊total/2⌋ items, using dynamic programming.
+#### 3.2 Multiset Combinations Count All
+Computes the number of ways to select exactly s items from a multiset for each s in the range [0, ⌊total/2⌋], where total is the sum of the frequencies. Returns an array of counts for those selection sizes, using dynamic programming.
 
 ```java
 int[] result = Calculator.multisetCombinationsCountAll(2, 1);
-System.out.println(Arrays.toString(result)); // Output: [1, 2, 1]
+System.out.println(Arrays.toString(result)); // Output: [1, 2]
 ```
 
-#### 3.4 Multiset Combinations Count
+#### 3.3 Multiset Combinations Count
 Calculates the number of ways to select exactly k items from a multiset.
 
 ```java
@@ -149,7 +140,7 @@ BigInteger result = Calculator.multisetCombinationsCount(2, 2, 1);
 System.out.println(result); // Output: 2
 ```
 
-#### 3.5 Multiset Combination Count starting from given index
+#### 3.4 Multiset Combination Count starting from given index
 Counts the number of ways to select exactly k items from a multiset defined by frequencies, considering only the item types from the specified index onward.
 
 ```java

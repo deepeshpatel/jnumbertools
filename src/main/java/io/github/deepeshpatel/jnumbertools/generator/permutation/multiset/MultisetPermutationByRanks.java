@@ -24,7 +24,9 @@ import java.util.*;
  * multiset.put("A", 2);
  * multiset.put("B", 1);
  *
- * new MultisetPermutationByRanks<>(multiset, List.of(BigInteger.ZERO, BigInteger.valueOf(2)), calculator)
+ * Calculator calculator = new Calculator();
+ * new MultisetPermutationBuilder<>(multiset, calculator)
+ *     .byRanks(List.of(BigInteger.ZERO, BigInteger.valueOf(2)))
  *     .forEach(System.out::println);
  *
  * // Output:

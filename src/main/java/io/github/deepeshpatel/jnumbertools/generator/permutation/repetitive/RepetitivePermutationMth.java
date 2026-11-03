@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
@@ -14,23 +15,28 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Generates the mᵗʰ repetitive permutation of a given multiset in lexicographical order.
+ * Generates every mᵗʰ repetitive permutation of a list of elements in lexicographical order.
  * <p>
- * This class is designed to efficiently compute a specific permutation at rank m (0-based)
- * from a multiset where elements may have repetitions. The implementation uses combinatorial
- * mathematics to determine the permutation without generating all preceding permutations.
+ * This class computes permutations at regularly spaced 0-based ranks without generating
+ * the permutations between those ranks. Elements are selected from the input list, and
+ * each position is selected independently, so an element may appear more than once.
  * </p>
  * <p><b>Example:</b>
  * <pre>{@code
- * // Get the 2nd repetitive permutation of [A, A, B]
- * List<String> items = Arrays.asList("A", "A", "B");
- * int[] multiset = {2, 1}; // 2 A's, 1 B
- * RepetitivePermutationMth<String> generator = new RepetitivePermutationMth<>(items, multiset, BigInteger.valueOf(2));
- * System.out.println(generator.next()); // Outputs: [A, B, A]
+ * Calculator calculator = new Calculator();
+ * List<String> items = List.of("A", "B");
+ * RepetitivePermutationBuilder<String> builder =
+ *     new RepetitivePermutationBuilder<>(2, items, calculator);
+ *
+ * // Get permutations at ranks 1, 3, ...
+ * RepetitivePermutationMth<String> generator =
+ *     builder.lexOrderMth(BigInteger.valueOf(2), BigInteger.ONE);
+ * generator.forEach(System.out::println);
+ * // Outputs: [A, B], [B, B]
  * }</pre>
  * <p>
- * <b>Note:</b> The total number of permutations is calculated as n! / (f₁! * f₂! * ... * fₖ!),
- * where n is the total number of elements, and fᵢ are the frequencies of distinct elements.
+ * <b>Note:</b> For n input elements and permutation width r, the total number of
+ * repetitive permutations is nʳ.
  * </p>
  *
  * @param <T> the type of elements in the permutation

@@ -154,7 +154,7 @@ public final class MultisetPermutationBuilder<T> implements Builder<T> {
      *
      * @param options a {@link LinkedHashMap} containing elements as keys and their frequencies as values
      * @param calculator an instance of {@link Calculator} for performing combinatorial computations
-     * @throws IllegalArgumentException if {@code options} is null, empty, or contains non-positive frequencies
+     * @throws NullPointerException if {@code options} is null or contains a null key or frequency
      */
     public MultisetPermutationBuilder(LinkedHashMap<T, Integer> options, Calculator calculator) {
         // filterZeroFrequencies returns a new filtered copy (it does not mutate its argument).

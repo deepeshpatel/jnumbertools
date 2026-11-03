@@ -32,9 +32,9 @@ import java.util.Objects;
  * <pre>
  * RankOf rankOf = new RankOf();
  *
- * // Rank of 2-permutation [1,0] from set of size 3
- * BigInteger rank = rankOf.kPermutation(2, 1, 0);
- * System.out.println(rank); // Rank of [1,0] among 3P2 = 6 permutations
+ * // Rank of 2-permutation [1,0] from a set of size 3
+ * BigInteger rank = rankOf.kPermutation(3, 1, 0);
+ * System.out.println(rank); // 2 (the third permutation in lexicographical order)
  * </pre>
  *
  * <h3>Ranking Unique Permutations</h3>
@@ -91,20 +91,21 @@ public final class RankOf {
     /**
      * Calculates the lexicographical rank of a k-permutation (`ⁿPₖ`).
      * <p>
-     * Ranks a permutation of k distinct elements selected from {0, 1, ..., n-1}, where
-     * the input array contains k distinct indices in lexicographical order.
+     * Ranks a permutation of {@code permutation.length} distinct elements selected from
+     * {@code {0, 1, ..., n-1}}, where {@code n} is the size of the source set.
+     * The input array contains the selected indices in lexicographical order.
      * </p>
      *
-     * @param k the size of the permutation (k ≥ 0)
+     * @param n the size of the source set (n ≥ 0)
      * @param permutation the array of k distinct indices
      * @return the rank of the k-permutation
      * @throws NullPointerException     if the permutation is null
-     * @throws IllegalArgumentException if k is negative, the permutation is longer than k, or it contains a
-     *                                  value outside [0, k) or a duplicate value
+     * @throws IllegalArgumentException if n is negative, the permutation is longer than n, or it contains a
+     *                                  value outside [0, n) or a duplicate value
      */
-    public BigInteger kPermutation(int k, int... permutation) {
-        validateArrangement(k, permutation);
-        return PermutadicAlgorithms.rank(k, permutation);
+    public BigInteger kPermutation(int n, int... permutation) {
+        validateArrangement(n, permutation);
+        return PermutadicAlgorithms.rank(n, permutation);
     }
 
     /**

@@ -241,25 +241,40 @@ conversion (for example a rank that cannot be encoded) remain where the conversi
 
 ## IMPLEMENTATION STATUS (Java reference implementation)
 
-Known places where the current Java code does not yet follow the rules above. Remove an entry
-once the code and tests are aligned. This section tracks one implementation; it is not part of
-the behavioral contract.
+This section tracks the current Java implementation against the behavioral contract above. The
+rules above are unchanged and remain the source of truth. Concrete Java exception classes are
+implementation details; the status below records them only where they currently differ from the
+required error category.
+
+### Builder validation and generation
 
 The combination (unique, repetitive, multiset), permutation (unique, k, repetitive, multiset),
-derangement, subset and constrained Cartesian product builders follow the builder rules
-(`isEmpty()`, null elements, snapshots, immutable results, traversal and sampling). The open
-items for builders are all in the simple Cartesian product.
+derangement, subset, constrained Cartesian product and simple Cartesian product builders implement
+the documented count, emptiness, snapshot, immutability, re-iterability, traversal and sampling
+behaviors in the current source.
 
-| Rule | Current behavior | Needed change |
+The six simple Cartesian product issues previously listed here are resolved:
+
+| Rule | Current implementation | Verification |
 |---|---|---|
-| `isEmpty()` ⇔ `count() == 0` | `SimpleProductBuilder` does not follow it: `simpleProductOf([]).and([1, 2])` has `count() == 0` but `isEmpty()` is `false` | Define `isEmpty()` as `count().signum() == 0`; add tests |
-| Null elements rejected during the copy (rule 7) | `SimpleProductBuilder` accepts `null` elements in `simpleProductOf(list)` and in `and(list)` | Use `Util.copyOfNoNulls` where each dimension is copied; add tests |
-| Builders snapshot their input (rule 8) | `SimpleProductBuilder` keeps the caller's lists: `count()` is unchanged after the caller edits a list, but a later `lexOrder()` reflects the edit | Copy each dimension when it is added; add tests |
-| Returned lists are immutable (rule 9) | `SimpleProductBuilder.lexOrder()` returns modifiable tuples (`lexOrderMth` and `byRanks` already return immutable ones) | Return unmodifiable tuples from `lexOrder()`; add tests |
-| Generators are re-iterable (rule 9) | `SimpleProductBuilder.lexOrderMth(..)` and `byRanks(..)` return a single-use wrapper around one iterator: the second traversal of the same generator is empty (`lexOrder()` and the constrained product are fine) | Return a re-iterable generator, as the constrained product does; add tests |
-| `choice` on an empty domain | `SimpleProductBuilder.choice(1, random)` on an empty product returns normally instead of signaling an invalid-argument error (`sample`, and `choice(0, …)`, are correct) | Reject `choice` when `count() == 0`; add tests |
-| Simple product with an empty first dimension | `simpleProductOf([])` has `count() == 1` and yields `[[]]`, while the table says any empty dimension gives count 0 (`simpleProductOf([]).and([1, 2])` already has count 0) | Decide which is intended, then align the code or the table |
-| `RankOf.kPermutation` parameter | The parameter and Javadoc call the first argument `k` ("size of the permutation"), but it is the size of the set `n` (`kPermutation(10, 0,1,7)` is rank 5) | Rename the parameter to `n` and fix the Javadoc |
-| `FactoradicAlgorithms` digit order | `intToFactoradic` is little-endian but `intToFactoradicKnownSize` is big-endian, so `factoradicToInt(intToFactoradicKnownSize(100, 5))` returns 8 | Document the order on each method, or add a clearly named converter |
-| `EveryMthIterable` | An increment of `0` or `-1` never terminates; `next()` past the end returns a value instead of failing | Reject `increment <= 0`; fail past the end |
-| Product table rows (rule text, not code) | Two rows cannot hold literally: simple product "All dimensions contribute 1 tuple" → `[[]]` (`[A] × [1]` yields `[[A, 1]]`) and constrained product "All dimensions have count = 1" → `[[]]` (`distinct(2, [A, B])` has count 1 and yields `[[A, B]]`). Only a quantity of 0 yields `[[]]` | Reword both rows, e.g. "every dimension selects nothing (quantity 0)" |
+| `isEmpty()` iff `count() == 0` | `SimpleProductBuilder.isEmpty()` checks `cachedCount.signum() == 0`. | `SimpleProductValidationRulesTest.isEmptyIsTrueExactlyWhenCountIsZero` |
+| Reject null elements while copying each dimension | The constructor and `and()` call `snapshot()`, which uses `Util.copyOfNoNulls`. | `SimpleProductValidationRulesTest.nullElementsAreRejectedWhenBuilderIsCreated` |
+| Snapshot caller-owned dimensions | Each dimension is copied before being stored; `and()` returns a new builder. | `SimpleProductValidationRulesTest.builderSnapshotsItsInput`; `andDoesNotChangeTheBuilderItWasCalledOn` |
+| Immutable tuples from every generator | `lexOrder()` delegates to `SimpleProduct`, and rank-based generation wraps each tuple as an unmodifiable list. | `SimpleProductValidationRulesTest.resultsAreImmutable` |
+| Re-iterable generators | `lexOrder()`, `lexOrderMth()`, and `byRanks()` create fresh iterators for each traversal. | `SimpleProductValidationRulesTest.generatorsAreReIterable` |
+| Reject `choice()` on an empty domain | `BigIntegerChoice` validation rejects a non-positive domain count. | `SimpleProductValidationRulesTest.choiceFromAnEmptyProductIsRejected` |
+
+### Remaining discrepancies
+
+The following shared validation cases still differ from the error categories specified in the
+rules above. They are not simple-Cartesian-product-specific; the shared validators are used by
+multiple builders.
+
+| Rule | Current Java behavior | Needed change |
+|---|---|---|
+| Null `ranks` passed to `byRanks(ranks)` is a null-input error | `Util.validateByRanksParams()` throws `IllegalArgumentException` for a null iterable. Existing tests across builders currently assert this exception. | Decide whether the behavioral contract or the established Java API is intended to take precedence. If the contract remains unchanged, signal a null-input error and update the affected tests. |
+| Null `m` or `start` passed to `lexOrderMth(m, start)` is a null-input error | `Util.validateLexOrderMthParams()` currently classifies either null value as `IllegalArgumentException`. | If null values are covered by the general null-input rule, signal a null-input error and add/update tests for both arguments. |
+
+No other outstanding builder discrepancy is recorded here. This statement is based on inspection of
+the current source and the corresponding validation tests; it is not a claim that the test suite was
+rerun as part of this documentation update.
