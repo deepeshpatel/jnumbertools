@@ -122,7 +122,7 @@ public class KPermutationByRanks<T> extends AbstractKPermutation<T> {
                 throw new IllegalArgumentException("Rank " + rank + " is out of bounds [0, " + nPk + ")");
             }
 
-            int[] next = PermutadicAlgorithms.unRankWithoutBoundCheck(rank, elements.size(), k);
+            int[] next = PermutadicAlgorithms.unRank(rank, elements.size(), k);
             return indicesToValues(next);
         }
     }

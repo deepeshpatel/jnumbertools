@@ -257,7 +257,7 @@ public final class PermutadicAlgorithms {
      * @return an array of length k representing the k-permutation at the specified rank
      * @see PermutadicAlgorithms#unRankWithBoundCheck(BigInteger, int, int, Calculator)
      */
-    public static int[] unRankWithoutBoundCheck(BigInteger rank, int size, int k) {
+    public static int[] unRank(BigInteger rank, int size, int k) {
         List<Integer> permutadic = toPermutadic(rank, size - k);
         return toMthPermutation(permutadic, size, k);
     }

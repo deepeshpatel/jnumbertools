@@ -4,7 +4,6 @@
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
-import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -13,12 +12,10 @@ import java.math.BigInteger;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static org.junit.jupiter.api.Assertions.*;
-import java.util.List;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Comprehensive test suite for {@link Permutadic} and {@link PermutadicAlgorithms}.
@@ -263,12 +260,12 @@ class PermutadicTest {
     class LowLevelAlgorithms {
 
         @Test
-        @DisplayName("unRankWithoutBoundCheck then rank round-trips for n=10, k=5")
+        @DisplayName("unRank then rank round-trips for n=10, k=5")
         void lowLevelRoundTrip() {
             int n = 10, k = 5;
             long total = calculator.nPr(n, k).longValue();
             for (long rank = 0; rank < total; rank += 10) { // sample every 10th
-                var array = PermutadicAlgorithms.unRankWithoutBoundCheck(
+                var array = PermutadicAlgorithms.unRank(
                         BigInteger.valueOf(rank), n, k);
                 var recovered = PermutadicAlgorithms.rank(n, array);
                 assertEquals(BigInteger.valueOf(rank), recovered,
@@ -277,10 +274,10 @@ class PermutadicTest {
         }
 
         @Test
-        @DisplayName("unRankWithoutBoundCheck at rank 0 gives [0,1,...,k-1]")
+        @DisplayName("unRank at rank 0 gives [0,1,...,k-1]")
         void lowLevelRank0() {
             int n = 7, k = 4;
-            var array = PermutadicAlgorithms.unRankWithoutBoundCheck(BigInteger.ZERO, n, k);
+            var array = PermutadicAlgorithms.unRank(BigInteger.ZERO, n, k);
             assertArrayEquals(new int[]{0, 1, 2, 3}, array,
                     "rank 0 should produce identity k-permutation");
         }
@@ -299,7 +296,7 @@ class PermutadicTest {
         var rank = calculator.nPr(n, k).divide(BigInteger.TWO);
         var trillion = new BigInteger("1000000000000");
         for (int i = 0; i <= 1000; i++) {
-            var array = PermutadicAlgorithms.unRankWithoutBoundCheck(rank, n, k);
+            var array = PermutadicAlgorithms.unRank(rank, n, k);
             var calculatedRank = PermutadicAlgorithms.rank(n, array);
             assertEquals(rank, calculatedRank,
                     "stress test failed at iteration " + i + " rank=" + rank);
