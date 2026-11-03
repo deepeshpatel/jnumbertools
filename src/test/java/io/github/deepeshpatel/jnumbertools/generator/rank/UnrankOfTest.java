@@ -97,11 +97,13 @@ public class UnrankOfTest {
     class UniqueCombinationTests {
 
         @Test
-        @DisplayName("uniqueCombination(rank=35, n=5, k=3) = [2,3,4]")
+        @DisplayName("uniqueCombination(rank=9, n=5, k=3) = [2,3,4], the last of 5C3 = 10 combinations")
         void correctCombination() {
-            int[] expected = {2, 3, 4};
-            int[] combination = unrankOf.uniqueCombination(BigInteger.valueOf(35), 5, 3);
-            assertArrayEquals(expected, combination);
+            // rank 35 used to be accepted and silently returned the last combination; it is out of range
+            // (see RankUnrankValidationRulesTest)
+            assertArrayEquals(new int[]{0, 1, 2}, unrankOf.uniqueCombination(BigInteger.ZERO, 5, 3));
+            assertArrayEquals(new int[]{0, 1, 3}, unrankOf.uniqueCombination(BigInteger.ONE, 5, 3));
+            assertArrayEquals(new int[]{2, 3, 4}, unrankOf.uniqueCombination(BigInteger.valueOf(9), 5, 3));
         }
     }
 

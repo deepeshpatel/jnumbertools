@@ -55,10 +55,13 @@ public class RankOfTest {
     class CombinationRanksTests {
 
         @Test
-        @DisplayName("uniqueCombination(5,2,1,0) = rank 2")
+        @DisplayName("uniqueCombination(5, {0,1,2}) = rank 0, {0,1,3} = 1, {2,3,4} = 9 (5C3 = 10)")
         void uniqueCombinationRank() {
-            BigInteger rank = rankOf.uniqueCombination(5, 2, 1, 0);
-            assertEquals(2, rank.intValue());
+            // the combination is the ascending list of indices (a descending {2,1,0} is rejected, see
+            // RankUnrankValidationRulesTest)
+            assertEquals(0, rankOf.uniqueCombination(5, 0, 1, 2).intValue());
+            assertEquals(1, rankOf.uniqueCombination(5, 0, 1, 3).intValue());
+            assertEquals(9, rankOf.uniqueCombination(5, 2, 3, 4).intValue());
         }
     }
 

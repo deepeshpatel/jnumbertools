@@ -4,7 +4,6 @@
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.datastructure.FenwickTree;
 
 import java.math.BigInteger;
@@ -35,10 +34,16 @@ import java.util.*;
  * <li>Compute the mᵗʰ permutation from a Permutadic representation: {@link #toMthPermutation(List, int, int)}</li>
  * <li>Convert an mᵗʰ permutation to Permutadic representation: {@link #mthPermutationToPermutadic(int[], int)}</li>
  * <li>Rank a permutation: {@link #rank(int, int...)}</li>
- * <li>Un-rank a permutation with or without bound checks: {@link #unRankWithoutBoundCheck(BigInteger, int, int)}, {@link #unRankWithBoundCheck(BigInteger, int, int, Calculator)}</li>
+ * <li>Un-rank a permutation (no bound check): {@link #unRank(BigInteger, int, int)}</li>
  * </ul>
  * </p>
  *
+ * <p>
+ * <strong>Implementation class: intended to be used through {@link io.github.deepeshpatel.jnumbertools.base.RankOf} and
+ * {@link io.github.deepeshpatel.jnumbertools.base.UnrankOf} (and the builders).</strong> Those validate their input (null, negative sizes, duplicate or
+ * out-of-range values, ranks outside [0, nPk), ...) as described in {@code ValidationRules.md}. The methods here
+ * assume valid input and do not check it, so that internal callers that already hold valid values pay nothing.
+ * </p>
  * @author Deepesh Patel
  */
 public final class PermutadicAlgorithms {
@@ -202,41 +207,13 @@ public final class PermutadicAlgorithms {
      * @param size the size of the set from which the permutation is selected.
      * @param mth_kPermutation the mᵗʰ permutation to be ranked.
      * @return the rank of the given permutation.
-     * @throws NullPointerException     if the permutation is null
-     * @throws IllegalArgumentException if size is negative, the permutation is longer than size,
-     *                                  or it contains a value outside [0, size) or a duplicate value
+     * @see {@link io.github.deepeshpatel.jnumbertools.base.RankOf}
+
      */
     public static BigInteger rank(int size, int... mth_kPermutation) {
-        validateArrangement(size, mth_kPermutation);
         int degree = size - mth_kPermutation.length;
         List<Integer> permutadic = mthPermutationToPermutadic(mth_kPermutation, degree);
         return toDecimal(permutadic, degree);
-    }
-
-    /**
-     * Rejects anything that is not a k-permutation of {0, ..., size-1}. Works on a sorted copy, so it costs
-     * O(k log k) time and O(k) memory whatever the size of the set.
-     */
-    private static void validateArrangement(int size, int[] arrangement) {
-        Objects.requireNonNull(arrangement, "arrangement must not be null");
-        if (size < 0) {
-            throw new IllegalArgumentException("size must be >= 0, found " + size);
-        }
-        if (arrangement.length > size) {
-            throw new IllegalArgumentException("An arrangement of " + arrangement.length
-                    + " values cannot be selected from a set of size " + size);
-        }
-        int[] sorted = arrangement.clone();
-        Arrays.sort(sorted);
-        if (sorted.length > 0 && (sorted[0] < 0 || sorted[sorted.length - 1] >= size)) {
-            throw new IllegalArgumentException("Every value must be in [0, " + size + "), found "
-                    + (sorted[0] < 0 ? sorted[0] : sorted[sorted.length - 1]));
-        }
-        for (int i = 1; i < sorted.length; i++) {
-            if (sorted[i] == sorted[i - 1]) {
-                throw new IllegalArgumentException("Duplicate value in arrangement: " + sorted[i]);
-            }
-        }
     }
 
     /**
@@ -255,31 +232,10 @@ public final class PermutadicAlgorithms {
      * @param size the total number of elements (n)
      * @param k the number of elements to select for the permutation
      * @return an array of length k representing the k-permutation at the specified rank
-     * @see PermutadicAlgorithms#unRankWithBoundCheck(BigInteger, int, int, Calculator)
+     * @see {@link io.github.deepeshpatel.jnumbertools.base.UnrankOf}
      */
     public static int[] unRank(BigInteger rank, int size, int k) {
         List<Integer> permutadic = toPermutadic(rank, size - k);
         return toMthPermutation(permutadic, size, k);
-    }
-
-    /**
-     * Un-ranks a permutation with bound checking.
-     *
-     * @param rank the rank of the permutation to be un-ranked.
-     * @param size the size of the set from which the permutation is selected.
-     * @param k the number of items to be selected for the permutation.
-     * @param calculator the Calculator instance for combinatorial computations
-     * @return an array representing the un-ranked permutation.
-     * @throws ArithmeticException if the rank is out of the valid range.
-     */
-    public static int[] unRankWithBoundCheck(BigInteger rank, int size, int k, Calculator calculator) {
-        BigInteger max = calculator.nPr(size, k);
-        if (rank.signum() < 0 || rank.compareTo(max) >= 0) {
-            throw new ArithmeticException(
-                    String.format("Out of range. Can't decode %d to mᵗʰ permutation as it is < 0 or ≥ Permutation(%d,%d)",
-                            rank, size, k)
-            );
-        }
-        return unRankWithoutBoundCheck(rank, size, k);
     }
 }

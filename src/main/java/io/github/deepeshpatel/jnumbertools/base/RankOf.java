@@ -10,6 +10,8 @@ import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlg
 import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
 
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Calculates the lexicographical rank of permutations and combinations.
@@ -96,8 +98,12 @@ public final class RankOf {
      * @param k the size of the permutation (k ≥ 0)
      * @param permutation the array of k distinct indices
      * @return the rank of the k-permutation
+     * @throws NullPointerException     if the permutation is null
+     * @throws IllegalArgumentException if k is negative, the permutation is longer than k, or it contains a
+     *                                  value outside [0, k) or a duplicate value
      */
     public BigInteger kPermutation(int k, int... permutation) {
+        validateArrangement(k, permutation);
         return PermutadicAlgorithms.rank(k, permutation);
     }
 
@@ -110,8 +116,12 @@ public final class RankOf {
      *
      * @param permutation the array of n distinct indices
      * @return the rank of the unique permutation
+     * @throws NullPointerException     if the permutation is null
+     * @throws IllegalArgumentException if it contains a value outside [0, n) or a duplicate value
      */
     public BigInteger uniquePermutation(int... permutation) {
+        Objects.requireNonNull(permutation, "permutation must not be null");
+        validateArrangement(permutation.length, permutation);
         return PermutadicAlgorithms.rank(permutation.length, permutation);
     }
 
@@ -120,19 +130,29 @@ public final class RankOf {
      * <p>
      * Ranks a permutation of r elements selected from {0, 1, ..., n-1} with repetition,
      * where the input array contains r indices (each 0 to n-1) in lexicographical order.
+     * The rank is the base-n value of the digit string, most significant digit first, and is exact however
+     * long the string is.
      * </p>
      *
-     * @param n the number of distinct elements
+     * @param n the number of distinct elements (n ≥ 0)
      * @param permutation the array of r indices with possible repetition
      * @return the rank of the repeated permutation
+     * @throws NullPointerException     if the array or any of its elements is null
+     * @throws IllegalArgumentException if n is negative or any value is outside [0, n)
      */
     public BigInteger repeatedPermutation(int n, Integer... permutation) {
+        Objects.requireNonNull(permutation, "permutation must not be null");
+        if (n < 0) {
+            throw new IllegalArgumentException("n must be >= 0, found " + n);
+        }
+        BigInteger base = BigInteger.valueOf(n);
         BigInteger result = BigInteger.ZERO;
-        long power = 1;
-        for (int i = permutation.length - 1; i >= 0; i--) {
-            long placeValue = permutation[i] * power;
-            result = result.add(BigInteger.valueOf(placeValue));
-            power *= n;
+        for (Integer digit : permutation) {
+            Objects.requireNonNull(digit, "permutation must not contain null");
+            if (digit < 0 || digit >= n) {
+                throw new IllegalArgumentException("Every value must be in [0, " + n + "), found " + digit);
+            }
+            result = result.multiply(base).add(BigInteger.valueOf(digit));   // Horner: no power to overflow
         }
         return result;
     }
@@ -141,14 +161,19 @@ public final class RankOf {
      * Calculates the lexicographical rank of a unique combination (`ⁿCᵣ`).
      * <p>
      * Ranks a combination of r distinct elements selected from {0, 1, ..., n-1} without
-     * repetition, where the input array contains r distinct indices in lexicographical order.
+     * repetition, where the input array contains r distinct indices in lexicographical order
+     * (strictly ascending).
      * </p>
      *
-     * @param n the number of distinct elements
-     * @param combination the array of r distinct indices
+     * @param n the number of distinct elements (n ≥ 0)
+     * @param combination the array of r distinct, strictly ascending indices
      * @return the rank of the unique combination
+     * @throws NullPointerException     if the combination is null
+     * @throws IllegalArgumentException if n is negative, the combination is longer than n, or its values are
+     *                                  not strictly ascending values in [0, n)
      */
     public BigInteger uniqueCombination(int n, int... combination) {
+        validateCombination(n, combination);
         return new CombinadicAlgorithms(calculator).rank(n, combination);
     }
 
@@ -162,5 +187,61 @@ public final class RankOf {
      */
     public BigInteger derangement(int... derangement) {
         return new DerangadicAlgorithms(calculator).rank(derangement, derangement.length);
+    }
+
+    // ── Input validation ────────────────────────────────────────────────────────────────────────
+    // These helpers are the user-facing entry points, so they own the validation described in
+    // ValidationRules.md ("RANK / UNRANK HELPERS"). The numbersystem classes they delegate to assume valid input.
+
+    /**
+     * Rejects anything that is not a k-permutation of {0, ..., size-1}. Works on a sorted copy, so it costs
+     * O(k log k) time and O(k) memory whatever the size of the set.
+     */
+    private static void validateArrangement(int size, int[] arrangement) {
+        Objects.requireNonNull(arrangement, "arrangement must not be null");
+        if (size < 0) {
+            throw new IllegalArgumentException("size must be >= 0, found " + size);
+        }
+        if (arrangement.length > size) {
+            throw new IllegalArgumentException("An arrangement of " + arrangement.length
+                    + " values cannot be selected from a set of size " + size);
+        }
+        int[] sorted = arrangement.clone();
+        Arrays.sort(sorted);
+        if (sorted.length > 0 && (sorted[0] < 0 || sorted[sorted.length - 1] >= size)) {
+            throw new IllegalArgumentException("Every value must be in [0, " + size + "), found "
+                    + (sorted[0] < 0 ? sorted[0] : sorted[sorted.length - 1]));
+        }
+        for (int i = 1; i < sorted.length; i++) {
+            if (sorted[i] == sorted[i - 1]) {
+                throw new IllegalArgumentException("Duplicate value in arrangement: " + sorted[i]);
+            }
+        }
+    }
+
+    /**
+     * Rejects anything that is not a combination of {0, ..., n-1} in canonical (strictly ascending) form.
+     * A single O(r) pass, with no copy: ascending order makes the duplicate and the range checks trivial.
+     */
+    private static void validateCombination(int n, int[] combination) {
+        Objects.requireNonNull(combination, "combination must not be null");
+        if (n < 0) {
+            throw new IllegalArgumentException("n must be >= 0, found " + n);
+        }
+        if (combination.length > n) {
+            throw new IllegalArgumentException("A combination of " + combination.length
+                    + " values cannot be selected from a set of size " + n);
+        }
+        for (int i = 0; i < combination.length; i++) {
+            int value = combination[i];
+            if (value < 0 || value >= n) {
+                throw new IllegalArgumentException("Every value must be in [0, " + n + "), found " + value);
+            }
+            if (i > 0 && value <= combination[i - 1]) {
+                throw new IllegalArgumentException(value == combination[i - 1]
+                        ? "Duplicate value in combination: " + value
+                        : "Combination must be in ascending order, but " + value + " follows " + combination[i - 1]);
+            }
+        }
     }
 }

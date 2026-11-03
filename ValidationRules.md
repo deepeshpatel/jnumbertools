@@ -223,6 +223,12 @@ reproducible.
 Helpers that convert between an arrangement and its rank are called directly by users, so they
 validate their own input.
 
+**Where the validation lives (Java reference implementation).** In the user-facing `RankOf` and
+`UnrankOf` classes. The number-system classes they delegate to (`PermutadicAlgorithms`,
+`CombinadicAlgorithms`, ...) are implementation classes: they assume valid input, so the builders, which
+only pass values they have already checked, pay nothing for validation. Checks that are intrinsic to a
+conversion (for example a rank that cannot be encoded) remain where the conversion detects them.
+
 | Operation | Condition | Throws |
 |---|---|---|
 | any `unrank` | rank `< 0` | invalid-argument error |
@@ -253,8 +259,6 @@ items for builders are all in the simple Cartesian product.
 | Generators are re-iterable (rule 9) | `SimpleProductBuilder.lexOrderMth(..)` and `byRanks(..)` return a single-use wrapper around one iterator: the second traversal of the same generator is empty (`lexOrder()` and the constrained product are fine) | Return a re-iterable generator, as the constrained product does; add tests |
 | `choice` on an empty domain | `SimpleProductBuilder.choice(1, random)` on an empty product returns normally instead of signaling an invalid-argument error (`sample`, and `choice(0, …)`, are correct) | Reject `choice` when `count() == 0`; add tests |
 | Simple product with an empty first dimension | `simpleProductOf([])` has `count() == 1` and yields `[[]]`, while the table says any empty dimension gives count 0 (`simpleProductOf([]).and([1, 2])` already has count 0) | Decide which is intended, then align the code or the table |
-| `rank` validates its input | Validated: `uniquePermutation`, `kPermutation`, `derangement`. Not validated: `RankOf.uniqueCombination` (`(5, -1,0,1)` returns -10, `(5, 1,1,2)` returns 3, `(2, 0,1,2)` returns -1) and `RankOf.repeatedPermutation` (`(3, 0,3,1)` returns 10, `(3, 0,-1,1)` returns -2). Both also accept a negative `n`. `uniqueCombination` expects ascending indices (Javadoc: "lexicographical order"); descending input gives non-unique numbers (`{2,1,0}`, `{3,1,0}`, `{4,1,0}` all return 2), and `RankOfTest` currently pins `(5, 2,1,0) == 2` although the rank of {0,1,2} is 0 | Validate in `CombinadicAlgorithms.rank` and `RankOf.repeatedPermutation`: `n >= 0`, values in `[0, n)`, no duplicates for combinations, arrangement not longer than `n` for combinations; decide whether non-ascending combinations are rejected (then change that `RankOfTest` case to `(5, 0,1,2) == 0`); add tests |
-| `unrank` validates its input | `UnrankOf.uniqueCombination` validates nothing: rank -1 returns `[-1, 3, 4]` (a negative index), ranks 10, 11 and 35 of 5C3 (10 combinations) all return the last combination `[2, 3, 4]`, `(rank 0, n=3, k=5)` returns `[-2, -1, 0, 1, 2]`, `n = -1` returns `[]` and `k = -1` throws `NegativeArraySizeException`. `UnrankOfTest` currently pins rank 35 of 5C3 = `[2, 3, 4]` | Reject rank `< 0` or `>= nCr(n, k)` (so every rank when `k > n`), and negative `n` or `k`; change that `UnrankOfTest` case to rank 9; add tests |
 | `RankOf.kPermutation` parameter | The parameter and Javadoc call the first argument `k` ("size of the permutation"), but it is the size of the set `n` (`kPermutation(10, 0,1,7)` is rank 5) | Rename the parameter to `n` and fix the Javadoc |
 | `FactoradicAlgorithms` digit order | `intToFactoradic` is little-endian but `intToFactoradicKnownSize` is big-endian, so `factoradicToInt(intToFactoradicKnownSize(100, 5))` returns 8 | Document the order on each method, or add a clearly named converter |
 | `EveryMthIterable` | An increment of `0` or `-1` never terminates; `next()` past the end returns a value instead of failing | Reject `increment <= 0`; fail past the end |

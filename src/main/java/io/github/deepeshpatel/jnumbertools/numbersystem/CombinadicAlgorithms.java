@@ -21,6 +21,12 @@ import java.util.List;
  * decimal and Combinadic formats.
  * </p>
  *
+ * <p>
+ * <strong>Implementation class: intended to be used through {@link io.github.deepeshpatel.jnumbertools.base.RankOf} and
+ * {@link io.github.deepeshpatel.jnumbertools.base.UnrankOf} (and the builders).</strong> Those validate their input (null, negative sizes, a
+ * combination that is not strictly ascending within [0, n), ranks outside [0, nCr), ...) as described in
+ * {@code ValidationRules.md}. The methods here assume valid input and do not check it.
+ * </p>
  * @author Deepesh Patel
  */
 public final class CombinadicAlgorithms {
@@ -50,7 +56,8 @@ public final class CombinadicAlgorithms {
      * @param n the total number of elements (n ≥ 0)
      * @param mthCombination the combination (sorted array of indices) whose rank is to be computed
      * @return the 0-based lexicographical rank of the combination
-     * @throws IllegalArgumentException if the combination is invalid for the given n
+     * @see {@link io.github.deepeshpatel.jnumbertools.base.RankOf}
+
      */
     public BigInteger rank(int n, int[] mthCombination) {
         int[] combinadic = combinationToCombinadic(n, mthCombination);

@@ -9,6 +9,7 @@ import io.github.deepeshpatel.jnumbertools.numbersystem.*;
 import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithms;
 
 import java.math.BigInteger;
+import java.util.Objects;
 
 /**
  * Determines the permutation or combination at a given lexicographical rank.
@@ -98,9 +99,19 @@ public final class UnrankOf {
      * @param n the number of distinct elements
      * @param k the size of the permutation (k ≥ 0)
      * @return an array of k distinct indices
+     * @throws NullPointerException if the rank is null
+     * @throws ArithmeticException  if the rank is negative or not below ⁿPₖ (this includes a negative n or k,
+     *                              and k &gt; n, where no k-permutation exists)
      */
     public int[] kPermutation(BigInteger rank, int n, int k) {
-        return PermutadicAlgorithms.unRankWithBoundCheck(rank, n, k, calculator);
+        BigInteger max = calculator.nPr(n, k);
+        if (rank.signum() < 0 || rank.compareTo(max) >= 0) {
+            throw new ArithmeticException(
+                    String.format("Out of range. Can't decode %d to mᵗʰ permutation as it is < 0 or ≥ Permutation(%d,%d)",
+                            rank, n, k)
+            );
+        }
+        return PermutadicAlgorithms.unRank(rank, n, k);
     }
 
     /**
@@ -110,13 +121,29 @@ public final class UnrankOf {
      * repetition, returning an array of r distinct indices in lexicographical order.
      * </p>
      *
-     * @param rank the lexicographical rank
-     * @param n the number of distinct elements
+     * @param rank the lexicographical rank (0 ≤ rank &lt; ⁿCᵣ)
+     * @param n the number of distinct elements (n ≥ 0)
      * @param r the size of the combination (r ≥ 0)
      * @return an array of r distinct indices
+     * @throws NullPointerException     if the rank is null
+     * @throws IllegalArgumentException if n or r is negative, or the rank is negative or not below ⁿCᵣ
+     *                                  (every rank is out of range when r &gt; n)
      */
     public int[] uniqueCombination(BigInteger rank, int n, int r) {
-        return new CombinadicAlgorithms(calculator).unRank(rank, calculator.nCr(n, r), n, r);
+        Objects.requireNonNull(rank, "rank must not be null");
+        if (n < 0) {
+            throw new IllegalArgumentException("n must be >= 0, found " + n);
+        }
+        if (r < 0) {
+            throw new IllegalArgumentException("r must be >= 0, found " + r);
+        }
+        BigInteger nCr = calculator.nCr(n, r);
+        if (rank.signum() < 0 || rank.compareTo(nCr) >= 0) {
+            throw new IllegalArgumentException(String.format(
+                    "Out of range. Can't decode %d to a combination as it is < 0 or >= Combination(%d,%d) = %d",
+                    rank, n, r, nCr));
+        }
+        return new CombinadicAlgorithms(calculator).unRank(rank, nCr, n, r);
     }
 
     /**

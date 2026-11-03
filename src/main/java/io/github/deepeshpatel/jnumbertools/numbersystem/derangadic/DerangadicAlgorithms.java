@@ -89,6 +89,14 @@ import java.util.*;
  * may differ in MSD-side padding.
  * </p>
  *
+ * <h2>Intended use</h2>
+ * <p>
+ * <strong>Implementation class: intended to be used through {@link io.github.deepeshpatel.jnumbertools.base.RankOf} and
+ * {@link io.github.deepeshpatel.jnumbertools.base.UnrankOf} (and the builders).</strong> Argument validation and its error signalling belong to those;
+ * this class assumes valid input. The checks that remain here are intrinsic to the conversion (a rank that is
+ * not below D_n cannot be encoded, and a derangement with no legal candidate at some position cannot be
+ * decoded) and cost a comparison.
+ * </p>
  * @author Deepesh Patel &amp; Aditya Patel
  * @since 3.0.2
  */
