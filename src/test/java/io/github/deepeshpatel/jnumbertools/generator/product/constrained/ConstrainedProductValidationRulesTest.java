@@ -22,9 +22,7 @@ import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Stage 1 (tests first): one test per ValidationRules.md rule that applies to the public API of
- * the CONSTRAINED CARTESIAN PRODUCT builder. Each test says what the CURRENT code is predicted to
- * do so the failures can be confirmed before any production change.
+ * Validation rules for the public API of the CONSTRAINED CARTESIAN PRODUCT builder.
  *
  * Conventions follow the already-migrated builders (see SubsetBuilderTest):
  *   null list / null element / null Random -> NullPointerException
@@ -82,10 +80,10 @@ class ConstrainedProductValidationRulesTest {
     }
 
     // ------------------------------------------------------------------------------------
-    // GENERAL RULE 1 - null input (guards: predicted to pass, they pin current behaviour)
+    // GENERAL RULE 1 - null input
     // ------------------------------------------------------------------------------------
 
-    /** PREDICTED: PASS (regression guard). */
+    /** Regression guard: null input is rejected everywhere. */
     @Test
     void nullInputIsRejectedEverywhere() {
         var builder = cartesianProduct.constrainedProductOfDistinct(2, ABC);
@@ -113,9 +111,7 @@ class ConstrainedProductValidationRulesTest {
     // ------------------------------------------------------------------------------------
 
     /**
-     * PREDICTED: FAIL for the distinct / multi-select entry points (the combination builders do not
-     * check yet) and for every and*() call made on an already-empty product (early return skips the
-     * check). The subset-range entry points already pass because SubsetBuilder rejects nulls.
+     * Null elements must be rejected by every entry point, including on already-empty products.
      */
     @Test
     void nullElementsAreRejectedWhenBuilderIsCreated() {
@@ -145,9 +141,8 @@ class ConstrainedProductValidationRulesTest {
     // ------------------------------------------------------------------------------------
 
     /**
-     * PREDICTED: UNCERTAIN / likely FAIL for the distinct and multi-select dimensions, because the
-     * combination builders they delegate to are listed as "not yet aligned" (no copy). The subset
-     * dimension should already pass.
+     * Builders must snapshot every dimension; changes to caller-owned lists after construction
+     * must not affect count(), lexOrder(), or any generated tuples.
      */
     @Test
     void builderTakesSnapshotOfEveryDimension() {
@@ -184,9 +179,8 @@ class ConstrainedProductValidationRulesTest {
     // ------------------------------------------------------------------------------------
 
     /**
-     * PREDICTED: FAIL for (a) a negative quantity with an EMPTY element list (EmptyBuilder accepts it),
-     * (b) andDistinct on an already-empty product (early return skips validation), and
-     * (c) the deprecated constrainedProductOf with an empty list.
+     * Negative quantity is an invalid-argument error for every input, including empty element
+     * lists and already-empty products.
      */
     @SuppressWarnings("removal")
     @Test
@@ -222,7 +216,7 @@ class ConstrainedProductValidationRulesTest {
 
     /**
      * Rule: invalid range (from < 0, to < from, from > n, to > n) -> invalid-argument error.
-     * PREDICTED: FAIL for every and*() call on an already-empty product (early return skips validation).
+     * Must be raised for every input, including already-empty products.
      */
     @Test
     void invalidRangeIsAlwaysAnInvalidArgumentError() {
@@ -247,7 +241,7 @@ class ConstrainedProductValidationRulesTest {
         assertAll(checks);
     }
 
-    /** Rule: n = 0 accepts any range with 0 <= from <= to (table SUBSETS). PREDICTED: PASS (regression guard). */
+    /** Rule: n = 0 accepts any range with 0 <= from <= to (table SUBSETS). */
     @Test
     void emptySetAcceptsAnyRangeEvenHugeOnes() {
         var withEmptySubset = cartesianProduct.constrainedProductOfInRange(0, Integer.MAX_VALUE, Collections.emptyList());
@@ -266,8 +260,7 @@ class ConstrainedProductValidationRulesTest {
 
     /**
      * Rule: count / isEmpty / lexOrder() must follow the table for EVERY (n, quantity) and (n, from, to).
-     * PREDICTED: FAIL. isEmpty() is taken from the combination builders, which report
-     * "empty" for quantity = 0 (count is 1) and "not empty" for quantity > n (count is 0).
+     * isEmpty() must be true exactly when count() is zero.
      */
     @Test
     void countIsEmptyAndLexOrderFollowTheTableForSingleDimensions() {
@@ -294,7 +287,7 @@ class ConstrainedProductValidationRulesTest {
         assertAll(checks);
     }
 
-    /** Same table, product of several dimensions (count = product of the dimension counts). PREDICTED: FAIL. */
+    /** Same table, product of several dimensions (count = product of the dimension counts). */
     @Test
     void countIsEmptyAndLexOrderFollowTheTableForChainedDimensions() {
         List<Executable> checks = new ArrayList<>();
@@ -322,8 +315,7 @@ class ConstrainedProductValidationRulesTest {
 
     /**
      * Rule: multiplicity 0 in a dimension contributes exactly one empty tuple ("as if the dimension
-     * were absent"), also when the dimension HAS elements. PREDICTED: FAIL (quantity 0 on a non-empty
-     * list marks the whole product empty).
+     * were absent"), also when the dimension has elements.
      */
     @Test
     void zeroMultiplicityDimensionContributesOneEmptyTuple() {
@@ -354,7 +346,7 @@ class ConstrainedProductValidationRulesTest {
                 () -> assertEquals(baseTuples, b.lexOrder().stream().toList(), "lexOrder"));
     }
 
-    /** Rule: any dimension with count = 0 makes the product empty ([]). PREDICTED: PASS (regression guard). */
+    /** Rule: any dimension with count = 0 makes the product empty ([]). */
     @Test
     void anyEmptyDimensionMakesTheProductEmpty() {
         var p = cartesianProduct.constrainedProductOfDistinct(2, ABC)
@@ -370,8 +362,7 @@ class ConstrainedProductValidationRulesTest {
     // ------------------------------------------------------------------------------------
 
     /**
-     * PREDICTED: FAIL for choice(0) / sample(0) when the checks only look at sampleSize < 0
-     * (they may be caught later by BigIntegerChoice/BigIntegerSample - the run will tell).
+     * choice() and sample() must reject sample sizes <= 0 and sizes exceeding the domain count.
      */
     @Test
     void choiceAndSampleSizeRules() {
@@ -391,7 +382,6 @@ class ConstrainedProductValidationRulesTest {
 
     /**
      * Rule: choice with count = 0 -> invalid-argument error; sample with count = 0 -> invalid-argument error.
-     * PREDICTED: FAIL on choice (empty-product shortcut returns an empty result instead of throwing).
      */
     @Test
     void emptyDomainRejectsChoiceAndSample() {
@@ -405,8 +395,6 @@ class ConstrainedProductValidationRulesTest {
 
     /**
      * Rule: sample/choice with a null random source -> null-input error.
-     * PREDICTED: PASS on a non-empty product (BigIntegerChoice/Sample check it); FAIL on an empty
-     * product only if the empty-domain test above is fixed first and the null check comes later.
      */
     @Test
     void nullRandomSourceThrowsNullInputError() {
@@ -419,8 +407,7 @@ class ConstrainedProductValidationRulesTest {
     /**
      * Rule: count = 1 and the only element is the empty list -> choice yields s empty results,
      * sample(1) one, byRanks one [] per rank (all ranks must be 0), lexOrderMth(1, 0) one [].
-     * PREDICTED: FAIL for quantity 0 on a NON-empty list (it is wrongly flagged empty);
-     * the empty-list variants should pass.
+     * Quantity 0 on any list (empty or not) must yield count = 1 and isEmpty() = false.
      */
     @Test
     void domainWhoseOnlyElementIsTheEmptyList() {
@@ -449,7 +436,7 @@ class ConstrainedProductValidationRulesTest {
                 () -> assertThrows(IllegalArgumentException.class, () -> b.sample(2, new Random(1)), "sample(2)"));
     }
 
-    /** Rule: lexOrderMth - count = 0 accepts any start >= 0; m <= 0 and start < 0 stay invalid. PREDICTED: PASS. */
+    /** Rule: lexOrderMth - count = 0 accepts any start >= 0; m <= 0 and start < 0 stay invalid. */
     @Test
     void lexOrderMthRules() {
         var builder = cartesianProduct.constrainedProductOfDistinct(2, ABC).andMultiSelect(2, ONE_TO_FOUR);   // 30
@@ -467,7 +454,7 @@ class ConstrainedProductValidationRulesTest {
 
     /**
      * Rule: byRanks - only null is checked up front, ranks are consumed lazily (may be infinite), and a
-     * rank < 0 or >= count is reported lazily when reached. PREDICTED: PASS (regression guard).
+     * rank < 0 or >= count is reported lazily when reached.
      */
     @Test
     void byRanksIsLazyAndOnlyChecksNullUpFront() {
@@ -492,8 +479,7 @@ class ConstrainedProductValidationRulesTest {
     // ------------------------------------------------------------------------------------
 
     /**
-     * PREDICTED: FAIL for lexOrder() of a multi-dimension product (ConstrainedProduct builds an ArrayList).
-     * byRanks-based sources return List.copyOf(...) and should pass.
+     * Results must be immutable tuples for every generation source.
      */
     @Test
     void resultsAreImmutable() {
@@ -521,7 +507,7 @@ class ConstrainedProductValidationRulesTest {
         assertAll(checks);
     }
 
-    /** PREDICTED: PASS (regression guard) - lexOrder creates a fresh iterator and the by-ranks types re-read their rank source. */
+    /** Regression guard: generators are re-iterable. */
     @Test
     void generatorsAreReIterable() {
         var builder = cartesianProduct.constrainedProductOfDistinct(2, ABC).andMultiSelect(2, ONE_TO_FOUR);

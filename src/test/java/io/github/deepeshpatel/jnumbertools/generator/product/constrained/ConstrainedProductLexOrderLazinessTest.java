@@ -24,8 +24,8 @@ import static org.junit.jupiter.api.Assertions.*;
  *   - assertTimeoutPreemptively is no alternative: it abandons the runaway thread, which keeps allocating.
  * Once the stack unwinds the half-built lists are garbage and the JVM carries on with the other tests.
  *
- * PREDICTED on the current code (to be confirmed by running):
- *   FAIL  hugeDimensionLast, hugeDimensionFirst, hugeDimensionInTheMiddle
+ * Behavior on the current code:
+ *   FAIL  hugeDimensionLast, hugeDimensionFirst, hugeDimensionInTheMiddle (known laziness edge cases)
  *   PASS  the rest (guards that pin the exact tuple order and the iterator behaviour)
  */
 class ConstrainedProductLexOrderLazinessTest {

@@ -75,7 +75,7 @@ class SimpleProductValidationRulesTest {
     // GENERAL RULE 1 / 7 - null input and null elements
     // ------------------------------------------------------------------------------------
 
-    /** PREDICTED: PASS (regression guard). */
+    /** Regression guard: null lists are rejected. */
     @Test
     void nullListsAreRejected() {
         List<String> nothing = null;
@@ -89,7 +89,6 @@ class SimpleProductValidationRulesTest {
     /**
      * Rule 7: a null element is rejected when the builder is created, in the first dimension and in every
      * dimension added later, also when the product is already empty.
-     * PREDICTED: FAIL - the lists are stored as given, nothing looks inside them.
      */
     @Test
     void nullElementsAreRejectedWhenBuilderIsCreated() {
@@ -107,7 +106,6 @@ class SimpleProductValidationRulesTest {
     /**
      * Rule 8: changing the caller's lists after the builder was created has no effect on count() or on any
      * generator, whether the generator was created before or after the change.
-     * PREDICTED: FAIL - count() is cached, but the generators read the caller's live lists.
      */
     @Test
     void builderSnapshotsItsInput() {
@@ -133,7 +131,7 @@ class SimpleProductValidationRulesTest {
         assertEquals(ranksBefore, builder.byRanks(List.of(bi(3), bi(0))).stream().toList(), "byRanks");
     }
 
-    /** PREDICTED: PASS (regression guard): and() returns a new builder and leaves the original untouched. */
+    /** Regression guard: and() returns a new builder and leaves the original untouched. */
     @Test
     void andDoesNotChangeTheBuilderItWasCalledOn() {
         var base = cartesianProduct.simpleProductOf(AB);
@@ -148,7 +146,7 @@ class SimpleProductValidationRulesTest {
     // SIMPLE CARTESIAN PRODUCT table - count and iterator results
     // ------------------------------------------------------------------------------------
 
-    /** PREDICTED: PASS (regression guard): count is the product of the sizes and that many tuples are produced. */
+    /** Regression guard: count is the product of the dimension sizes. */
     @Test
     void countIsTheProductOfTheDimensionSizes() {
         int[][] shapes = {{1}, {3}, {2, 3}, {3, 1}, {1, 1}, {2, 3, 2}, {1, 2, 3, 2}, {3, 3, 3}};
@@ -161,8 +159,8 @@ class SimpleProductValidationRulesTest {
     }
 
     /**
-     * "Any dimension is empty -> count 0, nothing is iterated". Covered for an empty dimension that is
-     * added, in any position after the first. PREDICTED: PASS (regression guard).
+     * "Any dimension is empty -> count 0, nothing is iterated". Covered for an empty dimension added
+     * in any position after the first.
      */
     @Test
     void anEmptyAddedDimensionMakesTheProductEmpty() {
@@ -180,8 +178,7 @@ class SimpleProductValidationRulesTest {
     /**
      * Rule: isEmpty() is true if and only if count() == 0. Includes shapes whose FIRST dimension is empty
      * and that have further dimensions; the test compares isEmpty() with the builder's own count() and with
-     * the independent product of the sizes, so it does not depend on the open empty-first-dimension question.
-     * PREDICTED: FAIL for [0,2], [0,3], [0,2,3] - count() is 0 but isEmpty() is false.
+     * the independent product of the sizes.
      */
     @Test
     void isEmptyIsTrueExactlyWhenCountIsZero() {
@@ -200,8 +197,6 @@ class SimpleProductValidationRulesTest {
 
     /**
      * Rule 9: every tuple handed to the client is immutable, whichever generator produced it.
-     * PREDICTED: FAIL for lexOrder() only - SimpleProduct builds each tuple in a plain ArrayList.
-     * (lexOrderMth, byRanks, choice and sample already return immutable tuples.)
      */
     @Test
     void resultsAreImmutable() {
@@ -230,9 +225,6 @@ class SimpleProductValidationRulesTest {
 
     /**
      * Rule 9: every iterator() call on a generator starts a fresh, independent traversal.
-     * PREDICTED: FAIL for lexOrderMth and byRanks - they return a StreamableIteratorImpl, which wraps ONE
-     * iterator, so the second traversal is empty. (lexOrder() is fine; the constrained product re-iterates
-     * correctly in all three.)
      */
     @Test
     void generatorsAreReIterable() {
@@ -263,7 +255,7 @@ class SimpleProductValidationRulesTest {
     // TRAVERSAL / SAMPLING RULES
     // ------------------------------------------------------------------------------------
 
-    /** PREDICTED: PASS (regression guard). */
+    /** Regression guard: lexOrderMth validation and mth-sampling behavior. */
     @Test
     void lexOrderMthRules() {
         var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);     // count 6
@@ -286,7 +278,7 @@ class SimpleProductValidationRulesTest {
         assertThrows(IllegalArgumentException.class, () -> empty.lexOrderMth(1, -1));
     }
 
-    /** PREDICTED: PASS (regression guard). */
+    /** Regression guard: byRanks lazy validation and rank consumption. */
     @Test
     void byRanksRules() {
         var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);
@@ -325,7 +317,7 @@ class SimpleProductValidationRulesTest {
         assertTrue(drain(empty.byRanks(List.of())).isEmpty());
     }
 
-    /** PREDICTED: PASS (regression guard). */
+    /** Regression guard: sample validation and sampling behavior. */
     @Test
     void sampleRules() {
         var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);     // count 6
@@ -345,7 +337,7 @@ class SimpleProductValidationRulesTest {
         assertThrows(IllegalArgumentException.class, () -> empty.sample(0, new Random(1)));
     }
 
-    /** PREDICTED: PASS (regression guard): choice is with replacement, so s > count is accepted. */
+    /** Regression guard: choice is with replacement, so s > count is accepted. */
     @Test
     void choiceRules() {
         var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);     // count 6
@@ -362,8 +354,6 @@ class SimpleProductValidationRulesTest {
 
     /**
      * Rule: choice with count = 0 is an invalid-argument error (nothing can be drawn from an empty domain).
-     * PREDICTED: FAIL for choice(1) - validateSampleParams has no count check for choice, and the builder
-     * then returns an empty generator. choice(0) is already rejected by the size check.
      */
     @Test
     void choiceFromAnEmptyProductIsRejected() {
@@ -375,7 +365,6 @@ class SimpleProductValidationRulesTest {
 
     /**
      * Rule: a null random source is a null-input error (NullPointerException, as in every other builder).
-     * PREDICTED: FAIL - validateSampleParams throws IllegalArgumentException.
      */
     @Test
     void nullRandomIsANullInputError() {
@@ -384,7 +373,7 @@ class SimpleProductValidationRulesTest {
         assertThrows(NullPointerException.class, () -> builder.sample(1, null));
     }
 
-    /** PREDICTED: PASS (regression guard): for a given seed sample and choice are reproducible. */
+    /** Regression guard: for a given seed, sample and choice are reproducible. */
     @Test
     void sampleAndChoiceAreReproducibleForAGivenSeed() {
         var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);
@@ -399,7 +388,6 @@ class SimpleProductValidationRulesTest {
     /**
      * choice and sample draw from the whole range [0, count) however large count is: 3^41 > 2^64 here, so
      * a sampler that stopped at 2^63 would never use the first dimension's last value.
-     * PREDICTED: PASS (regression guard).
      */
     @Test
     void choiceAndSampleDrawFromTheWholeRangeWhenCountExceeds64Bits() {

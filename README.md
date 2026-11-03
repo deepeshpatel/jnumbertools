@@ -25,11 +25,11 @@ Add the following section to your configuration(pom/gradle etc) file.
 
 **Gradle**
 ```gradle
-implementation 'io.github.deepeshpatel:jnumbertools:3.0.1'
+implementation 'io.github.deepeshpatel:jnumbertools:3.0.2'
 ```
 **SBT**
 ```sbt
-libraryDependencies += "io.github.deepeshpatel" % "jnumbertools" % "3.0.1"
+libraryDependencies += "io.github.deepeshpatel" % "jnumbertools" % "3.0.2"
 ```
 
 ## Performance

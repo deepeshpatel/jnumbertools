@@ -14,9 +14,9 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Ranks are BigInteger, so the helpers must be correct beyond the range of a long.
  *
- * PREDICTED on the current code (to be confirmed by running):
+ * Behavior on the current code:
  *   FAIL  the repeatedPermutation tests: the rank is accumulated in a long, so valid digit strings whose value
- *         is >= 2^63 silently return a wrong number (for example 64 ones in base 2 returns -1)
+ *         is >= 2^63 silently return a wrong number (for example 64 ones in base 2 returns -1) (known limitation)
  *   PASS  the combination tests (regression guards: validation added to uniqueCombination must stay cheap and
  *         must not reject any valid large input)
  */

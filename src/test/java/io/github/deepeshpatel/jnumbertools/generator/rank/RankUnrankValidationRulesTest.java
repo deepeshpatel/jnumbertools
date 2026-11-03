@@ -14,8 +14,7 @@ import static io.github.deepeshpatel.jnumbertools.TestBase.unrankOf;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Stage 1 (tests first): the ValidationRules.md "RANK / UNRANK HELPERS" rules for the helpers that do not
- * validate their input yet:
+ * Validation rules for the "RANK / UNRANK HELPERS" that currently lack input validation:
  *   rank:   RankOf.uniqueCombination, RankOf.repeatedPermutation
  *   unrank: UnrankOf.uniqueCombination
  * (uniquePermutation, kPermutation and derangement are covered in RankOfTest / UnrankOfTest.)
@@ -45,7 +44,7 @@ class RankUnrankValidationRulesTest {
     // RankOf.uniqueCombination(n, indices...)
     // ------------------------------------------------------------------------------------
 
-    /** PREDICTED: FAIL - (5, 1,1,2) returns 3: a duplicate is silently ranked. */
+    /** Duplicate indices are rejected. */
     @Test
     @DisplayName("rank: uniqueCombination rejects a duplicate index")
     void uniqueCombinationRejectsDuplicates() {
@@ -53,7 +52,7 @@ class RankUnrankValidationRulesTest {
         assertThrows(RuntimeException.class, () -> rankOf.uniqueCombination(5, 0, 3, 3));
     }
 
-    /** PREDICTED: FAIL - (5, 0,1,7) returns 2 and (5, -1,0,1) returns -10: out-of-range indices are silently ranked. */
+    /** Indices outside [0, n) are rejected. */
     @Test
     @DisplayName("rank: uniqueCombination rejects indices outside [0, n)")
     void uniqueCombinationRejectsIndicesOutsideRange() {
@@ -62,7 +61,7 @@ class RankUnrankValidationRulesTest {
         assertThrows(RuntimeException.class, () -> rankOf.uniqueCombination(5, 0, 1, 5));
     }
 
-    /** PREDICTED: FAIL - (2, 0,1,2) returns -1: a selection of 3 from a set of 2 is silently ranked. */
+    /** A selection longer than n is rejected. */
     @Test
     @DisplayName("rank: uniqueCombination rejects a combination longer than n")
     void uniqueCombinationRejectsTooManyIndices() {
@@ -70,7 +69,7 @@ class RankUnrankValidationRulesTest {
         assertThrows(RuntimeException.class, () -> rankOf.uniqueCombination(0, 0));
     }
 
-    /** PREDICTED: FAIL - uniqueCombination(-1) returns 0. */
+    /** Negative n is rejected. */
     @Test
     @DisplayName("rank: uniqueCombination rejects a negative n")
     void uniqueCombinationRejectsNegativeN() {
@@ -78,7 +77,7 @@ class RankUnrankValidationRulesTest {
         assertThrows(RuntimeException.class, () -> rankOf.uniqueCombination(-3, 0, 1));
     }
 
-    /** PREDICTED: PASS (regression guard). */
+    /** Null array is a null-input error. */
     @Test
     @DisplayName("rank: uniqueCombination of a null array is a null-input error")
     void uniqueCombinationRejectsNull() {
@@ -89,7 +88,7 @@ class RankUnrankValidationRulesTest {
     // RankOf.repeatedPermutation(n, digits...)
     // ------------------------------------------------------------------------------------
 
-    /** PREDICTED: FAIL - (3, 0,3,1) returns 10 and (3, 0,-1,1) returns -2: out-of-range digits are silently ranked. */
+    /** Values outside [0, n) are rejected. */
     @Test
     @DisplayName("rank: repeatedPermutation rejects values outside [0, n)")
     void repeatedPermutationRejectsValuesOutsideRange() {
@@ -99,7 +98,7 @@ class RankUnrankValidationRulesTest {
         assertThrows(RuntimeException.class, () -> rankOf.repeatedPermutation(1, 1));
     }
 
-    /** PREDICTED: FAIL - repeatedPermutation(-1, 0) returns 0. */
+    /** Negative n is rejected. */
     @Test
     @DisplayName("rank: repeatedPermutation rejects a negative n")
     void repeatedPermutationRejectsNegativeN() {
@@ -107,7 +106,7 @@ class RankUnrankValidationRulesTest {
         assertThrows(RuntimeException.class, () -> rankOf.repeatedPermutation(-2));
     }
 
-    /** PREDICTED: PASS (regression guard). */
+    /** Null array or null element is a null-input error. */
     @Test
     @DisplayName("rank: repeatedPermutation of a null array or null element is a null-input error")
     void repeatedPermutationRejectsNull() {
@@ -119,7 +118,7 @@ class RankUnrankValidationRulesTest {
     // UnrankOf.uniqueCombination(rank, n, k)
     // ------------------------------------------------------------------------------------
 
-    /** PREDICTED: FAIL - rank -1 returns [-1, 3, 4], an array holding a negative index. */
+    /** Negative rank is rejected. */
     @Test
     @DisplayName("unrank: uniqueCombination rejects a negative rank")
     void unrankCombinationRejectsNegativeRank() {
@@ -127,7 +126,7 @@ class RankUnrankValidationRulesTest {
         assertThrows(RuntimeException.class, () -> unrankOf.uniqueCombination(bi(-1), 0, 0));
     }
 
-    /** PREDICTED: FAIL - ranks 10, 11 and 35 of 5C3 (= 10 combinations) all return the last one, [2,3,4]. */
+    /** A rank >= nCr is rejected. */
     @Test
     @DisplayName("unrank: uniqueCombination rejects a rank >= nCr")
     void unrankCombinationRejectsRankBeyondTheLastCombination() {
@@ -140,7 +139,7 @@ class RankUnrankValidationRulesTest {
         assertThrows(RuntimeException.class, () -> unrankOf.uniqueCombination(BigInteger.ONE, 0, 0));
     }
 
-    /** PREDICTED: FAIL - (rank 0, n=3, k=5) returns [-2,-1,0,1,2]; there is no combination of 5 from 3 at all. */
+    /** k > n is rejected (every rank is out of range). */
     @Test
     @DisplayName("unrank: uniqueCombination rejects k > n, where every rank is out of range")
     void unrankCombinationRejectsSelectionLargerThanTheSet() {
@@ -148,7 +147,7 @@ class RankUnrankValidationRulesTest {
         assertThrows(RuntimeException.class, () -> unrankOf.uniqueCombination(BigInteger.ZERO, 0, 1));
     }
 
-    /** PREDICTED: FAIL - n = -1 returns []; k = -1 throws NegativeArraySizeException instead of a deliberate error. */
+    /** Negative n or k is rejected. */
     @Test
     @DisplayName("unrank: uniqueCombination rejects a negative n or k")
     void unrankCombinationRejectsNegativeSizes() {
@@ -156,7 +155,7 @@ class RankUnrankValidationRulesTest {
         assertThrows(IllegalArgumentException.class, () -> unrankOf.uniqueCombination(BigInteger.ZERO, 5, -1));
     }
 
-    /** PREDICTED: PASS (regression guard). */
+    /** Null rank is a null-input error. */
     @Test
     @DisplayName("unrank: uniqueCombination of a null rank is a null-input error")
     void unrankCombinationRejectsNullRank() {
@@ -164,7 +163,7 @@ class RankUnrankValidationRulesTest {
     }
 
     // ------------------------------------------------------------------------------------
-    // Valid input must keep working (regression guards, PREDICTED: PASS)
+    // Valid input must keep working (regression guards)
     // ------------------------------------------------------------------------------------
 
     /** Ascending indices give the position in the real lexicographic enumeration (independent of unrank). */

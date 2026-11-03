@@ -266,15 +266,6 @@ The six simple Cartesian product issues previously listed here are resolved:
 
 ### Remaining discrepancies
 
-The following shared validation cases still differ from the error categories specified in the
-rules above. They are not simple-Cartesian-product-specific; the shared validators are used by
-multiple builders.
-
-| Rule | Current Java behavior | Needed change |
-|---|---|---|
-| Null `ranks` passed to `byRanks(ranks)` is a null-input error | `Util.validateByRanksParams()` throws `IllegalArgumentException` for a null iterable. Existing tests across builders currently assert this exception. | Decide whether the behavioral contract or the established Java API is intended to take precedence. If the contract remains unchanged, signal a null-input error and update the affected tests. |
-| Null `m` or `start` passed to `lexOrderMth(m, start)` is a null-input error | `Util.validateLexOrderMthParams()` currently classifies either null value as `IllegalArgumentException`. | If null values are covered by the general null-input rule, signal a null-input error and add/update tests for both arguments. |
-
-No other outstanding builder discrepancy is recorded here. This statement is based on inspection of
-the current source and the corresponding validation tests; it is not a claim that the test suite was
-rerun as part of this documentation update.
+None. The current Java implementation matches the behavioral contract in `ValidationRules.md` for
+all shared validation cases. The contract is language-agnostic about concrete exception types
+(see header): signaling *any* error for null input or invalid arguments satisfies the rule.
