@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
 
+import io.github.deepeshpatel.jnumbertools.datastructure.BinomialCoefficientMap;
 import io.github.deepeshpatel.jnumbertools.datastructure.TwoLevelMap;
 
 import java.math.BigInteger;
