@@ -138,6 +138,12 @@ public final class Combinations {
      * in lexicographical order or by rank. Elements are treated as distinct based on
      * their position in the input.
      * </p>
+     * <p>
+     * <b>Overload caution:</b> a single {@code int}, {@code short}, {@code byte} or {@code char} argument
+     * (or its boxed type) binds to {@link #unique(int, int)} instead of this varargs method, so the two
+     * ints are read as {@code n} and {@code r} and not as {@code r} and an element. To use such a value as
+     * an element, pass {@code unique(r, List.of(x))} or an explicit array such as {@code new Integer[]{x}}.
+     * </p>
      *
      * @param r the size of each combination (0 ≤ r ≤ elements.length)
      * @param elements the elements to combine
@@ -195,6 +201,12 @@ public final class Combinations {
      * <p>
      * Generates combinations of r elements from the input set with repetition allowed,
      * in lexicographical order or by rank.
+     * </p>
+     * <p>
+     * <b>Overload caution:</b> a single {@code int}, {@code short}, {@code byte} or {@code char} argument
+     * (or its boxed type) binds to {@link #repetitive(int, int)} instead of this varargs method, so the
+     * two ints are read as {@code n} and {@code r} and not as {@code r} and an element. To use such a
+     * value as an element, pass {@code repetitive(r, List.of(x))} or an explicit array such as {@code new Integer[]{x}}.
      * </p>
      *
      * @param r the size of each combination (r ≥ 0)

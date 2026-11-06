@@ -127,6 +127,12 @@ public final class Subsets {
      * Generates all 2ⁿ subsets of the input set, where n is the number of elements.
      * Use the returned builder to configure range, sampling, or rank-based access.
      * </p>
+     * <p>
+     * <b>Overload caution:</b> a single {@code int}, {@code short}, {@code byte} or {@code char} argument
+     * (or its boxed type) binds to {@link #of(int)} instead of this varargs method, so it is read as a
+     * size and not as an element. To use such a value as an element, pass {@code of(List.of(x))} or an
+     * explicit array such as {@code new Integer[]{x}}.
+     * </p>
      *
      * @param elements the elements to build subsets from
      * @param <T> the type of the elements

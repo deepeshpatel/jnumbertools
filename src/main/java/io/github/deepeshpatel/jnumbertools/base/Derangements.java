@@ -110,6 +110,12 @@ public final class Derangements {
 
     /**
      * Creates a builder for derangements of the given varargs.
+     * <p>
+     * <b>Overload caution:</b> a single {@code int}, {@code short}, {@code byte} or {@code char} argument
+     * (or its boxed type) binds to {@link #of(int)} instead of this varargs method, so it is read as a
+     * size and not as an element. To use such a value as an element, pass {@code of(List.of(x))} or an
+     * explicit array such as {@code new Integer[]{x}}.
+     * </p>
      *
      * @param array the elements to derange
      * @param <T>   the element type

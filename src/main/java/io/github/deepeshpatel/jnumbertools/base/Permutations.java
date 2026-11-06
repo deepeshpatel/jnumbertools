@@ -155,9 +155,10 @@ public final class Permutations {
      * (Heap's algorithm) order, or by rank.
      * </p>
      * <p>
-     * <b>Note:</b> For a single character input (e.g., 'a'), this method may invoke
-     * {@link #unique(int)} with the ASCII value (97 for 'a'). For single elements,
-     * consider using {@link #unique(List)} with a single-element list.
+     * <b>Overload caution:</b> a single {@code int}, {@code short}, {@code byte} or {@code char} argument
+     * (or its boxed type) binds to {@link #unique(int)} instead of this varargs method, so it is read as a
+     * size and not as an element. To use such a value as an element, pass {@code unique(List.of(x))} or an
+     * explicit array such as {@code new Integer[]{x}}.
      * </p>
      *
      * @param array the elements to permute
@@ -210,6 +211,12 @@ public final class Permutations {
      * <p>
      * Generates permutations of k distinct elements from the input elements in
      * lexicographical or combination order, or by rank.
+     * </p>
+     * <p>
+     * <b>Overload caution:</b> a single {@code int}, {@code short}, {@code byte} or {@code char} argument
+     * (or its boxed type) binds to {@link #nPk(int, int)} instead of this varargs method, so the two ints
+     * are read as {@code n} and {@code k} and not as {@code k} and an element. To use such a value as an
+     * element, pass {@code nPk(k, List.of(x))} or an explicit array such as {@code new Integer[]{x}}.
      * </p>
      *
      * @param k the size of each permutation (0 ≤ k ≤ allElements.length)

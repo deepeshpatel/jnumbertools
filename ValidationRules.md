@@ -150,7 +150,7 @@ exactly like `{B:2}`.
 | Condition                             | Count | Iterator Returns | Interpretation                          |
 |---------------------------------------|-------|------------------|-----------------------------------------|
 | Any dimension is empty (positive multiplicity) | 0     | []               | Empty product                           |
-| All dimensions contribute 1 tuple     | 1     | [[]]             | Single empty tuple                      |
+| Every dimension has exactly 1 tuple   | 1     | one tuple (`[[]]` only if that tuple is empty) | The single tuple: each dimension's tuple, in order |
 | Normal case (no empty dimensions)     | Π sizes | products         | Normal product                          |
 | **Error case** | **Condition** | **Throws** | | |
 | | null input for any dimension | null-input error | | | Elements list cannot be null |
@@ -160,7 +160,7 @@ exactly like `{B:2}`.
 | Condition                             | Count | Iterator Returns | Interpretation                          |
 |---------------------------------------|-------|------------------|-----------------------------------------|
 | Any dimension has count = 0           | 0     | []               | Empty product (impossible)              |
-| All dimensions have count = 1         | 1     | [[]]             | Single empty tuple                      |
+| Every dimension has count = 1         | 1     | one tuple (`[[]]` only if every dimension's tuple is empty, e.g. quantity 0) | The single tuple: concatenation of each dimension's tuple, in order |
 | Normal case                           | Π counts | products         | Normal constrained product              |
 | **Error case** | **Condition** | **Throws** | | |
 | | quantity < 0 (for distinct/multi-select) | invalid-argument error | | | quantity must be ≥ 0 |
