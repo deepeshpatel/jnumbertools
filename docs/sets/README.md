@@ -80,14 +80,14 @@ Generates n random subsets with duplicates allowed.
 JNumberTools.subsets()
     .of(10)
     .all()
-    .choice(5)
+    .choice(5, new java.util.Random())
     .stream().forEach(System.out::println);
 
 // Generate 5 random subsets of ["Apple", "Banana", "Guava"] with duplicates
 JNumberTools.subsets()
     .of("Apple", "Banana", "Guava")
     .all()
-    .choice(5)
+    .choice(5, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -99,14 +99,14 @@ Generates n random subsets without duplicates.
 JNumberTools.subsets()
     .of(10)
     .all()
-    .sample(5)
+    .sample(5, new java.util.Random())
     .stream().forEach(System.out::println);
 
 // Generate 5 random subsets of ["Apple", "Banana", "Guava"] without duplicates
 JNumberTools.subsets()
     .of("Apple", "Banana", "Guava")
     .all()
-    .sample(5)
+    .sample(5, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -115,7 +115,7 @@ Generates subsets at indices specified by a custom sequence.
 
 ```java
 // Generates subsets of numbers in range [0,100) at specified indices
-var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
+var iterable = List.of(BigInteger.valueOf(10), BigInteger.valueOf(20), BigInteger.valueOf(1_000_000_000L), new BigInteger("1000000000000000000000"));
 JNumberTools.subsets()
     .of(100)
     .all()

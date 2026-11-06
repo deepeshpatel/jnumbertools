@@ -67,11 +67,6 @@ class SimpleProductValidationRulesTest {
         return p;
     }
 
-    // ------------------------------------------------------------------------------------
-    // GENERAL RULE 1 / 7 - null input and null elements
-    // ------------------------------------------------------------------------------------
-
-    /** Regression guard: null lists are rejected. */
     @Test
     void nullListsAreRejected() {
         List<String> nothing = null;
@@ -127,7 +122,6 @@ class SimpleProductValidationRulesTest {
         assertEquals(ranksBefore, builder.byRanks(List.of(bi(3), bi(0))).stream().toList(), "byRanks");
     }
 
-    /** Regression guard: and() returns a new builder and leaves the original untouched. */
     @Test
     void andDoesNotChangeTheBuilderItWasCalledOn() {
         var base = cartesianProduct.simpleProductOf(AB);
@@ -138,11 +132,6 @@ class SimpleProductValidationRulesTest {
         assertEquals(List.of(List.of("A"), List.of("B")), base.lexOrder().stream().toList());
     }
 
-    // ------------------------------------------------------------------------------------
-    // SIMPLE CARTESIAN PRODUCT table - count and iterator results
-    // ------------------------------------------------------------------------------------
-
-    /** Regression guard: count is the product of the dimension sizes. */
     @Test
     void countIsTheProductOfTheDimensionSizes() {
         int[][] shapes = {{1}, {3}, {2, 3}, {3, 1}, {1, 1}, {2, 3, 2}, {1, 2, 3, 2}, {3, 3, 3}};
@@ -247,11 +236,6 @@ class SimpleProductValidationRulesTest {
         }
     }
 
-    // ------------------------------------------------------------------------------------
-    // TRAVERSAL / SAMPLING RULES
-    // ------------------------------------------------------------------------------------
-
-    /** Regression guard: lexOrderMth validation and mth-sampling behavior. */
     @Test
     void lexOrderMthRules() {
         var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);     // count 6
@@ -274,7 +258,7 @@ class SimpleProductValidationRulesTest {
         assertThrows(IllegalArgumentException.class, () -> empty.lexOrderMth(1, -1));
     }
 
-    /** Regression guard: byRanks lazy validation and rank consumption. */
+    /**  byRanks lazy validation and rank consumption. */
     @Test
     void byRanksRules() {
         var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);
@@ -313,7 +297,6 @@ class SimpleProductValidationRulesTest {
         assertTrue(drain(empty.byRanks(List.of())).isEmpty());
     }
 
-    /** Regression guard: sample validation and sampling behavior. */
     @Test
     void sampleRules() {
         var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);     // count 6
@@ -333,7 +316,7 @@ class SimpleProductValidationRulesTest {
         assertThrows(IllegalArgumentException.class, () -> empty.sample(0, new Random(1)));
     }
 
-    /** Regression guard: choice is with replacement, so s > count is accepted. */
+    /** choice is with replacement, so s > count is accepted. */
     @Test
     void choiceRules() {
         var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);     // count 6
@@ -369,7 +352,6 @@ class SimpleProductValidationRulesTest {
         assertThrows(NullPointerException.class, () -> builder.sample(1, null));
     }
 
-    /** Regression guard: for a given seed, sample and choice are reproducible. */
     @Test
     void sampleAndChoiceAreReproducibleForAGivenSeed() {
         var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);

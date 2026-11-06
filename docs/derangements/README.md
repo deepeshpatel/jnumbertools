@@ -70,7 +70,7 @@ Generates random derangements with replacement (duplicates allowed).
 // Generate any 5 derangements of [0,1,2,3] with duplicates allowed
 JNumberTools.derangements()
     .of(4)
-    .choice(5)
+    .choice(5, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -81,7 +81,7 @@ Generates random derangements without replacement (unique output).
 // Generate 5 unique derangements of ["A","B","C","D","E"]
 JNumberTools.derangements()
     .of("A", "B", "C", "D", "E")
-    .sample(5)
+    .sample(5, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -93,7 +93,7 @@ var ranks = List.of(
         BigInteger.ZERO,
         BigInteger.valueOf(2),
         BigInteger.valueOf(10),
-        new BigInteger("1000000000000000000"));
+        BigInteger.valueOf(100));
 
 // Generate derangements of size 8 at specific ranks
 JNumberTools.derangements()

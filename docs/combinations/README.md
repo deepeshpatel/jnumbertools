@@ -80,13 +80,13 @@ Generates n random combinations with duplicates allowed.
 // Generate any 5 random combinations of 10 items [0,10) from 20 items [0,20) with duplicates
 JNumberTools.combinations()
     .unique(20, 10)
-    .choice(5)
+    .choice(5, new java.util.Random())
     .stream().forEach(System.out::println);
 
 // Generate any 5 random combinations of 5 items from ["A","B","C","D","E","F","G"] with duplicates
 JNumberTools.combinations()
     .unique(5, "A", "B", "C", "D", "E", "F", "G")
-    .choice(5)
+    .choice(5, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -97,13 +97,13 @@ Generates n random combinations without duplicates.
 // Generate any 5 random combinations of 10 items [0,10) from 20 items [0,20) without duplicates
 JNumberTools.combinations()
     .unique(20, 10)
-    .sample(5)
+    .sample(5, new java.util.Random())
     .stream().forEach(System.out::println);
 
 // Generate any 5 random combinations of 5 items from ["A","B","C","D","E","F","G"] without duplicates
 JNumberTools.combinations()
     .unique(5, "A", "B", "C", "D", "E", "F", "G")
-    .sample(5)
+    .sample(5, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -163,7 +163,7 @@ Generates n random multiset combinations with duplicates allowed.
 var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1));
 JNumberTools.combinations()
     .multiset(elements, 3)
-    .choice(5)
+    .choice(5, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -175,7 +175,7 @@ Generates n random multiset combinations without duplicates.
 var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1,  "Guava" ,5));
         JNumberTools.combinations()
     .multiset(elements, 3)
-    .sample(4)
+    .sample(4, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -235,7 +235,7 @@ Generates n random repetitive combinations with duplicates allowed.
 // Generate 5 random combinations of 3 numbers with repetition from [0,5) with duplicates
 JNumberTools.combinations()
     .repetitive(5, 3)
-    .choice(5)
+    .choice(5, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -246,7 +246,7 @@ Generates n random repetitive combinations without duplicates.
 // Generate 5 random combinations of 3 numbers with repetition from [0,5) without duplicates
 JNumberTools.combinations()
     .repetitive(5, 3)
-    .sample(5)
+    .sample(5, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 

@@ -1,4 +1,4 @@
-![JNumberTools](resources/JNumberTools_1280x640.png)
+![JNumberTools](resources/JNumberTools_logo_banner_transparent.png)
 
 # JNumberTools
 **JNumberTools** is an open-source Java library that tames massive combinatorial problems in big data pipelines, delivering scalable permutations, combinations, Cartesian products, and rankings. Integrated with Apache Spark, Flink, and Hadoop for batch and stream processing, it outperforms libraries like Apache Commons and Guava with constrained generation and lexicographical sampling. From synthetic data generation to cybersecurity, bioinformatics, and software testing, JNumberTools empowers data engineers, developers, and researchers to solve real-world challenges efficiently.

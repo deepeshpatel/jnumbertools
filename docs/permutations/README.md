@@ -110,13 +110,13 @@ Generates random unique permutations with duplicates allowed.
 // Generates exactly 10 permutations of 5 digits [0-5) which may contain duplicates
 JNumberTools.permutations()
     .unique(5)
-    .choice(10)
+    .choice(10, new java.util.Random())
     .stream().forEach(System.out::println);
 
 // Generates exactly 10 permutations of input which may contain duplicates
 JNumberTools.permutations()
     .unique("A", "B", "C", "D", "E")
-    .choice(10)
+    .choice(10, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -127,13 +127,13 @@ Generates random unique permutations without duplicates.
 // Generates exactly 10 permutations of 5 digits [0-5) without duplicates
 JNumberTools.permutations()
     .unique(5)
-    .sample(10)
+    .sample(10, new java.util.Random())
     .stream().forEach(System.out::println);
 
 // Generates exactly 10 permutations of input without duplicates
 JNumberTools.permutations()
     .unique("A", "B", "C", "D", "E")
-    .sample(10)
+    .sample(10, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -142,7 +142,7 @@ Generates all permutations at indices specified by a custom sequence.
 
 ```java
 // Generates all permutations of [0,100) at indices specified by Iterable<Number>
-var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
+var iterable = List.of(BigInteger.valueOf(10), BigInteger.valueOf(20), BigInteger.valueOf(1_000_000_000L), new BigInteger("1000000000000000000000"));
 JNumberTools.permutations()
     .unique(100)
     .byRanks(iterable)
@@ -185,7 +185,7 @@ Generates random permutations of a multiset with duplicates allowed.
 var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1, "Guava", 3));
 JNumberTools.permutations()
     .multiset(elements)
-    .choice(10)
+    .choice(10, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -197,7 +197,7 @@ Generates random permutations of a multiset without duplicates.
 var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1, "Guava", 3));
 JNumberTools.permutations()
     .multiset(elements)
-    .sample(10)
+    .sample(10, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -206,7 +206,7 @@ Generates all permutations at indices specified by a custom sequence.
 
 ```java
 // Generates all permutations of a multiset at indices specified by Iterable<Number>
-var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
+var iterable = List.of(BigInteger.valueOf(10), BigInteger.valueOf(20), BigInteger.valueOf(1_000_000_000L), new BigInteger("1000000000000000000000"));
 var elements = new LinkedHashMap<>(Map.of("Apple", 50, "Banana", 200, "Guava", 50));
 JNumberTools.permutations()
     .multiset(elements)
@@ -293,7 +293,7 @@ Generates random k-permutations with duplicates allowed.
 // Generates 20 k-permutations for n=20 and k=5, which may contain duplicates
 JNumberTools.permutations()
     .nPk(10, 5)
-    .choice(20)
+    .choice(20, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -304,7 +304,7 @@ Generates random k-permutations without duplicates.
 // Generates 20 k-permutations for n=20 and k=5, without duplicates
 JNumberTools.permutations()
     .nPk(10, 5)
-    .sample(20)
+    .sample(20, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -365,7 +365,7 @@ Generates random repetitive permutations with duplicates allowed.
 // Generates any 4 repetitive permutations of 3 numbers in range [0,5) which may contain duplicates
 JNumberTools.permutations()
     .repetitive(3, 5)
-    .choice(4)
+    .choice(4, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -376,7 +376,7 @@ Generates random repetitive permutations without duplicates.
 // Generates any 4 repetitive permutations of 3 numbers in range [0,5) without duplicates
 JNumberTools.permutations()
     .repetitive(3, 5)
-    .sample(4)
+    .sample(4, new java.util.Random())
     .stream().forEach(System.out::println);
 ```
 
@@ -385,7 +385,7 @@ Generates all repetitive permutations at indices specified by a custom sequence.
 
 ```java
 // Generates all repetitive permutations of n=500 and r=300 at indices specified by Iterable<Number>
-var iterable = List.of(10, 20, 1_000_000_000L, new BigInteger("1000000000000000000000"));
+var iterable = List.of(BigInteger.valueOf(10), BigInteger.valueOf(20), BigInteger.valueOf(1_000_000_000L), new BigInteger("1000000000000000000000"));
 JNumberTools.permutations()
     .repetitive(300, 500)
     .byRanks(iterable)

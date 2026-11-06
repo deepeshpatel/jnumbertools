@@ -71,7 +71,6 @@ class ConstrainedProductValidationRulesTest {
         return sum;
     }
 
-    /** A product that is empty for sure: its only dimension asks for 1 element out of nothing. */
     private ConstrainedProductBuilder emptyProduct() {
         var p = cartesianProduct.constrainedProductOfDistinct(1, Collections.emptyList());
         assertEquals(BigInteger.ZERO, p.count());
@@ -79,11 +78,6 @@ class ConstrainedProductValidationRulesTest {
         return p;
     }
 
-    // ------------------------------------------------------------------------------------
-    // GENERAL RULE 1 - null input
-    // ------------------------------------------------------------------------------------
-
-    /** Regression guard: null input is rejected everywhere. */
     @Test
     void nullInputIsRejectedEverywhere() {
         var builder = cartesianProduct.constrainedProductOfDistinct(2, ABC);
@@ -106,13 +100,6 @@ class ConstrainedProductValidationRulesTest {
         assertThrows(NullPointerException.class, () -> empty.andInRange(0, 1, nothing));
     }
 
-    // ------------------------------------------------------------------------------------
-    // GENERAL RULE 7 - null elements rejected while the builder copies its list
-    // ------------------------------------------------------------------------------------
-
-    /**
-     * Null elements must be rejected by every entry point, including on already-empty products.
-     */
     @Test
     void nullElementsAreRejectedWhenBuilderIsCreated() {
         List<String> withNull = Arrays.asList("A", null, "C");
@@ -136,14 +123,6 @@ class ConstrainedProductValidationRulesTest {
         assertAll(checks);
     }
 
-    // ------------------------------------------------------------------------------------
-    // GENERAL RULE 8 - builders snapshot their input
-    // ------------------------------------------------------------------------------------
-
-    /**
-     * Builders must snapshot every dimension; changes to caller-owned lists after construction
-     * must not affect count(), lexOrder(), or any generated tuples.
-     */
     @Test
     void builderTakesSnapshotOfEveryDimension() {
         List<String> first = new ArrayList<>(ABC);
@@ -507,7 +486,6 @@ class ConstrainedProductValidationRulesTest {
         assertAll(checks);
     }
 
-    /** Regression guard: generators are re-iterable. */
     @Test
     void generatorsAreReIterable() {
         var builder = cartesianProduct.constrainedProductOfDistinct(2, ABC).andMultiSelect(2, ONE_TO_FOUR);
