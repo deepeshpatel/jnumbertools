@@ -177,7 +177,7 @@ class MixedRadixTest {
 
     @Nested
     @DisplayName("Round-trip: valid for uniform bases only")
-    @Disabled("TODO: tests not poassing. Need to allign protocol for saving MSD to LSD vs LSD to MSD")
+    @Disabled("TODO: tests not passing. Need to align protocol for saving MSD to LSD vs LSD to MSD")
     class UniformBaseRoundTrip {
 
         @Test

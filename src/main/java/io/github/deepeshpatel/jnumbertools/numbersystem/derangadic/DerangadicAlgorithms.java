@@ -8,7 +8,6 @@ import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.datastructure.FenwickTree;
 
 import java.math.BigInteger;
-import java.util.*;
 
 /**
  * Core algorithms for the <strong>Derangadic</strong> number system — a combinatorial
@@ -93,9 +92,9 @@ import java.util.*;
  * <p>
  * <strong>Implementation class: intended to be used through {@link io.github.deepeshpatel.jnumbertools.base.RankOf} and
  * {@link io.github.deepeshpatel.jnumbertools.base.UnrankOf} (and the builders).</strong> Argument validation and its error signalling belong to those;
- * this class assumes valid input. The checks that remain here are intrinsic to the conversion (a rank that is
- * not below D_n cannot be encoded, and a derangement with no legal candidate at some position cannot be
- * decoded) and cost a comparison.
+ * this class assumes valid input. Intrinsic conversion checks remain here: ranks outside
+ * {@code [0, D_n)} cannot be encoded, and digit values outside the legal candidate range
+ * cannot be decoded.
  * </p>
  * @author Deepesh Patel &amp; Aditya Patel
  */
@@ -128,21 +127,6 @@ public final class DerangadicAlgorithms {
     }
 
     /**
-     * Counts the derangement completions for the remaining structure.
-     */
-    private BigInteger countCompletions(Set<Integer> remainingPositions,
-                                        Set<Integer> remainingElements) {
-        int size = remainingPositions.size();
-        int restrictedCount = 0;
-        for (int pos : remainingPositions) {
-            if (remainingElements.contains(pos)) {
-                restrictedCount++;
-            }
-        }
-        return calculator.restrictedDerangementCount(size, restrictedCount);
-    }
-
-    /**
      * Converts a decimal rank to its Derangadic digit array.
      *
      * <h3>Array index convention</h3>
@@ -167,6 +151,8 @@ public final class DerangadicAlgorithms {
      * {@code result.length-1} down to {@code 0}.
      * </p>
      *
+     * <p>Uses O(actualN²) candidate checks and O(actualN) auxiliary space.</p>
+     *
      * @param m decimal rank ({@code 0 ≤ m < D_n})
      * @param n order (number of elements, {@code n ≥ 2})
      * @return Derangadic digit array of length {@code actualN ≤ n},
@@ -187,41 +173,49 @@ public final class DerangadicAlgorithms {
         // Pre-calculate actualNMinus1 for array index calculations
         int actualNMinus1 = actualN - 1;
 
+        // Number of unused elements that are also in the remaining position range [step, actualN).
+        // This is maintained incrementally as positions and elements are consumed.
+        int restrictedCount = actualN;
+
         for (int step = 0; step < actualN; step++) {
             int remainingSize = actualN - step;
-            int restrictedCount = 0;
 
-            // Optimized loop: count unused elements
-            for (int i = step; i < actualN; i++) {
-                if (!elementUsed[i]) {
-                    restrictedCount++;
-                }
+            // The current position is no longer part of the remaining positions.
+            if (!elementUsed[step]) {
+                restrictedCount--;
             }
 
             int legalFoundCount = 0;
             BigInteger cumulative = BigInteger.ZERO;
-
-            boolean stepNotUsed = !elementUsed[step];
+            boolean selected = false;
 
             for (int candidate = 0; candidate < actualN; candidate++) {
-                if (elementUsed[candidate] || candidate == step) continue;
+                if (elementUsed[candidate] || candidate == step) {
+                    continue;
+                }
 
-                boolean pickingRestricted = (candidate > step);
-                int decrement = (pickingRestricted ? 1 : 0) + (stepNotUsed ? 1 : 0);
-                int nextRestricted = restrictedCount > decrement ? restrictedCount - decrement : 0;
-
-                BigInteger blockSize = calculator.restrictedDerangementCount(remainingSize - 1, nextRestricted);
+                // Selecting candidate removes it from the restricted set exactly when
+                // candidate belongs to the remaining position range.
+                int nextRestricted = restrictedCount - (candidate > step ? 1 : 0);
+                BigInteger blockSize = calculator.restrictedDerangementCount(
+                        remainingSize - 1, nextRestricted);
 
                 if (currentM.compareTo(cumulative.add(blockSize)) < 0) {
-                    // step 0 → index actualN-1 (MSD), step actualN-1 → index 0 (LSD = D_0)
+                    // step 0 → index actualN-1 (MSD), final step → index 0 (LSD).
                     digits[actualNMinus1 - step] = legalFoundCount;
                     elementUsed[candidate] = true;
                     currentM = currentM.subtract(cumulative);
+                    restrictedCount = nextRestricted;
+                    selected = true;
                     break;
                 }
 
                 cumulative = cumulative.add(blockSize);
                 legalFoundCount++;
+            }
+
+            if (!selected) {
+                throw new IllegalStateException("Unable to encode rank at position " + step);
             }
         }
 
@@ -252,56 +246,60 @@ public final class DerangadicAlgorithms {
      * zero-padded as needed).
      * </p>
      *
+     * <p>Uses O(n²) candidate checks and O(n) auxiliary space. Restricted
+     * derangement counts are maintained incrementally, avoiding temporary
+     * collection copies while considering candidate blocks.</p>
+     *
      * @param digits Derangadic digit array of length {@code actualN ≤ n},
      *               stored LSD-first ({@code digits[0] = D_0})
      * @param n      full order ({@code n ≥ 2})
      * @return decimal rank corresponding to the given digit array
+     * @throws IllegalArgumentException if a digit is outside the legal candidate range
      */
     public BigInteger decode(int[] digits, int n) {
         ZeroPaddedList allDigits = new ZeroPaddedList(digits, n);
-
-        Set<Integer> remainingElements = new HashSet<>();
-        Set<Integer> remainingPositions = new HashSet<>();
-        for (int i = 0; i < n; i++) {
-            remainingElements.add(i);
-            remainingPositions.add(i);
-        }
+        boolean[] elementUsed = new boolean[n];
 
         BigInteger result = BigInteger.ZERO;
-        List<Integer> positionsList = new ArrayList<>(remainingPositions);
-        Collections.sort(positionsList);
-
+        int restrictedCount = n;
         int nMinus1 = n - 1;
+
         for (int step = 0; step < n; step++) {
-            int pos = positionsList.get(0);
-
-            List<Integer> legal = new ArrayList<>();
-            for (int e : remainingElements) {
-                if (e != pos) legal.add(e);
+            // The current position leaves the remaining-position set.
+            if (!elementUsed[step]) {
+                restrictedCount--;
             }
-            Collections.sort(legal);
 
-            // Digit for this step: step 0 → index n-1 (MSD = D_{n-1}),
-            // step n-1 → index 0 (LSD = D_0).
             int digit = allDigits.get(nMinus1 - step);
+            int remainingSize = n - step;
+            int legalFoundCount = 0;
+            boolean selected = false;
 
-            for (int idx = 0; idx < digit; idx++) {
-                int candidate = legal.get(idx);
+            // Visit legal candidates in ascending order, as required by lexicographic ranking.
+            for (int candidate = 0; candidate < n; candidate++) {
+                if (elementUsed[candidate] || candidate == step) {
+                    continue;
+                }
 
-                Set<Integer> newRemainingElements = new HashSet<>(remainingElements);
-                newRemainingElements.remove(candidate);
+                int nextRestricted = restrictedCount - (candidate > step ? 1 : 0);
+                BigInteger blockSize = calculator.restrictedDerangementCount(
+                        remainingSize - 1, nextRestricted);
 
-                Set<Integer> newRemainingPositions = new HashSet<>(remainingPositions);
-                newRemainingPositions.remove(pos);
+                if (legalFoundCount == digit) {
+                    elementUsed[candidate] = true;
+                    restrictedCount = nextRestricted;
+                    selected = true;
+                    break;
+                }
 
-                result = result.add(countCompletions(newRemainingPositions, newRemainingElements));
+                result = result.add(blockSize);
+                legalFoundCount++;
             }
 
-            int chosen = legal.get(digit);
-            remainingElements.remove(chosen);
-            remainingPositions.remove(pos);
-            positionsList = new ArrayList<>(remainingPositions);
-            Collections.sort(positionsList);
+            if (!selected) {
+                throw new IllegalArgumentException(
+                        "Invalid Derangadic digit " + digit + " at position " + step);
+            }
         }
 
         return result;
@@ -398,7 +396,8 @@ public final class DerangadicAlgorithms {
 
     /**
      * Fenwick-tree-based implementation for large {@code n}.
-     * O(n + actualN × log n) — preferred when {@code n > 100}.
+     * O((n + actualN) × log n) — preferred when {@code n > 100}.
+     * Initializing the Fenwick tree costs O(n × log n).
      *
      * <p>The {@code digits} array must be LSD-first: {@code digits[0] = D_0} (Least
      * Significant Digit) and {@code digits[digits.length-1] = D_{k-1}} (Most
@@ -471,46 +470,51 @@ public final class DerangadicAlgorithms {
      * {@code result.length-1} down to {@code 0}.
      * </p>
      *
-     * @param derangement derangement array of length {@code n} (no fixed points,
-     *                    values in {@code [0, n)}, all distinct); correctness is
-     *                    not fully validated
+     * <p>Uses O(n²) time and O(n) auxiliary space.</p>
+     *
+     * @param derangement derangement array of length {@code n}, with no fixed points
+     *                    and each value in {@code [0, n)} appearing exactly once
      * @param n           order (must equal {@code derangement.length})
      * @return Derangadic digit array of minimal length, stored LSD-first
      *         ({@code result[0] = D_0})
-     * @throws IllegalArgumentException if {@code derangement} contains a fixed point
-     *                                  or an element that is not in the legal candidate list
+     * @throws IllegalArgumentException if an element is out of bounds, duplicated,
+     *                                  or creates a fixed point
      */
     public int[] fromDerangement(int[] derangement, int n) {
         int[] fullDigits = new int[n];
-
-        List<Integer> remainingElements = new ArrayList<>();
-        List<Integer> remainingPositions = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            remainingElements.add(i);
-            remainingPositions.add(i);
-        }
+        boolean[] elementUsed = new boolean[n];
 
         int nMinus1 = n - 1;
         for (int step = 0; step < n; step++) {
-            int pos = remainingPositions.get(0);
-
-            List<Integer> legal = new ArrayList<>();
-            for (int e : remainingElements) {
-                if (e != pos) legal.add(e);
-            }
-            Collections.sort(legal);
-
+            int pos = step;
             int chosen = derangement[pos];
-            int digit = legal.indexOf(chosen);
-            if (digit == -1) {
-                throw new IllegalArgumentException("Invalid derangement at position " + pos);
+
+            if (chosen < 0 || chosen >= n) {
+                throw new IllegalArgumentException(
+                        "Invalid derangement: element " + chosen + " out of bounds at position " + pos);
+            }
+            if (chosen == pos) {
+                throw new IllegalArgumentException(
+                        "Invalid derangement: fixed point at position " + pos);
+            }
+            if (elementUsed[chosen]) {
+                throw new IllegalArgumentException(
+                        "Invalid derangement: duplicate element " + chosen);
             }
 
-            // step 0 → index n-1 (MSD = D_{n-1}), step n-1 → index 0 (LSD = D_0).
-            fullDigits[nMinus1 - step] = digit;
+            int availableLessThanChosen = 0;
+            for (int element = 0; element < chosen; element++) {
+                if (!elementUsed[element]) {
+                    availableLessThanChosen++;
+                }
+            }
 
-            remainingElements.remove(Integer.valueOf(chosen));
-            remainingPositions.remove(0);
+            // Exclude the current position only when it is still unused and smaller than chosen.
+            int digit = availableLessThanChosen
+                    - (!elementUsed[pos] && chosen > pos ? 1 : 0);
+
+            fullDigits[nMinus1 - step] = digit;
+            elementUsed[chosen] = true;
         }
 
         // Trim MSD-side leading zeros (high indices) to produce minimal carrier length.

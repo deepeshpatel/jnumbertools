@@ -56,37 +56,71 @@ public final class CombinadicAlgorithms {
      * @param n the total number of elements (n ≥ 0)
      * @param mthCombination the combination (sorted array of indices) whose rank is to be computed
      * @return the 0-based lexicographical rank of the combination
-     * @see {@link io.github.deepeshpatel.jnumbertools.base.RankOf}
+     * @see io.github.deepeshpatel.jnumbertools.base.RankOf
 
      */
     public BigInteger rank(int n, int[] mthCombination) {
-        int[] combinadic = combinationToCombinadic(n, mthCombination);
-        BigInteger x = combinadicToDecimal(combinadic);
-        BigInteger nCr = calculator.nCr(n, mthCombination.length);
-        return nCr.subtract(x).subtract(BigInteger.ONE);
+        int r = mthCombination.length;
+        BigInteger x = BigInteger.ZERO;
+
+        for (int i = 0; i < r; i++) {
+            x = x.add(calculator.nCr(n - 1 - mthCombination[i], r - i));
+        }
+
+        return calculator.nCr(n, r).subtract(x).subtract(BigInteger.ONE);
     }
 
     /**
-     * Computes the combination corresponding to a given rank in the Combinadic representation.
-     * <p>
-     * This method computes:
-     * <pre>
-     *     x = Cₙ,ᵣ − rank − 1
-     * </pre>
-     * then converts x to a Combinadic representation of size rᵣ and transforms it back into a combination.
-     * </p>
+     * Un-ranks the nth combination in lexicographical order using the
+     * Combinatorial Number System (Combinadic) with Binary Search.
+     *
+     * Time Complexity: O(r * log n)
+     * Space Complexity: O(r) for the result array (Zero intermediate allocations)
      *
      * @param rank the rank of the combination
-     * @param nCr the total number of combinations (Cₙ,ᵣ)
+     * @param total the total number of combinations (Cₙ,ᵣ)
      * @param n the total number of elements (nₙ)
      * @param r the size of the combination (rᵣ)
-     * @return the combination corresponding to the given rank
+     * @return an int array of size r containing the combination in ascending order
      */
-    public int[] unRank(BigInteger rank, BigInteger nCr, int n, int r) {
-        BigInteger x = nCr.subtract(rank).subtract(BigInteger.ONE);
-        int[] a = decimalToCombinadic(x, r);
-        return combinadicToCombination(a, n);
+    public int[] unRank(BigInteger rank, BigInteger total, int n, int r) {
+        int[] result = new int[r];
+        int index = 0;
+
+        // To get lexicographical order, we unrank the "reversed" rank in co-lexicographical order
+        //BigInteger total = calculator.nCr(n, r);
+        BigInteger remaining = total.subtract(BigInteger.ONE).subtract(rank);
+
+        for (int k = r; k >= 1; k--) {
+            // BINARY SEARCH: Find the largest 'c' such that nCr(c, k) <= remaining
+            int low = k - 1;
+            int high = n - 1;
+            int best = k - 1; // Fallback if remaining is 0
+
+            while (low <= high) {
+                int mid = low + (high - low) / 2;
+                BigInteger val = calculator.nCr(mid, k);
+
+                if (val.compareTo(remaining) <= 0) {
+                    best = mid;      // This 'c' is valid, try to find a larger one
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;  // 'c' is too large, search lower
+                }
+            }
+
+            // MAP TO LEXICOGRAPHICAL ORDER:
+            // Because k decreases from r to 1, 'best' decreases,
+            // so (n - 1 - best) naturally increases, filling the array in ascending order!
+            result[index++] = n - 1 - best;
+
+            // Subtract the combinations we just skipped
+            remaining = remaining.subtract(calculator.nCr(best, k));
+        }
+
+        return result;
     }
+
 
     /**
      * Converts a combination to its Combinadic representation.

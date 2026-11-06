@@ -10,124 +10,71 @@ import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
 /**
- * An iterator that generates unique permutations of integer indices in lexicographical order.
- * <p>
- * This iterator produces all n! permutations of indices {0, 1, ..., n−1} (e.g., [0, 1, 2], [0, 2, 1], etc.),
- * where n is the input size. These can be mapped to actual elements by higher-level classes. For example,
- * with size=3, it generates:
- * <pre>
- * [0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]
- * </pre>
- * When no further permutations exist, the iterator signals completion by returning an empty array,
- * and subsequent calls to {@code next()} throw a {@link NoSuchElementException}.
- * </p>
- *
+ * Internal iterator for generating lexicographically ordered permutation indices.
+ * Intended for internal use only; use the public permutation builders instead.
  * @author Deepesh Patel
  */
 public final class UniquePermutationLexIndicesIterator implements Iterator<int[]> {
 
     private int[] indices;
+    private boolean exhausted;
 
-    /**
-     * Constructs an iterator for permutations of indices of the specified size.
-     * <p>
-     * Initializes with the identity permutation: [0, 1, 2, ..., n−1].
-     * </p>
-     *
-     * @param size the number of indices to permute (n); must be non-negative
-     * @throws IllegalArgumentException if size is negative
-     */
     UniquePermutationLexIndicesIterator(int size) {
         this.indices = IntStream.range(0, size).toArray();
+        this.exhausted = (size == 0);
     }
 
-    /**
-     * Constructs an iterator with a specified starting permutation.
-     *
-     * @param startingPermutation the initial permutation of indices; must be a valid permutation of {0, 1, ..., n−1}
-     * @throws IllegalArgumentException if startingPermutation is invalid
-     */
     public UniquePermutationLexIndicesIterator(int[] startingPermutation) {
-        this.indices = startingPermutation;
+        // Defensive copy to prevent caller from mutating our internal state
+        if (startingPermutation != null) {
+            this.indices = Arrays.copyOf(startingPermutation, startingPermutation.length);
+        } else {
+            this.indices = new int[0];
+        }
+        this.exhausted = (this.indices.length == 0);
     }
 
-    /**
-     * Checks if there are more permutations to generate.
-     *
-     * @return {@code true} if a subsequent permutation exists; {@code false} otherwise
-     */
     @Override
     public boolean hasNext() {
-        return indices.length != 0;
+        return !exhausted;
     }
 
-    /**
-     * Returns the next permutation of indices.
-     *
-     * @return the next permutation as an array of integers
-     * @throws NoSuchElementException if no more permutations are available
-     */
     @Override
     public int[] next() {
-        if (hasNext()) {
-            int[] old = indices;
-            indices = nextPermutation(indices);
-            return old;
-        }
-        throw new NoSuchElementException("Reached maximum permutation");
+        if (exhausted) { throw new NoSuchElementException("Reached maximum permutation");}
+        int[] result = Arrays.copyOf(indices, indices.length);
+        if (!advanceToNextPermutation(indices)) { exhausted = true;}
+        return result;
     }
 
-    /**
-     * Computes the next permutation in lexicographical order.
-     * <p>
-     * The algorithm:
-     * <ol>
-     *   <li>Finds the rightmost index i where cᵢ < cᵢ₊₁.</li>
-     *   <li>If no such index exists, returns an empty array (indicating the last permutation).</li>
-     *   <li>Finds the rightmost index j where cⱼ > cᵢ and swaps cᵢ and cⱼ.</li>
-     *   <li>Reverses the subarray from i+1 to the end.</li>
-     * </ol>
-     * </p>
-     *
-     * @param n the current permutation array
-     * @return the next permutation as an array of integers, or an empty array if no further permutation exists
-     */
-    private static int[] nextPermutation(int[] n) {
-        int[] c = Arrays.copyOf(n, n.length);
+    private static boolean advanceToNextPermutation(int[] n) {
         int highestI = -1;
 
-        for (int i = c.length - 2; i >= 0; i--) {
-            if (c[i] < c[i + 1]) {
+        for (int i = n.length - 2; i >= 0; i--) {
+            if (n[i] < n[i + 1]) {
                 highestI = i;
                 break;
             }
         }
 
         if (highestI == -1) {
-            return new int[]{};
+            return false;
         }
 
-        for (int j = c.length - 1; j > highestI; j--) {
-            if (c[j] > c[highestI]) {
-                swap(c, j, highestI);
+        for (int j = n.length - 1; j > highestI; j--) {
+            if (n[j] > n[highestI]) {
+                swap(n, j, highestI);
                 break;
             }
         }
 
-        for (int i = highestI + 1, j = c.length - 1; i < j; i++, j--) {
-            swap(c, i, j);
+        for (int i = highestI + 1, j = n.length - 1; i < j; i++, j--) {
+            swap(n, i, j);
         }
 
-        return c;
+        return true;
     }
 
-    /**
-     * Swaps two elements in the array at the specified indices.
-     *
-     * @param a the array to modify
-     * @param i the index of the first element
-     * @param j the index of the second element
-     */
     private static void swap(int[] a, int i, int j) {
         int t = a[i];
         a[i] = a[j];

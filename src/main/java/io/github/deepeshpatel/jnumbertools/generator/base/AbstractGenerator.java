@@ -4,7 +4,6 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.base;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -57,11 +56,12 @@ public abstract class AbstractGenerator<E> implements StreamableIterable<E> {
      * @return an immutable list of values corresponding to the provided indices
      */
     protected final List<E> indicesToValues(int[] indices) {
-        var output = new ArrayList<E>(indices.length);
-        for (int index : indices) {
-            output.add(elements.get(index));
+        @SuppressWarnings("unchecked")
+        E[] result = (E[]) new Object[indices.length];
+        for (int i = 0; i < indices.length; i++) {
+            result[i] = elements.get(indices[i]);
         }
-        return List.copyOf(output);
+        return List.of(result);
     }
 
     /**

@@ -54,11 +54,6 @@ public class BigIntegerSample implements Iterable<BigInteger> {
     }
 
     /**
-     * Returns an iterator that generates the specified number of unique random BigInteger values lazily.
-     *
-     * @return an iterator over unique BigInteger values
-     */
-    /**
      * Returns a uniformly distributed value in [0, bound) for any positive bound.
      * <p>
      * Uses {@link Random#nextLong(long, long)} when the bound fits in a long, otherwise rejection

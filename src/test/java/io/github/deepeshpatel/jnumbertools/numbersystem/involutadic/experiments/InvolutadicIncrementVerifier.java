@@ -8,7 +8,6 @@ import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.InvolutadicAlgorithms;
 import io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.InvolutadicIncrementStateMachine;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 
 /**

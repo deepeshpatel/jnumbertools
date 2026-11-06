@@ -14,7 +14,7 @@ import static io.github.deepeshpatel.jnumbertools.TestBase.unrankOf;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Validation rules for the "RANK / UNRANK HELPERS" that currently lack input validation:
+ * Validation rules for the "RANK / UNRANK HELPERS":
  *   rank:   RankOf.uniqueCombination, RankOf.repeatedPermutation
  *   unrank: UnrankOf.uniqueCombination
  * (uniquePermutation, kPermutation and derangement are covered in RankOfTest / UnrankOfTest.)
@@ -28,11 +28,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * ranking the i-th combination of Combinations.unique(n, r).lexOrder() gives i. The guards at the end pin that,
  * independently of unrank, so adding validation cannot change any answer for a valid combination.
  *
- * NOT covered here, because it needs a decision: RankOfTest currently pins uniqueCombination(5, 2, 1, 0) == 2,
- * but {2,1,0} is not ascending and 2 is not the rank of {0,1,2} (that is 0); descending input gives
- * non-unique numbers ([2,1,0], [3,1,0], [4,1,0] all give 2). Likewise UnrankOfTest pins
- * uniqueCombination(rank=35, n=5, k=3) == [2,3,4] although 5C3 = 10. Both existing cases would have to change
- * (to (5, 0,1,2) == 0 and rank 9) if the rules below are implemented.
+ * A combination is the strictly ascending list of its indices, so {2,1,0} is rejected and (5, 0,1,2) has rank 0;
+ * a rank must be below nCr, so rank 35 of 5C3 (= 10 combinations) is rejected and rank 9 is the last one
+ * (RankOfTest and UnrankOfTest pin the valid values).
  */
 class RankUnrankValidationRulesTest {
 
@@ -53,6 +51,14 @@ class RankUnrankValidationRulesTest {
     }
 
     /** Indices outside [0, n) are rejected. */
+    @Test
+    @DisplayName("rank: uniqueCombination rejects indices that are not in ascending order")
+    void uniqueCombinationRejectsNonAscendingIndices() {
+        assertThrows(RuntimeException.class, () -> rankOf.uniqueCombination(5, 2, 1, 0));
+        assertThrows(RuntimeException.class, () -> rankOf.uniqueCombination(5, 3, 1, 0));
+        assertThrows(RuntimeException.class, () -> rankOf.uniqueCombination(5, 0, 2, 1));
+    }
+
     @Test
     @DisplayName("rank: uniqueCombination rejects indices outside [0, n)")
     void uniqueCombinationRejectsIndicesOutsideRange() {

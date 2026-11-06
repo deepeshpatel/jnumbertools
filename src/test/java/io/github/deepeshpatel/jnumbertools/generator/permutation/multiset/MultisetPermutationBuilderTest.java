@@ -8,10 +8,9 @@ import java.math.BigInteger;
 import java.util.LinkedHashMap;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.List;
-import java.util.Map;
-import java.util.Collections;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class MultisetPermutationBuilderTest {

@@ -324,21 +324,25 @@ public final class Calculator {
      * @return array dp where dp[s] = number of ways to choose exactly s items (s ≤ total/2)
      */
     public static int[] multisetCombinationsCountAll(int... frequencies) {
-        int total = Arrays.stream(frequencies).sum();
+        int total = 0;
+        for (int f : frequencies) {
+            total += f;
+        }
         int k = total / 2;
+
         int[] dp = new int[k + 1];
         dp[0] = 1;
 
         for (int freq : frequencies) {
-            int[] next = new int[k + 1];
-            for (int i = 0; i <= k; i++) {
+            for (int i = k; i >= 0; i--) {
                 if (dp[i] == 0) continue;
-                for (int j = 0; j <= freq && i + j <= k; j++) {
-                    next[i + j] += dp[i];
+
+                for (int j = 1; j <= Math.min(freq, k - i); j++) {
+                    dp[i + j] += dp[i];
                 }
             }
-            dp = next;
         }
+
         return dp;
     }
 

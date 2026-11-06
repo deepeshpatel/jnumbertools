@@ -482,7 +482,7 @@ public class DerangadicIncrementStateMachineTest {
     @DisplayName("In-place increment keeps sub-microsecond average step time for representative n values")
     void testPerformanceOfInPlaceDerangement() {
         int[] nValues = {1000,10000, 50000};
-        long iterations = 1000_000l;
+        long iterations = 1000_000L;
         long startRank = 9_000_000_000L;
 
         long totalTime = 0;

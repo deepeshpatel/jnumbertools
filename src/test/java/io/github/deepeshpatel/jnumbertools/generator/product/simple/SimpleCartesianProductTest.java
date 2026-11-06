@@ -4,7 +4,6 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -181,7 +180,6 @@ class SimpleCartesianProductTest {
         }
 
         @Test
-        @Disabled("TODO: currently not implemented as immutable. Should we make the inner lists immutable?")
         @DisplayName("Inner lists are immutable")
         void innerListsAreImmutable() {
             var results = cartesianProduct.simpleProductOf(A_B).and(num_1_2_3)

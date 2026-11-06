@@ -1,6 +1,5 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -18,20 +17,17 @@ import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Stage 1 (tests first): one test per ValidationRules.md rule that applies to the public API of the
- * SIMPLE CARTESIAN PRODUCT builder, reached only through {@code cartesianProduct.simpleProductOf(..).and(..)}.
- * Each test states what the CURRENT code is predicted to do, so the failures can be confirmed before any
- * production change.
+ * One test per ValidationRules.md rule that applies to the public API of the SIMPLE CARTESIAN PRODUCT
+ * builder, reached only through {@code cartesianProduct.simpleProductOf(..).and(..)}.
  *
  * Conventions follow the already-migrated builders (see ConstrainedProductValidationRulesTest):
  *   null list / null element / null Random -> NullPointerException
  *   null ranks                              -> IllegalArgumentException
  *   everything else invalid                 -> IllegalArgumentException
  *
- * Deliberately NOT covered: a product whose ONLY dimension is empty, simpleProductOf([]). The table says
- * "any dimension is empty -> count 0" but the code returns count 1 / [[]]; which one is intended is an
- * open question in ValidationRules.md, so no test pins either answer. Expected counts are computed
- * independently (plain products of the dimension sizes), never through the builder's own isEmpty().
+ * Expected counts are computed independently (plain products of the dimension sizes), never through the
+ * builder's own isEmpty(). A product whose only dimension is empty (count 0, like any empty dimension) is
+ * pinned in SimpleCartesianProductTest.
  */
 class SimpleProductValidationRulesTest {
 

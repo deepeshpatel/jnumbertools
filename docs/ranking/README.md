@@ -32,7 +32,7 @@ BigInteger rank = JNumberTools.rankOf().uniquePermutation(3, 2, 1, 0);
 ```
 
 ### 2. Ranking of k-Permutation
-Calculates the rank of a k-permutation. For example, if we select 5 elements out of 8 [0,1,2,3,4,5,6,7], there are a total of <sup>8</sup>P<sub>5</sub> permutations, out of which the 1000<sup>th</sup> permutation is [8,4,6,2,0].
+Calculates the rank of a k-permutation. For example, if we select 4 elements out of 8 [0,1,2,3,4,5,6,7], there are a total of <sup>8</sup>P<sub>4</sub> permutations, out of which the 1000<sup>th</sup> permutation is [4,6,2,0].
 
 ```java
 // Will return 1000

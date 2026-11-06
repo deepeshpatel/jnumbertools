@@ -10,7 +10,6 @@ import java.math.BigInteger;
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
 import static io.github.deepeshpatel.jnumbertools.TestBase.unrankOf;
 import static org.junit.jupiter.api.Assertions.*;
-import java.util.List;
 
 @DisplayName("UnrankOf Factory")
 public class UnrankOfTest {

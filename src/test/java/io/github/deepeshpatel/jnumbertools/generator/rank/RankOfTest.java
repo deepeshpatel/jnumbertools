@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("RankOf Factory")

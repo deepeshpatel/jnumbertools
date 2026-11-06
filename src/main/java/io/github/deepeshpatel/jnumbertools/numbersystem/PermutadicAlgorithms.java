@@ -202,18 +202,97 @@ public final class PermutadicAlgorithms {
     }
 
     /**
-     * Computes the rank of a permutation in the Permutadic system.
+     * Ranks a permutation in lexicographical order.
+     * <p>
+     * Uses the ArrayList implementation for smaller permutations and switches
+     * to a Fenwick Tree implementation when the set size exceeds
+     * {@value #FENWICK_THRESHOLD}.
+     * </p>
      *
      * @param size the size of the set from which the permutation is selected.
-     * @param mth_kPermutation the mᵗʰ permutation to be ranked.
-     * @return the rank of the given permutation.
-     * @see {@link io.github.deepeshpatel.jnumbertools.base.RankOf}
-
+     * @param mth_kPermutation the permutation to be ranked.
+     * @return the zero-based rank of the permutation.
+     * @see io.github.deepeshpatel.jnumbertools.base.RankOf
      */
     public static BigInteger rank(int size, int... mth_kPermutation) {
         int degree = size - mth_kPermutation.length;
-        List<Integer> permutadic = mthPermutationToPermutadic(mth_kPermutation, degree);
-        return toDecimal(permutadic, degree);
+
+        if (size > FENWICK_THRESHOLD) {
+            return rankFenwick(mth_kPermutation, size, degree);
+        }
+
+        return rankArrayList(mth_kPermutation, size, degree);
+    }
+
+    private static BigInteger rankArrayList(int[] permutation, int size, int degree) {
+        Set<Integer> permutationSet = new HashSet<>(permutation.length);
+
+        for (int value : permutation) {
+            permutationSet.add(value);
+        }
+
+        List<Integer> pool = new ArrayList<>(size - permutation.length);
+
+        for (int i = 0; i < size; i++) {
+            if (!permutationSet.contains(i)) {
+                pool.add(i);
+            }
+        }
+
+        BigInteger rank = BigInteger.ZERO;
+        BigInteger placeValue = BigInteger.ONE;
+        int radix = degree;
+
+        for (int i = permutation.length - 1; i >= 0; i--) {
+            int value = permutation[i];
+
+            int index = Collections.binarySearch(pool, value);
+            index = -(index + 1);
+
+            rank = rank.add(placeValue.multiply(BigInteger.valueOf(index)));
+
+            pool.add(index, value);
+
+            radix++;
+            placeValue = placeValue.multiply(BigInteger.valueOf(radix));
+        }
+
+        return rank;
+    }
+
+    private static BigInteger rankFenwick(int[] permutation, int size, int degree) {
+        FenwickTree ft = new FenwickTree(size);
+
+        // Initially, all elements are available.
+        for (int i = 1; i <= size; i++) {
+            ft.update(i, 1);
+        }
+
+        // Remove elements belonging to the permutation.
+        for (int value : permutation) {
+            ft.update(value + 1, -1);
+        }
+
+        BigInteger rank = BigInteger.ZERO;
+        BigInteger placeValue = BigInteger.ONE;
+        int radix = degree;
+
+        for (int i = permutation.length - 1; i >= 0; i--) {
+            int value = permutation[i];
+
+            // Count available elements smaller than value.
+            int digit = ft.rsq(value);
+
+            rank = rank.add(placeValue.multiply(BigInteger.valueOf(digit)));
+
+            // Make the current element available.
+            ft.update(value + 1, 1);
+
+            radix++;
+            placeValue = placeValue.multiply(BigInteger.valueOf(radix));
+        }
+
+        return rank;
     }
 
     /**
@@ -232,7 +311,7 @@ public final class PermutadicAlgorithms {
      * @param size the total number of elements (n)
      * @param k the number of elements to select for the permutation
      * @return an array of length k representing the k-permutation at the specified rank
-     * @see {@link io.github.deepeshpatel.jnumbertools.base.UnrankOf}
+     * @see io.github.deepeshpatel.jnumbertools.base.UnrankOf
      */
     public static int[] unRank(BigInteger rank, int size, int k) {
         List<Integer> permutadic = toPermutadic(rank, size - k);
