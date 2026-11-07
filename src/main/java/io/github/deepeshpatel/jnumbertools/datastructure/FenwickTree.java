@@ -33,6 +33,24 @@ public final class FenwickTree {
     }
 
     /**
+     * Creates a Fenwick Tree of size n in which every position holds 1.
+     * <p>
+     * Built directly in O(n): the node at index i covers the {@code i & -i} positions ending at i, so it holds
+     * exactly that many ones. This replaces n calls to {@link #update(int, int)} (O(n log n)).
+     * </p>
+     *
+     * @param n size of the tree
+     * @return a tree whose {@link #get(int)} is 1 at every index in [1, n]
+     */
+    public static FenwickTree ofOnes(int n) {
+        FenwickTree tree = new FenwickTree(n);
+        for (int i = 1; i <= n; i++) {
+            tree.tree[i] = i & -i;
+        }
+        return tree;
+    }
+
+    /**
      * Creates a copy of an existing Fenwick Tree.
      *
      * @param other the tree to copy

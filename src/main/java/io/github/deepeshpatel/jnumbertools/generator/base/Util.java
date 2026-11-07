@@ -68,8 +68,6 @@ public class Util {
         if (r < 0) {
             throw new IllegalArgumentException("r must be ≥ 0 for multiset combinations");
         }
-        int[] frequencies = options.values().stream().mapToInt(Integer::intValue).toArray();
-        Calculator.multisetCombinationsCount(r, frequencies);
     }
 
     public static boolean isEmptyList(List<List<Object>> list) {

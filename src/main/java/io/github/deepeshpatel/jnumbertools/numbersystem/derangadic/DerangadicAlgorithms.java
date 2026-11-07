@@ -410,10 +410,7 @@ public final class DerangadicAlgorithms {
         int offset = n - actualN;
 
         int[] derangement = new int[n];
-        FenwickTree availableElements = new FenwickTree(n);
-        for (int i = 1; i <= n; i++) {
-            availableElements.update(i, 1);
-        }
+        FenwickTree availableElements = FenwickTree.ofOnes(n);
 
         int actualNMinus1 = actualN - 1;
         int nextAvailable = 1;
@@ -484,10 +481,7 @@ public final class DerangadicAlgorithms {
         int[] fullDigits = new int[n];
         // Initially every value in [0, n) is available. FenwickTree uses
         // 1-based indices, so value v is stored at index v + 1.
-        FenwickTree availableElements = new FenwickTree(n);
-        for (int index = 1; index <= n; index++) {
-            availableElements.update(index, 1);
-        }
+        FenwickTree availableElements = FenwickTree.ofOnes(n);
 
         int nMinus1 = n - 1;
         for (int step = 0; step < n; step++) {

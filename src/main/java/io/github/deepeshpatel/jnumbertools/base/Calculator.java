@@ -458,16 +458,27 @@ public final class Calculator {
         int k = total / 2;
 
         int[] dp = new int[k + 1];
+        int[] next = new int[k + 1];
         dp[0] = 1;
 
+        // Adding a type with multiplicity f: next[s] = dp[s - f] + ... + dp[s], kept as a sliding window sum.
+        // O(types * k) instead of O(types * k * f); int arithmetic wraps exactly as the direct sum would.
         for (int freq : frequencies) {
-            for (int i = k; i >= 0; i--) {
-                if (dp[i] == 0) continue;
-
-                for (int j = 1; j <= Math.min(freq, k - i); j++) {
-                    dp[i + j] += dp[i];
-                }
+            if (freq <= 0) {
+                continue; // contributes nothing (zero) or is outside the documented domain
             }
+            int window = 0;
+            for (int s = 0; s <= k; s++) {
+                window += dp[s];
+                int expired = s - freq - 1;
+                if (expired >= 0) {
+                    window -= dp[expired];
+                }
+                next[s] = window;
+            }
+            int[] swap = dp;
+            dp = next;
+            next = swap;
         }
 
         return dp;
@@ -538,33 +549,62 @@ public final class Calculator {
             }
         }
 
-        int n = counts.length;
-        int[] suffixSum = new int[n + 1];
-        suffixSum[n] = 0;
-        for (int i = n - 1; i >= 0; i--) {
-            suffixSum[i] = suffixSum[i + 1] + counts[i];
+        long total = 0;
+        for (int i = index; i < counts.length; i++) {
+            total += counts[i];
         }
-
-        TwoLevelMap<Integer, Integer, BigInteger> memo = new TwoLevelMap<>();
-        return multisetCombinationsHelper(counts, index, k, memo, suffixSum);
+        if (k > total) {
+            return BigInteger.ZERO;
+        }
+        // Symmetry: choosing k items is equivalent to leaving k' = total - k items out.
+        int target = (int) Math.min(k, total - k);
+        BigInteger[] ways = multisetWays(counts, index, target);
+        return ways[target];
     }
 
-    private static BigInteger multisetCombinationsHelper(int[] counts, int index, int remain,
-                                                         TwoLevelMap<Integer, Integer, BigInteger> memo,
-                                                         int[] suffixSum) {
-        if (remain == 0) return BigInteger.ONE;
-        if (index == counts.length || remain > suffixSum[index]) return BigInteger.ZERO;
-        if (remain == suffixSum[index]) return BigInteger.ONE;
+    /**
+     * Number of ways to choose exactly j items, for every j in [0, maxK], from the multiset formed by
+     * {@code counts[from..]}. Bottom-up over the item types with a sliding window sum: O((types) * maxK)
+     * big-number additions, no recursion, O(maxK) memory.
+     *
+     * @param counts non-negative multiplicities
+     * @param from   first item type to include
+     * @param maxK   largest number of items of interest (maxK ≥ 0)
+     * @return array of length maxK + 1 where element j is the number of ways to choose j items
+     */
+    static BigInteger[] multisetWays(int[] counts, int from, int maxK) {
+        BigInteger[] current = new BigInteger[maxK + 1];
+        BigInteger[] next = new BigInteger[maxK + 1];
+        java.util.Arrays.fill(current, BigInteger.ZERO);
+        current[0] = BigInteger.ONE;
+        int reach = 0; // highest index that can be non-zero so far
 
-        // === FIXED: Use computeIfAbsent ===
-        return memo.computeIfAbsent(index, remain, (idx, rem) -> {
-            BigInteger total = BigInteger.ZERO;
-            int max = Math.min(counts[idx], rem);
-            for (int i = 0; i <= max; i++) {
-                total = total.add(multisetCombinationsHelper(counts, idx + 1, rem - i, memo, suffixSum));
+        for (int type = from; type < counts.length; type++) {
+            int c = counts[type];
+            if (c == 0) {
+                continue;
             }
-            return total;
-        });
+            int newReach = (int) Math.min((long) maxK, (long) reach + c);
+            // next[j] = sum of current[j-c .. j]; maintained as a window over j.
+            BigInteger window = BigInteger.ZERO;
+            for (int j = 0; j <= newReach; j++) {
+                if (j <= reach) {
+                    window = window.add(current[j]);
+                }
+                if (j - c - 1 >= 0 && j - c - 1 <= reach) {
+                    window = window.subtract(current[j - c - 1]);
+                }
+                next[j] = window;
+            }
+            for (int j = newReach + 1; j <= maxK; j++) {
+                next[j] = BigInteger.ZERO;
+            }
+            BigInteger[] swap = current;
+            current = next;
+            next = swap;
+            reach = newReach;
+        }
+        return current;
     }
 
     /**

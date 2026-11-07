@@ -247,4 +247,66 @@ class MultisetPermutationByRanksTest {
                     builder.byRanks(of(middle)).iterator().next());
         }
     }
+
+    @Nested
+    @DisplayName("unranking across many shapes")
+    class UnrankingShapes {
+
+        @Test
+        @DisplayName("every rank of random small multisets equals the lexOrder permutation at that position")
+        void everyRankMatchesLexOrder() {
+            java.util.Random random = new java.util.Random(17);
+            for (int trial = 0; trial < 40; trial++) {
+                var options = new LinkedHashMap<Integer, Integer>();
+                int types = 1 + random.nextInt(5);
+                for (int i = 0; i < types; i++) {
+                    options.put(i, random.nextInt(4)); // zero frequencies are dropped
+                }
+                var builder = permutation.multiset(options);
+                List<List<Integer>> inOrder = builder.lexOrder().stream().toList();
+                assertEquals(BigInteger.valueOf(inOrder.size()), builder.count(), "count " + options);
+
+                List<BigInteger> allRanks = new ArrayList<>();
+                for (int rank = 0; rank < inOrder.size(); rank++) {
+                    allRanks.add(BigInteger.valueOf(rank));
+                }
+                assertEquals(inOrder, builder.byRanks(allRanks).stream().toList(), "all ranks in one pass " + options);
+                Collections.reverse(allRanks);
+                List<List<Integer>> reversed = new ArrayList<>(inOrder);
+                Collections.reverse(reversed);
+                assertEquals(reversed, builder.byRanks(allRanks).stream().toList(), "ranks in reverse order " + options);
+            }
+        }
+
+        @Test
+        @DisplayName("many types: first and last rank are the sorted and reverse-sorted multiset, other ranks agree with lexOrderMth")
+        void manyTypes() {
+            var options = new LinkedHashMap<Integer, Integer>();
+            for (int i = 0; i < 300; i++) {
+                options.put(i, 1 + (i % 3));
+            }
+            var builder = permutation.multiset(options);
+            BigInteger count = builder.count();
+
+            List<Integer> sorted = new ArrayList<>();
+            options.forEach((key, frequency) -> {
+                for (int i = 0; i < frequency; i++) {
+                    sorted.add(key);
+                }
+            });
+            List<Integer> reverseSorted = new ArrayList<>(sorted);
+            Collections.reverse(reverseSorted);
+
+            var ends = builder.byRanks(of(BigInteger.ZERO, count.subtract(BigInteger.ONE))).stream().toList();
+            assertEquals(sorted, ends.get(0));
+            assertEquals(reverseSorted, ends.get(1));
+
+            java.util.Random random = new java.util.Random(4);
+            for (int i = 0; i < 10; i++) {
+                BigInteger rank = new BigInteger(count.bitLength() + 4, random).mod(count);
+                assertEquals(builder.lexOrderMth(BigInteger.ONE, rank).iterator().next(),
+                        builder.byRanks(of(rank)).iterator().next(), "rank " + rank);
+            }
+        }
+    }
 }

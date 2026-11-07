@@ -4,8 +4,6 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.datastructure.TwoLevelMap;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -85,18 +83,41 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
         private final Iterator<BigInteger> rankIterator;
         private final Map<T, Integer> outputMap = new HashMap<>();
 
-        private final int[] suffixSum;
-        private final TwoLevelMap<Integer, Integer, BigInteger> memo = new TwoLevelMap<>();
+        /**
+         * ways[i][j] = number of ways to choose j items from the types i..end. Built bottom-up once, on the first
+         * rank that needs it, and reused for every later rank (no recursion, so any number of types is fine).
+         */
+        private BigInteger[][] ways;
 
         public SequenceIterator() {
             this.rankIterator = ranks.iterator();
+        }
 
-            // Pre-compute suffixSum ONCE (frequencies never change)
+        private BigInteger[][] buildWays() {
             int n = frequencies.length;
-            this.suffixSum = new int[n + 1];
+            BigInteger[][] table = new BigInteger[n + 1][];
+            table[n] = new BigInteger[]{BigInteger.ONE};
+            long suffixSum = 0;
             for (int i = n - 1; i >= 0; i--) {
-                suffixSum[i] = suffixSum[i + 1] + frequencies[i];
+                suffixSum += frequencies[i];
+                int length = (int) Math.min(r, suffixSum) + 1;
+                int c = frequencies[i];
+                BigInteger[] below = table[i + 1];
+                BigInteger[] row = new BigInteger[length];
+                BigInteger window = BigInteger.ZERO; // sum of below[j-c .. j]
+                for (int j = 0; j < length; j++) {
+                    if (j < below.length) {
+                        window = window.add(below[j]);
+                    }
+                    int drop = j - c - 1;
+                    if (drop >= 0 && drop < below.length) {
+                        window = window.subtract(below[drop]);
+                    }
+                    row[j] = window;
+                }
+                table[i] = row;
             }
+            return table;
         }
 
         @Override
@@ -117,6 +138,10 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
             BigInteger m = rankIterator.next();
             if (m.signum() < 0 || m.compareTo(totalCombinations) >= 0) {
                 throw new IllegalArgumentException("Rank " + m + " out of bounds [0, " + totalCombinations + ")");
+            }
+
+            if (ways == null) {
+                ways = buildWays();
             }
 
             // Use BigInteger for remainingRank to support huge ranks safely
@@ -141,16 +166,17 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
 
                 // Iterate x from MAX down to 0 (standard unranking)
                 for (int x = maxForThisType; x >= 0; x--) {
-                    // --- HOT PATH: Reuses memo & suffixSum, zero allocation ---
-                    BigInteger ways = Calculator.multisetCombinationsCountWithMemo(remainingR - x, i + 1, frequencies, memo, suffixSum);
+                    BigInteger[] rest = ways[i + 1];
+                    int need = remainingR - x;
+                    BigInteger waysForRest = need < rest.length ? rest[need] : BigInteger.ZERO;
 
                     // Compare BigIntegers
-                    if (remainingRank.compareTo(ways) < 0) {
+                    if (remainingRank.compareTo(waysForRest) < 0) {
                         combination[i] = x;
                         remainingR -= x;
                         break; // Found the count for this type, move to next type
                     } else {
-                        remainingRank = remainingRank.subtract(ways);
+                        remainingRank = remainingRank.subtract(waysForRest);
                     }
                 }
             }

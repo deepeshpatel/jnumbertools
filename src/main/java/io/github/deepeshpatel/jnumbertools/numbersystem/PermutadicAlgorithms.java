@@ -155,10 +155,7 @@ public final class PermutadicAlgorithms {
     private static int[] toMthPermutationFenwick(List<Integer> permutadic, int s, int k) {
         int[] result = new int[k];
 
-        FenwickTree ft = new FenwickTree(s);
-        for (int i = 1; i <= s; i++) {
-            ft.update(i, 1); // Mark all as available
-        }
+        FenwickTree ft = FenwickTree.ofOnes(s);
 
         int resultIdx = 0;
         for (int i = k - 1; i >= 0; i--) {
@@ -337,12 +334,7 @@ public final class PermutadicAlgorithms {
     }
 
     private static BigInteger rankFenwick(int[] permutation, int size, int degree) {
-        FenwickTree ft = new FenwickTree(size);
-
-        // Initially, all elements are available.
-        for (int i = 1; i <= size; i++) {
-            ft.update(i, 1);
-        }
+        FenwickTree ft = FenwickTree.ofOnes(size);
 
         // Remove elements belonging to the permutation.
         for (int value : permutation) {

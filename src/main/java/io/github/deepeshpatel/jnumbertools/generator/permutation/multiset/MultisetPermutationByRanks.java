@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.datastructure.FenwickTree;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -77,8 +78,19 @@ public final class MultisetPermutationByRanks<T> extends AbstractMultisetPermuta
     private class SequenceIterator implements Iterator<List<T>> {
         private final Iterator<BigInteger> rankIterator;
 
+        /** Remaining count of every element type; rebuilt to the full multiset after each rank. */
+        private final int[] remaining = Arrays.copyOf(frequencies, frequencies.length);
+
+        /** Fenwick tree over {@link #remaining}, so the type chosen at a position is found in O(log types). */
+        private final FenwickTree remainingTree = new FenwickTree(Math.max(1, frequencies.length));
+
         public SequenceIterator() {
             this.rankIterator = ranks.iterator();
+            for (int i = 0; i < frequencies.length; i++) {
+                if (frequencies[i] > 0) {
+                    remainingTree.update(i + 1, frequencies[i]);
+                }
+            }
         }
 
         @Override
@@ -95,42 +107,45 @@ public final class MultisetPermutationByRanks<T> extends AbstractMultisetPermuta
             if (rank.signum() < 0 || rank.compareTo(totalPermutations) >= 0) {
                 throw new IllegalArgumentException("Rank " + rank + " is out of bounds [0, " + totalPermutations + ")");
             }
-            return generatePermutationFromRank(rank);
+            return indicesToValues(indicesForRank(rank));
         }
 
-        private List<T> generatePermutationFromRank(BigInteger rank) {
-            int[] indices = getIndicesForMthPermutation(rank, totalLength);
-            return indicesToValues(indices);
-        }
-    }
+        /**
+         * Unranks position by position. With S items left and N = their number of distinct arrangements, the
+         * arrangements that start with type i number N * c_i / S exactly, so the arrangements starting with a type
+         * of index below i number N * P_i / S where P_i is the sum of the counts below i. The type for the
+         * current rank m is therefore the one whose cumulative count first exceeds floor(m * S / N), found with a
+         * Fenwick search instead of scanning every type.
+         */
+        private int[] indicesForRank(BigInteger m) {
+            int[] output = new int[totalLength];
+            long sum = totalLength;
+            BigInteger totalPossible = totalPermutations;
 
-    private int[] getIndicesForMthPermutation(BigInteger m, int totalLength) {
-        int[] output = new int[totalLength];
-        int[] currentMultisetCount = Arrays.copyOf(frequencies, frequencies.length);
-        long sum = totalLength;
-        BigInteger totalPossible = getTotalPermutations();
+            for (int j = 0; j < output.length; j++) {
+                BigInteger bigSum = BigInteger.valueOf(sum);
+                int target = m.multiply(bigSum).divide(totalPossible).intValueExact() + 1;
+                int position = remainingTree.findKth(target); // 1-based type index
+                int type = position - 1;
 
-        for (int j = 0; j < output.length; j++) {
-            BigInteger permutationsBefore = BigInteger.ZERO;
+                BigInteger permutationsBefore = totalPossible
+                        .multiply(BigInteger.valueOf(remainingTree.rsq(position - 1)))
+                        .divide(bigSum);
+                totalPossible = totalPossible.multiply(BigInteger.valueOf(remaining[type])).divide(bigSum);
 
-            for (int i = 0; i < currentMultisetCount.length; i++) {
-                if (currentMultisetCount[i] > 0) {
-                    BigInteger perms = totalPossible.multiply(BigInteger.valueOf(currentMultisetCount[i]))
-                            .divide(BigInteger.valueOf(sum));
-
-                    BigInteger rangeEnd = permutationsBefore.add(perms);
-                    if (m.compareTo(rangeEnd) < 0) {
-                        output[j] = i;
-                        m = m.subtract(permutationsBefore);
-                        currentMultisetCount[i]--;
-                        sum--;
-                        totalPossible = perms;
-                        break;
-                    }
-                    permutationsBefore = rangeEnd;
-                }
+                output[j] = type;
+                m = m.subtract(permutationsBefore);
+                remaining[type]--;
+                remainingTree.update(position, -1);
+                sum--;
             }
+
+            // Put the consumed items back so the next rank starts from the full multiset.
+            for (int index : output) {
+                remaining[index]++;
+                remainingTree.update(index + 1, 1);
+            }
+            return output;
         }
-        return output;
     }
 }

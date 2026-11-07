@@ -246,4 +246,61 @@ class MultisetCombinationBuilderTest {
             assertThrows(UnsupportedOperationException.class, () -> combination.put("Z", 1));
         }
     }
+
+    @Test
+    void byRanksAndCountAgreeWithLexOrderForManyShapes() {
+        Random random = new Random(3);
+        for (int trial = 0; trial < 60; trial++) {
+            var multiset = new LinkedHashMap<Integer, Integer>();
+            int types = 1 + random.nextInt(6);
+            int total = 0;
+            for (int i = 0; i < types; i++) {
+                int frequency = random.nextInt(4); // zero frequencies are dropped
+                multiset.put(i, frequency);
+                total += frequency;
+            }
+            int r = random.nextInt(total + 2);
+
+            var builder = combinations.multiset(multiset, r);
+            List<Map<Integer, Integer>> inOrder = builder.lexOrder().stream().toList();
+
+            assertEquals(BigInteger.valueOf(inOrder.size()), builder.count(), "count " + multiset + " r=" + r);
+            assertEquals(builder.count(), builder.count(), "count is stable across calls");
+            for (int rank = 0; rank < inOrder.size(); rank++) {
+                var atRank = builder.byRanks(List.of(BigInteger.valueOf(rank))).stream().toList();
+                assertEquals(List.of(inOrder.get(rank)), atRank, multiset + " r=" + r + " rank=" + rank);
+            }
+        }
+    }
+
+    @Test
+    void manyDistinctTypesNeitherOverflowTheStackNorSlowDown() {
+        int types = 20_000;
+        var multiset = new LinkedHashMap<Integer, Integer>();
+        for (int i = 0; i < types; i++) {
+            multiset.put(i, 1);
+        }
+        var builder = combinations.multiset(multiset, 3);
+
+        // choosing 3 of 20,000 distinct items
+        assertEquals(calculator.nCr(types, 3), builder.count());
+
+        BigInteger last = builder.count().subtract(BigInteger.ONE);
+        var ends = builder.byRanks(List.of(BigInteger.ZERO, last)).stream().toList();
+        assertEquals(Map.of(0, 1, 1, 1, 2, 1), ends.get(0));
+        assertEquals(Map.of(types - 3, 1, types - 2, 1, types - 1, 1), ends.get(1));
+    }
+
+    @Test
+    void largeMultisetCountsMatchTheClosedForm() {
+        // 3 types, each up to 400 copies, choose 400 in total: coefficient of x^400 in ((1 - x^401) / (1 - x))^3
+        var multiset = new LinkedHashMap<String, Integer>();
+        multiset.put("A", 400);
+        multiset.put("B", 400);
+        multiset.put("C", 400);
+        // no type can exceed 400 when choosing 400 in total, so this is C(402, 2)
+        assertEquals(calculator.nCr(402, 2), combinations.multiset(multiset, 400).count());
+        // symmetric around half of the 1,200 items
+        assertEquals(combinations.multiset(multiset, 300).count(), combinations.multiset(multiset, 900).count());
+    }
 }

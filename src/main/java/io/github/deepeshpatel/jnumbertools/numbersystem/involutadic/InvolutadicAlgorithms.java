@@ -161,8 +161,7 @@ public class InvolutadicAlgorithms{
      */
     private int[] encodeFenwick(BigInteger rank, int n, BigInteger[] T) {
         int[] digits = new int[n];
-        FenwickTree avail = new FenwickTree(n);
-        for (int i = 1; i <= n; i++) avail.update(i, 1);
+        FenwickTree avail = FenwickTree.ofOnes(n);
         BigInteger rem = rank;
 
         for (int pos = 0; pos < n; pos++) {
@@ -254,8 +253,7 @@ public class InvolutadicAlgorithms{
     /** Fenwick-tree decode (O(n log n)). */
     private BigInteger decodeFenwick(int[] digits, int n, BigInteger[] T) {
         BigInteger result = BigInteger.ZERO;
-        FenwickTree avail = new FenwickTree(n);
-        for (int i = 1; i <= n; i++) avail.update(i, 1);
+        FenwickTree avail = FenwickTree.ofOnes(n);
 
         for (int pos = 0; pos < n; pos++) {
             int d = digits[pos];
@@ -353,8 +351,7 @@ public class InvolutadicAlgorithms{
     /** Fenwick-tree digits→involution (O(n log n)). */
     private int[] toInvolutionFenwick(int[] digits, int n) {
         int[] involution = new int[n];
-        FenwickTree avail = new FenwickTree(n);
-        for (int i = 1; i <= n; i++) avail.update(i, 1);
+        FenwickTree avail = FenwickTree.ofOnes(n);
 
         for (int pos = 0; pos < n; pos++) {
             int d = digits[pos];
@@ -432,8 +429,7 @@ public class InvolutadicAlgorithms{
     /** Fenwick-tree involution→digits (O(n log n)). */
     private int[] fromInvolutionFenwick(int[] involution, int n) {
         int[] digits = new int[n];
-        FenwickTree avail = new FenwickTree(n);
-        for (int i = 1; i <= n; i++) avail.update(i, 1);
+        FenwickTree avail = FenwickTree.ofOnes(n);
 
         for (int pos = 0; pos < n; pos++) {
             int upto = avail.rsq(pos + 1);
@@ -528,8 +524,7 @@ public class InvolutadicAlgorithms{
     /** Fenwick-tree rank→involution (O(n log n) placement). */
     private int[] unrankFenwick(BigInteger rank, int n, BigInteger[] T) {
         int[] involution = new int[n];
-        FenwickTree avail = new FenwickTree(n);
-        for (int i = 1; i <= n; i++) avail.update(i, 1);
+        FenwickTree avail = FenwickTree.ofOnes(n);
         BigInteger rem = rank;
 
         for (int pos = 0; pos < n; pos++) {
@@ -605,8 +600,7 @@ public class InvolutadicAlgorithms{
     /** Fenwick-tree involution→rank (O(n log n)). */
     private BigInteger rankFenwick(int[] involution, int n, BigInteger[] T) {
         BigInteger result = BigInteger.ZERO;
-        FenwickTree avail = new FenwickTree(n);
-        for (int i = 1; i <= n; i++) avail.update(i, 1);
+        FenwickTree avail = FenwickTree.ofOnes(n);
 
         for (int pos = 0; pos < n; pos++) {
             int upto = avail.rsq(pos + 1);

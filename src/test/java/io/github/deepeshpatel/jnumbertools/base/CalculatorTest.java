@@ -224,6 +224,48 @@ public class CalculatorTest {
         }
 
         @Test
+        @DisplayName("multisetCombinationsCountAll matches a direct bounded-knapsack reference, including zero multiplicities")
+        void testMultisetCombinationsAllMatchesReference() {
+            java.util.Random random = new java.util.Random(11);
+            for (int trial = 0; trial < 300; trial++) {
+                int[] freq = new int[random.nextInt(8)];
+                for (int i = 0; i < freq.length; i++) {
+                    freq[i] = random.nextInt(7); // includes 0
+                }
+                int total = Arrays.stream(freq).sum();
+                int half = total / 2;
+
+                long[] reference = new long[half + 1];
+                reference[0] = 1;
+                for (int f : freq) {
+                    for (int s = half; s >= 0; s--) {
+                        long sum = 0;
+                        for (int take = 0; take <= Math.min(f, s); take++) {
+                            sum += reference[s - take];
+                        }
+                        reference[s] = sum;
+                    }
+                }
+
+                int[] actual = Calculator.multisetCombinationsCountAll(freq);
+                assertEquals(half + 1, actual.length, Arrays.toString(freq));
+                for (int s = 0; s <= half; s++) {
+                    assertEquals((int) reference[s], actual[s], Arrays.toString(freq) + " s=" + s);
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("multisetCombinationsCountAll agrees with multisetCombinationsCount for every size up to half")
+        void testMultisetCombinationsAllAgreesWithExactCount() {
+            int[] freq = {5, 0, 3, 7, 2, 2, 9};
+            int[] all = Calculator.multisetCombinationsCountAll(freq);
+            for (int s = 0; s < all.length; s++) {
+                assertEquals(Calculator.multisetCombinationsCount(s, freq).intValueExact(), all[s], "s=" + s);
+            }
+        }
+
+        @Test
         @DisplayName("multisetCombinationsCount: exact count for specific size")
         void testMultisetCombinationsExact() {
             assertEquals(1, Calculator.multisetCombinationsCount(0, 2, 3, 2).intValue());

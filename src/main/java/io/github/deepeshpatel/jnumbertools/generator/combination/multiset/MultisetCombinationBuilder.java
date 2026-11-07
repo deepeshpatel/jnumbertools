@@ -162,6 +162,12 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
     private final LinkedHashMap<T, Integer> options;
     private final int r;
 
+    /** Multiplicities in map order; computed once because the builder is immutable. */
+    private final int[] frequencies;
+
+    /** Total number of combinations, computed on first use (the builder is immutable, so it never changes). */
+    private volatile BigInteger cachedCount;
+
     /**
      * Constructs a builder for multiset combinations.
      *
@@ -175,6 +181,7 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
         // filterZeroFrequencies returns a new map: that is the snapshot, and the same pass rejects nulls.
         this.options = Util.filterZeroFrequencies(options);
         this.r = r;
+        this.frequencies = this.options.values().stream().mapToInt(Integer::intValue).toArray();
     }
 
     /**
@@ -203,7 +210,7 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
      * @throws IllegalArgumentException if sampleSize ≤ 0 or exceeds total combinations
      */
     public MultisetCombinationByRanks<T> sample(int sampleSize, Random random) {
-        BigInteger total = Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
+        BigInteger total = count();
         if (sampleSize <= 0 || BigInteger.valueOf(sampleSize).compareTo(total) > 0) {
             throw new IllegalArgumentException("Sample size must be positive and not exceed total combinations");
         }
@@ -226,7 +233,7 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
         if (sampleSize <= 0) {
             throw new IllegalArgumentException("Sample size must be positive");
         }
-        BigInteger total = Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
+        BigInteger total = count();
         return new MultisetCombinationByRanks<>(options, r, new BigIntegerChoice(total, sampleSize, random), count());
     }
 
@@ -262,7 +269,7 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
      */
     public MultisetCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
         Util.validateLexOrderMthParams(m, start, count());
-        BigInteger total = Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
+        BigInteger total = count();
         Iterable<BigInteger> mthIterable = new EveryMthIterable(start, m, total);
         return new MultisetCombinationByRanks<>(options, r, mthIterable, count());
     }
@@ -292,7 +299,12 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
 
     @Override
     public BigInteger count() {
-        return Calculator.multisetCombinationsCount(r, options.values().stream().mapToInt(Integer::intValue).toArray());
+        BigInteger result = cachedCount;
+        if (result == null) {
+            result = Calculator.multisetCombinationsCount(r, frequencies);
+            cachedCount = result;
+        }
+        return result;
     }
 
     @Override
