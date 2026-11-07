@@ -470,7 +470,7 @@ public final class DerangadicAlgorithms {
      * {@code result.length-1} down to {@code 0}.
      * </p>
      *
-     * <p>Uses O(n²) time and O(n) auxiliary space.</p>
+     * <p>Uses O(n log n) time and O(n) auxiliary space.</p>
      *
      * @param derangement derangement array of length {@code n}, with no fixed points
      *                    and each value in {@code [0, n)} appearing exactly once
@@ -482,7 +482,12 @@ public final class DerangadicAlgorithms {
      */
     public int[] fromDerangement(int[] derangement, int n) {
         int[] fullDigits = new int[n];
-        boolean[] elementUsed = new boolean[n];
+        // Initially every value in [0, n) is available. FenwickTree uses
+        // 1-based indices, so value v is stored at index v + 1.
+        FenwickTree availableElements = new FenwickTree(n);
+        for (int index = 1; index <= n; index++) {
+            availableElements.update(index, 1);
+        }
 
         int nMinus1 = n - 1;
         for (int step = 0; step < n; step++) {
@@ -497,24 +502,21 @@ public final class DerangadicAlgorithms {
                 throw new IllegalArgumentException(
                         "Invalid derangement: fixed point at position " + pos);
             }
-            if (elementUsed[chosen]) {
+            if (availableElements.get(chosen + 1) == 0) {
                 throw new IllegalArgumentException(
                         "Invalid derangement: duplicate element " + chosen);
             }
 
-            int availableLessThanChosen = 0;
-            for (int element = 0; element < chosen; element++) {
-                if (!elementUsed[element]) {
-                    availableLessThanChosen++;
-                }
-            }
+            // Prefix sum through Fenwick index 'chosen' counts available
+            // values [0, chosen), because value v is stored at v + 1.
+            int availableLessThanChosen = availableElements.rsq(chosen);
 
             // Exclude the current position only when it is still unused and smaller than chosen.
             int digit = availableLessThanChosen
-                    - (!elementUsed[pos] && chosen > pos ? 1 : 0);
+                    - (chosen > pos && availableElements.get(pos + 1) == 1 ? 1 : 0);
 
             fullDigits[nMinus1 - step] = digit;
-            elementUsed[chosen] = true;
+            availableElements.update(chosen + 1, -1);
         }
 
         // Trim MSD-side leading zeros (high indices) to produce minimal carrier length.
