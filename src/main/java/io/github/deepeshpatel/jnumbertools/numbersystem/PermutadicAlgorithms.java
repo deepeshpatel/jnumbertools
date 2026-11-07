@@ -55,6 +55,13 @@ public final class PermutadicAlgorithms {
     private static final int FENWICK_THRESHOLD = 8000;
 
     /**
+     * {@link #rank} and {@link #unRank} use the sparse O(k²) algorithms, whose cost does not depend on the
+     * set size, while k² is at most this many times the set size. Beyond that the pool-based
+     * algorithms (O(s·k) or Fenwick) are at least as fast.
+     */
+    private static final int SPARSE_MAX_K_SQUARED_PER_S = 8;
+
+    /**
      * Converts a decimal value to its Permutadic representation.
      *
      * @param decimalValue the decimal value to be converted.
@@ -217,11 +224,80 @@ public final class PermutadicAlgorithms {
     public static BigInteger rank(int size, int... mth_kPermutation) {
         int degree = size - mth_kPermutation.length;
 
+        if (useSparse(size, mth_kPermutation.length)) {
+            return rankSparse(mth_kPermutation, degree);
+        }
+
         if (size > FENWICK_THRESHOLD) {
             return rankFenwick(mth_kPermutation, size, degree);
         }
 
         return rankArrayList(mth_kPermutation, size, degree);
+    }
+
+    private static boolean useSparse(int size, int k) {
+        return (long) k * k <= (long) SPARSE_MAX_K_SQUARED_PER_S * size;
+    }
+
+    /**
+     * Rank computed from the k chosen values only, in O(k²) independent of the set size.
+     * The digit at place j is p[i] minus the number of earlier positions holding a smaller value, which is
+     * the index of p[i] among the values not used by positions before it.
+     */
+    private static BigInteger rankSparse(int[] p, int degree) {
+        int k = p.length;
+        BigInteger rank = BigInteger.ZERO;
+        BigInteger placeValue = BigInteger.ONE;
+        int radix = degree;
+
+        for (int i = k - 1; i >= 0; i--) {
+            int smaller = 0;
+            for (int x = 0; x < i; x++) {
+                if (p[x] < p[i]) {
+                    smaller++;
+                }
+            }
+            rank = rank.add(placeValue.multiply(BigInteger.valueOf(p[i] - smaller)));
+            radix++;
+            placeValue = placeValue.multiply(BigInteger.valueOf(radix));
+        }
+        return rank;
+    }
+
+    /**
+     * Un-rank computed without materialising the pool of s values: O(k²) independent of the set size.
+     * Each position picks the d-th smallest value not yet chosen, found by shifting d past the (sorted)
+     * values already chosen.
+     */
+    private static int[] unRankSparse(BigInteger rank, int size, int k) {
+        int degree = size - k;
+        int[] digit = new int[k];
+        BigInteger quotient = rank;
+        for (int j = 0; j < k && quotient.signum() > 0; j++) {
+            BigInteger[] dr = quotient.divideAndRemainder(BigInteger.valueOf(degree + 1L + j));
+            digit[j] = dr[1].intValue();
+            quotient = dr[0];
+        }
+
+        int[] result = new int[k];
+        int[] chosen = new int[k]; // sorted copy of result[0..m)
+        int m = 0;
+        for (int position = 0; position < k; position++) {
+            int value = digit[k - 1 - position];
+            for (int i = 0; i < m && chosen[i] <= value; i++) {
+                value++;
+            }
+            result[position] = value;
+
+            int at = m;
+            while (at > 0 && chosen[at - 1] > value) {
+                chosen[at] = chosen[at - 1];
+                at--;
+            }
+            chosen[at] = value;
+            m++;
+        }
+        return result;
     }
 
     private static BigInteger rankArrayList(int[] permutation, int size, int degree) {
@@ -314,6 +390,9 @@ public final class PermutadicAlgorithms {
      * @see io.github.deepeshpatel.jnumbertools.base.UnrankOf
      */
     public static int[] unRank(BigInteger rank, int size, int k) {
+        if (useSparse(size, k)) {
+            return unRankSparse(rank, size, k);
+        }
         List<Integer> permutadic = toPermutadic(rank, size - k);
         return toMthPermutation(permutadic, size, k);
     }

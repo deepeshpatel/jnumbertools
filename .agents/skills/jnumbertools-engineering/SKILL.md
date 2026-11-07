@@ -30,6 +30,14 @@ description: Project-specific guidance for AI assistants reviewing, modifying, t
 - When investigating a suspected defect, write a reproducer that starts with the relevant public builder and follows the normal public usage path.
 - Do not use direct construction of internal or implementation classes as evidence of a public API defect unless those constructors are explicitly part of the supported public API.
 
+### Tests also go through builders
+
+- Tests, including those in classes named after a generator (for example `*ByRanksTest`, `*GeneratorTest`), must obtain the object under test through the corresponding public builder entry point (for example `JNumberTools.combinations()`, `permutations()`, `subsets()`, `product()`). Do not construct generators or other internal implementation classes directly in tests.
+- Exceptions: classes that are themselves documented public API (builders and their constructors, `Calculator`, `RankOf`/`UnrankOf`, and the number-system classes such as `Combinadic`, `Factoradic`, `Permutadic`, `Derangadic`, `Involutadic`), and data structures that are tested on their own (for example `FreqVector`, `FenwickTree`, `BinomialCoefficientMap`).
+- Do not repeat in generator-level tests what is already verified at builder level. Checks that every builder shares (`lexOrder`, `lexOrderMth`, `byRanks`, `choice`, `sample` parameter rules, `isEmpty`, immutability, laziness) belong in the builder test and are run through `BuilderTestHelper`. Generator-level tests should cover only what the builder tests do not: produced output and order, rank values that are validated lazily (negative or out-of-bound ranks), element-level checks that can only happen when elements are consumed, and algorithm-specific behaviour.
+- Before adding a rule or validation test, check `BuilderTestHelper` and the family's `*BuilderTest` for an existing equivalent.
+- This section is a temporary convention. Once the library is split into modules with internal classes hidden from callers, visibility will enforce it and this section can be dropped.
+
 ## 4. Internal implementation classes
 
 - Classes intended for internal use (for example, `EveryMthIterable`) do not need to independently enforce every public validation rule or user-facing contract.

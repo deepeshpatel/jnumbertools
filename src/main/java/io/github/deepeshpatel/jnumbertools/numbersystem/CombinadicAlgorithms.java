@@ -31,6 +31,17 @@ import java.util.List;
  */
 public final class CombinadicAlgorithms {
 
+    /**
+     * Smallest combination size for which {@link #unRank} uses the monotone walk instead of the
+     * per-position binary search. Below this the binary search is at least as fast.
+     */
+    private static final int WALK_MIN_R = 256;
+
+    /**
+     * The walk visits up to n candidates, so it is only chosen while n is at most this many times r.
+     */
+    private static final int WALK_MAX_N_PER_R = 1024;
+
     private final Calculator calculator;
 
     /**
@@ -74,8 +85,9 @@ public final class CombinadicAlgorithms {
      * Un-ranks the nth combination in lexicographical order using the
      * Combinatorial Number System (Combinadic) with Binary Search.
      *
-     * Time Complexity: O(r * log n)
-     * Space Complexity: O(r) for the result array (Zero intermediate allocations)
+     * Small and medium r use a binary search per position. Large r (see {@code WALK_MIN_R}) uses a single
+     * monotone walk that updates one binomial coefficient incrementally instead of evaluating a new
+     * C(mid, k) for every probe; both give identical results.
      *
      * @param rank the rank of the combination
      * @param total the total number of combinations (Cₙ,ᵣ)
@@ -84,6 +96,13 @@ public final class CombinadicAlgorithms {
      * @return an int array of size r containing the combination in ascending order
      */
     public int[] unRank(BigInteger rank, BigInteger total, int n, int r) {
+        if (r >= WALK_MIN_R && n <= (long) WALK_MAX_N_PER_R * r) {
+            return unRankByWalk(rank, total, n, r);
+        }
+        return unRankBySearch(rank, total, n, r);
+    }
+
+    private int[] unRankBySearch(BigInteger rank, BigInteger total, int n, int r) {
         int[] result = new int[r];
         int index = 0;
 
@@ -121,6 +140,33 @@ public final class CombinadicAlgorithms {
         return result;
     }
 
+    /**
+     * Same result as {@code unRankBySearch}, computed by walking the candidate position c downwards once
+     * while keeping v = C(c, k) up to date with O(1) big-number operations per step.
+     */
+    private static int[] unRankByWalk(BigInteger rank, BigInteger total, int n, int r) {
+        BigInteger remaining = total.subtract(BigInteger.ONE).subtract(rank);
+        int[] result = new int[r];
+        int c = n - 1;
+        int k = r;
+        BigInteger v = total.multiply(BigInteger.valueOf(n - r)).divide(BigInteger.valueOf(n)); // C(n-1, r)
+
+        for (int index = 0; k >= 1; index++, k--) {
+            // v holds C(c, k). Step c down (C(c-1,k) = C(c,k)*(c-k)/c) until it no longer exceeds remaining.
+            while (v.compareTo(remaining) > 0) {
+                v = v.multiply(BigInteger.valueOf(c - k)).divide(BigInteger.valueOf(c));
+                c--;
+            }
+            result[index] = n - 1 - c;
+            remaining = remaining.subtract(v);
+            if (k > 1) {
+                // C(c, k-1) = C(c, k) * k / (c-k+1)
+                int d = c - k + 1;
+                v = d == 0 ? BigInteger.ONE : v.multiply(BigInteger.valueOf(k)).divide(BigInteger.valueOf(d));
+            }
+        }
+        return result;
+    }
 
     /**
      * Converts a combination to its Combinadic representation.

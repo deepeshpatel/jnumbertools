@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
+import static io.github.deepeshpatel.jnumbertools.TestBase.rankOf;
 import static io.github.deepeshpatel.jnumbertools.TestBase.unrankOf;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -103,6 +104,48 @@ public class UnrankOfTest {
             assertArrayEquals(new int[]{0, 1, 2}, unrankOf.uniqueCombination(BigInteger.ZERO, 5, 3));
             assertArrayEquals(new int[]{0, 1, 3}, unrankOf.uniqueCombination(BigInteger.ONE, 5, 3));
             assertArrayEquals(new int[]{2, 3, 4}, unrankOf.uniqueCombination(BigInteger.valueOf(9), 5, 3));
+        }
+
+        @Test
+        @DisplayName("large combinations (r >= 256) round-trip through rankOf, including first, last and middle ranks")
+        void largeCombinationsRoundTrip() {
+            java.util.Random random = new java.util.Random(42);
+            int[][] shapes = {{256, 256}, {257, 256}, {300, 299}, {512, 256}, {1000, 500}, {1000, 999}, {400, 300}, {3000, 300}};
+            for (int[] shape : shapes) {
+                int n = shape[0];
+                int r = shape[1];
+                BigInteger total = calculator.nCr(n, r);
+                java.util.List<BigInteger> ranks = new java.util.ArrayList<>(java.util.List.of(
+                        BigInteger.ZERO, total.subtract(BigInteger.ONE), total.shiftRight(1)));
+                for (int i = 0; i < 8; i++) {
+                    ranks.add(new BigInteger(total.bitLength() + 8, random).mod(total));
+                }
+                for (BigInteger rank : ranks) {
+                    int[] combination = unrankOf.uniqueCombination(rank, n, r);
+                    assertEquals(r, combination.length, "n=" + n + " r=" + r);
+                    for (int i = 0; i < r; i++) {
+                        assertTrue(combination[i] >= 0 && combination[i] < n, "in range, n=" + n + " r=" + r);
+                        if (i > 0) {
+                            assertTrue(combination[i] > combination[i - 1], "strictly ascending, n=" + n + " r=" + r);
+                        }
+                    }
+                    assertEquals(rank, rankOf.uniqueCombination(n, combination), "n=" + n + " r=" + r + " rank=" + rank);
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("large combinations: rank 0 is {0..r-1} and the last rank is {n-r..n-1}")
+        void largeCombinationsAtTheEnds() {
+            int n = 700;
+            int r = 300;
+            BigInteger total = calculator.nCr(n, r);
+            int[] first = unrankOf.uniqueCombination(BigInteger.ZERO, n, r);
+            int[] last = unrankOf.uniqueCombination(total.subtract(BigInteger.ONE), n, r);
+            for (int i = 0; i < r; i++) {
+                assertEquals(i, first[i]);
+                assertEquals(n - r + i, last[i]);
+            }
         }
     }
 
