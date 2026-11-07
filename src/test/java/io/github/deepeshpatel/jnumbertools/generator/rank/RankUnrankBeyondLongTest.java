@@ -40,7 +40,7 @@ class RankUnrankBeyondLongTest {
     @Test
     @DisplayName("rank: repeatedPermutation, base 2 with 64 one-digits is 2^64 - 1")
     void repeatedPermutationAllOnesBase2() {
-        assertEquals(BigInteger.TWO.pow(64).subtract(BigInteger.ONE), rankOf.repeatedPermutation(2, filled(64, 1)));
+        assertEquals(BigInteger.TWO.pow(64).subtract(BigInteger.ONE), rankOf.permutation().repetitive(2, filled(64, 1)));
     }
 
     @Test
@@ -48,7 +48,7 @@ class RankUnrankBeyondLongTest {
     void repeatedPermutationPowerOfTen() {
         Integer[] digits = filled(25, 0);
         digits[0] = 1;
-        assertEquals(BigInteger.TEN.pow(24), rankOf.repeatedPermutation(10, digits));
+        assertEquals(BigInteger.TEN.pow(24), rankOf.permutation().repetitive(10, digits));
     }
 
     @Test
@@ -56,7 +56,7 @@ class RankUnrankBeyondLongTest {
     void repeatedPermutationLongBinary() {
         Integer[] digits = filled(70, 0);
         digits[0] = 1;
-        assertEquals(BigInteger.TWO.pow(69), rankOf.repeatedPermutation(2, digits));
+        assertEquals(BigInteger.TWO.pow(69), rankOf.permutation().repetitive(2, digits));
     }
 
     @Test
@@ -69,7 +69,7 @@ class RankUnrankBeyondLongTest {
                     digits[i] = (i * 31 + n) % n;          // deterministic, covers the whole digit range
                 }
                 digits[0] = n - 1;                          // largest leading digit
-                assertEquals(baseNValue(n, digits), rankOf.repeatedPermutation(n, digits), "n=" + n + " length=" + length);
+                assertEquals(baseNValue(n, digits), rankOf.permutation().repetitive(n, digits), "n=" + n + " length=" + length);
             }
         }
     }
@@ -87,13 +87,13 @@ class RankUnrankBeyondLongTest {
             first[i] = i;
             last[i] = n - r + i;
         }
-        assertEquals(BigInteger.ZERO, rankOf.uniqueCombination(n, first));
-        assertEquals(count.subtract(BigInteger.ONE), rankOf.uniqueCombination(n, last));
-        assertArrayEquals(first, unrankOf.uniqueCombination(BigInteger.ZERO, n, r));
-        assertArrayEquals(last, unrankOf.uniqueCombination(count.subtract(BigInteger.ONE), n, r));
+        assertEquals(BigInteger.ZERO, rankOf.combination().unique(n, first));
+        assertEquals(count.subtract(BigInteger.ONE), rankOf.combination().unique(n, last));
+        assertArrayEquals(first, unrankOf.combination().unique(BigInteger.ZERO, n, r));
+        assertArrayEquals(last, unrankOf.combination().unique(count.subtract(BigInteger.ONE), n, r));
 
         // and a rank in the middle round-trips
         BigInteger middle = count.divide(BigInteger.valueOf(3));
-        assertEquals(middle, rankOf.uniqueCombination(n, unrankOf.uniqueCombination(middle, n, r)));
+        assertEquals(middle, rankOf.combination().unique(n, unrankOf.combination().unique(middle, n, r)));
     }
 }

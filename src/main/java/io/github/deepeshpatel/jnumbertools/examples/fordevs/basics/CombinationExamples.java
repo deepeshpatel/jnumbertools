@@ -97,7 +97,7 @@ public class CombinationExamples {
         System.out.println("\n*** Rank of given combination  ***");
         int[] combination = {0,1,4,6,8,9,10,11,13,14,17};
         int n = 20;
-        BigInteger rank = JNumberTools.rankOf().uniqueCombination(20,combination);
+        BigInteger rank = JNumberTools.rankOf().combination().unique(20,combination);
         System.out.printf("Rank of " + Arrays.toString(combination) + ", selected from %d items is %d\n", n,rank);
     }
 
@@ -106,7 +106,7 @@ public class CombinationExamples {
         int n = 20;
         int r = 11;
         BigInteger rank = BigInteger.valueOf(41559);
-        int[] combination = JNumberTools.unrankOf().uniqueCombination(rank,n, r);
+        int[] combination = JNumberTools.unrankOf().combination().unique(rank,n, r);
         System.out.printf("%dth combination of %d items selected from %d items is " + Arrays.toString(combination),rank, r,n);
     }
 }

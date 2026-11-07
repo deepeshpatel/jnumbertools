@@ -312,7 +312,8 @@ JNumberTools
                 <pre><code class="language-java">int[] permutation = new int[]{1,3,0,2};
 int rank = JNumberTools
     .rankOf()
-    .uniquePermutation(permutation)
+    .permutation()
+    .unique(permutation)
     .intValue();</code></pre>
     </td>
     <td> 10 </td>
@@ -326,7 +327,8 @@ int rank = JNumberTools
                 <pre><code class="language-java">int[] permutation = new int[]{1,3,0};
 int size=3;
 int rank = JNumberTools.rankOf()
-    .kPermutation(size, permutation).intValue();
+    .permutation()
+    .k(size, permutation).intValue();
                 </code></pre>
     </td>
     <td>4</td>

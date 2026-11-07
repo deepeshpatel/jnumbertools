@@ -161,23 +161,23 @@ class DerangementTest {
 
     // =========================================================
     // 3. Consistency with unrankOf
-    //    These tests verify the decode correctness of unrankOf.derangement(rank, n)
+    //    These tests verify the decode correctness of unrankOf.permutation().derangement(rank, n)
     //    specifically — not just mth iteration order.
     // =========================================================
 
     @Nested
-    @DisplayName("Consistency with unrankOf.derangement")
+    @DisplayName("Consistency with unrankOf.permutation().derangement")
     class ConsistencyWithUnrank {
 
         @ParameterizedTest(name = "n={0}")
         @ValueSource(ints = {3, 4, 5})
-        @DisplayName("k-th lexOrder element equals unrankOf.derangement(k, n)")
+        @DisplayName("k-th lexOrder element equals unrankOf.permutation().derangement(k, n)")
         void lexOrderMatchesUnrank(int n) {
             var lexList = derangement.of(n).lexOrder().stream().toList();
             assertEquals(calculator.subFactorial(n).intValue(), lexList.size());
 
             for (int rank = 0; rank < lexList.size(); rank++) {
-                int[] viaUnrank = unrankOf.derangement(rank, n);
+                int[] viaUnrank = unrankOf.permutation().derangement(rank, n);
                 var expected = new ArrayList<Integer>(n);
                 for (int v : viaUnrank) expected.add(v);
                 assertEquals(expected, lexList.get(rank),

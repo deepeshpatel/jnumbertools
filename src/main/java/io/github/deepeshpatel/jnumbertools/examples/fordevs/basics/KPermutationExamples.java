@@ -106,7 +106,7 @@ class KPermutationExamples {
 
         BigInteger rank = JNumberTools
                 .rankOf()
-                .kPermutation(40, permutation);
+                .permutation().k(40, permutation);
         System.out.println("Rank of 20-Choose-40 is " + rank);
     }
 
@@ -114,7 +114,7 @@ class KPermutationExamples {
         System.out.println("\n*** Print two hundred octillion-th 20-permutation of 40 items *** ");
         int[] permutation = JNumberTools
                 .unrankOf()
-                .kPermutation(new BigInteger("200000000000000000000000000000"),40,20);
+                .permutation().k(new BigInteger("200000000000000000000000000000"),40,20);
 
         System.out.println(Arrays.toString(permutation));
     }

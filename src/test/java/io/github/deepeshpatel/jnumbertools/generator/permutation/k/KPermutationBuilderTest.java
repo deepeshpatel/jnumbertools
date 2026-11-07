@@ -224,7 +224,7 @@ class KPermutationBuilderTest {
         int draws = 200, above = 0;
         for (List<Integer> p : huge.choice(draws, new Random(1))) {
             int[] indices = p.stream().mapToInt(Integer::intValue).toArray();
-            if (rankOf.kPermutation(30, indices).compareTo(twoPow63) >= 0) {
+            if (rankOf.permutation().k(30, indices).compareTo(twoPow63) >= 0) {
                 above++;
             }
         }

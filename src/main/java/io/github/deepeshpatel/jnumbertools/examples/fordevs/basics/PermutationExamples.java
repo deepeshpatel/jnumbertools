@@ -143,7 +143,7 @@ public class PermutationExamples {
     static void printRankOfUniquePermutation() {
         System.out.println("\n*** Rank of given permutation *** ");
         int[] permutation  = {7,6,5,3,4,1,2,0};
-        BigInteger rank = JNumberTools.rankOf().uniquePermutation(permutation);
+        BigInteger rank = JNumberTools.rankOf().permutation().unique(permutation);
         System.out.println("Rank of permutation " + Arrays.toString(permutation) + " is " + rank);
     }
 
@@ -151,7 +151,7 @@ public class PermutationExamples {
         System.out.println("\n*** Permutation of size 20 for rank = five hundred quadrillion  *** ");
         int size = 20;
         BigInteger rank = new BigInteger("500000000000000000");
-        int[] permutation = JNumberTools.unrankOf().uniquePermutation(rank, size);
+        int[] permutation = JNumberTools.unrankOf().permutation().unique(rank, size);
         System.out.printf("%s-th unique permutation of size %d is " + Arrays.toString(permutation), rank, size);
     }
 }

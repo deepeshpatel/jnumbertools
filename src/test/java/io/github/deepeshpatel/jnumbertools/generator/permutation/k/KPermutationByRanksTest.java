@@ -398,7 +398,7 @@ class KPermutationByRanksTest {
 
             for (BigInteger rank : of(BigInteger.ONE.shiftLeft(66).add(BigInteger.valueOf(777)), count.divide(BigInteger.TWO))) {
                 int[] arrangement = builder.byRanks(of(rank)).iterator().next().stream().mapToInt(Integer::intValue).toArray();
-                assertEquals(rank, rankOf.kPermutation(n, arrangement), "rank " + rank);
+                assertEquals(rank, rankOf.permutation().k(n, arrangement), "rank " + rank);
             }
         }
     }

@@ -81,11 +81,11 @@ import java.math.BigInteger;
  *
  * // The rank of a permutation can be converted to factoradic
  * int[] permutation = {2, 0, 1};
- * BigInteger rank = rankOf.uniquePermutation(permutation);
+ * BigInteger rank = rankOf.permutation().unique(permutation);
  * Factoradic fac = ns.factoradic(rank);
  *
  * // And factoradic can generate the permutation at that rank
- * int[] samePerm = unrankOf.uniquePermutation(3).atRank(rank);
+ * int[] samePerm = unrankOf.permutation().unique(rank, 3);
  * </pre>
  *
  * <p>

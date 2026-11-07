@@ -16,7 +16,7 @@ public class RankAndUnrankExamples {
         System.out.println("=== Ranking Examples ===");
         int[] permutation = {2, 0, 1};
         BigInteger rank = JNumberTools.rankOf()
-                .uniquePermutation(permutation);
+                .permutation().unique(permutation);
         System.out.printf("Permutation %s has rank %d%n",
                 Arrays.toString(permutation), rank);
 
@@ -25,7 +25,7 @@ public class RankAndUnrankExamples {
         int size = 4;
         BigInteger targetRank = BigInteger.valueOf(10);
         int[] result = JNumberTools.unrankOf()
-                .uniquePermutation(targetRank, size);
+                .permutation().unique(targetRank, size);
         System.out.printf("%d-th permutation of size %d is %s%n",
                 targetRank, size, Arrays.toString(result));
 
@@ -33,7 +33,7 @@ public class RankAndUnrankExamples {
         System.out.println("\n=== Combination Ranking ===");
         int[] combination = {0, 2, 4, 6, 8};
         BigInteger combRank = JNumberTools.rankOf()
-                .uniqueCombination(10, combination);
+                .combination().unique(10, combination);
         System.out.printf("Combination %s from 10 elements has rank %d%n",
                 Arrays.toString(combination), combRank);
     }

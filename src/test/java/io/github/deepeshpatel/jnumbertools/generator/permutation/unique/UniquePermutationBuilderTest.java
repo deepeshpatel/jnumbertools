@@ -120,7 +120,7 @@ class UniquePermutationBuilderTest {
         int draws = 200, above = 0;
         for (List<Integer> p : permutations.unique(25).choice(draws, new Random(1))) {
             int[] indices = p.stream().mapToInt(Integer::intValue).toArray();
-            if (rankOf.uniquePermutation(indices).compareTo(twoPow63) >= 0) {
+            if (rankOf.permutation().unique(indices).compareTo(twoPow63) >= 0) {
                 above++;
             }
         }

@@ -34,7 +34,7 @@ public class NumberSystemExamples {
 
         // Get permutation at rank 10 for 4 elements
         System.out.println("\n   Permutation at rank 10 for 4 elements:");
-        int[] perm = JNumberTools.unrankOf().uniquePermutation(BigInteger.valueOf(10), 4);
+        int[] perm = JNumberTools.unrankOf().permutation().unique(BigInteger.valueOf(10), 4);
         System.out.println("   " + Arrays.toString(perm));
 
         // Show the mathematical relationship
@@ -55,7 +55,7 @@ public class NumberSystemExamples {
         // Get combination at rank 7 for C(10,3)
         System.out.println("\n   Combination at rank 7 for C(10,3):");
         int[] combination = JNumberTools.unrankOf()
-                .uniqueCombination(BigInteger.valueOf(7), 10, 3);
+                .combination().unique(BigInteger.valueOf(7), 10, 3);
         System.out.println("   " + Arrays.toString(combination));
 
         // Show the mathematical relationship
@@ -76,7 +76,7 @@ public class NumberSystemExamples {
         // Get k-permutation at rank 42 for P(8,3)
         System.out.println("\n   k-permutation at rank 42 for P(8,3):");
         int[] kPerm = JNumberTools.unrankOf()
-                .kPermutation(BigInteger.valueOf(42), 8, 3);
+                .permutation().k(BigInteger.valueOf(42), 8, 3);
         System.out.println("   " + Arrays.toString(kPerm));
 
         // Show mathematical expression
@@ -92,7 +92,7 @@ public class NumberSystemExamples {
         System.out.println("   Lottery ticket lookup using combinadic:");
         BigInteger lotteryRank = new BigInteger("1234567");
         int[] lotteryTicket = JNumberTools.unrankOf()
-                .uniqueCombination(lotteryRank, 49, 6);
+                .combination().unique(lotteryRank, 49, 6);
         System.out.println("   Ticket at rank " + lotteryRank + ": " +
                 Arrays.toString(lotteryTicket));
 
@@ -100,7 +100,7 @@ public class NumberSystemExamples {
         System.out.println("\n   Dictionary word lookup using factoradic:");
         BigInteger wordRank = new BigInteger("1000000");
         int[] wordPerm = JNumberTools.unrankOf()
-                .uniquePermutation(wordRank, 10);
+                .permutation().unique(wordRank, 10);
         System.out.println("   Permutation at rank " + wordRank + ": " +
                 Arrays.toString(wordPerm));
 

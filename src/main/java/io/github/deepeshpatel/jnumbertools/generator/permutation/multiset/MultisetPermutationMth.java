@@ -25,8 +25,10 @@ import java.util.*;
  * <p>
  * <strong>Performance:</strong>
  * <ul>
- *   <li>Time Complexity: O(1) per permutation (direct computation)</li>
- *   <li>Space Complexity: O(k) where k is number of distinct elements</li>
+ *   <li>Time Complexity: O(L × T) per permutation in the worst case, excluding the cost of
+ *       {@link BigInteger} arithmetic, where L is the total number of elements and T is the
+ *       number of distinct element types</li>
+ *   <li>Space Complexity: O(L + T), for the output/index arrays and frequency counts</li>
  *   <li>Memory Efficient: Generates permutations on-demand</li>
  * </ul>
  * </p>

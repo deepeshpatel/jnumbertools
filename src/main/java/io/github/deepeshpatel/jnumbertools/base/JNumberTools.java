@@ -96,15 +96,20 @@ import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
  *
  * <h3>Ranking and Unranking</h3>
  * <pre>
- * // Get rank of a permutation
+ * // Rank a unique permutation of three elements
  * BigInteger rank = JNumberTools.rankOf()
- *     .permutation(List.of(1, 2, 0))
- *     .outOf(3);
+ *     .permutation()
+ *     .unique(2, 0, 1);
  *
- * // Get permutation at rank 5
- * List<Integer> perm = JNumberTools.unrankOf()
- *     .permutation(5)
- *     .outOf(3);
+ * // Retrieve the unique permutation at rank 5
+ * int[] permutation = JNumberTools.unrankOf()
+ *     .permutation()
+ *     .unique(BigInteger.valueOf(5), 3);
+ *
+ * // Rank a unique combination of size 2 from 4 elements
+ * BigInteger combinationRank = JNumberTools.rankOf()
+ *     .combination()
+ *     .unique(4, 1, 3);
  * </pre>
  *
  * @see AllExamples
@@ -179,8 +184,8 @@ public final class JNumberTools {
     /**
      * Creates a RankOf instance for ranking permutations and combinations.
      * <p>
-     * Supports ranking of unique permutations (n!), k-permutations (ⁿPₖ), repetitive
-     * permutations (nʳ), and unique combinations (ⁿCᵣ) in lexicographical order.
+     * Supports unique, k-, repetitive, and multiset permutations; derangements; and
+     * unique, repetitive, and multiset combinations in lexicographical order.
      * </p>
      *
      * @return a RankOf instance for ranking operations
@@ -193,8 +198,8 @@ public final class JNumberTools {
     /**
      * Creates an UnrankOf instance for unranking permutations and combinations.
      * <p>
-     * Supports unranking of unique permutations (n!), k-permutations (ⁿPₖ), and unique
-     * combinations (ⁿCᵣ) to retrieve the structure at a given lexicographical rank.
+     * Supports unique, k-, repetitive, and multiset permutations; derangements; and
+     * unique, repetitive, and multiset combinations at a given lexicographical rank.
      * </p>
      *
      * @return an UnrankOf instance for unranking operations
