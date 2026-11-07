@@ -107,9 +107,9 @@ public final class KPermutationBuilder<T> implements Builder<T> {
      * Constructs a builder for k-permutations.
      *
      * @param elements the list of elements to permute (e.g., [A, B, C])
-     * @param k the size of each permutation (kₖ); must be non-negative and ≤ nₙ
+     * @param k the size of each permutation; assumed non-negative and ≤ n when used via
+     *          {@link io.github.deepeshpatel.jnumbertools.base.Permutations#nPk}
      * @param calculator utility for combinatorial calculations
-     * @throws IllegalArgumentException if kₖ is negative or exceeds nₙ
      */
     public KPermutationBuilder(List<T> elements, int k, Calculator calculator) {
         // Defensive copy: later changes to the caller's list must not alter this builder.

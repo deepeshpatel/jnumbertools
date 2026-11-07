@@ -10,7 +10,7 @@
 
 # Ranking Algorithms
 
-JNumberTools provides the following 7 ranking algorithms for permutations and combinations. These APIs calculate the lexicographical rank of a given permutation or combination, supporting `BigInteger` for large indices, enabling efficient ranking even in massive combinatorial spaces.
+JNumberTools provides ranking APIs for permutations, combinations, and derangements. These APIs calculate the lexicographical rank of a given arrangement, supporting `BigInteger` for large indices and enabling efficient ranking even in massive combinatorial spaces.
 
 **Currently Available Algorithms**
 
@@ -18,9 +18,10 @@ JNumberTools provides the following 7 ranking algorithms for permutations and co
 2. [Ranking of k-Permutation](#2-ranking-of-k-permutation)  
 3. [Ranking of Repetitive Permutation](#3-ranking-of-repetitive-permutation)  
 4. [Ranking of Unique Combination](#4-ranking-of-unique-combination)  
-5. [Ranking of Repetitive Combination](#5-ranking-of-repetitive-combination)  
-6. [Ranking of Multiset Permutation](#6-ranking-of-multiset-permutation)  
-7. [Ranking of Multiset Combination](#7-ranking-of-multiset-combination)  
+5. [Ranking of Derangement](#5-ranking-of-derangement)  
+6. [Ranking of Repetitive Combination](#6-ranking-of-repetitive-combination) *(in development)*  
+7. [Ranking of Multiset Permutation](#7-ranking-of-multiset-permutation) *(in development)*  
+8. [Ranking of Multiset Combination](#8-ranking-of-multiset-combination) *(in development)*  
 
 ---
 
@@ -56,13 +57,21 @@ Calculates the rank of a given combination. For example, if we generate combinat
 BigInteger rank = JNumberTools.rankOf().uniqueCombination(8, 1, 2, 3, 4);
 ```
 
-### 5. Ranking of Repetitive Combination
+### 5. Ranking of Derangement
+Calculates the lexicographical rank of a derangement (a permutation with no fixed points). The input must be a full permutation of `{0, 1, ..., n-1}` with no index `i` satisfying `p[i] == i`.
+
+```java
+// Derangement [1, 0, 3, 2] of size 4
+BigInteger rank = JNumberTools.rankOf().derangement(1, 0, 3, 2);
+```
+
+### 6. Ranking of Repetitive Combination
 This feature is currently in development and will be available in a future release.
 
-### 6. Ranking of Multiset Permutation
+### 7. Ranking of Multiset Permutation
 This feature is currently in development and will be available in a future release.
 
-### 7. Ranking of Multiset Combination
+### 8. Ranking of Multiset Combination
 This feature is currently in development and will be available in a future release.
 
 [Home](../../README.md)

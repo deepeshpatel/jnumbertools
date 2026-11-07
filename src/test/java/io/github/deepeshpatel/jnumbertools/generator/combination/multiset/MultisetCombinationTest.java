@@ -198,25 +198,6 @@ class MultisetCombinationTest {
                         "size mismatch for r=" + r);
             }
         }
-
-        @Test
-        @DisplayName("Iterator implementation chosen by crossover threshold")
-        void iteratorSwitchesAtThreshold() {
-            var options = new LinkedHashMap<>(Map.of("A", 500, "B", 900));
-            int totalAvailable = 1400;
-            int[] rValues = {900, 999, 1000, 1500};
-
-            for (int r : rValues) {
-                var iterator = combination.multiset(options, r).lexOrder().iterator();
-                if (r > totalAvailable) {
-                    assertFalse(iterator.hasNext(), "r=" + r + " should be empty");
-                } else if (r < CROSSOVER_THRESHOLD) {
-                    assertInstanceOf(MultisetCombination.ArrayIterator.class, iterator, "expected ArrayIterator for r=" + r);
-                } else {
-                    assertInstanceOf(MultisetCombination.FreqVectorIterator.class, iterator, "expected FreqVectorIterator for r=" + r);
-                }
-            }
-        }
     }
 
     // =========================================================

@@ -135,15 +135,17 @@ import java.util.Random;
  *
  * <h3>Performance Considerations</h3>
  * <pre>
- * // For large combinations, the builder automatically switches to
- * // an optimized frequency-vector based implementation when r ≥ 1000
+ * // For larger r, lexOrder() switches from an array-based iterator to a
+ * // frequency-vector iterator. The crossover depends on the number of distinct
+ * // types n (roughly r ≈ 150 for small n, ≈ 250 for moderate n, ≈ 450 when
+ * // FreqVector uses its Fenwick path). See MultisetCombination.crossoverThreshold(n).
  * LinkedHashMap&lt;String, Integer&gt; largeMultiset = new LinkedHashMap&lt;&gt;();
  * largeMultiset.put("A", 500);
  * largeMultiset.put("B", 500);
  *
- * // Uses FreqVectorIterator internally for efficiency
  * MultisetCombinationBuilder&lt;String&gt; largeBuilder =
  *     new MultisetCombinationBuilder&lt;&gt;(largeMultiset, 800);
+ * // r=800 with n=2 → FreqVectorIterator
  * </pre>
  *
  * <p>

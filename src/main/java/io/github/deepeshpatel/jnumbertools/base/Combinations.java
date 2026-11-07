@@ -188,7 +188,7 @@ public final class Combinations {
      * @param n the number of distinct elements (n ≥ 0)
      * @param r the size of each combination (r ≥ 0)
      * @return a RepetitiveCombinationBuilder for integer elements
-     * @throws IllegalArgumentException if r < 0
+     * @throws IllegalArgumentException if n &lt; 0 or r &lt; 0
      */
     public RepetitiveCombinationBuilder<Integer> repetitive(int n, int r) {
         Util.validateNK(n, r);

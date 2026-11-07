@@ -118,10 +118,14 @@ import java.util.Random;
  * System.out.println(singleBuilder.count()); // 1
  * singleBuilder.lexOrder().forEach(System.out::println); // Prints: [X, X, X]
  *
- * // Zero frequencies not allowed (throws IllegalArgumentException)
- * LinkedHashMap&lt;String, Integer&gt; invalid = new LinkedHashMap&lt;&gt;();
- * invalid.put("A", 0);
- * // new MultisetPermutationBuilder&lt;&gt;(invalid, calculator); // Exception!
+ * // Zero-frequency entries are filtered out (treated as absent), matching ValidationRules.md.
+ * // {A:0, B:2} is processed exactly like {B:2}.
+ * LinkedHashMap&lt;String, Integer&gt; withZero = new LinkedHashMap&lt;&gt;();
+ * withZero.put("A", 0);
+ * withZero.put("B", 2);
+ * MultisetPermutationBuilder&lt;String&gt; filtered =
+ *     new MultisetPermutationBuilder&lt;&gt;(withZero, calculator);
+ * System.out.println(filtered.count()); // 1  (only B,B)
  * </pre>
  *
  * <h3>Performance Note</h3>

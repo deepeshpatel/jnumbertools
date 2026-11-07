@@ -164,6 +164,12 @@ public final class Calculator {
 
     /**
      * Finds the smallest integer n such that n! > value.
+     * <p>
+     * The search starts at {@code n = 1}. Consequently, for any {@code value < 1}
+     * (including zero and negatives) the result is {@code 1}, because {@code 1! = 1}
+     * is the first factorial strictly greater than those values under this convention.
+     * This matches the behaviour relied on by ranking/unranking helpers and by the unit tests.
+     * </p>
      * @param value the value to exceed (must be non-negative)
      * @return the smallest n where n! > value
      */

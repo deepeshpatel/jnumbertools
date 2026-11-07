@@ -23,8 +23,6 @@ import java.util.*;
  */
 public final class MultisetCombination<T> extends AbstractMultisetCombination<T> {
 
-    private static final int CROSSOVER_THRESHOLD = 1000;
-
     /**
      * Constructs a generator for multiset combinations.
      *
@@ -79,14 +77,25 @@ public final class MultisetCombination<T> extends AbstractMultisetCombination<T>
         }
 
         // Case 4: Normal case - use appropriate iterator based on size
-        return (r < CROSSOVER_THRESHOLD) ? new ArrayIterator() : new FreqVectorIterator();
+        return (r < crossoverThreshold(options.length))
+                ? new ArrayIterator()
+                : new FreqVectorIterator();
+
+        //return (r < CROSSOVER_THRESHOLD) ? new ArrayIterator() : new FreqVectorIterator();
+    }
+
+    private static int crossoverThreshold(int n) {
+        if (n <= 10)  return 150;   // few types: FreqVector pulls ahead early
+        if (n < 128)  return 250;   // cumulative path in FreqVector
+        return 450;                 // Fenwick path; Array stays competitive longer
     }
 
     /**
      * Iterator for generating multiset combinations using an array-based approach.
      * <p>
-     * Suitable for small combination sizes (r < 1000), this iterator generates combinations by
-     * incrementing indices lexicographically, respecting element multiplicities.
+     * Preferred when {@code r} is below the n-dependent crossover (see
+     * {@link #crossoverThreshold(int)}). Generates combinations by incrementing an
+     * {@code int[r]} of indices lexicographically, respecting element multiplicities.
      * </p>
      */
     public class ArrayIterator implements Iterator<Map<T, Integer>> {
@@ -208,9 +217,10 @@ public final class MultisetCombination<T> extends AbstractMultisetCombination<T>
     /**
      * Iterator for generating multiset combinations using a frequency vector approach.
      * <p>
-     * Suitable for large combination sizes (r ≥ 1000), this iterator generates combinations by
-     * manipulating a frequency vector, optimizing for performance while respecting element
-     * multiplicities.
+     * Preferred when {@code r} is at or above the n-dependent crossover (see
+     * {@link #crossoverThreshold(int)}). Generates combinations by manipulating a
+     * {@link io.github.deepeshpatel.jnumbertools.datastructure.FreqVector}, which keeps
+     * state size proportional to the number of distinct types rather than {@code r}.
      * </p>
      */
     public class FreqVectorIterator implements Iterator<Map<T, Integer>> {
