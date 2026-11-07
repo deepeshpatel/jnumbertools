@@ -587,9 +587,11 @@ public final class DerangadicAlgorithms {
      *         and {@code D_actualN > m}
      */
     private int smallestN(int n, BigInteger m) {
-        int actualN = n;
-        while (actualN > 2 && calculator.subFactorial(actualN - 2).compareTo(m) > 0) {
-            actualN -= 2;
+        // Scan upward from the smallest candidate of the right parity: a small rank stops after a few steps,
+        // and the cache is only asked for ascending values (a downward scan from n would need every D_k below n).
+        int actualN = (n % 2 == 0) ? 2 : 3;
+        while (actualN < n && calculator.subFactorial(actualN).compareTo(m) <= 0) {
+            actualN += 2;
         }
         return actualN;
     }

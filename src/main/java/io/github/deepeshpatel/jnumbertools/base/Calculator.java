@@ -10,6 +10,7 @@ import io.github.deepeshpatel.jnumbertools.datastructure.TwoLevelMap;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * Calculator for combinatorial computations with memoization.
@@ -20,11 +21,25 @@ import java.util.*;
  */
 public final class Calculator {
 
-    private final TwoLevelMap<Integer, Integer, BigInteger> nCrMemo = new TwoLevelMap<>();
+    private final BinomialCoefficientMap nCrMemo = new BinomialCoefficientMap();
     private final TwoLevelMap<Integer, Integer, BigInteger> nPrMemo = new TwoLevelMap<>();
     private final TwoLevelMap<Integer, Integer, BigInteger> restrictedDerangementMemo = new TwoLevelMap<>();
     private final List<BigInteger> factorialCache = new ArrayList<>();
     private final List<BigInteger> subFactorialCache = new ArrayList<>();
+
+    /**
+     * Factorials and subfactorials up to this value are kept in dense lists (every value cached).
+     * Above it only every {@link #CHECKPOINT_INTERVAL}-th value is kept, because a dense cache holds
+     * O(n²) bits in total: about 290 MB at n = 20 000 and over 1 GB at n = 40 000.
+     * Must be a multiple of {@link #CHECKPOINT_INTERVAL}.
+     */
+    private static final int DENSE_LIMIT = 2000;
+
+    /** Spacing of the cached checkpoints above {@link #DENSE_LIMIT}; any other value costs at most this many small steps. */
+    private static final int CHECKPOINT_INTERVAL = 20;
+
+    private final ConcurrentSkipListMap<Integer, BigInteger> factorialCheckpoints = new ConcurrentSkipListMap<>();
+    private final ConcurrentSkipListMap<Integer, BigInteger> subFactorialCheckpoints = new ConcurrentSkipListMap<>();
 
     /**
      * Constructs a new Calculator instance.
@@ -59,20 +74,13 @@ public final class Calculator {
     public BigInteger nCr(int n, int r) {
         if (r == n || r == 0) return BigInteger.ONE;
         if (n < r || r < 0) return BigInteger.ZERO;
-        if (r == 1) return BigInteger.valueOf(n);
-        if (r == 2) return BigInteger.valueOf(n).multiply(BigInteger.valueOf(n-1)).divide(BigInteger.TWO);
-
-
         r = Math.min(r, n - r);
+        if (r == 1) return BigInteger.valueOf(n);
+        if (r == 2) {
+            return BigInteger.valueOf(n).multiply(BigInteger.valueOf(n - 1)).divide(BigInteger.TWO);
+        }
 
-        return nCrMemo.computeIfAbsent(n, r, (nVal, rVal) -> {
-            BigInteger value = BigInteger.ONE;
-            for (int i = 1; i <= rVal; i++) {
-                value = value.multiply(BigInteger.valueOf(nVal - rVal + i))
-                        .divide(BigInteger.valueOf(i));
-            }
-            return value;
-        });
+        return nCrMemo.computeIfAbsent(n, r);
     }
 
     /**
@@ -160,21 +168,47 @@ public final class Calculator {
      * @return the smallest n where n! > value
      */
     public int factorialUpperBound(BigInteger value) {
-        int n = 1;
-        while (factorial(n).compareTo(value) <= 0) {
+        for (int n = 1; n <= DENSE_LIMIT; n++) {
+            if (factorial(n).compareTo(value) > 0) {
+                return n;
+            }
+        }
+        // Above the dense range, roll the product forward instead of asking the cache for every n,
+        // which would make it retain one value per n again.
+        BigInteger f = factorial(DENSE_LIMIT);
+        int n = DENSE_LIMIT;
+        while (f.compareTo(value) <= 0) {
             n++;
+            f = f.multiply(BigInteger.valueOf(n));
         }
         return n;
     }
 
     /**
      * Calculates n! (factorial of n).
+     * <p>
+     * Values up to {@value #DENSE_LIMIT} are cached individually. Above that only every
+     * {@value #CHECKPOINT_INTERVAL}-th value is cached, so memory stays proportional to the number of
+     * checkpoints touched and any value is at most {@value #CHECKPOINT_INTERVAL} small multiplications
+     * away from a checkpoint.
+     * </p>
      * @param n non-negative integer
      * @return n! as a BigInteger
      * @throws IllegalArgumentException if n is negative
      */
     public BigInteger factorial(int n) {
         if (n < 0) throw new IllegalArgumentException("Negative input is not allowed.");
+        if (n <= DENSE_LIMIT) return denseFactorial(n);
+
+        int checkpoint = n - n % CHECKPOINT_INTERVAL;
+        BigInteger value = factorialCheckpoint(checkpoint);
+        for (int i = checkpoint + 1; i <= n; i++) {
+            value = value.multiply(BigInteger.valueOf(i));
+        }
+        return value;
+    }
+
+    private BigInteger denseFactorial(int n) {
         synchronized (factorialCache) {
             while (factorialCache.size() <= n) {
                 int i = factorialCache.size();
@@ -185,14 +219,66 @@ public final class Calculator {
         }
     }
 
+    /** Returns {@code c!} for a multiple {@code c} of the checkpoint interval, deriving it from the nearest cached neighbour. */
+    private BigInteger factorialCheckpoint(int c) {
+        if (c <= DENSE_LIMIT) return denseFactorial(c);
+        BigInteger cached = factorialCheckpoints.get(c);
+        if (cached != null) return cached;
+
+        Map.Entry<Integer, BigInteger> below = factorialCheckpoints.lowerEntry(c);
+        Map.Entry<Integer, BigInteger> above = factorialCheckpoints.higherEntry(c);
+        int belowKey = below == null ? DENSE_LIMIT : below.getKey();
+
+        BigInteger result;
+        if (above != null && above.getKey() - c < c - belowKey) {
+            // The next checkpoint up is closer: c! = hi! / ((c + 1) · … · hi), an exact division.
+            result = above.getValue().divide(rangeProduct(c + 1, above.getKey()));
+        } else {
+            BigInteger start = below == null ? denseFactorial(DENSE_LIMIT) : below.getValue();
+            result = start.multiply(rangeProduct(belowKey + 1, c));
+        }
+        factorialCheckpoints.put(c, result);
+        return result;
+    }
+
+    /** Product of the integers {@code lo..hi} (1 if the range is empty), by balanced splitting so that large ranges use fast multiplication. */
+    private static BigInteger rangeProduct(int lo, int hi) {
+        if (lo > hi) return BigInteger.ONE;
+        if (hi - lo < 8) {
+            BigInteger product = BigInteger.valueOf(lo);
+            for (int i = lo + 1; i <= hi; i++) {
+                product = product.multiply(BigInteger.valueOf(i));
+            }
+            return product;
+        }
+        int mid = (lo + hi) >>> 1;
+        return rangeProduct(lo, mid).multiply(rangeProduct(mid + 1, hi));
+    }
+
     /**
      * Calculates !n (subfactorial / derangement number) — number of permutations of n items with no fixed points.
+     * <p>
+     * Cached like {@link #factorial(int)}: individually up to {@value #DENSE_LIMIT}, then at every
+     * {@value #CHECKPOINT_INTERVAL}-th value. Between checkpoints it steps with
+     * {@code !k = k·!(k−1) + (−1)^k}, which needs only the previous value.
+     * </p>
      * @param n non-negative integer
      * @return !n as a BigInteger
      * @throws IllegalArgumentException if n is negative
      */
     public BigInteger subFactorial(int n) {
         if (n < 0) throw new IllegalArgumentException("Negative input is not allowed.");
+        if (n <= DENSE_LIMIT) return denseSubFactorial(n);
+
+        int checkpoint = n - n % CHECKPOINT_INTERVAL;
+        BigInteger value = subFactorialCheckpoint(checkpoint);
+        for (int k = checkpoint + 1; k <= n; k++) {
+            value = nextSubFactorial(value, k);
+        }
+        return value;
+    }
+
+    private BigInteger denseSubFactorial(int n) {
         synchronized (subFactorialCache) {
             while (subFactorialCache.size() <= n) {
                 int i = subFactorialCache.size();
@@ -207,6 +293,44 @@ public final class Calculator {
             }
             return subFactorialCache.get(n);
         }
+    }
+
+    /** Returns {@code !c} for a multiple {@code c} of the checkpoint interval, deriving it from the nearest cached neighbour. */
+    private BigInteger subFactorialCheckpoint(int c) {
+        if (c <= DENSE_LIMIT) return denseSubFactorial(c);
+        BigInteger cached = subFactorialCheckpoints.get(c);
+        if (cached != null) return cached;
+
+        Map.Entry<Integer, BigInteger> below = subFactorialCheckpoints.lowerEntry(c);
+        Map.Entry<Integer, BigInteger> above = subFactorialCheckpoints.higherEntry(c);
+        int belowKey = below == null ? DENSE_LIMIT : below.getKey();
+
+        BigInteger value;
+        if (above != null && above.getKey() - c < c - belowKey) {
+            value = above.getValue();
+            for (int k = above.getKey(); k > c; k--) {
+                value = previousSubFactorial(value, k);
+            }
+        } else {
+            value = below == null ? denseSubFactorial(DENSE_LIMIT) : below.getValue();
+            for (int k = belowKey + 1; k <= c; k++) {
+                value = nextSubFactorial(value, k);
+            }
+        }
+        subFactorialCheckpoints.put(c, value);
+        return value;
+    }
+
+    /** {@code !k} from {@code !(k−1)}: {@code !k = k·!(k−1) + (−1)^k}. */
+    private static BigInteger nextSubFactorial(BigInteger previous, int k) {
+        BigInteger value = previous.multiply(BigInteger.valueOf(k));
+        return (k & 1) == 0 ? value.add(BigInteger.ONE) : value.subtract(BigInteger.ONE);
+    }
+
+    /** {@code !(k−1)} from {@code !k}: {@code !(k−1) = (!k − (−1)^k) / k}, an exact division. */
+    private static BigInteger previousSubFactorial(BigInteger current, int k) {
+        BigInteger value = (k & 1) == 0 ? current.subtract(BigInteger.ONE) : current.add(BigInteger.ONE);
+        return value.divide(BigInteger.valueOf(k));
     }
 
     /**
@@ -232,9 +356,11 @@ public final class Calculator {
 
         return restrictedDerangementMemo.computeIfAbsent(total, restricted, (t, r) -> {
             BigInteger result = BigInteger.ZERO;
+            BigInteger c = BigInteger.ONE; // C(r, j), stepped along the row: O(r) instead of O(r^2), and no nCr cache growth
             for (int j = 0; j <= r; j++) {
-                BigInteger term = nCr(r, j).multiply(factorial(t - j));
+                BigInteger term = c.multiply(factorial(t - j));
                 result = (j & 1) == 0 ? result.add(term) : result.subtract(term);
+                c = c.multiply(BigInteger.valueOf(r - j)).divide(BigInteger.valueOf(j + 1));
             }
             return result;
         });
@@ -554,6 +680,8 @@ public final class Calculator {
         nPrMemo.clear();
         restrictedDerangementMemo.clear();   // ← Add this
 
+        factorialCheckpoints.clear();
+        subFactorialCheckpoints.clear();
         synchronized (factorialCache) {
             factorialCache.clear();
             factorialCache.add(BigInteger.ONE);
