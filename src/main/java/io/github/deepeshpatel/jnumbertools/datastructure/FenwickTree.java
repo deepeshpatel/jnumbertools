@@ -29,8 +29,18 @@ public final class FenwickTree {
     public FenwickTree(int n) {
         this.n = n;
         this.tree = new int[n + 1];
-        // Precompute highest power of two ≤ n
         this.maxPower = Integer.highestOneBit(n);
+    }
+
+    /**
+     * Creates a copy of an existing Fenwick Tree.
+     *
+     * @param other the tree to copy
+     */
+    public FenwickTree(FenwickTree other) {
+        this.n = other.n;
+        this.tree = other.tree.clone();
+        this.maxPower = other.maxPower;
     }
 
     /**
@@ -72,7 +82,7 @@ public final class FenwickTree {
     }
 
     /**
-     * Finds the smallest index such that prefix sum ≥ k.
+     * Finds the smallest index such that prefix sum is at least k.
      * <p>
      * Assumes 1 ≤ k ≤ total sum of all elements.
      * Uses binary lifting for O(log n) time.
@@ -98,6 +108,8 @@ public final class FenwickTree {
 
     /**
      * Returns the size of the tree.
+     *
+     * @return the number of positions in the tree
      */
     public int size() {
         return n;

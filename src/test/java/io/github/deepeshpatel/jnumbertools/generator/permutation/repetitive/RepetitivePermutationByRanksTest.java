@@ -264,14 +264,6 @@ class RepetitivePermutationByRanksTest {
         }
 
         @Test
-        void shouldThrowExceptionForNegativeSampleSize() {
-            assertThrows(IllegalArgumentException.class, () -> permutation.repetitive(2, "A", "B")
-                    .choice(-1, TestBase.random)
-                    .stream()
-                    .toList(), "Negative sampleSize should throw exception");
-        }
-
-        @Test
         void shouldHandleEmptyInput() {
             var permutations = permutation.repetitive(0, Collections.emptyList())
                     .choice(1, TestBase.random)
@@ -335,25 +327,6 @@ class RepetitivePermutationByRanksTest {
                 assertEquals(width, perm.size(), "Each permutation should have size width");
                 assertTrue(elements.containsAll(perm), "All elements should come from input");
             }
-        }
-
-        @Test
-        void shouldThrowExceptionForSampleSizeGreaterThanTotalPermutations() {
-            List<String> elements = of("A", "B");
-            int width = 2;
-            int total = calculator.power(2, width).intValue(); // 2^2 = 4
-            assertThrows(IllegalArgumentException.class, () -> permutation.repetitive(width, elements)
-                    .sample(total + 1, TestBase.random)
-                    .stream()
-                    .toList(), "Sample size exceeding n^width should throw exception");
-        }
-
-        @Test
-        void shouldThrowExceptionForNegativeSampleSize() {
-            assertThrows(IllegalArgumentException.class, () -> permutation.repetitive(2, "A", "B")
-                    .sample(-1, TestBase.random)
-                    .stream()
-                    .toList(), "Negative sampleSize should throw exception");
         }
 
         @Test

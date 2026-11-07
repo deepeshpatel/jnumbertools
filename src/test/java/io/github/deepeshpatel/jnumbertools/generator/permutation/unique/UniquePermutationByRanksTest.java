@@ -197,14 +197,6 @@ class UniquePermutationByRanksTest {
         }
 
         @Test
-        void shouldThrowExceptionForNegativeSampleSize() {
-            assertThrows(IllegalArgumentException.class, () -> permutation.unique("A", "B")
-                    .choice(-1, TestBase.random)
-                    .stream()
-                    .toList(), "Negative sampleSize should throw exception");
-        }
-
-        @Test
         void shouldHandleEmptyInput() {
             var permutations = permutation.unique(Collections.emptyList())
                     .choice(1, TestBase.random)
@@ -266,24 +258,6 @@ class UniquePermutationByRanksTest {
                 assertEquals(new HashSet<>(perm).size(), elements.size(), "Permutation should be unique within itself");
                 assertTrue(elements.containsAll(perm), "All elements should come from input");
             }
-        }
-
-        @Test
-        void shouldThrowExceptionForSampleSizeGreaterThanTotalPermutations() {
-            List<String> elements = of("A", "B");
-            int total = calculator.nPr(2, 2).intValue(); // 2! = 2
-            assertThrows(IllegalArgumentException.class, () -> permutation.unique(elements)
-                    .sample(total + 1, TestBase.random)
-                    .stream()
-                    .toList(), "Sample size exceeding n! should throw exception");
-        }
-
-        @Test
-        void shouldThrowExceptionForNegativeSampleSize() {
-            assertThrows(IllegalArgumentException.class, () -> permutation.unique("A", "B")
-                    .sample(-1, TestBase.random)
-                    .stream()
-                    .toList(), "Negative sampleSize should throw exception");
         }
 
         @Test

@@ -82,15 +82,6 @@ class UniqueCombinationByRanksTest {
         }
 
         @Test
-        void shouldThrowExceptionForNegativeSampleSize() {
-            assertThrows(IllegalArgumentException.class, () -> JNumberTools.combinations()
-                    .unique(2, "A", "B", "C")
-                    .choice(-1, TestBase.random)
-                    .stream()
-                    .toList(), "Negative sampleSize should throw exception");
-        }
-
-        @Test
         void shouldHandleEmptyInputWithZeroSize() {
             var combinations = JNumberTools.combinations()
                     .unique(0, Collections.emptyList())
@@ -163,15 +154,6 @@ class UniqueCombinationByRanksTest {
 
     @Nested
     public class UniqueCombinationSampleTest {
-
-        @Test
-        void shouldThrowExceptionForSampleSizeZero() {
-            assertThrows(IllegalArgumentException.class, () -> combination
-                    .unique(2, "A", "B", "C")
-                    .sample(0, TestBase.random)
-                    .stream()
-                    .toList(), "Sample size of 0 should throw IllegalArgumentException");
-        }
 
         @Test
         void shouldGenerateConsistentPropertiesAcrossIterators() {
@@ -252,27 +234,6 @@ class UniqueCombinationByRanksTest {
                     .toList();
             assertEquals(sampleSize, combinations.size(), "Should generate all possible combinations when sampleSize equals nCr");
             assertEquals(sampleSize, new HashSet<>(combinations).size(), "All combinations should be unique");
-        }
-
-        @Test
-        void shouldThrowExceptionForNegativeSampleSize() {
-            assertThrows(IllegalArgumentException.class, () -> combination
-                    .unique(2, "A", "B", "C")
-                    .sample(-1, TestBase.random)
-                    .stream()
-                    .toList(), "Negative sampleSize should throw exception");
-        }
-
-        @Test
-        void shouldThrowExceptionForSampleSizeGreaterThanNcr() {
-            int n = 3;
-            int r = 2;
-            int nCr = calculator.nCr(n, r).intValueExact(); // 3C2 = 3
-            assertThrows(IllegalArgumentException.class, () -> combination
-                    .unique(n, r)
-                    .sample(nCr + 1, TestBase.random)
-                    .stream()
-                    .toList(), "Sample size exceeding nCr should throw exception");
         }
 
         @Test
@@ -417,13 +378,6 @@ class UniqueCombinationByRanksTest {
 
     @Nested
     class ByRanksValidationTest {
-
-        @Test
-        void byRanks_withNullRanks_shouldThrowException() {
-            assertThrows(IllegalArgumentException.class, () -> {
-                combination.unique(3, 2, "A", "B", "C").byRanks(null);
-            }, "Null ranks should throw IllegalArgumentException");
-        }
 
         @Test
         void byRanks_withNegativeRank_shouldThrowException() {

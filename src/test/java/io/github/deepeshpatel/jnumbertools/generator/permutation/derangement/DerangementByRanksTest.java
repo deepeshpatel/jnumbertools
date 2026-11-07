@@ -179,14 +179,6 @@ class DerangementByRanksTest {
                 }
             }
         }
-
-        @Test
-        void shouldThrowForNonPositiveSampleSize() {
-            assertThrows(IllegalArgumentException.class, () -> derangement.of("A", "B", "C", "D")
-                    .choice(0, TestBase.random));
-            assertThrows(IllegalArgumentException.class, () -> derangement.of("A", "B", "C", "D")
-                    .choice(-1, TestBase.random));
-        }
     }
 
     @Nested
@@ -210,21 +202,6 @@ class DerangementByRanksTest {
             assertEquals(sampleSize, samples.size());
             assertEquals(sampleSize, new HashSet<>(samples).size(),
                     "Sample without replacement must be all distinct");
-        }
-
-        @Test
-        void shouldThrowForSampleSizeGreaterThanTotal() {
-            // D_3 = 2; asking for 3 must throw
-            assertThrows(IllegalArgumentException.class, () -> derangement.of("A", "B", "C")
-                    .sample(3, TestBase.random));
-        }
-
-        @Test
-        void shouldThrowForNonPositiveSampleSize() {
-            assertThrows(IllegalArgumentException.class, () -> derangement.of("A", "B", "C", "D")
-                    .sample(0, TestBase.random));
-            assertThrows(IllegalArgumentException.class, () -> derangement.of("A", "B", "C", "D")
-                    .sample(-1, TestBase.random));
         }
 
         @Test

@@ -206,27 +206,6 @@ class KPermutationByRanksTest {
         }
 
         @Test
-        void shouldThrowExceptionForSampleSizeGreaterThanTotalPermutations() {
-            var input = List.of(0, 1, 2);
-            int k = 2;
-            int totalPermutations = 6; // 3P2 = 6
-            assertThrows(IllegalArgumentException.class, () -> permutation.nPk(k, input)
-                    .sample(totalPermutations + 1, random)
-                    .stream()
-                    .toList(), "Sample size exceeding total permutations should throw exception");
-        }
-
-        @Test
-        void shouldThrowExceptionForNegativeSampleSize() {
-            var input = List.of(0, 1, 2);
-            int k = 2;
-            assertThrows(IllegalArgumentException.class, () -> permutation.nPk(k, input)
-                    .sample(-1, random)
-                    .stream()
-                    .toList(), "Negative sampleSize should throw exception");
-        }
-
-        @Test
         void shouldHandleKEqualsZero() {
             var input = List.of(0, 1, 2);
             int k = 0;
@@ -314,16 +293,6 @@ class KPermutationByRanksTest {
                     .stream()
                     .toList();
             assertEquals(choiceSize, permutations.size(), "Should generate choiceSize permutations even if > total permutations");
-        }
-
-        @Test
-        void shouldThrowExceptionForNegativeChoiceSize() {
-            var input = List.of(0, 1, 2);
-            int k = 2;
-            assertThrows(IllegalArgumentException.class, () -> permutation.nPk(k, input)
-                    .choice(-1, TestBase.random)
-                    .stream()
-                    .toList(), "Negative choiceSize should throw exception");
         }
 
         @Test

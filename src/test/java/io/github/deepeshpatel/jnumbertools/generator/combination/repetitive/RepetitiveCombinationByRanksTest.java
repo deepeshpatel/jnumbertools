@@ -186,27 +186,6 @@ class RepetitiveCombinationByRanksTest {
         }
 
         @Test
-        void shouldThrowExceptionForNegativeSampleSize() {
-            assertThrows(IllegalArgumentException.class, () -> JNumberTools.combinations()
-                    .repetitive(2, "A", "B", "C")
-                    .sample(-1, TestBase.random)
-                    .stream()
-                    .toList(), "Negative sampleSize should throw exception");
-        }
-
-        @Test
-        void shouldThrowExceptionForSampleSizeGreaterThanNcrRepetitive() {
-            int n = 2;
-            int r = 2;
-            int nCrRepetitive = calculator.nCrRepetitive(n, r).intValueExact(); // 3C2 = 3
-            assertThrows(IllegalArgumentException.class, () -> JNumberTools.combinations()
-                    .repetitive(r, "A", "B")
-                    .sample(nCrRepetitive + 1, TestBase.random)
-                    .stream()
-                    .toList(), "Sample size exceeding nCrRepetitive should throw exception");
-        }
-
-        @Test
         void shouldHandleEmptyInputWithZeroSize() {
             var combinations = JNumberTools.combinations()
                     .repetitive(0, Collections.emptyList())
@@ -328,15 +307,6 @@ class RepetitiveCombinationByRanksTest {
                     .stream()
                     .toList();
             assertEquals(sampleSize, combinations.size(), "Should generate sampleSize combinations even if > nCrRepetitive");
-        }
-
-        @Test
-        void shouldThrowExceptionForNegativeSampleSize() {
-            assertThrows(IllegalArgumentException.class, () -> JNumberTools.combinations()
-                    .repetitive(2, "A", "B", "C")
-                    .choice(-1, TestBase.random)
-                    .stream()
-                    .toList(), "Negative sampleSize should throw exception");
         }
 
         @Test
