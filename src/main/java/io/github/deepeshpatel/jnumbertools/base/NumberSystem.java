@@ -15,7 +15,7 @@ import java.math.BigInteger;
 /**
  * Converts decimal numbers to specialized number systems for combinatorial computations.
  * <p>
- * This class provides conversions to three fundamental combinatorial number systems:
+ * This class provides conversions to the following combinatorial number systems:
  * <ul>
  *   <li><b>Permutadic</b> - For k-permutations (ⁿPₖ). Each permutadic number uniquely
  *       represents a k-permutation of n distinct elements.</li>
@@ -23,6 +23,8 @@ import java.math.BigInteger;
  *       represents a combination of r elements from n distinct elements.</li>
  *   <li><b>Factoradic</b> - For unique permutations (n!). Each factoradic number uniquely
  *       represents a full permutation of n distinct elements.</li>
+ *   <li><b>Derangadic</b> - For derangements (!n), encoding the lexicographical rank of a
+ *       fixed-point-free permutation.</li>
  * </ul>
  * These number systems are essential for ranking (finding the position) and unranking
  * (generating the element at a given position) combinatorial structures without
@@ -96,6 +98,7 @@ import java.math.BigInteger;
  * @see Permutadic
  * @see Combinadic
  * @see Factoradic
+ * @see Derangadic
  * @see RankOf
  * @see UnrankOf
  * @see <a href="https://en.wikipedia.org/wiki/Factorial_number_system">Factorial Number System</a>

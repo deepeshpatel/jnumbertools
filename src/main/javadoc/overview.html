@@ -4,198 +4,89 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JNumberTools Overview</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            line-height: 1.6;
-            margin: 40px;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-            color: #333;
-        }
-        h1, h2, h3 {
-            color: #2c3e50;
-        }
-        h1 {
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 10px;
-        }
-        h2 {
-            border-bottom: 2px solid #ecf0f1;
-            padding-bottom: 8px;
-            margin-top: 30px;
-        }
-        p {
-            margin: 15px 0;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        th, td {
-            border: 1px solid #dfe4ea;
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #3498db;
-            color: #fff;
-            font-weight: 600;
-        }
-        tr:nth-child(even) {
-            background-color: #f9fbfc;
-        }
-        a {
-            color: #2980b9;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        .note {
-            background-color: #ecf0f1;
-            padding: 15px;
-            border-left: 4px solid #3498db;
-            margin: 20px 0;
-        }
-    </style>
 </head>
 <body>
 <h1>JNumberTools Overview</h1>
-<p>
-    JNumberTools is a Java library designed for generating combinatorial objects such as permutations, combinations, subsets, and Cartesian products, with support for large-scale computations using <code>BigInteger</code>. It provides efficient algorithms for lexicographical ordering, random sampling (with or without replacement), and rank-based generation, making it suitable for applications requiring precise combinatorial enumeration and manipulation.
-</p>
-<p>
-    The library emphasizes flexibility, allowing users to generate all possible outcomes, every mᵗʰ outcome, or random samples, with or without replacement. It is built to handle both small and large datasets, leveraging <code>BigInteger</code> for calculations that exceed standard integer limits. JNumberTools is ideal for developers working on problems in combinatorics, data analysis, algorithm design, and computational mathematics.
-</p>
+<p>JNumberTools is a Java library for generating and working with combinatorial structures. Its public API covers permutations, derangements, combinations, subsets, Cartesian products, combinatorial ranking and unranking, and combinatorial number systems. Counts and ranks use <code>BigInteger</code> where the size of the combinatorial space can exceed primitive integer ranges.</p>
+<p>Start with the static entry points on <code>io.github.deepeshpatel.jnumbertools.base.JNumberTools</code>. Select the structure and its parameters through the returned builder, then choose an enumeration or sampling operation. This is the intended public usage; implementation classes in generator subpackages are not the normal entry points.</p>
 
-<h2>Key Features</h2>
+<h2>Capabilities</h2>
 <ul>
-    <li><strong>Combinatorial Generation</strong>: Generate permutations, combinations, subsets, and Cartesian products in lexicographical order or based on specific ranks.</li>
-    <li><strong>Flexible Sampling</strong>: Support for random sampling with or without replacement, enabling efficient selection from large combinatorial spaces.</li>
-    <li><strong>BigInteger Support</strong>: Handle large numbers for combinatorial counts and ranks, ensuring scalability for extensive datasets.</li>
-    <li><strong>Lexicographical Ordering</strong>: Generate outcomes in a predictable, ordered sequence or select every mᵗʰ outcome for systematic exploration.</li>
-    <li><strong>Rank-Based Generation</strong>: Map sequences of ranks to specific combinatorial objects using algorithms like factoradic and combinadic unranking.</li>
-    <li><strong>Modular Design</strong>: Organized into packages for specific combinatorial tasks, with builders for intuitive configuration.</li>
+    <li>Unique, repetitive, multiset and k-permutations; derangements.</li>
+    <li>Unique, repetitive and multiset combinations; subsets.</li>
+    <li>Simple and constrained Cartesian products.</li>
+    <li>Lexicographical enumeration, every-mth traversal where supported, and access by zero-based ranks.</li>
+    <li>Random selection with replacement (<code>choice</code>) and without replacement (<code>sample</code>).</li>
+    <li>Ranking, unranking, and BigInteger-based combinatorial counts and ranks.</li>
+    <li>Factoradic, Combinadic, Permutadic and Derangadic representations.</li>
 </ul>
 
-<h2>Package Structure</h2>
-<p>
-    JNumberTools is organized into several packages, each focusing on a specific aspect of combinatorial generation or computation. The table below summarizes the main packages and their purposes.
-</p>
+<h2>Package structure</h2>
 <table>
-    <tr>
-        <th>Package</th>
-        <th>Description</th>
-    </tr>
-    <tr>
-        <td><code>io.github.deepeshpatel.jnumbertools.base</code></td>
-        <td>
-            Core utilities for combinatorial calculations, including the <code>Calculator</code> class for binomial coefficients, factorials, and power operations with <code>BigInteger</code>. Also includes builders for combinations and subsets.
-        </td>
-    </tr>
-    <tr>
-        <td><code>io.github.deepeshpatel.jnumbertools.generator.base</code></td>
-        <td>
-            Abstract classes and utilities for building combinatorial generators, such as <code>AbstractGenerator</code> and <code>Builder</code>, providing a foundation for permutation, combination, and product generation.
-        </td>
-    </tr>
-    <tr>
-        <td><code>io.github.deepeshpatel.jnumbertools.generator.permutation</code></td>
-        <td>
-            Generators for unique, repetitive, multiset, and k-permutations, supporting lexicographical order, mᵗʰ permutations, single-swap algorithms, and rank-based generation via classes like <code>UniquePermutationByRanks</code>.
-        </td>
-    </tr>
-    <tr>
-        <td><code>io.github.deepeshpatel.jnumbertools.generator.combination</code></td>
-        <td>
-            Generators for unique, repetitive, and multiset combinations, supporting lexicographical order and rank-based generation via classes like <code>UniqueCombinationByRanks</code>.
-        </td>
-    </tr>
-    <tr>
-        <td><code>io.github.deepeshpatel.jnumbertools.generator.product</code></td>
-        <td>
-            Generators for simple and constrained Cartesian products, allowing combinations of elements or subsets from multiple lists, with support for lexicographical order and rank-based generation via <code>CartesianProductByRanks</code>.
-        </td>
-    </tr>
-    <tr>
-        <td><code>io.github.deepeshpatel.jnumbertools.generator.subset</code></td>
-        <td>
-            Generators for subsets of a given size range, supporting lexicographical order and mᵗʰ subset generation.
-        </td>
-    </tr>
-    <tr>
-        <td><code>io.github.deepeshpatel.jnumbertools.generator.numbers</code></td>
-        <td>
-            Tools for generating random numbers with or without replacement, using <code>BigInteger</code> for large ranges, useful for rank-based combinatorial sampling.
-        </td>
-    </tr>
-    <tr>
-        <td><code>io.github.deepeshpatel.jnumbertools.numbersystem</code></td>
-        <td>
-            Algorithms for number system conversions, such as factoradic, combinadic, and permutadic unranking, used to map ranks to combinatorial objects.
-        </td>
-    </tr>
+    <thead><tr><th>Package</th><th>Purpose</th></tr></thead>
+    <tbody>
+    <tr><td><code>base</code></td><td>Public entry points, structure-specific facades, Calculator, and rank/unrank APIs.</td></tr>
+    <tr><td><code>generator.base</code></td><td>Shared builder and iterable contracts used by generator implementations.</td></tr>
+    <tr><td><code>generator.permutation</code></td><td>Permutation and derangement generation strategies.</td></tr>
+    <tr><td><code>generator.combination</code></td><td>Unique, repetitive and multiset combination generation.</td></tr>
+    <tr><td><code>generator.subset</code></td><td>Subset generation, including size-restricted subsets.</td></tr>
+    <tr><td><code>generator.product</code></td><td>Simple and constrained Cartesian-product generation.</td></tr>
+    <tr><td><code>numbersystem</code></td><td>Combinatorial number-system representations and conversions.</td></tr>
+    </tbody>
 </table>
 
-<h2>Usage Examples</h2>
-<p>
-    JNumberTools provides a builder-based API for intuitive configuration of combinatorial generators. Below are examples of common use cases:
-</p>
-<div class="note">
-    <strong>Generating All Permutations:</strong>
-    <pre>
-List<String> elements = Arrays.asList("A", "B", "C");
-Permutations permutations = new Permutations(new Calculator());
-List<List<String>> allPerms = permutations.unique(elements.size()).lexOrder().stream().toList();
-// Output: [[A, B, C], [A, C, B], [B, A, C], [B, C, A], [C, A, B], [C, B, A]]
-        </pre>
-</div>
-<div class="note">
-    <strong>Random Sampling of Combinations:</strong>
-    <pre>
-List<String> elements = Arrays.asList("A", "B", "C", "D");
-Combinations combinations = new Combinations(new Calculator());
-List<List<String>> sample = combinations.unique(2, elements).sample(2).stream().toList();
-// Output example: [[A, B], [C, D]]
-        </pre>
-</div>
-<div class="note">
-    <strong>Cartesian Product by Ranks:</strong>
-    <pre>
-List<List<String>> lists = Arrays.asList(Arrays.asList("A", "B"), Arrays.asList("1", "2"));
-SimpleProductBuilder builder = new SimpleProductBuilder(lists.get(0), new Calculator()).and(lists.get(1));
-List<List<Object>> products = builder.byRanks(Arrays.asList(BigInteger.ZERO, BigInteger.ONE)).stream().toList();
-// Output: [[A, 1], [A, 2]]
-        </pre>
-</div>
+<h2>Usage examples</h2>
+<h3>All unique permutations</h3>
+<pre><code>JNumberTools.permutations()
+    .unique("A", "B", "C")
+    .lexOrder()
+    .forEach(System.out::println);</code></pre>
 
-<h2>Getting Started</h2>
-<p>
-    To use JNumberTools, include it as a dependency in your Java project. The library is available on GitHub at
-    <a href="https://github.com/deepeshpatel/jnumbertools">https://github.com/deepeshpatel/jnumbertools</a>.
-    Check the <a href="https://github.com/deepeshpatel/jnumbertools/blob/main/README.md">README</a> for installation instructions and detailed documentation.
-</p>
-<p>
-    Explore the individual package READMEs for in-depth guides on specific features:
-</p>
+<h3>Every fifth unique permutation, starting at zero-based rank two</h3>
+<pre><code>JNumberTools.permutations()
+    .unique("A", "B", "C", "D")
+    .lexOrderMth(5, 2)
+    .forEach(System.out::println);</code></pre>
+
+<h3>Combinations and subsets</h3>
+<pre><code>JNumberTools.combinations()
+    .unique(2, "A", "B", "C", "D")
+    .lexOrder()
+    .forEach(System.out::println);
+
+JNumberTools.subsets()
+    .of("A", "B", "C")
+    .inRange(1, 2)
+    .lexOrder()
+    .forEach(System.out::println);</code></pre>
+
+<h3>Ranking and unranking</h3>
+<pre><code>BigInteger rank = JNumberTools.rankOf()
+    .permutation()
+    .unique(2, 0, 1);
+
+int[] permutation = JNumberTools.unrankOf()
+    .permutation()
+    .unique(BigInteger.valueOf(4), 3);</code></pre>
+
+<h3>Cartesian product</h3>
+<pre><code>JNumberTools.cartesianProduct()
+    .simpleProductOf("A", "B")
+    .and("X", "Y")
+    .lexOrder()
+    .forEach(System.out::println);</code></pre>
+
+<p>For complete method contracts, see the Javadoc for the relevant facade and builder. The project repository contains installation instructions and additional guides:</p>
 <ul>
+    <li><a href="https://github.com/deepeshpatel/jnumbertools">GitHub repository</a></li>
+    <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/README.md">README</a></li>
     <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/docs/calculator/README.md">Calculator</a></li>
     <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/docs/combinations/README.md">Combinations</a></li>
     <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/docs/permutations/README.md">Permutations</a></li>
-    <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/docs/products/README.md">Products</a></li>
-    <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/docs/numbersystem/README.md">Number Systems</a></li>
-    <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/docs/sets/README.md">Sets</a></li>
+    <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/docs/products/README.md">Cartesian products</a></li>
+    <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/docs/numbersystem/README.md">Number systems</a></li>
+    <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/docs/sets/README.md">Subsets</a></li>
 </ul>
-
-<h2>License</h2>
-<p>
-    JNumberTools is licensed under the MIT License. See the
-    <a href="https://github.com/deepeshpatel/jnumbertools/blob/main/LICENSE">LICENSE</a> file for details.
-</p>
+<p>See the repository's <a href="https://github.com/deepeshpatel/jnumbertools/blob/main/LICENSE">LICENSE</a> file for the applicable license terms.</p>
 </body>
 </html>

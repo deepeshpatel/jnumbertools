@@ -3,38 +3,15 @@
  * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 /**
- * Base package for combinatorial generator classes.
+ * Contains the implementation packages for combinatorial generators.
  *
- * Contains subpackages (e.g., generator.permutation, generator.combination, generator.subset, generator.product)
- * with classes for generating combinatorial structures, used via builder classes in the base package.
- * Supports generation of:
- * - Unique permutations (`n!`), k-permutations (`ⁿPₖ`), repetitive permutations (`nᵣ`), and multiset permutations.
- * - Unique combinations (`ⁿCᵣ`) and multiset combinations.
- * - Subsets (`2ⁿ`).
- * - Simple and constrained Cartesian products.
- * - Ranking (RankOf) and unranking (UnrankOf) of permutations and combinations.
+ * <p>Subpackages group permutation and derangement, combination, subset and Cartesian-product
+ * implementations. The public facade and structure-specific builders are exposed from
+ * {@code io.github.deepeshpatel.jnumbertools.base}. Applications should normally configure and
+ * obtain generators through those facade/builder APIs rather than instantiate implementation
+ * classes in these packages directly.</p>
  *
- * Generators produce structures in lexicographical order, by specific ranks, or every mᵗʰ element.
- * Thread safety depends on the implementation; builders in the base package are typically thread-safe.
- *
- * Example usage:
- * ```
- * // Generate unique permutations via base package builder
- * JNumberTools.permutations().unique("A", "B", "C").lexOrder().forEach(System.out::println);
- *
- * // Generate multiset combinations via generator.combination subpackage
- * var elements = new LinkedHashMap<>(Map.of("A", 2, "B", 1));
- * JNumberTools.combinations().multiset(elements, 2).lexOrder().forEach(System.out::println);
- * ```
- *
- * @see io.github.deepeshpatel.jnumbertools.base
- * @see io.github.deepeshpatel.jnumbertools.base.Permutations
- * @see io.github.deepeshpatel.jnumbertools.base.Combinations
- * @see io.github.deepeshpatel.jnumbertools.base.Subsets
- * @see io.github.deepeshpatel.jnumbertools.base.CartesianProduct
- * @see io.github.deepeshpatel.jnumbertools.base.RankOf
- * @see io.github.deepeshpatel.jnumbertools.base.UnrankOf
+ * @see io.github.deepeshpatel.jnumbertools.base.JNumberTools
  * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
- * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  */
 package io.github.deepeshpatel.jnumbertools.generator;

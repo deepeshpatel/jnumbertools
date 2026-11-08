@@ -3,25 +3,23 @@
  * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 /**
- * Contains builder classes for the major public APIs in JNumberTools.
+ * Provides the public entry points and facade classes for JNumberTools.
  *
- * This package provides the entry point for creating generators of combinatorial structures, such as
- * permutations (`n!`, `ⁿPₖ`, `nᵣ`, multiset), combinations (`ⁿCᵣ`, multiset), subsets (`2ⁿ`), Cartesian
- * products, and number system conversions (permutadic, combinadic, factoradic). Key classes include
- * JNumberTools, Calculator, Permutations, Combinations, Subsets, RankOf, UnrankOf, CartesianProduct,
- * and NumberSystem. These classes support generating structures in lexicographical order, by rank, or
- * every mᵗʰ element, with thread-safe operations unless specified otherwise.
+ * The {@link io.github.deepeshpatel.jnumbertools.base.JNumberTools} facade creates the builders and
+ * services used to generate permutations, derangements, combinations, subsets and Cartesian products.
+ * This package also contains {@link io.github.deepeshpatel.jnumbertools.base.Calculator} for
+ * combinatorial arithmetic, {@link io.github.deepeshpatel.jnumbertools.base.RankOf} and
+ * {@link io.github.deepeshpatel.jnumbertools.base.UnrankOf} for rank conversion, and
+ * {@link io.github.deepeshpatel.jnumbertools.base.NumberSystem} for combinatorial number systems.
  *
- * Example usage:
- * ```
- * // Generate all unique permutations of {A, B, C}
- * JNumberTools.permutations().unique("A", "B", "C").lexOrder().forEach(System.out::println);
- *
- * // Generate all unique combinations of 2 elements from {A, B, C}
- * JNumberTools.combinations().unique(2, "A", "B", "C").lexOrder().forEach(System.out::println);
- * ```
+ * <p>Use the facade and its returned builders as the normal public API. For example:</p>
+ * <pre>{@code
+ * JNumberTools.permutations()
+ *     .unique("A", "B", "C")
+ *     .lexOrder()
+ *     .forEach(System.out::println);
+ * }</pre>
  *
  * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
- * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  */
 package io.github.deepeshpatel.jnumbertools.base;
