@@ -1,5 +1,5 @@
 /*
- * JNumberTools Library v3.0.2
+ * JNumberTools Library v4.0.0
  * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.base;
@@ -142,7 +142,7 @@ public final class CartesianProduct {
      * @return a ConstrainedProductBuilder for configuring additional constrained dimensions
      * @deprecated Use {@link #constrainedProductOfDistinct(int, List)} instead for clearer intent
      */
-    @Deprecated(since = "3.0.2", forRemoval = true)
+    @Deprecated(since = "4.0.0", forRemoval = true)
     public ConstrainedProductBuilder constrainedProductOf(int quantity, List<?> elements) {
         return new ConstrainedProductBuilder(quantity, elements, false, calculator);
     }

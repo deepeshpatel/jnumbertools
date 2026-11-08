@@ -1,5 +1,5 @@
 /*
- * JNumberTools Library v3.0.2
+ * JNumberTools Library v4.0.0
  * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.derangement;
