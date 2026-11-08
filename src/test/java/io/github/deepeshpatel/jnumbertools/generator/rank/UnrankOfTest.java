@@ -208,6 +208,17 @@ public class UnrankOfTest {
             assertThrows(IllegalArgumentException.class,
                     () -> unrankOf.permutation().derangement(BigInteger.ZERO, 1));
         }
+
+        @Test
+        @DisplayName("derangement of n=0 is the empty permutation")
+        void n0ReturnsEmptyPermutation() {
+            assertArrayEquals(new int[0], unrankOf.permutation().derangement(BigInteger.ZERO, 0));
+            assertArrayEquals(new int[0], unrankOf.permutation().derangement(0L, 0));
+            assertThrows(IllegalArgumentException.class,
+                    () -> unrankOf.permutation().derangement(BigInteger.ONE, 0));
+            assertThrows(IllegalArgumentException.class,
+                    () -> unrankOf.permutation().derangement(BigInteger.valueOf(-1), 0));
+        }
     }
 
     @Nested

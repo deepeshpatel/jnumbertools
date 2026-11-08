@@ -168,6 +168,12 @@ public final class PermutationUnrankOfBuilder {
      * @throws IllegalArgumentException if {@code rank} is out of range
      */
     public int[] derangement(BigInteger rank, int n) {
+        Objects.requireNonNull(rank, "rank must not be null");
+        // There is exactly one derangement of zero elements: the empty permutation.
+        // DerangadicAlgorithms uses a minimum carrier length of 2 and cannot decode n=0.
+        if (n == 0 && rank.signum() == 0) {
+            return new int[0];
+        }
         return new DerangadicAlgorithms(calculator).unrank(rank, n);
     }
 

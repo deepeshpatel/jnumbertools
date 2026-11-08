@@ -1,14 +1,14 @@
 ![JNumberTools](resources/JNumberTools_logo_banner_transparent.png)
 
 # JNumberTools
-**JNumberTools** is an open-source Java library that tames massive combinatorial problems in big data pipelines, delivering scalable permutations, combinations, Cartesian products, and rankings. Integrated with Apache Spark, Flink, and Hadoop for batch and stream processing, it outperforms libraries like Apache Commons and Guava with constrained generation and lexicographical sampling. From synthetic data generation to cybersecurity, bioinformatics, and software testing, JNumberTools empowers data engineers, developers, and researchers to solve real-world challenges efficiently.
+**JNumberTools** is an open-source Java library for combinatorics and number theory. It provides permutations, combinations, Cartesian products, derangements, and ranking/unranking algorithms, including constrained generation and lexicographical sampling. Its iterator- and stream-based APIs can be consumed by Java applications and adapted for use in data-processing workflows, including applications built with Apache Spark, Flink, and Hadoop. From synthetic data generation to cybersecurity, bioinformatics, and software testing, JNumberTools helps developers and researchers work with large combinatorial spaces.
 
 **Key Features:**
 
-1. Versatile applications in machine learning, cryptography, testing, and optimization, with production-ready performance.
-2. Stream-based APIs for constrained permutations, combinations, and Cartesian products, optimized for distributed pipelines.
+1. Applications in machine learning, cryptography, testing, and optimization.
+2. Iterator- and stream-based APIs for permutations, combinations, and Cartesian products, including constrained generation.
 3. Lexicographical sampling and ranking for efficient exploration of large combinatorial spaces.
-4. Seamless integration with Spark, Flink, and Hadoop for big data workflows.
+4. Java APIs that can be adapted by application code for workflows using Spark, Flink, Hadoop, and other data-processing frameworks; JNumberTools does not provide framework-specific connectors.
 
 ## Latest Version
 The latest release of the library is available on [GitHub](https://github.com/deepeshpatel/jnumbertools/releases).
@@ -36,7 +36,7 @@ libraryDependencies += "io.github.deepeshpatel" % "jnumbertools" % "3.0.2"
 
 - **BigInteger Support**: Handle indices up to 10^100 and beyond
 - **Memory Efficient**: Stream-based generation for massive datasets
-- **Big Data Ready**: Native integration with Apache Spark, Flink, Hadoop
+- **Data-processing workflows**: Java iterators and streams can be adapted for use in applications built with Apache Spark, Flink, and Hadoop; framework-specific integration is handled by the application.
 - **Optimized Algorithms**: Efficient lexicographical generation and ranking
 
 ## Operations available on every generator

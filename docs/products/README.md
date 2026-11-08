@@ -52,7 +52,7 @@ Generates every m<sup>th</sup> Cartesian product starting from any chosen index 
 
 ```java
 // Every 10th combination of 1 pizza base, 1 pizza crust, and 1 cheese
-// starting from the 5th index in lex order (i.e., 5th, 15th, 25th, etc.)
+// starting from index 5 (zero-based) in lex order (i.e., the 6th, 16th, 26th, etc.)
 var pizzaSize = List.of("Small", "Medium", "Large");
 var pizzaCrust = List.of("Flatbread", "Neapolitan", "Thin Crust");
 var cheese = List.of("Ricotta", "Mozzarella", "Cheddar");
