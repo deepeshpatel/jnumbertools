@@ -495,7 +495,9 @@ public class DerangadicIncrementStateMachineTest {
         }
         long averageNanos = totalTime/nValues.length;
         System.out.println("Average time per increment across tested n values: " + averageNanos + " ns");
-            assertTrue(averageNanos < 100,
+        // The threshold is the documented 1 microsecond. Typical results are around 0.1 microseconds, so this still
+        // catches an order-of-magnitude regression without failing on slower or shared (CI) machines.
+        assertTrue(averageNanos < 1_000,
                 "Average time per increment across tested n values should be under 1 microsecond, but was "
                         + averageNanos + " ns");
     }
