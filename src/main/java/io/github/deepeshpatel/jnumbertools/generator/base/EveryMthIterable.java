@@ -60,7 +60,7 @@ public class EveryMthIterable implements Iterable<BigInteger> {
      * Generates ranks from start to upperBound (exclusive), incrementing by increment.
      * The iterator is not thread-safe and should not be shared across threads.
      *
-     * @return an Iterator<BigInteger> producing ranks
+     * @return an {@code Iterator<BigInteger>} producing ranks
      */
     @Override
     public Iterator<BigInteger> iterator() {

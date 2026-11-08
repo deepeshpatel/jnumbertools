@@ -64,7 +64,7 @@ public final class PermutationUnrankOfBuilder {
     /**
      * Determines the unique permutation (`n!`) at a given rank with minimal size.
      * <p>
-     * Un-ranks a full permutation, determining the smallest n where rank < n!, and
+     * Un-ranks a full permutation, determining the smallest n where rank &lt; n!, and
      * returns an array of n distinct indices from {0, 1, ..., n-1} in lexicographical order.
      * </p>
      *

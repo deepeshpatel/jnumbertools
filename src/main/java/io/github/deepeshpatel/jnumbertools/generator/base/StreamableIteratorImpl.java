@@ -32,7 +32,6 @@ import java.util.stream.StreamSupport;
  * long count = streamable.stream().count();
  * List<String> first = streamable.stream().findFirst().orElse(List.of());
  * }</pre>
- * </p>
  *
  * @param <E> the type of elements in the generated structures
  * @author Deepesh Patel

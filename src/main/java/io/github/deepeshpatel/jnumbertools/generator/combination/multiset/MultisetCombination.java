@@ -49,9 +49,8 @@ public final class MultisetCombination<T> extends AbstractMultisetCombination<T>
      * <ul>
      *   <li>r = 0 → returns one empty map [{}] (⁰C₀ = 1)</li>
      *   <li>Empty multiset or r > total available → returns empty iterator</li>
-     *   <li>Normal case (0 < r ≤ total) → generates all valid combinations</li>
+     *   <li>Normal case (0 &lt; r ≤ total) → generates all valid combinations</li>
      * </ul>
-     * </p>
      *
      * @return an iterator over frequency maps representing multiset combinations;
      *         returns {@link Util#emptyMapIterator()} for r = 0;

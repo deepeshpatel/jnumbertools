@@ -248,9 +248,9 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
      * </p>
      *
      * @param m     the increment between ranks (m > 0)
-     * @param start the starting rank (0 ≤ start < total combinations)
+     * @param start the starting rank (0 ≤ start &lt; total combinations)
      * @return a {@link MultisetCombinationByRanks} for the sequence
-     * @throws IllegalArgumentException if m ≤ 0 or start < 0
+     * @throws IllegalArgumentException if m ≤ 0 or start &lt; 0
      */
     public MultisetCombinationByRanks<T> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));
@@ -265,9 +265,9 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
      * </p>
      *
      * @param m     the increment between ranks (m > 0)
-     * @param start the starting rank (0 ≤ start < total combinations)
+     * @param start the starting rank (0 ≤ start &lt; total combinations)
      * @return a {@link MultisetCombinationByRanks} for the sequence
-     * @throws IllegalArgumentException if m ≤ 0 or start < 0
+     * @throws IllegalArgumentException if m ≤ 0 or start &lt; 0
      */
     public MultisetCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
         Util.validateLexOrderMthParams(m, start, count());
@@ -284,7 +284,7 @@ public class MultisetCombinationBuilder<T>  implements MultisetBuilder<T> {
      * byRanks([0, 1]) would generate both combinations in that order.
      * </p>
      *
-     * @param ranks iterable of 0-based rank numbers (each rank must be ≥ 0 and < total combinations)
+     * @param ranks iterable of 0-based rank numbers (each rank must be ≥ 0 and &lt; total combinations)
      * @return a generator producing combinations at the specified ranks
      * @throws IllegalArgumentException if ranks is null or contains invalid ranks during iteration
      */

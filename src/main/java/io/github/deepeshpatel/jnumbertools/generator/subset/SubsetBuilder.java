@@ -295,7 +295,7 @@ public class SubsetBuilder<T> implements Builder<T> {
      * as an {@link IllegalArgumentException} during iteration, when that rank is reached.
      * </p>
      *
-     * @param ranks the iterable of ranks (each rank must be ≥ 0 and < total subsets)
+     * @param ranks the iterable of ranks (each rank must be ≥ 0 and &lt; total subsets)
      * @return a generator producing subsets at the given ranks
      * @throws IllegalArgumentException if {@code ranks} is null
      * @throws IllegalStateException if no range was set via {@link #inRange(int, int)} or {@link #all()}

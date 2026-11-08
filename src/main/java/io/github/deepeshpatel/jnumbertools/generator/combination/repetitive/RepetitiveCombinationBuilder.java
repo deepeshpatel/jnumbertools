@@ -25,7 +25,6 @@ import java.util.Random;
  *   <li>Order does not matter ([A,A,B] is the same as [A,B,A])</li>
  *   <li>The total number of combinations is given by C(n+r-1, r) = (n+r-1)!/(r!·(n-1)!)</li>
  * </ul>
- * </p>
  *
  * <h2>Key Characteristics</h2>
  * <ul>
@@ -174,9 +173,9 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
      * </p>
      *
      * @param m     the increment between ranks (m > 0)
-     * @param start the starting rank (0 ≤ start < ⁿ⁺ᵣ⁻¹Cᵣ)
+     * @param start the starting rank (0 ≤ start &lt; ⁿ⁺ᵣ⁻¹Cᵣ)
      * @return a {@link RepetitiveCombinationByRanks} for the sequence
-     * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿ⁺ᵣ⁻¹Cᵣ
+     * @throws IllegalArgumentException if m ≤ 0 or start &lt; 0 or start ≥ ⁿ⁺ᵣ⁻¹Cᵣ
      */
     public RepetitiveCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
         Util.validateLexOrderMthParams(m,start, count());
@@ -227,7 +226,7 @@ public final class RepetitiveCombinationBuilder<T> implements Builder<T> {
      *
      * @param ranks the iterable of ranks (each rank in [0, ⁿ⁺ᵣ⁻¹Cᵣ))
      * @return a {@link RepetitiveCombinationByRanks} for the custom sequence
-     * @throws IllegalArgumentException if any rank < 0 or rank ≥ ⁿ⁺ᵣ⁻¹Cᵣ
+     * @throws IllegalArgumentException if any rank &lt; 0 or rank ≥ ⁿ⁺ᵣ⁻¹Cᵣ
      */
     public RepetitiveCombinationByRanks<T> byRanks(Iterable<BigInteger> ranks) {
         Util.validateByRanksParams(ranks);

@@ -163,9 +163,9 @@ public final class UniqueCombinationBuilder<T> implements Builder<T> {
      * </p>
      *
      * @param m     the increment between ranks (m > 0)
-     * @param start the starting rank (0 ≤ start < ⁿCᵣ)
+     * @param start the starting rank (0 ≤ start &lt; ⁿCᵣ)
      * @return a {@link UniqueCombinationByRanks} for the sequence
-     * @throws IllegalArgumentException if m ≤ 0 or start < 0 or start ≥ ⁿCᵣ
+     * @throws IllegalArgumentException if m ≤ 0 or start &lt; 0 or start ≥ ⁿCᵣ
      */
     public UniqueCombinationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
         Util.validateLexOrderMthParams(m, start, count());

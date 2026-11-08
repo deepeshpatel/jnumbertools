@@ -175,7 +175,6 @@ public final class CombinadicAlgorithms {
      * <pre>
      *     combinadic[i] = nₙ − 1 − mthCombination[i]
      * </pre>
-     * </p>
      *
      * @param n the total number of elements (nₙ)
      * @param mthCombination the combination (array of indices) to be converted

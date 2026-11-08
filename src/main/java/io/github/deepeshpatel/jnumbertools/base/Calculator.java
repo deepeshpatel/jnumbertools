@@ -69,7 +69,7 @@ public final class Calculator {
      * Represents the number of ways to choose r distinct items from n distinct items without regard to order.
      * @param n the total number of items (n ≥ 0)
      * @param r the number of items to choose (r ≥ 0)
-     * @return the binomial coefficient as a BigInteger (returns 0 if r > n or r < 0)
+     * @return the binomial coefficient as a BigInteger (returns 0 if r > n or r &lt; 0)
      */
     public BigInteger nCr(int n, int r) {
         if (r == n || r == 0) return BigInteger.ONE;
@@ -495,7 +495,7 @@ public final class Calculator {
      * @param k      number of items to choose (k ≥ 0)
      * @param counts non-negative multiplicities of each distinct type
      * @return number of ways to choose exactly k items as a BigInteger
-     * @throws IllegalArgumentException if k < 0 or any count < 0
+     * @throws IllegalArgumentException if k &lt; 0 or any count &lt; 0
      */
     public static BigInteger multisetCombinationsCount(int k, int... counts) {
         return multisetCombinationsCountStartingFromIndex(k, 0, counts);
@@ -627,7 +627,7 @@ public final class Calculator {
      * @param n size of the set (n ≥ 0)
      * @param k number of fixed points (0 ≤ k ≤ n)
      * @return the Rencontres number as a BigInteger;
-     *         returns {@code BigInteger.ZERO} if k < 0 or k > n
+     *         returns {@code BigInteger.ZERO} if k &lt; 0 or k > n
      * @see <a href="https://en.wikipedia.org/wiki/Rencontres_numbers">Rencontres numbers</a>
      */
     public BigInteger rencontresNumber(int n, int k) {
@@ -644,7 +644,7 @@ public final class Calculator {
      *
      * @param n n >= 0
      * @return T(n)
-     * @throws IllegalArgumentException if n < 0
+     * @throws IllegalArgumentException if n &lt; 0
      * @see <a href="https://en.wikipedia.org/wiki/Telephone_number_(mathematics)">Telephone Number (mathematics)</a>
      */
     public BigInteger telephoneNumber(int n) {

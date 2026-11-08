@@ -126,7 +126,7 @@ public class Util {
      * @throws IllegalArgumentException if:
      *         <ul>
      *           <li>m is null or ≤ 0</li>
-     *           <li>start is null or < 0</li>
+     *           <li>start is null or &lt; 0</li>
      *           <li>start is ≥ count (out of valid range)</li>
      *         </ul>
      */

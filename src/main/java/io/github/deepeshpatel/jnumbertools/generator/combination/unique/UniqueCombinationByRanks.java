@@ -41,7 +41,7 @@ public class UniqueCombinationByRanks<T> extends AbstractGenerator<T> {
      * @param r          the size of each combination (0 ≤ r ≤ n)
      * @param ranks      the iterable of ranks (each rank in [0, ⁿCᵣ))
      * @param calculator the calculator for computing combination counts
-     * @throws IllegalArgumentException if r < 0, r > n, elements is null/empty, or any rank < 0 or ≥ ⁿCᵣ
+     * @throws IllegalArgumentException if r &lt; 0, r > n, elements is null/empty, or any rank &lt; 0 or ≥ ⁿCᵣ
      */
     public UniqueCombinationByRanks(List<T> elements, int r, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements);

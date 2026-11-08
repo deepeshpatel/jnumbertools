@@ -12,10 +12,10 @@ import java.util.Random;
  * Interface for builders that generate multiset combinations (frequency maps).
  * <p>
  * Similar to {@link Builder}, but specialized for multiset combinations where each element is a
- * {@link Map <T,Integer>} representing frequencies of elements in the combination.
+ * {@code Map<T,Integer>} representing frequencies of elements in the combination.
  * </p>
  * <p>
- * All methods return generators producing {@link Map <T,Integer>} (immutable frequency maps).
+ * All methods return generators producing {@code Map<T,Integer>} (immutable frequency maps).
  * </p>
  * <p>
  * Implementations are expected to be immutable and thread-safe. Configuration methods should return new instances.
@@ -47,7 +47,7 @@ public interface MultisetBuilder<T> {
      * @param m     the increment (m > 0)
      * @param start the starting rank (start ≥ 0)
      * @return a generator producing every mᵗʰ combination
-     * @throws IllegalArgumentException if m ≤ 0 or start < 0
+     * @throws IllegalArgumentException if m ≤ 0 or start &lt; 0
      */
     Iterable<Map<T, Integer>> lexOrderMth(BigInteger m, BigInteger start);
 
@@ -57,7 +57,7 @@ public interface MultisetBuilder<T> {
      * Ranks are 0-based in lexicographical order.
      * </p>
      *
-     * @param ranks the sequence of ranks (each must be ≥ 0 and < total)
+     * @param ranks the sequence of ranks (each must be ≥ 0 and &lt; total)
      * @return a generator producing combinations at the given ranks
      */
     Iterable<Map<T, Integer>> byRanks(Iterable<BigInteger> ranks);

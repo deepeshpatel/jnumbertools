@@ -29,7 +29,6 @@ import java.math.BigInteger;
  * These number systems are essential for ranking (finding the position) and unranking
  * (generating the element at a given position) combinatorial structures without
  * enumerating all possibilities.
- * </p>
  *
  * <h2>Usage Examples</h2>
  *

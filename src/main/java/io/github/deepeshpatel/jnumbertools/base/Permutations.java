@@ -28,7 +28,6 @@ import static java.util.Arrays.asList;
  *   <li><b>Repetitive Permutations</b> (nʳ): Permutations of r elements from n distinct elements with repetition</li>
  *   <li><b>Multiset Permutations</b>: Permutations of a multiset with specified multiplicities</li>
  * </ul>
- * </p>
  *
  * <h2>Usage Examples</h2>
  *
@@ -180,7 +179,7 @@ public final class Permutations {
      * @param n the number of distinct elements (n ≥ 0)
      * @param k the size of each permutation (0 ≤ k ≤ n)
      * @return a KPermutationBuilder for integer elements
-     * @throws IllegalArgumentException if k < 0 or k > n
+     * @throws IllegalArgumentException if k &lt; 0 or k > n
      */
     public KPermutationBuilder<Integer> nPk(int n, int k) {
         Util.validateNK(n,k);
@@ -267,7 +266,7 @@ public final class Permutations {
      * @param elements the list of distinct elements to permute
      * @param <T> the type of elements
      * @return a RepetitivePermutationBuilder for the specified elements
-     * @throws IllegalArgumentException if r < 0 or elements is null
+     * @throws IllegalArgumentException if r &lt; 0 or elements is null
      */
     public <T> RepetitivePermutationBuilder<T> repetitive(int r, List<T> elements) {
         Util.validateInput(elements);
@@ -287,7 +286,7 @@ public final class Permutations {
      * @param elements the elements to permute
      * @param <T> the type of elements
      * @return a RepetitivePermutationBuilder for the specified elements
-     * @throws IllegalArgumentException if r < 0 or elements is null
+     * @throws IllegalArgumentException if r &lt; 0 or elements is null
      */
     @SafeVarargs
     public final <T> RepetitivePermutationBuilder<T> repetitive(int r, T... elements) {

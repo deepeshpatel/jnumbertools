@@ -20,7 +20,6 @@ import java.util.List;
  *   <li><b>Simple Product</b>: Aⁿ where A is a single set repeated n times</li>
  *   <li><b>Constrained Product</b>: A₁ × A₂ × ... × Aₖ where each Aᵢ can be a set, combination, or subset with constraints</li>
  * </ul>
- * </p>
  *
  * <h2>Usage Examples</h2>
  *
@@ -196,7 +195,7 @@ public final class CartesianProduct {
      * @param to       the maximum subset size (inclusive, must be ≥ from)
      * @param elements the list of elements for the first dimension
      * @return a ConstrainedProductBuilder for configuring additional constrained dimensions
-     * @throws IllegalArgumentException if from < 0, to < from, or from > elements.size()
+     * @throws IllegalArgumentException if from &lt; 0, to &lt; from, or from > elements.size()
      */
     public ConstrainedProductBuilder constrainedProductOfInRange(int from, int to, List<?> elements) {
         Util.validateInput(elements);

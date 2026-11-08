@@ -24,7 +24,6 @@ import java.util.stream.IntStream;
  *   <li><b>Repetitive Combinations</b> (ⁿ⁺ʳ⁻¹Cᵣ): Select r elements from n distinct elements with repetition allowed</li>
  *   <li><b>Multiset Combinations</b>: Select r elements from a multiset with specified multiplicities</li>
  * </ul>
- * </p>
  *
  * <h2>Usage Examples</h2>
  *
@@ -258,7 +257,7 @@ public final class Combinations {
      * @param r the size of each combination (r ≥ 0)
      * @param <T> the type of elements
      * @return a MultisetCombinationBuilder for the specified multiset
-     * @throws IllegalArgumentException if options is null, contains non-positive frequencies, or r < 0
+     * @throws IllegalArgumentException if options is null, contains non-positive frequencies, or r &lt; 0
      */
     public <T> MultisetCombinationBuilder<T> multiset(LinkedHashMap<T, Integer> options, int r) {
         Util.validateMapOptions(options, r);

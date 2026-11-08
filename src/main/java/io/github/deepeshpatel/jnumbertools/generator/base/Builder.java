@@ -22,7 +22,7 @@ import java.util.Random;
  * Example usage:
  * <pre>
  * // Example with a concrete builder (e.g., UniquePermutationBuilder)
- * Builder<String> builder = new UniquePermutationBuilder<>(List.of("A", "B", "C"));
+ * Builder&lt;String&gt; builder = new UniquePermutationBuilder&lt;&gt;(List.of("A", "B", "C"));
  * builder.lexOrder().stream().forEach(System.out::println); // All permutations in lex order
  * builder.lexOrderMth(BigInteger.valueOf(2), BigInteger.ZERO).stream().forEach(System.out::println); // Every 2nd permutation
  * builder.byRanks(List.of(BigInteger.ZERO)).stream().forEach(System.out::println); // Permutations at specific ranks
@@ -46,9 +46,9 @@ public interface Builder<E> {
      * Convenience method for lexOrderMth using long values.
      *
      * @param m     the interval to select every mᵗʰ element (must be > 0)
-     * @param start the starting rank (must be ≥ 0 and < total count when count > 0)
+     * @param start the starting rank (must be ≥ 0 and &lt; total count when count > 0)
      * @return a generator for every mᵗʰ element in lexicographical order
-     * @throws IllegalArgumentException if m ≤ 0, start < 0, or start ≥ count() when count() > 0
+     * @throws IllegalArgumentException if m ≤ 0, start &lt; 0, or start ≥ count() when count() > 0
      */
     default StreamableIterable<E> lexOrderMth(long m, long start) {
         return lexOrderMth(BigInteger.valueOf(m), BigInteger.valueOf(start));

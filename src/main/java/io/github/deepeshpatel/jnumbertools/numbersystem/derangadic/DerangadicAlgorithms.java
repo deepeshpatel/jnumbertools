@@ -129,7 +129,7 @@ public final class DerangadicAlgorithms {
     /**
      * Converts a decimal rank to its Derangadic digit array.
      *
-     * <h3>Array index convention</h3>
+     * <h4>Array index convention</h4>
      * <p>
      * The returned array is <strong>LSD-first</strong>:
      * </p>
@@ -236,7 +236,7 @@ public final class DerangadicAlgorithms {
     /**
      * Converts a Derangadic digit array back to its decimal rank.
      *
-     * <h3>Array index convention</h3>
+     * <h4>Array index convention</h4>
      * <p>
      * The input array must be <strong>LSD-first</strong>:
      * {@code digits[0] = D_0} (Least Significant Digit) and
@@ -308,7 +308,7 @@ public final class DerangadicAlgorithms {
     /**
      * Converts a Derangadic digit array to the corresponding derangement.
      *
-     * <h3>Array index convention</h3>
+     * <h4>Array index convention</h4>
      * <p>
      * The input array must be <strong>LSD-first</strong>:
      * {@code digits[0] = D_0} (Least Significant Digit) and
@@ -454,7 +454,7 @@ public final class DerangadicAlgorithms {
     /**
      * Converts a derangement back to its minimal Derangadic digit array.
      *
-     * <h3>Array index convention of the returned array</h3>
+     * <h4>Array index convention of the returned array</h4>
      * <p>
      * The returned array is <strong>LSD-first</strong>:
      * {@code result[0] = D_0} (Least Significant Digit) and

@@ -27,7 +27,7 @@ import java.util.NoSuchElementException;
  * that streaming a long rank sequence does not pay for upfront validation.
  * </p>
  *
- * <h3>Edge cases</h3>
+ * <h2>Edge cases</h2>
  * <ul>
  *   <li>For {@code n = 0} ({@code D_0 = 1}), the only valid rank is {@code 0}
  *       which decodes to an empty list.</li>

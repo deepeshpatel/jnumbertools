@@ -25,7 +25,7 @@ import java.util.*;
  * {@code new Derangements().of(...).lexOrder()}.
  * </p>
  *
- * <h3>Edge cases</h3>
+ * <h2>Edge cases</h2>
  * <ul>
  *   <li>If the input list is empty (n = 0): yields a single empty list. There
  *       is exactly one derangement of the empty set (the empty arrangement),

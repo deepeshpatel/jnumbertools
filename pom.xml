@@ -2,7 +2,7 @@
 <!--
   ~ Copyright (c) 2020 Deepesh Patel
   ~
-  ~    This file is part of Data Number Tools. Number Tools is free software: you can redistribute it and/or modify
+  ~    This file is part of JNumberTools. JNumberTools is free software: you can redistribute it and/or modify
   ~    it under the terms of the GNU Lesser General Public License as published by
   ~    the Free Software Foundation, either version 3 of the License or any
   ~    later version.
@@ -37,15 +37,16 @@
     <licenses>
         <license>
             <name>GNU LESSER GENERAL PUBLIC LICENSE v3</name>
-            <url>http://www.gnu.org/licenses/lgpl.html</url>
+            <url>https://www.gnu.org/licenses/lgpl-3.0.html</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
+        <!-- Minimum supported Java version. Compiled with the compiler release option, so newer JDK APIs cannot be used by mistake. -->
+        <maven.compiler.release>21</maven.compiler.release>
+        <junit.version>5.11.4</junit.version>
     </properties>
 
     <developers>
@@ -76,128 +77,130 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.11.4</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>5.11.4</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>disable-java8-doclint</id>
-            <activation>
-                <jdk>[1.8,)</jdk>
-            </activation>
-            <properties>
-                <doclint>none</doclint>
-            </properties>
-        </profile>
-    </profiles>
-
     <build>
         <plugins>
-            <!-- Maven Compiler Plugin with UTF-8 encoding -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.14.0</version>
                 <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
+                    <release>${maven.compiler.release}</release>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
 
             <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.13</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.0.0-M2</version>
-                <configuration>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Maven Javadoc Plugin with UTF-8 encoding -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.4.0</version>
-                <configuration>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <excludePackageNames>
-                        io.github.deepeshpatel.jnumbertools.examples,
-                        io.github.deepeshpatel.jnumbertools.generator.permutation.unique,
-                        io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive,
-                        io.github.deepeshpatel.jnumbertools.generator.permutation.multiset,
-                        io.github.deepeshpatel.jnumbertools.generator.permutation.k,
-                        io.github.deepeshpatel.jnumbertools.generator.permutation.iterator
-                    </excludePackageNames>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>3.0.1</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.3</version>
             </plugin>
         </plugins>
     </build>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
+    <profiles>
+        <!--
+          Release profile: builds the source and javadoc jars, signs all artifacts and publishes to
+          Maven Central through the Central Publisher Portal.
+
+            mvn clean deploy -Prelease
+
+          Requires (outside this file):
+            - a Central Portal user token in ~/.m2/settings.xml under <server><id>central</id>
+            - a GPG key available to the gpg plugin
+          Ordinary builds (mvn test, mvn verify, mvn install) do not need either.
+        -->
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.3.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.12.0</version>
+                        <configuration>
+                            <encoding>${project.build.sourceEncoding}</encoding>
+                            <release>${maven.compiler.release}</release>
+                            <overview>${project.basedir}/src/main/javadoc/overview.html</overview>
+                            <!-- Fail the release on malformed javadoc HTML. Missing comments are not reported. -->
+                            <doclint>all,-missing</doclint>
+                            <excludePackageNames>
+                                io.github.deepeshpatel.jnumbertools.examples,
+                                io.github.deepeshpatel.jnumbertools.generator.permutation.unique,
+                                io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive,
+                                io.github.deepeshpatel.jnumbertools.generator.permutation.multiset,
+                                io.github.deepeshpatel.jnumbertools.generator.permutation.k,
+                                io.github.deepeshpatel.jnumbertools.generator.permutation.iterator
+                            </excludePackageNames>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.7</version>
+                        <configuration>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.12.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <!-- Upload only; review and press Publish in the Central Portal. Set true to publish automatically. -->
+                            <autoPublish>false</autoPublish>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

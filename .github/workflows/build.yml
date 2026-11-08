@@ -1,0 +1,37 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 21 is the minimum supported Java version (maven.compiler.release); 25 is the version used for development.
+        java: [ '21', '25' ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+      - name: Build and test
+        run: mvn -B verify
+
+  javadoc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      # Same doclint and package exclusions as the release profile, without signing or publishing.
+      - name: Javadoc (doclint on)
+        run: mvn -B -Prelease -Dgpg.skip=true javadoc:javadoc

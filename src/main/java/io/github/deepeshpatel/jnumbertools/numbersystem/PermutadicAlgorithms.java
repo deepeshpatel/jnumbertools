@@ -24,7 +24,6 @@ import java.util.*;
  *   <li>Fenwick tree, O(s + k log s), otherwise;</li>
  *   <li>a plain ArrayList pool, O(s·k), only when turning digits back into a permutation for small s.</li>
  * </ul>
- * </p>
  *
  * <p>
  * Example usages:
@@ -36,7 +35,6 @@ import java.util.*;
  * <li>Rank a permutation: {@link #rank(int, int...)}</li>
  * <li>Un-rank a permutation (no bound check): {@link #unRank(BigInteger, int, int)}</li>
  * </ul>
- * </p>
  *
  * <p>
  * <strong>Implementation class: intended to be used through {@link io.github.deepeshpatel.jnumbertools.base.RankOf} and
@@ -349,7 +347,7 @@ public final class PermutadicAlgorithms {
      * <p>
      * Directly computes the k-permutation at the given lexicographical rank using
      * permutadic representation. This method skips bounds validation for performance,
-     * assuming the caller has verified that 0 ≤ rank < P(n,k).
+     * assuming the caller has verified that 0 ≤ rank &lt; P(n,k).
      * </p>
      * <p>
      * Example: For size=5, k=3, rank 0 returns [0,1,2], rank 1 returns [0,1,3],

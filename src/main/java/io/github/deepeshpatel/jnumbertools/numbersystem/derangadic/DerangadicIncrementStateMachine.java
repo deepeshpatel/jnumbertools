@@ -504,7 +504,7 @@ public final class DerangadicIncrementStateMachine {
     /**
      * Mutable state for one incremental Derangadic walk.
      *
-     * <h3>Field inventory</h3>
+     * <h2>Field inventory</h2>
      * <pre>
      * ── Encoded state (relative, active window of size actualN) ──────────────
      *   digits[]          Digit array, LSD-first: digits[0] = D_0 (LSD),

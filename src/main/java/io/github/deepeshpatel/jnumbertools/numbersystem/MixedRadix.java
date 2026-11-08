@@ -21,7 +21,6 @@ import java.util.List;
  * </pre>
  * This is commonly used in time systems (60 seconds, 60 minutes, 24 hours) and
  * combinatorial algorithms for efficient indexing.
- * </p>
  * <p>
  * <strong>Example:</strong>
  * <pre>{@code
@@ -29,7 +28,6 @@ import java.util.List;
  * int[] result = MixedRadix.toMixedRadix(47, new int[]{3, 4, 5});
  * // Returns: [1, 2, 3, 2]
  * }</pre>
- * </p>
  *
  * @author Deepesh Patel
  * @see <a href="https://en.wikipedia.org/wiki/Mixed_radix">Wikipedia: Mixed Radix</a>
