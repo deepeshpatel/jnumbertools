@@ -50,5 +50,5 @@ libraryDependencies += "io.github.deepeshpatel" % "jnumbertools" % "3.0.2"
 4. [Set/subset generations: 7 different types available](docs/sets/README.md)
 5. [Cartesian Product: 4 different types of products](docs/products/README.md)
 6. [Ranking of permutations & combinations: 8 different types of rankings](docs/ranking/README.md)
-7. [Number system algorithms: 3 different types for combinatorics](docs/numbersystem/README.md)
+7. [Number system algorithms: 4 different types for combinatorics](docs/numbersystem/README.md)
 8. [Math Functions](docs/calculator/README.md)

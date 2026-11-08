@@ -303,4 +303,94 @@ class PermutadicTest {
             rank = rank.add(trillion);
         }
     }
+
+    @Nested
+    @DisplayName("Conversion to and from k-permutations across set sizes")
+    class PermutationConversions {
+
+        private void enumerate(int n, int k, int[] current, boolean[] used, int depth, java.util.List<int[]> out) {
+            if (depth == k) {
+                out.add(current.clone());
+                return;
+            }
+            for (int v = 0; v < n; v++) {
+                if (!used[v]) {
+                    used[v] = true;
+                    current[depth] = v;
+                    enumerate(n, k, current, used, depth + 1, out);
+                    used[v] = false;
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("every rank of small (n, k) converts to the lexicographic k-permutation and back")
+        void matchesBruteForceEnumeration() {
+            int[][] shapes = {{1, 0}, {1, 1}, {4, 4}, {5, 3}, {6, 2}, {6, 6}, {7, 4}, {8, 3}};
+            for (int[] shape : shapes) {
+                int n = shape[0];
+                int k = shape[1];
+                java.util.List<int[]> expected = new java.util.ArrayList<>();
+                enumerate(n, k, new int[k], new boolean[n], 0, expected);
+
+                for (int rank = 0; rank < expected.size(); rank++) {
+                    Permutadic fromRank = Permutadic.of(rank, n - k);
+                    assertArrayEquals(expected.get(rank), fromRank.toMthPermutation(k), "toMthPermutation n=" + n + " k=" + k + " rank=" + rank);
+
+                    Permutadic fromPermutation = Permutadic.fromMthPermutation(expected.get(rank), n - k);
+                    assertEquals(BigInteger.valueOf(rank), fromPermutation.decimalValue, "fromMthPermutation n=" + n + " k=" + k + " rank=" + rank);
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("toMthPermutation rejects a digit outside its radix on the sparse, Fenwick and pool paths")
+        void digitOutsideRadixIsRejectedOnEveryPath() {
+            // {s, k}: sparse (k^2 <= 8s), Fenwick (s > 100, k^2 > 8s) and pool (s <= 100, k^2 > 8s)
+            int[][] shapes = {{1000, 20}, {1000, 200}, {50, 40}};
+            for (int[] shape : shapes) {
+                int s = shape[0];
+                int k = shape[1];
+                int degree = s - k;
+                for (int place : new int[]{0, k / 2, k - 1}) {
+                    java.util.List<Integer> digits = new java.util.ArrayList<>(java.util.Collections.nCopies(k, 0));
+                    digits.set(place, degree + 1 + place); // first value past the radix
+                    assertThrows(IndexOutOfBoundsException.class,
+                            () -> PermutadicAlgorithms.toMthPermutation(digits, s, k), "s=" + s + " k=" + k + " place=" + place);
+                    digits.set(place, degree + place);     // last valid value
+                    assertEquals(k, PermutadicAlgorithms.toMthPermutation(digits, s, k).length);
+                    digits.set(place, -1);
+                    assertThrows(IndexOutOfBoundsException.class,
+                            () -> PermutadicAlgorithms.toMthPermutation(digits, s, k), "negative, s=" + s + " k=" + k);
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("larger shapes round-trip on both sides of the sparse / pool-based switch, up to a million elements")
+        void largerShapesRoundTrip() {
+            java.util.Random random = new java.util.Random(23);
+            int[][] shapes = {{100, 5}, {100, 28}, {100, 60}, {1000, 90}, {1000, 400}, {9000, 3}, {9000, 250},
+                    {9000, 400}, {20000, 141}, {100000, 7}, {100000, 316}, {1000000, 5}, {300, 300}};
+            for (int[] shape : shapes) {
+                int n = shape[0];
+                int k = shape[1];
+                BigInteger total = calculator.nPr(n, k);
+                for (int i = 0; i < 6; i++) {
+                    BigInteger rank = i == 0 ? BigInteger.ZERO : i == 1 ? total.subtract(BigInteger.ONE)
+                                                                 : new BigInteger(total.bitLength() + 8, random).mod(total);
+
+                    int[] permutation = Permutadic.of(rank, n - k).toMthPermutation(k);
+                    assertEquals(k, permutation.length, "n=" + n + " k=" + k);
+                    boolean[] seen = new boolean[n];
+                    for (int value : permutation) {
+                        assertTrue(value >= 0 && value < n && !seen[value], "valid and distinct, n=" + n + " k=" + k);
+                        seen[value] = true;
+                    }
+                    assertEquals(rank, Permutadic.fromMthPermutation(permutation, n - k).decimalValue,
+                            "round trip n=" + n + " k=" + k + " rank=" + rank);
+                }
+            }
+        }
+    }
 }

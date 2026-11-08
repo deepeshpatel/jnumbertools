@@ -1,10 +1,12 @@
-package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.experiments;
+package io.github.deepeshpatel.jnumbertools.experiments.derangadic;
 
+import org.junit.jupiter.api.Disabled;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.file.*;
 import java.util.*;
 
+@Disabled("Experiment or benchmark harness, not a correctness test; run manually")
 public final class DerangadicCarryCounterDPPersistent {
 
     private static final String DEFAULT_FILE = "resources/cached/derangadic-carry-counts.txt";

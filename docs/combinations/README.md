@@ -147,12 +147,12 @@ elements.put("Apple", 3);
 elements.put("Banana", 2);
 elements.put("Cherry", 1);
 
-// Count should be > 1, so start=5 is valid
-var result = JNumberTools.combinations()
+// This multiset has 6 combinations of size 3 (ranks 0 to 5), so start=5 is the last valid rank
+JNumberTools.combinations()
         .multiset(elements, 3)
         .lexOrderMth(3, 5)  // Every 3rd combination starting from rank 5
         .stream()
-        .toList();
+        .forEach(System.out::println);  // {Banana=2, Cherry=1}
 ```
 
 #### 2.3 Multiset combination random choice

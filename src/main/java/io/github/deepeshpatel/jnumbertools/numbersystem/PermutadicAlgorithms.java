@@ -17,12 +17,12 @@ import java.util.*;
  * </p>
  *
  * <p>
- * <strong>Performance Optimization:</strong> For large permutations (s > 8000), this implementation automatically switches
- * to a Fenwick Tree-based algorithm that achieves O(k log s) time complexity instead of O(s·k). Benchmark results show:
+ * <strong>Performance:</strong> each conversion picks one of three algorithms from the set size s and the number of
+ * selected items k (thresholds measured with {@code OptimizationBenchmark}; they depend on the JVM and CPU):
  * <ul>
- *   <li>For s=20000, k=10000: Fenwick version is 3.4x faster than ArrayList version</li>
- *   <li>Crossover point where Fenwick becomes beneficial is around s=8000</li>
- *   <li>For smaller sizes, the standard ArrayList implementation is used for better performance</li>
+ *   <li>sparse, O(k²), independent of s, when k² is at most a few times s;</li>
+ *   <li>Fenwick tree, O(s + k log s), otherwise;</li>
+ *   <li>a plain ArrayList pool, O(s·k), only when turning digits back into a permutation for small s.</li>
  * </ul>
  * </p>
  *
@@ -49,17 +49,24 @@ import java.util.*;
 public final class PermutadicAlgorithms {
 
     /**
-     * Threshold for switching to Fenwick Tree optimization.
-     * Based on benchmarks, Fenwick becomes beneficial when s > 8000.
+     * Below this set size, turning digits back into a permutation with an ArrayList pool is as fast as the
+     * Fenwick tree (the two are within noise from about s = 100) and has the lower constant cost.
      */
-    private static final int FENWICK_THRESHOLD = 8000;
+    private static final int FENWICK_THRESHOLD = 100;
 
     /**
-     * {@link #rank} and {@link #unRank} use the sparse O(k²) algorithms, whose cost does not depend on the
-     * set size, while k² is at most this many times the set size. Beyond that the pool-based
-     * algorithms (O(s·k) or Fenwick) are at least as fast.
+     * Computing digits from a permutation ({@link #rank}, {@link #mthPermutationToPermutadic}) uses the
+     * sparse O(k²) loop while k² is at most this many times the set size; beyond that the Fenwick tree wins.
+     * Measured crossover: about 1 to 2 for s ≥ 8,000 (larger, up to 4 to 8, for small s where the difference is a fraction of a microsecond).
      */
-    private static final int SPARSE_MAX_K_SQUARED_PER_S = 8;
+    private static final int SPARSE_DIGITS_MAX_K_SQUARED_PER_S = 2;
+
+    /**
+     * Turning digits into a permutation ({@link #unRank}, {@link #toMthPermutation}) uses the sparse
+     * algorithm while k² is at most this many times the set size. The crossover is later than for computing
+     * digits (about 8 to 16) because the BigInteger division in {@code unRank} dominates the cost.
+     */
+    private static final int SPARSE_SELECT_MAX_K_SQUARED_PER_S = 8;
 
     /**
      * Converts a decimal value to its Permutadic representation.
@@ -107,10 +114,10 @@ public final class PermutadicAlgorithms {
     /**
      * Computes the mᵗʰ permutation from the given Permutadic representation.
      * <p>
-     * For large permutations (s > {@value #FENWICK_THRESHOLD}), this method automatically switches
-     * to an optimized Fenwick Tree implementation that achieves O(k log s) time complexity.
-     * For smaller sizes, the standard ArrayList implementation (O(s·k)) is used for better
-     * performance due to lower overhead and better cache locality.
+     * When k is small relative to s (k² ≤ {@value #SPARSE_SELECT_MAX_K_SQUARED_PER_S}·s) a sparse O(k²) algorithm that never builds the
+     * pool of s values is used. Otherwise a Fenwick tree (O(s + k log s)) is used, except for small sets
+     * (s ≤ {@value #FENWICK_THRESHOLD}) where an ArrayList pool is as fast.
+     * A digit outside its radix throws {@link IndexOutOfBoundsException} on every path.
      * </p>
      *
      * @param permutadic the Permutadic representation to be converted.
@@ -119,6 +126,9 @@ public final class PermutadicAlgorithms {
      * @return an array representing the mᵗʰ permutation.
      */
     public static int[] toMthPermutation(List<Integer> permutadic, int s, int k) {
+        if (useSparseSelect(s, k)) {
+            return toMthPermutationSparse(permutadic, s, k);
+        }
         if (s > FENWICK_THRESHOLD) {
             return toMthPermutationFenwick(permutadic, s, k);
         } else {
@@ -159,7 +169,12 @@ public final class PermutadicAlgorithms {
 
         int resultIdx = 0;
         for (int i = k - 1; i >= 0; i--) {
-            int rank = (i < permutadic.size() ? permutadic.get(i) : 0) + 1; // Convert to 1-indexed
+            int digit = i < permutadic.size() ? permutadic.get(i) : 0;
+            if (digit < 0 || digit >= s - resultIdx) {
+                throw new IndexOutOfBoundsException("Permutadic digit " + digit + " at place " + i
+                        + " is outside [0, " + (s - resultIdx) + ")");
+            }
+            int rank = digit + 1; // Convert to 1-indexed
 
             int pos = ft.findKth(rank);
             result[resultIdx++] = pos - 1; // Convert back to 0-indexed
@@ -172,45 +187,29 @@ public final class PermutadicAlgorithms {
 
     /**
      * Converts a permutation to its Permutadic representation.
+     * <p>
+     * When k is small relative to the set size (k² ≤ {@value #SPARSE_DIGITS_MAX_K_SQUARED_PER_S}·s) the digits are computed from the k values alone in
+     * O(k²), without building the pool of s values; otherwise a Fenwick tree is used (O(s + k log s)).
+     * </p>
      *
      * @param permutation the mᵗʰ permutation to be converted.
      * @param degree the degree of the Permutadic representation.
      * @return a list of integers representing the Permutadic value.
      */
     public static List<Integer> mthPermutationToPermutadic(int[] permutation, int degree) {
-        int size = degree + permutation.length;
-
-        Set<Integer> permutationSet = new HashSet<>(permutation.length);
-        for (int v : permutation) {
-            permutationSet.add(v);
+        int[] digits = digitsOf(permutation, degree + permutation.length);
+        Integer[] boxed = new Integer[digits.length];
+        for (int j = 0; j < digits.length; j++) {
+            boxed[j] = digits[j];
         }
-
-        List<Integer> pool = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            if (!permutationSet.contains(i)) {
-                pool.add(i);
-            }
-        }
-
-        List<Integer> result = new ArrayList<>(permutation.length);
-
-        for (int i = permutation.length - 1; i >= 0; i--) {
-            int value = permutation[i];
-            int index = Collections.binarySearch(pool, value);
-            index = -(index + 1);
-            pool.add(index, value);
-            result.add(index);
-        }
-
-        return List.copyOf(result);
+        return List.of(boxed);
     }
 
     /**
      * Ranks a permutation in lexicographical order.
      * <p>
-     * Uses the ArrayList implementation for smaller permutations and switches
-     * to a Fenwick Tree implementation when the set size exceeds
-     * {@value #FENWICK_THRESHOLD}.
+     * Computes the digits with the sparse O(k²) loop when k is small relative to the set size, and with a Fenwick
+     * tree otherwise; the rank is then the digits accumulated in the mixed radix.
      * </p>
      *
      * @param size the size of the set from which the permutation is selected.
@@ -220,41 +219,67 @@ public final class PermutadicAlgorithms {
      */
     public static BigInteger rank(int size, int... mth_kPermutation) {
         int degree = size - mth_kPermutation.length;
-
-        if (useSparse(size, mth_kPermutation.length)) {
-            return rankSparse(mth_kPermutation, degree);
-        }
-
-        if (size > FENWICK_THRESHOLD) {
-            return rankFenwick(mth_kPermutation, size, degree);
-        }
-
-        return rankArrayList(mth_kPermutation, size, degree);
+        return accumulate(digitsOf(mth_kPermutation, size), degree);
     }
 
-    private static boolean useSparse(int size, int k) {
-        return (long) k * k <= (long) SPARSE_MAX_K_SQUARED_PER_S * size;
+    private static boolean useSparseDigits(int size, int k) {
+        return (long) k * k <= (long) SPARSE_DIGITS_MAX_K_SQUARED_PER_S * size;
+    }
+
+    private static boolean useSparseSelect(int size, int k) {
+        return (long) k * k <= (long) SPARSE_SELECT_MAX_K_SQUARED_PER_S * size;
     }
 
     /**
-     * Rank computed from the k chosen values only, in O(k²) independent of the set size.
-     * The digit at place j is p[i] minus the number of earlier positions holding a smaller value, which is
-     * the index of p[i] among the values not used by positions before it.
+     * Permutadic digits of a k-permutation of {0..size-1}, for positions i = k-1 down to 0. The digit for
+     * position i is the index of p[i] among the values not used by positions before it.
      */
-    private static BigInteger rankSparse(int[] p, int degree) {
-        int k = p.length;
-        BigInteger rank = BigInteger.ZERO;
-        BigInteger placeValue = BigInteger.ONE;
-        int radix = degree;
+    private static int[] digitsOf(int[] p, int size) {
+        return useSparseDigits(size, p.length) ? digitsSparse(p) : digitsFenwick(p, size);
+    }
 
-        for (int i = k - 1; i >= 0; i--) {
+    /** O(k²), independent of the set size. */
+    private static int[] digitsSparse(int[] p) {
+        int k = p.length;
+        int[] digits = new int[k];
+        for (int i = k - 1, j = 0; i >= 0; i--, j++) {
+            int pi = p[i];
             int smaller = 0;
             for (int x = 0; x < i; x++) {
-                if (p[x] < p[i]) {
+                if (p[x] < pi) {
                     smaller++;
                 }
             }
-            rank = rank.add(placeValue.multiply(BigInteger.valueOf(p[i] - smaller)));
+            digits[j] = pi - smaller;
+        }
+        return digits;
+    }
+
+    /** O(size + k log size). */
+    private static int[] digitsFenwick(int[] p, int size) {
+        int k = p.length;
+        FenwickTree ft = FenwickTree.ofOnes(size);
+        for (int value : p) {
+            ft.update(value + 1, -1); // remove the chosen values; what is left is the pool of unused values
+        }
+        int[] digits = new int[k];
+        for (int i = k - 1, j = 0; i >= 0; i--, j++) {
+            int value = p[i];
+            digits[j] = ft.rsq(value);  // unused values smaller than value
+            ft.update(value + 1, 1);    // value is unused for the positions before i
+        }
+        return digits;
+    }
+
+    /** Sum of digits[j] * (degree+1) * (degree+2) * ... * (degree+j), the mixed-radix value. */
+    private static BigInteger accumulate(int[] digits, int degree) {
+        BigInteger rank = BigInteger.ZERO;
+        BigInteger placeValue = BigInteger.ONE;
+        int radix = degree;
+        for (int digit : digits) {
+            if (digit != 0) {
+                rank = rank.add(placeValue.multiply(BigInteger.valueOf(digit)));
+            }
             radix++;
             placeValue = placeValue.multiply(BigInteger.valueOf(radix));
         }
@@ -276,6 +301,14 @@ public final class PermutadicAlgorithms {
             quotient = dr[0];
         }
 
+        return selectFromDigits(digit, k);
+    }
+
+    /**
+     * Turns permutadic digits (digit[j] has radix degree + 1 + j) into the k selected values, without
+     * materialising the pool: position p takes the digit[k - 1 - p]-th smallest value not chosen yet.
+     */
+    private static int[] selectFromDigits(int[] digit, int k) {
         int[] result = new int[k];
         int[] chosen = new int[k]; // sorted copy of result[0..m)
         int m = 0;
@@ -297,70 +330,18 @@ public final class PermutadicAlgorithms {
         return result;
     }
 
-    private static BigInteger rankArrayList(int[] permutation, int size, int degree) {
-        Set<Integer> permutationSet = new HashSet<>(permutation.length);
-
-        for (int value : permutation) {
-            permutationSet.add(value);
-        }
-
-        List<Integer> pool = new ArrayList<>(size - permutation.length);
-
-        for (int i = 0; i < size; i++) {
-            if (!permutationSet.contains(i)) {
-                pool.add(i);
+    private static int[] toMthPermutationSparse(List<Integer> permutadic, int s, int k) {
+        int degree = s - k;
+        int[] digit = new int[k];
+        for (int j = 0; j < k && j < permutadic.size(); j++) {
+            int d = permutadic.get(j);
+            if (d < 0 || d >= degree + 1L + j) {
+                throw new IndexOutOfBoundsException("Permutadic digit " + d + " at place " + j
+                        + " is outside [0, " + (degree + 1L + j) + ")");
             }
+            digit[j] = d;
         }
-
-        BigInteger rank = BigInteger.ZERO;
-        BigInteger placeValue = BigInteger.ONE;
-        int radix = degree;
-
-        for (int i = permutation.length - 1; i >= 0; i--) {
-            int value = permutation[i];
-
-            int index = Collections.binarySearch(pool, value);
-            index = -(index + 1);
-
-            rank = rank.add(placeValue.multiply(BigInteger.valueOf(index)));
-
-            pool.add(index, value);
-
-            radix++;
-            placeValue = placeValue.multiply(BigInteger.valueOf(radix));
-        }
-
-        return rank;
-    }
-
-    private static BigInteger rankFenwick(int[] permutation, int size, int degree) {
-        FenwickTree ft = FenwickTree.ofOnes(size);
-
-        // Remove elements belonging to the permutation.
-        for (int value : permutation) {
-            ft.update(value + 1, -1);
-        }
-
-        BigInteger rank = BigInteger.ZERO;
-        BigInteger placeValue = BigInteger.ONE;
-        int radix = degree;
-
-        for (int i = permutation.length - 1; i >= 0; i--) {
-            int value = permutation[i];
-
-            // Count available elements smaller than value.
-            int digit = ft.rsq(value);
-
-            rank = rank.add(placeValue.multiply(BigInteger.valueOf(digit)));
-
-            // Make the current element available.
-            ft.update(value + 1, 1);
-
-            radix++;
-            placeValue = placeValue.multiply(BigInteger.valueOf(radix));
-        }
-
-        return rank;
+        return selectFromDigits(digit, k);
     }
 
     /**
@@ -382,7 +363,7 @@ public final class PermutadicAlgorithms {
      * @see io.github.deepeshpatel.jnumbertools.base.UnrankOf
      */
     public static int[] unRank(BigInteger rank, int size, int k) {
-        if (useSparse(size, k)) {
+        if (useSparseSelect(size, k)) {
             return unRankSparse(rank, size, k);
         }
         List<Integer> permutadic = toPermutadic(rank, size - k);

@@ -1,5 +1,6 @@
-package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.experiments;
+package io.github.deepeshpatel.jnumbertools.experiments.involutadic;
 
+import org.junit.jupiter.api.Disabled;
 import java.util.*;
 
 /**
@@ -16,6 +17,7 @@ import java.util.*;
  *
  * Main method runs for n = 5.
  */
+@Disabled("Experiment or benchmark harness, not a correctness test; run manually")
 public class InvolutadicVsICodeTable {
 
     public static void main(String[] args) {

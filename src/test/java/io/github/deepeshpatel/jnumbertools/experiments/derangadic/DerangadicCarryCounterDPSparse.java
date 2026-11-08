@@ -2,8 +2,9 @@
  * JNumberTools Library
  * Copyright (c) 2026 Deepesh Patel
  */
-package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.experiments;
+package io.github.deepeshpatel.jnumbertools.experiments.derangadic;
 
+import org.junit.jupiter.api.Disabled;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.Map;
  * Memory-optimized Derangadic Carry Counter using sparse DP + flattened legal table.
  * CORRECTED: Proper dependency ordering (nextMask has more bits, so process by decreasing bitCount).
  */
+@Disabled("Experiment or benchmark harness, not a correctness test; run manually")
 public final class DerangadicCarryCounterDPSparse {
 
     private static final Map<Integer, LegalTable> legalCache = new HashMap<>();

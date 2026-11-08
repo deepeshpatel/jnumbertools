@@ -2,8 +2,9 @@
  * JNumberTools Library
  * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
-package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.experiments;
+package io.github.deepeshpatel.jnumbertools.experiments.involutadic;
 
+import org.junit.jupiter.api.Disabled;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.InvolutadicAlgorithms;
 
@@ -19,6 +20,7 @@ import java.math.RoundingMode;
  * <p>For each n, prints {@code C_n(L)} for all L, T(n), E[L_n], and
  * the probability distribution {@code C_n(L)/T(n)}.
  */
+@Disabled("Experiment or benchmark harness, not a correctness test; run manually")
 public final class InvolutadicCarryDistributionTable {
 
     private static final MathContext MC = new MathContext(10, RoundingMode.HALF_UP);

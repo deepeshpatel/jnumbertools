@@ -2,8 +2,9 @@
 JNumberTools Library v3.0.2
 Copyright (c) 2026 Deepesh Patel
 */
-package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.experiments;
+package io.github.deepeshpatel.jnumbertools.experiments.involutadic;
 
+import org.junit.jupiter.api.Disabled;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -22,6 +23,7 @@ import java.util.*;
  *   <li>PSLQ-ready output</li>
  * </ul>
  */
+@Disabled("Experiment or benchmark harness, not a correctness test; run manually")
 public final class InvolutadicCarryAnalysis {
 
     private static final int DECIMAL_SCALE = 50;

@@ -174,7 +174,7 @@ JNumberTools.permutations()
     .multiset(elements)
     .lexOrderMth(3, 5)
     .stream()
-    .toList();
+    .forEach(System.out::println);
 ```
 
 #### 2.3 Multiset permutation random choice
@@ -239,13 +239,13 @@ Generates every m<sup>th</sup> k-permutation in lexicographical order without co
 To achieve this, a concept called Permutational Number System (Permutadic, a generalization of factoradic) and Deep-code (a generalization of Lehmer code) is used. Details can be found in the research paper: [Generating the nth Lexicographical Element of a Mathematical k-Permutation using Permutational Number System](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4174035).
 
 ```java
-// Generates every 3rd permutation starting from 0th of size 3 out of 10 numbers in range [0,10) (i.e., 0th, 3rd, 6th, 9th...)
+// Generates every 3rd permutation starting from 0th of size 5 out of 10 numbers in range [0,10) (i.e., 0th, 3rd, 6th, 9th...)
 JNumberTools.permutations()
     .nPk(10, 5)
     .lexOrderMth(3, 0)
     .stream().forEach(System.out::println);
 
-// Generates every 3rd permutation starting from 0th of size 3 out of a list of n elements
+// Generates every 3rd permutation starting from 0th of size 2 out of a list of n elements
 JNumberTools.permutations()
     .nPk(2, "A", "B", "C", "D", "E")
     .lexOrderMth(3, 0)

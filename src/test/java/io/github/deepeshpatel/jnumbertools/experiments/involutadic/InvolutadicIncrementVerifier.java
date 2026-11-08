@@ -2,8 +2,9 @@
  * JNumberTools Library
  * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
-package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.experiments;
+package io.github.deepeshpatel.jnumbertools.experiments.involutadic;
 
+import org.junit.jupiter.api.Disabled;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.InvolutadicAlgorithms;
 import io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.InvolutadicIncrementStateMachine;
@@ -23,6 +24,7 @@ import java.util.Arrays;
  *   <li>The carry-length distribution sums to T(n) - 1.</li>
  * </ol>
  */
+@Disabled("Experiment or benchmark harness, not a correctness test; run manually")
 public final class InvolutadicIncrementVerifier {
 
     private final InvolutadicAlgorithms alg;

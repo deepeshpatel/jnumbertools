@@ -2,8 +2,9 @@
 JNumberTools Library v3.0.2
 Copyright (c) 2026 Deepesh Patel
 */
-package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.experiments;
+package io.github.deepeshpatel.jnumbertools.experiments.involutadic;
 
+import org.junit.jupiter.api.Disabled;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -33,6 +34,7 @@ import java.util.*;
  *   java InvolutadicCarryCounterDP [maxN] [cacheFile]
  * </pre>
  */
+@Disabled("Experiment or benchmark harness, not a correctness test; run manually")
 public final class InvolutadicCarryCounterDP {
 
     // ===================================================================

@@ -30,8 +30,9 @@
  * Repeated unranking is intentionally NOT benchmarked: it is O(n) per step and
  * the comparison of interest is against incremental lex-order generators.
  */
-package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.experiments;
+package io.github.deepeshpatel.jnumbertools.experiments.involutadic;
 
+import org.junit.jupiter.api.Disabled;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.InvolutadicIncrementStateMachine;
 
@@ -41,6 +42,7 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Arrays;
 
+@Disabled("Experiment or benchmark harness, not a correctness test; run manually")
 public class InvolutadicDataGenerator {
 
     private static final BigDecimal ICONST = new BigDecimal("2.2533141373155002512");

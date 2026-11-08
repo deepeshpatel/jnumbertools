@@ -2,8 +2,9 @@
  * JNumberTools Library
  * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
-package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.experiments;
+package io.github.deepeshpatel.jnumbertools.experiments.involutadic;
 
+import org.junit.jupiter.api.Disabled;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.InvolutadicAlgorithms;
 
@@ -16,6 +17,7 @@ import java.math.RoundingMode;
  * Computes exact grand-mean carry lengths E[L_n] for the Involutadic number
  * system and analyses convergence to the limiting constant (if one exists).
  */
+@Disabled("Experiment or benchmark harness, not a correctness test; run manually")
 public final class InvolutadicMeanConvergenceAnalysis {
 
     private static final MathContext MC = new MathContext(20, RoundingMode.HALF_UP);

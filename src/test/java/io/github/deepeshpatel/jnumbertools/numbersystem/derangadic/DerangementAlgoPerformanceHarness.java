@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @EnabledIfSystemProperty(named = "performance.testing", matches = "true")
+@Disabled("Experiment or benchmark harness, not a correctness test; run manually")
 public class DerangementAlgoPerformanceHarness {
 
     private static final DerangadicAlgorithms DERANGADIC = new DerangadicAlgorithms(new Calculator());

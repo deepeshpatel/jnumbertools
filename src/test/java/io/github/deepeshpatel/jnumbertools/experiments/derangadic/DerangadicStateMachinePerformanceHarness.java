@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.experiments;
+package io.github.deepeshpatel.jnumbertools.experiments.derangadic;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithms;

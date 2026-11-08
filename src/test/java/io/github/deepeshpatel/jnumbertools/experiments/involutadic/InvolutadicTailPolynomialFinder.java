@@ -2,8 +2,9 @@
  * JNumberTools Library
  * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
-package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.experiments;
+package io.github.deepeshpatel.jnumbertools.experiments.involutadic;
 
+import org.junit.jupiter.api.Disabled;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,7 @@ import java.util.List;
  *     j>=0: leading coeff = 2^(j+1),  degree = j+1
  * </pre>
  */
+@Disabled("Experiment or benchmark harness, not a correctness test; run manually")
 public final class InvolutadicTailPolynomialFinder {
 
     // =========================================================

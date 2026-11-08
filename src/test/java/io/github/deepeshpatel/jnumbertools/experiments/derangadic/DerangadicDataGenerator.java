@@ -58,7 +58,7 @@
  *                      occurs during measurement.
  *   Run 1 output goes to the sink variable only and is never printed.
  */
-package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.experiments;
+package io.github.deepeshpatel.jnumbertools.experiments.derangadic;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithms;

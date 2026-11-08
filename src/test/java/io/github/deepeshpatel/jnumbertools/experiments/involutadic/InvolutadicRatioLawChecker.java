@@ -2,8 +2,9 @@
  * JNumberTools Library
  * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
  */
-package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.experiments;
+package io.github.deepeshpatel.jnumbertools.experiments.involutadic;
 
+import org.junit.jupiter.api.Disabled;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -16,6 +17,7 @@ import java.util.Map;
  * {@code R_n(L) = C_n(L+1) / C_n(L)} converge as n → ∞ for each fixed L,
  * analogous to Conjecture 6.3 in the Derangadic paper.
  */
+@Disabled("Experiment or benchmark harness, not a correctness test; run manually")
 public final class InvolutadicRatioLawChecker {
 
     private static final MathContext MC = new MathContext(15, RoundingMode.HALF_UP);

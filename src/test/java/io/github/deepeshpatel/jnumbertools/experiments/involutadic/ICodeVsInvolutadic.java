@@ -1,5 +1,6 @@
-package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.experiments;
+package io.github.deepeshpatel.jnumbertools.experiments.involutadic;
 
+import org.junit.jupiter.api.Disabled;
 import java.util.*;
 
 /**
@@ -14,6 +15,7 @@ import java.util.*;
  * - For FPFIs only -> encodings are IDENTICAL.
  * - For general involutions with fixed points -> encodings DIFFER.
  */
+@Disabled("Experiment or benchmark harness, not a correctness test; run manually")
 public class ICodeVsInvolutadic {
 
     public static void main(String[] args) {
