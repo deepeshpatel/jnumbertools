@@ -1,10 +1,9 @@
 /*
- * JNumberTools Library v4.0.0
- * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2021-2026 Deepesh Patel
+ * SPDX-License-Identifier: Apache-2.0
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
-import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Combinadic;
@@ -112,7 +111,6 @@ import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
  *     .unique(4, 1, 3);
  * </pre>
  *
- * @see AllExamples
  * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  * @author Deepesh Patel
  */

@@ -1,10 +1,8 @@
 /*
- * JNumberTools Library v4.0.0
- * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2021-2026 Deepesh Patel
+ * SPDX-License-Identifier: Apache-2.0
  */
 package io.github.deepeshpatel.jnumbertools.generator.base;
-
-import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 
 import java.math.BigInteger;
 import java.util.Random;
@@ -29,7 +27,6 @@ import java.util.Random;
  * </pre>
  *
  * @param <E> the type of elements in the generated structures
- * @see AllExamples
  * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  * @author Deepesh Patel
  */

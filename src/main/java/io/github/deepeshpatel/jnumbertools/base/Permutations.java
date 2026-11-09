@@ -1,10 +1,9 @@
 /*
- * JNumberTools Library v4.0.0
- * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2021-2026 Deepesh Patel
+ * SPDX-License-Identifier: Apache-2.0
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
-import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.k.KPermutationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.multiset.MultisetPermutationBuilder;
@@ -90,7 +89,6 @@ import static java.util.Arrays.asList;
  * This class is immutable and thread-safe. All methods return new builder instances.
  * </p>
  *
- * @see AllExamples
  * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  * @author Deepesh Patel
  */

@@ -3,6 +3,27 @@
 All notable changes to JNumberTools are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.0.1] - 2026-11-09
+
+Maintenance release. There are no changes to the supported public API or to library behavior.
+
+### Changed
+
+- Relicensed under the Apache License 2.0. This resolves a conflict in earlier releases, where the
+  `LICENSE` file stated GPL-3.0 while the published `pom.xml` stated LGPL-3.0. Earlier releases
+  (4.0.0 and before) remain available under the license stated in their published artifacts.
+- Source file headers now carry an `SPDX-License-Identifier` and no longer contain a version number.
+
+### Removed
+
+- The `io.github.deepeshpatel.jnumbertools.examples` package, including `AllExamples`. It was not
+  part of the public API and was excluded from the javadoc. Examples now live in
+  [JNumberToolsExamples](https://github.com/deepeshpatel/JNumberToolsExamples).
+- The `io.github.deepeshpatel.jnumbertools.experiments` package (`abstractalgebra`:
+  `ExperimentalCombinationAlgorithms`, `PermutationGroup`, `InfiniteSupplyPartition` and
+  `WeightedRandomGenerator`). This was research code that 4.0.0 documented as experimental, with
+  no stability guarantee.
+
 ## [4.0.0] - Released
 
 Compared with the last tagged release, 3.0.0. This release reshapes much of the public API around
@@ -77,15 +98,15 @@ builders, so **it contains breaking changes**. See the migration table below bef
 ### Changed
 
 - Faster ranking, unranking and counting across the library:
-    - Fenwick-tree algorithms for k-permutation and derangement ranking and unranking.
-    - A sparse O(k²) path for k-permutations of large sets, so cost no longer depends on the set size
-      when k is small. The switch between sparse, Fenwick and list-based algorithms was tuned with the
-      `OptimizationBenchmark` harness, and the digit conversions between a permutation and its
-      Permutadic form now use the same selection.
-    - Combination unranking that walks the digits for large r, and multiset combination counting and
-      unranking by dynamic programming.
-    - Multiset permutation unranking using a Fenwick tree.
-    - Hybrid factorial and subfactorial caches.
+  - Fenwick-tree algorithms for k-permutation and derangement ranking and unranking.
+  - A sparse O(k²) path for k-permutations of large sets, so cost no longer depends on the set size
+    when k is small. The switch between sparse, Fenwick and list-based algorithms was tuned with the
+    `OptimizationBenchmark` harness, and the digit conversions between a permutation and its
+    Permutadic form now use the same selection.
+  - Combination unranking that walks the digits for large r, and multiset combination counting and
+    unranking by dynamic programming.
+  - Multiset permutation unranking using a Fenwick tree.
+  - Hybrid factorial and subfactorial caches.
 - Test suite reorganised so that tests go through the public builders; experiments and benchmark
   harnesses live under `src/test/.../experiments` and are disabled by default.
 - Build: compiles with `--release 21`; source, javadoc and signing steps moved into a `release`

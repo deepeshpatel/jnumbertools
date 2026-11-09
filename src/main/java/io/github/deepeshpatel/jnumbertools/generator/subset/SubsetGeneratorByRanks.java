@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v4.0.0
- * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2021-2026 Deepesh Patel
+ * SPDX-License-Identifier: Apache-2.0
  */
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 

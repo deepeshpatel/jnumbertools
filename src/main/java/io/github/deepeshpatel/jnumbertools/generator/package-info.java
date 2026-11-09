@@ -1,6 +1,6 @@
 /*
- * JNumberTools Library v4.0.0
- * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2021-2026 Deepesh Patel
+ * SPDX-License-Identifier: Apache-2.0
  */
 /**
  * Contains the implementation packages for combinatorial generators.
@@ -12,6 +12,5 @@
  * classes in these packages directly.</p>
  *
  * @see io.github.deepeshpatel.jnumbertools.base.JNumberTools
- * @see io.github.deepeshpatel.jnumbertools.examples.AllExamples
  */
 package io.github.deepeshpatel.jnumbertools.generator;

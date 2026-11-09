@@ -1,10 +1,9 @@
 /*
- * JNumberTools Library v4.0.0
- * Copyright (c) 2026 Deepesh Patel (patel.deepesh@gmail.com)
+ * Copyright (c) 2021-2026 Deepesh Patel
+ * SPDX-License-Identifier: Apache-2.0
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
-import io.github.deepeshpatel.jnumbertools.examples.AllExamples;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.derangement.DerangementBuilder;
 
@@ -57,7 +56,6 @@ import java.util.stream.IntStream;
  * <p>This class is immutable and thread-safe. All factory methods return new
  * builder instances.</p>
  *
- * @see AllExamples
  * @see Permutations
  * @see Combinations
  * @see io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic
