@@ -3,7 +3,7 @@
 All notable changes to JNumberTools are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [4.0.0] - Unreleased
+## [4.0.0] - Released
 
 Compared with the last tagged release, 3.0.0. This release reshapes much of the public API around
 builders, so **it contains breaking changes**. See the migration table below before upgrading.
