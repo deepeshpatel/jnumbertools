@@ -24,7 +24,7 @@ Maintenance release. There are no changes to the supported public API or to libr
   `WeightedRandomGenerator`). This was research code that 4.0.0 documented as experimental, with
   no stability guarantee.
 
-## [4.0.0] - Released
+## [4.0.0] - 2026-11-09
 
 Compared with the last tagged release, 3.0.0. This release reshapes much of the public API around
 builders, so **it contains breaking changes**. See the migration table below before upgrading.
