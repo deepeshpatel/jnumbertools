@@ -1,166 +1,166 @@
 Benchmark                                                              (generator)  Mode  Cnt       Score       Error   Units
-GeneratorSurveyBenchmark.choice100                              permutation-unique  avgt   30      16.166 ±     0.805   us/op
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate                permutation-unique  avgt   30    7098.749 ±   256.804  MB/sec
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm           permutation-unique  avgt   30  119904.374 ±     0.018    B/op
-GeneratorSurveyBenchmark.choice100:gc.count                     permutation-unique  avgt   30     156.000              counts
-GeneratorSurveyBenchmark.choice100:gc.time                      permutation-unique  avgt   30      62.000                  ms
-GeneratorSurveyBenchmark.choice100                                   permutation-k  avgt   30       8.523 ±     0.137   us/op
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate                     permutation-k  avgt   30    9911.419 ±   148.106  MB/sec
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm                permutation-k  avgt   30   88560.197 ±     0.003    B/op
-GeneratorSurveyBenchmark.choice100:gc.count                          permutation-k  avgt   30     220.000              counts
-GeneratorSurveyBenchmark.choice100:gc.time                           permutation-k  avgt   30      85.000                  ms
-GeneratorSurveyBenchmark.choice100                          permutation-repetitive  avgt   30       7.276 ±     0.022   us/op
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate            permutation-repetitive  avgt   30   11021.931 ±    32.460  MB/sec
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm       permutation-repetitive  avgt   30   84120.168 ±     0.001    B/op
-GeneratorSurveyBenchmark.choice100:gc.count                 permutation-repetitive  avgt   30     244.000              counts
-GeneratorSurveyBenchmark.choice100:gc.time                  permutation-repetitive  avgt   30      95.000                  ms
-GeneratorSurveyBenchmark.choice100                            permutation-multiset  avgt   30      45.394 ±     1.815   us/op
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate              permutation-multiset  avgt   30    9641.641 ±   385.742  MB/sec
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm         permutation-multiset  avgt   30  457521.048 ±   768.764    B/op
-GeneratorSurveyBenchmark.choice100:gc.count                   permutation-multiset  avgt   30     213.000              counts
-GeneratorSurveyBenchmark.choice100:gc.time                    permutation-multiset  avgt   30      85.000                  ms
-GeneratorSurveyBenchmark.choice100                              combination-unique  avgt   30       8.275 ±     0.111   us/op
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate                combination-unique  avgt   30    2726.865 ±   115.723  MB/sec
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm           combination-unique  avgt   30   23648.191 ±   776.492    B/op
-GeneratorSurveyBenchmark.choice100:gc.count                     combination-unique  avgt   30     191.000              counts
-GeneratorSurveyBenchmark.choice100:gc.time                      combination-unique  avgt   30      44.000                  ms
-GeneratorSurveyBenchmark.choice100                          combination-repetitive  avgt   30      23.867 ±     0.581   us/op
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate            combination-repetitive  avgt   30    4535.678 ±   133.814  MB/sec
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm       combination-repetitive  avgt   30  113384.551 ±   768.796    B/op
-GeneratorSurveyBenchmark.choice100:gc.count                 combination-repetitive  avgt   30     224.000              counts
-GeneratorSurveyBenchmark.choice100:gc.time                  combination-repetitive  avgt   30      62.000                  ms
-GeneratorSurveyBenchmark.choice100                            combination-multiset  avgt   30      23.805 ±     0.595   us/op
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate              combination-multiset  avgt   30    6625.343 ±   168.243  MB/sec
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm         combination-multiset  avgt   30  165208.550 ±     0.014    B/op
-GeneratorSurveyBenchmark.choice100:gc.count                   combination-multiset  avgt   30     145.000              counts
-GeneratorSurveyBenchmark.choice100:gc.time                    combination-multiset  avgt   30      58.000                  ms
-GeneratorSurveyBenchmark.choice100                                     derangement  avgt   30      71.383 ±     0.686   us/op
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate                       derangement  avgt   30    3963.018 ±    39.795  MB/sec
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm                  derangement  avgt   30  296684.315 ±   248.570    B/op
-GeneratorSurveyBenchmark.choice100:gc.count                            derangement  avgt   30     273.000              counts
-GeneratorSurveyBenchmark.choice100:gc.time                             derangement  avgt   30      65.000                  ms
-GeneratorSurveyBenchmark.choice100                                         subsets  avgt   30      22.721 ±     0.276   us/op
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate                           subsets  avgt   30    4357.050 ±    52.880  MB/sec
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm                      subsets  avgt   30  103808.526 ±     0.006    B/op
-GeneratorSurveyBenchmark.choice100:gc.count                                subsets  avgt   30     287.000              counts
-GeneratorSurveyBenchmark.choice100:gc.time                                 subsets  avgt   30      68.000                  ms
-GeneratorSurveyBenchmark.choice100                                  product-simple  avgt   30       4.538 ±     0.016   us/op
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate                    product-simple  avgt   30    7113.823 ±    24.613  MB/sec
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm               product-simple  avgt   30   33864.105 ±     0.001    B/op
-GeneratorSurveyBenchmark.choice100:gc.count                         product-simple  avgt   30     156.000              counts
-GeneratorSurveyBenchmark.choice100:gc.time                          product-simple  avgt   30      62.000                  ms
-GeneratorSurveyBenchmark.choice100                             product-constrained  avgt   30      65.964 ±     0.159   us/op
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate               product-constrained  avgt   30    3650.526 ±     8.838  MB/sec
-GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm          product-constrained  avgt   30  252593.525 ±     0.007    B/op
-GeneratorSurveyBenchmark.choice100:gc.count                    product-constrained  avgt   30     247.000              counts
-GeneratorSurveyBenchmark.choice100:gc.time                     product-constrained  avgt   30      54.000                  ms
-GeneratorSurveyBenchmark.lexOrder1000                           permutation-unique  avgt   30      39.505 ±     4.910   us/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate             permutation-unique  avgt   30    4791.653 ±   570.883  MB/sec
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm        permutation-unique  avgt   30  192216.913 ±     0.113    B/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.count                  permutation-unique  avgt   30     242.000              counts
-GeneratorSurveyBenchmark.lexOrder1000:gc.time                   permutation-unique  avgt   30      62.000                  ms
-GeneratorSurveyBenchmark.lexOrder1000                                permutation-k  avgt   30      27.898 ±     0.125   us/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate                  permutation-k  avgt   30    6398.587 ±    28.795  MB/sec
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm             permutation-k  avgt   30  187243.309 ±    10.254    B/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.count                       permutation-k  avgt   30     144.000              counts
-GeneratorSurveyBenchmark.lexOrder1000:gc.time                        permutation-k  avgt   30      58.000                  ms
-GeneratorSurveyBenchmark.lexOrder1000                       permutation-repetitive  avgt   30      12.866 ±     0.201   us/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate         permutation-repetitive  avgt   30    6529.861 ±   102.931  MB/sec
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm    permutation-repetitive  avgt   30   88080.297 ±     0.005    B/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.count              permutation-repetitive  avgt   30     147.000              counts
-GeneratorSurveyBenchmark.lexOrder1000:gc.time               permutation-repetitive  avgt   30      57.000                  ms
-GeneratorSurveyBenchmark.lexOrder1000                         permutation-multiset  avgt   30      54.131 ±     1.037   us/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate           permutation-multiset  avgt   30    5386.603 ±   102.564  MB/sec
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm      permutation-multiset  avgt   30  305609.253 ±     0.028    B/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.count                permutation-multiset  avgt   30     125.000              counts
-GeneratorSurveyBenchmark.lexOrder1000:gc.time                 permutation-multiset  avgt   30      50.000                  ms
-GeneratorSurveyBenchmark.lexOrder1000                           combination-unique  avgt   30      20.539 ±     0.211   us/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate             combination-unique  avgt   30    7807.648 ±    80.097  MB/sec
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm        combination-unique  avgt   30  168176.475 ±     0.005    B/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.count                  combination-unique  avgt   30     176.000              counts
-GeneratorSurveyBenchmark.lexOrder1000:gc.time                   combination-unique  avgt   30      68.000                  ms
-GeneratorSurveyBenchmark.lexOrder1000                       combination-repetitive  avgt   30      19.620 ±     0.214   us/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate         combination-repetitive  avgt   30    7002.940 ±    75.937  MB/sec
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm    combination-repetitive  avgt   30  144088.453 ±     0.005    B/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.count              combination-repetitive  avgt   30     159.000              counts
-GeneratorSurveyBenchmark.lexOrder1000:gc.time               combination-repetitive  avgt   30      62.000                  ms
-GeneratorSurveyBenchmark.lexOrder1000                         combination-multiset  avgt   30      42.180 ±     1.789   us/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate           combination-multiset  avgt   30    9875.076 ±   733.905  MB/sec
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm      combination-multiset  avgt   30  433936.975 ± 15376.069    B/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.count                combination-multiset  avgt   30     218.000              counts
-GeneratorSurveyBenchmark.lexOrder1000:gc.time                 combination-multiset  avgt   30      87.000                  ms
-GeneratorSurveyBenchmark.lexOrder1000                                  derangement  avgt   30     119.871 ±     1.931   us/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate                    derangement  avgt   30    2047.480 ±    33.807  MB/sec
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm               derangement  avgt   30  257306.765 ±     0.046    B/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.count                         derangement  avgt   30     199.000              counts
-GeneratorSurveyBenchmark.lexOrder1000:gc.time                          derangement  avgt   30      38.000                  ms
-GeneratorSurveyBenchmark.lexOrder1000                                      subsets  avgt   30      20.507 ±     0.146   us/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate                        subsets  avgt   30    6856.888 ±    48.596  MB/sec
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm                   subsets  avgt   30  147480.475 ±     0.004    B/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.count                             subsets  avgt   30     153.000              counts
-GeneratorSurveyBenchmark.lexOrder1000:gc.time                              subsets  avgt   30      60.000                  ms
-GeneratorSurveyBenchmark.lexOrder1000                               product-simple  avgt   30       7.038 ±     0.106   us/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate                 product-simple  avgt   30    7616.104 ±   104.547  MB/sec
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm            product-simple  avgt   30   56200.163 ±     0.003    B/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.count                      product-simple  avgt   30     176.000              counts
-GeneratorSurveyBenchmark.lexOrder1000:gc.time                       product-simple  avgt   30      68.000                  ms
-GeneratorSurveyBenchmark.lexOrder1000                          product-constrained  avgt   30      11.804 ±     0.488   us/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate            product-constrained  avgt   30    5108.947 ±   197.692  MB/sec
-GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm       product-constrained  avgt   30   63040.272 ±     0.011    B/op
-GeneratorSurveyBenchmark.lexOrder1000:gc.count                 product-constrained  avgt   30     130.000              counts
-GeneratorSurveyBenchmark.lexOrder1000:gc.time                  product-constrained  avgt   30      52.000                  ms
-GeneratorSurveyBenchmark.lexOrderMth100                         permutation-unique  avgt   30      15.122 ±     0.267   us/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate           permutation-unique  avgt   30    7461.438 ±    86.288  MB/sec
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm      permutation-unique  avgt   30  118304.349 ±   776.500    B/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.count                permutation-unique  avgt   30     165.000              counts
-GeneratorSurveyBenchmark.lexOrderMth100:gc.time                 permutation-unique  avgt   30      65.000                  ms
-GeneratorSurveyBenchmark.lexOrderMth100                              permutation-k  avgt   30       7.803 ±     0.030   us/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate                permutation-k  avgt   30   10766.971 ±    41.129  MB/sec
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm           permutation-k  avgt   30   88128.180 ±     0.001    B/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.count                     permutation-k  avgt   30     240.000              counts
-GeneratorSurveyBenchmark.lexOrderMth100:gc.time                      permutation-k  avgt   30      92.000                  ms
-GeneratorSurveyBenchmark.lexOrderMth100                     permutation-repetitive  avgt   30       6.236 ±     0.038   us/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate       permutation-repetitive  avgt   30   10730.625 ±    65.903  MB/sec
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm  permutation-repetitive  avgt   30   70184.144 ±     0.001    B/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.count            permutation-repetitive  avgt   30     237.000              counts
-GeneratorSurveyBenchmark.lexOrderMth100:gc.time             permutation-repetitive  avgt   30      93.000                  ms
-GeneratorSurveyBenchmark.lexOrderMth100                       permutation-multiset  avgt   30      46.627 ±     0.210   us/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate         permutation-multiset  avgt   30    8649.118 ±    38.656  MB/sec
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm    permutation-multiset  avgt   30  423001.089 ±     0.034    B/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.count              permutation-multiset  avgt   30     190.000              counts
-GeneratorSurveyBenchmark.lexOrderMth100:gc.time               permutation-multiset  avgt   30      75.000                  ms
-GeneratorSurveyBenchmark.lexOrderMth100                         combination-unique  avgt   30       7.982 ±     0.119   us/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate           combination-unique  avgt   30    2908.120 ±   117.965  MB/sec
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm      combination-unique  avgt   30   24328.184 ±   776.493    B/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.count                combination-unique  avgt   30     192.000              counts
-GeneratorSurveyBenchmark.lexOrderMth100:gc.time                 combination-unique  avgt   30      48.000                  ms
-GeneratorSurveyBenchmark.lexOrderMth100                     combination-repetitive  avgt   30      20.795 ±     0.939   us/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate       combination-repetitive  avgt   30    5111.505 ±   225.594  MB/sec
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm  combination-repetitive  avgt   30  111016.481 ±     0.022    B/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.count            combination-repetitive  avgt   30     176.000              counts
-GeneratorSurveyBenchmark.lexOrderMth100:gc.time             combination-repetitive  avgt   30      58.000                  ms
-GeneratorSurveyBenchmark.lexOrderMth100                       combination-multiset  avgt   30      24.165 ±     0.285   us/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate         combination-multiset  avgt   30    6393.239 ±    74.633  MB/sec
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm    combination-multiset  avgt   30  162008.562 ±     0.009    B/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.count              combination-multiset  avgt   30     139.000              counts
-GeneratorSurveyBenchmark.lexOrderMth100:gc.time               combination-multiset  avgt   30      58.000                  ms
-GeneratorSurveyBenchmark.lexOrderMth100                                derangement  avgt   30      70.526 ±     1.077   us/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate                  derangement  avgt   30    3925.760 ±    58.834  MB/sec
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm             derangement  avgt   30  290292.308 ±   926.136    B/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.count                       derangement  avgt   30     285.000              counts
-GeneratorSurveyBenchmark.lexOrderMth100:gc.time                        derangement  avgt   30      65.000                  ms
-GeneratorSurveyBenchmark.lexOrderMth100                                    subsets  avgt   30      19.822 ±     0.616   us/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate                      subsets  avgt   30    4651.093 ±   136.602  MB/sec
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm                 subsets  avgt   30   96520.459 ±     0.014    B/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.count                           subsets  avgt   30     218.000              counts
-GeneratorSurveyBenchmark.lexOrderMth100:gc.time                            subsets  avgt   30      66.000                  ms
-GeneratorSurveyBenchmark.lexOrderMth100                             product-simple  avgt   30       5.040 ±     0.055   us/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate               product-simple  avgt   30   10512.847 ±   109.762  MB/sec
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm          product-simple  avgt   30   55568.116 ±     0.001    B/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.count                    product-simple  avgt   30     233.000              counts
-GeneratorSurveyBenchmark.lexOrderMth100:gc.time                     product-simple  avgt   30      93.000                  ms
-GeneratorSurveyBenchmark.lexOrderMth100                        product-constrained  avgt   30      66.098 ±     1.113   us/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate          product-constrained  avgt   30    3713.067 ±    58.751  MB/sec
-GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm     product-constrained  avgt   30  257297.527 ±     0.027    B/op
-GeneratorSurveyBenchmark.lexOrderMth100:gc.count               product-constrained  avgt   30     246.000              counts
-GeneratorSurveyBenchmark.lexOrderMth100:gc.time                product-constrained  avgt   30      59.000                  ms
+GeneratorSurveyBenchmark.choice100                              permutation-unique  avgt   16      14.060 ±     0.199   us/op
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate                permutation-unique  avgt   16    5979.017 ±    84.550  MB/sec
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm           permutation-unique  avgt   16   88160.296 ±     0.004    B/op
+GeneratorSurveyBenchmark.choice100:gc.count                     permutation-unique  avgt   16      69.000              counts
+GeneratorSurveyBenchmark.choice100:gc.time                      permutation-unique  avgt   16      28.000                  ms
+GeneratorSurveyBenchmark.choice100                                   permutation-k  avgt   16       6.930 ±     0.089   us/op
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate                     permutation-k  avgt   16    5440.599 ±    68.348  MB/sec
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm                permutation-k  avgt   16   39544.146 ±     0.002    B/op
+GeneratorSurveyBenchmark.choice100:gc.count                          permutation-k  avgt   16      61.000              counts
+GeneratorSurveyBenchmark.choice100:gc.time                           permutation-k  avgt   16      26.000                  ms
+GeneratorSurveyBenchmark.choice100                          permutation-repetitive  avgt   16       6.574 ±     0.028   us/op
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate            permutation-repetitive  avgt   16    9666.915 ±    40.518  MB/sec
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm       permutation-repetitive  avgt   16   66664.138 ±     0.001    B/op
+GeneratorSurveyBenchmark.choice100:gc.count                 permutation-repetitive  avgt   16     111.000              counts
+GeneratorSurveyBenchmark.choice100:gc.time                  permutation-repetitive  avgt   16      43.000                  ms
+GeneratorSurveyBenchmark.choice100                            permutation-multiset  avgt   16       8.621 ±     0.075   us/op
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate              permutation-multiset  avgt   16    1723.251 ±    15.140  MB/sec
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm         permutation-multiset  avgt   16   15584.181 ±     0.002    B/op
+GeneratorSurveyBenchmark.choice100:gc.count                   permutation-multiset  avgt   16      90.000              counts
+GeneratorSurveyBenchmark.choice100:gc.time                    permutation-multiset  avgt   16      18.000                  ms
+GeneratorSurveyBenchmark.choice100                              combination-unique  avgt   16       5.615 ±     0.078   us/op
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate                combination-unique  avgt   16    2199.489 ±    30.377  MB/sec
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm           combination-unique  avgt   16   12952.118 ±     0.002    B/op
+GeneratorSurveyBenchmark.choice100:gc.count                     combination-unique  avgt   16      79.000              counts
+GeneratorSurveyBenchmark.choice100:gc.time                      combination-unique  avgt   16      19.000                  ms
+GeneratorSurveyBenchmark.choice100                          combination-repetitive  avgt   16       4.432 ±     0.104   us/op
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate            combination-repetitive  avgt   16    2439.763 ±    57.241  MB/sec
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm       combination-repetitive  avgt   16   11336.093 ±     0.002    B/op
+GeneratorSurveyBenchmark.choice100:gc.count                 combination-repetitive  avgt   16      83.000              counts
+GeneratorSurveyBenchmark.choice100:gc.time                  combination-repetitive  avgt   16      21.000                  ms
+GeneratorSurveyBenchmark.choice100                            combination-multiset  avgt   16      24.638 ±     1.417   us/op
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate              combination-multiset  avgt   16    4918.412 ±   282.290  MB/sec
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm         combination-multiset  avgt   16  126744.519 ±     0.032    B/op
+GeneratorSurveyBenchmark.choice100:gc.count                   combination-multiset  avgt   16     157.000              counts
+GeneratorSurveyBenchmark.choice100:gc.time                    combination-multiset  avgt   16      41.000                  ms
+GeneratorSurveyBenchmark.choice100                                     derangement  avgt   16      12.069 ±     0.401   us/op
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate                       derangement  avgt   16    2224.657 ±    72.391  MB/sec
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm                  derangement  avgt   16   28136.254 ±     0.009    B/op
+GeneratorSurveyBenchmark.choice100:gc.count                            derangement  avgt   16      80.000              counts
+GeneratorSurveyBenchmark.choice100:gc.time                             derangement  avgt   16      19.000                  ms
+GeneratorSurveyBenchmark.choice100                                         subsets  avgt   16       4.708 ±     0.051   us/op
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate                           subsets  avgt   16    2811.158 ±    30.491  MB/sec
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm                      subsets  avgt   16   13880.099 ±     0.001    B/op
+GeneratorSurveyBenchmark.choice100:gc.count                                subsets  avgt   16     106.000              counts
+GeneratorSurveyBenchmark.choice100:gc.time                                 subsets  avgt   16      24.000                  ms
+GeneratorSurveyBenchmark.choice100                                  product-simple  avgt   16       4.428 ±     0.041   us/op
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate                    product-simple  avgt   16    5246.925 ±    48.692  MB/sec
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm               product-simple  avgt   16   24368.093 ±     0.001    B/op
+GeneratorSurveyBenchmark.choice100:gc.count                         product-simple  avgt   16     111.000              counts
+GeneratorSurveyBenchmark.choice100:gc.time                          product-simple  avgt   16      34.000                  ms
+GeneratorSurveyBenchmark.choice100                             product-constrained  avgt   16      13.322 ±     0.270   us/op
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate               product-constrained  avgt   16    7360.259 ±   139.724  MB/sec
+GeneratorSurveyBenchmark.choice100:gc.alloc.rate.norm          product-constrained  avgt   16  102819.070 ±     7.804    B/op
+GeneratorSurveyBenchmark.choice100:gc.count                    product-constrained  avgt   16      97.000              counts
+GeneratorSurveyBenchmark.choice100:gc.time                     product-constrained  avgt   16      38.000                  ms
+GeneratorSurveyBenchmark.lexOrder1000                           permutation-unique  avgt   16      16.348 ±     0.329   us/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate             permutation-unique  avgt   16    6544.874 ±   131.498  MB/sec
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm        permutation-unique  avgt   16  112192.344 ±     0.008    B/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.count                  permutation-unique  avgt   16      74.000              counts
+GeneratorSurveyBenchmark.lexOrder1000:gc.time                   permutation-unique  avgt   16      30.000                  ms
+GeneratorSurveyBenchmark.lexOrder1000                                permutation-k  avgt   16      23.323 ±     0.282   us/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate                  permutation-k  avgt   16    5907.776 ±    71.158  MB/sec
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm             permutation-k  avgt   16  144512.486 ±     0.005    B/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.count                       permutation-k  avgt   16      67.000              counts
+GeneratorSurveyBenchmark.lexOrder1000:gc.time                        permutation-k  avgt   16      28.000                  ms
+GeneratorSurveyBenchmark.lexOrder1000                       permutation-repetitive  avgt   16      10.368 ±     0.063   us/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate         permutation-repetitive  avgt   16    2948.975 ±    17.642  MB/sec
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm    permutation-repetitive  avgt   16   32072.218 ±     0.002    B/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.count              permutation-repetitive  avgt   16     102.000              counts
+GeneratorSurveyBenchmark.lexOrder1000:gc.time               permutation-repetitive  avgt   16      24.000                  ms
+GeneratorSurveyBenchmark.lexOrder1000                         permutation-multiset  avgt   16      19.072 ±     0.341   us/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate           permutation-multiset  avgt   16    5673.399 ±   102.408  MB/sec
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm      permutation-multiset  avgt   16  113464.402 ±     0.008    B/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.count                permutation-multiset  avgt   16      66.000              counts
+GeneratorSurveyBenchmark.lexOrder1000:gc.time                 permutation-multiset  avgt   16      27.000                  ms
+GeneratorSurveyBenchmark.lexOrder1000                           combination-unique  avgt   16      30.645 ±     1.168   us/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate             combination-unique  avgt   16    2995.087 ±   112.561  MB/sec
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm        combination-unique  avgt   16   96152.645 ±     0.025    B/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.count                  combination-unique  avgt   16     102.000              counts
+GeneratorSurveyBenchmark.lexOrder1000:gc.time                   combination-unique  avgt   16      26.000                  ms
+GeneratorSurveyBenchmark.lexOrder1000                       combination-repetitive  avgt   16      27.930 ±     0.932   us/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate         combination-repetitive  avgt   16    2735.846 ±    91.857  MB/sec
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm    combination-repetitive  avgt   16   80072.587 ±     0.018    B/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.count              combination-repetitive  avgt   16      95.000              counts
+GeneratorSurveyBenchmark.lexOrder1000:gc.time               combination-repetitive  avgt   16      24.000                  ms
+GeneratorSurveyBenchmark.lexOrder1000                         combination-multiset  avgt   16      44.904 ±     0.277   us/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate           combination-multiset  avgt   16    8254.158 ±    50.321  MB/sec
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm      combination-multiset  avgt   16  388800.943 ±     0.007    B/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.count                combination-multiset  avgt   16      96.000              counts
+GeneratorSurveyBenchmark.lexOrder1000:gc.time                 combination-multiset  avgt   16      38.000                  ms
+GeneratorSurveyBenchmark.lexOrder1000                                  derangement  avgt   16      73.580 ±     0.758   us/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate                    derangement  avgt   16    1459.895 ±    15.094  MB/sec
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm               derangement  avgt   16  112673.546 ±     0.018    B/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.count                         derangement  avgt   16     112.000              counts
+GeneratorSurveyBenchmark.lexOrder1000:gc.time                          derangement  avgt   16      18.000                  ms
+GeneratorSurveyBenchmark.lexOrder1000                                      subsets  avgt   16      14.944 ±     0.317   us/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate                        subsets  avgt   16    5596.308 ±   118.752  MB/sec
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm                   subsets  avgt   16   87688.315 ±     0.006    B/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.count                             subsets  avgt   16      63.000              counts
+GeneratorSurveyBenchmark.lexOrder1000:gc.time                              subsets  avgt   16      26.000                  ms
+GeneratorSurveyBenchmark.lexOrder1000                               product-simple  avgt   16       5.527 ±     0.009   us/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate                 product-simple  avgt   16    4163.103 ±     7.077  MB/sec
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm            product-simple  avgt   16   24136.116 ±     0.001    B/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.count                      product-simple  avgt   16     144.000              counts
+GeneratorSurveyBenchmark.lexOrder1000:gc.time                       product-simple  avgt   16      36.000                  ms
+GeneratorSurveyBenchmark.lexOrder1000                          product-constrained  avgt   16      13.862 ±     0.745   us/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate            product-constrained  avgt   16    3108.335 ±   143.916  MB/sec
+GeneratorSurveyBenchmark.lexOrder1000:gc.alloc.rate.norm       product-constrained  avgt   16   45096.291 ±    25.234    B/op
+GeneratorSurveyBenchmark.lexOrder1000:gc.count                 product-constrained  avgt   16     111.000              counts
+GeneratorSurveyBenchmark.lexOrder1000:gc.time                  product-constrained  avgt   16      28.000                  ms
+GeneratorSurveyBenchmark.lexOrderMth100                         permutation-unique  avgt   16      14.151 ±     0.190   us/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate           permutation-unique  avgt   16    5901.350 ±    77.619  MB/sec
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm      permutation-unique  avgt   16   87584.298 ±     0.004    B/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.count                permutation-unique  avgt   16      66.000              counts
+GeneratorSurveyBenchmark.lexOrderMth100:gc.time                 permutation-unique  avgt   16      27.000                  ms
+GeneratorSurveyBenchmark.lexOrderMth100                              permutation-k  avgt   16       6.111 ±     0.072   us/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate                permutation-k  avgt   16    6402.341 ±    74.533  MB/sec
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm           permutation-k  avgt   16   41032.129 ±     0.002    B/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.count                     permutation-k  avgt   16      72.000              counts
+GeneratorSurveyBenchmark.lexOrderMth100:gc.time                      permutation-k  avgt   16      29.000                  ms
+GeneratorSurveyBenchmark.lexOrderMth100                     permutation-repetitive  avgt   16       5.644 ±     0.030   us/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate       permutation-repetitive  avgt   16    9273.256 ±    48.861  MB/sec
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm  permutation-repetitive  avgt   16   54896.118 ±     0.001    B/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.count            permutation-repetitive  avgt   16     108.000              counts
+GeneratorSurveyBenchmark.lexOrderMth100:gc.time             permutation-repetitive  avgt   16      42.000                  ms
+GeneratorSurveyBenchmark.lexOrderMth100                       permutation-multiset  avgt   16       6.324 ±     0.127   us/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate         permutation-multiset  avgt   16    3469.919 ±    68.606  MB/sec
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm    permutation-multiset  avgt   16   23008.133 ±     0.003    B/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.count              permutation-multiset  avgt   16     124.000              counts
+GeneratorSurveyBenchmark.lexOrderMth100:gc.time               permutation-multiset  avgt   16      29.000                  ms
+GeneratorSurveyBenchmark.lexOrderMth100                         combination-unique  avgt   16       7.313 ±     0.251   us/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate           combination-unique  avgt   16    2095.076 ±    71.441  MB/sec
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm      combination-unique  avgt   16   16056.154 ±     0.005    B/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.count                combination-unique  avgt   16      72.000              counts
+GeneratorSurveyBenchmark.lexOrderMth100:gc.time                 combination-unique  avgt   16      19.000                  ms
+GeneratorSurveyBenchmark.lexOrderMth100                     combination-repetitive  avgt   16       4.753 ±     0.111   us/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate       combination-repetitive  avgt   16    2897.568 ±    67.194  MB/sec
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm  combination-repetitive  avgt   16   14440.100 ±     0.002    B/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.count            combination-repetitive  avgt   16      99.000              counts
+GeneratorSurveyBenchmark.lexOrderMth100:gc.time             combination-repetitive  avgt   16      25.000                  ms
+GeneratorSurveyBenchmark.lexOrderMth100                       combination-multiset  avgt   16      24.467 ±     0.222   us/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate         combination-multiset  avgt   16    4824.120 ±    43.819  MB/sec
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm    combination-multiset  avgt   16  123800.514 ±     0.005    B/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.count              combination-multiset  avgt   16     155.000              counts
+GeneratorSurveyBenchmark.lexOrderMth100:gc.time               combination-multiset  avgt   16      40.000                  ms
+GeneratorSurveyBenchmark.lexOrderMth100                                derangement  avgt   16      12.381 ±     0.355   us/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate                  derangement  avgt   16    1974.519 ±    57.253  MB/sec
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm             derangement  avgt   16   25624.260 ±     0.008    B/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.count                       derangement  avgt   16      70.000              counts
+GeneratorSurveyBenchmark.lexOrderMth100:gc.time                        derangement  avgt   16      18.000                  ms
+GeneratorSurveyBenchmark.lexOrderMth100                                    subsets  avgt   16       5.115 ±     0.122   us/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate                      subsets  avgt   16    3153.651 ±    74.703  MB/sec
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm                 subsets  avgt   16   16912.106 ±     0.003    B/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.count                           subsets  avgt   16     119.000              counts
+GeneratorSurveyBenchmark.lexOrderMth100:gc.time                            subsets  avgt   16      28.000                  ms
+GeneratorSurveyBenchmark.lexOrderMth100                             product-simple  avgt   16       5.036 ±     0.721   us/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate               product-simple  avgt   16    6396.917 ±  1092.210  MB/sec
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm          product-simple  avgt   16   34536.105 ± 10599.976    B/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.count                    product-simple  avgt   16      73.000              counts
+GeneratorSurveyBenchmark.lexOrderMth100:gc.time                     product-simple  avgt   16      30.000                  ms
+GeneratorSurveyBenchmark.lexOrderMth100                        product-constrained  avgt   16      13.492 ±     0.098   us/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate          product-constrained  avgt   16    7756.093 ±    55.539  MB/sec
+GeneratorSurveyBenchmark.lexOrderMth100:gc.alloc.rate.norm     product-constrained  avgt   16  109760.657 ±     1.536    B/op
+GeneratorSurveyBenchmark.lexOrderMth100:gc.count               product-constrained  avgt   16     100.000              counts
+GeneratorSurveyBenchmark.lexOrderMth100:gc.time                product-constrained  avgt   16      39.000                  ms

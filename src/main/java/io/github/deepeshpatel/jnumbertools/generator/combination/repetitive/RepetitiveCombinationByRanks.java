@@ -6,6 +6,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.numbersystem.LongBinomials;
 
 import java.math.BigInteger;
 import java.util.Iterator;
@@ -33,6 +34,7 @@ public class RepetitiveCombinationByRanks<T> extends AbstractGenerator<T> {
     private final Calculator calculator;
     private final Iterable<BigInteger> ranks;
     private final BigInteger totalCombinations;
+    private final long[][] longTable;   // binomials for the primitive path, or null when it does not apply
 
     /**
      * Constructs a generator for repetitive combinations based on a rank sequence.
@@ -59,6 +61,9 @@ public class RepetitiveCombinationByRanks<T> extends AbstractGenerator<T> {
             throw new IllegalArgumentException("Combination size (r) must be non-negative");
         }
         totalCombinations = calculator.nCrRepetitive(elements.size(), r);
+        // C(n - j + k - 1, k) is looked up for j < n and k < r, so rows up to n + r - 2 and columns up to r - 1.
+        longTable = totalCombinations.bitLength() <= 62 && r > 0 && !elements.isEmpty()
+                ? LongBinomials.table(elements.size() + r - 1, r) : null;
     }
 
     /**
@@ -106,7 +111,7 @@ public class RepetitiveCombinationByRanks<T> extends AbstractGenerator<T> {
                 throw new IllegalArgumentException("Rank " + m + " is out of bounds [0, " + totalCombinations + ")");
             }
 
-            int[] indices = mthCombinationWithRepetition(m);
+            int[] indices = longTable != null ? mthCombinationLong(m.longValue()) : mthCombinationWithRepetition(m);
             return indicesToValues(indices);
         }
 
@@ -121,6 +126,26 @@ public class RepetitiveCombinationByRanks<T> extends AbstractGenerator<T> {
          * @param m the rank of the combination (m ≥ 0); may exceed the range of a {@code long}
          * @return an array of indices representing the combination
          */
+        private int[] mthCombinationLong(long remainingM) {
+            int n = elements.size();
+            int[] result = new int[r];
+            int currentValue = 0;
+
+            for (int i = 0; i < r; i++) {
+                int k = r - i - 1;
+                for (int j = currentValue; j < n; j++) {
+                    long combinationsWithCurrentElement = longTable[n - j + k - 1][k];   // = nCrRepetitive(n - j, k)
+                    if (remainingM < combinationsWithCurrentElement) {
+                        result[i] = j;
+                        currentValue = j;
+                        break;
+                    }
+                    remainingM -= combinationsWithCurrentElement;
+                }
+            }
+            return result;
+        }
+
         private int[] mthCombinationWithRepetition(BigInteger m) {
             int n = elements.size();
             int[] result = new int[r];

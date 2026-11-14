@@ -79,10 +79,9 @@ public final class Derangement<T> extends AbstractGenerator<T> {
         @Override
         public List<T> next() {
             if (!hasNext()) throw new NoSuchElementException();
-            List<T> derangement= indicesToValues(current.derangement().clone());
+            List<T> derangement= indicesToValues(current.derangement());
             current.nextWithoutBoundCheck();
             return derangement;
         }
     }
 }
-

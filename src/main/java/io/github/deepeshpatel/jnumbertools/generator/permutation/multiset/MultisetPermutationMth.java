@@ -44,6 +44,7 @@ import java.util.*;
 public final class MultisetPermutationMth<T> extends AbstractMultisetPermutation<T> {
 
     private final BigInteger possiblePermutations;
+    private final long longTotal;   // total permutations when the long path applies, else -1
     private final BigInteger start;
     private final BigInteger increment;
 
@@ -69,6 +70,7 @@ public final class MultisetPermutationMth<T> extends AbstractMultisetPermutation
             throw new IllegalArgumentException("Start must be non-negative: " + start);
         }
         this.possiblePermutations = getTotalPermutations();
+        this.longTotal = totalForLongArithmetic(possiblePermutations);
         this.start = start;
         this.increment = increment;
     }
@@ -100,9 +102,40 @@ public final class MultisetPermutationMth<T> extends AbstractMultisetPermutation
             if (!hasNext()) {
                 throw new NoSuchElementException("No more permutations available");
             }
-            currentIndices = getIndicesForMthPermutation(currentN, totalLength);
+            currentIndices = longTotal >= 0
+                    ? getIndicesForMthPermutationLong(currentN.longValue())
+                    : getIndicesForMthPermutation(currentN, totalLength);
             currentN = currentN.add(increment);
             return indicesToValues(currentIndices);
+        }
+
+        /** Same arithmetic as the BigInteger version; every product is at most total x totalLength, so it fits. */
+        private int[] getIndicesForMthPermutationLong(long m) {
+            int[] output = new int[totalLength];
+            int[] currentMultisetCount = Arrays.copyOf(frequencies, frequencies.length);
+            long sum = totalLength;
+            long totalPossible = longTotal;
+
+            for (int j = 0; j < output.length; j++) {
+                long permutationsBefore = 0;
+
+                for (int i = 0; i < currentMultisetCount.length; i++) {
+                    if (currentMultisetCount[i] > 0) {
+                        long perms = totalPossible * currentMultisetCount[i] / sum;
+                        long rangeEnd = permutationsBefore + perms;
+                        if (m < rangeEnd) {
+                            output[j] = i;
+                            m -= permutationsBefore;
+                            currentMultisetCount[i]--;
+                            sum--;
+                            totalPossible = perms;
+                            break;
+                        }
+                        permutationsBefore = rangeEnd;
+                    }
+                }
+            }
+            return output;
         }
 
         private int[] getIndicesForMthPermutation(BigInteger m, int totalLength) {

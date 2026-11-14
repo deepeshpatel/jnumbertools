@@ -164,6 +164,10 @@ public final class DerangadicAlgorithms {
         if (m.signum() < 0 || m.compareTo(max) >= 0) {
             throw new IllegalArgumentException("m out of range");
         }
+        if (max.bitLength() <= 62) {
+            int[] digits = encodeLong(m.longValue(), n);
+            if (digits != null) return digits;
+        }
 
         int actualN = smallestN(n, m);
         int[] digits = new int[actualN];
@@ -231,6 +235,88 @@ public final class DerangadicAlgorithms {
      */
     public int[] encode(long m, int n) {
         return encode(BigInteger.valueOf(m), n);
+    }
+
+    /**
+     * Largest order handled in primitive arithmetic: D_20 and 20! both fit in a long with room to spare,
+     * while D_21 does not fit in 62 bits.
+     */
+    private static final int LONG_MAX_N = 20;
+
+    /** Counts in primitive form for orders up to {@link #LONG_MAX_N}; they depend on nothing but n. */
+    private static final class LongCounts {
+        /** sub[k] = D_k. */
+        static final long[] SUB = new long[LONG_MAX_N + 1];
+        /** restricted[total][r]; -1 where r > total, which the algorithm never asks for. */
+        static final long[][] RESTRICTED = new long[LONG_MAX_N + 1][LONG_MAX_N + 1];
+
+        static {
+            Calculator calc = new Calculator();
+            for (int t = 0; t <= LONG_MAX_N; t++) {
+                SUB[t] = calc.subFactorial(t).longValueExact();
+                for (int r = 0; r <= LONG_MAX_N; r++) {
+                    RESTRICTED[t][r] = r <= t ? calc.restrictedDerangementCount(t, r).longValueExact() : -1;
+                }
+            }
+        }
+    }
+
+    /**
+     * {@link #encode(BigInteger, int)} in primitive arithmetic, same algorithm and same digits. Used when
+     * D_n fits in 62 bits (n up to 20), which is when every block size and running total fits in a long.
+     *
+     * @return the digits, or null when this path does not apply
+     */
+    private static int[] encodeLong(long m, int n) {
+        if (n > LONG_MAX_N) return null;
+        long[] sub = LongCounts.SUB;
+        long[][] restricted = LongCounts.RESTRICTED;
+
+        int actualN = (n % 2 == 0) ? 2 : 3;
+        while (actualN < n && sub[actualN] <= m) {
+            actualN += 2;
+        }
+
+        int[] digits = new int[actualN];
+        boolean[] elementUsed = new boolean[actualN];
+        int restrictedCount = actualN;
+        for (int step = 0; step < actualN; step++) {
+            int remainingSize = actualN - step;
+            if (!elementUsed[step]) {
+                restrictedCount--;
+            }
+
+            int legalFoundCount = 0;
+            long cumulative = 0;
+            boolean selected = false;
+            for (int candidate = 0; candidate < actualN; candidate++) {
+                if (elementUsed[candidate] || candidate == step) {
+                    continue;
+                }
+                int nextRestricted = restrictedCount - (candidate > step ? 1 : 0);
+                long blockSize;
+                if (nextRestricted < 0) {
+                    blockSize = 0;
+                } else {
+                    blockSize = restricted[remainingSize - 1][nextRestricted];
+                    if (blockSize < 0) return null;   // outside the table: let the general path decide
+                }
+                if (m < cumulative + blockSize) {
+                    digits[actualN - 1 - step] = legalFoundCount;
+                    elementUsed[candidate] = true;
+                    m -= cumulative;
+                    restrictedCount = nextRestricted;
+                    selected = true;
+                    break;
+                }
+                cumulative += blockSize;
+                legalFoundCount++;
+            }
+            if (!selected) {
+                throw new IllegalStateException("Unable to encode rank at position " + step);
+            }
+        }
+        return digits;
     }
 
     /**

@@ -48,6 +48,7 @@ public final class MultisetPermutationByRanks<T> extends AbstractMultisetPermuta
 
     private final Iterable<BigInteger> ranks;
     private final BigInteger totalPermutations;
+    private final long longTotal;   // total permutations when the long path applies, else -1
 
     /**
      * Constructs a multiset permutation generator for specific ranks.
@@ -68,6 +69,7 @@ public final class MultisetPermutationByRanks<T> extends AbstractMultisetPermuta
         super(multiset, calculator);
         this.ranks = ranks;
         this.totalPermutations = getTotalPermutations();
+        this.longTotal = totalForLongArithmetic(totalPermutations);
     }
 
     @Override
@@ -118,6 +120,40 @@ public final class MultisetPermutationByRanks<T> extends AbstractMultisetPermuta
          * Fenwick search instead of scanning every type.
          */
         private int[] indicesForRank(BigInteger m) {
+            int[] output = longTotal >= 0 ? fillByLong(m.longValue()) : fillByBigInteger(m);
+
+            // Put the consumed items back so the next rank starts from the full multiset.
+            for (int index : output) {
+                remaining[index]++;
+                remainingTree.update(index + 1, 1);
+            }
+            return output;
+        }
+
+        /** Same arithmetic as {@link #fillByBigInteger}; every product is at most total x totalLength, so it fits. */
+        private int[] fillByLong(long m) {
+            int[] output = new int[totalLength];
+            long sum = totalLength;
+            long totalPossible = longTotal;
+
+            for (int j = 0; j < output.length; j++) {
+                int target = (int) (m * sum / totalPossible) + 1;
+                int position = remainingTree.findKth(target); // 1-based type index
+                int type = position - 1;
+
+                long permutationsBefore = totalPossible * remainingTree.rsq(position - 1) / sum;
+                totalPossible = totalPossible * remaining[type] / sum;
+
+                output[j] = type;
+                m -= permutationsBefore;
+                remaining[type]--;
+                remainingTree.update(position, -1);
+                sum--;
+            }
+            return output;
+        }
+
+        private int[] fillByBigInteger(BigInteger m) {
             int[] output = new int[totalLength];
             long sum = totalLength;
             BigInteger totalPossible = totalPermutations;
@@ -138,12 +174,6 @@ public final class MultisetPermutationByRanks<T> extends AbstractMultisetPermuta
                 remaining[type]--;
                 remainingTree.update(position, -1);
                 sum--;
-            }
-
-            // Put the consumed items back so the next rank starts from the full multiset.
-            for (int index : output) {
-                remaining[index]++;
-                remainingTree.update(index + 1, 1);
             }
             return output;
         }

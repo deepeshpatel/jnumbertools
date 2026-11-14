@@ -6,6 +6,7 @@ package io.github.deepeshpatel.jnumbertools.generator.subset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
+import io.github.deepeshpatel.jnumbertools.numbersystem.LongBinomials;
 
 import java.math.BigInteger;
 import java.util.Iterator;
@@ -52,6 +53,10 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> {
     private final BigInteger limit;     // absolute rank one past the range's last subset
     private final BigInteger total;     // number of subsets in the range, i.e. the builder's count()
 
+    // Primitive path, used when every absolute rank fits in 62 bits (otherwise both are null).
+    private final long[] lpre;          // pre[] as longs
+    private final long[][] ltable;      // binomials C(c, k) for c < n, k <= min(to, n), saturated
+
     SubsetGeneratorMth(int from, int to, BigInteger m, BigInteger start, List<T> elements, Calculator calculator) {
         super(elements);
         this.from = from;
@@ -71,6 +76,8 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> {
             initialM = BigInteger.ZERO;
             limit = BigInteger.ZERO;
             total = BigInteger.ZERO;
+            lpre = null;
+            ltable = null;
         } else {
             // Prefix sums of binomials give the block boundaries, the range offset, and the limit:
             //   pre[from]    = #subsets of size < from  -> converts a relative rank to an absolute one
@@ -81,6 +88,16 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> {
             initialM = start.add(pre[from]);
             limit = pre[top + 1];
             total = limit.subtract(pre[from]);
+
+            long[][] table = limit.bitLength() <= 62 ? LongBinomials.table(n, top + 1) : null;
+            if (table != null) {
+                lpre = new long[pre.length];
+                for (int i = 0; i < pre.length; i++) lpre[i] = pre[i].longValue();
+                ltable = table;
+            } else {
+                lpre = null;
+                ltable = null;
+            }
         }
     }
 
@@ -94,7 +111,7 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> {
         if (initialM.compareTo(limit) >= 0) {
             throw new NoSuchElementException("The configured range has no subset at the requested position");
         }
-        return indicesToValues(mth(initialM));
+        return indicesToValues(lpre != null ? mthLong(initialM.longValue()) : mth(initialM));
     }
 
     /** Number of subsets in the configured range (the builder's {@code count()}). */
@@ -116,10 +133,31 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> {
         if (rank.signum() < 0 || rank.compareTo(total) >= 0) {
             throw new IllegalArgumentException("Rank " + rank + " is out of bounds [0, " + total + ")");
         }
-        return indicesToValues(mth(rank.add(pre[from])));
+        return indicesToValues(lpre != null ? mthLong(rank.longValue() + lpre[from]) : mth(rank.add(pre[from])));
     }
 
     /** Absolute rank -> index array of the corresponding subset. */
+    /** {@link #mth(BigInteger)} in primitive arithmetic; only valid when the long tables exist. */
+    private int[] mthLong(long m) {
+        int lo = 0, hi = lpre.length - 1, block = 0;      // size of the subset: last block starting at or before m
+        while (lo <= hi) {
+            int mid = (lo + hi) >>> 1;
+            if (lpre[mid] <= m) { block = mid; lo = mid + 1; } else hi = mid - 1;
+        }
+        int r = block;
+        long rank = m - lpre[block];                      // offset within that size
+        int[] res = new int[r];
+        int x = 0;
+        for (int i = 0; i < r; i++) {
+            while (true) {
+                long c = ltable[n - 1 - x][r - 1 - i];
+                if (rank < c) { res[i] = x++; break; }
+                rank -= c; x++;
+            }
+        }
+        return res;
+    }
+
     private int[] mth(BigInteger m) {
         int block = blockOf(m);                          // size of the subset
         return unrankLex(block, m.subtract(pre[block])); // offset within that size
@@ -173,7 +211,7 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            int[] indices = mth(m);
+            int[] indices = lpre != null ? mthLong(m.longValue()) : mth(m);
             m = m.add(increment);
             return indicesToValues(indices);
         }

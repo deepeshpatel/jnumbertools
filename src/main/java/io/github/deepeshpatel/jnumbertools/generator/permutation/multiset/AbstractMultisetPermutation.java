@@ -8,6 +8,8 @@ import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.base.Permutations;
 import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Tuple;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -112,17 +114,33 @@ public abstract class AbstractMultisetPermutation<T> implements StreamableIterab
     }
 
     /**
+     * The total number of permutations as a long when every intermediate product of the unranking arithmetic
+     * (at most total x totalLength) fits in a long, otherwise -1. Unranking then runs in primitive arithmetic
+     * with exactly the same results.
+     *
+     * @param total the total number of permutations
+     * @return the total as a long, or -1 when the BigInteger path must be used
+     */
+    protected final long totalForLongArithmetic(BigInteger total) {
+        if (total.bitLength() > 62) return -1;
+        long t = total.longValue();
+        return t <= Long.MAX_VALUE / Math.max(1, totalLength) ? t : -1;
+    }
+
+    /**
      * Converts an array of indices to a permutation list using the sorted elements.
      *
      * @param indices the array of indices corresponding to positions in the elements list
      * @return the permutation as a {@code List<T>}
      */
     protected List<T> indicesToValues(int[] indices) {
-        List<T> result = new ArrayList<>(indices.length);
-        for (int index : indices) {
-            result.add(elements.get(index));
+        @SuppressWarnings("unchecked")
+        T[] result = (T[]) new Object[indices.length];
+        for (int i = 0; i < indices.length; i++) {
+            result[i] = elements.get(indices[i]);
         }
-        return List.copyOf(result);
+        // The array is private to this call, so wrapping it avoids two further copies.
+        return Tuple.wrap(result);
     }
 
     /**

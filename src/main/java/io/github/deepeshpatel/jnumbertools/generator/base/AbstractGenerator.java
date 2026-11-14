@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.base;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Tuple;
+
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -61,7 +63,8 @@ public abstract class AbstractGenerator<E> implements StreamableIterable<E> {
         for (int i = 0; i < indices.length; i++) {
             result[i] = elements.get(indices[i]);
         }
-        return List.of(result);
+        // The array is private to this call, so wrapping it avoids the extra copy List.of would make.
+        return Tuple.wrap(result);
     }
 
     /**

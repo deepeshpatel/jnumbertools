@@ -6,7 +6,7 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.derangement;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic;
+import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithms;
 
 import java.math.BigInteger;
 import java.util.Collections;
@@ -43,6 +43,7 @@ public final class DerangementByRanks<T> extends AbstractGenerator<T> {
 
     private final Iterable<BigInteger> ranks;
     private final Calculator calculator;
+    private final DerangadicAlgorithms algorithms;
     private final BigInteger totalDerangements;
 
     /**
@@ -56,6 +57,7 @@ public final class DerangementByRanks<T> extends AbstractGenerator<T> {
         super(elements);
         this.ranks = ranks;
         this.calculator = calculator;
+        this.algorithms = new DerangadicAlgorithms(calculator);
         this.totalDerangements = calculator.subFactorial(elements.size());
     }
 
@@ -95,9 +97,8 @@ public final class DerangementByRanks<T> extends AbstractGenerator<T> {
                 return Collections.emptyList();
             }
             // n >= 2 here: n=1 has total=0 so the rank check above always rejects.
-            var derangadic = new Derangadic(n, rank, calculator);
-            return indicesToValues(derangadic.derangement());
+            // Straight encode and decode: no incremental state machine is needed to answer a single rank.
+            return indicesToValues(algorithms.unrank(rank, n));
         }
     }
 }
-
