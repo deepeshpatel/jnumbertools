@@ -169,6 +169,38 @@ exactly like `{B:2}`.
 
 **Note**: Multiplicity 0 in a dimension (min = max = 0) contributes 1 empty tuple (as if dimension is absent).
 
+## CONDITIONAL CARTESIAN PRODUCT
+
+A simple Cartesian product of the dimensions, restricted by **rules**. A rule names two different
+dimensions and says: *whenever the value chosen from dimension A is in set S₁, the value chosen from
+dimension B must be in set S₂* (the rule says nothing about tuples where A is not in S₁). A tuple is
+**valid** when it satisfies every rule. `count()` is the number of valid tuples; every traversal
+operation works on the valid tuples only, and a rank is a position among the valid tuples in
+lexicographic order (dimension order, then the order of each list), so ranks change when rules change.
+Values are matched with equality. A dimension is referred to by the list it was added with.
+
+| Condition                             | Count | Iterator Returns | Interpretation                          |
+|---------------------------------------|-------|------------------|-----------------------------------------|
+| No rules                              | Π sizes | products       | Same as the simple Cartesian product    |
+| Any dimension is empty                | 0     | []               | Empty product                           |
+| Rules that no tuple satisfies         | 0     | []               | Empty product (impossible)              |
+| Normal case                           | number of tuples satisfying every rule | valid tuples | Restricted product |
+| **Error case** | **Condition** | **Throws** | | |
+| | null dimension, null value, null values collection, or null element in a dimension | null-input error | | | |
+| | a rule value that is not a value of the named dimension | invalid-argument error | | | |
+| | a rule with an empty list of values | invalid-argument error | | | at least one value is required |
+| | a rule whose two sides are the same dimension | invalid-argument error | | | a rule needs two different dimensions |
+| | a list that is not a dimension of the product, or the same list instance used for more than one dimension | invalid-argument error | | | the dimension would be ambiguous |
+| | two dimensions have more value pairs than the implementation limit (Java: 50,000,000) | invalid-argument error | | | implementation limit |
+| | rules link dimensions in a loop whose sizes multiply beyond the implementation limit (Java: 1,000,000) | invalid-argument error | | | implementation limit |
+
+**Note**: Rules are evaluated on pairs of dimensions, never on whole tuples. A rule cannot express a
+condition on three or more dimensions at once, or a condition on the sum of values, and an arbitrary
+predicate cannot be counted without evaluating every tuple, so none of these is supported.
+Builders are immutable; `and(...)` and the rule steps return new builders, and the builder snapshots
+its dimensions like every other builder (General rule 8). `choice` and `sample` on an empty product
+signal an invalid-argument error, as for the simple product.
+
 ## GENERAL RULES
 
 1. Null input always throws a **null-input error** (programmer error). This covers a null
@@ -263,6 +295,16 @@ The six simple Cartesian product issues previously listed here are resolved:
 | Immutable tuples from every generator | `lexOrder()` delegates to `SimpleProduct`, and rank-based generation wraps each tuple as an unmodifiable list. | `SimpleProductValidationRulesTest.resultsAreImmutable` |
 | Re-iterable generators | `lexOrder()`, `lexOrderMth()`, and `byRanks()` create fresh iterators for each traversal. | `SimpleProductValidationRulesTest.generatorsAreReIterable` |
 | Reject `choice()` on an empty domain | `BigIntegerChoice` validation rejects a non-positive domain count. | `SimpleProductValidationRulesTest.choiceFromAnEmptyProductIsRejected` |
+
+The conditional Cartesian product builder (unreleased) is specified by the section above and is
+verified by `ConditionalProductBuilderTest`: the worked example (`twoRulesOnTheSameTrigger`,
+`threeRulesFormingAPath`), the rule vocabulary (`ruleVocabularyIsEquivalent`), empty products
+(`ruleThatForbidsEverythingMakesTheProductEmpty`, `emptyDimensionMakesTheProductEmpty`), snapshots and
+immutability (`snapshotOfTheCallersLists`, `immutability`, `sharedBuilderRules`), the error cases
+(`nullAndUnknownInput`, `ruleValuesMustBeValuesOfTheDimension`, `aRuleNeedsTwoDifferentDimensions`,
+`sameListInstanceForTwoDimensionsIsAmbiguous`, `aLoopOverTooManyCombinationsIsRejected`), and counting,
+order, ranking and sampling against a brute-force filter on 400 random rule sets
+(`randomRuleSetsAgreeWithBruteForce`).
 
 ### Remaining discrepancies
 

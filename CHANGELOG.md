@@ -3,6 +3,18 @@
 All notable changes to JNumberTools are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- Conditional Cartesian product, started with `cartesianProduct().conditionalProductOf(list)` and
+  extended with `.and(list)` for more dimensions and `.when(list).is(...).then(list).isOneOf(...)` for
+  rules between two dimensions (`is`, `isNot`, `isOneOf`, `isNoneOf`, `isNotIn`). All rules must hold.
+  `count()`, `isEmpty()`, `lexOrder()`, `lexOrderMth(...)`, `byRanks(...)`, `choice(...)` and `sample(...)`
+  work on the valid tuples only, without enumerating the full product, and ranks are `BigInteger`.
+  Rules are evaluated on pairs of dimensions; dimensions linked in a loop are solved together and the
+  size of such a group is limited. See `docs/products/README.md` and `ValidationRules.md`.
+
 ## [4.0.1] - 2026-11-09
 
 Maintenance release. There are no changes to the supported public API or to library behavior.

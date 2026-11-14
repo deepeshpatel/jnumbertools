@@ -15,10 +15,11 @@ import java.util.List;
  * Generates Cartesian products of elements from given sets.
  * <p>
  * The Cartesian product of sets A₁, A₂, ..., Aₖ is the set of all ordered tuples (a₁, a₂, ..., aₖ)
- * where aᵢ ∈ Aᵢ. This class supports two types of products:
+ * where aᵢ ∈ Aᵢ. This class supports three types of products:
  * <ul>
  *   <li><b>Simple Product</b>: Aⁿ where A is a single set repeated n times</li>
  *   <li><b>Constrained Product</b>: A₁ × A₂ × ... × Aₖ where each Aᵢ can be a set, combination, or subset with constraints</li>
+ *   <li><b>Conditional Product</b>: a simple product restricted by rules between two dimensions</li>
  * </ul>
  *
  * <h2>Usage Examples</h2>

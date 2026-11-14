@@ -6,7 +6,7 @@
 **Key Features:**
 
 1. Applications in machine learning, cryptography, testing, and optimization.
-2. Iterator- and stream-based APIs for permutations, combinations, and Cartesian products, including constrained generation.
+2. Iterator- and stream-based APIs for permutations, combinations, and Cartesian products, including constrained generation and rule-restricted ("conditional") products that count, rank and sample without filtering the full product.
 3. Lexicographical sampling and ranking for efficient exploration of large combinatorial spaces.
 4. Java APIs that can be adapted by application code for workflows using Spark, Flink, Hadoop, and other data-processing frameworks; JNumberTools does not provide framework-specific connectors.
 
@@ -71,7 +71,7 @@ The argument checks and the exceptions each operation raises are specified in [V
 2. [Derangements: fixed-point-free permutations](docs/derangements/README.md)
 3. [Combinations: 15 different types of combinations](docs/combinations/README.md)
 4. [Set/subset generations: 7 different types available](docs/sets/README.md)
-5. [Cartesian Product: simple and constrained products](docs/products/README.md)
+5. [Cartesian Product: simple, constrained and conditional products](docs/products/README.md)
 6. [Ranking of permutations & combinations: 8 different types of rankings](docs/ranking/README.md)
 7. [Number system algorithms: 4 different types for combinatorics](docs/numbersystem/README.md)
 8. [Math Functions](docs/calculator/README.md)
