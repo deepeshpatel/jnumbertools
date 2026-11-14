@@ -42,7 +42,17 @@ public final class CombinadicAlgorithms {
      */
     private static final int WALK_MAX_N_PER_R = 1024;
 
+    /** Largest table (rows x columns) built for the {@code long} unranking path. */
+    private static final int LONG_TABLE_MAX_CELLS = 1 << 16;
+
     private final Calculator calculator;
+
+    /**
+     * Saturating Pascal table for the {@code long} path. Binomial coefficients do not depend on the
+     * calculator, so one table is shared by every instance (generators create instances per call). It only
+     * ever grows, and is replaced, never mutated, so it is safe to share between threads.
+     */
+    private static volatile long[][] longBinomials = new long[0][];
 
     /**
      * Constructs an instance of {@link CombinadicAlgorithms} with the specified calculator.
@@ -99,10 +109,66 @@ public final class CombinadicAlgorithms {
         if (r >= WALK_MIN_R && n <= (long) WALK_MAX_N_PER_R * r) {
             return unRankByWalk(rank, total, n, r);
         }
+        // When the whole space fits in 62 bits every comparison and subtraction below fits in a long too.
+        if (total.bitLength() <= 62 && rank.bitLength() <= 62) {
+            long[][] table = longTable(n, r);
+            if (table != null) {
+                return unRankByLongSearch(rank.longValue(), total.longValue(), n, r, table);
+            }
+        }
         return unRankBySearch(rank, total, n, r);
     }
 
-    private int[] unRankBySearch(BigInteger rank, BigInteger total, int n, int r) {
+    /**
+     * Returns a table t with t[c][k] = C(c, k) for 0 <= c < n and 0 <= k <= r, saturated at
+     * {@link Long#MAX_VALUE}, or null when it would be too large. A saturated entry only ever takes part in
+     * a "greater than remaining" comparison (remaining is below 2^62), so saturation never changes a result.
+     * Entries C(n-1, k) can exceed the total C(n, r) when r is close to n, hence the saturation.
+     */
+    private static long[][] longTable(int n, int r) {
+        long[][] t = longBinomials;
+        if (t.length >= n && t.length > 0 && t[0].length > r) return t;
+        if (n < 1) return null;
+        // Grow to cover everything seen so far, so alternating requests do not rebuild the table each time.
+        int rows = Math.max(n, t.length);
+        int cols = Math.max(r + 1, t.length > 0 ? t[0].length : 0);
+        if ((long) rows * cols > LONG_TABLE_MAX_CELLS) return null;
+        t = new long[rows][cols];
+        for (int c = 0; c < rows; c++) {
+            t[c][0] = 1;
+            for (int k = 1; k < cols && k <= c; k++) {
+                long sum = t[c - 1][k - 1] + t[c - 1][k];
+                t[c][k] = sum < 0 ? Long.MAX_VALUE : sum;
+            }
+        }
+        longBinomials = t;
+        return t;
+    }
+
+    private static int[] unRankByLongSearch(long rank, long total, int n, int r, long[][] t) {
+        int[] result = new int[r];
+        long remaining = total - 1 - rank;
+        for (int k = r, index = 0; k >= 1; k--) {
+            int low = k - 1;
+            int high = n - 1;
+            int best = k - 1;
+            while (low <= high) {
+                int mid = (low + high) >>> 1;
+                if (t[mid][k] <= remaining) {
+                    best = mid;
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+            result[index++] = n - 1 - best;
+            remaining -= t[best][k];
+        }
+        return result;
+    }
+
+    // Package-private so tests can compare it with the long path.
+    int[] unRankBySearch(BigInteger rank, BigInteger total, int n, int r) {
         int[] result = new int[r];
         int index = 0;
 

@@ -1,0 +1,345 @@
+Benchmark                                                                                  (scenarioName)  Mode  Cnt           Score       Error   Units
+ConditionalProductComplexPathBenchmark.builderBuildAndCount                                CHAIN_5x30_d30  avgt   30         132.166 ±     0.949   us/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate                  CHAIN_5x30_d30  avgt   30        5697.711 ±    40.610  MB/sec
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate.norm             CHAIN_5x30_d30  avgt   30      789705.842 ±     0.015    B/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.count                       CHAIN_5x30_d30  avgt   30         240.000              counts
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.time                        CHAIN_5x30_d30  avgt   30          98.000                  ms
+ConditionalProductComplexPathBenchmark.builderBuildAndCount                           STAR_FIRST_5x30_d30  avgt   30         133.448 ±     0.874   us/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate             STAR_FIRST_5x30_d30  avgt   30        5636.172 ±    39.328  MB/sec
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate.norm        STAR_FIRST_5x30_d30  avgt   30      788769.861 ±  1230.085    B/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.count                  STAR_FIRST_5x30_d30  avgt   30         246.000              counts
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.time                   STAR_FIRST_5x30_d30  avgt   30          99.000                  ms
+ConditionalProductComplexPathBenchmark.builderBuildAndCount                            STAR_LAST_5x30_d30  avgt   30         127.239 ±     0.884   us/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate              STAR_LAST_5x30_d30  avgt   30        5934.777 ±    39.489  MB/sec
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate.norm         STAR_LAST_5x30_d30  avgt   30      791905.773 ±     0.013    B/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.count                   STAR_LAST_5x30_d30  avgt   30         248.000              counts
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.time                    STAR_LAST_5x30_d30  avgt   30          98.000                  ms
+ConditionalProductComplexPathBenchmark.builderBuildAndCount                            STAR_LAST_7x15_d20  avgt   30          63.904 ±     2.002   us/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate              STAR_LAST_7x15_d20  avgt   30        6112.849 ±   167.891  MB/sec
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate.norm         STAR_LAST_7x15_d20  avgt   30      408947.560 ±   115.853    B/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.count                   STAR_LAST_7x15_d20  avgt   30         578.000              counts
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.time                    STAR_LAST_7x15_d20  avgt   30         153.000                  ms
+ConditionalProductComplexPathBenchmark.builderBuildAndCount                        SHUFFLED_TREE_8x12_d25  avgt   30          60.285 ±     0.511   us/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate          SHUFFLED_TREE_8x12_d25  avgt   30        5876.646 ±    50.388  MB/sec
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate.norm     SHUFFLED_TREE_8x12_d25  avgt   30      371504.843 ±     0.008    B/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.count               SHUFFLED_TREE_8x12_d25  avgt   30         262.000              counts
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.time                SHUFFLED_TREE_8x12_d25  avgt   30         103.000                  ms
+ConditionalProductComplexPathBenchmark.builderBuildAndCount                       SHUFFLED_TREE_12x10_d15  avgt   30         103.296 ±     2.075   us/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate         SHUFFLED_TREE_12x10_d15  avgt   30        4697.234 ±    92.538  MB/sec
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate.norm    SHUFFLED_TREE_12x10_d15  avgt   30      508457.440 ±     0.029    B/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.count              SHUFFLED_TREE_12x10_d15  avgt   30         572.000              counts
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.time               SHUFFLED_TREE_12x10_d15  avgt   30         128.000                  ms
+ConditionalProductComplexPathBenchmark.builderBuildAndCount                                CYCLE_3x60_d50  avgt   30        2218.134 ±   163.755   us/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate                  CYCLE_3x60_d50  avgt   30        3236.655 ±   170.950  MB/sec
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate.norm             CYCLE_3x60_d50  avgt   30     7467094.988 ±  1845.106    B/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.count                       CYCLE_3x60_d50  avgt   30         314.000              counts
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.time                        CYCLE_3x60_d50  avgt   30         147.000                  ms
+ConditionalProductComplexPathBenchmark.builderBuildAndCount                           CYCLE_TAIL_6x20_d40  avgt   30         176.778 ±     2.386   us/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate             CYCLE_TAIL_6x20_d40  avgt   30        5455.055 ±    70.678  MB/sec
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate.norm        CYCLE_TAIL_6x20_d40  avgt   30     1011026.463 ±   930.259    B/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.count                  CYCLE_TAIL_6x20_d40  avgt   30         341.000              counts
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.time                   CYCLE_TAIL_6x20_d40  avgt   30         114.000                  ms
+ConditionalProductComplexPathBenchmark.builderBuildAndCount                        SHUFFLED_TREE_30x8_d30  avgt   30        2093.886 ±    96.117   us/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate          SHUFFLED_TREE_30x8_d30  avgt   30         785.937 ±    34.868  MB/sec
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.alloc.rate.norm     SHUFFLED_TREE_30x8_d30  avgt   30     1718461.517 ±    27.613    B/op
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.count               SHUFFLED_TREE_30x8_d30  avgt   30         122.000              counts
+ConditionalProductComplexPathBenchmark.builderBuildAndCount:gc.time                SHUFFLED_TREE_30x8_d30  avgt   30          25.000                  ms
+ConditionalProductComplexPathBenchmark.builderFirstN                                       CHAIN_5x30_d30  avgt   30          27.579 ±     0.975   us/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate                         CHAIN_5x30_d30  avgt   30        2230.963 ±    71.396  MB/sec
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate.norm                    CHAIN_5x30_d30  avgt   30       64372.791 ±     5.629    B/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.count                              CHAIN_5x30_d30  avgt   30         316.000              counts
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.time                               CHAIN_5x30_d30  avgt   30          65.000                  ms
+ConditionalProductComplexPathBenchmark.builderFirstN                                  STAR_FIRST_5x30_d30  avgt   30          27.630 ±     0.626   us/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate                    STAR_FIRST_5x30_d30  avgt   30        2223.692 ±    48.712  MB/sec
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate.norm               STAR_FIRST_5x30_d30  avgt   30       64370.181 ±     3.661    B/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.count                         STAR_FIRST_5x30_d30  avgt   30         271.000              counts
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.time                          STAR_FIRST_5x30_d30  avgt   30          64.000                  ms
+ConditionalProductComplexPathBenchmark.builderFirstN                                   STAR_LAST_5x30_d30  avgt   30         231.698 ±     7.217   us/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate                     STAR_LAST_5x30_d30  avgt   30         265.452 ±     8.488  MB/sec
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate.norm                STAR_LAST_5x30_d30  avgt   30       64371.230 ±     0.101    B/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.count                          STAR_LAST_5x30_d30  avgt   30         267.000              counts
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.time                           STAR_LAST_5x30_d30  avgt   30          37.000                  ms
+ConditionalProductComplexPathBenchmark.builderFirstN                                   STAR_LAST_7x15_d20  avgt   30         242.072 ±    14.598   us/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate                     STAR_LAST_7x15_d20  avgt   30         287.363 ±    17.619  MB/sec
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate.norm                STAR_LAST_7x15_d20  avgt   30       72379.370 ±     0.201    B/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.count                          STAR_LAST_7x15_d20  avgt   30          27.000              counts
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.time                           STAR_LAST_7x15_d20  avgt   30          12.000                  ms
+ConditionalProductComplexPathBenchmark.builderFirstN                               SHUFFLED_TREE_8x12_d25  avgt   30          73.427 ±     1.394   us/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate                 SHUFFLED_TREE_8x12_d25  avgt   30         940.714 ±    17.458  MB/sec
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate.norm            SHUFFLED_TREE_8x12_d25  avgt   30       72391.562 ±     7.715    B/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.count                      SHUFFLED_TREE_8x12_d25  avgt   30         117.000              counts
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.time                       SHUFFLED_TREE_8x12_d25  avgt   30          30.000                  ms
+ConditionalProductComplexPathBenchmark.builderFirstN                              SHUFFLED_TREE_12x10_d15  avgt   30         312.519 ±    23.311   us/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate                SHUFFLED_TREE_12x10_d15  avgt   30         272.988 ±    20.577  MB/sec
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate.norm           SHUFFLED_TREE_12x10_d15  avgt   30       88396.350 ±     0.321    B/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.count                     SHUFFLED_TREE_12x10_d15  avgt   30          31.000              counts
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.time                      SHUFFLED_TREE_12x10_d15  avgt   30          13.000                  ms
+ConditionalProductComplexPathBenchmark.builderFirstN                                       CYCLE_3x60_d50  avgt   30          31.402 ±     0.356   us/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate                         CYCLE_3x60_d50  avgt   30        1711.870 ±    19.405  MB/sec
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate.norm                    CYCLE_3x60_d50  avgt   30       56365.214 ±     6.418    B/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.count                              CYCLE_3x60_d50  avgt   30         540.000              counts
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.time                               CYCLE_3x60_d50  avgt   30          79.000                  ms
+ConditionalProductComplexPathBenchmark.builderFirstN                                  CYCLE_TAIL_6x20_d40  avgt   30          32.715 ±     0.767   us/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate                    CYCLE_TAIL_6x20_d40  avgt   30        1878.307 ±    45.051  MB/sec
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate.norm               CYCLE_TAIL_6x20_d40  avgt   30       64373.219 ±     6.183    B/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.count                         CYCLE_TAIL_6x20_d40  avgt   30         236.000              counts
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.time                          CYCLE_TAIL_6x20_d40  avgt   30          54.000                  ms
+ConditionalProductComplexPathBenchmark.builderFirstN                               SHUFFLED_TREE_30x8_d30  avgt   30         220.897 ±     4.670   us/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate                 SHUFFLED_TREE_30x8_d30  avgt   30         693.245 ±    14.401  MB/sec
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.alloc.rate.norm            SHUFFLED_TREE_30x8_d30  avgt   30      160467.081 ±     0.068    B/op
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.count                      SHUFFLED_TREE_30x8_d30  avgt   30          82.000              counts
+ConditionalProductComplexPathBenchmark.builderFirstN:gc.time                       SHUFFLED_TREE_30x8_d30  avgt   30          22.000                  ms
+ConditionalProductComplexPathBenchmark.builderSample100                                    CHAIN_5x30_d30  avgt   30          95.813 ±     1.342   us/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate                      CHAIN_5x30_d30  avgt   30         185.429 ±     2.454  MB/sec
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate.norm                 CHAIN_5x30_d30  avgt   30       18626.707 ±     2.738    B/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.count                           CHAIN_5x30_d30  avgt   30         215.000              counts
+ConditionalProductComplexPathBenchmark.builderSample100:gc.time                            CHAIN_5x30_d30  avgt   30          31.000                  ms
+ConditionalProductComplexPathBenchmark.builderSample100                               STAR_FIRST_5x30_d30  avgt   30          93.919 ±     5.268   us/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate                 STAR_FIRST_5x30_d30  avgt   30         190.122 ±    10.140  MB/sec
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate.norm            STAR_FIRST_5x30_d30  avgt   30       18607.027 ±    15.483    B/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.count                      STAR_FIRST_5x30_d30  avgt   30         228.000              counts
+ConditionalProductComplexPathBenchmark.builderSample100:gc.time                       STAR_FIRST_5x30_d30  avgt   30          32.000                  ms
+ConditionalProductComplexPathBenchmark.builderSample100                                STAR_LAST_5x30_d30  avgt   30         412.468 ±    16.016   us/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate                  STAR_LAST_5x30_d30  avgt   30          37.635 ±     1.416  MB/sec
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate.norm             STAR_LAST_5x30_d30  avgt   30       16229.746 ±     0.221    B/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.count                       STAR_LAST_5x30_d30  avgt   30          37.000              counts
+ConditionalProductComplexPathBenchmark.builderSample100:gc.time                        STAR_LAST_5x30_d30  avgt   30          17.000                  ms
+ConditionalProductComplexPathBenchmark.builderSample100                                STAR_LAST_7x15_d20  avgt   30         197.577 ±    10.446   us/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate                  STAR_LAST_7x15_d20  avgt   30         105.597 ±     5.757  MB/sec
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate.norm             STAR_LAST_7x15_d20  avgt   30       21746.737 ±     0.144    B/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.count                       STAR_LAST_7x15_d20  avgt   30          10.000              counts
+ConditionalProductComplexPathBenchmark.builderSample100:gc.time                        STAR_LAST_7x15_d20  avgt   30           4.000                  ms
+ConditionalProductComplexPathBenchmark.builderSample100                            SHUFFLED_TREE_8x12_d25  avgt   30         214.272 ±     9.708   us/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate              SHUFFLED_TREE_8x12_d25  avgt   30          79.659 ±     3.446  MB/sec
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate.norm         SHUFFLED_TREE_8x12_d25  avgt   30       17826.966 ±     0.135    B/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.count                   SHUFFLED_TREE_8x12_d25  avgt   30           8.000              counts
+ConditionalProductComplexPathBenchmark.builderSample100:gc.time                    SHUFFLED_TREE_8x12_d25  avgt   30           4.000                  ms
+ConditionalProductComplexPathBenchmark.builderSample100                           SHUFFLED_TREE_12x10_d15  avgt   30         200.839 ±    18.795   us/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate             SHUFFLED_TREE_12x10_d15  avgt   30         151.434 ±    14.517  MB/sec
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate.norm        SHUFFLED_TREE_12x10_d15  avgt   30       31282.787 ±     0.260    B/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.count                  SHUFFLED_TREE_12x10_d15  avgt   30          15.000              counts
+ConditionalProductComplexPathBenchmark.builderSample100:gc.time                   SHUFFLED_TREE_12x10_d15  avgt   30           6.000                  ms
+ConditionalProductComplexPathBenchmark.builderSample100                                    CYCLE_3x60_d50  avgt   30         448.716 ±     8.731   us/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate                      CYCLE_3x60_d50  avgt   30          32.748 ±     1.029  MB/sec
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate.norm                 CYCLE_3x60_d50  avgt   30       15430.350 ±   769.018    B/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.count                           CYCLE_3x60_d50  avgt   30          32.000              counts
+ConditionalProductComplexPathBenchmark.builderSample100:gc.time                            CYCLE_3x60_d50  avgt   30           9.000                  ms
+ConditionalProductComplexPathBenchmark.builderSample100                               CYCLE_TAIL_6x20_d40  avgt   30         270.544 ±     2.149   us/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate                 CYCLE_TAIL_6x20_d40  avgt   30          65.654 ±     0.505  MB/sec
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate.norm            CYCLE_TAIL_6x20_d40  avgt   30       18627.771 ±     0.030    B/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.count                      CYCLE_TAIL_6x20_d40  avgt   30          83.000              counts
+ConditionalProductComplexPathBenchmark.builderSample100:gc.time                       CYCLE_TAIL_6x20_d40  avgt   30          15.000                  ms
+ConditionalProductComplexPathBenchmark.builderSample100                            SHUFFLED_TREE_30x8_d30  avgt   30        3925.763 ±    28.888   us/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate              SHUFFLED_TREE_30x8_d30  avgt   30          13.568 ±     0.098  MB/sec
+ConditionalProductComplexPathBenchmark.builderSample100:gc.alloc.rate.norm         SHUFFLED_TREE_30x8_d30  avgt   30       55862.141 ±     0.402    B/op
+ConditionalProductComplexPathBenchmark.builderSample100:gc.count                   SHUFFLED_TREE_30x8_d30  avgt   30           2.000              counts
+ConditionalProductComplexPathBenchmark.builderSample100:gc.time                    SHUFFLED_TREE_30x8_d30  avgt   30             ≈ 0                  ms
+ConditionalProductComplexPathBenchmark.builderUnrank                                       CHAIN_5x30_d30  avgt   30           0.957 ±     0.024   us/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate                         CHAIN_5x30_d30  avgt   30         343.402 ±    15.817  MB/sec
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate.norm                    CHAIN_5x30_d30  avgt   30         344.013 ±     7.688    B/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.count                              CHAIN_5x30_d30  avgt   30         356.000              counts
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.time                               CHAIN_5x30_d30  avgt   30          45.000                  ms
+ConditionalProductComplexPathBenchmark.builderUnrank                                  STAR_FIRST_5x30_d30  avgt   30           1.009 ±     0.009   us/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate                    STAR_FIRST_5x30_d30  avgt   30         317.369 ±     4.738  MB/sec
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate.norm               STAR_FIRST_5x30_d30  avgt   30         336.014 ±     7.688    B/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.count                         STAR_FIRST_5x30_d30  avgt   30         350.000              counts
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.time                          STAR_FIRST_5x30_d30  avgt   30          43.000                  ms
+ConditionalProductComplexPathBenchmark.builderUnrank                                   STAR_LAST_5x30_d30  avgt   30           4.300 ±     0.107   us/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate                     STAR_LAST_5x30_d30  avgt   30          72.831 ±     1.718  MB/sec
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate.norm                STAR_LAST_5x30_d30  avgt   30         328.060 ±     0.001    B/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.count                          STAR_LAST_5x30_d30  avgt   30          85.000              counts
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.time                           STAR_LAST_5x30_d30  avgt   30          16.000                  ms
+ConditionalProductComplexPathBenchmark.builderUnrank                                   STAR_LAST_7x15_d20  avgt   30           1.875 ±     0.073   us/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate                     STAR_LAST_7x15_d20  avgt   30         183.508 ±     6.443  MB/sec
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate.norm                STAR_LAST_7x15_d20  avgt   30         360.026 ±     7.688    B/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.count                          STAR_LAST_7x15_d20  avgt   30          18.000              counts
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.time                           STAR_LAST_7x15_d20  avgt   30           8.000                  ms
+ConditionalProductComplexPathBenchmark.builderUnrank                               SHUFFLED_TREE_8x12_d25  avgt   30           2.228 ±     0.070   us/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate                 SHUFFLED_TREE_8x12_d25  avgt   30         147.521 ±     4.588  MB/sec
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate.norm            SHUFFLED_TREE_8x12_d25  avgt   30         344.031 ±     0.001    B/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.count                      SHUFFLED_TREE_8x12_d25  avgt   30          17.000              counts
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.time                       SHUFFLED_TREE_8x12_d25  avgt   30           7.000                  ms
+ConditionalProductComplexPathBenchmark.builderUnrank                              SHUFFLED_TREE_12x10_d15  avgt   30           2.180 ±     0.255   us/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate                SHUFFLED_TREE_12x10_d15  avgt   30         169.813 ±    21.350  MB/sec
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate.norm           SHUFFLED_TREE_12x10_d15  avgt   30         376.030 ±     0.004    B/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.count                     SHUFFLED_TREE_12x10_d15  avgt   30          18.000              counts
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.time                      SHUFFLED_TREE_12x10_d15  avgt   30           7.000                  ms
+ConditionalProductComplexPathBenchmark.builderUnrank                                       CYCLE_3x60_d50  avgt   30           4.565 ±     0.061   us/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate                         CYCLE_3x60_d50  avgt   30          65.210 ±     0.864  MB/sec
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate.norm                    CYCLE_3x60_d50  avgt   30         312.063 ±     0.001    B/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.count                              CYCLE_3x60_d50  avgt   30          61.000              counts
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.time                               CYCLE_3x60_d50  avgt   30          11.000                  ms
+ConditionalProductComplexPathBenchmark.builderUnrank                                  CYCLE_TAIL_6x20_d40  avgt   30           2.877 ±     0.030   us/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate                    CYCLE_TAIL_6x20_d40  avgt   30         108.745 ±     1.141  MB/sec
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate.norm               CYCLE_TAIL_6x20_d40  avgt   30         328.040 ±     0.001    B/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.count                         CYCLE_TAIL_6x20_d40  avgt   30         125.000              counts
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.time                          CYCLE_TAIL_6x20_d40  avgt   30          19.000                  ms
+ConditionalProductComplexPathBenchmark.builderUnrank                               SHUFFLED_TREE_30x8_d30  avgt   30          38.935 ±     0.409   us/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate                 SHUFFLED_TREE_30x8_d30  avgt   30          12.744 ±     0.132  MB/sec
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.alloc.rate.norm            SHUFFLED_TREE_30x8_d30  avgt   30         520.286 ±     0.645    B/op
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.count                      SHUFFLED_TREE_30x8_d30  avgt   30           2.000              counts
+ConditionalProductComplexPathBenchmark.builderUnrank:gc.time                       SHUFFLED_TREE_30x8_d30  avgt   30             ≈ 0                  ms
+ConditionalProductComplexPathBenchmark.imperativeBacktracking                              CHAIN_5x30_d30  avgt   30          20.578 ±     1.355   us/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate                CHAIN_5x30_d30  avgt   30        1874.324 ±   115.409  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate.norm           CHAIN_5x30_d30  avgt   30       40096.287 ±     0.019    B/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.count                     CHAIN_5x30_d30  avgt   30         252.000              counts
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.time                      CHAIN_5x30_d30  avgt   30          53.000                  ms
+ConditionalProductComplexPathBenchmark.imperativeBacktracking                         STAR_FIRST_5x30_d30  avgt   30          19.923 ±     0.255   us/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate           STAR_FIRST_5x30_d30  avgt   30        1919.575 ±    23.603  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate.norm      STAR_FIRST_5x30_d30  avgt   30       40096.277 ±     0.004    B/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.count                STAR_FIRST_5x30_d30  avgt   30         258.000              counts
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.time                 STAR_FIRST_5x30_d30  avgt   30          54.000                  ms
+ConditionalProductComplexPathBenchmark.imperativeBacktracking                          STAR_LAST_5x30_d30  avgt   30         156.282 ±     4.912   us/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate            STAR_LAST_5x30_d30  avgt   30         391.836 ±    11.748  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate.norm       STAR_LAST_5x30_d30  avgt   30       64098.178 ±     0.070    B/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.count                 STAR_LAST_5x30_d30  avgt   30         429.000              counts
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.time                  STAR_LAST_5x30_d30  avgt   30          57.000                  ms
+ConditionalProductComplexPathBenchmark.imperativeBacktracking                          STAR_LAST_7x15_d20  avgt   30       29922.353 ±   374.093   us/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate            STAR_LAST_7x15_d20  avgt   30           2.311 ±     0.028  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate.norm       STAR_LAST_7x15_d20  avgt   30       72504.506 ±     8.798    B/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.count                 STAR_LAST_7x15_d20  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.imperativeBacktracking                      SHUFFLED_TREE_8x12_d25  avgt   30          56.987 ±     0.443   us/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate        SHUFFLED_TREE_8x12_d25  avgt   30        1206.539 ±     9.251  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate.norm   SHUFFLED_TREE_8x12_d25  avgt   30       72104.796 ±     0.006    B/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.count             SHUFFLED_TREE_8x12_d25  avgt   30         149.000              counts
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.time              SHUFFLED_TREE_8x12_d25  avgt   30          37.000                  ms
+ConditionalProductComplexPathBenchmark.imperativeBacktracking                     SHUFFLED_TREE_12x10_d15  avgt   30         236.611 ±     1.728   us/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate       SHUFFLED_TREE_12x10_d15  avgt   30         355.134 ±     2.556  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate.norm  SHUFFLED_TREE_12x10_d15  avgt   30       88123.295 ±     0.024    B/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.count            SHUFFLED_TREE_12x10_d15  avgt   30          45.000              counts
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.time             SHUFFLED_TREE_12x10_d15  avgt   30          14.000                  ms
+ConditionalProductComplexPathBenchmark.imperativeBacktracking                              CYCLE_3x60_d50  avgt   30          17.553 ±     0.335   us/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate                CYCLE_3x60_d50  avgt   30        1744.292 ±    31.534  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate.norm           CYCLE_3x60_d50  avgt   30       32088.245 ±     0.005    B/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.count                     CYCLE_3x60_d50  avgt   30         551.000              counts
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.time                      CYCLE_3x60_d50  avgt   30          80.000                  ms
+ConditionalProductComplexPathBenchmark.imperativeBacktracking                         CYCLE_TAIL_6x20_d40  avgt   30          22.308 ±     0.083   us/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate           CYCLE_TAIL_6x20_d40  avgt   30        1713.838 ±     6.401  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate.norm      CYCLE_TAIL_6x20_d40  avgt   30       40096.311 ±     0.001    B/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.count                CYCLE_TAIL_6x20_d40  avgt   30         238.000              counts
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.time                 CYCLE_TAIL_6x20_d40  avgt   30          49.000                  ms
+ConditionalProductComplexPathBenchmark.imperativeBacktracking                      SHUFFLED_TREE_30x8_d30  avgt   30       63891.963 ±  1012.922   us/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate        SHUFFLED_TREE_30x8_d30  avgt   30           0.016 ±     0.001  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.alloc.rate.norm   SHUFFLED_TREE_30x8_d30  avgt   30        1104.000 ±     0.001    B/op
+ConditionalProductComplexPathBenchmark.imperativeBacktracking:gc.count             SHUFFLED_TREE_30x8_d30  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly                              CHAIN_5x30_d30  avgt   30          13.010 ±     2.911   us/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate                CHAIN_5x30_d30  avgt   30           7.755 ±     1.462  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate.norm           CHAIN_5x30_d30  avgt   30          96.180 ±     0.040    B/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.count                     CHAIN_5x30_d30  avgt   30           9.000              counts
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.time                      CHAIN_5x30_d30  avgt   30           6.000                  ms
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly                         STAR_FIRST_5x30_d30  avgt   30          10.350 ±     0.073   us/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate           STAR_FIRST_5x30_d30  avgt   30           8.857 ±     0.061  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate.norm      STAR_FIRST_5x30_d30  avgt   30          96.143 ±     0.001    B/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.count                STAR_FIRST_5x30_d30  avgt   30          11.000              counts
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.time                 STAR_FIRST_5x30_d30  avgt   30           6.000                  ms
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly                          STAR_LAST_5x30_d30  avgt   30         136.728 ±     1.688   us/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate            STAR_LAST_5x30_d30  avgt   30           0.683 ±     0.008  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate.norm       STAR_LAST_5x30_d30  avgt   30          97.890 ±     0.024    B/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.count                 STAR_LAST_5x30_d30  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly                          STAR_LAST_7x15_d20  avgt   30       29834.592 ±   100.891   us/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate            STAR_LAST_7x15_d20  avgt   30           0.016 ±     0.001  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate.norm       STAR_LAST_7x15_d20  avgt   30         507.514 ±     7.099    B/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.count                 STAR_LAST_7x15_d20  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly                      SHUFFLED_TREE_8x12_d25  avgt   30          40.116 ±     0.510   us/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate        SHUFFLED_TREE_8x12_d25  avgt   30           2.486 ±     0.029  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate.norm   SHUFFLED_TREE_8x12_d25  avgt   30         104.555 ±     0.007    B/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.count             SHUFFLED_TREE_8x12_d25  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly                     SHUFFLED_TREE_12x10_d15  avgt   30         214.140 ±     1.624   us/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate       SHUFFLED_TREE_12x10_d15  avgt   30           0.548 ±     0.004  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate.norm  SHUFFLED_TREE_12x10_d15  avgt   30         122.960 ±     0.022    B/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.count            SHUFFLED_TREE_12x10_d15  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly                              CYCLE_3x60_d50  avgt   30          10.373 ±     0.126   us/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate                CYCLE_3x60_d50  avgt   30           8.104 ±     0.093  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate.norm           CYCLE_3x60_d50  avgt   30          88.144 ±     0.002    B/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.count                     CYCLE_3x60_d50  avgt   30           9.000              counts
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.time                      CYCLE_3x60_d50  avgt   30           2.000                  ms
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly                         CYCLE_TAIL_6x20_d40  avgt   30          14.054 ±     0.220   us/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate           CYCLE_TAIL_6x20_d40  avgt   30           6.529 ±     0.093  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate.norm      CYCLE_TAIL_6x20_d40  avgt   30          96.195 ±     0.003    B/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.count                CYCLE_TAIL_6x20_d40  avgt   30           7.000              counts
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.time                 CYCLE_TAIL_6x20_d40  avgt   30           4.000                  ms
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly                      SHUFFLED_TREE_30x8_d30  avgt   30       63383.590 ±    77.696   us/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate        SHUFFLED_TREE_30x8_d30  avgt   30           0.017 ±     0.001  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.alloc.rate.norm   SHUFFLED_TREE_30x8_d30  avgt   30        1104.000 ±     0.001    B/op
+ConditionalProductComplexPathBenchmark.imperativeChecksumOnly:gc.count             SHUFFLED_TREE_30x8_d30  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.imperativeCount                                     CHAIN_5x30_d30  avgt   30        1461.716 ±    20.343   us/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate                       CHAIN_5x30_d30  avgt   30           0.071 ±     0.001  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate.norm                  CHAIN_5x30_d30  avgt   30         108.206 ±     0.276    B/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.count                            CHAIN_5x30_d30  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.imperativeCount                                STAR_FIRST_5x30_d30  avgt   30        2313.009 ±   429.277   us/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate                  STAR_FIRST_5x30_d30  avgt   30           0.053 ±     0.009  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate.norm             STAR_FIRST_5x30_d30  avgt   30         119.901 ±     5.907    B/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.count                       STAR_FIRST_5x30_d30  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.imperativeCount                                 STAR_LAST_5x30_d30  avgt   30      106200.877 ±  1197.577   us/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate                   STAR_LAST_5x30_d30  avgt   30           0.013 ±     0.001  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate.norm              STAR_LAST_5x30_d30  avgt   30        1483.200 ±     0.001    B/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.count                        STAR_LAST_5x30_d30  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.imperativeCount                                 STAR_LAST_7x15_d20  avgt   30      117660.700 ±  3722.935   us/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate                   STAR_LAST_7x15_d20  avgt   30           0.012 ±     0.001  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate.norm              STAR_LAST_7x15_d20  avgt   30        1518.613 ±    42.581    B/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.count                        STAR_LAST_7x15_d20  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.imperativeCount                             SHUFFLED_TREE_8x12_d25  avgt   30        2587.684 ±     3.703   us/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate               SHUFFLED_TREE_8x12_d25  avgt   30           0.049 ±     0.001  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate.norm          SHUFFLED_TREE_8x12_d25  avgt   30         131.671 ±     0.076    B/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.count                    SHUFFLED_TREE_8x12_d25  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.imperativeCount                            SHUFFLED_TREE_12x10_d15  avgt   30        1042.092 ±     1.804   us/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate              SHUFFLED_TREE_12x10_d15  avgt   30           0.107 ±     0.007  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate.norm         SHUFFLED_TREE_12x10_d15  avgt   30         117.095 ±     7.766    B/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.count                   SHUFFLED_TREE_12x10_d15  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.imperativeCount                                     CYCLE_3x60_d50  avgt   30        1571.466 ±    64.425   us/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate                       CYCLE_3x60_d50  avgt   30           0.062 ±     0.002  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate.norm                  CYCLE_3x60_d50  avgt   30         101.682 ±     0.891    B/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.count                            CYCLE_3x60_d50  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.imperativeCount                                CYCLE_TAIL_6x20_d40  avgt   30        3418.231 ±    11.902   us/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate                  CYCLE_TAIL_6x20_d40  avgt   30           0.038 ±     0.001  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate.norm             CYCLE_TAIL_6x20_d40  avgt   30         135.073 ±     0.172    B/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.count                       CYCLE_TAIL_6x20_d40  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.imperativeCount                             SHUFFLED_TREE_30x8_d30  avgt   30      123801.601 ±   167.851   us/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate               SHUFFLED_TREE_30x8_d30  avgt   30           0.012 ±     0.001  MB/sec
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.alloc.rate.norm          SHUFFLED_TREE_30x8_d30  avgt   30        1595.200 ±     0.001    B/op
+ConditionalProductComplexPathBenchmark.imperativeCount:gc.count                    SHUFFLED_TREE_30x8_d30  avgt   30             ≈ 0              counts
+ConditionalProductComplexPathBenchmark.javaStreamFilter                                    CHAIN_5x30_d30  avgt   30        5866.619 ±    17.147   us/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate                      CHAIN_5x30_d30  avgt   30        2540.884 ±     7.310  MB/sec
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate.norm                 CHAIN_5x30_d30  avgt   30    15637049.192 ±     0.349    B/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.count                           CHAIN_5x30_d30  avgt   30         282.000              counts
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.time                            CHAIN_5x30_d30  avgt   30         104.000                  ms
+ConditionalProductComplexPathBenchmark.javaStreamFilter                               STAR_FIRST_5x30_d30  avgt   30        5253.437 ±    76.445   us/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate                 STAR_FIRST_5x30_d30  avgt   30        2567.771 ±    33.701  MB/sec
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate.norm            STAR_FIRST_5x30_d30  avgt   30    14145136.849 ±     1.027    B/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.count                      STAR_FIRST_5x30_d30  avgt   30         281.000              counts
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.time                       STAR_FIRST_5x30_d30  avgt   30         106.000                  ms
+ConditionalProductComplexPathBenchmark.javaStreamFilter                                STAR_LAST_5x30_d30  avgt   30        1440.422 ±     7.309   us/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate                  STAR_LAST_5x30_d30  avgt   30        2397.558 ±    11.992  MB/sec
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate.norm             STAR_LAST_5x30_d30  avgt   30     3622652.047 ±     0.104    B/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.count                       STAR_LAST_5x30_d30  avgt   30         270.000              counts
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.time                        STAR_LAST_5x30_d30  avgt   30         105.000                  ms
+ConditionalProductComplexPathBenchmark.javaStreamFilter                                STAR_LAST_7x15_d20  avgt   30      399620.499 ± 16080.847   us/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate                  STAR_LAST_7x15_d20  avgt   30        2312.183 ±    89.250  MB/sec
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate.norm             STAR_LAST_7x15_d20  avgt   30   965923036.000 ±     0.001    B/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.count                       STAR_LAST_7x15_d20  avgt   30         442.000              counts
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.time                        STAR_LAST_7x15_d20  avgt   30         152.000                  ms
+ConditionalProductComplexPathBenchmark.javaStreamFilter                            SHUFFLED_TREE_8x12_d25  avgt   30      235446.582 ± 10731.589   us/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate              SHUFFLED_TREE_8x12_d25  avgt   30        1961.532 ±    78.805  MB/sec
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate.norm         SHUFFLED_TREE_8x12_d25  avgt   30   482540299.911 ±   270.827    B/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.count                   SHUFFLED_TREE_8x12_d25  avgt   30         325.000              counts
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.time                    SHUFFLED_TREE_8x12_d25  avgt   30         128.000                  ms
+ConditionalProductComplexPathBenchmark.javaStreamFilter                           SHUFFLED_TREE_12x10_d15  avgt   30     1843082.172 ± 61482.955   us/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate             SHUFFLED_TREE_12x10_d15  avgt   30        1369.263 ±    47.855  MB/sec
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate.norm        SHUFFLED_TREE_12x10_d15  avgt   30  2640007584.000 ±     0.001    B/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.count                  SHUFFLED_TREE_12x10_d15  avgt   30         766.000              counts
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.time                   SHUFFLED_TREE_12x10_d15  avgt   30         310.000                  ms
+ConditionalProductComplexPathBenchmark.javaStreamFilter                                    CYCLE_3x60_d50  avgt   30         225.023 ±     3.586   us/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate                      CYCLE_3x60_d50  avgt   30        1496.950 ±    23.988  MB/sec
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate.norm                 CYCLE_3x60_d50  avgt   30      353171.133 ±     0.050    B/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.count                           CYCLE_3x60_d50  avgt   30         437.000              counts
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.time                            CYCLE_3x60_d50  avgt   30         113.000                  ms
+ConditionalProductComplexPathBenchmark.javaStreamFilter                               CYCLE_TAIL_6x20_d40  avgt   30       14196.325 ±   224.966   us/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate                 CYCLE_TAIL_6x20_d40  avgt   30        2339.954 ±    33.624  MB/sec
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate.norm            CYCLE_TAIL_6x20_d40  avgt   30    34830443.466 ±     3.343    B/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.count                      CYCLE_TAIL_6x20_d40  avgt   30         259.000              counts
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.time                       CYCLE_TAIL_6x20_d40  avgt   30         104.000                  ms
+ConditionalProductComplexPathBenchmark.javaStreamFilter                            SHUFFLED_TREE_30x8_d30  avgt   30     2992779.903 ± 49684.798   us/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate              SHUFFLED_TREE_30x8_d30  avgt   30        1530.348 ±    25.829  MB/sec
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.alloc.rate.norm         SHUFFLED_TREE_30x8_d30  avgt   30  4800007656.000 ±     0.001    B/op
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.count                   SHUFFLED_TREE_30x8_d30  avgt   30        1763.000              counts
+ConditionalProductComplexPathBenchmark.javaStreamFilter:gc.time                    SHUFFLED_TREE_30x8_d30  avgt   30         561.000                  ms
