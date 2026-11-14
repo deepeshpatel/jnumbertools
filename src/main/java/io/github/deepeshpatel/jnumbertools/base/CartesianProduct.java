@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
+import io.github.deepeshpatel.jnumbertools.generator.product.conditional.ConditionalProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder;
 
@@ -121,6 +122,25 @@ public final class CartesianProduct {
     public SimpleProductBuilder simpleProductOf(List<?> elements) {
         Util.validateInput(elements);
         return new SimpleProductBuilder(elements);
+    }
+
+    /**
+     * Creates a builder for a Cartesian product whose dimensions are linked by rules such as
+     * {@code when(browser).is("Safari").then(os).isOneOf("macOS")}.
+     * <p>
+     * Add further dimensions with {@code and(list)} and rules with {@code when(list)...then(list)...}.
+     * Counting, ranking and sampling work on the valid tuples only, without enumerating the full product.
+     * Rules refer to a dimension by the same list instance that was passed in. See
+     * {@link ConditionalProductBuilder} for the rule vocabulary and its limits.
+     * </p>
+     *
+     * @param elements the first dimension; copied. An empty list is allowed and makes the product empty.
+     * @return a ConditionalProductBuilder for adding dimensions and rules
+     * @throws NullPointerException if {@code elements} is null or contains a null element
+     */
+    public ConditionalProductBuilder conditionalProductOf(List<?> elements) {
+        Util.validateInput(elements);
+        return new ConditionalProductBuilder(elements);
     }
 
     /**
