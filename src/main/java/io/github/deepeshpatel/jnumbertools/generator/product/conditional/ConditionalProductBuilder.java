@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Tuple;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
@@ -15,7 +16,6 @@ import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 import java.math.BigInteger;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Random;
-import java.util.RandomAccess;
 import java.util.Set;
 
 /**
@@ -1104,20 +1103,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         for (int i = 0; i < val.length; i++) {
             result[i] = dims.get(i).get(val[i]);
         }
-        return new Tuple(result);
-    }
-
-    /** Immutable view of one tuple: a single wrapper around the array. */
-    private static final class Tuple extends AbstractList<Object> implements RandomAccess {
-        private final Object[] items;
-
-        Tuple(Object[] items) { this.items = items; }
-
-        @Override public Object get(int index) { return items[index]; }
-
-        @Override public int size() { return items.length; }
-
-        @Override public Object[] toArray() { return items.clone(); }
+        return Tuple.wrap(result);
     }
 
     private final class LexOrderGenerator extends AbstractGenerator<Object> {

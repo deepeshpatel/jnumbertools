@@ -145,6 +145,11 @@ exactly like `{B:2}`.
 | | to > n | invalid-argument error | | | to cannot exceed n |
 | | null input | null-input error | | | Elements list cannot be null |
 
+**Note**: A subset builder always has a size range. There is no "range not chosen yet" state in which
+`count()` returns 0 or an operation signals an error: an implementation must either make that state
+unrepresentable (the Java binding returns a selector that only offers `all()` and `inRange(from, to)`) or
+signal an error from every operation, including `count()` and `isEmpty()`.
+
 ## SIMPLE CARTESIAN PRODUCT
 
 | Condition                             | Count | Iterator Returns | Interpretation                          |

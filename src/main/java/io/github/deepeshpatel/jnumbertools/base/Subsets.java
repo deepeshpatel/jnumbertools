@@ -6,6 +6,7 @@ package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetSelector;
 import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetGeneratorByRanks;
 import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetGeneratorMth;
@@ -120,7 +121,7 @@ public final class Subsets {
     }
 
     /**
-     * Creates a SubsetBuilder for a varargs set of elements.
+     * Creates a SubsetSelector for a varargs set of elements.
      * <p>
      * Generates all 2ⁿ subsets of the input set, where n is the number of elements.
      * Use the returned builder to configure range, sampling, or rank-based access.
@@ -134,15 +135,15 @@ public final class Subsets {
      *
      * @param elements the elements to build subsets from
      * @param <T> the type of the elements
-     * @return a SubsetBuilder for the specified elements
+     * @return a SubsetSelector for the specified elements
      */
     @SafeVarargs
-    public final <T> SubsetBuilder<T> of(T... elements) {
+    public final <T> SubsetSelector<T> of(T... elements) {
         return of(List.of(elements));
     }
 
     /**
-     * Creates a SubsetBuilder for a list of elements.
+     * Creates a SubsetSelector for a list of elements.
      * <p>
      * Generates all 2ⁿ subsets of the input set, where n = elements.size().
      * Elements are treated as distinct based on their position in the list.
@@ -150,28 +151,28 @@ public final class Subsets {
      *
      * @param elements the list of elements to build subsets from
      * @param <T> the type of the elements
-     * @return a SubsetBuilder for the specified elements
+     * @return a SubsetSelector for the specified elements
      */
-    public <T> SubsetBuilder<T> of(List<T> elements) {
+    public <T> SubsetSelector<T> of(List<T> elements) {
         Util.validateInput(elements);
-        return new SubsetBuilder<>(elements, calculator);
+        return new SubsetSelector<>(elements, calculator);
     }
 
     /**
-     * Creates a SubsetBuilder for a range of integers from 0 to n-1.
+     * Creates a SubsetSelector for a range of integers from 0 to n-1.
      * <p>
      * Generates all 2ⁿ subsets of the set {0, 1, ..., n-1}. Useful for generating
      * subsets of indices without creating explicit element lists.
      * </p>
      *
      * @param dataSize the number of elements in the range (n)
-     * @return a SubsetBuilder for the integer range
+     * @return a SubsetSelector for the integer range
      */
-    public SubsetBuilder<Integer> of(int dataSize) {
+    public SubsetSelector<Integer> of(int dataSize) {
         if(dataSize < 0) {
             throw new IllegalArgumentException("dataSize should be ≥ 0 to generate subsets");
         }
         var elements = IntStream.range(0, dataSize).boxed().toList();
-        return new SubsetBuilder<>(elements, calculator);
+        return new SubsetSelector<>(elements, calculator);
     }
 }

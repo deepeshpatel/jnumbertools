@@ -1,0 +1,240 @@
+Benchmark                                                                         (scenarioName)  Mode  Cnt          Score     Error   Units
+ConditionalProductBenchmark.conditionalProductBuilder                         25_LOW_SELECTIVITY  avgt   30         19.977 ±   0.298   us/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate           25_LOW_SELECTIVITY  avgt   30       2692.617 ±  40.287  MB/sec
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate.norm      25_LOW_SELECTIVITY  avgt   30      56400.458 ±   7.081    B/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.count                25_LOW_SELECTIVITY  avgt   30        171.000            counts
+ConditionalProductBenchmark.conditionalProductBuilder:gc.time                 25_LOW_SELECTIVITY  avgt   30         43.000                ms
+ConditionalProductBenchmark.conditionalProductBuilder                         50_LOW_SELECTIVITY  avgt   30         19.611 ±   0.552   us/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate           50_LOW_SELECTIVITY  avgt   30       2746.381 ±  77.163  MB/sec
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate.norm      50_LOW_SELECTIVITY  avgt   30      56399.869 ±   6.810    B/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.count                50_LOW_SELECTIVITY  avgt   30        176.000            counts
+ConditionalProductBenchmark.conditionalProductBuilder:gc.time                 50_LOW_SELECTIVITY  avgt   30         46.000                ms
+ConditionalProductBenchmark.conditionalProductBuilder                        100_LOW_SELECTIVITY  avgt   30         18.920 ±   0.763   us/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate          100_LOW_SELECTIVITY  avgt   30       2850.693 ± 104.477  MB/sec
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate.norm     100_LOW_SELECTIVITY  avgt   30      56399.680 ±   6.621    B/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.count               100_LOW_SELECTIVITY  avgt   30        182.000            counts
+ConditionalProductBenchmark.conditionalProductBuilder:gc.time                100_LOW_SELECTIVITY  avgt   30         49.000                ms
+ConditionalProductBenchmark.conditionalProductBuilder                        150_LOW_SELECTIVITY  avgt   30         20.591 ±   0.782   us/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate          150_LOW_SELECTIVITY  avgt   30       2619.056 ±  95.882  MB/sec
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate.norm     150_LOW_SELECTIVITY  avgt   30      56400.225 ±   7.040    B/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.count               150_LOW_SELECTIVITY  avgt   30        165.000            counts
+ConditionalProductBenchmark.conditionalProductBuilder:gc.time                150_LOW_SELECTIVITY  avgt   30         44.000                ms
+ConditionalProductBenchmark.conditionalProductBuilder                        200_LOW_SELECTIVITY  avgt   30         20.486 ±   0.442   us/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate          200_LOW_SELECTIVITY  avgt   30       2627.203 ±  55.717  MB/sec
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate.norm     200_LOW_SELECTIVITY  avgt   30      56400.224 ±   7.140    B/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.count               200_LOW_SELECTIVITY  avgt   30        167.000            counts
+ConditionalProductBenchmark.conditionalProductBuilder:gc.time                200_LOW_SELECTIVITY  avgt   30         42.000                ms
+ConditionalProductBenchmark.conditionalProductBuilder                        250_LOW_SELECTIVITY  avgt   30         20.971 ±   0.344   us/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate          250_LOW_SELECTIVITY  avgt   30       2565.350 ±  42.457  MB/sec
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate.norm     250_LOW_SELECTIVITY  avgt   30      56400.391 ±   7.201    B/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.count               250_LOW_SELECTIVITY  avgt   30        162.000            counts
+ConditionalProductBenchmark.conditionalProductBuilder:gc.time                250_LOW_SELECTIVITY  avgt   30         42.000                ms
+ConditionalProductBenchmark.conditionalProductBuilder                      25_HIGHER_SELECTIVITY  avgt   30         20.632 ±   0.327   us/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate        25_HIGHER_SELECTIVITY  avgt   30       2607.430 ±  40.987  MB/sec
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate.norm   25_HIGHER_SELECTIVITY  avgt   30      56400.362 ±   7.255    B/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.count             25_HIGHER_SELECTIVITY  avgt   30        166.000            counts
+ConditionalProductBenchmark.conditionalProductBuilder:gc.time              25_HIGHER_SELECTIVITY  avgt   30         43.000                ms
+ConditionalProductBenchmark.conditionalProductBuilder                      50_HIGHER_SELECTIVITY  avgt   30         18.350 ±   0.293   us/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate        50_HIGHER_SELECTIVITY  avgt   30       2931.708 ±  46.592  MB/sec
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate.norm   50_HIGHER_SELECTIVITY  avgt   30      56399.409 ±   6.612    B/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.count             50_HIGHER_SELECTIVITY  avgt   30        186.000            counts
+ConditionalProductBenchmark.conditionalProductBuilder:gc.time              50_HIGHER_SELECTIVITY  avgt   30         46.000                ms
+ConditionalProductBenchmark.conditionalProductBuilder                     100_HIGHER_SELECTIVITY  avgt   30         18.987 ±   0.294   us/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate       100_HIGHER_SELECTIVITY  avgt   30       2833.191 ±  43.502  MB/sec
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate.norm  100_HIGHER_SELECTIVITY  avgt   30      56399.665 ±   6.596    B/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.count            100_HIGHER_SELECTIVITY  avgt   30        181.000            counts
+ConditionalProductBenchmark.conditionalProductBuilder:gc.time             100_HIGHER_SELECTIVITY  avgt   30         45.000                ms
+ConditionalProductBenchmark.conditionalProductBuilder                     150_HIGHER_SELECTIVITY  avgt   30         20.228 ±   0.529   us/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate       150_HIGHER_SELECTIVITY  avgt   30       2661.704 ±  68.920  MB/sec
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate.norm  150_HIGHER_SELECTIVITY  avgt   30      56400.203 ±   7.015    B/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.count            150_HIGHER_SELECTIVITY  avgt   30        171.000            counts
+ConditionalProductBenchmark.conditionalProductBuilder:gc.time             150_HIGHER_SELECTIVITY  avgt   30         45.000                ms
+ConditionalProductBenchmark.conditionalProductBuilder                     200_HIGHER_SELECTIVITY  avgt   30         19.770 ±   0.254   us/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate       200_HIGHER_SELECTIVITY  avgt   30       2720.591 ±  34.373  MB/sec
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate.norm  200_HIGHER_SELECTIVITY  avgt   30      56399.937 ±   7.033    B/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.count            200_HIGHER_SELECTIVITY  avgt   30        174.000            counts
+ConditionalProductBenchmark.conditionalProductBuilder:gc.time             200_HIGHER_SELECTIVITY  avgt   30         48.000                ms
+ConditionalProductBenchmark.conditionalProductBuilder                     250_HIGHER_SELECTIVITY  avgt   30         20.076 ±   0.345   us/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate       250_HIGHER_SELECTIVITY  avgt   30       2679.895 ±  46.221  MB/sec
+ConditionalProductBenchmark.conditionalProductBuilder:gc.alloc.rate.norm  250_HIGHER_SELECTIVITY  avgt   30      56400.055 ±   7.072    B/op
+ConditionalProductBenchmark.conditionalProductBuilder:gc.count            250_HIGHER_SELECTIVITY  avgt   30        173.000            counts
+ConditionalProductBenchmark.conditionalProductBuilder:gc.time             250_HIGHER_SELECTIVITY  avgt   30         45.000                ms
+ConditionalProductBenchmark.imperativeBacktracking                            25_LOW_SELECTIVITY  avgt   30          5.297 ±   0.032   us/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate              25_LOW_SELECTIVITY  avgt   30         25.941 ±   0.153  MB/sec
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate.norm         25_LOW_SELECTIVITY  avgt   30        144.122 ±   0.001    B/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.count                   25_LOW_SELECTIVITY  avgt   30         16.000            counts
+ConditionalProductBenchmark.imperativeBacktracking:gc.time                    25_LOW_SELECTIVITY  avgt   30          6.000                ms
+ConditionalProductBenchmark.imperativeBacktracking                            50_LOW_SELECTIVITY  avgt   30          5.319 ±   0.367   us/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate              50_LOW_SELECTIVITY  avgt   30         26.022 ±   1.303  MB/sec
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate.norm         50_LOW_SELECTIVITY  avgt   30        144.122 ±   0.008    B/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.count                   50_LOW_SELECTIVITY  avgt   30         16.000            counts
+ConditionalProductBenchmark.imperativeBacktracking:gc.time                    50_LOW_SELECTIVITY  avgt   30          7.000                ms
+ConditionalProductBenchmark.imperativeBacktracking                           100_LOW_SELECTIVITY  avgt   30          5.093 ±   0.011   us/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate             100_LOW_SELECTIVITY  avgt   30         26.975 ±   0.057  MB/sec
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate.norm        100_LOW_SELECTIVITY  avgt   30        144.117 ±   0.001    B/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.count                  100_LOW_SELECTIVITY  avgt   30         15.000            counts
+ConditionalProductBenchmark.imperativeBacktracking:gc.time                   100_LOW_SELECTIVITY  avgt   30          7.000                ms
+ConditionalProductBenchmark.imperativeBacktracking                           150_LOW_SELECTIVITY  avgt   30          5.176 ±   0.110   us/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate             150_LOW_SELECTIVITY  avgt   30         26.564 ±   0.510  MB/sec
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate.norm        150_LOW_SELECTIVITY  avgt   30        144.119 ±   0.003    B/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.count                  150_LOW_SELECTIVITY  avgt   30         17.000            counts
+ConditionalProductBenchmark.imperativeBacktracking:gc.time                   150_LOW_SELECTIVITY  avgt   30         10.000                ms
+ConditionalProductBenchmark.imperativeBacktracking                           200_LOW_SELECTIVITY  avgt   30          5.564 ±   0.504   us/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate             200_LOW_SELECTIVITY  avgt   30         24.956 ±   1.357  MB/sec
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate.norm        200_LOW_SELECTIVITY  avgt   30        144.128 ±   0.012    B/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.count                  200_LOW_SELECTIVITY  avgt   30         14.000            counts
+ConditionalProductBenchmark.imperativeBacktracking:gc.time                   200_LOW_SELECTIVITY  avgt   30          6.000                ms
+ConditionalProductBenchmark.imperativeBacktracking                           250_LOW_SELECTIVITY  avgt   30          5.358 ±   0.006   us/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate             250_LOW_SELECTIVITY  avgt   30         25.641 ±   0.027  MB/sec
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate.norm        250_LOW_SELECTIVITY  avgt   30        144.123 ±   0.001    B/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.count                  250_LOW_SELECTIVITY  avgt   30         12.000            counts
+ConditionalProductBenchmark.imperativeBacktracking:gc.time                   250_LOW_SELECTIVITY  avgt   30          7.000                ms
+ConditionalProductBenchmark.imperativeBacktracking                         25_HIGHER_SELECTIVITY  avgt   30          6.391 ±   0.012   us/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate           25_HIGHER_SELECTIVITY  avgt   30         21.502 ±   0.039  MB/sec
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate.norm      25_HIGHER_SELECTIVITY  avgt   30        144.147 ±   0.001    B/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.count                25_HIGHER_SELECTIVITY  avgt   30         12.000            counts
+ConditionalProductBenchmark.imperativeBacktracking:gc.time                 25_HIGHER_SELECTIVITY  avgt   30          5.000                ms
+ConditionalProductBenchmark.imperativeBacktracking                         50_HIGHER_SELECTIVITY  avgt   30          7.301 ±   0.031   us/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate           50_HIGHER_SELECTIVITY  avgt   30         18.824 ±   0.079  MB/sec
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate.norm      50_HIGHER_SELECTIVITY  avgt   30        144.168 ±   0.001    B/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.count                50_HIGHER_SELECTIVITY  avgt   30         12.000            counts
+ConditionalProductBenchmark.imperativeBacktracking:gc.time                 50_HIGHER_SELECTIVITY  avgt   30          4.000                ms
+ConditionalProductBenchmark.imperativeBacktracking                        100_HIGHER_SELECTIVITY  avgt   30         11.723 ±   0.123   us/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate          100_HIGHER_SELECTIVITY  avgt   30         11.734 ±   0.122  MB/sec
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate.norm     100_HIGHER_SELECTIVITY  avgt   30        144.269 ±   0.003    B/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.count               100_HIGHER_SELECTIVITY  avgt   30          8.000            counts
+ConditionalProductBenchmark.imperativeBacktracking:gc.time                100_HIGHER_SELECTIVITY  avgt   30          4.000                ms
+ConditionalProductBenchmark.imperativeBacktracking                        150_HIGHER_SELECTIVITY  avgt   30         19.724 ±   0.218   us/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate          150_HIGHER_SELECTIVITY  avgt   30          6.983 ±   0.075  MB/sec
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate.norm     150_HIGHER_SELECTIVITY  avgt   30        144.453 ±   0.005    B/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.count               150_HIGHER_SELECTIVITY  avgt   30          2.000            counts
+ConditionalProductBenchmark.imperativeBacktracking:gc.time                150_HIGHER_SELECTIVITY  avgt   30          2.000                ms
+ConditionalProductBenchmark.imperativeBacktracking                        200_HIGHER_SELECTIVITY  avgt   30         11.244 ±   0.135   us/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate          200_HIGHER_SELECTIVITY  avgt   30         12.234 ±   0.142  MB/sec
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate.norm     200_HIGHER_SELECTIVITY  avgt   30        144.258 ±   0.003    B/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.count               200_HIGHER_SELECTIVITY  avgt   30          3.000            counts
+ConditionalProductBenchmark.imperativeBacktracking:gc.time                200_HIGHER_SELECTIVITY  avgt   30          3.000                ms
+ConditionalProductBenchmark.imperativeBacktracking                        250_HIGHER_SELECTIVITY  avgt   30         14.485 ±   0.185   us/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate          250_HIGHER_SELECTIVITY  avgt   30          9.502 ±   0.121  MB/sec
+ConditionalProductBenchmark.imperativeBacktracking:gc.alloc.rate.norm     250_HIGHER_SELECTIVITY  avgt   30        144.332 ±   0.004    B/op
+ConditionalProductBenchmark.imperativeBacktracking:gc.count               250_HIGHER_SELECTIVITY  avgt   30            ≈ 0            counts
+ConditionalProductBenchmark.javaStreamFilter                                  25_LOW_SELECTIVITY  avgt   30         44.017 ±   1.084   us/op
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate                    25_LOW_SELECTIVITY  avgt   30       6345.440 ± 144.820  MB/sec
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate.norm               25_LOW_SELECTIVITY  avgt   30     292633.016 ±   0.026    B/op
+ConditionalProductBenchmark.javaStreamFilter:gc.count                         25_LOW_SELECTIVITY  avgt   30        135.000            counts
+ConditionalProductBenchmark.javaStreamFilter:gc.time                          25_LOW_SELECTIVITY  avgt   30         57.000                ms
+ConditionalProductBenchmark.javaStreamFilter                                  50_LOW_SELECTIVITY  avgt   30         42.951 ±   0.182   us/op
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate                    50_LOW_SELECTIVITY  avgt   30       6496.207 ±  27.372  MB/sec
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate.norm               50_LOW_SELECTIVITY  avgt   30     292656.992 ±   0.006    B/op
+ConditionalProductBenchmark.javaStreamFilter:gc.count                         50_LOW_SELECTIVITY  avgt   30        138.000            counts
+ConditionalProductBenchmark.javaStreamFilter:gc.time                          50_LOW_SELECTIVITY  avgt   30         57.000                ms
+ConditionalProductBenchmark.javaStreamFilter                                 100_LOW_SELECTIVITY  avgt   30         44.623 ±   0.414   us/op
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate                   100_LOW_SELECTIVITY  avgt   30       6480.933 ±  58.977  MB/sec
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate.norm              100_LOW_SELECTIVITY  avgt   30     303297.032 ±   0.010    B/op
+ConditionalProductBenchmark.javaStreamFilter:gc.count                        100_LOW_SELECTIVITY  avgt   30        138.000            counts
+ConditionalProductBenchmark.javaStreamFilter:gc.time                         100_LOW_SELECTIVITY  avgt   30         55.000                ms
+ConditionalProductBenchmark.javaStreamFilter                                 150_LOW_SELECTIVITY  avgt   30         45.613 ±   0.517   us/op
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate                   150_LOW_SELECTIVITY  avgt   30       6606.594 ±  70.398  MB/sec
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate.norm              150_LOW_SELECTIVITY  avgt   30     316009.055 ±   0.014    B/op
+ConditionalProductBenchmark.javaStreamFilter:gc.count                        150_LOW_SELECTIVITY  avgt   30        139.000            counts
+ConditionalProductBenchmark.javaStreamFilter:gc.time                         150_LOW_SELECTIVITY  avgt   30         58.000                ms
+ConditionalProductBenchmark.javaStreamFilter                                 200_LOW_SELECTIVITY  avgt   30         46.815 ±   0.232   us/op
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate                   200_LOW_SELECTIVITY  avgt   30       6700.554 ±  33.079  MB/sec
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate.norm              200_LOW_SELECTIVITY  avgt   30     329017.080 ±   0.006    B/op
+ConditionalProductBenchmark.javaStreamFilter:gc.count                        200_LOW_SELECTIVITY  avgt   30        142.000            counts
+ConditionalProductBenchmark.javaStreamFilter:gc.time                         200_LOW_SELECTIVITY  avgt   30         58.000                ms
+ConditionalProductBenchmark.javaStreamFilter                                 250_LOW_SELECTIVITY  avgt   30         48.552 ±   0.341   us/op
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate                   250_LOW_SELECTIVITY  avgt   30       6722.340 ±  46.378  MB/sec
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate.norm              250_LOW_SELECTIVITY  avgt   30     342321.121 ±   0.008    B/op
+ConditionalProductBenchmark.javaStreamFilter:gc.count                        250_LOW_SELECTIVITY  avgt   30        142.000            counts
+ConditionalProductBenchmark.javaStreamFilter:gc.time                         250_LOW_SELECTIVITY  avgt   30         57.000                ms
+ConditionalProductBenchmark.javaStreamFilter                               25_HIGHER_SELECTIVITY  avgt   30        121.213 ±   2.301   us/op
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate                 25_HIGHER_SELECTIVITY  avgt   30       6754.650 ± 125.883  MB/sec
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate.norm            25_HIGHER_SELECTIVITY  avgt   30     858162.798 ±   0.052    B/op
+ConditionalProductBenchmark.javaStreamFilter:gc.count                      25_HIGHER_SELECTIVITY  avgt   30        144.000            counts
+ConditionalProductBenchmark.javaStreamFilter:gc.time                       25_HIGHER_SELECTIVITY  avgt   30         59.000                ms
+ConditionalProductBenchmark.javaStreamFilter                               50_HIGHER_SELECTIVITY  avgt   30        501.805 ±  11.061   us/op
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate                 50_HIGHER_SELECTIVITY  avgt   30       7266.093 ± 146.969  MB/sec
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate.norm            50_HIGHER_SELECTIVITY  avgt   30    3820971.598 ±   0.254    B/op
+ConditionalProductBenchmark.javaStreamFilter:gc.count                      50_HIGHER_SELECTIVITY  avgt   30        153.000            counts
+ConditionalProductBenchmark.javaStreamFilter:gc.time                       50_HIGHER_SELECTIVITY  avgt   30         64.000                ms
+ConditionalProductBenchmark.javaStreamFilter                              100_HIGHER_SELECTIVITY  avgt   30       4199.626 ±  52.935   us/op
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate                100_HIGHER_SELECTIVITY  avgt   30       6368.420 ±  79.731  MB/sec
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate.norm           100_HIGHER_SELECTIVITY  avgt   30   28044296.424 ±   1.385    B/op
+ConditionalProductBenchmark.javaStreamFilter:gc.count                     100_HIGHER_SELECTIVITY  avgt   30        137.000            counts
+ConditionalProductBenchmark.javaStreamFilter:gc.time                      100_HIGHER_SELECTIVITY  avgt   30         55.000                ms
+ConditionalProductBenchmark.javaStreamFilter                              150_HIGHER_SELECTIVITY  avgt   30      15664.888 ± 431.348   us/op
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate                150_HIGHER_SELECTIVITY  avgt   30       5690.549 ± 155.789  MB/sec
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate.norm           150_HIGHER_SELECTIVITY  avgt   30   93353864.995 ±   9.716    B/op
+ConditionalProductBenchmark.javaStreamFilter:gc.count                     150_HIGHER_SELECTIVITY  avgt   30        127.000            counts
+ConditionalProductBenchmark.javaStreamFilter:gc.time                      150_HIGHER_SELECTIVITY  avgt   30         53.000                ms
+ConditionalProductBenchmark.javaStreamFilter                              200_HIGHER_SELECTIVITY  avgt   30      30634.671 ± 631.631   us/op
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate                200_HIGHER_SELECTIVITY  avgt   30       6857.310 ± 142.930  MB/sec
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate.norm           200_HIGHER_SELECTIVITY  avgt   30  220147801.891 ±  20.478    B/op
+ConditionalProductBenchmark.javaStreamFilter:gc.count                     200_HIGHER_SELECTIVITY  avgt   30        152.000            counts
+ConditionalProductBenchmark.javaStreamFilter:gc.time                      200_HIGHER_SELECTIVITY  avgt   30         64.000                ms
+ConditionalProductBenchmark.javaStreamFilter                              250_HIGHER_SELECTIVITY  avgt   30      61911.633 ± 964.890   us/op
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate                250_HIGHER_SELECTIVITY  avgt   30       6606.445 ±  95.660  MB/sec
+ConditionalProductBenchmark.javaStreamFilter:gc.alloc.rate.norm           250_HIGHER_SELECTIVITY  avgt   30  428826430.400 ±   0.001    B/op
+ConditionalProductBenchmark.javaStreamFilter:gc.count                     250_HIGHER_SELECTIVITY  avgt   30        144.000            counts
+ConditionalProductBenchmark.javaStreamFilter:gc.time                      250_HIGHER_SELECTIVITY  avgt   30         59.000                ms
+ConditionalProductBenchmark.prunedStream                                      25_LOW_SELECTIVITY  avgt   30         42.086 ±   0.601   us/op
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate                        25_LOW_SELECTIVITY  avgt   30       6466.002 ±  90.076  MB/sec
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate.norm                   25_LOW_SELECTIVITY  avgt   30     285328.972 ±   0.014    B/op
+ConditionalProductBenchmark.prunedStream:gc.count                             25_LOW_SELECTIVITY  avgt   30        137.000            counts
+ConditionalProductBenchmark.prunedStream:gc.time                              25_LOW_SELECTIVITY  avgt   30         57.000                ms
+ConditionalProductBenchmark.prunedStream                                      50_LOW_SELECTIVITY  avgt   30         40.703 ±   0.695   us/op
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate                        50_LOW_SELECTIVITY  avgt   30       6532.494 ± 108.964  MB/sec
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate.norm                   50_LOW_SELECTIVITY  avgt   30     278744.941 ±   0.016    B/op
+ConditionalProductBenchmark.prunedStream:gc.count                             50_LOW_SELECTIVITY  avgt   30        138.000            counts
+ConditionalProductBenchmark.prunedStream:gc.time                              50_LOW_SELECTIVITY  avgt   30         59.000                ms
+ConditionalProductBenchmark.prunedStream                                     100_LOW_SELECTIVITY  avgt   30         40.219 ±   0.635   us/op
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate                       100_LOW_SELECTIVITY  avgt   30       6540.328 ± 100.167  MB/sec
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate.norm                  100_LOW_SELECTIVITY  avgt   30     275784.929 ±   0.016    B/op
+ConditionalProductBenchmark.prunedStream:gc.count                            100_LOW_SELECTIVITY  avgt   30        139.000            counts
+ConditionalProductBenchmark.prunedStream:gc.time                             100_LOW_SELECTIVITY  avgt   30         59.000                ms
+ConditionalProductBenchmark.prunedStream                                     150_LOW_SELECTIVITY  avgt   30         39.604 ±   0.455   us/op
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate                       150_LOW_SELECTIVITY  avgt   30       6619.109 ±  74.709  MB/sec
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate.norm                  150_LOW_SELECTIVITY  avgt   30     274896.916 ±   0.011    B/op
+ConditionalProductBenchmark.prunedStream:gc.count                            150_LOW_SELECTIVITY  avgt   30        142.000            counts
+ConditionalProductBenchmark.prunedStream:gc.time                             150_LOW_SELECTIVITY  avgt   30         59.000                ms
+ConditionalProductBenchmark.prunedStream                                     200_LOW_SELECTIVITY  avgt   30         39.578 ±   1.500   us/op
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate                       200_LOW_SELECTIVITY  avgt   30       6623.692 ± 202.631  MB/sec
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate.norm                  200_LOW_SELECTIVITY  avgt   30     274304.914 ±   0.035    B/op
+ConditionalProductBenchmark.prunedStream:gc.count                            200_LOW_SELECTIVITY  avgt   30        141.000            counts
+ConditionalProductBenchmark.prunedStream:gc.time                             200_LOW_SELECTIVITY  avgt   30         59.000                ms
+ConditionalProductBenchmark.prunedStream                                     250_LOW_SELECTIVITY  avgt   30         42.279 ±   0.784   us/op
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate                       250_LOW_SELECTIVITY  avgt   30       6182.608 ± 103.331  MB/sec
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate.norm                  250_LOW_SELECTIVITY  avgt   30     274008.978 ±   0.020    B/op
+ConditionalProductBenchmark.prunedStream:gc.count                            250_LOW_SELECTIVITY  avgt   30        129.000            counts
+ConditionalProductBenchmark.prunedStream:gc.time                             250_LOW_SELECTIVITY  avgt   30         53.000                ms
+ConditionalProductBenchmark.prunedStream                                   25_HIGHER_SELECTIVITY  avgt   30         52.224 ±   0.630   us/op
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate                     25_HIGHER_SELECTIVITY  avgt   30       5686.970 ±  65.942  MB/sec
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate.norm                25_HIGHER_SELECTIVITY  avgt   30     311441.206 ±   0.015    B/op
+ConditionalProductBenchmark.prunedStream:gc.count                          25_HIGHER_SELECTIVITY  avgt   30        120.000            counts
+ConditionalProductBenchmark.prunedStream:gc.time                           25_HIGHER_SELECTIVITY  avgt   30         48.000                ms
+ConditionalProductBenchmark.prunedStream                                   50_HIGHER_SELECTIVITY  avgt   30         56.936 ±   1.405   us/op
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate                     50_HIGHER_SELECTIVITY  avgt   30       5731.587 ± 138.195  MB/sec
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate.norm                50_HIGHER_SELECTIVITY  avgt   30     341865.315 ±   0.033    B/op
+ConditionalProductBenchmark.prunedStream:gc.count                          50_HIGHER_SELECTIVITY  avgt   30        121.000            counts
+ConditionalProductBenchmark.prunedStream:gc.time                           50_HIGHER_SELECTIVITY  avgt   30         49.000                ms
+ConditionalProductBenchmark.prunedStream                                  100_HIGHER_SELECTIVITY  avgt   30         91.513 ±   1.438   us/op
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate                    100_HIGHER_SELECTIVITY  avgt   30       5441.690 ±  78.696  MB/sec
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate.norm               100_HIGHER_SELECTIVITY  avgt   30     522106.114 ±   0.037    B/op
+ConditionalProductBenchmark.prunedStream:gc.count                         100_HIGHER_SELECTIVITY  avgt   30        122.000            counts
+ConditionalProductBenchmark.prunedStream:gc.time                          100_HIGHER_SELECTIVITY  avgt   30         49.000                ms
+ConditionalProductBenchmark.prunedStream                                  150_HIGHER_SELECTIVITY  avgt   30        142.757 ±   4.050   us/op
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate                    150_HIGHER_SELECTIVITY  avgt   30       5513.958 ± 138.773  MB/sec
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate.norm               150_HIGHER_SELECTIVITY  avgt   30     824419.303 ±   0.095    B/op
+ConditionalProductBenchmark.prunedStream:gc.count                         150_HIGHER_SELECTIVITY  avgt   30        315.000            counts
+ConditionalProductBenchmark.prunedStream:gc.time                          150_HIGHER_SELECTIVITY  avgt   30         79.000                ms
+ConditionalProductBenchmark.prunedStream                                  200_HIGHER_SELECTIVITY  avgt   30        207.431 ±   0.859   us/op
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate                    200_HIGHER_SELECTIVITY  avgt   30       5731.493 ±  23.543  MB/sec
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate.norm               200_HIGHER_SELECTIVITY  avgt   30    1247028.795 ±   0.036    B/op
+ConditionalProductBenchmark.prunedStream:gc.count                         200_HIGHER_SELECTIVITY  avgt   30        121.000            counts
+ConditionalProductBenchmark.prunedStream:gc.time                          200_HIGHER_SELECTIVITY  avgt   30         49.000                ms
+ConditionalProductBenchmark.prunedStream                                  250_HIGHER_SELECTIVITY  avgt   30        300.806 ±   2.476   us/op
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate                    250_HIGHER_SELECTIVITY  avgt   30       5673.520 ±  46.194  MB/sec
+ConditionalProductBenchmark.prunedStream:gc.alloc.rate.norm               250_HIGHER_SELECTIVITY  avgt   30    1789934.974 ±   0.066    B/op
+ConditionalProductBenchmark.prunedStream:gc.count                         250_HIGHER_SELECTIVITY  avgt   30        121.000            counts
+ConditionalProductBenchmark.prunedStream:gc.time                          250_HIGHER_SELECTIVITY  avgt   30         50.000                ms

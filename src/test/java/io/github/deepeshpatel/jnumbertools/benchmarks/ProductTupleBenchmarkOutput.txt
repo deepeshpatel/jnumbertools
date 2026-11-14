@@ -1,0 +1,106 @@
+Benchmark                                                                   (shape)  Mode  Cnt       Score      Error   Units
+ProductTupleBenchmark.constrainedProduct                                       3x10  avgt   30      11.857 ±    0.675   us/op
+ProductTupleBenchmark.constrainedProduct:gc.alloc.rate                         3x10  avgt   30    5104.076 ±  250.769  MB/sec
+ProductTupleBenchmark.constrainedProduct:gc.alloc.rate.norm                    3x10  avgt   30   63109.607 ±   66.631    B/op
+ProductTupleBenchmark.constrainedProduct:gc.count                              3x10  avgt   30     224.000             counts
+ProductTupleBenchmark.constrainedProduct:gc.time                               3x10  avgt   30      73.000                 ms
+ProductTupleBenchmark.constrainedProduct                                        6x5  avgt   30      16.451 ±    1.404   us/op
+ProductTupleBenchmark.constrainedProduct:gc.alloc.rate                          6x5  avgt   30    3658.130 ±  784.992  MB/sec
+ProductTupleBenchmark.constrainedProduct:gc.alloc.rate.norm                     6x5  avgt   30   60789.714 ± 7585.519    B/op
+ProductTupleBenchmark.constrainedProduct:gc.count                               6x5  avgt   30     229.000             counts
+ProductTupleBenchmark.constrainedProduct:gc.time                                6x5  avgt   30      61.000                 ms
+ProductTupleBenchmark.constrainedProduct                                       10x3  avgt   30      16.569 ±    0.202   us/op
+ProductTupleBenchmark.constrainedProduct:gc.alloc.rate                         10x3  avgt   30    5904.148 ±   71.866  MB/sec
+ProductTupleBenchmark.constrainedProduct:gc.alloc.rate.norm                    10x3  avgt   30  102584.383 ±  184.512    B/op
+ProductTupleBenchmark.constrainedProduct:gc.count                              10x3  avgt   30     151.000             counts
+ProductTupleBenchmark.constrainedProduct:gc.time                               10x3  avgt   30      61.000                 ms
+ProductTupleBenchmark.loopWithTuple                                            3x10  avgt   30      10.631 ±    0.169   us/op
+ProductTupleBenchmark.loopWithTuple:gc.alloc.rate                              3x10  avgt   30    5389.653 ±   82.655  MB/sec
+ProductTupleBenchmark.loopWithTuple:gc.alloc.rate.norm                         3x10  avgt   30   60072.246 ±    0.004    B/op
+ProductTupleBenchmark.loopWithTuple:gc.count                                   3x10  avgt   30     122.000             counts
+ProductTupleBenchmark.loopWithTuple:gc.time                                    3x10  avgt   30      51.000                 ms
+ProductTupleBenchmark.loopWithTuple                                             6x5  avgt   30      15.774 ±    0.176   us/op
+ProductTupleBenchmark.loopWithTuple:gc.alloc.rate                               6x5  avgt   30    4115.424 ±   45.324  MB/sec
+ProductTupleBenchmark.loopWithTuple:gc.alloc.rate.norm                          6x5  avgt   30   68080.365 ±    0.004    B/op
+ProductTupleBenchmark.loopWithTuple:gc.count                                    6x5  avgt   30     262.000             counts
+ProductTupleBenchmark.loopWithTuple:gc.time                                     6x5  avgt   30      68.000                 ms
+ProductTupleBenchmark.loopWithTuple                                            10x3  avgt   30      28.240 ±    1.939   us/op
+ProductTupleBenchmark.loopWithTuple:gc.alloc.rate                              10x3  avgt   30    2860.149 ±  146.290  MB/sec
+ProductTupleBenchmark.loopWithTuple:gc.alloc.rate.norm                         10x3  avgt   30   84096.653 ±    0.047    B/op
+ProductTupleBenchmark.loopWithTuple:gc.count                                   10x3  avgt   30     207.000             counts
+ProductTupleBenchmark.loopWithTuple:gc.time                                    10x3  avgt   30      50.000                 ms
+ProductTupleBenchmark.loopWithUnmodifiableList                                 3x10  avgt   30      13.285 ±    0.045   us/op
+ProductTupleBenchmark.loopWithUnmodifiableList:gc.alloc.rate                   3x10  avgt   30    6033.194 ±   20.510  MB/sec
+ProductTupleBenchmark.loopWithUnmodifiableList:gc.alloc.rate.norm              3x10  avgt   30   84072.307 ±    0.002    B/op
+ProductTupleBenchmark.loopWithUnmodifiableList:gc.count                        3x10  avgt   30     138.000             counts
+ProductTupleBenchmark.loopWithUnmodifiableList:gc.time                         3x10  avgt   30      55.000                 ms
+ProductTupleBenchmark.loopWithUnmodifiableList                                  6x5  avgt   30      16.535 ±    0.285   us/op
+ProductTupleBenchmark.loopWithUnmodifiableList:gc.alloc.rate                    6x5  avgt   30    5312.001 ±   91.177  MB/sec
+ProductTupleBenchmark.loopWithUnmodifiableList:gc.alloc.rate.norm               6x5  avgt   30   92080.382 ±    0.006    B/op
+ProductTupleBenchmark.loopWithUnmodifiableList:gc.count                         6x5  avgt   30     121.000             counts
+ProductTupleBenchmark.loopWithUnmodifiableList:gc.time                          6x5  avgt   30      49.000                 ms
+ProductTupleBenchmark.loopWithUnmodifiableList                                 10x3  avgt   30      24.487 ±    0.648   us/op
+ProductTupleBenchmark.loopWithUnmodifiableList:gc.alloc.rate                   10x3  avgt   30    4214.585 ±  107.657  MB/sec
+ProductTupleBenchmark.loopWithUnmodifiableList:gc.alloc.rate.norm              10x3  avgt   30  108096.566 ±    0.014    B/op
+ProductTupleBenchmark.loopWithUnmodifiableList:gc.count                        10x3  avgt   30     282.000             counts
+ProductTupleBenchmark.loopWithUnmodifiableList:gc.time                         10x3  avgt   30      71.000                 ms
+ProductTupleBenchmark.loopWithoutLists                                         3x10  avgt   30       3.488 ±    0.035   us/op
+ProductTupleBenchmark.loopWithoutLists:gc.alloc.rate                           3x10  avgt   30       8.770 ±    0.085  MB/sec
+ProductTupleBenchmark.loopWithoutLists:gc.alloc.rate.norm                      3x10  avgt   30      32.080 ±    0.001    B/op
+ProductTupleBenchmark.loopWithoutLists:gc.count                                3x10  avgt   30      42.000             counts
+ProductTupleBenchmark.loopWithoutLists:gc.time                                 3x10  avgt   30      15.000                 ms
+ProductTupleBenchmark.loopWithoutLists                                          6x5  avgt   30       6.130 ±    0.267   us/op
+ProductTupleBenchmark.loopWithoutLists:gc.alloc.rate                            6x5  avgt   30       6.264 ±    0.232  MB/sec
+ProductTupleBenchmark.loopWithoutLists:gc.alloc.rate.norm                       6x5  avgt   30      40.142 ±    0.006    B/op
+ProductTupleBenchmark.loopWithoutLists:gc.count                                 6x5  avgt   30      32.000             counts
+ProductTupleBenchmark.loopWithoutLists:gc.time                                  6x5  avgt   30      13.000                 ms
+ProductTupleBenchmark.loopWithoutLists                                         10x3  avgt   30       9.638 ±    0.436   us/op
+ProductTupleBenchmark.loopWithoutLists:gc.alloc.rate                           10x3  avgt   30       5.580 ±    0.195  MB/sec
+ProductTupleBenchmark.loopWithoutLists:gc.alloc.rate.norm                      10x3  avgt   30      56.222 ±    0.010    B/op
+ProductTupleBenchmark.loopWithoutLists:gc.count                                10x3  avgt   30      26.000             counts
+ProductTupleBenchmark.loopWithoutLists:gc.time                                 10x3  avgt   30      11.000                 ms
+ProductTupleBenchmark.simpleProduct                                            3x10  avgt   30       7.399 ±    0.326   us/op
+ProductTupleBenchmark.simpleProduct:gc.alloc.rate                              3x10  avgt   30    7267.754 ±  282.318  MB/sec
+ProductTupleBenchmark.simpleProduct:gc.alloc.rate.norm                         3x10  avgt   30   56200.171 ±    0.007    B/op
+ProductTupleBenchmark.simpleProduct:gc.count                                   3x10  avgt   30     166.000             counts
+ProductTupleBenchmark.simpleProduct:gc.time                                    3x10  avgt   30      69.000                 ms
+ProductTupleBenchmark.simpleProduct                                             6x5  avgt   30       8.995 ±    0.124   us/op
+ProductTupleBenchmark.simpleProduct:gc.alloc.rate                               6x5  avgt   30    6808.100 ±   88.812  MB/sec
+ProductTupleBenchmark.simpleProduct:gc.alloc.rate.norm                          6x5  avgt   30   64216.208 ±    0.003    B/op
+ProductTupleBenchmark.simpleProduct:gc.count                                    6x5  avgt   30     158.000             counts
+ProductTupleBenchmark.simpleProduct:gc.time                                     6x5  avgt   30      65.000                 ms
+ProductTupleBenchmark.simpleProduct                                            10x3  avgt   30      12.072 ±    0.214   us/op
+ProductTupleBenchmark.simpleProduct:gc.alloc.rate                              10x3  avgt   30    6341.488 ±  111.377  MB/sec
+ProductTupleBenchmark.simpleProduct:gc.alloc.rate.norm                         10x3  avgt   30   80248.279 ±    0.005    B/op
+ProductTupleBenchmark.simpleProduct:gc.count                                   10x3  avgt   30     143.000             counts
+ProductTupleBenchmark.simpleProduct:gc.time                                    10x3  avgt   30      59.000                 ms
+ProductTupleBenchmark.streamingLoopWithTuple                                   3x10  avgt   30       7.434 ±    0.232   us/op
+ProductTupleBenchmark.streamingLoopWithTuple:gc.alloc.rate                     3x10  avgt   30    4115.136 ±  113.769  MB/sec
+ProductTupleBenchmark.streamingLoopWithTuple:gc.alloc.rate.norm                3x10  avgt   30   32032.172 ±    0.005    B/op
+ProductTupleBenchmark.streamingLoopWithTuple:gc.count                          3x10  avgt   30     280.000             counts
+ProductTupleBenchmark.streamingLoopWithTuple:gc.time                           3x10  avgt   30      68.000                 ms
+ProductTupleBenchmark.streamingLoopWithTuple                                    6x5  avgt   30      11.810 ±    0.250   us/op
+ProductTupleBenchmark.streamingLoopWithTuple:gc.alloc.rate                      6x5  avgt   30    3234.850 ±   59.311  MB/sec
+ProductTupleBenchmark.streamingLoopWithTuple:gc.alloc.rate.norm                 6x5  avgt   30   40040.272 ±    0.006    B/op
+ProductTupleBenchmark.streamingLoopWithTuple:gc.count                           6x5  avgt   30     225.000             counts
+ProductTupleBenchmark.streamingLoopWithTuple:gc.time                            6x5  avgt   30      54.000                 ms
+ProductTupleBenchmark.streamingLoopWithTuple                                   10x3  avgt   30      17.718 ±    0.239   us/op
+ProductTupleBenchmark.streamingLoopWithTuple:gc.alloc.rate                     10x3  avgt   30    3017.313 ±   39.421  MB/sec
+ProductTupleBenchmark.streamingLoopWithTuple:gc.alloc.rate.norm                10x3  avgt   30   56056.409 ±    0.005    B/op
+ProductTupleBenchmark.streamingLoopWithTuple:gc.count                          10x3  avgt   30     215.000             counts
+ProductTupleBenchmark.streamingLoopWithTuple:gc.time                           10x3  avgt   30      50.000                 ms
+ProductTupleBenchmark.streamingLoopWithUnmodifiableList                        3x10  avgt   30       7.850 ±    0.343   us/op
+ProductTupleBenchmark.streamingLoopWithUnmodifiableList:gc.alloc.rate          3x10  avgt   30    3903.446 ±  147.164  MB/sec
+ProductTupleBenchmark.streamingLoopWithUnmodifiableList:gc.alloc.rate.norm     3x10  avgt   30   32032.181 ±    0.008    B/op
+ProductTupleBenchmark.streamingLoopWithUnmodifiableList:gc.count               3x10  avgt   30     219.000             counts
+ProductTupleBenchmark.streamingLoopWithUnmodifiableList:gc.time                3x10  avgt   30      64.000                 ms
+ProductTupleBenchmark.streamingLoopWithUnmodifiableList                         6x5  avgt   30      12.035 ±    0.274   us/op
+ProductTupleBenchmark.streamingLoopWithUnmodifiableList:gc.alloc.rate           6x5  avgt   30    3175.002 ±   68.398  MB/sec
+ProductTupleBenchmark.streamingLoopWithUnmodifiableList:gc.alloc.rate.norm      6x5  avgt   30   40040.278 ±    0.006    B/op
+ProductTupleBenchmark.streamingLoopWithUnmodifiableList:gc.count                6x5  avgt   30     218.000             counts
+ProductTupleBenchmark.streamingLoopWithUnmodifiableList:gc.time                 6x5  avgt   30      55.000                 ms
+ProductTupleBenchmark.streamingLoopWithUnmodifiableList                        10x3  avgt   30      18.091 ±    0.348   us/op
+ProductTupleBenchmark.streamingLoopWithUnmodifiableList:gc.alloc.rate          10x3  avgt   30    2956.218 ±   56.955  MB/sec
+ProductTupleBenchmark.streamingLoopWithUnmodifiableList:gc.alloc.rate.norm     10x3  avgt   30   56056.418 ±    0.008    B/op
+ProductTupleBenchmark.streamingLoopWithUnmodifiableList:gc.count               10x3  avgt   30     200.000             counts
+ProductTupleBenchmark.streamingLoopWithUnmodifiableList:gc.time                10x3  avgt   30      51.000                 ms

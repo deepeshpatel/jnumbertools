@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Tuple;
 import io.github.deepeshpatel.jnumbertools.generator.base.*;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
@@ -263,7 +264,7 @@ public final class SimpleProductBuilder implements Builder<Object> {
                 remaining = qr[0];
                 result[i] = dim.get(qr[1].intValue());
             }
-            return Collections.unmodifiableList(Arrays.asList(result));
+            return Tuple.wrap(result);
         }
     }
 }

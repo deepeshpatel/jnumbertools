@@ -35,7 +35,7 @@ import java.util.Random;
  *
  * <h3>All Subsets</h3>
  * <pre>
- * SubsetBuilder&lt;String&gt; builder = new SubsetBuilder&lt;&gt;(
+ * SubsetSelector&lt;String&gt; builder = new SubsetSelector&lt;&gt;(
  *     List.of("A", "B", "C"), calculator);
  *
  * // All 2³ = 8 subsets
@@ -63,7 +63,7 @@ import java.util.Random;
  * <h3>Integer Range Input</h3>
  * <pre>
  * // Subsets of {0,1,2,3,4}
- * SubsetBuilder&lt;Integer&gt; intBuilder = new SubsetBuilder&lt;&gt;(5, calculator);
+ * SubsetSelector&lt;Integer&gt; intBuilder = new SubsetSelector&lt;&gt;(5, calculator);
  *
  * // All subsets of size 2 to 4
  * intBuilder.inRange(2, 4)
@@ -107,8 +107,8 @@ import java.util.Random;
  * <h3>Empty and Edge Cases</h3>
  * <pre>
  * // Empty-set(∅) has one subset (the empty-set itself)
- * SubsetBuilder&lt;String&gt; emptyBuilder =
- *     new SubsetBuilder&lt;&gt;(Collections.emptyList(), calculator);
+ * SubsetSelector&lt;String&gt; emptyBuilder =
+ *     new SubsetSelector&lt;&gt;(Collections.emptyList(), calculator);
  * System.out.println(emptyBuilder.all().count()); // 1
  * emptyBuilder.all().lexOrder().forEach(System.out::println); // Prints: []
  *
@@ -125,7 +125,7 @@ import java.util.Random;
  * <h3>Mathematical Properties</h3>
  * <pre>
  * // Total subsets = 2ⁿ
- * SubsetBuilder&lt;String&gt; builder4 = new SubsetBuilder&lt;&gt;(List.of("A","B","C","D"), calculator);
+ * SubsetSelector&lt;String&gt; builder4 = new SubsetSelector&lt;&gt;(List.of("A","B","C","D"), calculator);
  * System.out.println(builder4.all().count()); // 16
  *
  * // Sum of C(4,i) for i=0..4 = 16
@@ -144,10 +144,14 @@ import java.util.Random;
  * </pre>
  *
  * <p>
- * This builder is immutable and thread-safe. All configuration methods return new instances.
+ * A {@code SubsetBuilder} always has a size range: it is obtained from a {@link SubsetSelector}
+ * ({@code subsets().of(...)}) by choosing {@code all()} or {@code inRange(from, to)}, so there is no
+ * half-configured builder. The examples above call {@code all()} and {@code inRange(...)} on the
+ * selector. This builder is immutable and thread-safe.
  * </p>
  *
  * @param <T> the type of elements in the subsets
+ * @see SubsetSelector
  * @see SubsetGenerator
  * @see SubsetGeneratorMth
  * @see SubsetGeneratorByRanks
@@ -162,29 +166,11 @@ public class SubsetBuilder<T> implements Builder<T> {
     private final int to;
 
     /**
-     * Constructs a {@code SubsetBuilder} with the specified elements and calculator.
-     *
-     * @param elements   the list of elements from which subsets will be generated; copied, so later
-     *                   changes to the caller's list do not affect this builder. An empty list is
-     *                   allowed (see ValidationRules.md)
-     * @param calculator a calculator used for computing subset counts
-     * @throws NullPointerException if {@code elements} is null or contains a null element
+     * Creates a builder for an already validated, snapshotted element list and a size range.
+     * Instances come from {@link SubsetSelector#all()} and {@link SubsetSelector#inRange(int, int)}, so
+     * a builder always has a range.
      */
-    public SubsetBuilder(List<T> elements, Calculator calculator) {
-        // Null list is a programmer error (rule 1), not an empty set.
-        Util.validateInput(elements);
-        // Snapshot (rule 8): later changes to the caller's list must not alter this builder.
-        // Null elements are rejected here, during the copy, rather than later during iteration (rule 7).
-        this.elements = Util.copyOfNoNulls(elements);
-        this.calculator = calculator;
-        this.from = -1;
-        this.to = -1;
-    }
-
-    /**
-     * Private constructor for creating new instances with range specified.
-     */
-    private SubsetBuilder(List<T> elements, Calculator calculator, int from, int to) {
+    SubsetBuilder(List<T> elements, Calculator calculator, int from, int to) {
         this.elements = elements;
         this.calculator = calculator;
         this.from = from;
@@ -192,66 +178,11 @@ public class SubsetBuilder<T> implements Builder<T> {
     }
 
     /**
-     * Configures the builder to generate all subsets of the given elements.
-     *
-     * @return a new SubsetBuilder instance configured for all subsets
-     */
-    public SubsetBuilder<T> all() {
-        return new SubsetBuilder<>(elements, calculator, 0, elements.size());
-    }
-
-    /**
-     * Restricts subset generation to sizes within the specified range.
-     * <p>
-     * Only subsets whose size is between {@code from} and {@code to} (inclusive) will be generated.
-     * Subsets are produced in lexicographical order, first by size, then by combination order within each size.
-     * </p>
-     *
-     * <p>
-     * For an empty set the rows of the SUBSETS table in ValidationRules.md apply: every range with
-     * {@code 0 ≤ from ≤ to} is accepted ({@code from = 0} gives the single empty subset,
-     * {@code from > 0} gives none), however large {@code to} is.
-     * </p>
-     *
-     * @param from the minimum subset size (inclusive, must be ≥ 0)
-     * @param to the maximum subset size (inclusive, must be ≥ from, and ≤ elements.size() for a non-empty list)
-     * @return a new SubsetBuilder configured for the specified size range
-     * @throws IllegalArgumentException if from &lt; 0, to &lt; from, or (non-empty list) to &gt; elements.size()
-     *         (which also covers from &gt; elements.size())
-     */
-    public SubsetBuilder<T> inRange(int from, int to) {
-        if (from < 0 || to < from) {
-            throw new IllegalArgumentException(
-                    String.format("Invalid range: from=%d, to=%d - must satisfy 0 ≤ from ≤ to", from, to)
-            );
-        }
-
-        // Empty list special cases
-        if (elements.isEmpty()) {
-            // All ranges with from ≥ 0 are valid, but will produce:
-            // - from=0 → count=1, returns [[]]
-            // - from>0 → count=0, returns []
-            return new SubsetBuilder<>(elements, calculator, from, to);
-        }
-
-        // For non-empty list, validate bounds (to ≥ from, so to ≤ n also guarantees from ≤ n)
-        if (to > elements.size()) {
-            throw new IllegalArgumentException("Invalid range: to cannot exceed " + elements.size());
-        }
-
-        return new SubsetBuilder<>(elements, calculator, from, to);
-    }
-
-    /**
      * Creates a {@link SubsetGenerator} that generates subsets in lexicographical order within the specified range.
      *
      * @return a {@code SubsetGenerator} instance
-     * @throws IllegalArgumentException if the range is not specified using {@link #inRange(int, int)} or {@link #all()}
      */
     public SubsetGenerator<T> lexOrder() {
-        if (from < 0 || to < 0) {
-            throw new IllegalArgumentException("Must specify range of subsets via method inRange() or all()");
-        }
         return new SubsetGenerator<>(elements, from, to);
     }
 
@@ -267,21 +198,12 @@ public class SubsetBuilder<T> implements Builder<T> {
      * @param start the starting position for subsets as a {@link BigInteger}
      * @return a {@code SubsetGeneratorMth} instance
      * @throws IllegalArgumentException if m ≤ 0, start &lt; 0, or start ≥ count() while count() &gt; 0
-     * @throws IllegalStateException if no range was set via {@link #inRange(int, int)} or {@link #all()}
      */
     public SubsetGeneratorMth<T> lexOrderMth(BigInteger m, BigInteger start) {
-        requireRange();
         // Rules: m ≤ 0, start < 0, and (count > 0 and start ≥ count) are errors;
         // count == 0 accepts any start ≥ 0 and the generator is simply empty.
         Util.validateLexOrderMthParams(m, start, count());
         return new SubsetGeneratorMth<>(from, to, m, start, elements, calculator);
-    }
-
-    /** Fails fast when neither {@link #all()} nor {@link #inRange(int, int)} was called. */
-    private void requireRange() {
-        if (from < 0 || to < 0) {
-            throw new IllegalStateException("Must specify range via inRange() or all()");
-        }
     }
 
     /**
@@ -298,10 +220,8 @@ public class SubsetBuilder<T> implements Builder<T> {
      * @param ranks the iterable of ranks (each rank must be ≥ 0 and &lt; total subsets)
      * @return a generator producing subsets at the given ranks
      * @throws IllegalArgumentException if {@code ranks} is null
-     * @throws IllegalStateException if no range was set via {@link #inRange(int, int)} or {@link #all()}
      */
     public SubsetGeneratorByRanks<T> byRanks(Iterable<BigInteger> ranks) {
-        requireRange();
         Util.validateByRanksParams(ranks);
         return new SubsetGeneratorByRanks<>(from, to, ranks, elements, calculator);
     }
@@ -367,17 +287,13 @@ public class SubsetBuilder<T> implements Builder<T> {
     /**
      * Returns the total number of subsets in the specified range.
      * <p>
-     * This method calculates the total number of subsets based on the range defined by {@link #inRange(int, int)}
-     * or {@link #all()}.
+     * This method calculates the total number of subsets of the size range this builder was created with
+     * (see {@link SubsetSelector}).
      * </p>
      *
      * @return the count of subsets
      */
     public BigInteger count() {
-        if (from < 0 || to < 0) {
-            return BigInteger.ZERO; // Not configured yet
-        }
-
         // Empty list special cases
         if (elements.isEmpty()) {
             if (from == 0) {
@@ -393,7 +309,6 @@ public class SubsetBuilder<T> implements Builder<T> {
     public boolean isEmpty() {
         // Empty if and only if the builder yields no results at all (count() == 0).
         // A builder whose only result is the empty subset ([[]]) has count() == 1 and is NOT empty.
-        // An unconfigured builder (no all()/inRange()) reports count() == 0 and is therefore empty.
         return count().signum() == 0;
     }
 
@@ -403,7 +318,7 @@ public class SubsetBuilder<T> implements Builder<T> {
                 "elements=" + elements +
                 ", from=" + from +
                 ", to=" + to +
-                ", count=" + (from >= 0 && to >= 0 ? count() : "unspecified") +
+                ", count=" + count() +
                 '}';
     }
 }

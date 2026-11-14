@@ -15,6 +15,24 @@ All notable changes to JNumberTools are recorded here. The format follows
   Rules are evaluated on pairs of dimensions; dimensions linked in a loop are solved together and the
   size of such a group is limited. See `docs/products/README.md` and `ValidationRules.md`.
 
+### Changed
+
+- The simple, constrained and conditional products now return each tuple as one small immutable list
+  object (`io.github.deepeshpatel.jnumbertools.datastructure.Tuple`) instead of
+  `Collections.unmodifiableList(Arrays.asList(...))`, which creates two objects per tuple. Tuples still
+  follow the `List` contract (`equals`, `hashCode`, `toString`, immutability, serialization).
+
+### Changed (breaking)
+
+- `JNumberTools.subsets().of(...)` now returns a `SubsetSelector`, which only offers `all()` and
+  `inRange(from, to)`. Those return the `SubsetBuilder` with `count()`, `lexOrder()` and the other
+  operations. Previously `of(...)` returned a `SubsetBuilder` that had no size range yet: `count()` was
+  `0`, `isEmpty()` was `true` and `lexOrder()` threw, so a forgotten `all()` looked like an empty result.
+  Now forgetting the range does not compile. Code that always called `all()` or `inRange(...)` right after
+  `of(...)`, as the documentation shows, needs no change. The public `SubsetBuilder(List, Calculator)`
+  constructor is replaced by `SubsetSelector(List, Calculator)`, and `SubsetBuilder` no longer has
+  `all()` and `inRange(...)`.
+
 ## [4.0.1] - 2026-11-09
 
 Maintenance release. There are no changes to the supported public API or to library behavior.

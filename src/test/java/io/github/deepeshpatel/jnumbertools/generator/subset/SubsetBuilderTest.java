@@ -29,12 +29,10 @@ class SubsetBuilderTest {
                   | to < from                                         | IllegalArgumentException
                   | to > elements.size() (non-empty list)            | IllegalArgumentException
                   | from > 0 for empty list                           | IllegalArgumentException
-    lexOrder()    | called without range specified                    | IllegalArgumentException
     lexOrderMth() | m ≤ 0                                             | IllegalArgumentException
                   | start < 0                                         | IllegalArgumentException
                   | start ≥ count() (count > 0)                       | IllegalArgumentException
                   | count() = 0 and start ≥ 0                         | accepted, yields nothing
-                  | called without range specified                    | IllegalStateException
     byRanks()     | null ranks                                        | IllegalArgumentException
                   | rank < 0 or ≥ count()                             | IllegalArgumentException (lazily, on iteration)
     choice()      | sampleSize ≤ 0                                    | IllegalArgumentException
@@ -121,10 +119,7 @@ class SubsetBuilderTest {
     void lexOrder() {
         var builder = subsets.of(elements);
 
-        // Should throw if range not specified
-        assertThrows(IllegalArgumentException.class, () ->
-                builder.lexOrder());
-
+        // The selector has no lexOrder(): a size range must be chosen first (checked by the compiler).
         // Should return generator when range is specified
         var rangeBuilder = builder.inRange(1, 2);
         assertNotNull(rangeBuilder.lexOrder());
@@ -174,11 +169,6 @@ class SubsetBuilderTest {
         // Null ranks
         assertThrows(IllegalArgumentException.class, () ->
                 builder.byRanks(null));
-
-        // Should throw if called without range
-        var unconfiguredBuilder = subsets.of(elements);
-        assertThrows(IllegalStateException.class, () ->
-                unconfiguredBuilder.byRanks(ranks));
     }
 
     @Test
@@ -267,10 +257,6 @@ class SubsetBuilderTest {
         // Builder that produces zero elements
         var zeroBuilder = subsets.of(Collections.emptyList()).inRange(1, 2);
         assertTrue(zeroBuilder.isEmpty());
-
-        // Unconfigured builder
-        var unconfigured = subsets.of(elements);
-        assertTrue(unconfigured.isEmpty()); // Should be empty until range specified
     }
 
     // ---- Rules from ValidationRules.md: isEmpty, null input, snapshot, immutability, sampling, traversal ----
@@ -299,7 +285,7 @@ class SubsetBuilderTest {
 
     @Test
     void nullInputThrowsNullInputError() {
-        assertThrows(NullPointerException.class, () -> new SubsetBuilder<String>(null, calculator));
+        assertThrows(NullPointerException.class, () -> new SubsetSelector<String>(null, calculator));
         assertThrows(NullPointerException.class, () -> subsets.of((List<String>) null));
     }
 
@@ -309,7 +295,7 @@ class SubsetBuilderTest {
 
         // thrown at creation, not later during iteration
         assertThrows(NullPointerException.class, () -> subsets.of(withNull));
-        assertThrows(NullPointerException.class, () -> new SubsetBuilder<>(withNull, calculator));
+        assertThrows(NullPointerException.class, () -> new SubsetSelector<>(withNull, calculator));
     }
 
     @Test
@@ -432,9 +418,6 @@ class SubsetBuilderTest {
         var onlyEmptySubset = subsets.of(Collections.emptyList()).all();
         assertEquals(List.of(List.of()), onlyEmptySubset.lexOrderMth(1, 0).stream().toList());
         assertThrows(IllegalArgumentException.class, () -> onlyEmptySubset.lexOrderMth(1, 1));
-
-        // no range configured: fails fast with a clear error
-        assertThrows(IllegalStateException.class, () -> subsets.of(elements).lexOrderMth(1, 0));
     }
 
     @Test
@@ -451,5 +434,36 @@ class SubsetBuilderTest {
         assertTrue(noSubsets.isEmpty());
         assertTrue(noSubsets.lexOrder().stream().toList().isEmpty());
         assertTrue(noSubsets.lexOrderMth(1, 0).stream().toList().isEmpty());
+    }
+
+    // ---- SubsetSelector: the step before a size range is chosen ----
+
+    @Test
+    void selectorOffersAllAndInRangeAndNothingElse() {
+        // A selector cannot count or generate: only all() and inRange(...) lead to a builder.
+        var selector = subsets.of(elements);
+        assertTrue(selector instanceof SubsetSelector);
+        assertFalse((Object) selector instanceof io.github.deepeshpatel.jnumbertools.generator.base.Builder);
+        assertEquals(java.math.BigInteger.valueOf(1L << elements.size()), selector.all().count());
+        assertEquals(selector.inRange(0, elements.size()).count(), selector.all().count());
+    }
+
+    @Test
+    void selectorCanBeReusedForDifferentRanges() {
+        var selector = subsets.of(elements);
+        var all = selector.all();
+        var some = selector.inRange(1, 1);
+        assertEquals(java.math.BigInteger.valueOf(elements.size()), some.count());
+        // choosing one range does not change what the selector or another builder yields
+        assertEquals(java.math.BigInteger.valueOf(1L << elements.size()), all.count());
+        assertEquals(java.math.BigInteger.valueOf(1L << elements.size()), selector.all().count());
+    }
+
+    @Test
+    void selectorSnapshotsItsElements() {
+        List<String> mutable = new ArrayList<>(List.of("A", "B"));
+        var selector = new SubsetSelector<>(mutable, calculator);
+        mutable.add("C");
+        assertEquals(java.math.BigInteger.valueOf(4), selector.all().count());
     }
 }

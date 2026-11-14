@@ -4,8 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
-import java.util.Arrays;
-import java.util.Collections;
+import io.github.deepeshpatel.jnumbertools.datastructure.Tuple;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -59,11 +59,16 @@ public class SimpleProduct implements Iterable<List<Object>> {
     private class SimpleProductIterator implements Iterator<List<Object>> {
 
         private final int[] indices = new int[allLists.size()];
+        // The current tuple. Advancing rewrites only the positions that changed, and next() copies the array.
+        private final Object[] current = new Object[allLists.size()];
         private boolean hasNext;
 
         SimpleProductIterator() {
             // No dimensions: one empty tuple. Any empty dimension: no tuples at all.
             hasNext = allLists.stream().noneMatch(List::isEmpty);
+            if (hasNext) {
+                for (int i = 0; i < current.length; i++) current[i] = allLists.get(i).get(0);
+            }
         }
 
         @Override
@@ -75,22 +80,22 @@ public class SimpleProduct implements Iterable<List<Object>> {
         public List<Object> next() {
             if (!hasNext) throw new NoSuchElementException();
 
-            Object[] tuple = new Object[indices.length];
-            for (int i = 0; i < indices.length; i++) {
-                tuple[i] = allLists.get(i).get(indices[i]);
-            }
+            Object[] tuple = current.clone();
             hasNext = advanceIndices();
             // The array is private to this call, so wrapping it (no copy) is safe and immutable to callers.
-            return Collections.unmodifiableList(Arrays.asList(tuple));
+            return Tuple.wrap(tuple);
         }
 
         private boolean advanceIndices() {
             for (int i = indices.length - 1; i >= 0; i--) {
-                if (indices[i] < allLists.get(i).size() - 1) {
+                List<?> dimension = allLists.get(i);
+                if (indices[i] < dimension.size() - 1) {
                     indices[i]++;
+                    current[i] = dimension.get(indices[i]);
                     return true;
                 }
                 indices[i] = 0;
+                current[i] = dimension.get(0);
             }
             return false;
         }

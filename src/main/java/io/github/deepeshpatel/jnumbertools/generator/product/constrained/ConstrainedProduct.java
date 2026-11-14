@@ -4,11 +4,13 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Tuple;
+
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.RandomAccess;
 
 /**
  * Generates the constrained Cartesian product of multiple dimensions in lexicographical order
@@ -76,6 +78,11 @@ public class ConstrainedProduct implements Iterable<List<Object>> {
         private final int n = dimensions.size();
         private final Iterator<List<Object>>[] cursors;
         private final List<Object>[] current;   // the tuple each dimension currently contributes
+        // The concatenation of the current tuples. Only the part from the dimension that moved onwards is
+        // rewritten, and next() copies the finished array, so a tuple costs one array copy instead of one
+        // pass over every dimension's elements.
+        private Object[] buffer = new Object[16];
+        private final int[] start = new int[n + 1];   // start[k]: where dimension k's elements begin in buffer
         private boolean hasNext;
 
         @SuppressWarnings("unchecked")
@@ -94,6 +101,28 @@ public class ConstrainedProduct implements Iterable<List<Object>> {
                 }
             }
             hasNext = ok;
+            if (ok) fillFrom(0);
+        }
+
+        /** Rewrites buffer from dimension {@code from} onwards; the dimensions before it are unchanged. */
+        private void fillFrom(int from) {
+            int pos = start[from];
+            for (int d = from; d < n; d++) {
+                start[d] = pos;
+                List<Object> part = current[d];
+                int size = part.size();
+                if (pos + size > buffer.length) {
+                    buffer = Arrays.copyOf(buffer, Math.max(buffer.length * 2, pos + size));
+                }
+                if (part instanceof RandomAccess) {
+                    for (int k = 0; k < size; k++) buffer[pos + k] = part.get(k);
+                } else {
+                    int k = pos;
+                    for (Object element : part) buffer[k++] = element;
+                }
+                pos += size;
+            }
+            start[n] = pos;
         }
 
         @Override
@@ -107,17 +136,11 @@ public class ConstrainedProduct implements Iterable<List<Object>> {
                 throw new NoSuchElementException("No more tuples available");
             }
 
-            int size = 0;
-            for (List<Object> part : current) size += part.size();
-            Object[] tuple = new Object[size];
-            int pos = 0;
-            for (List<Object> part : current) {
-                for (Object element : part) tuple[pos++] = element;
-            }
+            Object[] tuple = Arrays.copyOf(buffer, start[n]);
 
             advance();
             // The array is private to this call, so wrapping it (no copy) is safe; clients cannot modify it.
-            return Collections.unmodifiableList(Arrays.asList(tuple));
+            return Tuple.wrap(tuple);
         }
 
         /** Moves the rightmost dimension that still has tuples and restarts every dimension to its right. */
@@ -129,6 +152,7 @@ public class ConstrainedProduct implements Iterable<List<Object>> {
                         cursors[j] = dimensions.get(j).iterator();
                         current[j] = cursors[j].next();   // non-empty: it produced a tuple when first iterated
                     }
+                    fillFrom(i);
                     return;
                 }
             }
