@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
 import io.github.deepeshpatel.jnumbertools.datastructure.FreqVector;
+import io.github.deepeshpatel.jnumbertools.datastructure.FrequencyMap;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 
 import java.util.*;
@@ -125,24 +126,26 @@ public final class MultisetCombination<T> extends AbstractMultisetCombination<T>
         @Override
         public Map<T, Integer> next() {
             if (!hasNext()) throw new NoSuchElementException();
-            int[] old = indices;
+            // Build the result before advancing: the indices are advanced in place.
+            Map<T, Integer> result = createFrequencyMap(indices);
             indices = nextMultisetCombination(indices);
-            return createFrequencyMap(old);
+            return result;
         }
 
         /**
-         * Computes the next multiset combination in lexicographical order.
+         * Computes the next multiset combination in lexicographical order, in place.
          * <p>
          * Given the current combination of indices [a₀, a₁, ..., aᵣ₋₁], this method finds the
          * rightmost index i, where aᵢ can be incremented (aᵢ < n-1) while respecting element
          * multiplicities, increments it, and fills subsequent positions with valid indices.
-         * Returns an empty array if no further combination exists.
+         * Returns an empty array if no further combination exists (the contents of {@code a} are then
+         * meaningless, which is fine because the iteration is over).
          *
-         * @param a the current combination of indices
-         * @return the next combination of indices, or an empty array if none exists
+         * @param a the current combination of indices, updated in place
+         * @return {@code a}, now holding the next combination, or an empty array if none exists
          */
         private int[] nextMultisetCombination(int[] a) {
-            int[] next = Arrays.copyOf(a, a.length);
+            int[] next = a;
             int maxSupportedValue = options.length - 1;
 
             int i = next.length - 1;
@@ -187,29 +190,21 @@ public final class MultisetCombination<T> extends AbstractMultisetCombination<T>
          * @return a map of elements to their frequencies
          */
         public Map<T, Integer> createFrequencyMap(int[] sortedArray) {
-            var freqMap = new LinkedHashMap<T, Integer>();
-
-            if (sortedArray.length == 0) {
-                return Collections.unmodifiableMap(freqMap);
+            int distinct = 0;
+            for (int i = 0; i < sortedArray.length; i++) {
+                if (i == 0 || sortedArray[i] != sortedArray[i - 1]) distinct++;
             }
 
-            int currentNum = sortedArray[0];
-            int currentCount = 1;
-
-            for (int i = 1; i < sortedArray.length; i++) {
-                if (sortedArray[i] == currentNum) {
-                    currentCount++;
-                } else {
-                    freqMap.put(options[currentNum].getKey(), currentCount);
-                    currentNum = sortedArray[i];
-                    currentCount = 1;
-                }
+            Object[] keys = new Object[distinct];
+            int[] counts = new int[distinct];
+            int d = -1;
+            for (int i = 0; i < sortedArray.length; i++) {
+                if (i == 0 || sortedArray[i] != sortedArray[i - 1]) keys[++d] = options[sortedArray[i]].getKey();
+                counts[d]++;
             }
 
-            freqMap.put(options[currentNum].getKey(), currentCount);
-
-            // Fresh map per result, so wrapping (not copying) is enough to make it immutable.
-            return Collections.unmodifiableMap(freqMap);
+            // Fresh arrays per result, so they can be handed over to the immutable map without copying.
+            return FrequencyMap.wrap(keys, counts);
         }
     }
 
@@ -224,7 +219,6 @@ public final class MultisetCombination<T> extends AbstractMultisetCombination<T>
      */
     public class FreqVectorIterator implements Iterator<Map<T, Integer>> {
         private FreqVector indices;
-        private final Map<T, Integer> outputMap = new LinkedHashMap<>();
 
         public FreqVectorIterator() {
             indices = nextMultisetCombination(new FreqVector(r, options.length));
@@ -249,9 +243,9 @@ public final class MultisetCombination<T> extends AbstractMultisetCombination<T>
         @Override
         public Map<T, Integer> next() {
             if (!hasNext()) throw new NoSuchElementException();
-            FreqVector previous = new FreqVector(indices);
+            Map<T, Integer> result = mapListToMap(indices); // before advancing: the vector is changed in place
             indices = nextMultisetCombination(indices);
-            return mapListToMap(previous);
+            return result;
         }
 
         /**
@@ -264,13 +258,22 @@ public final class MultisetCombination<T> extends AbstractMultisetCombination<T>
          * @return a map of elements to their frequencies
          */
         private Map<T, Integer> mapListToMap(FreqVector freqVector) {
-            outputMap.clear();
+            int[] freq = freqVector.frequencies;
+            int distinct = 0;
             for (int i = 0; i < options.length; i++) {
-                if (freqVector.frequencies[i] != 0) {
-                    outputMap.put(options[i].getKey(), freqVector.frequencies[i]);
+                if (freq[i] != 0) distinct++;
+            }
+
+            Object[] keys = new Object[distinct];
+            int[] counts = new int[distinct];
+            for (int i = 0, d = 0; i < options.length; i++) {
+                if (freq[i] != 0) {
+                    keys[d] = options[i].getKey();
+                    counts[d++] = freq[i];
                 }
             }
-            return Collections.unmodifiableMap(new LinkedHashMap<>(outputMap));
+            // Fresh arrays per result, so they can be handed over to the immutable map without copying.
+            return FrequencyMap.wrap(keys, counts);
         }
 
         /**

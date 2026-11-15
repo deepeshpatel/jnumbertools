@@ -71,11 +71,16 @@ public final class UniquePermutationLexElementIterator<T> implements Iterator<Li
      */
     @Override
     public List<T> next() {
-        return mapper.indicesToValues(iterator.next());
+        // The mapper copies the values out, so the index array is mapped without a defensive copy.
+        return iterator.nextMapped(mapper);
     }
 
     /**
      * A functional interface for mapping an array of indices to a list of values.
+     * <p>
+     * The array passed in is the iterator's live state and changes after the call returns, so an implementation
+     * must copy what it needs and must not keep a reference to the array.
+     * </p>
      *
      * @param <T> the type of elements to be mapped
      */

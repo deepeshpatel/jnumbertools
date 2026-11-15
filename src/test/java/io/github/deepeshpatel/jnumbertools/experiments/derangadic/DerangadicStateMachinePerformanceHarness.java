@@ -105,7 +105,7 @@ public class DerangadicStateMachinePerformanceHarness {
 
         for (int i = 0; i < iterations; i++) {
             stateMachine.increment();
-            encodedCache.add(stateMachine.encoded());
+            encodedCache.add(stateMachine.encoded().clone());
         }
 
         // Step 2: Time materialization only
@@ -185,28 +185,32 @@ public class DerangadicStateMachinePerformanceHarness {
 
         Calculator CALC = new Calculator();
         DerangadicAlgorithms ALG = new DerangadicAlgorithms(CALC);
-        // Method 1: Full increment
-        var stateMachine = new DerangadicIncrementStateMachine(n,BigInteger.valueOf(startRank), CALC);
-
-        // Method 2: Materialization from encoded
-
-        List<int[]> encodedCache = new ArrayList<>(iterations);
-        for (int i = 0; i < iterations; i++) {
-            stateMachine.increment();
-            encodedCache.add(stateMachine.encoded());
-        }
+        // All three methods must be evaluated at the same rank. The state machine
+        // starts at startRank, so advance it exactly once per iteration.
+        var stateMachine = new DerangadicIncrementStateMachine(n, BigInteger.valueOf(startRank), CALC);
 
         boolean allMatch = true;
-        for (int i = 0; i < iterations && allMatch; i++) {
-            stateMachine.increment();
+        for (int i = 0; i < iterations; i++) {
+            if (!stateMachine.increment()) {
+                System.out.printf("│ ✗ State machine exhausted at iteration %d%n", i);
+                allMatch = false;
+                break;
+            }
+
             int[] fromIncrement = stateMachine.derangement();
 
-            int[] fromMaterialize = ALG.toDerangement(encodedCache.get(i), n);
+            // encoded() exposes the live internal array. Materialize it immediately,
+            // before the next increment mutates it; no cache of live references.
+            int[] fromMaterialize = ALG.toDerangement(stateMachine.encoded().clone(), n);
             int[] fromUnrank = ALG.unrank(startRank + i + 1, n);
 
             if (!java.util.Arrays.equals(fromIncrement, fromMaterialize) ||
                     !java.util.Arrays.equals(fromIncrement, fromUnrank)) {
-                System.out.printf("│ ✗ MISMATCH at iteration %d%n", i);
+                System.err.printf("│ ✗ MISMATCH at iteration %d (rank %d)%n", i, startRank + i + 1);
+                System.err.printf("│   increment:   %s%n", java.util.Arrays.toString(fromIncrement));
+                System.err.printf("│   materialize: %s%n", java.util.Arrays.toString(fromMaterialize));
+                System.err.printf("│   unrank:      %s%n", java.util.Arrays.toString(fromUnrank));
+
                 allMatch = false;
                 break;
             }
@@ -283,7 +287,7 @@ public class DerangadicStateMachinePerformanceHarness {
         List<int[]> encodedCache = new ArrayList<>(iterations);
         for (int i = 0; i < iterations; i++) {
             stateMachine.increment();
-            encodedCache.add(stateMachine.encoded());
+            encodedCache.add(stateMachine.encoded().clone());
         }
 
         // Warmup

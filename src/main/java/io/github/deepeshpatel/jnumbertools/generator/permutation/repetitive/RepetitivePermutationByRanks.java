@@ -100,8 +100,20 @@ public final class RepetitivePermutationByRanks<T> extends AbstractGenerator<T> 
             if (width == 0) {
                 return List.of(); // the single empty permutation
             }
-            int[] indices = unrankRepetitivePermutation(rank, elements.size(), width);
+            int[] indices = totalPermutations.bitLength() < 64
+                    ? unrankLong(rank.longValue(), elements.size(), width)
+                    : unrankRepetitivePermutation(rank, elements.size(), width);
             return indicesToValues(indices);
+        }
+
+        /** The same base-n digits in primitive arithmetic; valid because rank &lt; nᵂ &lt; 2⁶³. */
+        private int[] unrankLong(long rank, int n, int width) {
+            int[] indices = new int[width];
+            for (int i = width - 1; i >= 0; i--) {
+                indices[i] = (int) (rank % n);
+                rank /= n;
+            }
+            return indices;
         }
 
         /**

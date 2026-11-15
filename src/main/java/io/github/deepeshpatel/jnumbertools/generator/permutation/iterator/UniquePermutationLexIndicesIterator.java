@@ -47,6 +47,18 @@ public final class UniquePermutationLexIndicesIterator implements Iterator<int[]
         return result;
     }
 
+    /**
+     * Maps the current permutation without copying it, then advances. The mapper sees the live array, so it
+     * must copy whatever it needs and must not keep the array. Used by {@link UniquePermutationLexElementIterator},
+     * whose mappers copy the values into a new list, which makes the defensive copy in {@link #next()} redundant.
+     */
+    <T> java.util.List<T> nextMapped(UniquePermutationLexElementIterator.IndicesToValueMapper<T> mapper) {
+        if (exhausted) { throw new NoSuchElementException("Reached maximum permutation");}
+        java.util.List<T> result = mapper.indicesToValues(indices);
+        if (!advanceToNextPermutation(indices)) { exhausted = true;}
+        return result;
+    }
+
     private static boolean advanceToNextPermutation(int[] n) {
         int highestI = -1;
 

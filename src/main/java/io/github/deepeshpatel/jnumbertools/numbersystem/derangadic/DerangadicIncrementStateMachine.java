@@ -5,7 +5,6 @@
 package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.datastructure.FenwickTree;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -253,11 +252,8 @@ public final class DerangadicIncrementStateMachine {
         // Reset derangement state
         boolean[] usedFull = state.usedFull;
         Arrays.fill(usedFull, false);
-        FenwickTree avail = state.availTree;
-        for (int i = 1; i <= n; i++) {
-            int v = avail.get(i);
-            if (v != 1) avail.update(i, 1 - v);
-        }
+        AvailabilitySet avail = state.availTree;
+        avail.fillAll();
 
         // Fill prefix [0, offset) with the greedy minimum derangement.
         int nextCandidate = 0;
@@ -271,7 +267,7 @@ public final class DerangadicIncrementStateMachine {
             }
             state.derangement[pos] = chosen;
             state.usedFull[chosen] = true;
-            avail.update(chosen + 1, -1);
+            avail.take(chosen);
             if (chosen == nextCandidate) nextCandidate++;
         }
 
@@ -304,14 +300,14 @@ public final class DerangadicIncrementStateMachine {
     private void rollbackAndRebuild(int changedStep) {
         int actualN = state.actualN;
         int offset = state.n - actualN;
-        FenwickTree avail = state.availTree;
+        AvailabilitySet avail = state.availTree;
 
         // ----- Release suffix -----
         for (int step = changedStep; step < actualN; step++) {
             state.eUsed[state.consumedAtStep[step]] = false;       // encoded
             int abs = state.derangement[offset + step];
             state.usedFull[abs] = false;                           // absolute
-            avail.update(abs + 1, 1);                              // Fenwick
+            avail.release(abs);                                    // availability
         }
 
         // ----- Rebuild suffix -----
@@ -353,7 +349,7 @@ public final class DerangadicIncrementStateMachine {
      * @param avail  Fenwick tree tracking available absolute elements (1-based indexing)
      * @param offset global offset {@code n - actualN}; maps step index to absolute position
      */
-    private void consumeAtStep(int step, int digit, FenwickTree avail, int offset) {
+    private void consumeAtStep(int step, int digit, AvailabilitySet avail, int offset) {
         int actualN = state.actualN;
 
         // ---- Encoded (relative) selection with dead-end avoidance ----
@@ -381,20 +377,22 @@ public final class DerangadicIncrementStateMachine {
 
         // ---- Absolute selection via Fenwick tree ----
         int pos = offset + step;
-        boolean posAvail = (avail.rsq(pos + 1) - avail.rsq(pos)) == 1;
+        // usedFull mirrors the Fenwick tree (both change together everywhere), so one array read replaces
+        // the two prefix-sum queries rsq(pos + 1) - rsq(pos).
+        boolean posAvail = !state.usedFull[pos];
         int chosenAbs;
         if (posAvail) {
-            int posRank = avail.rsq(pos);
+            int posRank = avail.countBelow(pos);
             chosenAbs = (digit < posRank)
-                    ? avail.findKth(digit + 1)
-                    : avail.findKth(digit + 2);
+                    ? avail.select(digit + 1)
+                    : avail.select(digit + 2);
         } else {
-            chosenAbs = avail.findKth(digit + 1);
+            chosenAbs = avail.select(digit + 1);
         }
 
         state.derangement[pos] = chosenAbs - 1;
         state.usedFull[chosenAbs - 1] = true;
-        avail.update(chosenAbs, -1);
+        avail.take(chosenAbs - 1);
     }
 
     // =========================================================================
@@ -544,7 +542,7 @@ public final class DerangadicIncrementStateMachine {
         // derangement state
         final int[] derangement;
         final boolean[] usedFull;
-        final FenwickTree availTree;
+        final AvailabilitySet availTree;
 
         // immutable
         final int n;
@@ -566,7 +564,7 @@ public final class DerangadicIncrementStateMachine {
             this.eUsed = new boolean[actualN];
             this.derangement = new int[n];
             this.usedFull = new boolean[n];
-            this.availTree = new FenwickTree(n);
+            this.availTree = new AvailabilitySet(n);
         }
 
         /**

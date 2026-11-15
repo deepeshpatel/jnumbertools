@@ -8,9 +8,6 @@ import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermutationLexElementIterator;
 
 import java.util.*;
-import java.util.stream.IntStream;
-
-import static java.util.stream.Collectors.toCollection;
 
 /**
  * Generates unique k-permutations in lexicographical order from a list of elements.
@@ -55,7 +52,8 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
      *
      * <p>The iterator behavior:
      * <ul>
-     *   <li>Returns empty iterator if k=0</li>
+     *   <li>Returns an empty iterator if k &gt; n</li>
+     *   <li>Returns a single empty permutation if k=0</li>
      *   <li>Uses optimized full permutation iterator when k = n</li>
      *   <li>Otherwise uses incremental lexicographical generation</li>
      * </ul>
@@ -80,56 +78,43 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
      * in lexicographical order.
      */
     private class Itr implements Iterator<List<T>> {
-        private int[] indices;
-        private final LinkedList<Integer> list;
+        private final int n = elements.size();
+        private final int[] indices = new int[k];      // the current k-permutation, advanced in place
+        private final int[] pool = new int[n];         // unused elements in ascending order, from poolHead
+        private final boolean[] used = new boolean[n];
+        private int poolHead;
+        private int poolSize;
+        private boolean hasNext = true;
 
-        /**
-         * Initializes iterator state with first permutation [0,1,...,k−1]
-         * and remaining indices [k,...,n−1] in a linked list for efficient removal.
-         */
         public Itr() {
-            indices = IntStream.range(0, k).toArray();
-            list = IntStream.range(k, elements.size()).boxed()
-                    .collect(toCollection(LinkedList::new));
+            for (int i = 0; i < k; i++) indices[i] = i;
+            for (int v = k; v < n; v++) pool[poolSize++] = v;
         }
 
         @Override
         public boolean hasNext() {
-            return indices.length > 0;
+            return hasNext;
         }
 
         @Override
         public List<T> next() {
-            if (!hasNext()) {
+            if (!hasNext) {
                 throw new NoSuchElementException("No more permutations available");
             }
-            int[] old = indices;
-            indices = kPermutationNextLex(indices, list, elements.size() - 1);
-            return indicesToValues(old);
+            // indicesToValues copies the values out, so the indices can be advanced in place afterwards.
+            List<T> result = indicesToValues(indices);
+            hasNext = advance();
+            return result;
         }
 
-        /**
-         * Generates the next permutation in lexicographical order.
-         *
-         * <p>Algorithm:
-         * <ol>
-         *   <li>If remaining indices exist, appends next available index</li>
-         *   <li>Otherwise finds rightmost incrementable position</li>
-         *   <li>Updates it with next valid value and resets subsequent positions</li>
-         * </ol>
-         *
-         * @param current current permutation indices
-         * @param remaining available indices not in current permutation
-         * @param maxAllowed maximum valid index (n−1)
-         * @return next permutation indices or empty array if done
-         */
-        private int[] kPermutationNextLex(int[] current, LinkedList<Integer> remaining, int maxAllowed) {
-            int[] a = Arrays.copyOf(current, current.length);
+        /** Moves to the next k-permutation in lexicographic order; false when the current one was the last. */
+        private boolean advance() {
+            int[] a = indices;
 
-            if (!remaining.isEmpty()) {
-                int next = remaining.removeFirst();
-                a[a.length - 1] = next;
-                return a;
+            // Most steps only replace the last position with the next unused element.
+            if (poolHead < poolSize) {
+                a[a.length - 1] = pool[poolHead++];
+                return true;
             }
 
             int index = -1;
@@ -139,26 +124,35 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
                     break;
                 }
             }
-
             if (index == -1) {
-                return new int[0];
+                return false;
             }
 
-            remaining.addAll(IntStream.rangeClosed(0, maxAllowed).boxed().toList());
+            // Everything outside the fixed prefix a[0..index-1] is available again.
+            Arrays.fill(used, false);
             for (int i = 0; i < index; i++) {
-                remaining.remove(Integer.valueOf(a[i]));
+                used[a[i]] = true;
             }
             int valueForCurrentIndex = a[index] + 1;
-            while (!remaining.contains(valueForCurrentIndex)) {
+            while (used[valueForCurrentIndex]) {
                 valueForCurrentIndex++;
             }
             a[index] = valueForCurrentIndex;
-            remaining.remove(Integer.valueOf(valueForCurrentIndex));
+            used[valueForCurrentIndex] = true;
 
-            for (int i = index + 1; i < a.length; i++) {
-                a[i] = remaining.removeFirst();
+            // The positions after it take the smallest unused elements, the rest become the new pool.
+            int slot = index + 1;
+            poolHead = 0;
+            poolSize = 0;
+            for (int x = 0; x < n; x++) {
+                if (used[x]) continue;
+                if (slot < a.length) {
+                    a[slot++] = x;
+                } else {
+                    pool[poolSize++] = x;
+                }
             }
-            return a;
+            return true;
         }
     }
 }

@@ -125,20 +125,55 @@ public final class FactoradicAlgorithms {
             }
             return factoradic;
         }
-        long d = 1;
-        int i = sizeOfFactoradic - 1;
-        while (!k.equals(BigInteger.ZERO)) {
-            if (i < 0) {
-                // value needs more digits than allowed, i.e. value >= size!
-                throw new IllegalArgumentException(
-                        "value is too large to be represented with " + sizeOfFactoradic + " factoradic digits");
-            }
-            BigInteger[] divideAndRemainder = k.divideAndRemainder(BigInteger.valueOf(d));
-            factoradic[i--] = divideAndRemainder[1].intValue();
-            k = divideAndRemainder[0];
-            d++;
-        }
+        fillDigitsMagnitude(k, factoradic);
         return factoradic;
+    }
+
+    /**
+     * Digit extraction for values that do not fit in a long. The value is copied once into a mutable array of
+     * 32-bit words and divided in place, so the whole conversion allocates one array instead of several
+     * {@code BigInteger}s per digit. Consecutive divisors d, d+1, ... are multiplied together while the product
+     * stays below 2<sup>31</sup>, so each pass over the words yields several digits at once: dividing by the
+     * product leaves a remainder R whose mixed-radix digits (R mod d, then R / d mod (d+1), ...) are exactly
+     * the digits that dividing by d, d+1, ... one at a time would give.
+     */
+    private static void fillDigitsMagnitude(BigInteger k, int[] factoradic) {
+        byte[] bytes = k.toByteArray();                       // big-endian, two's complement; k > 0
+        int words = (bytes.length + 3) >>> 2;
+        int[] mag = new int[words];                           // mag[0] is the most significant word
+        for (int b = 0; b < bytes.length; b++) {
+            int fromEnd = bytes.length - 1 - b;               // byte position counted from the least significant end
+            mag[words - 1 - (fromEnd >>> 2)] |= (bytes[b] & 0xFF) << ((fromEnd & 3) << 3);
+        }
+        int first = 0;                                        // index of the first non-zero word
+        while (first < words && mag[first] == 0) first++;
+
+        int size = factoradic.length;
+        int digitsDone = 0;                                   // digits for divisors 1 .. digitsDone are written
+        while (digitsDone < size && first < words) {
+            long product = digitsDone + 1L;
+            int last = digitsDone + 1;                        // the group covers divisors digitsDone+1 .. last
+            while (last < size && product * (last + 1L) < (1L << 31)) {
+                product *= ++last;
+            }
+            long remainder = 0;
+            for (int w = first; w < words; w++) {
+                long current = (remainder << 32) | (mag[w] & 0xFFFFFFFFL);
+                mag[w] = (int) (current / product);
+                remainder = current % product;
+            }
+            for (int d = digitsDone + 1; d <= last; d++) {
+                factoradic[size - d] = (int) (remainder % d);   // divisor d belongs to digit size - d
+                remainder /= d;
+            }
+            digitsDone = last;
+            while (first < words && mag[first] == 0) first++;
+        }
+        if (first < words) {
+            // value needs more digits than allowed, i.e. value >= size!
+            throw new IllegalArgumentException(
+                    "value is too large to be represented with " + size + " factoradic digits");
+        }
     }
 
     /**

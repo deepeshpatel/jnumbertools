@@ -77,6 +77,17 @@ public final class PermutadicAlgorithms {
         List<Integer> permutadicValues = new ArrayList<>(16);
         int radix = degree + 1;
 
+        if (decimalValue.bitLength() < 64) {
+            // Same digits in primitive arithmetic: the value and every quotient fit in a long.
+            long value = decimalValue.longValue();
+            do {
+                permutadicValues.add((int) (value % radix));
+                value /= radix;
+                radix++;
+            } while (value > 0);
+            return List.copyOf(permutadicValues);
+        }
+
         do {
             BigInteger[] dr = decimalValue.divideAndRemainder(BigInteger.valueOf(radix));
             permutadicValues.add(dr[1].intValue());
@@ -292,6 +303,16 @@ public final class PermutadicAlgorithms {
     private static int[] unRankSparse(BigInteger rank, int size, int k) {
         int degree = size - k;
         int[] digit = new int[k];
+        if (rank.bitLength() < 64) {
+            // Same digits in primitive arithmetic: the rank and every quotient fit in a long.
+            long quotient = rank.longValue();
+            for (int j = 0; j < k && quotient > 0; j++) {
+                long radix = degree + 1L + j;
+                digit[j] = (int) (quotient % radix);
+                quotient /= radix;
+            }
+            return selectFromDigits(digit, k);
+        }
         BigInteger quotient = rank;
         for (int j = 0; j < k && quotient.signum() > 0; j++) {
             BigInteger[] dr = quotient.divideAndRemainder(BigInteger.valueOf(degree + 1L + j));

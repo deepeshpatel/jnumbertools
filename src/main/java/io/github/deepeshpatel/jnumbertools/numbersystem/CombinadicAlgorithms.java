@@ -106,6 +106,9 @@ public final class CombinadicAlgorithms {
                 return unRankByLongSearch(rank.longValue(), total.longValue(), n, r, table);
             }
         }
+        if (n <= LogFactorials.MAX_N) {
+            return unRankByEstimate(rank, total, n, r);
+        }
         return unRankBySearch(rank, total, n, r);
     }
 
@@ -134,6 +137,77 @@ public final class CombinadicAlgorithms {
             remaining -= t[best][k];
         }
         return result;
+    }
+
+    /** Float comparisons closer than this are settled with exact arithmetic (error of the log table is below 1e-8). */
+    private static final double LOG_MARGIN = 1e-6;
+
+    /**
+     * Same result as {@link #unRankBySearch}, with far fewer exact binomial lookups.
+     * <p>
+     * For each position the largest c with C(c, k) â‰¤ remaining is first estimated from the logarithm table (a
+     * binary search over primitive doubles, no {@code BigInteger} work), then confirmed exactly: C(c, k) is looked
+     * up once, which the subtraction needs anyway, and C(c + 1, k) only when the estimate leaves any doubt.
+     * An exact check that disagrees with the estimate moves c by one, so the result never depends on the
+     * floating-point error. {@link #unRankBySearch} makes about logâ‚‚(n) exact lookups for every position instead.
+     * </p>
+     * Package-private so tests can compare it with {@link #unRankBySearch}; requires n â‰¤ {@link LogFactorials#MAX_N}.
+     */
+    int[] unRankByEstimate(BigInteger rank, BigInteger total, int n, int r) {
+        double[] logFactorial = LogFactorials.upTo(n);
+        int[] result = new int[r];
+        BigInteger remaining = total.subtract(BigInteger.ONE).subtract(rank);
+        int upper = n - 1;                                   // c strictly decreases from one position to the next
+        for (int k = r, index = 0; k >= 1; k--, index++) {
+            int best = k - 1;                                // fallback when no c â‰¥ k qualifies (C(k-1, k) = 0)
+            BigInteger exact = BigInteger.ZERO;
+            if (remaining.signum() > 0) {
+                double target = logOf(remaining) + logFactorial[k];   // ln(remaining) + ln(k!)
+                int low = k;
+                int high = upper;
+                int c = k - 1;
+                while (low <= high) {                        // largest c with ln(c!) - ln((c-k)!) <= target
+                    int mid = (low + high) >>> 1;
+                    if (logFactorial[mid] - logFactorial[mid - k] <= target) {
+                        c = mid;
+                        low = mid + 1;
+                    } else {
+                        high = mid - 1;
+                    }
+                }
+                if (c >= k) {
+                    exact = calculator.nCr(c, k);
+                    while (c >= k && exact.compareTo(remaining) > 0) {      // the estimate was too high
+                        c--;
+                        exact = c >= k ? calculator.nCr(c, k) : BigInteger.ZERO;
+                    }
+                    while (c + 1 <= upper
+                            && logFactorial[c + 1] - logFactorial[c + 1 - k] <= target + LOG_MARGIN) {
+                        BigInteger next = calculator.nCr(c + 1, k);          // the estimate may have been too low
+                        if (next.compareTo(remaining) > 0) {
+                            break;
+                        }
+                        c++;
+                        exact = next;
+                    }
+                }
+                best = Math.max(c, k - 1);
+            }
+            result[index] = n - 1 - best;
+            remaining = remaining.subtract(exact);
+            upper = best - 1;
+        }
+        return result;
+    }
+
+    /** Natural logarithm of a positive BigInteger, also for values beyond the range of a double. */
+    private static double logOf(BigInteger value) {
+        int bits = value.bitLength();
+        if (bits <= 1000) {
+            return Math.log(value.doubleValue());
+        }
+        int shift = bits - 1000;
+        return Math.log(value.shiftRight(shift).doubleValue()) + shift * 0.6931471805599453;
     }
 
     // Package-private so tests can compare it with the long path.

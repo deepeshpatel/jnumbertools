@@ -5,6 +5,8 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-11-15
+
 ### Added
 
 - Conditional Cartesian product, started with `cartesianProduct().conditionalProductOf(list)` and
@@ -21,6 +23,43 @@ All notable changes to JNumberTools are recorded here. The format follows
   object (`io.github.deepeshpatel.jnumbertools.datastructure.Tuple`) instead of
   `Collections.unmodifiableList(Arrays.asList(...))`, which creates two objects per tuple. Tuples still
   follow the `List` contract (`equals`, `hashCode`, `toString`, immutability, serialization).
+
+### Performance
+
+No change in results or order; these changes only reduce time and allocation.
+
+- k-permutations in lexicographic order (`nPk(k, list).lexOrder()`) advance a primitive index array
+  in place instead of using a boxed `LinkedList`.
+- Multiset combinations: `lexOrder()` builds each result map once instead of copying it, and
+  `byRanks(...)` (also used by `lexOrderMth`, `choice` and `sample`) uses `long` tables when all counts
+  fit in a `long`, falling back to `BigInteger` otherwise.
+- Factoradic unranking (used by permutation `byRanks`, `lexOrderMth`, `choice` and `sample`) uses
+  primitive arithmetic for ranks that fit in a `long`, and for larger ranks extracts several digits
+  per pass over a single mutable word array instead of creating `BigInteger`s for each digit.
+- Cartesian product by ranks reuses one by-rank generator per dimension and uses `long` arithmetic
+  when the whole product fits in 62 bits.
+- The conditional product builds its internal plan in the same order on every run, so its
+  performance is reproducible from one JVM run to the next.
+- Unique and repetitive combinations in `lexOrder()`, and unique permutations in `lexOrder()`, advance
+  one index array in place instead of copying it for every result.
+- Derangements in `lexOrder()` detect the last result from the successor engine instead of counting
+  and comparing a `BigInteger` rank, and the Derangadic engine tracks available values with a
+  lighter bit-set-style structure instead of a Fenwick tree.
+- Multiset permutations `byRanks(...)` and `lexOrderMth(...)` share one unranker: a linear scan over
+  the element types for up to 8 types when the count fits in a `long`, and a Fenwick tree otherwise.
+  `lexOrderMth` previously always scanned linearly, which was slow for many types.
+- Multiset combinations return each result as a compact immutable map (`FrequencyMap`, backed by
+  two arrays) instead of a `LinkedHashMap` wrapped in `Collections.unmodifiableMap`. Iteration order,
+  `equals`/`hashCode`/`toString` and immutability are unchanged.
+- k-permutations `combinationOrderMth(...)` unrank the combination and its arrangement directly
+  instead of creating builders and iterators for every result.
+- Repetitive permutations (`byRanks`, `lexOrderMth`), simple Cartesian product by rank and
+  Permutadic conversion use primitive arithmetic when the values fit in a `long`.
+- Unranking a unique combination whose count does not fit in a `long` (used by unique combinations
+  `byRanks`, `lexOrderMth`, `choice` and `sample`, by `unrankOf().combination().unique(...)` and by
+  k-permutations `combinationOrderMth`) estimates each position from a table of log-factorials and
+  confirms it with one or two exact binomials, instead of a binary search over exact binomials.
+  Applies for n ≤ 4096 when the large-r walk is not used (r < 256 in practice); measured 3–5× faster.
 
 ### Changed (breaking)
 

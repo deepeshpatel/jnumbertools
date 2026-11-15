@@ -84,9 +84,10 @@ public final class UniqueCombination<T> extends AbstractGenerator<T> {
 
         /**
          * The current combination as an array of indices, where indices[i] is the index
-         * of the selected element from the input list (0 ≤ i < r).
+         * of the selected element from the input list (0 ≤ i < r). Advanced in place.
          */
-        int[] indices;
+        private final int[] indices;
+        private boolean hasNext = true;
 
         private Itr() {
             indices = IntStream.range(0, r).toArray();
@@ -99,7 +100,7 @@ public final class UniqueCombination<T> extends AbstractGenerator<T> {
          */
         @Override
         public boolean hasNext() {
-            return indices != null;
+            return hasNext;
         }
 
         /**
@@ -110,45 +111,43 @@ public final class UniqueCombination<T> extends AbstractGenerator<T> {
          */
         @Override
         public List<T> next() {
-            if (!hasNext()) {
+            if (!hasNext) {
                 throw new NoSuchElementException();
             }
-            int[] old = indices;
-            indices = nextCombination(indices, elements.size());
-            return indicesToValues(old);
+            // indicesToValues copies the values out, so the indices can be advanced in place afterwards.
+            List<T> result = indicesToValues(indices);
+            hasNext = advance(indices, elements.size());
+            return result;
         }
 
         /**
-         * Computes the next combination in lexicographical order.
+         * Moves to the next combination in lexicographical order, in place.
          * <p>
          * Given the current combination of indices [a₀, a₁, ..., aᵣ₋₁], this method
          * finds the rightmost index i where aᵢ can be incremented (i.e., aᵢ < n - (r - i)).
          * It increments aᵢ and resets subsequent indices to maintain ascending order.
-         * Returns null if no further combination exists.
          *
-         * @param currentKCombination the current combination of indices
-         * @param n                   the total number of elements in the input list
-         * @return the next combination of indices, or null if none exists
+         * @param a the current combination of indices, updated in place
+         * @param n the total number of elements in the input list
+         * @return false if the current combination was the last one
          */
-        private int[] nextCombination(int[] currentKCombination, int n) {
-            if (currentKCombination.length == 0 ||
-                    currentKCombination[0] == n - currentKCombination.length) {
-                return null;
+        private boolean advance(int[] a, int n) {
+            if (a.length == 0 || a[0] == n - a.length) {
+                return false;
             }
-            int[] next = Arrays.copyOf(currentKCombination, currentKCombination.length);
-            int i = next.length - 1;
+            int i = a.length - 1;
             int maxSupportedValueAtIndexI = n - 1;
 
-            while (i >= 0 && next[i] == maxSupportedValueAtIndexI) {
+            while (i >= 0 && a[i] == maxSupportedValueAtIndexI) {
                 i--;
                 maxSupportedValueAtIndexI--;
             }
-            next[i] = next[i] + 1;
+            a[i] = a[i] + 1;
 
-            for (int j = i + 1; j < next.length; j++) {
-                next[j] = next[j - 1] + 1;
+            for (int j = i + 1; j < a.length; j++) {
+                a[j] = a[j - 1] + 1;
             }
-            return next;
+            return true;
         }
     }
 }

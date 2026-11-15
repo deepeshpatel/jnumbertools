@@ -257,6 +257,17 @@ public final class SimpleProductBuilder implements Builder<Object> {
             }
 
             Object[] result = new Object[allLists.size()];
+            if (cachedCount.bitLength() < 64) {
+                // Same mixed-radix digits in primitive arithmetic: rank < count < 2⁶³.
+                long remaining = rank.longValue();
+                for (int i = result.length - 1; i >= 0; i--) {
+                    List<?> dim = allLists.get(i);
+                    int size = dim.size();
+                    result[i] = dim.get((int) (remaining % size));
+                    remaining /= size;
+                }
+                return Tuple.wrap(result);
+            }
             BigInteger remaining = rank;
             for (int i = result.length - 1; i >= 0; i--) {
                 List<?> dim = allLists.get(i);

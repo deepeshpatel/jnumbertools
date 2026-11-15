@@ -5,9 +5,9 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.base.Combinations;
-import io.github.deepeshpatel.jnumbertools.base.Permutations;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
+import io.github.deepeshpatel.jnumbertools.numbersystem.CombinadicAlgorithms;
+import io.github.deepeshpatel.jnumbertools.numbersystem.FactoradicAlgorithms;
 
 import java.math.BigInteger;
 import java.util.Collections;
@@ -40,7 +40,8 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
     final BigInteger permutationsPerList;
     final BigInteger increment;
     final BigInteger start;
-    private final Calculator calculator;
+    private final CombinadicAlgorithms combinadic;
+    private final BigInteger combinationCount;   // ⁿCₖ, for unranking the combination part of a rank
 
     /**
      * Constructs an instance for generating every mᵗʰ k-permutation in combination order.
@@ -67,7 +68,8 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
         // k! can exceed Long.MAX_VALUE (k >= 21), so it must stay a BigInteger.
         // When k > n there is nothing to generate; avoid computing a pointless huge factorial.
         this.permutationsPerList = k > elements.size() ? BigInteger.ONE : calculator.factorial(k);
-        this.calculator = calculator;
+        this.combinadic = new CombinadicAlgorithms(calculator);
+        this.combinationCount = calculator.nCr(elements.size(), k);
     }
 
     /**
@@ -135,15 +137,15 @@ public final class KPermutationCombinationOrderMth<T> extends AbstractKPermutati
             BigInteger permutationIncrement = divideAndRemainder[1];
             currentIncrement = currentIncrement.add(increment);
 
-            List<T> nextCombination = combinationListNumber.equals(BigInteger.ZERO)
-                    ? new Combinations(calculator).unique(k, elements).lexOrder().iterator().next()
-                    : new Combinations(calculator).unique(k, elements)
-                      .lexOrderMth(combinationListNumber, combinationListNumber).iterator().next();
-
-            return permutationIncrement.signum() == 0
-                    ? new Permutations(calculator).unique(nextCombination).lexOrder().iterator().next()
-                    : new Permutations(calculator).unique(nextCombination)
-                      .lexOrderMth(permutationIncrement, permutationIncrement).iterator().next();
+            // Unrank the combination and the permutation of its k positions directly, instead of building a
+            // builder, a generator and an iterator (and repeating their validation) for both on every result.
+            int[] combination = combinadic.unRank(combinationListNumber, combinationCount, elements.size(), k);
+            int[] order = FactoradicAlgorithms.unRank(permutationIncrement, k);
+            int[] indices = new int[k];
+            for (int i = 0; i < k; i++) {
+                indices[i] = combination[order[i]];
+            }
+            return indicesToValues(indices);
         }
     }
 }

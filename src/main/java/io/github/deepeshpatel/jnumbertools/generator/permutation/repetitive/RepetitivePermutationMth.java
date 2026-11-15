@@ -146,6 +146,16 @@ public final class RepetitivePermutationMth<T> extends AbstractGenerator<T> {
          * @return {@code true} if the increment succeeded; {@code false} if exhausted
          */
         private boolean incrementIndices(int[] indices, int base, BigInteger step) {
+            // Below 2⁶² the step plus one digit (< base ≤ 2³¹) cannot overflow a long: same carries, no BigInteger.
+            if (step.bitLength() <= 62) {
+                long carry = step.longValue();
+                for (int i = indices.length - 1; i >= 0 && carry != 0; i--) {
+                    long sum = carry + indices[i];
+                    indices[i] = (int) (sum % base);
+                    carry = sum / base;
+                }
+                return carry == 0;
+            }
             BigInteger nextK = step;
             for (int i = indices.length - 1; i >= 0; i--) {
                 BigInteger sum = nextK.add(BigInteger.valueOf(indices[i]));

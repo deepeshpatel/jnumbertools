@@ -8,6 +8,7 @@ import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic;
+import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicIncrementStateMachine;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -20,8 +21,8 @@ import java.util.*;
  * is never the element originally at position {@code i} in the input list.
  * </p>
  * <p>
- * Backed by {@link Derangadic#next()}, which uses the incremental Derangadic
- * successor engine. Instances should be created via {@link DerangementBuilder#lexOrder()} or
+ * Backed by {@link DerangadicIncrementStateMachine}, the incremental Derangadic
+ * successor engine that also drives {@link Derangadic#next()}. Instances should be created via {@link DerangementBuilder#lexOrder()} or
  * {@code new Derangements().of(...).lexOrder()}.
  * </p>
  *
@@ -42,7 +43,6 @@ import java.util.*;
 public final class Derangement<T> extends AbstractGenerator<T> {
 
     private final Calculator calculator;
-    private final BigInteger maxCount;
 
     /**
      * Constructs the generator.
@@ -52,7 +52,6 @@ public final class Derangement<T> extends AbstractGenerator<T> {
     Derangement(List<T> elements, Calculator calculator) {
         super(elements);
         this.calculator = calculator;
-        this.maxCount = calculator.subFactorial(elements.size());
     }
 
     @Override
@@ -65,22 +64,25 @@ public final class Derangement<T> extends AbstractGenerator<T> {
 
     private final class DerangadicIterator implements Iterator<List<T>> {
 
-        private final Derangadic current;
+        private final DerangadicIncrementStateMachine current;
+        private boolean hasNext = true; // D_n ≥ 1 for n ≥ 2
 
         DerangadicIterator(int n) {
-            this.current = new Derangadic(n, BigInteger.ZERO, calculator);
+            this.current = new DerangadicIncrementStateMachine(n, BigInteger.ZERO, calculator);
         }
 
         @Override
         public boolean hasNext() {
-            return current.rank().compareTo(maxCount) < 0;
+            return hasNext;
         }
 
         @Override
         public List<T> next() {
-            if (!hasNext()) throw new NoSuchElementException();
-            List<T> derangement= indicesToValues(current.derangement());
-            current.nextWithoutBoundCheck();
+            if (!hasNext) throw new NoSuchElementException();
+            // indicesToValues copies the values out, so the state machine can advance in place afterwards.
+            List<T> derangement = indicesToValues(current.derangement());
+            // increment() reports the end itself, so no BigInteger rank has to be counted and compared.
+            hasNext = current.increment();
             return derangement;
         }
     }

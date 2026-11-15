@@ -19,17 +19,17 @@ Add the following section to your configuration(pom/gradle etc) file.
 <dependency>
     <groupId>io.github.deepeshpatel</groupId>
     <artifactId>jnumbertools</artifactId>
-    <version>4.0.1</version>
+    <version>4.1.0</version>
 </dependency>
 ```
 
 **Gradle**
 ```gradle
-implementation 'io.github.deepeshpatel:jnumbertools:4.0.1'
+implementation 'io.github.deepeshpatel:jnumbertools:4.1.0'
 ```
 **SBT**
 ```sbt
-libraryDependencies += "io.github.deepeshpatel" % "jnumbertools" % "4.0.1"
+libraryDependencies += "io.github.deepeshpatel" % "jnumbertools" % "4.1.0"
 ```
 
 ## Performance

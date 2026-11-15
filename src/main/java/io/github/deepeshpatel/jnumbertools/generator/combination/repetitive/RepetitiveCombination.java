@@ -81,9 +81,10 @@ public final class RepetitiveCombination<T> extends AbstractGenerator<T> {
 
         /**
          * The current combination as an array of indices, where indices[i] is the index
-         * of the selected element from the input list (0 ≤ i < r).
+         * of the selected element from the input list (0 ≤ i < r). Advanced in place.
          */
-        int[] indices = new int[r];
+        private final int[] indices = new int[r];
+        private boolean hasNext = true;
 
         /**
          * Checks if more combinations are available.
@@ -92,7 +93,7 @@ public final class RepetitiveCombination<T> extends AbstractGenerator<T> {
          */
         @Override
         public boolean hasNext() {
-            return indices.length != 0;
+            return hasNext;
         }
 
         /**
@@ -103,44 +104,43 @@ public final class RepetitiveCombination<T> extends AbstractGenerator<T> {
          */
         @Override
         public List<T> next() {
-            if (!hasNext()) {
+            if (!hasNext) {
                 throw new NoSuchElementException();
             }
-            int[] old = indices;
-            indices = nextRepetitiveCombination(indices, elements.size());
-            return indicesToValues(old);
+            // indicesToValues copies the values out, so the indices can be advanced in place afterwards.
+            List<T> result = indicesToValues(indices);
+            hasNext = advance(indices, elements.size());
+            return result;
         }
 
         /**
-         * Computes the next repetitive combination in lexicographical order.
+         * Moves to the next repetitive combination in lexicographical order, in place.
          * <p>
          * Given the current combination of indices [a₀, a₁, ..., aᵣ₋₁], this method
          * finds the rightmost index i where aᵢ < n-1, increments it, and sets all
          * subsequent indices to the same value to maintain lexicographical order.
-         * Returns an empty array if no further combination exists.
          *
-         * @param a the current combination of indices
-         * @param n the number of elementsචn the number of items in the input list
-         * @return the next combination of indices, or an empty array if none exists
+         * @param a the current combination of indices, updated in place
+         * @param n the number of items in the input list
+         * @return false if the current combination was the last one (a is then unchanged)
          */
-        private int[] nextRepetitiveCombination(int[] a, int n) {
-            final int[] next = Arrays.copyOf(a, a.length);
+        private boolean advance(int[] a, int n) {
             final int maxSupportedValue = n - 1;
-            int i = next.length - 1;
+            int i = a.length - 1;
 
             while (i >= 0 && a[i] == maxSupportedValue) {
                 i--;
             }
             if (i == -1) {
-                return new int[]{};
+                return false;
             }
 
             int fillValue = a[i] + 1;
 
-            for (int k = i; k < next.length; k++) {
-                next[k] = fillValue;
+            for (int k = i; k < a.length; k++) {
+                a[k] = fillValue;
             }
-            return next;
+            return true;
         }
     }
 }

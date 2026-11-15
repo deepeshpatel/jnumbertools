@@ -86,86 +86,19 @@ public final class MultisetPermutationMth<T> extends AbstractMultisetPermutation
 
     private class Itr implements Iterator<List<T>> {
         private BigInteger currentN = start;
-        private int[] currentIndices;
-
-        public Itr() {
-            currentIndices = createFlattenedIndices(frequencies);
-        }
-
+        private final MultisetUnranker unranker = new MultisetUnranker(frequencies, totalLength, possiblePermutations, longTotal);
         @Override
         public boolean hasNext() {
             return currentN.compareTo(possiblePermutations) < 0;
         }
-
         @Override
         public List<T> next() {
             if (!hasNext()) {
                 throw new NoSuchElementException("No more permutations available");
             }
-            currentIndices = longTotal >= 0
-                    ? getIndicesForMthPermutationLong(currentN.longValue())
-                    : getIndicesForMthPermutation(currentN, totalLength);
+            int[] indices = unranker.unrank(currentN);
             currentN = currentN.add(increment);
-            return indicesToValues(currentIndices);
-        }
-
-        /** Same arithmetic as the BigInteger version; every product is at most total x totalLength, so it fits. */
-        private int[] getIndicesForMthPermutationLong(long m) {
-            int[] output = new int[totalLength];
-            int[] currentMultisetCount = Arrays.copyOf(frequencies, frequencies.length);
-            long sum = totalLength;
-            long totalPossible = longTotal;
-
-            for (int j = 0; j < output.length; j++) {
-                long permutationsBefore = 0;
-
-                for (int i = 0; i < currentMultisetCount.length; i++) {
-                    if (currentMultisetCount[i] > 0) {
-                        long perms = totalPossible * currentMultisetCount[i] / sum;
-                        long rangeEnd = permutationsBefore + perms;
-                        if (m < rangeEnd) {
-                            output[j] = i;
-                            m -= permutationsBefore;
-                            currentMultisetCount[i]--;
-                            sum--;
-                            totalPossible = perms;
-                            break;
-                        }
-                        permutationsBefore = rangeEnd;
-                    }
-                }
-            }
-            return output;
-        }
-
-        private int[] getIndicesForMthPermutation(BigInteger m, int totalLength) {
-            int[] output = new int[totalLength];
-            int[] currentMultisetCount = Arrays.copyOf(frequencies, frequencies.length);
-            long sum = totalLength;
-            BigInteger totalPossible = possiblePermutations;
-
-            for (int j = 0; j < output.length; j++) {
-                BigInteger permutationsBefore = BigInteger.ZERO;
-
-                for (int i = 0; i < currentMultisetCount.length; i++) {
-                    if (currentMultisetCount[i] > 0) {
-                        BigInteger perms = totalPossible.multiply(BigInteger.valueOf(currentMultisetCount[i]))
-                                .divide(BigInteger.valueOf(sum));
-
-                        BigInteger rangeEnd = permutationsBefore.add(perms);
-                        if (m.compareTo(rangeEnd) < 0) {
-                            output[j] = i;
-                            m = m.subtract(permutationsBefore);
-                            currentMultisetCount[i]--;
-                            sum--;
-                            totalPossible = perms;
-                            break;
-                        }
-                        permutationsBefore = rangeEnd;
-                    }
-                }
-            }
-            return output;
+            return indicesToValues(indices);
         }
     }
 }

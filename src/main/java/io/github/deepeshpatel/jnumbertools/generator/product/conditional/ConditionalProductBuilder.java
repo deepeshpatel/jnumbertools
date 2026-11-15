@@ -23,12 +23,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Builder for a Cartesian product whose dimensions are linked by <em>rules</em>, written as plain
@@ -47,6 +49,7 @@ import java.util.Set;
  *         .when(network).is("4G").then(os).isNoneOf("Linux");
  *
  * configs.count();                       // exact, without listing the tuples
+ * configs.lexOrder().stream().forEach(System.out::println); // all valid tuples, in lexicographic order
  * configs.lexOrderMth(1000, 0);          // every 1000th valid tuple
  * configs.choice(5, new Random(42));     // uniform over the valid tuples
  * }</pre>
@@ -62,15 +65,67 @@ import java.util.Set;
  * <p>Rules are evaluated on pairs of values, never on whole tuples. Dimensions linked by rules in a tree
  * shape are handled with a small table per dimension. Dimensions that rules link in a <em>loop</em> (for
  * example rules between A and B, B and C, and C and A) are solved together as one block, so the work for
- * such a block grows with the product of the sizes of its dimensions; a rule that would make that product
- * larger than a limit is rejected. For all accepted rule sets {@link #count()}, {@link #lexOrder()},
+ * such a block grows with the product of the sizes of its dimensions. A loop block is rejected if that
+ * product exceeds 1,000,000 ({@code MAX_LOOP_COMBINATIONS}). Each pair of dimensions connected by a rule
+ * also requires a relation table; a rule is rejected if that table would exceed 50,000,000 value pairs
+ * ({@code MAX_PAIR_CELLS}).
+ * For all accepted rule sets {@link #count()}, {@link #lexOrder()},
  * {@link #lexOrderMth(BigInteger, BigInteger)}, {@link #byRanks(Iterable)}, {@link #choice(int, Random)}
  * and {@link #sample(int, Random)} work on the valid tuples only, without enumerating the full product.
  * Ranks are positions among the valid tuples in lexicographic order (dimension order, then the order of
  * each list). They change when rules change.</p>
  *
- * <p>Instances are immutable and thread-safe; {@code and(...)}, {@code when(...)} chains return new
- * builders.</p>
+ * <p>Instances are immutable and thread-safe. Calls to {@code and(...)} and completed rule chains return
+ * new builders; intermediate {@code when(...)} and {@code then(...)} steps do not modify the existing
+ * builder.</p>
+ *
+ * <h2>Algorithm &amp; Complexity</h2>
+ * <p>Internally, this builder models rule-constrained Cartesian products as a binary
+ * <strong>Constraint Satisfaction Problem (CSP)</strong> and compiles the rules into an exact counting
+ * and generation plan:</p>
+ * <ul>
+ *   <li><strong>Cycle Contraction &amp; Forest Decomposition</strong>
+ *       <em>(related to Freuder 1982; Dechter &amp; Pearl 1987)</em>:
+ *       Dimensions linked by rules form a constraint graph. Bridges are identified, and dimensions
+ *       connected through non-bridge edges are contracted into disjoint blocks. The valid joint
+ *       assignments of each block are enumerated once, subject to the
+ *       {@code MAX_LOOP_COMBINATIONS} limit (1,000,000) on the product of the original dimension sizes in that
+ *       block. The remaining bridge edges form a forest (of treewidth at most 1), enabling dynamic
+ *       programming across the resulting trees.</li>
+ *
+ *   <li><strong>Bottom-Up Tree DP / Sum-Product Counting</strong>
+ *       <em>(related to Pearl 1988; Dechter 1999)</em>:
+ *       A post-order traversal computes exact subtree completion counts
+ *       ({@code free} and {@code msg} tables). The forest DP takes
+ *       <i>O</i>(<i>N</i> &middot; <i>D</i><sup>2</sup>) time, where <i>N</i> is the number of
+ *       contracted nodes and <i>D</i> is the maximum number of states (valid joint assignments)
+ *       in any contracted node. This bound excludes the separate enumeration of loop blocks.
+ *       Consequently, {@link #count()} and {@link #isEmpty()} resolve without enumerating the full
+ *       Cartesian product.</li>
+ *
+ *   <li><strong>Prefix-Conditioned Unranking &amp; Hybrid Sampling</strong>
+ *       <em>(JNumberTools extensions)</em>:
+ *       The implementation preserves the caller's exact dimension declaration order. Partially
+ *       fixed loop blocks are queried using binary searches over sorted joint assignments and
+ *       prefix-sum tables, accelerating exact prefix-conditioned completion counts and rank-based
+ *       generation. When all intermediate counts fit within 62 bits, queries use primitive
+ *       {@code long} tables before falling back to {@link BigInteger}.
+ *       {@link #choice(int, Random)} dynamically selects between rejection sampling, when at least
+ *       25% of the full product is valid, and rank-based DP unranking otherwise. In the rejection
+ *       sampling case, the expected number of full-product draws per accepted tuple is at most four.</li>
+ * </ul>
+ *
+ * <h3>References</h3>
+ * <ul>
+ *   <li>E. C. Freuder (1982), <em>A Sufficient Condition for Backtrack-Free Search</em>,
+ *       Journal of the ACM, 29(1), 24&ndash;32.</li>
+ *   <li>R. Dechter &amp; J. Pearl (1987), <em>Network-Based Heuristics for Constraint-Satisfaction
+ *       Problems</em>, Artificial Intelligence, 34(1), 1&ndash;38.</li>
+ *   <li>J. Pearl (1988), <em>Probabilistic Reasoning in Intelligent Systems: Networks of Plausible
+ *       Inference</em>, Morgan Kaufmann.</li>
+ *   <li>R. Dechter (1999), <em>Bucket Elimination: A Unifying Framework for Reasoning</em>,
+ *       Artificial Intelligence, 113(1&ndash;2), 41&ndash;85.</li>
+ * </ul>
  *
  * @author Deepesh Patel
  */
@@ -333,7 +388,11 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         Map<Long, Relation> newRelations = new HashMap<>(relations);
         newRelations.put(key, updated);
         checkLoopBlocks(dims, newRelations.keySet());
-        return new ConditionalProductBuilder(dims, originals, Map.copyOf(newRelations));
+        // Ascending key order (lower dimension, then higher), so the plan is built the same way on every run;
+        // Map.copyOf would iterate in an order that changes from one JVM run to the next.
+        Map<Long, Relation> ordered = new LinkedHashMap<>();
+        new TreeMap<>(newRelations).forEach(ordered::put);
+        return new ConditionalProductBuilder(dims, originals, Collections.unmodifiableMap(ordered));
     }
 
     /** Rejects a rule set in which a group of dimensions linked in loops has too many combinations. */

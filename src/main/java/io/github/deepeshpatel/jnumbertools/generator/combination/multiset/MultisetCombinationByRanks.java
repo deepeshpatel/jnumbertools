@@ -4,9 +4,9 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.FrequencyMap;
 
 import java.math.BigInteger;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -81,7 +81,6 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
      */
     private class SequenceIterator implements Iterator<Map<T, Integer>> {
         private final Iterator<BigInteger> rankIterator;
-        private final Map<T, Integer> outputMap = new LinkedHashMap<>();
 
         /**
          * ways[i][j] = number of ways to choose j items from the types i..end. Built bottom-up once, on the first
@@ -89,8 +88,63 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
          */
         private BigInteger[][] ways;
 
+        /**
+         * The same table in primitive longs, used when the whole space fits in 62 bits and every table entry fits a
+         * long; null otherwise, and then {@link #ways} is used.
+         */
+        private long[][] longWays;
+        private boolean prepared;
+
         public SequenceIterator() {
             this.rankIterator = ranks.iterator();
+        }
+
+        private long[][] buildLongWays() {
+            if (totalCombinations.bitLength() > 62) return null;
+            int n = frequencies.length;
+            long[][] table = new long[n + 1][];
+            table[n] = new long[]{1};
+            long suffixSum = 0;
+            try {
+                for (int i = n - 1; i >= 0; i--) {
+                    suffixSum += frequencies[i];
+                    int length = (int) Math.min(r, suffixSum) + 1;
+                    int c = frequencies[i];
+                    long[] below = table[i + 1];
+                    long[] row = new long[length];
+                    long window = 0; // sum of below[j-c .. j]
+                    for (int j = 0; j < length; j++) {
+                        if (j < below.length) window = Math.addExact(window, below[j]);
+                        int drop = j - c - 1;
+                        if (drop >= 0 && drop < below.length) window -= below[drop];
+                        row[j] = window;
+                    }
+                    table[i] = row;
+                }
+            } catch (ArithmeticException tooBigForLong) {
+                return null; // an intermediate count is larger than the total itself: use BigInteger
+            }
+            return table;
+        }
+
+        private int[] unrankLong(int r, long rank) {
+            int[] combination = new int[frequencies.length];
+            int remainingR = r;
+            long remainingRank = rank;
+            for (int i = 0; i < frequencies.length; i++) {
+                long[] rest = longWays[i + 1];
+                for (int x = Math.min(frequencies[i], remainingR); x >= 0; x--) {
+                    int need = remainingR - x;
+                    long waysForRest = need < rest.length ? rest[need] : 0;
+                    if (remainingRank < waysForRest) {
+                        combination[i] = x;
+                        remainingR -= x;
+                        break;
+                    }
+                    remainingRank -= waysForRest;
+                }
+            }
+            return combination;
         }
 
         private BigInteger[][] buildWays() {
@@ -140,20 +194,29 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
                 throw new IllegalArgumentException("Rank " + m + " out of bounds [0, " + totalCombinations + ")");
             }
 
-            if (ways == null) {
-                ways = buildWays();
+            if (!prepared) {
+                prepared = true;
+                longWays = buildLongWays();
+                if (longWays == null) ways = buildWays();
             }
 
-            // Use BigInteger for remainingRank to support huge ranks safely
-            int[] combination = unrankMultisetCombination(r, m);
+            // m < totalCombinations, so when the long table exists the rank fits in a long too
+            int[] combination = longWays != null ? unrankLong(r, m.longValue()) : unrankMultisetCombination(r, m);
 
-            outputMap.clear();
-            for (int i = 0; i < combination.length; i++) {
+            // Fresh arrays per result, so they can be handed over to the immutable map without copying.
+            int distinct = 0;
+            for (int c : combination) {
+                if (c > 0) distinct++;
+            }
+            Object[] keys = new Object[distinct];
+            int[] counts = new int[distinct];
+            for (int i = 0, d = 0; i < combination.length; i++) {
                 if (combination[i] > 0) {
-                    outputMap.put(options[i].getKey(), combination[i]);
+                    keys[d] = options[i].getKey();
+                    counts[d++] = combination[i];
                 }
             }
-            return Collections.unmodifiableMap(new LinkedHashMap<>(outputMap));
+            return FrequencyMap.wrap(keys, counts);
         }
 
         private int[] unrankMultisetCombination(int r, BigInteger rank) {
