@@ -9,7 +9,6 @@ import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 /**
  * Provides various algorithms for working with the Factoradic numeral system.
@@ -110,6 +109,22 @@ public final class FactoradicAlgorithms {
         if (k.equals(BigInteger.ZERO)) {
             return factoradic;
         }
+        if (k.bitLength() < 64) {
+            // Same digits in primitive arithmetic (k fits in a long, and so does every quotient).
+            long value = k.longValue();
+            long divisor = 1;
+            int index = sizeOfFactoradic - 1;
+            while (value != 0) {
+                if (index < 0) {
+                    throw new IllegalArgumentException(
+                            "value is too large to be represented with " + sizeOfFactoradic + " factoradic digits");
+                }
+                factoradic[index--] = (int) (value % divisor);
+                value /= divisor;
+                divisor++;
+            }
+            return factoradic;
+        }
         long d = 1;
         int i = sizeOfFactoradic - 1;
         while (!k.equals(BigInteger.ZERO)) {
@@ -136,7 +151,8 @@ public final class FactoradicAlgorithms {
      * @return an array representing the permutation corresponding to the given Factoradic representation.
      */
     public static int[] factoradicToMthPermutation(int[] factoradic) {
-        int[] output = IntStream.range(0, factoradic.length).toArray();
+        int[] output = new int[factoradic.length];
+        for (int i = 0; i < output.length; i++) output[i] = i;
         for (int i = 0; i < output.length; i++) {
             int index = factoradic[i] + i;
             if (index != i) {

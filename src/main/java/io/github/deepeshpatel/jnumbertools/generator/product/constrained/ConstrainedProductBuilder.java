@@ -339,7 +339,26 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
 
         @Override
         public StreamableIterable<Object> byRanks(Iterable<BigInteger> ranks) {
-            throw new UnsupportedOperationException("EmptyBuilder does not support rank-based generation");
+            Util.validateByRanksParams(ranks);
+            // quantity > 0: no element at all (count 0), so every rank is out of range.
+            // quantity = 0: exactly one element, the empty list, at rank 0.
+            return new StreamableIteratorImpl<>(new Iterator<List<Object>>() {
+                private final Iterator<BigInteger> rankIterator = ranks.iterator();
+
+                @Override
+                public boolean hasNext() {
+                    return rankIterator.hasNext();
+                }
+
+                @Override
+                public List<Object> next() {
+                    BigInteger rank = rankIterator.next();
+                    if (rank.signum() < 0 || rank.compareTo(count) >= 0) {
+                        throw new IllegalArgumentException("Rank " + rank + " out of bounds [0, " + count + ")");
+                    }
+                    return Collections.emptyList();
+                }
+            });
         }
 
         @Override

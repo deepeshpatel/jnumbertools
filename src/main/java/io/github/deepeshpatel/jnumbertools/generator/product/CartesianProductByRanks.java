@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Tuple;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
 import io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder;
@@ -42,12 +43,26 @@ public class CartesianProductByRanks<T> implements StreamableIterable<T> {
     private final List<Builder<T>> builders;
     private final BigInteger maxCount;
     private final boolean isEmptyProduct;
+    private final BigInteger[] counts;      // per-dimension counts, taken once (builders are immutable)
+    private final long[] longCounts;        // the same as longs when the whole product fits in 62 bits, else null
 
     public CartesianProductByRanks(List<Builder<T>> builders, Iterable<BigInteger> ranks) {
         this.builders = builders != null ? builders : Collections.emptyList();
         this.ranks    = ranks;
         this.isEmptyProduct = this.builders.stream().anyMatch(Builder::isEmpty);
         this.maxCount = computeMaxCount();
+        if (isEmptyProduct || this.builders.isEmpty()) {
+            this.counts = new BigInteger[0];
+            this.longCounts = null;
+        } else {
+            this.counts = this.builders.stream().map(Builder::count).toArray(BigInteger[]::new);
+            if (maxCount.bitLength() <= 62) {
+                this.longCounts = new long[counts.length];
+                for (int i = 0; i < counts.length; i++) longCounts[i] = counts[i].longValue();
+            } else {
+                this.longCounts = null;
+            }
+        }
     }
 
     private BigInteger computeMaxCount() {
@@ -80,43 +95,25 @@ public class CartesianProductByRanks<T> implements StreamableIterable<T> {
 
     // ── Rank resolution ──────────────────────────────────────────────────────
 
-    private List<T> getMth(BigInteger rank) {
-        if (isEmptyProduct) {
-            throw new IllegalArgumentException("Product is empty - no ranks available");
-        }
-        if (builders.isEmpty()) {
-            if (rank.equals(BigInteger.ZERO)) return Collections.emptyList();
-            throw new IllegalArgumentException(
-                    "Rank " + rank + " out of bounds for empty product [0, 1)");
-        }
-        if (rank.signum() < 0 || rank.compareTo(maxCount) >= 0) {
-            throw new IllegalArgumentException(
-                    "Rank " + rank + " out of bounds [0, " + maxCount + ")");
-        }
-
-        // Mixed-radix decomposition: iterate dimensions right-to-left.
-        Deque<T> output = new ArrayDeque<>();
-        BigInteger remaining = rank;
-        for (int i = builders.size() - 1; i >= 0; i--) {
-            Builder<T> b = builders.get(i);
-            BigInteger dimCount = b.count();
-            BigInteger[] qr = remaining.divideAndRemainder(dimCount);
-            remaining = qr[0];
-
-            // Retrieve the single element at position qr[1] in this dimension.
-            // lexOrderMth(ONE, index) is the generic way when we only have a Builder.
-            List<T> values = b.lexOrderMth(BigInteger.ONE, qr[1]).iterator().next();
-            for (int j = values.size() - 1; j >= 0; j--) {
-                output.addFirst(values.get(j));
-            }
-        }
-        return List.copyOf(output);
-    }
-
     // ── Iterator ─────────────────────────────────────────────────────────────
+
+    /** A rank source whose current value is set by the caller; it never runs out. */
+    private static final class RankSlot implements Iterable<BigInteger>, Iterator<BigInteger> {
+        BigInteger value;
+
+        @Override public Iterator<BigInteger> iterator() { return this; }
+        @Override public boolean hasNext() { return true; }
+        @Override public BigInteger next() { return value; }
+    }
 
     private class Itr implements Iterator<List<T>> {
         private final Iterator<BigInteger> rankIt = ranks.iterator();
+
+        // One long-lived by-rank generator per dimension, fed through a settable slot. Fetching the element at
+        // one position of a dimension then costs a single unrank, instead of building a generator, an iterator
+        // and its validation for every position of every result.
+        private RankSlot[] slots;
+        private Iterator<List<T>>[] dimensions;
 
         @Override public boolean hasNext() { return rankIt.hasNext(); }
 
@@ -124,6 +121,78 @@ public class CartesianProductByRanks<T> implements StreamableIterable<T> {
         public List<T> next() {
             if (!hasNext()) throw new NoSuchElementException();
             return getMth(rankIt.next());
+        }
+
+        @SuppressWarnings("unchecked")
+        private void openDimensions() {
+            slots = new RankSlot[builders.size()];
+            dimensions = (Iterator<List<T>>[]) new Iterator[builders.size()];
+            for (int i = 0; i < slots.length; i++) {
+                slots[i] = new RankSlot();
+                try {
+                    dimensions[i] = builders.get(i).byRanks(slots[i]).iterator();
+                } catch (UnsupportedOperationException noByRanks) {
+                    dimensions[i] = null;   // a builder without rank support: fetch() uses lexOrderMth instead
+                }
+            }
+        }
+
+        private List<T> fetch(int dimension, BigInteger position) {
+            Iterator<List<T>> generator = dimensions[dimension];
+            if (generator != null && generator.hasNext()) {
+                slots[dimension].value = position;
+                return generator.next();
+            }
+            // No by-rank generator, or one that stopped after a fixed number of elements regardless of the ranks
+            // fed to it: build a one-off generator for this position.
+            return builders.get(dimension).lexOrderMth(BigInteger.ONE, position).iterator().next();
+        }
+
+        private List<T> getMth(BigInteger rank) {
+            if (isEmptyProduct) {
+                throw new IllegalArgumentException("Product is empty - no ranks available");
+            }
+            if (builders.isEmpty()) {
+                if (rank.equals(BigInteger.ZERO)) return Collections.emptyList();
+                throw new IllegalArgumentException(
+                        "Rank " + rank + " out of bounds for empty product [0, 1)");
+            }
+            if (rank.signum() < 0 || rank.compareTo(maxCount) >= 0) {
+                throw new IllegalArgumentException(
+                        "Rank " + rank + " out of bounds [0, " + maxCount + ")");
+            }
+            if (dimensions == null) openDimensions();
+
+            // Mixed-radix decomposition: iterate dimensions right-to-left.
+            int n = builders.size();
+            @SuppressWarnings("unchecked")
+            List<T>[] parts = (List<T>[]) new List[n];
+            int total = 0;
+            if (longCounts != null) {
+                long remaining = rank.longValue();
+                for (int i = n - 1; i >= 0; i--) {
+                    long quotient = remaining / longCounts[i];
+                    parts[i] = fetch(i, BigInteger.valueOf(remaining - quotient * longCounts[i]));
+                    remaining = quotient;
+                    total += parts[i].size();
+                }
+            } else {
+                BigInteger remaining = rank;
+                for (int i = n - 1; i >= 0; i--) {
+                    BigInteger[] qr = remaining.divideAndRemainder(counts[i]);
+                    remaining = qr[0];
+                    parts[i] = fetch(i, qr[1]);
+                    total += parts[i].size();
+                }
+            }
+
+            // One array for the whole tuple, wrapped without a further copy.
+            Object[] output = new Object[total];
+            int position = 0;
+            for (List<T> part : parts) {
+                for (int j = 0, size = part.size(); j < size; j++) output[position++] = part.get(j);
+            }
+            return Tuple.wrap(output);
         }
     }
 }

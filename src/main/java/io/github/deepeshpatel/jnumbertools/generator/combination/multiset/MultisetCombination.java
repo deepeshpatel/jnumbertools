@@ -270,7 +270,7 @@ public final class MultisetCombination<T> extends AbstractMultisetCombination<T>
                     outputMap.put(options[i].getKey(), freqVector.frequencies[i]);
                 }
             }
-            return Map.copyOf(outputMap);
+            return Collections.unmodifiableMap(new LinkedHashMap<>(outputMap));
         }
 
         /**

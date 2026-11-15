@@ -6,7 +6,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
 
 import java.math.BigInteger;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -81,7 +81,7 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
      */
     private class SequenceIterator implements Iterator<Map<T, Integer>> {
         private final Iterator<BigInteger> rankIterator;
-        private final Map<T, Integer> outputMap = new HashMap<>();
+        private final Map<T, Integer> outputMap = new LinkedHashMap<>();
 
         /**
          * ways[i][j] = number of ways to choose j items from the types i..end. Built bottom-up once, on the first
@@ -153,7 +153,7 @@ public class MultisetCombinationByRanks<T> extends AbstractMultisetCombination<T
                     outputMap.put(options[i].getKey(), combination[i]);
                 }
             }
-            return Map.copyOf(outputMap);
+            return Collections.unmodifiableMap(new LinkedHashMap<>(outputMap));
         }
 
         private int[] unrankMultisetCombination(int r, BigInteger rank) {
