@@ -61,6 +61,12 @@ No change in results or order; these changes only reduce time and allocation.
   confirms it with one or two exact binomials, instead of a binary search over exact binomials.
   Applies for n ≤ 4096 when the large-r walk is not used (r < 256 in practice); measured 3–5× faster.
 
+### Fixed
+
+- Multiset combinations now return their result maps in the order of the options they were created with,
+  on every path (`lexOrder`, `lexOrderMth`, `byRanks`, `choice`, `sample`). Previously the order could
+  differ from one JVM run to the next, so seeded output was not reproducible.
+
 ### Changed (breaking)
 
 - `JNumberTools.subsets().of(...)` now returns a `SubsetSelector`, which only offers `all()` and

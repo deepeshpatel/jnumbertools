@@ -1,0 +1,76 @@
+Benchmark                                                                       (scenario)  Mode  Cnt         Score      Error   Units
+OptimisationCandidatesBenchmark.run                                  derangement-9-lex1000  avgt   16        49.708 ±    1.568   us/op
+OptimisationCandidatesBenchmark.run:gc.alloc.rate                    derangement-9-lex1000  avgt   16      1270.503 ±   36.256  MB/sec
+OptimisationCandidatesBenchmark.run:gc.alloc.rate.norm               derangement-9-lex1000  avgt   16     66193.044 ±    0.033    B/op
+OptimisationCandidatesBenchmark.run:gc.count                         derangement-9-lex1000  avgt   16       140.000             counts
+OptimisationCandidatesBenchmark.run:gc.time                          derangement-9-lex1000  avgt   16        22.000                 ms
+OptimisationCandidatesBenchmark.run                                 derangement-40-lex1000  avgt   16       107.021 ±    0.374   us/op
+OptimisationCandidatesBenchmark.run:gc.alloc.rate                   derangement-40-lex1000  avgt   16      1898.106 ±    6.657  MB/sec
+OptimisationCandidatesBenchmark.run:gc.alloc.rate.norm              derangement-40-lex1000  avgt   16    213082.251 ±    0.015    B/op
+OptimisationCandidatesBenchmark.run:gc.count                        derangement-40-lex1000  avgt   16        64.000             counts
+OptimisationCandidatesBenchmark.run:gc.time                         derangement-40-lex1000  avgt   16        17.000                 ms
+OptimisationCandidatesBenchmark.run                         multiset-perm-4types-choice100  avgt   16         5.596 ±    0.075   us/op
+OptimisationCandidatesBenchmark.run:gc.alloc.rate           multiset-perm-4types-choice100  avgt   16      2652.754 ±   34.853  MB/sec
+OptimisationCandidatesBenchmark.run:gc.alloc.rate.norm      multiset-perm-4types-choice100  avgt   16     15568.117 ±    0.002    B/op
+OptimisationCandidatesBenchmark.run:gc.count                multiset-perm-4types-choice100  avgt   16        91.000             counts
+OptimisationCandidatesBenchmark.run:gc.time                 multiset-perm-4types-choice100  avgt   16        23.000                 ms
+OptimisationCandidatesBenchmark.run                            multiset-perm-4types-mth100  avgt   16         6.352 ±    0.178   us/op
+OptimisationCandidatesBenchmark.run:gc.alloc.rate              multiset-perm-4types-mth100  avgt   16      2799.310 ±   76.985  MB/sec
+OptimisationCandidatesBenchmark.run:gc.alloc.rate.norm         multiset-perm-4types-mth100  avgt   16     18640.134 ±    0.004    B/op
+OptimisationCandidatesBenchmark.run:gc.count                   multiset-perm-4types-mth100  avgt   16        97.000             counts
+OptimisationCandidatesBenchmark.run:gc.time                    multiset-perm-4types-mth100  avgt   16        24.000                 ms
+OptimisationCandidatesBenchmark.run                     multiset-perm-4types-big-choice100  avgt   16      1211.827 ±   12.647   us/op
+OptimisationCandidatesBenchmark.run:gc.alloc.rate       multiset-perm-4types-big-choice100  avgt   16      8579.299 ±   88.444  MB/sec
+OptimisationCandidatesBenchmark.run:gc.alloc.rate.norm  multiset-perm-4types-big-choice100  avgt   16  10904561.425 ±    0.278    B/op
+OptimisationCandidatesBenchmark.run:gc.count            multiset-perm-4types-big-choice100  avgt   16        98.000             counts
+OptimisationCandidatesBenchmark.run:gc.time             multiset-perm-4types-big-choice100  avgt   16        41.000                 ms
+OptimisationCandidatesBenchmark.run                         multiset-perm-8types-choice100  avgt   16         9.264 ±    0.127   us/op
+OptimisationCandidatesBenchmark.run:gc.alloc.rate           multiset-perm-8types-choice100  avgt   16      2205.783 ±   29.892  MB/sec
+OptimisationCandidatesBenchmark.run:gc.alloc.rate.norm      multiset-perm-8types-choice100  avgt   16     21432.195 ±    0.003    B/op
+OptimisationCandidatesBenchmark.run:gc.count                multiset-perm-8types-choice100  avgt   16        75.000             counts
+OptimisationCandidatesBenchmark.run:gc.time                 multiset-perm-8types-choice100  avgt   16        20.000                 ms
+OptimisationCandidatesBenchmark.run                        multiset-perm-16types-choice100  avgt   16        16.770 ±    0.052   us/op
+OptimisationCandidatesBenchmark.run:gc.alloc.rate          multiset-perm-16types-choice100  avgt   16      1141.912 ±    3.590  MB/sec
+OptimisationCandidatesBenchmark.run:gc.alloc.rate.norm     multiset-perm-16types-choice100  avgt   16     20088.354 ±    0.003    B/op
+OptimisationCandidatesBenchmark.run:gc.count               multiset-perm-16types-choice100  avgt   16       119.000             counts
+OptimisationCandidatesBenchmark.run:gc.time                multiset-perm-16types-choice100  avgt   16        18.000                 ms
+OptimisationCandidatesBenchmark.run                           multiset-perm-16types-mth100  avgt   16        17.745 ±    0.288   us/op
+OptimisationCandidatesBenchmark.run:gc.alloc.rate             multiset-perm-16types-mth100  avgt   16      1382.549 ±   22.438  MB/sec
+OptimisationCandidatesBenchmark.run:gc.alloc.rate.norm        multiset-perm-16types-mth100  avgt   16     25728.373 ±    0.006    B/op
+OptimisationCandidatesBenchmark.run:gc.count                  multiset-perm-16types-mth100  avgt   16       146.000             counts
+OptimisationCandidatesBenchmark.run:gc.time                   multiset-perm-16types-mth100  avgt   16        21.000                 ms
+OptimisationCandidatesBenchmark.run                        multiset-perm-64types-choice100  avgt   16      2107.203 ±  224.027   us/op
+OptimisationCandidatesBenchmark.run:gc.alloc.rate          multiset-perm-64types-choice100  avgt   16      6754.464 ±  535.113  MB/sec
+OptimisationCandidatesBenchmark.run:gc.alloc.rate.norm     multiset-perm-64types-choice100  avgt   16  14816131.705 ±   16.735    B/op
+OptimisationCandidatesBenchmark.run:gc.count               multiset-perm-64types-choice100  avgt   16        77.000             counts
+OptimisationCandidatesBenchmark.run:gc.time                multiset-perm-64types-choice100  avgt   16        33.000                 ms
+OptimisationCandidatesBenchmark.run                           multiset-perm-64types-mth100  avgt   16      1033.312 ±   19.530   us/op
+OptimisationCandidatesBenchmark.run:gc.alloc.rate             multiset-perm-64types-mth100  avgt   16      6267.898 ±  119.281  MB/sec
+OptimisationCandidatesBenchmark.run:gc.alloc.rate.norm        multiset-perm-64types-mth100  avgt   16   6791389.701 ±  840.881    B/op
+OptimisationCandidatesBenchmark.run:gc.count                  multiset-perm-64types-mth100  avgt   16        71.000             counts
+OptimisationCandidatesBenchmark.run:gc.time                   multiset-perm-64types-mth100  avgt   16        28.000                 ms
+OptimisationCandidatesBenchmark.run                       multiset-perm-256types-choice100  avgt   16      8028.357 ±  935.140   us/op
+OptimisationCandidatesBenchmark.run:gc.alloc.rate         multiset-perm-256types-choice100  avgt   16      5429.334 ±  463.543  MB/sec
+OptimisationCandidatesBenchmark.run:gc.alloc.rate.norm    multiset-perm-256types-choice100  avgt   16  45312489.001 ±   21.107    B/op
+OptimisationCandidatesBenchmark.run:gc.count              multiset-perm-256types-choice100  avgt   16        63.000             counts
+OptimisationCandidatesBenchmark.run:gc.time               multiset-perm-256types-choice100  avgt   16        28.000                 ms
+OptimisationCandidatesBenchmark.run                          multiset-perm-256types-mth100  avgt   16      2946.315 ±   11.177   us/op
+OptimisationCandidatesBenchmark.run:gc.alloc.rate            multiset-perm-256types-mth100  avgt   16      5703.570 ±   21.740  MB/sec
+OptimisationCandidatesBenchmark.run:gc.alloc.rate.norm       multiset-perm-256types-mth100  avgt   16  17626525.855 ±    0.735    B/op
+OptimisationCandidatesBenchmark.run:gc.count                 multiset-perm-256types-mth100  avgt   16        66.000             counts
+OptimisationCandidatesBenchmark.run:gc.time                  multiset-perm-256types-mth100  avgt   16        28.000                 ms
+OptimisationCandidatesBenchmark.run                                  subsets-200-choice100  avgt   16      2126.488 ±   38.264   us/op
+OptimisationCandidatesBenchmark.run:gc.alloc.rate                    subsets-200-choice100  avgt   16      4372.737 ±   78.764  MB/sec
+OptimisationCandidatesBenchmark.run:gc.alloc.rate.norm               subsets-200-choice100  avgt   16   9750647.888 ±   93.637    B/op
+OptimisationCandidatesBenchmark.run:gc.count                         subsets-200-choice100  avgt   16        91.000             counts
+OptimisationCandidatesBenchmark.run:gc.time                          subsets-200-choice100  avgt   16        31.000                 ms
+OptimisationCandidatesBenchmark.run                          combination-30000C3-choice100  avgt   16       284.313 ±  107.326   us/op
+OptimisationCandidatesBenchmark.run:gc.alloc.rate            combination-30000C3-choice100  avgt   16      6334.990 ± 1416.135  MB/sec
+OptimisationCandidatesBenchmark.run:gc.alloc.rate.norm       combination-30000C3-choice100  avgt   16   1748850.272 ±   22.414    B/op
+OptimisationCandidatesBenchmark.run:gc.count                 combination-30000C3-choice100  avgt   16        70.000             counts
+OptimisationCandidatesBenchmark.run:gc.time                  combination-30000C3-choice100  avgt   16        41.000                 ms
+OptimisationCandidatesBenchmark.run                                  multiset-comb-lex1000  avgt   16        25.742 ±    0.267   us/op
+OptimisationCandidatesBenchmark.run:gc.alloc.rate                    multiset-comb-lex1000  avgt   16      2478.903 ±   25.637  MB/sec
+OptimisationCandidatesBenchmark.run:gc.alloc.rate.norm               multiset-comb-lex1000  avgt   16     66928.541 ±    0.007    B/op
+OptimisationCandidatesBenchmark.run:gc.count                         multiset-comb-lex1000  avgt   16        54.000             counts
+OptimisationCandidatesBenchmark.run:gc.time                          multiset-comb-lex1000  avgt   16        16.000                 ms

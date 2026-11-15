@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -30,7 +29,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
-import java.util.TreeMap;
 
 /**
  * Builder for a Cartesian product whose dimensions are linked by <em>rules</em>, written as plain
@@ -385,13 +383,26 @@ public final class ConditionalProductBuilder implements Builder<Object> {
             relation = Relation.full(dims.get(u).size(), dims.get(v).size());
         }
         Relation updated = relation.restrict(triggerValues, allowedTargets, triggerDim == u);
-        Map<Long, Relation> newRelations = new HashMap<>(relations);
-        newRelations.put(key, updated);
-        checkLoopBlocks(dims, newRelations.keySet());
-        // Ascending key order (lower dimension, then higher), so the plan is built the same way on every run;
-        // Map.copyOf would iterate in an order that changes from one JVM run to the next.
-        Map<Long, Relation> ordered = new LinkedHashMap<>();
-        new TreeMap<>(newRelations).forEach(ordered::put);
+        // Every relations map comes from here (or is empty), so it is always in ascending key order (lower
+        // dimension, then higher). Inserting the new key in its place keeps that order, so the plan is built the
+        // same way on every run; Map.copyOf would iterate in an order that changes from one JVM run to the next.
+        // One pass over the existing entries, with no intermediate HashMap or TreeMap.
+        Map<Long, Relation> ordered = new LinkedHashMap<>(relations.size() * 2 + 2);
+        boolean placed = false;
+        for (Map.Entry<Long, Relation> e : relations.entrySet()) {
+            if (!placed && key <= e.getKey()) {
+                ordered.put(key, updated);
+                placed = true;
+                if (key == e.getKey()) {
+                    continue;                           // replaces the existing relation for this pair
+                }
+            }
+            ordered.put(e.getKey(), e.getValue());
+        }
+        if (!placed) {
+            ordered.put(key, updated);
+        }
+        checkLoopBlocks(dims, ordered.keySet());
         return new ConditionalProductBuilder(dims, originals, Collections.unmodifiableMap(ordered));
     }
 
