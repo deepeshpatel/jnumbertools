@@ -14,6 +14,8 @@ import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
 import java.math.BigInteger;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +24,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -143,7 +144,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
     private final List<List<?>> dims;            // private snapshots; unmodifiable
     private final List<List<?>> originals;       // the caller's list objects, matched by identity only
-    private final Map<Long, Relation> relations; // key(u, v) with u < v; immutable values
+    private final PersistentRelationMap relations; // persistent AVL map; key(u, v) with u < v
     private volatile Plan plan;                  // built lazily on first use
 
 
@@ -153,10 +154,10 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @throws NullPointerException if {@code elements} is null or contains a null element
      */
     public ConditionalProductBuilder(List<?> elements) {
-        this(List.<List<?>>of(snapshot(elements)), List.<List<?>>of(elements), Map.of());
+        this(List.<List<?>>of(snapshot(elements)), List.<List<?>>of(elements), PersistentRelationMap.empty());
     }
 
-    private ConditionalProductBuilder(List<List<?>> dims, List<List<?>> originals, Map<Long, Relation> relations) {
+    private ConditionalProductBuilder(List<List<?>> dims, List<List<?>> originals, PersistentRelationMap relations) {
         this.dims = dims;
         this.originals = originals;
         this.relations = relations;
@@ -466,31 +467,14 @@ public final class ConditionalProductBuilder implements Builder<Object> {
             relation = Relation.full(dims.get(u).size(), dims.get(v).size());
         }
         Relation updated = relation.restrict(triggerValues, allowedTargets, triggerDim == u);
-        // Every relations map comes from here (or is empty), so it is always in ascending key order (lower
-        // dimension, then higher). Inserting the new key in its place keeps that order, so the plan is built the
-        // same way on every run; Map.copyOf would iterate in an order that changes from one JVM run to the next.
-        // One pass over the existing entries, with no intermediate HashMap or TreeMap.
-        Map<Long, Relation> ordered = new LinkedHashMap<>(relations.size() * 2 + 2);
-        boolean placed = false;
-        for (Map.Entry<Long, Relation> e : relations.entrySet()) {
-            if (!placed && key <= e.getKey()) {
-                ordered.put(key, updated);
-                placed = true;
-                if (key == e.getKey()) {
-                    continue;                           // replaces the existing relation for this pair
-                }
-            }
-            ordered.put(e.getKey(), e.getValue());
-        }
-        if (!placed) {
-            ordered.put(key, updated);
-        }
-        // Adding another rule to an existing pair changes only its relation, not the constraint graph.
-        // The loop-block limit therefore needs to be re-evaluated only when a new graph edge is introduced.
+        // Path-copy only the AVL search path. Adding another rule to an existing pair is O(log E)
+        // rather than copying all E relation entries; older builders retain their previous root.
+        PersistentRelationMap updatedRelations = relations.with(key, updated);
+        // A new graph edge can change loop blocks; another restriction on an existing edge cannot.
         if (newLinkedPair) {
-            checkLoopBlocks(dims, ordered.keySet());
+            checkLoopBlocks(dims, updatedRelations.keySet());
         }
-        return new ConditionalProductBuilder(dims, originals, Collections.unmodifiableMap(ordered));
+        return new ConditionalProductBuilder(dims, originals, updatedRelations);
     }
 
     /** Rejects a rule set in which a group of dimensions linked in loops has too many combinations. */
@@ -692,6 +676,153 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     // ── Rule tables ──────────────────────────────────────────────────────────
 
     /** Allowed value pairs between dimension u and dimension v (u &lt; v). Immutable once built. */
+    /**
+     * Immutable AVL map used for dimension-pair relations. Updates copy only the search path, while
+     * iteration remains in ascending key order so model construction is deterministic.
+     */
+    private static final class PersistentRelationMap extends AbstractMap<Long, Relation> {
+        private static final PersistentRelationMap EMPTY = new PersistentRelationMap(null);
+        private final RelationNode root;
+        private transient Set<Entry<Long, Relation>> entries;
+
+        private PersistentRelationMap(RelationNode root) {
+            this.root = root;
+        }
+
+        static PersistentRelationMap empty() {
+            return EMPTY;
+        }
+
+        PersistentRelationMap with(long key, Relation value) {
+            return new PersistentRelationMap(put(root, key, value));
+        }
+
+        @Override
+        public Relation get(Object key) {
+            if (!(key instanceof Long)) return null;
+            long target = (Long) key;
+            RelationNode node = root;
+            while (node != null) {
+                if (target == node.key) return node.value;
+                node = target < node.key ? node.left : node.right;
+            }
+            return null;
+        }
+
+        @Override
+        public boolean containsKey(Object key) {
+            if (!(key instanceof Long)) return false;
+            long target = (Long) key;
+            RelationNode node = root;
+            while (node != null) {
+                if (target == node.key) return true;
+                node = target < node.key ? node.left : node.right;
+            }
+            return false;
+        }
+
+        @Override
+        public int size() {
+            return size(root);
+        }
+
+        @Override
+        public Set<Entry<Long, Relation>> entrySet() {
+            if (entries == null) {
+                entries = new AbstractSet<>() {
+                    @Override public int size() { return PersistentRelationMap.this.size(); }
+
+                    @Override
+                    public Iterator<Entry<Long, Relation>> iterator() {
+                        return new Iterator<>() {
+                            private final ArrayDeque<RelationNode> stack = new ArrayDeque<>();
+                            { pushLeft(root); }
+
+                            private void pushLeft(RelationNode node) {
+                                while (node != null) {
+                                    stack.push(node);
+                                    node = node.left;
+                                }
+                            }
+
+                            @Override public boolean hasNext() { return !stack.isEmpty(); }
+
+                            @Override
+                            public Entry<Long, Relation> next() {
+                                if (stack.isEmpty()) throw new NoSuchElementException();
+                                RelationNode node = stack.pop();
+                                pushLeft(node.right);
+                                return new SimpleImmutableEntry<>(node.key, node.value);
+                            }
+                        };
+                    }
+                };
+            }
+            return entries;
+        }
+
+        private static RelationNode put(RelationNode node, long key, Relation value) {
+            if (node == null) return new RelationNode(key, value, null, null);
+            if (key == node.key) return new RelationNode(key, value, node.left, node.right);
+            RelationNode updated = key < node.key
+                    ? new RelationNode(node.key, node.value, put(node.left, key, value), node.right)
+                    : new RelationNode(node.key, node.value, node.left, put(node.right, key, value));
+            return balance(updated);
+        }
+
+        private static RelationNode balance(RelationNode node) {
+            int factor = height(node.left) - height(node.right);
+            if (factor > 1) {
+                if (height(node.left.left) < height(node.left.right)) {
+                    return rotateRight(new RelationNode(node.key, node.value,
+                            rotateLeft(node.left), node.right));
+                }
+                return rotateRight(node);
+            }
+            if (factor < -1) {
+                if (height(node.right.right) < height(node.right.left)) {
+                    return rotateLeft(new RelationNode(node.key, node.value,
+                            node.left, rotateRight(node.right)));
+                }
+                return rotateLeft(node);
+            }
+            return node;
+        }
+
+        private static RelationNode rotateRight(RelationNode node) {
+            RelationNode pivot = node.left;
+            RelationNode right = new RelationNode(node.key, node.value, pivot.right, node.right);
+            return new RelationNode(pivot.key, pivot.value, pivot.left, right);
+        }
+
+        private static RelationNode rotateLeft(RelationNode node) {
+            RelationNode pivot = node.right;
+            RelationNode left = new RelationNode(node.key, node.value, node.left, pivot.left);
+            return new RelationNode(pivot.key, pivot.value, left, pivot.right);
+        }
+
+        private static int height(RelationNode node) { return node == null ? 0 : node.height; }
+        private static int size(RelationNode node) { return node == null ? 0 : node.size; }
+    }
+
+    private static final class RelationNode {
+        final long key;
+        final Relation value;
+        final RelationNode left;
+        final RelationNode right;
+        final int height;
+        final int size;
+
+        RelationNode(long key, Relation value, RelationNode left, RelationNode right) {
+            this.key = key;
+            this.value = value;
+            this.left = left;
+            this.right = right;
+            this.height = 1 + Math.max(left == null ? 0 : left.height, right == null ? 0 : right.height);
+            this.size = 1 + (left == null ? 0 : left.size) + (right == null ? 0 : right.size);
+        }
+    }
+
     private static final class Relation {
         final BitSet[] uToV; // uToV[a] = values of v allowed together with value a of u
         final BitSet[] vToU; // vToU[b] = values of u allowed together with value b of v
