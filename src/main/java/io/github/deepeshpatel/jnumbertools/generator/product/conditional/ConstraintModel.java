@@ -18,7 +18,7 @@ import java.util.Map;
  */
 final class ConstraintModel {
     final List<List<?>> dimensions;
-    final Map<Long, ?> relations;
+    final Map<Long, Relation> relations;
     private volatile Rows rows;
 
     ConstraintModel(List<List<?>> dimensions, Map<Long, ?> relations) {
@@ -56,10 +56,10 @@ final class ConstraintModel {
                 dimensionLists.add(new ArrayList<>());
                 rowLists.add(new ArrayList<>());
             }
-            for (Map.Entry<Long, ?> entry : relations.entrySet()) {
+            for (Map.Entry<Long, Relation> entry : relations.entrySet()) {
                 int lower = (int) (entry.getKey() >>> 32);
                 int higher = (int) (long) entry.getKey();
-                Relation relation = (Relation) entry.getValue();
+                Relation relation = entry.getValue();
                 dimensionLists.get(higher).add(lower);
                 rowLists.get(higher).add(relation.uToV);
             }
