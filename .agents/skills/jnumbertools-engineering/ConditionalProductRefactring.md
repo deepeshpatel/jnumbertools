@@ -135,7 +135,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 
 ### WP4: Parallel
 
-- [ ] 4.1 Splittable spliterator for the pruned generators (prefix split, ordered, size threshold)
+- [~] 4.1 Delivered an ordered, lazy spliterator for PRUNED_BITSET and PRUNED_DFS. It splits the first dimension into disjoint contiguous ranges above a minimum range size; each range gets an independent iterator and shares the immutable model / cached relation rows. Deeper-dimension splitting remains a follow-up if benchmarks show first-dimension partitioning is insufficient. Awaiting focused parallel-order tests.
 - [ ] 4.2 Rank-range split for `DpLexGenerator`
 - [ ] 4.3 Tests: ordered parallel equals sequential for all generators; `unordered()` has the same set of tuples
 
@@ -160,7 +160,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 | WP1 setup cost | 3 verified | 3 |
 | WP2 shared model | 4 verified | 4 |
 | WP3 generators | 5 verified; all four strategies retained and dispatched | 5 |
-| WP4 parallel | 0 | 3 |
+| WP4 parallel | 1 delivered; awaiting verification | 3 |
 | WP5 benchmarks | 0 | 3 |
 | WP6 finish | 0 | 3 |
 
@@ -179,6 +179,9 @@ Update this table whenever an item changes status.
 - Unit tests live next to the existing ones in `ConditionalProductBuilderTest`, `ConditionalProductRuleOrderTest`, and a new differential test per generator.
 
 ## 8. Progress log (newest first)
+
+- 2026-11-17: Started WP4.1. Added PrunedLexSpliterator for PRUNED_BITSET and PRUNED_DFS. It lazily creates independent bounded iterators over disjoint contiguous first-dimension ranges; trySplit returns the lower range and retains the upper range, preserving ordered encounter semantics. Splitting stops once a range contains at most two first-dimension indices or traversal has begun. DP remains on its existing iterator spliterator path for WP4.2. Added a parallel-stream regression test that compares both order and tuple set with sequential traversal. Awaiting maintainer execution of the focused test classes.
+
 
 - 2026-11-16: Plan written. WP0 patch (`conditional-compact-rules.patch`) delivered against a4b57d2; benchmark with the plain Java stream row delivered. Maintainer's local tree has `LexOrderStrategy {PRUNED_BITSET, PRUNED_DFS, DP, ADAPTIVE}`; waiting for the push before rebasing WP0 and starting WP1.
 
