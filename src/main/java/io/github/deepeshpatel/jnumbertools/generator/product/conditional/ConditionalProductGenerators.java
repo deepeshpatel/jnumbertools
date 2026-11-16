@@ -29,6 +29,10 @@ final class ConditionalProductGenerators {
         return new LexOrderGenerator(model, strategy);
     }
 
+    static StreamableIterable<Object> anyOrder(ConstraintModel model) {
+        return new AnyOrderGenerator(model);
+    }
+
     static StreamableIterable<Object> rejectionChoice(ConstraintModel model, int sampleSize, Random random) {
         return new RejectionChoiceGenerator(model, sampleSize, random);
     }
