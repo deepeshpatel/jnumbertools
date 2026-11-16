@@ -5,8 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
-import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
-import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
+import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
 
 import java.math.BigInteger;
 import java.util.BitSet;
