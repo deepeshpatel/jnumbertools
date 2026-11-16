@@ -62,7 +62,7 @@ class ConditionalProductBuilderTest {
         var expected = expectedConfigs(true);
 
         assertEquals(expected, builder.lexOrder().stream().toList());
-        assertEquals(expected, builder.lexOrder(LexOrderStrategy.PRUNED).stream().toList());
+        assertEquals(expected, builder.lexOrder(LexOrderStrategy.PRUNED_BITSET).stream().toList());
         assertEquals(expected, builder.lexOrder(LexOrderStrategy.DP).stream().toList());
         assertEquals(expected, builder.lexOrder(LexOrderStrategy.ADAPTIVE, 9_999).stream().toList());
         assertEquals(expected, builder.lexOrder(LexOrderStrategy.ADAPTIVE, 10_000).stream().toList());
@@ -78,7 +78,7 @@ class ConditionalProductBuilderTest {
         assertThrows(NullPointerException.class, () -> builder.lexOrder((LexOrderStrategy) null));
         assertThrows(IllegalArgumentException.class, () -> builder.lexOrder(LexOrderStrategy.ADAPTIVE));
         assertThrows(IllegalArgumentException.class,
-                () -> builder.lexOrder(LexOrderStrategy.PRUNED, 1));
+                () -> builder.lexOrder(LexOrderStrategy.PRUNED_BITSET, 1));
         assertThrows(IllegalArgumentException.class,
                 () -> builder.lexOrder(LexOrderStrategy.DP, 1));
         assertThrows(IllegalArgumentException.class,
