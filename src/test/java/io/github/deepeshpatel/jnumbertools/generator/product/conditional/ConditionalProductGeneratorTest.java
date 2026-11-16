@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -69,7 +70,7 @@ class ConditionalProductGeneratorTest {
         assertEquals(new HashSet<>(expected), new HashSet<>(actual));
         assertEquals(expected.size(), actual.size(), "anyOrder must not emit duplicate tuples");
         assertEquals(actual, generator.stream().toList(), "the generator must be re-iterable");
-        assertEquals(expected.size(), builder.count());
+        assertEquals(BigInteger.valueOf(expected.size()), builder.count());
 
         var spliterator = generator.spliterator();
         assertTrue((spliterator.characteristics() & java.util.Spliterator.ORDERED) == 0,
