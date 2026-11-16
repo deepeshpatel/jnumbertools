@@ -4,7 +4,6 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
-import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
@@ -18,9 +17,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Random;
 
@@ -331,7 +328,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         if (strategy == LexOrderStrategy.ADAPTIVE) {
             throw new IllegalArgumentException("ADAPTIVE requires an estimated traversal limit; use lexOrder(strategy, estimatedLimit)");
         }
-        return new LexOrderGenerator(strategy);
+        return ConditionalProductGenerators.lexOrder(model, strategy);
     }
 
     /**
@@ -364,7 +361,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         LexOrderStrategy selected = estimatedLimit >= 10_000L
                 ? LexOrderStrategy.DP
                 : LexOrderStrategy.PRUNED_BITSET;
-        return new LexOrderGenerator(selected);
+        return ConditionalProductGenerators.lexOrder(model, selected);
     }
 
     /**
@@ -376,7 +373,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     public StreamableIterable<Object> lexOrderMth(BigInteger m, BigInteger start) {
         BigInteger count = count();
         Util.validateLexOrderMthParams(m, start, count);
-        return new RankBasedGenerator(new EveryMthIterable(start, m, count));
+        return ConditionalProductGenerators.rankBased(model, new EveryMthIterable(start, m, count));
     }
 
     /**
@@ -387,7 +384,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     @Override
     public StreamableIterable<Object> byRanks(Iterable<BigInteger> ranks) {
         Util.validateByRanksParams(ranks);
-        return new RankBasedGenerator(ranks);
+        return ConditionalProductGenerators.rankBased(model, ranks);
     }
 
     /**
@@ -399,9 +396,9 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         BigIntegerChoice ranks = new BigIntegerChoice(count(), sampleSize, random); // validates the arguments
         ConstraintPlan p = model.plan();
         if (p.counts.mostTuplesValid()) {
-            return new RejectionChoiceGenerator(sampleSize, random);
+            return ConditionalProductGenerators.rejectionChoice(model, sampleSize, random);
         }
-        return new RankBasedGenerator(ranks);
+        return ConditionalProductGenerators.rankBased(model, ranks);
     }
 
     /**
@@ -410,7 +407,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     @Override
     public StreamableIterable<Object> sample(int sampleSize, Random random) {
-        return new RankBasedGenerator(new BigIntegerSample(count(), sampleSize, random));
+        return ConditionalProductGenerators.rankBased(model, new BigIntegerSample(count(), sampleSize, random));
     }
 
     /**
@@ -459,234 +456,5 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     // ── Counting plan ────────────────────────────────────────────────────────
 
 
-    // ── Generators
 
-    private final class LexOrderGenerator extends AbstractGenerator<Object> {
-        private final LexOrderStrategy strategy;
-
-        LexOrderGenerator(LexOrderStrategy strategy) {
-            super(Collections.emptyList());
-            this.strategy = strategy;
-        }
-
-        @Override
-        public Iterator<List<Object>> iterator() {
-            return strategy == LexOrderStrategy.PRUNED_BITSET
-                    ? new PrunedLexItr()
-                    : new LexItr(model.plan());
-        }
-    }
-
-    /**
-     * Lexicographic depth-first traversal without the counting plan. At each dimension, candidates are
-     * filtered against all earlier dimensions connected to it by a rule. A prefix that has no completion
-     * may still be explored until the conflicting later dimension is reached; unlike the DP iterator, this
-     * iterator does not perform future-completion lookahead.
-     */
-    private final class PrunedLexItr implements Iterator<List<Object>> {
-        private final int dimensions = model.dimensions.size();
-        private final int[] val = new int[dimensions];
-        private final int[] nextCandidate = new int[dimensions];
-        private final int[][] belowDims;
-        private final BitSet[][][] belowRows;
-        private int depth;
-        private boolean ready;
-        private boolean exhausted;
-
-        PrunedLexItr() {
-            ConstraintModel.Rows rows = model.rows();
-            belowDims = rows.belowDims;
-            belowRows = rows.belowRows;
-            for (List<?> dimension : model.dimensions) {
-                if (dimension.isEmpty()) {
-                    exhausted = true;
-                    break;
-                }
-            }
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (!ready && !exhausted) {
-                ready = advance();
-                if (!ready) exhausted = true;
-            }
-            return ready;
-        }
-
-        @Override
-        public List<Object> next() {
-            if (!hasNext()) throw new NoSuchElementException();
-            ready = false;
-            return model.tuple(val);
-        }
-
-        private boolean advance() {
-            while (depth >= 0) {
-                int candidate = nextValidCandidate(depth, nextCandidate[depth]);
-                if (candidate < 0) {
-                    if (depth == 0) return false;
-                    depth--;
-                    nextCandidate[depth] = val[depth] + 1;
-                    continue;
-                }
-
-                val[depth] = candidate;
-                nextCandidate[depth] = candidate + 1;
-                if (depth == dimensions - 1) return true;
-
-                depth++;
-                nextCandidate[depth] = 0;
-            }
-            return false;
-        }
-
-        private int nextValidCandidate(int dimension, int from) {
-            int size = model.dimensions.get(dimension).size();
-            if (from >= size) return -1;
-
-            int[] earlier = belowDims[dimension];
-            if (earlier.length == 0) return from;
-
-            BitSet[][] rows = belowRows[dimension];
-            BitSet firstAllowed = rows[0][val[earlier[0]]];
-            candidateLoop:
-            for (int candidate = firstAllowed.nextSetBit(from);
-                 candidate >= 0 && candidate < size;
-                 candidate = firstAllowed.nextSetBit(candidate + 1)) {
-                for (int i = 1; i < earlier.length; i++) {
-                    if (!rows[i][val[earlier[i]]].get(candidate)) continue candidateLoop;
-                }
-                return candidate;
-            }
-            return -1;
-        }
-    }
-
-    /** Walks the valid tuples in lexicographic order; branches without any valid completion are skipped. */
-    private final class LexItr implements Iterator<List<Object>> {
-        private final ConstraintPlan p;
-        private final int[] val;
-        private boolean started;
-        private boolean ready;
-        private boolean exhausted;
-
-        LexItr(ConstraintPlan p) {
-            this.p = p;
-            this.val = new int[p.dimensions];
-            this.exhausted = p.counts.total.signum() == 0;
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (!ready && !exhausted) {
-                if (advance()) {
-                    ready = true;
-                } else {
-                    exhausted = true;
-                }
-            }
-            return ready;
-        }
-
-        @Override
-        public List<Object> next() {
-            if (!hasNext()) throw new NoSuchElementException();
-            ready = false;
-            return model.tuple(val);
-        }
-
-        private boolean advance() {
-            int k;
-            int from;
-            if (!started) {
-                started = true;
-                k = 0;
-                from = 0;
-            } else {
-                k = p.dimensions - 1;
-                from = val[k] + 1;
-            }
-            while (true) {
-                int idx = p.firstValid(k, from, val);
-                if (idx < 0) {
-                    k--;
-                    if (k < 0) return false;
-                    from = val[k] + 1;
-                } else {
-                    val[k] = idx;
-                    k++;
-                    if (k == p.dimensions) return true;
-                    from = 0;
-                }
-            }
-        }
-    }
-
-    /**
-     * Uniform choice with replacement by rejection: draw a random point of the full product and keep it if it
-     * satisfies every rule. Exact (each valid tuple is equally likely) and used only when at least a quarter
-     * of the product is valid, so a draw is accepted after four attempts on average.
-     */
-    private final class RejectionChoiceGenerator extends AbstractGenerator<Object> {
-        private final int sampleSize;
-        private final Random random;
-
-        RejectionChoiceGenerator(int sampleSize, Random random) {
-            super(Collections.emptyList());
-            this.sampleSize = sampleSize;
-            this.random = random;
-        }
-
-        @Override
-        public Iterator<List<Object>> iterator() {
-            ConstraintPlan p = model.plan();
-            return new Iterator<>() {
-                private int produced;
-
-                @Override public boolean hasNext() { return produced < sampleSize; }
-
-                @Override
-                public List<Object> next() {
-                    if (!hasNext()) throw new NoSuchElementException();
-                    produced++;
-                    int[] val = new int[p.dimensions];
-                    do {
-                        for (int d = 0; d < val.length; d++) val[d] = random.nextInt(p.dimSize[d]);
-                    } while (!p.isValid(val));
-                    return model.tuple(val);
-                }
-            };
-        }
-    }
-
-    /** Resolves each rank to a tuple through the counting tables. Ranks are consumed lazily. */
-    private final class RankBasedGenerator extends AbstractGenerator<Object> {
-        private final Iterable<BigInteger> ranks;
-
-        RankBasedGenerator(Iterable<BigInteger> ranks) {
-            super(Collections.emptyList());
-            this.ranks = ranks;
-        }
-
-        @Override
-        public Iterator<List<Object>> iterator() {
-            Iterator<BigInteger> rankIt = ranks.iterator();
-            return new Iterator<>() {
-                @Override public boolean hasNext() { return rankIt.hasNext(); }
-
-                @Override
-                public List<Object> next() {
-                    if (!hasNext()) throw new NoSuchElementException();
-                    BigInteger rank = rankIt.next();
-                    ConstraintPlan p = model.plan();
-                    if (rank.signum() < 0 || rank.compareTo(p.counts.total) >= 0) {
-                        throw new IllegalArgumentException(
-                                "Rank " + rank + " is out of bounds [0, " + p.counts.total + ")");
-                    }
-                    return model.tuple(p.counts.unrank(rank));
-                }
-            };
-        }
-    }
 }
