@@ -19,7 +19,7 @@ import java.util.Collections;
  */
 final class ConstraintModel {
     final List<List<?>> dimensions;
-    final Map<Long, Relation> relations;
+    final PersistentRelationMap relations;
     private volatile Rows rows;
 
     ConstraintModel(List<List<?>> dimensions, PersistentRelationMap relations) {
@@ -30,7 +30,7 @@ final class ConstraintModel {
     ConstraintModel withDimension(List<?> dimension) {
         List<List<?>> updated = new ArrayList<>(dimensions);
         updated.add(dimension);
-        return new ConstraintModel(Collections.unmodifiableList(updated), (PersistentRelationMap) relations);
+        return new ConstraintModel(Collections.unmodifiableList(updated), relations);
     }
 
     ConstraintModel withRule(int triggerDim, BitSet triggerValues, int targetDim, BitSet allowedTargets) {
