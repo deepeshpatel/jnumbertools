@@ -118,7 +118,7 @@ final class ConstraintCounts {
     private long range(int c, int k, int[] val) {
         int[] mem = plan.members[c];
         if (mem[0] >= k) return (long) plan.size[c];                 // nothing fixed: [0, plan.size)
-        if (values[c] == null) {
+        if (plan.values[c] == null) {
             int b = val[mem[0]];
             return ((long) b << 32) | (b + 1);
         }
@@ -270,7 +270,7 @@ final class ConstraintCounts {
             int dimSize = plan.dimensionSize(k);
             for (int idx = 0; idx < dimSize; idx++) {
                 val[k] = idx;
-                BigInteger c = k == dimensions - 1
+                BigInteger c = k == plan.dimensions - 1
                         ? (plan.agreesWithBelow(k, idx, val) ? BigInteger.ONE : BigInteger.ZERO)
                         : completions(k + 1, val);
                 if (c.signum() == 0) continue;
@@ -296,7 +296,7 @@ final class ConstraintCounts {
             int size = plan.dimensionSize(k);
             for (int idx = 0; idx < size; idx++) {
                 val[k] = idx;
-                long c = k == dimensions - 1
+                long c = k == plan.dimensions - 1
                         ? (plan.agreesWithBelow(k, idx, val) ? 1L : 0L)
                         : completionsL(k + 1, val);
                 if (c == 0) continue;
