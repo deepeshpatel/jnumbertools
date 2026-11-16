@@ -256,7 +256,7 @@ final class ConstraintCounts {
             return result;
         }
 
-        private boolean hasCompletion(int k, int[] val) {
+        boolean hasCompletion(int k, int[] val) {
             return this.lsuffix != null ? completionsL(k, val) > 0 : completions(k, val).signum() > 0;
         }
 
