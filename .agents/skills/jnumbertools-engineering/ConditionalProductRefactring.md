@@ -88,8 +88,11 @@ Decisions already made:
 - Public enum `LexOrderStrategy`: `PRUNED_BITSET` (default), `PRUNED_DFS`, `DP`, `ADAPTIVE`. `ADAPTIVE` stays until a benchmark with dead-end shapes decides its cutoff.
 - No stream-based generator is currently planned. Nested-stream baselines are useful for comparison, but must be benchmarked with equivalent rule/setup costs; they do not define the library's public generator architecture.
 - Keep `PRUNED_DFS` as a permanent member of the strategy set during this work; optimize it for workloads such as thousands of tuples over small lists.
-- Parallel is opt-in through `stream().parallel()`; the default stays sequential. No automatic parallel selection (the real output size is unknown without counting).
-- Parallel splitting: custom `Spliterator` whose `trySplit` cuts by prefix (contiguous ranges of the first dimension, then further dimensions if needed). Pieces are lexicographically ordered, so ordered parallel results stay correct; `.unordered()` drops the ordering cost. It stops splitting below a work threshold. `DpLexGenerator` can split by rank range with exact sizes (costs the counting plan).
+- Existing `lexOrder()` behaviour is out of scope for the new unordered traversal work. Do not extend or redesign its parallel implementation as part of the `anyOrder()` work; revisit it only after `anyOrder()` is complete, tested, and benchmarked.
+- `anyOrder()` is a separate full-generation API for optimization, not randomization. Its contract will yield every valid tuple exactly once without promising encounter order. `choice()` and `sample()` remain the random-selection APIs.
+- The intended `anyOrder()` policy is automatic sequential-versus-parallel selection using a workload threshold. The threshold and workload estimate must be supported by benchmark evidence; do not assume that first-dimension size alone is a sufficient estimate.
+- Its parallel splitting design must expose useful independent work even when the first dimension has too few values. Evaluate deeper prefix/frontier splitting or another disjoint partitioning strategy. Avoid eager materialization and preserve lazy, re-iterable traversal.
+- Keep the existing `lexOrder()` and its current spliterators stable during this work. The existing ordered lexicographic parallel tests remain regression coverage, not a mandate to add further `lexOrder()` parallel features.
 - Exact counting and rank operations (`count`, `lexOrderMth`, `byRanks`, `choice`, `sample`) always use the counting plan, independent of the traversal strategy.
 
 ## 3. Constraints to preserve
@@ -139,6 +142,14 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 - [x] 4.2 Added `DpRankSpliterator`: partitions the exact BigInteger valid-tuple rank interval into disjoint contiguous ranges, lazily unranks each tuple, and preserves ordered encounter semantics. Maintainer confirmed the focused regression suite passed (35 tests).
 - [x] 4.3 Added unordered parallel-stream tuple-set checks for PRUNED_BITSET, PRUNED_DFS, DP, and ADAPTIVE; maintainer confirmed the focused suite passed (36 tests). Ordered encounter-order equality remains covered for all explicit generators.
 
+### WP4 follow-up: separate unordered traversal (deferred; not part of the completed WP4 lexicographic work)
+
+- [ ] 4.4 Agree the public `anyOrder()` contract: full valid tuple set exactly once, unspecified order, lazy and re-iterable; no random-selection semantics.
+- [ ] 4.5 Implement `anyOrder()` sequential traversal first, then add automatic threshold-based parallel execution with a partitioning strategy that can split below the first dimension when necessary.
+- [ ] 4.6 Add differential, iterator, concurrency and parallel tuple-set tests. Keep `lexOrder()` unchanged.
+- [ ] 4.7 Benchmark complete `anyOrder()` consumption against its sequential counterpart and representative baselines. Enable automatic parallel execution only where measurements demonstrate a repeatable benefit; derive the threshold from those results.
+- [ ] 4.8 Only after 4.4–4.7 are complete, tests pass and benchmarks show a real benefit, consider whether any separate `lexOrder()` parallel work is justified.
+
 ### WP5: Benchmarks (maintainer runs them)
 
 - [~] 5.1 Delivered `ConditionalProductStrategyBenchmark` with case definitions externalized as classpath `.properties` resources. JMH's `scenarioName` parameter is the case's relative resource path, so a single case can be selected without editing Java source. All four library strategies are compared with the nested-stream baseline; traversal-only and end-to-end are separate benchmark methods.
@@ -153,11 +164,12 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 
 - [~] Split the benchmark into `benchmarks.conditionalproduct`, `scenario`, and `baseline` packages. `Scenario`/`Rule` own property-driven workload construction, `NestedStreamBaseline` owns the independent stream reference, the JMH class owns timed methods, and `ConditionalProductBenchmarkRunner` owns execution and result persistence. Retained the properties-based case hierarchy and benchmark semantics. Awaiting maintainer compilation and a focused launcher run.
 
-### WP6: Finish — deferred until the very end
+### WP6: Documentation and release finish — remaining items deferred
+
 
 These deliverables are intentionally postponed until implementation, parallel work, and benchmark analysis are settled.
 
-- [ ] 6.1 Javadocs: document every strategy and give a concise explanation of when to use it.
+- [x] 6.1 Added practical dimension-ordering guidance to `ConditionalProductBuilder` Javadocs: explain when pairwise constraints become evaluable, how selective dimensions can prune downstream work, why dependency order matters, and the SQL join-order/predicate-placement analogy. Guidance for `anyOrder()` parallel execution is deliberately deferred until that API and its measured behavior exist.
 - [ ] 6.2 Documentation: update the main README, benchmarks README, and changelog to reflect the final API, behavior, benchmark methodology, and measured results.
 - [ ] 6.3 Final benchmark decisions: use the complete benchmark evidence to tune implementations, defaults, and the ADAPTIVE cutoff where justified. Record the final results and rationale. Never remove or deprecate a strategy.
 
@@ -191,6 +203,8 @@ Update this table whenever an item changes status.
 - Unit tests live next to the existing ones in `ConditionalProductBuilderTest`, `ConditionalProductRuleOrderTest`, and a new differential test per generator.
 
 ## 8. Progress log (newest first)
+
+- 2026-11-17: Delivered the first documentation slice ahead of the `anyOrder()` implementation. Added practical dimension-ordering guidance to `ConditionalProductBuilder` Javadocs, including constraint-evaluation dependencies, selective-dimension pruning, tuple-position/lexicographic-order consequences, and the SQL join-order analogy. Updated the target design to keep existing `lexOrder()` behavior out of scope and recorded the staged, separate `anyOrder()` work package: contract, sequential traversal, automatic parallel traversal, correctness tests, then benchmark-based threshold selection. No traversal code or behavior changed.
 
 - 2026-11-17: Added explicit benchmark follow-ups to WP5: remove unintended intermediate console output while retaining JMH progress/results and useful errors; analyze the complete JSON matrix for latency, allocation, strategy crossover, and ADAPTIVE quality; use targeted reruns only for unresolved comparisons. Added a deferred benchmark-maintainability task to split the currently consolidated Java benchmark class into cohesive classes/packages after results analysis. The maintainer observed and is currently clearing intermediate console output; exact sources still need to be traced and addressed.
 - 2026-11-17: Extended case descriptors to support heterogeneous dimension sizes through a comma-separated `sizes` property; `size` remains the uniform-size shorthand. Documented that new case paths must also be added to the JMH `@Param` list. The physical case hierarchy represents workload axes; strategy and measurement are selected through JMH's `implementation` parameter and benchmark method to avoid duplicating every workload directory for every strategy.
