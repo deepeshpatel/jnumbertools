@@ -54,12 +54,12 @@ The implementation has two distinct optimization targets. Do not optimize one by
 
 | Enum constant | Intended implementation | Contract / status |
 |---|---|---|
-| `PRUNED_BITSET` | Prefix-pruned DFS using compact BitSet relation rows | Default candidate; avoids exact counting plan for ordinary traversal |
-| `PRUNED_DFS` | Prefix-pruned indexed DFS using dense boolean relation rows | Alternative implementation; retain until representative benchmarks decide whether it has a useful workload |
-| `DP` | Exact DP completion-count lookahead | Explicit option; has higher setup cost and may be poor for cyclic/loop-heavy constraints |
-| `ADAPTIVE` | Selects `PRUNED_BITSET` or `DP` from the caller's expected tuple consumption | Current cutoff is a heuristic only; do not treat 10,000 as validated until benchmark evidence supports it |
+| `PRUNED_BITSET` | Prefix-pruned DFS using compact BitSet relation rows | Required implementation; default candidate; avoids exact counting plan for ordinary traversal |
+| `PRUNED_DFS` | Prefix-pruned indexed DFS using dense boolean relation rows | Required implementation; optimize it for its workload rather than removing it based on an early benchmark |
+| `DP` | Exact DP completion-count lookahead | Required implementation; optimize setup and traversal for its workload, including cyclic/loop-heavy constraints |
+| `ADAPTIVE` | Selects `PRUNED_BITSET` or `DP` from the caller's expected tuple consumption | Required implementation; selection heuristic and cutoff may be tuned using benchmark evidence |
 
-All enum constants must remain documented even if later benchmark results lead to deprecating or removing one. Any removal or default/cutoff change requires benchmark evidence, tests, and a progress-log entry.
+**Retention rule: all four enum constants and their corresponding implementations must remain available throughout this work. No strategy is to be removed or deprecated as part of these work packages.** If a strategy performs poorly, improve its implementation and tests. Only after the complete flow is implemented and correctness-verified should the full benchmark suite be used to tune implementations, defaults, or the `ADAPTIVE` cutoff. Benchmark results may inform later maintainer decisions, but this plan does not authorize removing a strategy.
 
 The current adaptive threshold (10,000 tuples) is provisional. The full-generation target is complete consumption, so benchmark coverage must include full traversal rather than infer the best strategy from first-N microbenchmarks.
 
@@ -87,7 +87,7 @@ Decisions already made:
 
 - Public enum `LexOrderStrategy`: `PRUNED_BITSET` (default), `PRUNED_DFS`, `DP`, `ADAPTIVE`. `ADAPTIVE` stays until a benchmark with dead-end shapes decides its cutoff.
 - No stream-based generator is currently planned. Nested-stream baselines are useful for comparison, but must be benchmarked with equivalent rule/setup costs; they do not define the library's public generator architecture.
-- Do not drop `PRUNED_DFS` early (a user may have thousands of tuples over small lists).
+- Keep `PRUNED_DFS` as a permanent member of the strategy set during this work; optimize it for workloads such as thousands of tuples over small lists.
 - Parallel is opt-in through `stream().parallel()`; the default stays sequential. No automatic parallel selection (the real output size is unknown without counting).
 - Parallel splitting: custom `Spliterator` whose `trySplit` cuts by prefix (contiguous ranges of the first dimension, then further dimensions if needed). Pieces are lexicographically ordered, so ordered parallel results stay correct; `.unordered()` drops the ordering cost. It stops splitting below a work threshold. `DpLexGenerator` can split by rank range with exact sizes (costs the counting plan).
 - Exact counting and rank operations (`count`, `lexOrderMth`, `byRanks`, `choice`, `sample`) always use the counting plan, independent of the traversal strategy.
@@ -150,7 +150,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 
 - [ ] 6.1 Javadoc for every strategy, with a plain statement of when to use it
 - [ ] 6.2 README and benchmarks README update; changelog line
-- [ ] 6.3 Decide `PRUNED_DFS` and `ADAPTIVE` from benchmark data (keep, change cutoff, or remove)
+- [ ] 6.3 Benchmark all four retained strategies after the complete flow is ready; tune implementations, defaults, and the `ADAPTIVE` cutoff where evidence supports a change. Do not remove or deprecate any strategy.
 
 ## 5. Progress summary
 
@@ -169,7 +169,7 @@ Update this table whenever an item changes status.
 ## 6. Open questions for the maintainer
 
 - Keep the new generator classes package-private in `...generator.product.conditional`, or move them into a subpackage?
-- Final default and the fate of `PRUNED_DFS` / `ADAPTIVE`: decided by WP5 data, not before.
+- Final default and the `ADAPTIVE` cutoff may be tuned after WP5; all four strategies remain available.
 
 ## 7. Verification method
 
@@ -186,5 +186,7 @@ Update this table whenever an item changes status.
 
 - Full-result `lexOrder()` and any-order full generation are optimized for consuming the complete result set. Do not choose an implementation solely because it wins a short-prefix benchmark.
 - Special operations (`count`, `isEmpty`, `lexOrderMth`, `byRanks`, `choice`, `sample`, etc.) may pay the exact-plan/counting cost. Their end-to-end benchmarks include builder construction and rule registration.
-- The complete lexicographic enum strategy set is `PRUNED_BITSET`, `PRUNED_DFS`, `DP`, and `ADAPTIVE`. Document every constant and its selection semantics for future maintainers and AI contributors.
+- The complete lexicographic enum strategy set is `PRUNED_BITSET`, `PRUNED_DFS`, `DP`, and `ADAPTIVE`. All four strategies must remain implemented and available. If one is inefficient, optimize it; do not remove or deprecate it during implementation. Benchmark only after the complete flow is ready, then tune implementations/defaults/cutoffs without dropping a strategy.
 - 2026-11-17: Created development branch `conditional-product-optimization` from commit `27c2066`. Corrected `ConditionalProductBuilder` references from the obsolete `PRUNED` enum constant to `PRUNED_BITSET`; the plan was expanded with the full-generation versus special-operation objectives and the full strategy table. Compile/tests have not yet been run.
+
+- 2026-11-17: Maintainer explicitly confirmed that no strategy is to be removed. Updated the retention rule, WP3/WP6 expectations, and open questions accordingly: all four strategies remain implemented; benchmark evidence is for optimization/default/cutoff tuning after the full flow is complete, not for dropping algorithms.
