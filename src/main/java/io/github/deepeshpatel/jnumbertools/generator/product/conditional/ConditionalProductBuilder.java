@@ -315,7 +315,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     @Override
     public StreamableIterable<Object> lexOrder() {
-        return lexOrder(LexOrderStrategy.PRUNED);
+        return lexOrder(LexOrderStrategy.PRUNED_BITSET);
     }
 
     /**
@@ -380,7 +380,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         }
         LexOrderStrategy selected = estimatedLimit >= 10_000L
                 ? LexOrderStrategy.DP
-                : LexOrderStrategy.PRUNED;
+                : LexOrderStrategy.PRUNED_BITSET;
         return new LexOrderGenerator(selected);
     }
 
@@ -1268,7 +1268,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
         @Override
         public Iterator<List<Object>> iterator() {
-            return strategy == LexOrderStrategy.PRUNED
+            return strategy == LexOrderStrategy.PRUNED_BITSET
                     ? new PrunedLexItr()
                     : new LexItr(plan());
         }
