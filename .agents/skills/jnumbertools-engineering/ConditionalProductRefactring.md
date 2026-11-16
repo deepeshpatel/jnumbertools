@@ -123,11 +123,11 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 - [x] 2.1 Extract the immutable `Relation` into a package-private file. There is no standalone `Rule` type in the current implementation: each rule is immediately compiled into a combined pairwise `Relation`, so do not introduce a redundant `Rule` object without a concrete need (verified by maintainer)
 - [x] 2.2 Extract `ConstraintModel` to own immutable dimensions and pairwise relations; materialize prefix-pruned `Rows` lazily and share them across generators from the same builder (verified: all 25 `ConditionalProductBuilderTest` tests passed)
 - [x] 2.3 Extracted the former nested `Plan` into package-private `ConstraintPlan`. `ConstraintCounts` owns the derived BigInteger/long count tables, prefix-completion queries, primitive-long fast path, and unranking operations; `ConstraintPlan` retains topology, feasibility checks, and candidate selection (verified: all 25 `ConditionalProductBuilderTest` tests passed).
-- [~] 2.4 Continued reducing `ConditionalProductBuilder` to the facade. Extracted the immutable persistent AVL relation map into package-private `PersistentRelationMap`, graph validation/decomposition into package-private `ConstraintGraph`, and rule dimension/value resolution into package-private `RuleCompiler`. Further extractions are required before this item is complete.
+- [x] 2.4 Reduced `ConditionalProductBuilder` to the immutable fluent/API facade. Persistent relation storage, graph validation, rule compilation, immutable model transitions, lazy plan/tuple access, and generator mechanics are delegated to package-private collaborators. The builder is 460 lines, including its public fluent DSL and API documentation; maintainer verified the generator extraction with the focused test.
 
 ### WP3: Generators
 
-- [ ] 3.1 `PrunedLexGenerator` (abstract control flow) and `BitSetPrunedGenerator`
+- [~] 3.1 Extracted `PrunedLexGenerator` (shared depth-first control flow) and `BitSetPrunedGenerator` (BitSet candidate filtering). Awaiting focused test verification.
 - [ ] 3.2 `DenseDfsGenerator` (dense boolean rows, size cap, falls back to BitSet beyond the cap)
 - [ ] 3.3 `DpLexGenerator`
 - [ ] 3.4 Facade selects a generator from `LexOrderStrategy`; `ADAPTIVE` kept
@@ -158,8 +158,8 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 |---|---|---|
 | WP0 baseline | 0 (3 delivered, unconfirmed) | 3 |
 | WP1 setup cost | 3 verified | 3 |
-| WP2 shared model | 3 verified, 1 in progress | 4 |
-| WP3 generators | 0 | 5 |
+| WP2 shared model | 4 verified | 4 |
+| WP3 generators | 1 delivered, unverified | 5 |
 | WP4 parallel | 0 | 3 |
 | WP5 benchmarks | 0 | 3 |
 | WP6 finish | 0 | 3 |
@@ -226,3 +226,7 @@ Update this table whenever an item changes status.
 - 2026-11-17: Continued WP2.4 / prepared WP3: extracted lexicographic, rejection-choice, and rank-based generator implementations into package-private `ConditionalProductGenerators`. `ConditionalProductBuilder` now delegates generator creation and is reduced to 460 lines. This is a mechanical extraction: strategy dispatch and iterator algorithms are intentionally unchanged; in particular, the dedicated `PRUNED_DFS` implementation remains a planned WP3 task, not silently removed or substituted in this change. Awaiting focused test verification.
 
 - 2026-11-17: Maintainer confirmed `mvn -Dtest=ConditionalProductBuilderTest test` passed after the `ConditionalProductGenerators` extraction. The generator extraction slice is verified. WP2.4 remains in progress pending a facade review and any remaining cohesive extractions; WP3 strategy-specific implementations have not started.
+
+
+- 2026-11-17: Maintainer confirmed the focused ConditionalProductBuilderTest passed after extracting ConditionalProductGenerators. Reviewed the remaining 460-line builder: the remaining code is the public fluent rule DSL, public builder operations, immutable facade state, and API documentation; no further extraction is justified without changing public API structure. WP2.4 is complete.
+- 2026-11-17: Started WP3.1. Extracted the shared prefix-pruned depth-first iterator control flow into PrunedLexGenerator and its BitSet candidate-selection implementation into BitSetPrunedGenerator. ConditionalProductGenerators now dispatches PRUNED_BITSET to the extracted implementation. PRUNED_DFS is deliberately still pending WP3.2; for this intermediate commit it retains the previous non-BitSet fallback behavior. Awaiting ConditionalProductBuilderTest verification.
