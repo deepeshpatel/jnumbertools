@@ -185,7 +185,7 @@ These deliverables are intentionally postponed until implementation, parallel wo
 | WP5 benchmark delivery | 3 delivered, unverified | 3 |
 | WP5 benchmark cleanup/analysis | 1 delivered, unverified | 2 |
 | WP5 maintainability follow-up | 1 delivered, unverified | 1 |
-| WP6 finish | 0 | 3 |
+| WP6 documentation/finish | 1 delivered, 2 pending | 3 |
 
 Update this table whenever an item changes status.
 
