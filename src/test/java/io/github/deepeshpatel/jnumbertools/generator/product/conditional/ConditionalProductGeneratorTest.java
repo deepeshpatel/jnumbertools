@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -107,6 +108,30 @@ class ConditionalProductGeneratorTest {
 
         var empty = cartesianProduct.conditionalProductOf(first).and(List.<Integer>of());
         assertTrue(empty.anyOrder().stream().toList().isEmpty());
+    }
+
+    @Test
+    void anyOrderSupportsConcurrentIndependentTraversals() {
+        List<Integer> first = java.util.stream.IntStream.range(0, 17).boxed().toList();
+        List<Integer> second = java.util.stream.IntStream.range(0, 13).boxed().toList();
+        List<Integer> third = java.util.stream.IntStream.range(0, 9).boxed().toList();
+        var builder = cartesianProduct.conditionalProductOf(first).and(second).and(third)
+                .when(first).isOneOf(List.of(1, 4, 7, 10, 13, 16))
+                .then(second).isOneOf(List.of(0, 3, 6, 9, 12))
+                .when(second).is(6).then(third).isNot(4);
+        var generator = builder.anyOrder();
+        Set<List<Object>> expected = new HashSet<>(builder.lexOrder().stream().toList());
+
+        List<CompletableFuture<Set<List<Object>>>> traversals =
+                java.util.stream.IntStream.range(0, 6)
+                        .mapToObj(ignored -> CompletableFuture.supplyAsync(
+                                () -> new HashSet<>(generator.stream().parallel().toList())))
+                        .toList();
+
+        for (CompletableFuture<Set<List<Object>>> traversal : traversals) {
+            assertEquals(expected, traversal.join(),
+                    "independent concurrent traversals must each produce the complete tuple set");
+        }
     }
 
     @Test
