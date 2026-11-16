@@ -823,54 +823,6 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         }
     }
 
-    private static final class Relation {
-        final BitSet[] uToV; // uToV[a] = values of v allowed together with value a of u
-        final BitSet[] vToU; // vToU[b] = values of u allowed together with value b of v
-
-        private Relation(BitSet[] uToV, BitSet[] vToU) {
-            this.uToV = uToV;
-            this.vToU = vToU;
-        }
-
-        static Relation full(int du, int dv) {
-            BitSet[] uv = new BitSet[du];
-            for (int a = 0; a < du; a++) {
-                uv[a] = new BitSet(dv);
-                uv[a].set(0, dv);
-            }
-            BitSet[] vu = new BitSet[dv];
-            for (int b = 0; b < dv; b++) {
-                vu[b] = new BitSet(du);
-                vu[b].set(0, du);
-            }
-            return new Relation(uv, vu);
-        }
-
-        /** Copy in which every value of the trigger dimension in {@code triggers} allows only {@code allowedTargets}. */
-        Relation restrict(BitSet triggers, BitSet allowedTargets, boolean triggerIsU) {
-            BitSet[] uv = deepCopy(uToV);
-            BitSet[] vu = deepCopy(vToU);
-            int targetSize = triggerIsU ? vu.length : uv.length;
-            for (int a = triggers.nextSetBit(0); a >= 0; a = triggers.nextSetBit(a + 1)) {
-                for (int b = allowedTargets.nextClearBit(0); b < targetSize; b = allowedTargets.nextClearBit(b + 1)) {
-                    if (triggerIsU) {
-                        uv[a].clear(b);
-                        vu[b].clear(a);
-                    } else {
-                        vu[a].clear(b);
-                        uv[b].clear(a);
-                    }
-                }
-            }
-            return new Relation(uv, vu);
-        }
-
-        private static BitSet[] deepCopy(BitSet[] rows) {
-            BitSet[] copy = new BitSet[rows.length];
-            for (int i = 0; i < rows.length; i++) copy[i] = (BitSet) rows[i].clone();
-            return copy;
-        }
-    }
 
     // ── Counting plan ────────────────────────────────────────────────────────
 
