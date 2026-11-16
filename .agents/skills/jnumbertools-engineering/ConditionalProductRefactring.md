@@ -122,7 +122,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 
 - [x] 2.1 Extract the immutable `Relation` into a package-private file. There is no standalone `Rule` type in the current implementation: each rule is immediately compiled into a combined pairwise `Relation`, so do not introduce a redundant `Rule` object without a concrete need (verified by maintainer)
 - [x] 2.2 Extract `ConstraintModel` to own immutable dimensions and pairwise relations; materialize prefix-pruned `Rows` lazily and share them across generators from the same builder (verified: all 25 `ConditionalProductBuilderTest` tests passed)
-- [~] 2.3 Extracted the former nested `Plan` into package-private `ConstraintPlan`. `ConstraintCounts` owns the derived BigInteger/long count tables and their construction (verified: all 25 `ConditionalProductBuilderTest` tests passed). Prefix-completion and unranking query methods still remain in `ConstraintPlan`; move those operations into `ConstraintCounts` in the next slice before marking WP2.3 complete.
+- [~] 2.3 Extracted the former nested `Plan` into package-private `ConstraintPlan`. `ConstraintCounts` owns the derived BigInteger/long count tables, prefix-completion queries, primitive-long fast path, and unranking operations; `ConstraintPlan` retains topology, feasibility checks, and candidate selection. The maintainer has confirmed all 25 focused tests after each preceding extraction slice; this final query-method move is awaiting verification.
 - [ ] 2.4 `ConditionalProductBuilder` becomes the facade only (target: well under 500 lines)
 
 ### WP3: Generators
@@ -158,7 +158,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 |---|---|---|
 | WP0 baseline | 0 (3 delivered, unconfirmed) | 3 |
 | WP1 setup cost | 3 verified | 3 |
-| WP2 shared model | 2 verified, 1 partially delivered (table extraction verified; query extraction remains) | 4 |
+| WP2 shared model | 2 verified, 1 delivered pending verification | 4 |
 | WP3 generators | 0 | 5 |
 | WP4 parallel | 0 | 3 |
 | WP5 benchmarks | 0 | 3 |
@@ -189,6 +189,8 @@ Update this table whenever an item changes status.
 - 2026-11-17: Maintainer confirmed all 25 `ConditionalProductBuilderTest` tests passed after WP2.2. WP2.2 is verified. Started WP2.3 by extracting the nested exact completion plan into package-private `ConstraintPlan`; this is intentionally a first mechanical step. Exact-count tables and operations remain in `ConstraintPlan` for now and must be moved into `ConstraintCounts` in the next stage before WP2.3 can be considered complete. Awaiting focused test run for the extraction.
 
 - 2026-11-17: Maintainer confirmed all 25 `ConditionalProductBuilderTest` tests passed after the `ConstraintCounts` table extraction. The derived BigInteger/primitive-long tables and their construction are now verified in `ConstraintCounts`. WP2.3 remains partial: prefix-completion and unranking query methods still live in `ConstraintPlan`; the next slice will move those operations into `ConstraintCounts`, leaving topology and feasibility traversal in `ConstraintPlan`.
+
+- 2026-11-17: Continued WP2.3: moved prefix-range lookup, subtree/root completion counting, primitive-long completion counting, and rank unranking from `ConstraintPlan` into `ConstraintCounts`. `ConstraintPlan` now retains the graph/tree topology and feasibility operations (`firstValid`, `isValid`, and the earlier-dimension relation checks); it delegates prefix feasibility lookahead to `ConstraintCounts`. The builder's adaptive-density and unranking call sites now use the count holder directly. Awaiting `ConditionalProductBuilderTest` verification.
 
 ## 9. Maintainer clarifications (2026-11-17)
 
