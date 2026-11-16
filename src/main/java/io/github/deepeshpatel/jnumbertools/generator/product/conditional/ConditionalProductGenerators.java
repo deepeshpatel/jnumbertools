@@ -52,6 +52,10 @@ final class ConditionalProductGenerators {
             if (strategy == LexOrderStrategy.PRUNED_BITSET || strategy == LexOrderStrategy.PRUNED_DFS) {
                 return new PrunedLexSpliterator(model, strategy);
             }
+            if (strategy == LexOrderStrategy.DP) {
+                ConstraintPlan plan = model.plan();
+                return new DpRankSpliterator(model, plan, BigInteger.ZERO, plan.counts.total);
+            }
             return Spliterators.spliteratorUnknownSize(iterator(),
                     Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE);
         }
