@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Immutable shared input model for a conditional Cartesian product.
  *
- * <p>The dimension snapshots and pairwise relations are shared by derived builders.
+ * <p>The dimension snapshots and pairwise relations are immutable inputs to the builder's generators.
  * The compact rows used by prefix-pruned traversal are materialized lazily and then
  * safely published for reuse by every generator created from this model.</p>
  */
