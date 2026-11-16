@@ -18,6 +18,13 @@ final class BitSetPrunedGenerator extends PrunedLexGenerator {
         belowRows = rows.belowRows;
     }
 
+    BitSetPrunedGenerator(ConstraintModel model, int firstDimensionFrom, int firstDimensionTo) {
+        super(model, firstDimensionFrom, firstDimensionTo);
+        ConstraintModel.Rows rows = model.rows();
+        belowDims = rows.belowDims;
+        belowRows = rows.belowRows;
+    }
+
     @Override
     protected int nextValidCandidate(int dimension, int from) {
         int size = model.dimensions.get(dimension).size();
