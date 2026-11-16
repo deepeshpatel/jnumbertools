@@ -297,9 +297,88 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     }
 
     // Builder interface Methods
+    /**
+     * Returns the valid tuples in lexicographic order using the {@link LexOrderStrategy#PRUNED} strategy.
+     *
+     * <p>This is the default and recommended strategy for ordinary traversal, especially when the caller
+     * expects to consume only part of the result. It checks constraints against the already selected prefix
+     * and does not build the exact counting plan.</p>
+     *
+     * <p>Use {@link #lexOrder(LexOrderStrategy)} to select {@link LexOrderStrategy#DP} explicitly, or
+     * {@link #lexOrder(LexOrderStrategy, long)} to let {@link LexOrderStrategy#ADAPTIVE} choose based on
+     * an expected traversal size.</p>
+     *
+     * @return a re-iterable generator of valid tuples in lexicographic order
+     */
     @Override
     public StreamableIterable<Object> lexOrder() {
-        return new LexOrderGenerator();
+        return lexOrder(LexOrderStrategy.PRUNED);
+    }
+
+    /**
+     * Returns the valid tuples in lexicographic order using the specified traversal strategy.
+     *
+     * <ul>
+     *   <li>{@link LexOrderStrategy#PRUNED}: performs prefix-based backtracking and checks only the
+     *       constraints between the candidate dimension and dimensions already selected. It avoids
+     *       constructing the counting/DP plan and is the default strategy.</li>
+     *   <li>{@link LexOrderStrategy#DP}: uses the exact counting plan. Its completion counts allow it to
+     *       skip prefixes that cannot lead to a valid tuple. This can be useful when a substantial
+     *       fraction of a large result is expected to be traversed, but plan construction has an upfront
+     *       cost.</li>
+     * </ul>
+     *
+     * <p>{@link LexOrderStrategy#ADAPTIVE} requires an expected traversal size and must be selected with
+     * {@link #lexOrder(LexOrderStrategy, long)}.</p>
+     *
+     * <p>This setting affects only this lexicographic traversal. Exact-count and rank-based operations,
+     * including {@link #count()}, {@link #lexOrderMth(BigInteger, BigInteger)}, {@link #byRanks(Iterable)},
+     * {@link #choice(int, Random)} and {@link #sample(int, Random)}, continue to use the DP plan.</p>
+     *
+     * @param strategy traversal strategy; must not be {@code null} or {@link LexOrderStrategy#ADAPTIVE}
+     * @return a re-iterable generator of valid tuples in lexicographic order
+     * @throws NullPointerException if {@code strategy} is null
+     * @throws IllegalArgumentException if {@code strategy} is {@code ADAPTIVE}
+     */
+    public StreamableIterable<Object> lexOrder(LexOrderStrategy strategy) {
+        Objects.requireNonNull(strategy, "strategy");
+        if (strategy == LexOrderStrategy.ADAPTIVE) {
+            throw new IllegalArgumentException("ADAPTIVE requires an estimated traversal limit; use lexOrder(strategy, estimatedLimit)");
+        }
+        return new LexOrderGenerator(strategy);
+    }
+
+    /**
+     * Returns the valid tuples in lexicographic order using the adaptive strategy.
+     *
+     * <p>{@code estimatedLimit} is the expected number of valid tuples the caller intends to consume
+     * from one traversal. The current adaptive policy selects {@link LexOrderStrategy#PRUNED} for
+     * estimates below 10,000 tuples and {@link LexOrderStrategy#DP} for estimates of 10,000 tuples or
+     * more. The cutoff is a conservative heuristic, not a performance guarantee; workload shape,
+     * constraint density and dimension sizes can change the crossover. Benchmark representative data
+     * before relying on the adaptive choice for latency-sensitive workloads.</p>
+     *
+     * <p>The estimate does not limit the number of tuples produced. It is used only to select the
+     * traversal implementation. The returned iterable remains lazy and re-iterable.</p>
+     *
+     * @param strategy must be {@link LexOrderStrategy#ADAPTIVE}
+     * @param estimatedLimit expected number of tuples to consume in one traversal; must be non-negative
+     * @return a re-iterable generator of valid tuples in lexicographic order
+     * @throws NullPointerException if {@code strategy} is null
+     * @throws IllegalArgumentException if the strategy is not {@code ADAPTIVE} or the estimate is negative
+     */
+    public StreamableIterable<Object> lexOrder(LexOrderStrategy strategy, long estimatedLimit) {
+        Objects.requireNonNull(strategy, "strategy");
+        if (strategy != LexOrderStrategy.ADAPTIVE) {
+            throw new IllegalArgumentException("An estimated traversal limit is supported only with ADAPTIVE");
+        }
+        if (estimatedLimit < 0) {
+            throw new IllegalArgumentException("estimatedLimit must be non-negative");
+        }
+        LexOrderStrategy selected = estimatedLimit >= 10_000L
+                ? LexOrderStrategy.DP
+                : LexOrderStrategy.PRUNED;
+        return new LexOrderGenerator(selected);
     }
 
     /**
@@ -1177,11 +1256,119 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     }
 
     private final class LexOrderGenerator extends AbstractGenerator<Object> {
-        LexOrderGenerator() { super(Collections.emptyList()); }
+        private final LexOrderStrategy strategy;
+
+        LexOrderGenerator(LexOrderStrategy strategy) {
+            super(Collections.emptyList());
+            this.strategy = strategy;
+        }
 
         @Override
         public Iterator<List<Object>> iterator() {
-            return new LexItr(plan());
+            return strategy == LexOrderStrategy.PRUNED
+                    ? new PrunedLexItr()
+                    : new LexItr(plan());
+        }
+    }
+
+    /**
+     * Lexicographic depth-first traversal without the counting plan. At each dimension, candidates are
+     * filtered against all earlier dimensions connected to it by a rule. A prefix that has no completion
+     * may still be explored until the conflicting later dimension is reached; unlike the DP iterator, this
+     * iterator does not perform future-completion lookahead.
+     */
+    private final class PrunedLexItr implements Iterator<List<Object>> {
+        private final int dimensions = dims.size();
+        private final int[] val = new int[dimensions];
+        private final int[] nextCandidate = new int[dimensions];
+        private final int[][] belowDims;
+        private final BitSet[][][] belowRows;
+        private int depth;
+        private boolean ready;
+        private boolean exhausted;
+
+        PrunedLexItr() {
+            List<List<Integer>> dimensionLists = new ArrayList<>(dimensions);
+            List<List<BitSet[]>> rowLists = new ArrayList<>(dimensions);
+            for (int d = 0; d < dimensions; d++) {
+                dimensionLists.add(new ArrayList<>());
+                rowLists.add(new ArrayList<>());
+            }
+            for (Map.Entry<Long, Relation> entry : relations.entrySet()) {
+                int lower = (int) (entry.getKey() >>> 32);
+                int higher = (int) (long) entry.getKey();
+                dimensionLists.get(higher).add(lower);
+                rowLists.get(higher).add(entry.getValue().uToV);
+            }
+            belowDims = new int[dimensions][];
+            belowRows = new BitSet[dimensions][][];
+            for (int d = 0; d < dimensions; d++) {
+                belowDims[d] = dimensionLists.get(d).stream().mapToInt(Integer::intValue).toArray();
+                belowRows[d] = rowLists.get(d).toArray(new BitSet[0][]);
+            }
+            for (List<?> dimension : dims) {
+                if (dimension.isEmpty()) {
+                    exhausted = true;
+                    break;
+                }
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (!ready && !exhausted) {
+                ready = advance();
+                if (!ready) exhausted = true;
+            }
+            return ready;
+        }
+
+        @Override
+        public List<Object> next() {
+            if (!hasNext()) throw new NoSuchElementException();
+            ready = false;
+            return tuple(val);
+        }
+
+        private boolean advance() {
+            while (depth >= 0) {
+                int candidate = nextValidCandidate(depth, nextCandidate[depth]);
+                if (candidate < 0) {
+                    if (depth == 0) return false;
+                    depth--;
+                    nextCandidate[depth] = val[depth] + 1;
+                    continue;
+                }
+
+                val[depth] = candidate;
+                nextCandidate[depth] = candidate + 1;
+                if (depth == dimensions - 1) return true;
+
+                depth++;
+                nextCandidate[depth] = 0;
+            }
+            return false;
+        }
+
+        private int nextValidCandidate(int dimension, int from) {
+            int size = dims.get(dimension).size();
+            if (from >= size) return -1;
+
+            int[] earlier = belowDims[dimension];
+            if (earlier.length == 0) return from;
+
+            BitSet[][] rows = belowRows[dimension];
+            BitSet firstAllowed = rows[0][val[earlier[0]]];
+            candidateLoop:
+            for (int candidate = firstAllowed.nextSetBit(from);
+                 candidate >= 0 && candidate < size;
+                 candidate = firstAllowed.nextSetBit(candidate + 1)) {
+                for (int i = 1; i < earlier.length; i++) {
+                    if (!rows[i][val[earlier[i]]].get(candidate)) continue candidateLoop;
+                }
+                return candidate;
+            }
+            return -1;
         }
     }
 
