@@ -20,6 +20,13 @@ final class DenseDfsGenerator extends PrunedLexGenerator {
         this.belowRows = rows.belowRows;
     }
 
+    DenseDfsGenerator(ConstraintModel model, ConstraintModel.DenseRows rows,
+                      int firstDimensionFrom, int firstDimensionTo) {
+        super(model, firstDimensionFrom, firstDimensionTo);
+        this.belowDims = rows.belowDims;
+        this.belowRows = rows.belowRows;
+    }
+
     @Override
     protected int nextValidCandidate(int dimension, int from) {
         int size = model.dimensions.get(dimension).size();
