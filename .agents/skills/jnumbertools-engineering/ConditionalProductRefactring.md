@@ -137,7 +137,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 
 - [x] 4.1 Ordered, lazy spliterator for PRUNED_BITSET and PRUNED_DFS; splits disjoint contiguous first-dimension ranges, preserves encounter order, and stops below the minimum range threshold. Maintainer confirmed the focused regression suite passed (35 tests). Deeper-dimension splitting remains a follow-up if benchmarks show first-dimension partitioning is insufficient.
 - [x] 4.2 Added `DpRankSpliterator`: partitions the exact BigInteger valid-tuple rank interval into disjoint contiguous ranges, lazily unranks each tuple, and preserves ordered encounter semantics. Maintainer confirmed the focused regression suite passed (35 tests).
-- [~] 4.3 Added unordered parallel-stream tuple-set checks for PRUNED_BITSET, PRUNED_DFS, DP, and ADAPTIVE; awaiting maintainer verification. Ordered parallel equality remains covered for all explicit generators.
+- [x] 4.3 Added unordered parallel-stream tuple-set checks for PRUNED_BITSET, PRUNED_DFS, DP, and ADAPTIVE; maintainer confirmed the focused suite passed (36 tests). Ordered parallel equality remains covered for all explicit generators.
 
 ### WP5: Benchmarks (maintainer runs them)
 
@@ -162,7 +162,7 @@ These three deliverables are intentionally postponed until the implementation, p
 | WP1 setup cost | 3 verified | 3 |
 | WP2 shared model | 4 verified | 4 |
 | WP3 generators | 5 verified; all four strategies retained and dispatched | 5 |
-| WP4 parallel | 2 verified, 1 delivered awaiting verification | 3 |
+| WP4 parallel | 3 verified | 3 |
 | WP5 benchmarks | 0 | 3 |
 | WP6 finish | 0 | 3 |
 
@@ -181,6 +181,8 @@ Update this table whenever an item changes status.
 - Unit tests live next to the existing ones in `ConditionalProductBuilderTest`, `ConditionalProductRuleOrderTest`, and a new differential test per generator.
 
 ## 8. Progress log (newest first)
+
+- 2026-11-17: Maintainer confirmed the focused suite passed after WP4.3: 36 tests. WP4 is complete. The new unordered parallel test passed for all four strategies, comparing tuple sets with sequential traversal; ordered encounter-order checks remain in place for the three explicit generators.
 
 - 2026-11-17: Delivered WP4.3 test coverage. Added an unordered parallel-stream regression test that compares the tuple set against sequential default traversal for PRUNED_BITSET, PRUNED_DFS, DP, and ADAPTIVE. The existing ordered-parallel test continues to compare exact encounter order for the three explicit generators. Awaiting the maintainer's focused test run.
 
