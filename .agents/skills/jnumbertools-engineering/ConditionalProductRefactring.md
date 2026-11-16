@@ -127,8 +127,8 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 
 ### WP3: Generators
 
-- [~] 3.1 Extracted `PrunedLexGenerator` (shared depth-first control flow) and `BitSetPrunedGenerator` (BitSet candidate filtering). Awaiting focused test verification.
-- [ ] 3.2 `DenseDfsGenerator` (dense boolean rows, size cap, falls back to BitSet beyond the cap)
+- [x] 3.1 Extracted `PrunedLexGenerator` (shared depth-first control flow) and `BitSetPrunedGenerator` (BitSet candidate filtering); maintainer confirmed the focused test passed.
+- [~] 3.2 Implemented `DenseDfsGenerator` using lazily materialized, model-shared boolean relation rows with a 4,000,000-cell aggregate cap; larger representations fall back to `BitSetPrunedGenerator`. Added strategy-equivalence and cap-fallback tests. Awaiting focused test verification.
 - [ ] 3.3 `DpLexGenerator`
 - [ ] 3.4 Facade selects a generator from `LexOrderStrategy`; `ADAPTIVE` kept
 - [ ] 3.5 Rename the enum constants (`PRUNED_BITSET`, `PRUNED_DFS`) if the maintainer's push has not already
@@ -159,7 +159,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 | WP0 baseline | 0 (3 delivered, unconfirmed) | 3 |
 | WP1 setup cost | 3 verified | 3 |
 | WP2 shared model | 4 verified | 4 |
-| WP3 generators | 1 delivered, unverified | 5 |
+| WP3 generators | 1 verified, 1 delivered unverified | 5 |
 | WP4 parallel | 0 | 3 |
 | WP5 benchmarks | 0 | 3 |
 | WP6 finish | 0 | 3 |
@@ -230,3 +230,6 @@ Update this table whenever an item changes status.
 
 - 2026-11-17: Maintainer confirmed the focused ConditionalProductBuilderTest passed after extracting ConditionalProductGenerators. Reviewed the remaining 460-line builder: the remaining code is the public fluent rule DSL, public builder operations, immutable facade state, and API documentation; no further extraction is justified without changing public API structure. WP2.4 is complete.
 - 2026-11-17: Started WP3.1. Extracted the shared prefix-pruned depth-first iterator control flow into PrunedLexGenerator and its BitSet candidate-selection implementation into BitSetPrunedGenerator. ConditionalProductGenerators now dispatches PRUNED_BITSET to the extracted implementation. PRUNED_DFS is deliberately still pending WP3.2; for this intermediate commit it retains the previous non-BitSet fallback behavior. Awaiting ConditionalProductBuilderTest verification.
+
+
+- 2026-11-17: Maintainer confirmed the focused ConditionalProductBuilderTest passed after WP3.1. WP3.1 is verified. Delivered WP3.2: PRUNED_DFS now uses DenseDfsGenerator with boolean relation rows cached lazily on ConstraintModel and shared by iterators. Dense materialization is capped at 4,000,000 aggregate relation cells; above the cap the strategy falls back to the BitSet implementation to bound memory. Added a small-case strategy-equivalence assertion and a 4.2-million-cell case that exercises the fallback without traversing the full result. Awaiting focused test verification.
