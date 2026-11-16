@@ -57,6 +57,35 @@ class ConditionalProductBuilderTest {
     }
 
     @Test
+    void lexOrderStrategiesProduceTheSameLexicographicSequence() {
+        var builder = twoRules().when(browser).is("Safari").then(os).isOneOf("macOS");
+        var expected = expectedConfigs(true);
+
+        assertEquals(expected, builder.lexOrder().stream().toList());
+        assertEquals(expected, builder.lexOrder(LexOrderStrategy.PRUNED).stream().toList());
+        assertEquals(expected, builder.lexOrder(LexOrderStrategy.DP).stream().toList());
+        assertEquals(expected, builder.lexOrder(LexOrderStrategy.ADAPTIVE, 9_999).stream().toList());
+        assertEquals(expected, builder.lexOrder(LexOrderStrategy.ADAPTIVE, 10_000).stream().toList());
+
+        var adaptive = builder.lexOrder(LexOrderStrategy.ADAPTIVE, 10_000);
+        assertEquals(expected, adaptive.stream().toList());
+        assertEquals(expected, adaptive.stream().toList(), "the returned iterable must be re-iterable");
+    }
+
+    @Test
+    void lexOrderStrategyArgumentsAreValidated() {
+        var builder = twoRules();
+        assertThrows(NullPointerException.class, () -> builder.lexOrder((LexOrderStrategy) null));
+        assertThrows(IllegalArgumentException.class, () -> builder.lexOrder(LexOrderStrategy.ADAPTIVE));
+        assertThrows(IllegalArgumentException.class,
+                () -> builder.lexOrder(LexOrderStrategy.PRUNED, 1));
+        assertThrows(IllegalArgumentException.class,
+                () -> builder.lexOrder(LexOrderStrategy.DP, 1));
+        assertThrows(IllegalArgumentException.class,
+                () -> builder.lexOrder(LexOrderStrategy.ADAPTIVE, -1));
+    }
+
+    @Test
     void ruleVocabularyIsEquivalent() {
         var a = cartesianProduct.conditionalProductOf(os).and(browser)
                 .when(browser).is("Safari").then(os).isOneOf("macOS");
