@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 /**
  * Immutable shared input model for a conditional Cartesian product.
@@ -21,9 +22,37 @@ final class ConstraintModel {
     final Map<Long, Relation> relations;
     private volatile Rows rows;
 
-    ConstraintModel(List<List<?>> dimensions, Map<Long, Relation> relations) {
+    ConstraintModel(List<List<?>> dimensions, PersistentRelationMap relations) {
         this.dimensions = dimensions;
         this.relations = relations;
+    }
+
+    ConstraintModel withDimension(List<?> dimension) {
+        List<List<?>> updated = new ArrayList<>(dimensions);
+        updated.add(dimension);
+        return new ConstraintModel(Collections.unmodifiableList(updated), (PersistentRelationMap) relations);
+    }
+
+    ConstraintModel withRule(int triggerDim, BitSet triggerValues, int targetDim, BitSet allowedTargets) {
+        int u = Math.min(triggerDim, targetDim);
+        int v = Math.max(triggerDim, targetDim);
+        long key = ConstraintGraph.key(u, v);
+        Relation relation = relations.get(key);
+        boolean newLinkedPair = relation == null;
+        if (newLinkedPair) {
+            long cells = (long) dimensions.get(u).size() * dimensions.get(v).size();
+            if (cells > ConstraintGraph.MAX_PAIR_CELLS) {
+                throw new IllegalArgumentException("The two dimensions have too many value pairs (" + cells
+                        + ") for a rule; the limit is " + ConstraintGraph.MAX_PAIR_CELLS);
+            }
+            relation = Relation.full(dimensions.get(u).size(), dimensions.get(v).size());
+        }
+        Relation updated = relation.restrict(triggerValues, allowedTargets, triggerDim == u);
+        PersistentRelationMap updatedRelations = relations.with(key, updated);
+        if (newLinkedPair) {
+            ConstraintGraph.checkLoopBlocks(dimensions, updatedRelations.keySet());
+        }
+        return new ConstraintModel(dimensions, updatedRelations);
     }
 
     Rows rows() {
