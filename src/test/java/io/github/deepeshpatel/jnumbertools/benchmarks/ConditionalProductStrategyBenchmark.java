@@ -41,7 +41,7 @@ public class ConditionalProductStrategyBenchmark {
     public static class BenchmarkState {
 
         /**
-         * Bounded full-traversal cases. The largest unconstrained space is 80,000 tuples.
+         * Bounded full-traversal cases. The largest valid result set is 80,000 tuples.
          * STAR_FIRST and STAR_LAST expose the effect of constraint direction relative to dimension order.
          */
         @Param({
@@ -138,12 +138,6 @@ public class ConditionalProductStrategyBenchmark {
             return builder.lexOrder(LexOrderStrategy.ADAPTIVE, expectedCount);
         }
         return builder.lexOrder(LexOrderStrategy.valueOf(implementation));
-    }
-
-    private static long count(Iterable<?> tuples) {
-        long count = 0;
-        for (Object ignored : tuples) count++;
-        return count;
     }
 
     private static long checksum(Iterable<?> tuples) {
