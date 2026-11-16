@@ -526,40 +526,64 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * index of its block.
      */
     private static int[] blockOf(int n, Collection<Long> keys) {
-        List<int[]> edges = new ArrayList<>(keys.size());
-        for (long key : keys) edges.add(new int[]{(int) (key >>> 32), (int) key});
-        int[] parent = new int[n];
-        for (int i = 0; i < n; i++) parent[i] = i;
-        for (int skip = 0; skip < edges.size(); skip++) {
-            int[] e = edges.get(skip);
-            if (reachable(n, edges, skip, e[0], e[1])) {   // still connected without this edge: not a bridge
-                union(parent, e[0], e[1]);
+        List<List<Integer>> adjacency = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) {
+            adjacency.add(new ArrayList<>());
+        }
+        for (long edge : keys) {
+            int u = (int) (edge >>> 32);
+            int v = (int) edge;
+            adjacency.get(u).add(v);
+            adjacency.get(v).add(u);
+        }
+
+        int[] discovery = new int[n];
+        int[] low = new int[n];
+        int[] time = {0};
+        Set<Long> bridges = new HashSet<>();
+        for (int vertex = 0; vertex < n; vertex++) {
+            if (discovery[vertex] == 0) {
+                findBridges(vertex, -1, adjacency, discovery, low, time, bridges);
             }
         }
+
+        // A dimension belongs to a loop block exactly when it is connected through non-bridge edges.
         int[] block = new int[n];
-        for (int i = 0; i < n; i++) block[i] = find(parent, i);
+        for (int i = 0; i < n; i++) {
+            block[i] = i;
+        }
+        for (long edge : keys) {
+            if (!bridges.contains(edge)) {
+                union(block, (int) (edge >>> 32), (int) edge);
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            block[i] = find(block, i);
+        }
         return block;
     }
 
-    private static boolean reachable(int n, List<int[]> edges, int skip, int from, int to) {
-        boolean[] seen = new boolean[n];
-        ArrayDeque<Integer> stack = new ArrayDeque<>();
-        stack.push(from);
-        seen[from] = true;
-        while (!stack.isEmpty()) {
-            int x = stack.pop();
-            if (x == to) return true;
-            for (int i = 0; i < edges.size(); i++) {
-                if (i == skip) continue;
-                int[] e = edges.get(i);
-                int other = e[0] == x ? e[1] : e[1] == x ? e[0] : -1;
-                if (other >= 0 && !seen[other]) {
-                    seen[other] = true;
-                    stack.push(other);
+    /**
+     * Tarjan's depth-first bridge search. The constraint graph has at most one edge per dimension pair,
+     * because {@code relations} stores one combined relation for each pair.
+     */
+    private static void findBridges(int vertex, int parent, List<List<Integer>> adjacency,
+                                    int[] discovery, int[] low, int[] time, Set<Long> bridges) {
+        discovery[vertex] = low[vertex] = ++time[0];
+        for (int next : adjacency.get(vertex)) {
+            if (next == parent) {
+                continue;
+            }
+            if (discovery[next] == 0) {
+                findBridges(next, vertex, adjacency, discovery, low, time, bridges);
+                low[vertex] = Math.min(low[vertex], low[next]);
+                if (low[next] > discovery[vertex]) {
+                    bridges.add(key(Math.min(vertex, next), Math.max(vertex, next)));
                 }
+            } else {
+                low[vertex] = Math.min(low[vertex], discovery[next]);
             }
         }
-        return false;
     }
 
     private static void union(int[] parent, int a, int b) {
