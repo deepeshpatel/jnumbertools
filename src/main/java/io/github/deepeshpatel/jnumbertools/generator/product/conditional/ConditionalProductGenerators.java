@@ -53,71 +53,9 @@ final class ConditionalProductGenerators {
                     ConstraintModel.DenseRows rows = model.denseRows();
                     yield rows == null ? new BitSetPrunedGenerator(model) : new DenseDfsGenerator(model, rows);
                 }
-                case DP -> new LexItr(model, model.plan());
+                case DP -> new DpLexGenerator(model, model.plan());
                 case ADAPTIVE -> throw new IllegalArgumentException("ADAPTIVE must be resolved by the builder");
             };
-        }
-    }
-
-    /** Walks the valid tuples in lexicographic order; branches without any valid completion are skipped. */
-    private static final class LexItr implements Iterator<List<Object>> {
-        private final ConstraintPlan p;
-        private final ConstraintModel model;
-        private final int[] val;
-        private boolean started;
-        private boolean ready;
-        private boolean exhausted;
-
-        LexItr(ConstraintModel model, ConstraintPlan p) {
-            this.model = model;
-            this.p = p;
-            this.val = new int[p.dimensions];
-            this.exhausted = p.counts.total.signum() == 0;
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (!ready && !exhausted) {
-                if (advance()) {
-                    ready = true;
-                } else {
-                    exhausted = true;
-                }
-            }
-            return ready;
-        }
-
-        @Override
-        public List<Object> next() {
-            if (!hasNext()) throw new NoSuchElementException();
-            ready = false;
-            return model.tuple(val);
-        }
-
-        private boolean advance() {
-            int k;
-            int from;
-            if (!started) {
-                started = true;
-                k = 0;
-                from = 0;
-            } else {
-                k = p.dimensions - 1;
-                from = val[k] + 1;
-            }
-            while (true) {
-                int idx = p.firstValid(k, from, val);
-                if (idx < 0) {
-                    k--;
-                    if (k < 0) return false;
-                    from = val[k] + 1;
-                } else {
-                    val[k] = idx;
-                    k++;
-                    if (k == p.dimensions) return true;
-                    from = 0;
-                }
-            }
         }
     }
 
