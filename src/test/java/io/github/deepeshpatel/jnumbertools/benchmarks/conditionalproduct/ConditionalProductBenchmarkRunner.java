@@ -97,7 +97,7 @@ public final class ConditionalProductBenchmarkRunner {
             throws IOException {
         Map<String, List<String>> summaries = new LinkedHashMap<>();
         for (RunResult run : results) {
-            String benchmark = run.getBenchmark();
+            String benchmark = run.getParams().getBenchmark();
             String method = benchmark.substring(benchmark.lastIndexOf('.') + 1);
             summaries.computeIfAbsent(method, ignored -> new ArrayList<>()).add(format(run));
         }
