@@ -105,6 +105,30 @@ class ConditionalProductGeneratorTest {
     }
 
     @Test
+    void unorderedParallelStreamsPreserveTheTupleSetForEveryStrategy() {
+        List<Integer> first = java.util.stream.IntStream.range(0, 24).boxed().toList();
+        List<Integer> second = java.util.stream.IntStream.range(0, 9).boxed().toList();
+        List<Integer> third = java.util.stream.IntStream.range(0, 6).boxed().toList();
+        var builder = cartesianProduct.conditionalProductOf(first).and(second).and(third)
+                .when(first).isOneOf(List.of(2, 5, 8, 13, 17, 21))
+                .then(second).isOneOf(List.of(0, 3, 6, 8))
+                .when(second).is(3).then(third).isNot(4);
+
+        Set<List<Object>> expected = new HashSet<>(builder.lexOrder().stream().toList());
+
+        for (LexOrderStrategy strategy : EXPLICIT_STRATEGIES) {
+            Set<List<Object>> actual = new HashSet<>(builder.lexOrder(strategy)
+                    .stream().unordered().parallel().toList());
+            assertEquals(expected, actual, strategy + " unordered parallel tuple set");
+        }
+
+        Set<List<Object>> adaptive = new HashSet<>(builder
+                .lexOrder(LexOrderStrategy.ADAPTIVE, 100)
+                .stream().unordered().parallel().toList());
+        assertEquals(expected, adaptive, "ADAPTIVE unordered parallel tuple set");
+    }
+
+    @Test
     void seededRandomRuleSetsMatchBruteForceForEveryStrategy() {
         Random random = new Random(0x5EED_C0DEL);
         for (int round = 0; round < 300; round++) {
