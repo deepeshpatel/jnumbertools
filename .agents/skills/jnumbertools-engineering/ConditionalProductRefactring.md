@@ -129,7 +129,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 
 - [x] 3.1 Extracted `PrunedLexGenerator` (shared depth-first control flow) and `BitSetPrunedGenerator` (BitSet candidate filtering); maintainer confirmed the focused test passed.
 - [x] 3.2 Implemented `DenseDfsGenerator` using lazily materialized, model-shared boolean relation rows with a 4,000,000-cell aggregate cap; larger representations fall back to `BitSetPrunedGenerator`. Maintainer confirmed the focused test passed.
-- [ ] 3.3 `DpLexGenerator`
+- [~] 3.3 Extracted `DpLexGenerator`; awaiting maintainer verification
 - [ ] 3.4 Facade selects a generator from `LexOrderStrategy`; `ADAPTIVE` kept
 - [ ] 3.5 Rename the enum constants (`PRUNED_BITSET`, `PRUNED_DFS`) if the maintainer's push has not already
 
@@ -159,7 +159,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 | WP0 baseline | 0 (3 delivered, unconfirmed) | 3 |
 | WP1 setup cost | 3 verified | 3 |
 | WP2 shared model | 4 verified | 4 |
-| WP3 generators | 2 implementation steps verified; dedicated strategy test suite verified | 5 |
+| WP3 generators | 2 implementation steps verified; DP extraction delivered and awaiting verification; dedicated strategy test suite verified | 5 |
 | WP4 parallel | 0 | 3 |
 | WP5 benchmarks | 0 | 3 |
 | WP6 finish | 0 | 3 |
@@ -240,3 +240,6 @@ Update this table whenever an item changes status.
 
 
 - 2026-11-17: Maintainer reported three failures in `ConditionalProductRuleOrderTest`, all caused by its reflection helper looking for the former `relations` field directly on `ConditionalProductBuilder`. Updated the test helper to follow the extracted ownership path (`builder.model.relations`); no production code changed. Maintainer confirmed 34 tests passed after the correction. The dedicated generator-level strategy/differential tests and the rule-order regression suite are now verified. WP3.3 remains the next implementation step; do not start it until the maintainer says to proceed.
+
+
+- 2026-11-17: Delivered WP3.3: extracted the DP lexicographic iterator from the private nested `LexItr` in `ConditionalProductGenerators` into package-private `DpLexGenerator`. The iterator retains the same exact-count lookahead through `ConstraintPlan.firstValid`, lexicographic candidate order, lazy `hasNext` advancement, tuple materialization through `ConstraintModel`, and exhaustion behavior. Updated strategy dispatch to instantiate the extracted class. No counting, rank, or sampling code changed. Awaiting maintainer verification with the focused builder, generator differential, and rule-order suites.
