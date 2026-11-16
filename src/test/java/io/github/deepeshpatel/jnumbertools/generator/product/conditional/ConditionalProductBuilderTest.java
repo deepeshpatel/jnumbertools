@@ -63,6 +63,7 @@ class ConditionalProductBuilderTest {
 
         assertEquals(expected, builder.lexOrder().stream().toList());
         assertEquals(expected, builder.lexOrder(LexOrderStrategy.PRUNED_BITSET).stream().toList());
+        assertEquals(expected, builder.lexOrder(LexOrderStrategy.PRUNED_DFS).stream().toList());
         assertEquals(expected, builder.lexOrder(LexOrderStrategy.DP).stream().toList());
         assertEquals(expected, builder.lexOrder(LexOrderStrategy.ADAPTIVE, 9_999).stream().toList());
         assertEquals(expected, builder.lexOrder(LexOrderStrategy.ADAPTIVE, 10_000).stream().toList());
@@ -70,6 +71,19 @@ class ConditionalProductBuilderTest {
         var adaptive = builder.lexOrder(LexOrderStrategy.ADAPTIVE, 10_000);
         assertEquals(expected, adaptive.stream().toList());
         assertEquals(expected, adaptive.stream().toList(), "the returned iterable must be re-iterable");
+    }
+
+
+    @Test
+    void prunedDfsFallsBackToBitSetWhenDenseRowsExceedTheMemoryCap() {
+        List<Integer> left = java.util.stream.IntStream.range(0, 2_100).boxed().toList();
+        List<Integer> right = java.util.stream.IntStream.range(0, 2_000).boxed().toList();
+        var builder = cartesianProduct.conditionalProductOf(left).and(right)
+                .when(left).is(0).then(right).is(0);
+
+        var expectedPrefix = builder.lexOrder(LexOrderStrategy.PRUNED_BITSET).stream().limit(20).toList();
+        var actualPrefix = builder.lexOrder(LexOrderStrategy.PRUNED_DFS).stream().limit(20).toList();
+        assertEquals(expectedPrefix, actualPrefix);
     }
 
     @Test
