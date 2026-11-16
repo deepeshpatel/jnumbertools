@@ -439,7 +439,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     @Override
     public BigInteger count() {
-        return plan().total;
+        return plan().counts.total;
     }
 
     @Override
@@ -966,7 +966,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         LexItr(ConstraintPlan p) {
             this.p = p;
             this.val = new int[p.dimensions];
-            this.exhausted = p.total.signum() == 0;
+            this.exhausted = p.counts.total.signum() == 0;
         }
 
         @Override
@@ -1072,9 +1072,9 @@ public final class ConditionalProductBuilder implements Builder<Object> {
                     if (!hasNext()) throw new NoSuchElementException();
                     BigInteger rank = rankIt.next();
                     ConstraintPlan p = plan();
-                    if (rank.signum() < 0 || rank.compareTo(p.total) >= 0) {
+                    if (rank.signum() < 0 || rank.compareTo(p.counts.total) >= 0) {
                         throw new IllegalArgumentException(
-                                "Rank " + rank + " is out of bounds [0, " + p.total + ")");
+                                "Rank " + rank + " is out of bounds [0, " + p.counts.total + ")");
                     }
                     return tuple(p.unrank(rank));
                 }
