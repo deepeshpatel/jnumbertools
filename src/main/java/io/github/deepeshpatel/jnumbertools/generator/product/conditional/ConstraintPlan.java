@@ -19,8 +19,8 @@ import java.util.Map;
      * valid joint assignments of its dimensions. Nodes and the single rules between them form a forest;
      * each tree is rooted at its node with the lowest dimension index.
      * <ul>
-     *   <li>{@code free[v][a]}: ways to choose the values of v's subtree when v has value a.</li>
-     *   <li>{@code msg[c][a]}: ways to choose c's subtree when c's parent has value a.</li>
+     *   <li>{@code counts.free[v][a]}: ways to choose the values of v's subtree when v has value a.</li>
+     *   <li>{@code counts.msg[c][a]}: ways to choose c's subtree when c's parent has value a.</li>
      * </ul>
      * The number of completions of a prefix (the first k dimensions fixed) is a product over the trees; a
      * tree without a fixed dimension uses the tables directly, a tree with fixed dimensions is evaluated
@@ -33,25 +33,14 @@ final class ConstraintPlan {
         final int[][] children;
         final BitSet[][] fromParent;   // fromParent[c][a]: values of c allowed when c's parent has value a
         final int[] minSub;            // lowest dimension index in the subtree
-        final BigInteger[][] free;
-        final BigInteger[][] msg;
-        final BigInteger[][] freePrefix; // freePrefix[v][i] = sum of free[v][0..i-1]; only for multi-dimension nodes
         final int[] minChildSub;        // lowest dimension index among the children's subtrees (MAX_VALUE if none)
         final int[] roots;             // ascending
-        final BigInteger[] suffix;     // suffix[i] = product of the free totals of roots[i..]
         final int[] firstRoot;         // firstRoot[k] = index in roots of the first root whose lowest dimension is >= k
         final int dimensions;
         final int[] dimSize;           // number of values of each dimension
         final int[][] belowDims;       // belowDims[d]: lower-numbered dimensions linked to d by a rule
         final BitSet[][][] belowRows;  // belowRows[d][i][a]: values of d allowed when belowDims[d][i] has value a
-        final BigInteger total;
-        final BigInteger fullProduct;   // product of all dimension sizes, ignoring the rules
-        // Same tables as above in primitive form; null unless every table entry fits in a long. When they do,
-        // every intermediate count computed at query time is bounded by a table entry, so no overflow is possible.
-        final long[][] lfree;
-        final long[][] lmsg;
-        final long[][] lfreePrefix;
-        final long[] lsuffix;
+        final ConstraintCounts counts;
 
     ConstraintPlan(List<List<?>> dims, Map<Long, Relation> relations) {
             dimensions = dims.size();
@@ -148,72 +137,28 @@ final class ConstraintPlan {
                 children[x] = childLists.get(x).stream().mapToInt(Integer::intValue).toArray();
             }
 
-            free = new BigInteger[m][];
-            msg = new BigInteger[m][];
             minSub = new int[m];
             for (int idx = order.size() - 1; idx >= 0; idx--) {
                 int v = order.get(idx);
-                BigInteger[] f = new BigInteger[size[v]];
-                Arrays.fill(f, BigInteger.ONE);
                 minSub[v] = members[v][0];
-                for (int c : children[v]) {
-                    BigInteger[] msgToParent = new BigInteger[size[v]];
-                    for (int a = 0; a < size[v]; a++) {
-                        BitSet allowed = fromParent[c][a];
-                        BigInteger sum = BigInteger.ZERO;
-                        for (int b = allowed.nextSetBit(0); b >= 0; b = allowed.nextSetBit(b + 1)) {
-                            sum = sum.add(free[c][b]);
-                        }
-                        msgToParent[a] = sum;
-                        f[a] = f[a].multiply(sum);
-                    }
-                    msg[c] = msgToParent;
-                    minSub[v] = Math.min(minSub[v], minSub[c]);
-                }
-                free[v] = f;
+                for (int c : children[v]) minSub[v] = Math.min(minSub[v], minSub[c]);
             }
 
-            freePrefix = new BigInteger[m][];
             minChildSub = new int[m];
             for (int x = 0; x < m; x++) {
                 int low = Integer.MAX_VALUE;
                 for (int c : children[x]) low = Math.min(low, minSub[c]);
                 minChildSub[x] = low;
-                if (values[x] != null) {
-                    BigInteger[] prefix = new BigInteger[size[x] + 1];
-                    prefix[0] = BigInteger.ZERO;
-                    for (int i = 0; i < size[x]; i++) prefix[i + 1] = prefix[i].add(free[x][i]);
-                    freePrefix[x] = prefix;
-                }
             }
 
             roots = rootList.stream().mapToInt(Integer::intValue).toArray();
-            BigInteger[] rootTotal = new BigInteger[roots.length];
-            for (int i = 0; i < roots.length; i++) {
-                BigInteger sum = BigInteger.ZERO;
-                for (BigInteger w : free[roots[i]]) sum = sum.add(w);
-                rootTotal[i] = sum;
-            }
-            suffix = new BigInteger[roots.length + 1];
-            suffix[roots.length] = BigInteger.ONE;
-            for (int i = roots.length - 1; i >= 0; i--) suffix[i] = suffix[i + 1].multiply(rootTotal[i]);
-            total = suffix[0];
-            BigInteger product = BigInteger.ONE;
-            for (int d = 0; d < n; d++) product = product.multiply(BigInteger.valueOf(dimSize[d]));
-            fullProduct = product;
-
-            boolean fits = fitsLong(free) && fitsLong(msg) && fitsLong(freePrefix) && fitsLong(suffix);
-            lfree = fits ? toLong(free) : null;
-            lmsg = fits ? toLong(msg) : null;
-            lfreePrefix = fits ? toLong(freePrefix) : null;
-            lsuffix = fits ? toLong(suffix) : null;
-
             firstRoot = new int[n + 1];
             int ri = 0;
             for (int k = 0; k <= n; k++) {
                 while (ri < roots.length && members[roots[ri]][0] < k) ri++;
                 firstRoot[k] = ri;
             }
+            counts = new ConstraintCounts(this, order.stream().mapToInt(Integer::intValue).toArray(), dimSize);
         }
 
         /** All assignments of the dimensions in {@code dimsOfNode} that satisfy every rule among them. */
@@ -319,9 +264,9 @@ final class ConstraintPlan {
                 hi = (int) r;
             }
             if (lo >= hi) return BigInteger.ZERO;
-            if (allowed == null && minChildSub[c] >= k && freePrefix[c] != null) {
-                // no fixed dimension below c's children: every value counts exactly free[c][b]
-                return freePrefix[c][hi].subtract(freePrefix[c][lo]);
+            if (allowed == null && minChildSub[c] >= k && counts.freePrefix[c] != null) {
+                // no fixed dimension below c's children: every value counts exactly counts.free[c][b]
+                return counts.freePrefix[c][hi].subtract(counts.freePrefix[c][lo]);
             }
             BigInteger sum = BigInteger.ZERO;
             if (allowed == null) {
@@ -334,33 +279,9 @@ final class ConstraintPlan {
             return sum;
         }
 
-        private static boolean fitsLong(BigInteger[] row) {
-            if (row == null) return true;
-            for (BigInteger b : row) if (b.bitLength() > 62) return false;
-            return true;
-        }
-
-        private static boolean fitsLong(BigInteger[][] rows) {
-            for (BigInteger[] row : rows) if (!fitsLong(row)) return false;
-            return true;
-        }
-
-        private static long[] toLong(BigInteger[] row) {
-            if (row == null) return null;
-            long[] r = new long[row.length];
-            for (int i = 0; i < r.length; i++) r[i] = row[i].longValue();
-            return r;
-        }
-
-        private static long[][] toLong(BigInteger[][] rows) {
-            long[][] r = new long[rows.length][];
-            for (int i = 0; i < rows.length; i++) r[i] = toLong(rows[i]);
-            return r;
-        }
-
         /** True when a uniformly random point of the full product is valid with probability at least 1/4. */
         boolean mostTuplesValid() {
-            return total.shiftLeft(2).compareTo(fullProduct) >= 0;
+            return counts.total.shiftLeft(2).compareTo(counts.fullProduct) >= 0;
         }
 
         /** Whether a complete tuple satisfies every rule. */
@@ -371,7 +292,7 @@ final class ConstraintPlan {
             return true;
         }
 
-        // ── primitive-long versions of the counting queries (used when lsuffix != null) ──
+        // ── primitive-long versions of the counting queries (used when counts.lsuffix != null) ──
 
         private long sumConsistentL(int c, BitSet allowed, int k, int[] val) {
             long r = range(c, k, val);
@@ -385,8 +306,8 @@ final class ConstraintPlan {
                 hi = (int) r;
             }
             if (lo >= hi) return 0;
-            if (allowed == null && minChildSub[c] >= k && lfreePrefix[c] != null) {
-                return lfreePrefix[c][hi] - lfreePrefix[c][lo];
+            if (allowed == null && minChildSub[c] >= k && counts.lfreePrefix[c] != null) {
+                return counts.lfreePrefix[c][hi] - counts.lfreePrefix[c][lo];
             }
             long sum = 0;
             if (allowed == null) {
@@ -401,7 +322,7 @@ final class ConstraintPlan {
 
         private long completionsL(int k, int[] val) {
             int fixedRoots = firstRoot[k];
-            long result = lsuffix[fixedRoots];
+            long result = counts.lsuffix[fixedRoots];
             if (result == 0) return 0;
             for (int i = 0; i < fixedRoots; i++) {
                 long c = sumConsistentL(roots[i], null, k, val);
@@ -412,11 +333,11 @@ final class ConstraintPlan {
         }
 
         private long countL(int v, int a, int k, int[] val) {
-            if (minSub[v] >= k) return lfree[v][a];
+            if (minSub[v] >= k) return counts.lfree[v][a];
             long result = 1;
             for (int c : children[v]) {
                 BitSet allowed = fromParent[c][a];
-                long s = minSub[c] >= k ? lmsg[c][a] : sumConsistentL(c, allowed, k, val);
+                long s = minSub[c] >= k ? counts.lmsg[c][a] : sumConsistentL(c, allowed, k, val);
                 if (s == 0) return 0;
                 result *= s;
             }
@@ -426,7 +347,7 @@ final class ConstraintPlan {
         /** Number of valid ways to choose dimensions k..n-1 when dimensions 0..k-1 have values val[0..k-1]. */
         BigInteger completions(int k, int[] val) {
             int fixedRoots = firstRoot[k];
-            BigInteger result = suffix[fixedRoots];
+            BigInteger result = counts.suffix[fixedRoots];
             if (result.signum() == 0) return BigInteger.ZERO;
             for (int i = 0; i < fixedRoots; i++) {
                 BigInteger c = sumConsistent(roots[i], null, k, val);
@@ -438,11 +359,11 @@ final class ConstraintPlan {
 
         /** Ways to choose v's subtree when v has value a, with dimensions below k fixed. */
         private BigInteger count(int v, int a, int k, int[] val) {
-            if (minSub[v] >= k) return free[v][a];
+            if (minSub[v] >= k) return counts.free[v][a];
             BigInteger result = BigInteger.ONE;
             for (int c : children[v]) {
                 BitSet allowed = fromParent[c][a];
-                BigInteger s = minSub[c] >= k ? msg[c][a] : sumConsistent(c, allowed, k, val);
+                BigInteger s = minSub[c] >= k ? counts.msg[c][a] : sumConsistent(c, allowed, k, val);
                 if (s.signum() == 0) return BigInteger.ZERO;
                 result = result.multiply(s);
             }
@@ -492,7 +413,7 @@ final class ConstraintPlan {
         }
 
         private boolean hasCompletion(int k, int[] val) {
-            return lsuffix != null ? completionsL(k, val) > 0 : completions(k, val).signum() > 0;
+            return counts.lsuffix != null ? completionsL(k, val) > 0 : completions(k, val).signum() > 0;
         }
 
         int dimensionSize(int dim) {
@@ -501,7 +422,7 @@ final class ConstraintPlan {
 
         /** Value indexes of the tuple with the given rank among the valid tuples; rank must be in range. */
         int[] unrank(BigInteger rank) {
-            if (lsuffix != null) return unrankL(rank.longValueExact());
+            if (counts.lsuffix != null) return unrankL(rank.longValueExact());
             int[] val = new int[dimensions];
             BigInteger remaining = rank;
             for (int k = 0; k < dimensions; k++) {
