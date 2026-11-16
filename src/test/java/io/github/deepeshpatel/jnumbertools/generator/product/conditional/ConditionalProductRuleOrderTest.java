@@ -95,9 +95,13 @@ class ConditionalProductRuleOrderTest {
 
     @SuppressWarnings("unchecked")
     private static Map<Long, ?> relationsOf(ConditionalProductBuilder builder) throws ReflectiveOperationException {
-        Field field = ConditionalProductBuilder.class.getDeclaredField("relations");
-        field.setAccessible(true);
-        return (Map<Long, ?>) field.get(builder);
+        Field modelField = ConditionalProductBuilder.class.getDeclaredField("model");
+        modelField.setAccessible(true);
+        Object model = modelField.get(builder);
+
+        Field relationsField = ConstraintModel.class.getDeclaredField("relations");
+        relationsField.setAccessible(true);
+        return (Map<Long, ?>) relationsField.get(model);
     }
 
     private static Set<Integer> pairsOf(List<Rule> rules) {
