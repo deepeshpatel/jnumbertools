@@ -144,11 +144,12 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 
 ### WP4 follow-up: separate unordered traversal (deferred; not part of the completed WP4 lexicographic work)
 
-- [ ] 4.4 Agree the public `anyOrder()` contract: full valid tuple set exactly once, unspecified order, lazy and re-iterable; no random-selection semantics.
-- [ ] 4.5 Implement `anyOrder()` sequential traversal first, then add automatic threshold-based parallel execution with a partitioning strategy that can split below the first dimension when necessary.
-- [ ] 4.6 Add differential, iterator, concurrency and parallel tuple-set tests. Keep `lexOrder()` unchanged.
-- [ ] 4.7 Benchmark complete `anyOrder()` consumption against its sequential counterpart and representative baselines. Enable automatic parallel execution only where measurements demonstrate a repeatable benefit; derive the threshold from those results.
-- [ ] 4.8 Only after 4.4–4.7 are complete, tests pass and benchmarks show a real benefit, consider whether any separate `lexOrder()` parallel work is justified.
+- [x] 4.4 Agreed and exposed the public `anyOrder()` contract: full valid tuple set exactly once, unspecified encounter order, lazy and re-iterable; no random-selection semantics.
+- [~] 4.5 Delivered the first sequential `anyOrder()` implementation using the prefix-pruned BitSet iterator. Its spliterator deliberately omits `ORDERED` and does not split. Awaiting maintainer compilation and focused tests.
+- [ ] 4.6 Implement automatic threshold-based parallel execution with a partitioning strategy that can split below the first dimension when necessary. Do not enable it until correctness tests pass and benchmarks demonstrate a repeatable benefit.
+- [ ] 4.7 Add differential, iterator, concurrency and parallel tuple-set tests for the final implementation. Keep `lexOrder()` unchanged.
+- [ ] 4.8 Benchmark complete `anyOrder()` consumption against its sequential counterpart and representative baselines; derive any parallel threshold from measured results.
+- [ ] 4.9 Only after 4.4–4.8 are complete, tests pass and benchmarks show a real benefit, consider whether any separate `lexOrder()` parallel work is justified.
 
 ### WP5: Benchmarks (maintainer runs them)
 
@@ -203,6 +204,8 @@ Update this table whenever an item changes status.
 - Unit tests live next to the existing ones in `ConditionalProductBuilderTest`, `ConditionalProductRuleOrderTest`, and a new differential test per generator.
 
 ## 8. Progress log (newest first)
+
+- 2026-11-17: Started the separate `anyOrder()` API. Added its public contract to `ConditionalProductBuilder`: it returns every valid tuple once, is lazy/re-iterable, makes no encounter-order guarantee, and is not random selection (`choice`/`sample` retain that role). Added `AnyOrderGenerator` as an initial sequential implementation using the existing prefix-pruned BitSet iterator; its spliterator omits `ORDERED` and refuses splitting so this stage introduces no accidental parallel execution. Added a focused test for tuple-set equality, duplicate-free output, re-iteration, empty output, and the unordered/non-splitting spliterator contract. Awaiting maintainer compilation and test execution. Automatic parallel selection and splitting remain separate follow-up work; `lexOrder()` is unchanged.
 
 - 2026-11-17: Delivered the first documentation slice ahead of the `anyOrder()` implementation. Added practical dimension-ordering guidance to `ConditionalProductBuilder` Javadocs, including constraint-evaluation dependencies, selective-dimension pruning, tuple-position/lexicographic-order consequences, and the SQL join-order analogy. Updated the target design to keep existing `lexOrder()` behavior out of scope and recorded the staged, separate `anyOrder()` work package: contract, sequential traversal, automatic parallel traversal, correctness tests, then benchmark-based threshold selection. No traversal code or behavior changed.
 
