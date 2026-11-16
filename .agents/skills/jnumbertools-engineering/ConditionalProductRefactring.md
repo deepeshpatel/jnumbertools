@@ -114,8 +114,8 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 ### WP1: Setup cost
 
 - [~] 1.1 Run the loop check only when a rule adds a new linked pair (verified by the maintainer's full test run; branch change not yet merged)
-- [~] 1.2 Replace repeated edge-removal reachability searches in `blockOf` with one iterative Tarjan bridge traversal; union only non-bridge edges into loop blocks (new regression test pending maintainer run)
-- [ ] 1.3 Reduce the O(E) relation-map copy performed by `withRule` when adding or updating a linked pair; choose a representation compatible with immutable builders
+- [x] 1.2 Replace repeated edge-removal reachability searches in `blockOf` with one iterative Tarjan bridge traversal; union only non-bridge edges into loop blocks (verified by maintainer: all 24 ConditionalProductBuilderTest tests passed)
+- [~] 1.3 Replace full relation-map copies with a persistent AVL map; updates path-copy O(log E) nodes while preserving immutable builder snapshots and sorted iteration (new regression test added; awaiting maintainer test run)
 - Acceptance: lower builder-construction cost on CHAIN and CYCLE; identical tuples and loop-limit decisions on differential checks.
 
 ### WP2: Extract the shared model
@@ -157,7 +157,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 | Package | Done | Total |
 |---|---|---|
 | WP0 baseline | 0 (3 delivered, unconfirmed) | 3 |
-| WP1 setup cost | 0 (2 delivered, 1 test-confirmed) | 3 |
+| WP1 setup cost | 2 verified, 1 delivered pending verification | 3 |
 | WP2 shared model | 0 | 4 |
 | WP3 generators | 0 | 5 |
 | WP4 parallel | 0 | 3 |
@@ -194,3 +194,7 @@ Update this table whenever an item changes status.
 - 2026-11-17: WP1.1 delivered and verified by the maintainer's full test run. `withRule` runs `checkLoopBlocks` only when the rule introduces a new dimension-pair edge; adding another restriction to an existing pair cannot change graph connectivity or loop blocks. A builder-style regression test checks exact count and lexicographic output after adding a further restriction to an edge in a three-dimension loop.
 
 - 2026-11-17: WP1.2 delivered. The previous `blockOf` implementation removed each edge and reran graph reachability, doing repeated work for every new linked pair. Replaced it with iterative Tarjan bridge detection in one DFS traversal (avoiding graph-depth dependence on the Java call stack), then unioned only non-bridge edges to form loop blocks. Added a builder-style regression test proving that a 1,001-value dimension attached to a 1,000,000-combination cycle by a bridge is excluded from that cycle's loop-block product. The maintainer should run the test suite before this item is marked verified.
+
+- 2026-11-17: Maintainer confirmed all 24 `ConditionalProductBuilderTest` tests passed, including the iterative Tarjan bridge regression. WP1.2 is now verified.
+
+- 2026-11-17: WP1.3 delivered. Replaced the full `LinkedHashMap` copy in `withRule` with an immutable AVL relation map. Updating an existing dimension pair now path-copies O(log E) nodes instead of copying all E entries; iteration remains sorted by pair key, and old builder instances retain their original map root. Added a builder-style regression covering repeated same-pair updates, independent branches, exact counts, and lexicographic output. Awaiting maintainer test run.
