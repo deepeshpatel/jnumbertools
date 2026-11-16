@@ -182,6 +182,9 @@ Update this table whenever an item changes status.
 
 ## 8. Progress log (newest first)
 
+- 2026-11-17: Removed the two legacy conditional-product JMH benchmark classes and their committed output snapshots; removed their entries and obsolete notes from the benchmarks README. The replacement benchmark design is still pending the maintainer's instructions. Progress reporting requirement: no console output from timed benchmark methods; any ETA/progress display must run outside measured methods, at most once per minute, with detailed results written to a file and a consolidated final report.
+
+
 - 2026-11-17: Maintainer confirmed the focused suite passed after WP4.3: 36 tests. WP4 is complete. The new unordered parallel test passed for all four strategies, comparing tuple sets with sequential traversal; ordered encounter-order checks remain in place for the three explicit generators.
 
 - 2026-11-17: Delivered WP4.3 test coverage. Added an unordered parallel-stream regression test that compares the tuple set against sequential default traversal for PRUNED_BITSET, PRUNED_DFS, DP, and ADAPTIVE. The existing ordered-parallel test continues to compare exact encounter order for the three explicit generators. Awaiting the maintainer's focused test run.
