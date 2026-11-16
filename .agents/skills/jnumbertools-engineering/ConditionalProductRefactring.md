@@ -121,8 +121,8 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 ### WP2: Extract the shared model
 
 - [x] 2.1 Extract the immutable `Relation` into a package-private file. There is no standalone `Rule` type in the current implementation: each rule is immediately compiled into a combined pairwise `Relation`, so do not introduce a redundant `Rule` object without a concrete need (verified by maintainer)
-- [~] 2.2 Extract `ConstraintModel` to own immutable dimensions and pairwise relations; materialize prefix-pruned `Rows` lazily and share them across generators from the same builder (delivered; awaiting maintainer test run)
-- [ ] 2.3 `ConstraintPlan` (feasibility) and `ConstraintCounts` (exact) as separate files
+- [x] 2.2 Extract `ConstraintModel` to own immutable dimensions and pairwise relations; materialize prefix-pruned `Rows` lazily and share them across generators from the same builder (verified: all 25 `ConditionalProductBuilderTest` tests passed)
+- [~] 2.3 Extracted the former nested `Plan` into package-private `ConstraintPlan`. Its exact-count tables and methods are still co-located in this first mechanical extraction; next split them into `ConstraintCounts` while keeping feasibility/topology in `ConstraintPlan` (first stage delivered; awaiting tests)
 - [ ] 2.4 `ConditionalProductBuilder` becomes the facade only (target: well under 500 lines)
 
 ### WP3: Generators
@@ -158,7 +158,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 |---|---|---|
 | WP0 baseline | 0 (3 delivered, unconfirmed) | 3 |
 | WP1 setup cost | 3 verified | 3 |
-| WP2 shared model | 1 verified, 1 delivered pending verification | 4 |
+| WP2 shared model | 2 verified, 1 delivered pending verification | 4 |
 | WP3 generators | 0 | 5 |
 | WP4 parallel | 0 | 3 |
 | WP5 benchmarks | 0 | 3 |
@@ -185,6 +185,8 @@ Update this table whenever an item changes status.
 - 2026-11-17: Maintainer confirmed the WP1.3 persistent relation-map regression test passed. WP1.3 is now verified. Started WP2.1 by extracting the immutable pairwise `Relation` into package-private `Relation.java`. The current implementation does not retain individual `Rule` objects: each fluent rule is immediately intersected into its pairwise relation. Do not add a redundant rule representation just to match the original target-design wording. Builder behavior is unchanged; awaiting the maintainer's focused test run.
 
 - 2026-11-17: Maintainer confirmed the WP2.1 `Relation` extraction passed `ConditionalProductBuilderTest`. WP2.1 is verified. Delivered WP2.2: introduced package-private `ConstraintModel` to own the immutable dimension snapshots and pairwise relation map; its prefix-pruned `Rows` are built lazily with safe publication and reused by generators from the same builder. `PrunedLexItr` now consumes those shared rows instead of rebuilding its adjacency arrays for every iterator. Awaiting focused test run.
+
+- 2026-11-17: Maintainer confirmed all 25 `ConditionalProductBuilderTest` tests passed after WP2.2. WP2.2 is verified. Started WP2.3 by extracting the nested exact completion plan into package-private `ConstraintPlan`; this is intentionally a first mechanical step. Exact-count tables and operations remain in `ConstraintPlan` for now and must be moved into `ConstraintCounts` in the next stage before WP2.3 can be considered complete. Awaiting focused test run for the extraction.
 
 ## 9. Maintainer clarifications (2026-11-17)
 
