@@ -54,7 +54,9 @@ public class ConditionalProductStrategyBenchmark {
                 "EMPTY_3x10",
                 "CHAIN_3x25_MEDIUM",
                 "STAR_FIRST_3x50_LOW",
-                "CHAIN_10x2_LOW"
+                "CHAIN_10x2_LOW",
+                "CHAIN_5x10_TIGHT",
+                "CYCLE_5x6_MEDIUM"
         })
         public String scenarioName;
 
@@ -217,8 +219,8 @@ public class ConditionalProductStrategyBenchmark {
     // Scenario definitions
     // ---------------------------------------------------------------------
 
-    private enum Topology { STAR_FIRST, STAR_LAST, CHAIN, SPARSE, DENSE, DEAD_END, EMPTY }
-    private enum Selectivity { HIGH, MEDIUM, LOW, NONE }
+    private enum Topology { STAR_FIRST, STAR_LAST, CHAIN, CYCLE, SPARSE, DENSE, DEAD_END, EMPTY }
+    private enum Selectivity { TIGHT, HIGH, MEDIUM, LOW, NONE }
 
     private record Rule(int triggerDimension, BitSet triggerValues,
                         int targetDimension, BitSet allowedValues) { }
@@ -265,6 +267,8 @@ public class ConditionalProductStrategyBenchmark {
                 case "CHAIN_3x25_MEDIUM" -> new Scenario(Topology.CHAIN, Selectivity.MEDIUM, 3, 25, false);
                 case "STAR_FIRST_3x50_LOW" -> new Scenario(Topology.STAR_FIRST, Selectivity.LOW, 3, 50, false);
                 case "CHAIN_10x2_LOW" -> new Scenario(Topology.CHAIN, Selectivity.LOW, 10, 2, false);
+                case "CHAIN_5x10_TIGHT" -> new Scenario(Topology.CHAIN, Selectivity.TIGHT, 5, 10, false);
+                case "CYCLE_5x6_MEDIUM" -> new Scenario(Topology.CYCLE, Selectivity.MEDIUM, 5, 6, false);
                 default -> throw new IllegalArgumentException("Unknown scenario: " + name);
             };
         }
@@ -281,6 +285,9 @@ public class ConditionalProductStrategyBenchmark {
                 }
                 case CHAIN -> {
                     for (int d = 0; d < n - 1; d++) addRule(result, d, d + 1, allowedSet(d + 1, -1));
+                }
+                case CYCLE -> {
+                    for (int d = 0; d < n; d++) addRule(result, d, (d + 1) % n, allowedSet((d + 1) % n, -1));
                 }
                 case SPARSE -> {
                     int[][] edges = {{0, 1}, {2, 3}, {4, 5}, {5, 6}};
@@ -312,6 +319,7 @@ public class ConditionalProductStrategyBenchmark {
         private BitSet allowedSet(int dimension, int variant) {
             int size = dimensions.get(dimension).size();
             int allowedCount = switch (selectivity) {
+                case TIGHT -> Math.max(1, (int) Math.floor(size * 0.10));
                 case HIGH -> Math.max(1, (int) Math.floor(size * 0.20));
                 case MEDIUM -> Math.max(1, (int) Math.floor(size * 0.50));
                 case LOW -> Math.max(1, (int) Math.floor(size * 0.80));
