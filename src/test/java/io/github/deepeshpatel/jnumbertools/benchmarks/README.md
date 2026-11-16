@@ -114,10 +114,13 @@ The size range describes input-domain size, not the number of valid output tuple
 descriptors use a uniform size for all dimensions. The `edge-cases` group deliberately holds workloads
 outside these ranges or workloads whose defining property is an empty result or dead end.
 
-A case descriptor contains `topology`, `selectivity`, `dimensions`, and `size`; `emptyDimension`
-is optional. The benchmark loads it from the classpath, so adding a case does not require editing the
-JMH benchmark's scenario factory. The current `TIGHT` profile permits approximately 1% of each target
-dimension (at least one value), keeping the larger range cases bounded.
+A case descriptor contains `topology`, `selectivity`, and `dimensions`. Use `size` as a
+uniform-size shorthand, or `sizes` as a comma-separated list with one value per dimension; every value
+must fall within the folder's declared size range. `emptyDimension` is optional. The benchmark loads
+descriptors from the classpath, so adding a case does not require editing the JMH benchmark's scenario
+factory. The current descriptors use uniform sizes, but mixed-size workloads are supported. The
+`TIGHT` profile permits approximately 1% of each target dimension (at least one value), keeping the
+larger range cases bounded.
 
 Important interpretation note: the current rule generator selects every trigger value, so
 the `high`/`medium`/`low`/`tight` profile currently controls the allowed target-value fraction;
