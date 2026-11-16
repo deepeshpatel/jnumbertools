@@ -118,7 +118,8 @@ A case descriptor contains `topology`, `selectivity`, and `dimensions`. Use `siz
 uniform-size shorthand, or `sizes` as a comma-separated list with one value per dimension; every value
 must fall within the folder's declared size range. `emptyDimension` is optional. The benchmark loads
 descriptors from the classpath, so adding a case does not require editing the JMH benchmark's scenario
-factory. The current descriptors use uniform sizes, but mixed-size workloads are supported. The
+factory; add the new resource path to the benchmark state's `@Param` list so JMH includes it in the
+default matrix. The current descriptors use uniform sizes, but mixed-size workloads are supported. The
 `TIGHT` profile permits approximately 1% of each target dimension (at least one value), keeping the
 larger range cases bounded.
 
