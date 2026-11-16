@@ -85,7 +85,7 @@ class ConditionalProductGeneratorTest {
 
 
     @Test
-    void prunedStrategiesPreserveLexicographicOrderInParallelStreams() {
+    void allExplicitStrategiesPreserveLexicographicOrderInParallelStreams() {
         List<Integer> first = java.util.stream.IntStream.range(0, 32).boxed().toList();
         List<Integer> second = java.util.stream.IntStream.range(0, 7).boxed().toList();
         List<Integer> third = java.util.stream.IntStream.range(0, 5).boxed().toList();
@@ -94,8 +94,7 @@ class ConditionalProductGeneratorTest {
                 .then(second).isOneOf(List.of(1, 3, 5))
                 .when(second).is(3).then(third).isNot(2);
 
-        for (LexOrderStrategy strategy : List.of(
-                LexOrderStrategy.PRUNED_BITSET, LexOrderStrategy.PRUNED_DFS)) {
+        for (LexOrderStrategy strategy : EXPLICIT_STRATEGIES) {
             var iterable = builder.lexOrder(strategy);
             List<List<Object>> sequential = iterable.stream().toList();
             List<List<Object>> parallel = iterable.stream().parallel().toList();
