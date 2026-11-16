@@ -123,7 +123,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 - [x] 2.1 Extract the immutable `Relation` into a package-private file. There is no standalone `Rule` type in the current implementation: each rule is immediately compiled into a combined pairwise `Relation`, so do not introduce a redundant `Rule` object without a concrete need (verified by maintainer)
 - [x] 2.2 Extract `ConstraintModel` to own immutable dimensions and pairwise relations; materialize prefix-pruned `Rows` lazily and share them across generators from the same builder (verified: all 25 `ConditionalProductBuilderTest` tests passed)
 - [x] 2.3 Extracted the former nested `Plan` into package-private `ConstraintPlan`. `ConstraintCounts` owns the derived BigInteger/long count tables, prefix-completion queries, primitive-long fast path, and unranking operations; `ConstraintPlan` retains topology, feasibility checks, and candidate selection (verified: all 25 `ConditionalProductBuilderTest` tests passed).
-- [ ] 2.4 `ConditionalProductBuilder` becomes the facade only (target: well under 500 lines)
+- [~] 2.4 Began reducing `ConditionalProductBuilder` to the facade. Extracted the immutable persistent AVL relation map into package-private `PersistentRelationMap`; the builder now consumes that type without owning its tree implementation. Further extractions are required before this item is complete.
 
 ### WP3: Generators
 
@@ -158,7 +158,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 |---|---|---|
 | WP0 baseline | 0 (3 delivered, unconfirmed) | 3 |
 | WP1 setup cost | 3 verified | 3 |
-| WP2 shared model | 3 verified | 4 |
+| WP2 shared model | 3 verified, 1 in progress | 4 |
 | WP3 generators | 0 | 5 |
 | WP4 parallel | 0 | 3 |
 | WP5 benchmarks | 0 | 3 |
@@ -212,3 +212,5 @@ Update this table whenever an item changes status.
 - 2026-11-17: Continued WP2.3: extracted exact subtree/root count-table construction and BigInteger/primitive-long table storage into package-private `ConstraintCounts`. `ConstraintPlan` retains graph topology, loop-block assignments, prefix feasibility, and currently still hosts the prefix-completion/rank query methods, which are the next extraction slice. Updated builder count/rank consumers to read the count holder. Awaiting focused test run.
 
 - 2026-11-17: Maintainer confirmed all 25 `ConditionalProductBuilderTest` tests passed after the final WP2.3 query-method extraction and the subsequent `ConstraintCounts` reference fixes (`values`/`dimensions` now resolve through `plan`). WP2.3 is verified. The shared model extraction is complete through WP2.3; next is WP2.4, reducing `ConditionalProductBuilder` to the immutable public facade before starting generator extraction.
+
+- 2026-11-17: Started WP2.4 by extracting the immutable AVL relation map and its tree nodes from `ConditionalProductBuilder` into package-private `PersistentRelationMap.java`. The builder retains only the map reference and update calls; balancing, path-copy insertion, lookup, and ordered iteration now live outside the facade. This is the first WP2.4 slice, not completion: graph validation, rule compilation helpers, and generator implementations still need to move out. Awaiting the maintainer's focused test run.
