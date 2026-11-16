@@ -159,7 +159,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 | WP0 baseline | 0 (3 delivered, unconfirmed) | 3 |
 | WP1 setup cost | 3 verified | 3 |
 | WP2 shared model | 4 verified | 4 |
-| WP3 generators | 2 verified; dedicated strategy test suite added, awaiting verification | 5 |
+| WP3 generators | 2 implementation steps verified; dedicated strategy test suite verified | 5 |
 | WP4 parallel | 0 | 3 |
 | WP5 benchmarks | 0 | 3 |
 | WP6 finish | 0 | 3 |
@@ -237,3 +237,6 @@ Update this table whenever an item changes status.
 - 2026-11-17: Maintainer confirmed `mvn -Dtest=ConditionalProductBuilderTest test` passed after WP3.2. WP3.2 is verified. Maintainer raised whether repeatedly running the same focused test class is sufficient after many structural commits. Agreed to strengthen verification deliberately: add dedicated generator-level tests and seeded brute-force differential coverage across all four strategies, including empty/dead-end cases, repeated iteration, and lazy-plan behavior where observable. Keep the focused builder suite as regression coverage; do not inflate test count with redundant examples. Decide the exact test split before/alongside WP3.3 rather than delaying it until the end.
 
 - 2026-11-17: In response to the maintainer's request for stronger test coverage beyond repeatedly running the existing builder suite, added `ConditionalProductGeneratorTest`. It independently brute-forces small Cartesian products and compares ordered output for PRUNED_BITSET, PRUNED_DFS, DP, and ADAPTIVE across 300 fixed-seed random rule sets. It also covers unconstrained products, empty dimensions, a fully dead-ended product, repeated iteration, idempotent `hasNext`, exhaustion, and `next` after exhaustion. Existing `ConditionalProductBuilderTest` remains the public API and broader builder regression suite. Awaiting focused execution of both classes.
+
+
+- 2026-11-17: Maintainer reported three failures in `ConditionalProductRuleOrderTest`, all caused by its reflection helper looking for the former `relations` field directly on `ConditionalProductBuilder`. Updated the test helper to follow the extracted ownership path (`builder.model.relations`); no production code changed. Maintainer confirmed 34 tests passed after the correction. The dedicated generator-level strategy/differential tests and the rule-order regression suite are now verified. WP3.3 remains the next implementation step; do not start it until the maintainer says to proceed.
