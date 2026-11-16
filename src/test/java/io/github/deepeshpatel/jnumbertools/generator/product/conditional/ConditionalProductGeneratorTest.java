@@ -87,15 +87,16 @@ class ConditionalProductGeneratorTest {
     void seededRandomRuleSetsMatchBruteForceForEveryStrategy() {
         Random random = new Random(0x5EED_C0DEL);
         for (int round = 0; round < 300; round++) {
+            int caseNumber = round;
             RandomCase testCase = randomCase(random);
             List<List<Object>> expected = bruteForce(testCase);
             for (LexOrderStrategy strategy : EXPLICIT_STRATEGIES) {
                 assertEquals(expected, testCase.builder().lexOrder(strategy).stream().toList(),
-                        () -> "round=" + round + ", strategy=" + strategy);
+                        () -> "round=" + caseNumber + ", strategy=" + strategy);
             }
             assertEquals(expected, testCase.builder()
                     .lexOrder(LexOrderStrategy.ADAPTIVE, 500).stream().toList(),
-                    () -> "round=" + round + ", strategy=ADAPTIVE");
+                    () -> "round=" + caseNumber + ", strategy=ADAPTIVE");
         }
     }
 
