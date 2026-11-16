@@ -1,13 +1,15 @@
 # Benchmarks
 
-JMH benchmarks for developers of JNumberTools. They are not part of the published library. Each benchmark
-class has a matching `*BenchmarkOutput.txt` file holding the last committed results.
+JMH benchmarks for developers of JNumberTools. They are not part of the published library. Committed
+`*BenchmarkOutput.txt` files hold selected historical results; new benchmark runs may write machine-readable
+results under Maven's `target/` directory.
 
 | Class | Output file | What it measures |
 |---|---|---|
 | `GeneratorSurveyBenchmark` | `GeneratorSurveyBenchmarkOutput.txt` | `lexOrder`, `lexOrderMth`, `choice`, unranking for every generator family |
 | `ProductTupleBenchmark` | `ProductTupleBenchmarkOutput.txt` | Cartesian product tuple handling |
 | `OptimisationCandidatesBenchmark` | `OptimisationCandidatesBenchmarkOutput.txt` | Comparisons of candidate optimisations (for example derangement lexOrder) |
+| `ConditionalProductStrategyBenchmark` | `target/conditional-product-strategy.json` | Full traversal and end-to-end comparison of all four conditional-product strategies against a nested-stream baseline |
 
 ## Benchmark environment
 
@@ -33,6 +35,23 @@ Run one benchmark row:
 mvn clean test-compile exec:exec -Dexec.executable=java -Dexec.classpathScope=test \
   -Dexec.args="-cp %classpath org.openjdk.jmh.Main GeneratorSurveyBenchmark.lexOrder1000 -p generator=permutation-k -prof gc"
 ```
+
+Run the complete conditional-product strategy matrix and save machine-readable results:
+
+```bash
+mvn clean test-compile exec:exec -Dexec.executable=java -Dexec.classpathScope=test \\
+  -Dexec.args="-cp %classpath org.openjdk.jmh.Main ConditionalProductStrategyBenchmark -prof gc -rf json -rff target/conditional-product-strategy.json"
+```
+
+The conditional-product matrix uses one fork, one 500 ms warmup iteration, and two 500 ms measurement
+iterations. It fully consumes each scenario and compares `PRUNED_BITSET`, `PRUNED_DFS`, `DP`,
+`ADAPTIVE`, and `NESTED_STREAM`. It reports traversal-only and end-to-end measurements. Scenarios cover
+STAR_FIRST, STAR_LAST, CHAIN, CYCLE, SPARSE, DENSE, DEAD_END, and EMPTY topologies, with bounded
+dimension/list-size combinations.
+
+Keep JMH's normal progress output enabled: it reports run progress and an ETA. Benchmark methods themselves
+do not print. The JSON result file captures scores and `-prof gc` allocation metrics without requiring
+per-scenario console summaries.
 
 Replace the class and method names to run another benchmark.
 
