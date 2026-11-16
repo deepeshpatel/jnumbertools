@@ -145,13 +145,13 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 - [~] 5.2 Delivered the hierarchical case tree: topology → numeric dimension/size range → selectivity → case. Numeric ranges are inclusive and non-overlapping: `Dim2-5`, `Dim6-10`, `Dim11-20`; `Size10-100`, `Size101-250`. STAR, CHAIN, SPARSE, DENSE, CYCLE, DEAD_END, and EMPTY coverage is retained. Workloads outside the numeric ranges are isolated under `edge-cases`.
 - Benchmark limitation recorded: current rules select every trigger value. The selectivity profile therefore varies allowed target values, not trigger coverage; do not interpret these results as a trigger-selectivity study. Add trigger-coverage as a separate workload axis in a later benchmark slice.
 - [~] 5.3 Added the initial large-size tier for all three dimension bands and both size bands. Large cases use the TIGHT profile (approximately 1% of target values, minimum one) to keep complete traversal bounded. These cases still require maintainer compilation and benchmark execution.
-- [ ] 5.4 Console-output cleanup: identify and suppress unintended intermediate/diagnostic output emitted during benchmark setup or traversal. Preserve JMH's own progress/ETA and final result output; do not silence useful errors. Trace each message to its source rather than assuming it originates in the benchmark class.
+- [~] 5.4 Added a dedicated JMH launcher that keeps progress/errors on the console, writes the complete JMH JSON result, and emits one final text summary per benchmark method. Remaining console cleanup (tracing unrelated intermediate diagnostics) is still pending. Console-output cleanup: identify and suppress unintended intermediate/diagnostic output emitted during benchmark setup or traversal. Preserve JMH's own progress/ETA and final result output; do not silence useful errors. Trace each message to its source rather than assuming it originates in the benchmark class.
 - [ ] 5.5 Benchmark analysis: inspect the full JSON matrix (all scenarios, implementations, and both methods); compare latency and allocation; identify strategy-specific workload regions; evaluate ADAPTIVE selection; and make only evidence-supported tuning changes. Run targeted JMH comparisons only for unresolved questions, not the full matrix again.
 - Settings: one fork, 500 ms warmup, two 500 ms measurement iterations; precompute dimensions/rule inputs outside timed methods; report traversal-only and end-to-end. Timed benchmark methods should not print. Use JMH progress/ETA output and write detailed results as JSON.
 
-### WP5 follow-up: benchmark maintainability (after current results)
+### WP5 follow-up: benchmark maintainability
 
-- [ ] Split the current benchmark implementation into a proper package/class structure. Keep scenario loading, workload definitions, topology construction, correctness validation, and benchmark execution in cohesive classes. Retain the properties-based case hierarchy; avoid changing benchmark semantics during this organizational refactor.
+- [~] Split the benchmark into `benchmarks.conditionalproduct`, `scenario`, and `baseline` packages. `Scenario`/`Rule` own property-driven workload construction, `NestedStreamBaseline` owns the independent stream reference, the JMH class owns timed methods, and `ConditionalProductBenchmarkRunner` owns execution and result persistence. Retained the properties-based case hierarchy and benchmark semantics. Awaiting maintainer compilation and a focused launcher run.
 
 ### WP6: Finish — deferred until the very end
 
@@ -171,8 +171,8 @@ These deliverables are intentionally postponed until implementation, parallel wo
 | WP3 generators | 5 verified; all four strategies retained and dispatched | 5 |
 | WP4 parallel | 3 verified | 3 |
 | WP5 benchmark delivery | 3 delivered, unverified | 3 |
-| WP5 benchmark cleanup/analysis | 0 | 2 |
-| WP5 maintainability follow-up | 0 | 1 |
+| WP5 benchmark cleanup/analysis | 1 delivered, unverified | 2 |
+| WP5 maintainability follow-up | 1 delivered, unverified | 1 |
 | WP6 finish | 0 | 3 |
 
 Update this table whenever an item changes status.
@@ -253,3 +253,6 @@ Update this table whenever an item changes status.
 - 2026-11-17: Maintainer reported three failures in `ConditionalProductRuleOrderTest`, all caused by its reflection helper looking for the former `relations` field directly on `ConditionalProductBuilder`. Updated the test helper to follow the extracted ownership path (`builder.model.relations`); no production code changed. Maintainer confirmed 34 tests passed after the correction. The dedicated generator-level strategy/differential tests and the rule-order regression suite are now verified. WP3.3 remains the next implementation step; do not start it until the maintainer says to proceed.
 - 2026-11-17: Delivered WP3.3: extracted the DP lexicographic iterator from the private nested `LexItr` in `ConditionalProductGenerators` into package-private `DpLexGenerator`. The iterator retains the same exact-count lookahead through `ConstraintPlan.firstValid`, lexicographic candidate order, lazy `hasNext` advancement, tuple materialization through `ConstraintModel`, and exhaustion behavior. Updated strategy dispatch to instantiate the extracted class. No counting, rank, or sampling code changed. Awaiting maintainer verification with the focused builder, generator differential, and rule-order suites.
 - 2026-11-17: Maintainer confirmed all 34 tests passed after WP3.3. Reviewed the final strategy wiring for WP3.4: `PRUNED_BITSET`, `PRUNED_DFS`, and `DP` dispatch to their dedicated iterator implementations in `ConditionalProductGenerators`; `ADAPTIVE` is resolved by `ConditionalProductBuilder` using the existing 10,000-tuple threshold, and remains available. Verified WP3.5 requires no enum rename: all four required constants are already present. WP3 is complete. No strategy was removed or deprecated.
+
+
+- 2026-11-17: Refactored the conditional-product benchmark into `benchmarks.conditionalproduct`, with separate `scenario` and `baseline` packages. Moved declarative case loading/rule construction into `Scenario` and `Rule`, and the nested-stream reference implementation into `NestedStreamBaseline`; the JMH benchmark retains the same 17 case parameters, five implementations, checksum validation, and two timing boundaries. Added `ConditionalProductBenchmarkRunner`, which runs JMH programmatically, preserves console progress/errors, writes complete JSON to `target/benchmarks/ConditionalProductStrategyBenchmark_results.json`, and writes one final text summary per method (`ConditionalProductStrategyBenchmark.traversalOnly_output.txt` and `...endToEnd_output.txt`). Supports optional method, scenario, implementation, output-directory selectors; GC profiling is on by default. This is delivered but not yet compiled or run by the maintainer.
