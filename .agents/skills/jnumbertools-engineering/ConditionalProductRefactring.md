@@ -129,14 +129,14 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 
 - [x] 3.1 Extracted `PrunedLexGenerator` (shared depth-first control flow) and `BitSetPrunedGenerator` (BitSet candidate filtering); maintainer confirmed the focused test passed.
 - [x] 3.2 Implemented `DenseDfsGenerator` using lazily materialized, model-shared boolean relation rows with a 4,000,000-cell aggregate cap; larger representations fall back to `BitSetPrunedGenerator`. Maintainer confirmed the focused test passed.
-- [~] 3.3 Extracted `DpLexGenerator`; awaiting maintainer verification
+- [x] 3.3 Extracted `DpLexGenerator`; maintainer confirmed the focused strategy/differential suite passed.
 - [x] 3.4 Strategy dispatch reviewed: `PRUNED_BITSET`, `PRUNED_DFS`, and `DP` select their dedicated iterators; `ADAPTIVE` is resolved by the builder and remains available.
 - [x] 3.5 Enum constants are already `PRUNED_BITSET`, `PRUNED_DFS`, `DP`, and `ADAPTIVE`; no rename required.
 
 ### WP4: Parallel
 
 - [x] 4.1 Ordered, lazy spliterator for PRUNED_BITSET and PRUNED_DFS; splits disjoint contiguous first-dimension ranges, preserves encounter order, and stops below the minimum range threshold. Maintainer confirmed the focused regression suite passed (35 tests). Deeper-dimension splitting remains a follow-up if benchmarks show first-dimension partitioning is insufficient.
-- [ ] 4.2 Rank-range split for `DpLexGenerator`
+- [~] 4.2 Added `DpRankSpliterator`: partitions the exact BigInteger valid-tuple rank interval into disjoint contiguous ranges, lazily unranks each tuple, and preserves ordered encounter semantics. DP parallel-stream regression coverage added; awaiting maintainer verification.
 - [ ] 4.3 Tests: ordered parallel equals sequential for all generators; `unordered()` has the same set of tuples
 
 ### WP5: Benchmarks (maintainer runs them)
@@ -160,7 +160,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 | WP1 setup cost | 3 verified | 3 |
 | WP2 shared model | 4 verified | 4 |
 | WP3 generators | 5 verified; all four strategies retained and dispatched | 5 |
-| WP4 parallel | 1 verified | 3 |
+| WP4 parallel | 1 verified, 1 delivered awaiting verification | 3 |
 | WP5 benchmarks | 0 | 3 |
 | WP6 finish | 0 | 3 |
 
@@ -179,6 +179,8 @@ Update this table whenever an item changes status.
 - Unit tests live next to the existing ones in `ConditionalProductBuilderTest`, `ConditionalProductRuleOrderTest`, and a new differential test per generator.
 
 ## 8. Progress log (newest first)
+
+- 2026-11-17: Started WP4.2. Added `DpRankSpliterator`, which partitions the exact valid-tuple rank interval `[0, counts.total)` using BigInteger midpoint splits. Each partition lazily unranks its next rank and materializes the tuple; lower ranges are returned while the current spliterator retains the upper range, preserving ordered parallel-stream semantics without materializing tuples. Wired DP lex-order streams to this spliterator and expanded the parallel-order/set regression test to include DP. Awaiting the focused test run.
 
 - 2026-11-17: WP4.1 verified by maintainer. `mvn -Dtest=ConditionalProductBuilderTest,ConditionalProductGeneratorTest,ConditionalProductRuleOrderTest test` passed: 35 tests. Ordered parallel traversal test passed for PRUNED_BITSET and PRUNED_DFS. No DP parallel splitting was included in this step.
 
