@@ -141,10 +141,10 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 
 ### WP5: Benchmarks (maintainer runs them)
 
-- [ ] 5.1 Tier 1: dimensions 3, 5, 7, 10 x list sizes 10, 25, 50, fully consumed up to about 100,000 rows; include many small lists
-- [ ] 5.2 Tier 2: dead-end shapes (`STAR_LAST`, 5 to 10% density chain, empty product)
-- [ ] 5.3 Tier 3: large sizes only if tiers 1 and 2 leave open questions
-- Settings: one fork, fewer iterations; precompute rule inputs outside the timed section; report both traversal-only and end-to-end.
+- [~] 5.1 Delivered `ConditionalProductStrategyBenchmark`: representative bounded full-traversal scenarios span 3, 5, 7, and 10 dimensions and list sizes 2, 4, 6, 10, 25, and 50. Every scenario is fully consumed; the largest valid result set is 80,000 tuples. All four library strategies are compared with a nested-stream baseline that prunes as soon as both dimensions of a rule are assigned.
+- [~] 5.2 Delivered STAR_FIRST, STAR_LAST, CHAIN, CYCLE, SPARSE, DENSE, DEAD_END, EMPTY, and tight-chain cases (10% allowed values). These cover late rejection, loop handling, sparse/dense constraint graphs, and zero-result paths.
+- [ ] 5.3 Large-size tier remains deferred until tiers 1 and 2 results identify an unanswered performance question.
+- Settings: one fork, one 500 ms warmup and two 500 ms measurement iterations; precompute dimensions/rule inputs outside timed methods; report traversal-only and end-to-end. Benchmark methods do not print; use JMH progress/ETA output and write detailed results as JSON.
 
 ### WP6: Finish — deferred until the very end
 
@@ -152,7 +152,7 @@ These three deliverables are intentionally postponed until the implementation, p
 
 - [ ] FINAL TODO 1 — Javadoc update: document every strategy and give a plain statement of when to use it.
 - [ ] FINAL TODO 2 — README update: update the main README, benchmarks README, and changelog to reflect the final API, behavior, and measured results.
-- [ ] FINAL TODO 3 — Benchmark update: implement and run the final benchmark classes for all four retained strategies, then use the evidence to tune implementations, defaults, and the ADAPTIVE cutoff where justified. The maintainer will provide the benchmark class design; do not design or implement these classes before receiving those instructions. Never remove or deprecate a strategy.
+- [ ] FINAL TODO 3 — Benchmark update: run the delivered full-traversal benchmark suite for all four retained strategies, then use the evidence to tune implementations, defaults, and the ADAPTIVE cutoff where justified. Add further scenarios or large-size cases only when the first results identify a gap. Never remove or deprecate a strategy.
 
 ## 5. Progress summary
 
@@ -163,7 +163,7 @@ These three deliverables are intentionally postponed until the implementation, p
 | WP2 shared model | 4 verified | 4 |
 | WP3 generators | 5 verified; all four strategies retained and dispatched | 5 |
 | WP4 parallel | 3 verified | 3 |
-| WP5 benchmarks | 0 | 3 |
+| WP5 benchmarks | 2 delivered, unverified | 3 |
 | WP6 finish | 0 | 3 |
 
 Update this table whenever an item changes status.
@@ -182,7 +182,7 @@ Update this table whenever an item changes status.
 
 ## 8. Progress log (newest first)
 
-- 2026-11-17: Removed the two legacy conditional-product JMH benchmark classes and their committed output snapshots; removed their entries and obsolete notes from the benchmarks README. The replacement benchmark design is still pending the maintainer's instructions. Progress reporting requirement: no console output from timed benchmark methods; any ETA/progress display must run outside measured methods, at most once per minute, with detailed results written to a file and a consolidated final report.
+- 2026-11-17: Removed the two legacy conditional-product JMH benchmark classes and their committed output snapshots. Delivered `ConditionalProductStrategyBenchmark` with bounded full-traversal scenarios, all four library strategies, a prefix-pruned nested-stream baseline, tuple/order verification, and separate traversal-only/end-to-end methods. Added the benchmark README entry and JSON output command. Timed methods contain no console output; JMH's normal progress/ETA display stays enabled and detailed results are written to JSON. WP5.1 and WP5.2 are delivered but await maintainer compilation and benchmark runs.
 
 
 - 2026-11-17: Maintainer confirmed the focused suite passed after WP4.3: 36 tests. WP4 is complete. The new unordered parallel test passed for all four strategies, comparing tuple sets with sequential traversal; ordered encounter-order checks remain in place for the three explicit generators.
