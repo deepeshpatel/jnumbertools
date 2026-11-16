@@ -419,7 +419,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     @Override
     public BigInteger count() {
-        return plan().counts.total;
+        return model.plan().counts.total;
     }
 
     @Override
@@ -593,7 +593,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         public List<Object> next() {
             if (!hasNext()) throw new NoSuchElementException();
             ready = false;
-            return tuple(val);
+            return model.tuple(val);
         }
 
         private boolean advance() {
@@ -640,7 +640,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
         @Override
         public Iterator<List<Object>> iterator() {
-            ConstraintPlan p = plan();
+            ConstraintPlan p = model.plan();
             return new Iterator<>() {
                 private int produced;
 
@@ -654,7 +654,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
                     do {
                         for (int d = 0; d < val.length; d++) val[d] = random.nextInt(p.dimSize[d]);
                     } while (!p.isValid(val));
-                    return tuple(val);
+                    return model.tuple(val);
                 }
             };
         }
@@ -679,7 +679,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
                 public List<Object> next() {
                     if (!hasNext()) throw new NoSuchElementException();
                     BigInteger rank = rankIt.next();
-                    ConstraintPlan p = plan();
+                    ConstraintPlan p = model.plan();
                     if (rank.signum() < 0 || rank.compareTo(p.counts.total) >= 0) {
                         throw new IllegalArgumentException(
                                 "Rank " + rank + " is out of bounds [0, " + p.counts.total + ")");
