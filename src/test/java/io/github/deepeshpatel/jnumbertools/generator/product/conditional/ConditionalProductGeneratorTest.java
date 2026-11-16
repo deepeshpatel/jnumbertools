@@ -53,6 +53,35 @@ class ConditionalProductGeneratorTest {
     }
 
     @Test
+    void anyOrderProducesEveryValidTupleOnceWithoutAnOrderGuarantee() {
+        List<Integer> first = java.util.stream.IntStream.range(0, 18).boxed().toList();
+        List<Integer> second = java.util.stream.IntStream.range(0, 7).boxed().toList();
+        List<Integer> third = java.util.stream.IntStream.range(0, 5).boxed().toList();
+        var builder = cartesianProduct.conditionalProductOf(first).and(second).and(third)
+                .when(first).isOneOf(List.of(2, 5, 8, 13, 17))
+                .then(second).isOneOf(List.of(0, 3, 6))
+                .when(second).is(3).then(third).isNot(4);
+
+        var generator = builder.anyOrder();
+        List<List<Object>> expected = builder.lexOrder().stream().toList();
+        List<List<Object>> actual = generator.stream().toList();
+
+        assertEquals(new HashSet<>(expected), new HashSet<>(actual));
+        assertEquals(expected.size(), actual.size(), "anyOrder must not emit duplicate tuples");
+        assertEquals(actual, generator.stream().toList(), "the generator must be re-iterable");
+        assertEquals(expected.size(), builder.count());
+
+        var spliterator = generator.spliterator();
+        assertTrue((spliterator.characteristics() & java.util.Spliterator.ORDERED) == 0,
+                "anyOrder must not advertise encounter order");
+        assertEquals(null, spliterator.trySplit(),
+                "the initial anyOrder implementation is deliberately sequential");
+
+        var empty = cartesianProduct.conditionalProductOf(first).and(List.<Integer>of());
+        assertTrue(empty.anyOrder().stream().toList().isEmpty());
+    }
+
+    @Test
     void everyStrategyHonoursIteratorAndReiterationContracts() {
         List<String> os = List.of("Windows", "macOS", "Linux");
         List<String> browsers = List.of("Chrome", "Safari", "Firefox");
