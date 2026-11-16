@@ -124,7 +124,7 @@ final class ConstraintCounts {
         }
         int fixed = 0;
         while (fixed < mem.length && mem[fixed] < k) fixed++;
-        int[][] list = values[c];
+        int[][] list = plan.values[c];
         int lo = lowerBound(list, mem, fixed, val, false);
         int hi = lowerBound(list, mem, fixed, val, true);
         return ((long) lo << 32) | hi;
@@ -263,9 +263,9 @@ final class ConstraintCounts {
     /** Value indexes of the tuple with the given rank among the valid tuples; rank must be in range. */
     int[] unrank(BigInteger rank) {
         if (this.lsuffix != null) return unrankL(rank.longValueExact());
-        int[] val = new int[dimensions];
+        int[] val = new int[plan.dimensions];
         BigInteger remaining = rank;
-        for (int k = 0; k < dimensions; k++) {
+        for (int k = 0; k < plan.dimensions; k++) {
             boolean found = false;
             int dimSize = plan.dimensionSize(k);
             for (int idx = 0; idx < dimSize; idx++) {
@@ -289,9 +289,9 @@ final class ConstraintCounts {
 
     /** {@link #unrank(BigInteger)} in primitive arithmetic; only valid when the long tables exist. */
     private int[] unrankL(long rank) {
-        int[] val = new int[dimensions];
+        int[] val = new int[plan.dimensions];
         long remaining = rank;
-        for (int k = 0; k < dimensions; k++) {
+        for (int k = 0; k < plan.dimensions; k++) {
             boolean found = false;
             int size = plan.dimensionSize(k);
             for (int idx = 0; idx < size; idx++) {
