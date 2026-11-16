@@ -539,11 +539,10 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
         int[] discovery = new int[n];
         int[] low = new int[n];
-        int[] time = {0};
         Set<Long> bridges = new HashSet<>();
         for (int vertex = 0; vertex < n; vertex++) {
             if (discovery[vertex] == 0) {
-                findBridges(vertex, -1, adjacency, discovery, low, time, bridges);
+                findBridges(vertex, adjacency, discovery, low, bridges);
             }
         }
 
