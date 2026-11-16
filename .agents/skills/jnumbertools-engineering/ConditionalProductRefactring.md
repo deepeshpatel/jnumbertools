@@ -14,13 +14,13 @@ Working plan and progress tracker. **Read this file first when resuming. Update 
 
 ## 1. Why
 
-Benchmark evidence (JMH, maintainer's machine, `ConditionalProductStrategyBenchmark`, 3 to 5 dimensions, lists of 25 to 100):
+Historical benchmark observations (JMH, maintainer's machine, `ConditionalProductStrategyBenchmark`, 3 to 5 dimensions, lists of 25 to 100). Treat these as provisional until the revised, equivalent-setup benchmarks are rerun:
 
 | Finding | Numbers |
 |---|---|
-| Walking tuples is already fast | library pruned traversal is 3.4 to 5.7x faster than a nested Java stream (e.g. CHAIN 10,000 rows: 137 us vs 786 us) |
+| Traversal-only performance | Earlier measurements suggested library prefix-pruned traversal can outperform nested Java streams; the comparison setup was later found not fully equivalent. Re-measure before relying on the ratio. |
 | Setup dominates small jobs | builder construction is about 491 us (CHAIN), 76 us (STAR), 1.1 ms (CYCLE): 63 to 100% of the end-to-end time at 1,000 rows |
-| End-to-end crossover | library beats a nested stream from about 10,000 rows (CHAIN tie, STAR 2.6x faster, CYCLE nested stream still 1.4x faster); below that the stream wins by 1.2 to 4.5x |
+| End-to-end crossover | Earlier first-N results suggested workload-dependent crossovers, but setup costs were not equivalent. Re-measure with builder/rule construction included for every implementation. |
 | `DP` loses on cycles | CYCLE end to end: 13 ms vs 1.1 ms (loop block enumeration, about 17 MB per run) |
 | `ADAPTIVE` cutoff is unproven | from 10,000 tuples it picks `DP`, which is 12x worse on CYCLE |
 | `PRUNED_DFS` has no winning region yet | traversal 2x slower than BitSet at 10,000 rows, 2.3x more allocation; kept until the many-small-lists shapes are measured |
@@ -28,6 +28,40 @@ Benchmark evidence (JMH, maintainer's machine, `ConditionalProductStrategyBenchm
 Hypothesis for the setup cost (not yet profiled): every `withRule` copies the whole rule list, rebuilds a sorted set of linked pairs and re-runs the loop check, so building R rules costs O(R^2).
 
 Goals: (1) cut setup cost for every strategy; (2) one shared constraint model, several interchangeable generators; (3) parallel traversal through the normal `stream().parallel()`.
+
+## 1A. Performance objectives and operation boundaries
+
+The implementation has two distinct optimization targets. Do not optimize one by making the other slower without measuring both.
+
+### Full-result generation
+
+- `lexOrder()` and any public any-order/full-generation operation must be optimized primarily for consuming the complete result set, not just the first few tuples.
+- Sequential full traversal should avoid constructing exact-counting/DP state unless that state is genuinely needed by the selected generator.
+- Preserve laziness and re-iterability; full-generation optimization does not permit eager materialization of all tuples.
+- Measure traversal-only cost separately from end-to-end cost. A traversal-only benchmark may construct the builder and immutable rule model in trial setup; an end-to-end benchmark must include builder/rule construction, generator creation, and complete consumption.
+- The public API currently exposes lexicographic generation and rank/random operations. Do not invent an any-order API as part of documentation: if an any-order full-generation API is added or already exists elsewhere, give it the same full-consumption performance objective and document its semantics explicitly.
+
+### Special operations
+
+- `count()`, `isEmpty()`, `lexOrderMth(...)`, `byRanks(...)`, `choice(...)`, and `sample(...)` are special operations, not ordinary full traversal.
+- These operations may build and use the exact feasibility/counting plan, including loop-block processing and BigInteger/primitive count tables.
+- Their end-to-end performance measurement must include builder construction and rule registration as well as the special operation. Also report operation-only measurements where useful, but never substitute those for end-to-end results.
+- `isEmpty()` should use the least expensive exact feasibility mechanism that preserves semantics; it need not calculate full counts if a separate feasibility tier is sufficient.
+
+### Public lexicographic strategy enum
+
+`LexOrderStrategy` controls only ordinary lexicographic traversal. It does not select the implementation of `count`, rank, choice, or sample operations.
+
+| Enum constant | Intended implementation | Contract / status |
+|---|---|---|
+| `PRUNED_BITSET` | Prefix-pruned DFS using compact BitSet relation rows | Default candidate; avoids exact counting plan for ordinary traversal |
+| `PRUNED_DFS` | Prefix-pruned indexed DFS using dense boolean relation rows | Alternative implementation; retain until representative benchmarks decide whether it has a useful workload |
+| `DP` | Exact DP completion-count lookahead | Explicit option; has higher setup cost and may be poor for cyclic/loop-heavy constraints |
+| `ADAPTIVE` | Selects `PRUNED_BITSET` or `DP` from the caller's expected tuple consumption | Current cutoff is a heuristic only; do not treat 10,000 as validated until benchmark evidence supports it |
+
+All enum constants must remain documented even if later benchmark results lead to deprecating or removing one. Any removal or default/cutoff change requires benchmark evidence, tests, and a progress-log entry.
+
+The current adaptive threshold (10,000 tuples) is provisional. The full-generation target is complete consumption, so benchmark coverage must include full traversal rather than infer the best strategy from first-N microbenchmarks.
 
 ## 2. Target design
 
@@ -52,7 +86,7 @@ Lex generators (package-private)
 Decisions already made:
 
 - Public enum `LexOrderStrategy`: `PRUNED_BITSET` (default), `PRUNED_DFS`, `DP`, `ADAPTIVE`. `ADAPTIVE` stays until a benchmark with dead-end shapes decides its cutoff.
-- No stream-based generator: the nested stream wins at small sizes only because the benchmark hands it raw tables; a generator behind the public rule API cannot reproduce that, and it is 3 to 6x slower per tuple.
+- No stream-based generator is currently planned. Nested-stream baselines are useful for comparison, but must be benchmarked with equivalent rule/setup costs; they do not define the library's public generator architecture.
 - Do not drop `PRUNED_DFS` early (a user may have thousands of tuples over small lists).
 - Parallel is opt-in through `stream().parallel()`; the default stays sequential. No automatic parallel selection (the real output size is unknown without counting).
 - Parallel splitting: custom `Spliterator` whose `trySplit` cuts by prefix (contiguous ranges of the first dimension, then further dimensions if needed). Pieces are lexicographically ordered, so ordered parallel results stay correct; `.unordered()` drops the ordering cost. It stops splitting below a work threshold. `DpLexGenerator` can split by rank range with exact sizes (costs the counting plan).
@@ -147,3 +181,10 @@ Update this table whenever an item changes status.
 ## 8. Progress log (newest first)
 
 - 2026-11-16: Plan written. WP0 patch (`conditional-compact-rules.patch`) delivered against a4b57d2; benchmark with the plain Java stream row delivered. Maintainer's local tree has `LexOrderStrategy {PRUNED_BITSET, PRUNED_DFS, DP, ADAPTIVE}`; waiting for the push before rebasing WP0 and starting WP1.
+
+## 9. Maintainer clarifications (2026-11-17)
+
+- Full-result `lexOrder()` and any-order full generation are optimized for consuming the complete result set. Do not choose an implementation solely because it wins a short-prefix benchmark.
+- Special operations (`count`, `isEmpty`, `lexOrderMth`, `byRanks`, `choice`, `sample`, etc.) may pay the exact-plan/counting cost. Their end-to-end benchmarks include builder construction and rule registration.
+- The complete lexicographic enum strategy set is `PRUNED_BITSET`, `PRUNED_DFS`, `DP`, and `ADAPTIVE`. Document every constant and its selection semantics for future maintainers and AI contributors.
+- 2026-11-17: Created development branch `conditional-product-optimization` from commit `27c2066`. Corrected `ConditionalProductBuilder` references from the obsolete `PRUNED` enum constant to `PRUNED_BITSET`; the plan was expanded with the full-generation versus special-operation objectives and the full strategy table. Compile/tests have not yet been run.
