@@ -141,9 +141,9 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 
 ### WP5: Benchmarks (maintainer runs them)
 
-- [~] 5.1 Delivered `ConditionalProductStrategyBenchmark`: representative bounded full-traversal scenarios span 3, 5, 7, and 10 dimensions and list sizes 2, 4, 6, 10, 25, and 50. Every scenario is fully consumed; the largest valid result set is 80,000 tuples. All four library strategies are compared with a nested-stream baseline that prunes as soon as both dimensions of a rule are assigned.
-- [~] 5.2 Delivered STAR_FIRST, STAR_LAST, CHAIN, CYCLE, SPARSE, DENSE, DEAD_END, EMPTY, and tight-chain cases (10% allowed values). These cover late rejection, loop handling, sparse/dense constraint graphs, and zero-result paths.
-- [ ] 5.3 Large-size tier remains deferred until tiers 1 and 2 results identify an unanswered performance question.
+- [~] 5.1 Delivered `ConditionalProductStrategyBenchmark` with case definitions externalized as classpath `.properties` resources. JMH's `scenarioName` parameter is the case's relative resource path, so a single case can be selected without editing Java source. All four library strategies are compared with the nested-stream baseline; traversal-only and end-to-end are separate benchmark methods.
+- [~] 5.2 Delivered the hierarchical case tree: topology → numeric dimension/size range → selectivity → case. Numeric ranges are inclusive and non-overlapping: `Dim2-5`, `Dim6-10`, `Dim11-20`; `Size10-100`, `Size101-250`. STAR, CHAIN, SPARSE, DENSE, CYCLE, DEAD_END, and EMPTY coverage is retained. Workloads outside the numeric ranges are isolated under `edge-cases`.
+- [~] 5.3 Added the initial large-size tier for all three dimension bands and both size bands. Large cases use the TIGHT profile (approximately 1% of target values, minimum one) to keep complete traversal bounded. These cases still require maintainer compilation and benchmark execution.
 - Settings: one fork, one 500 ms warmup and two 500 ms measurement iterations; precompute dimensions/rule inputs outside timed methods; report traversal-only and end-to-end. Benchmark methods do not print; use JMH progress/ETA output and write detailed results as JSON.
 
 ### WP6: Finish — deferred until the very end
@@ -163,7 +163,7 @@ These three deliverables are intentionally postponed until the implementation, p
 | WP2 shared model | 4 verified | 4 |
 | WP3 generators | 5 verified; all four strategies retained and dispatched | 5 |
 | WP4 parallel | 3 verified | 3 |
-| WP5 benchmarks | 2 delivered, unverified | 3 |
+| WP5 benchmarks | 3 delivered, unverified | 3 |
 | WP6 finish | 0 | 3 |
 
 Update this table whenever an item changes status.
@@ -181,6 +181,8 @@ Update this table whenever an item changes status.
 - Unit tests live next to the existing ones in `ConditionalProductBuilderTest`, `ConditionalProductRuleOrderTest`, and a new differential test per generator.
 
 ## 8. Progress log (newest first)
+
+- 2026-11-17: Reorganized conditional-product benchmark cases into classpath resources under `src/test/resources/benchmarks/conditionalproduct/cases`. The physical case hierarchy is topology → numeric dimension/size range → selectivity; each resource path is directly usable as the JMH `scenarioName` parameter. Added all six agreed non-overlapping range groups across dimension bands 2–5, 6–10, 11–20 and size bands 10–100, 101–250, plus isolated edge cases. Added a 1%-minimum-one TIGHT profile for bounded large cases and documented exact single-case/strategy/measurement commands. Compilation and benchmark execution are pending maintainer verification.
 
 - 2026-11-17: Removed the two legacy conditional-product JMH benchmark classes and their committed output snapshots. Delivered `ConditionalProductStrategyBenchmark` with bounded full-traversal scenarios, all four library strategies, a prefix-pruned nested-stream baseline, tuple/order verification, and separate traversal-only/end-to-end methods. Added the benchmark README entry and JSON output command. Timed methods contain no console output; JMH's normal progress/ETA display stays enabled and detailed results are written to JSON. WP5.1 and WP5.2 are delivered but await maintainer compilation and benchmark runs.
 
