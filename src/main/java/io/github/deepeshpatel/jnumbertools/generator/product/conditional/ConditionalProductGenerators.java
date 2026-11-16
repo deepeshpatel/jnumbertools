@@ -8,7 +8,6 @@ import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
 
 import java.math.BigInteger;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -48,100 +47,11 @@ final class ConditionalProductGenerators {
 
         @Override
         public Iterator<List<Object>> iterator() {
-            return strategy == LexOrderStrategy.PRUNED_BITSET
-                    ? new PrunedLexItr(model)
-                    : new LexItr(model, model.plan());
-        }
-    }
-
-    /**
-     * Lexicographic depth-first traversal without the counting plan. At each dimension, candidates are
-     * filtered against all earlier dimensions connected to it by a rule. A prefix that has no completion
-     * may still be explored until the conflicting later dimension is reached; unlike the DP iterator, this
-     * iterator does not perform future-completion lookahead.
-     */
-    private static final class PrunedLexItr implements Iterator<List<Object>> {
-        private final ConstraintModel model;
-        private final int dimensions;
-        private final int[] val;
-        private final int[] nextCandidate;
-        private final int[][] belowDims;
-        private final BitSet[][][] belowRows;
-        private int depth;
-        private boolean ready;
-        private boolean exhausted;
-
-        PrunedLexItr(ConstraintModel model) {
-            this.model = model;
-            this.dimensions = model.dimensions.size();
-            this.val = new int[dimensions];
-            this.nextCandidate = new int[dimensions];
-            ConstraintModel.Rows rows = model.rows();
-            belowDims = rows.belowDims;
-            belowRows = rows.belowRows;
-            for (List<?> dimension : model.dimensions) {
-                if (dimension.isEmpty()) {
-                    exhausted = true;
-                    break;
-                }
-            }
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (!ready && !exhausted) {
-                ready = advance();
-                if (!ready) exhausted = true;
-            }
-            return ready;
-        }
-
-        @Override
-        public List<Object> next() {
-            if (!hasNext()) throw new NoSuchElementException();
-            ready = false;
-            return model.tuple(val);
-        }
-
-        private boolean advance() {
-            while (depth >= 0) {
-                int candidate = nextValidCandidate(depth, nextCandidate[depth]);
-                if (candidate < 0) {
-                    if (depth == 0) return false;
-                    depth--;
-                    nextCandidate[depth] = val[depth] + 1;
-                    continue;
-                }
-
-                val[depth] = candidate;
-                nextCandidate[depth] = candidate + 1;
-                if (depth == dimensions - 1) return true;
-
-                depth++;
-                nextCandidate[depth] = 0;
-            }
-            return false;
-        }
-
-        private int nextValidCandidate(int dimension, int from) {
-            int size = model.dimensions.get(dimension).size();
-            if (from >= size) return -1;
-
-            int[] earlier = belowDims[dimension];
-            if (earlier.length == 0) return from;
-
-            BitSet[][] rows = belowRows[dimension];
-            BitSet firstAllowed = rows[0][val[earlier[0]]];
-            candidateLoop:
-            for (int candidate = firstAllowed.nextSetBit(from);
-                 candidate >= 0 && candidate < size;
-                 candidate = firstAllowed.nextSetBit(candidate + 1)) {
-                for (int i = 1; i < earlier.length; i++) {
-                    if (!rows[i][val[earlier[i]]].get(candidate)) continue candidateLoop;
-                }
-                return candidate;
-            }
-            return -1;
+            return switch (strategy) {
+                case PRUNED_BITSET -> new BitSetPrunedGenerator(model);
+                case PRUNED_DFS, DP -> new LexItr(model, model.plan());
+                case ADAPTIVE -> throw new IllegalArgumentException("ADAPTIVE must be resolved by the builder");
+            };
         }
     }
 
