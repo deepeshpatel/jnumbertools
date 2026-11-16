@@ -418,7 +418,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     public StreamableIterable<Object> choice(int sampleSize, Random random) {
         BigIntegerChoice ranks = new BigIntegerChoice(count(), sampleSize, random); // validates the arguments
         ConstraintPlan p = plan();
-        if (p.mostTuplesValid()) {
+        if (p.counts.mostTuplesValid()) {
             return new RejectionChoiceGenerator(sampleSize, random);
         }
         return new RankBasedGenerator(ranks);
@@ -1076,7 +1076,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
                         throw new IllegalArgumentException(
                                 "Rank " + rank + " is out of bounds [0, " + p.counts.total + ")");
                     }
-                    return tuple(p.unrank(rank));
+                    return tuple(p.counts.unrank(rank));
                 }
             };
         }
