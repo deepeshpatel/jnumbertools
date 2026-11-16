@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
+import io.github.deepeshpatel.jnumbertools.datastructure.Tuple;
 import java.util.Collections;
 
 /**
@@ -21,6 +22,7 @@ final class ConstraintModel {
     final List<List<?>> dimensions;
     final PersistentRelationMap relations;
     private volatile Rows rows;
+    private volatile ConstraintPlan plan;
 
     ConstraintModel(List<List<?>> dimensions, PersistentRelationMap relations) {
         this.dimensions = dimensions;
@@ -53,6 +55,28 @@ final class ConstraintModel {
             ConstraintGraph.checkLoopBlocks(dimensions, updatedRelations.keySet());
         }
         return new ConstraintModel(dimensions, updatedRelations);
+    }
+
+    ConstraintPlan plan() {
+        ConstraintPlan result = plan;
+        if (result == null) {
+            synchronized (this) {
+                result = plan;
+                if (result == null) {
+                    result = new ConstraintPlan(dimensions, relations);
+                    plan = result;
+                }
+            }
+        }
+        return result;
+    }
+
+    List<Object> tuple(int[] indices) {
+        Object[] values = new Object[indices.length];
+        for (int i = 0; i < indices.length; i++) {
+            values[i] = dimensions.get(i).get(indices[i]);
+        }
+        return Tuple.wrap(values);
     }
 
     Rows rows() {
