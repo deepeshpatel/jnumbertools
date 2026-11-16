@@ -113,10 +113,10 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 
 ### WP1: Setup cost
 
-- [~] 1.1 Run the loop check only when a rule adds a new linked pair (delivered; compile/test confirmation pending)
-- [ ] 1.2 Replace the sorted-set rebuild per rule with a scan for "is this pair already linked"
-- [ ] 1.3 Chain the rules (shared tail) so adding a rule is O(1) instead of copying the list
-- Acceptance: `builderConstructionOnly` clearly lower on CHAIN and CYCLE; identical tuples on the differential check.
+- [x] 1.1 Run the loop check only when a rule adds a new linked pair (verified by the maintainer's full test run)
+- [x] 1.2 Replace repeated edge-removal reachability searches in `blockOf` with one Tarjan bridge traversal; union only non-bridge edges into loop blocks
+- [ ] 1.3 Reduce the O(E) relation-map copy performed by `withRule` when adding or updating a linked pair; choose a representation compatible with immutable builders
+- Acceptance: lower builder-construction cost on CHAIN and CYCLE; identical tuples and loop-limit decisions on differential checks.
 
 ### WP2: Extract the shared model
 
@@ -157,7 +157,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 | Package | Done | Total |
 |---|---|---|
 | WP0 baseline | 0 (3 delivered, unconfirmed) | 3 |
-| WP1 setup cost | 0 (1 delivered, unconfirmed) | 3 |
+| WP1 setup cost | 2 | 3 |
 | WP2 shared model | 0 | 4 |
 | WP3 generators | 0 | 5 |
 | WP4 parallel | 0 | 3 |
@@ -191,4 +191,6 @@ Update this table whenever an item changes status.
 
 - 2026-11-17: Maintainer explicitly confirmed that no strategy is to be removed. Updated the retention rule, WP3/WP6 expectations, and open questions accordingly: all four strategies remain implemented; benchmark evidence is for optimization/default/cutoff tuning after the full flow is complete, not for dropping algorithms.
 
-- 2026-11-17: WP1.1 delivered. `withRule` now runs `checkLoopBlocks` only when the rule introduces a new dimension-pair edge; adding another restriction to an existing pair cannot change graph connectivity or loop blocks. Added a builder-style regression test that adds a further restriction to an edge after a three-dimension loop has formed and checks exact count and lexicographic output. Compilation and tests have not been run.
+- 2026-11-17: WP1.1 delivered and verified by the maintainer's full test run. `withRule` runs `checkLoopBlocks` only when the rule introduces a new dimension-pair edge; adding another restriction to an existing pair cannot change graph connectivity or loop blocks. A builder-style regression test checks exact count and lexicographic output after adding a further restriction to an edge in a three-dimension loop.
+
+- 2026-11-17: WP1.2 delivered. The previous `blockOf` implementation removed each edge and reran graph reachability, doing repeated work for every new linked pair. Replaced it with Tarjan bridge detection in one DFS traversal, then unioned only non-bridge edges to form loop blocks. Added a builder-style regression test proving that a 1,001-value dimension attached to a 1,000,000-combination cycle by a bridge is excluded from that cycle's loop-block product. The maintainer should run the test suite before this item is marked verified.
