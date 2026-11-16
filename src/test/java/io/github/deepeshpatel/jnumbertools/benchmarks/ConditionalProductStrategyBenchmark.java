@@ -64,34 +64,38 @@ public class ConditionalProductStrategyBenchmark {
 
         Scenario scenario;
         long expectedCount;
+        BaselinePlan baselinePlan;
         ConditionalProductBuilder builder;
         Iterable<?> preparedGenerator;
 
         @Setup(Level.Trial)
         public void setup() {
             scenario = Scenario.create(scenarioName);
+            baselinePlan = buildBaselinePlan(scenario);
             // The exact expected traversal size is scenario metadata for ADAPTIVE, not timed work.
-            expectedCount = nestedStream(scenario).count();
-            builder = buildBuilder(scenario);
-            preparedGenerator = createLibraryGenerator(builder, implementation, expectedCount);
-            verifyPreparedResult();
-        }
+            expectedCount = nestedStream(baselinePlan).count();
 
-        private void verifyPreparedResult() {
-            long actual = implementation.equals("NESTED_STREAM")
-                    ? nestedStream(scenario).count()
-                    : count(preparedGenerator);
-            if (actual != expectedCount) {
-                throw new IllegalStateException(scenarioName + "/" + implementation
-                        + ": expected " + expectedCount + " tuples but got " + actual);
+            // Verify on a disposable builder so DP's lazy counting state is not warmed for measurement.
+            if (!implementation.equals("NESTED_STREAM")) {
+                long actual = count(createLibraryGenerator(
+                        buildBuilder(scenario), implementation, expectedCount));
+                if (actual != expectedCount) {
+                    throw new IllegalStateException(scenarioName + "/" + implementation
+                            + ": expected " + expectedCount + " tuples but got " + actual);
+                }
             }
+
+            // The measured traversal-only builder/generator is fresh and unconsumed.
+            builder = implementation.equals("NESTED_STREAM") ? null : buildBuilder(scenario);
+            preparedGenerator = implementation.equals("NESTED_STREAM")
+                    ? null : createLibraryGenerator(builder, implementation, expectedCount);
         }
     }
 
     @Benchmark
     public long traversalOnly(BenchmarkState state) {
         if (state.implementation.equals("NESTED_STREAM")) {
-            return checksum(nestedStream(state.scenario));
+            return checksum(nestedStream(state.baselinePlan));
         }
         return checksum(state.preparedGenerator);
     }
@@ -99,8 +103,8 @@ public class ConditionalProductStrategyBenchmark {
     @Benchmark
     public long endToEnd(BenchmarkState state) {
         if (state.implementation.equals("NESTED_STREAM")) {
-            // Build the baseline's constraint plan and consume its complete nested stream.
-            return checksum(nestedStream(state.scenario));
+            // Include compilation of the baseline's per-depth rule index in the timed operation.
+            return checksum(nestedStream(buildBaselinePlan(state.scenario)));
         }
         ConditionalProductBuilder builder = buildBuilder(state.scenario);
         Iterable<?> generator = createLibraryGenerator(builder, state.implementation, state.expectedCount);
@@ -165,32 +169,41 @@ public class ConditionalProductStrategyBenchmark {
     // Independent nested-stream baseline
     // ---------------------------------------------------------------------
 
-    private static Stream<List<Object>> nestedStream(Scenario scenario) {
-        return nestedAt(0, new int[scenario.dimensions.size()],
-                new Object[scenario.dimensions.size()], scenario);
+    private static BaselinePlan buildBaselinePlan(Scenario scenario) {
+        List<Rule>[] byDepth = new List[scenario.dimensions.size()];
+        for (int d = 0; d < byDepth.length; d++) byDepth[d] = new ArrayList<>();
+        for (Rule rule : scenario.rules) {
+            int laterDimension = Math.max(rule.triggerDimension, rule.targetDimension);
+            byDepth[laterDimension].add(new Rule(rule.triggerDimension,
+                    (BitSet) rule.triggerValues.clone(), rule.targetDimension,
+                    (BitSet) rule.allowedValues.clone()));
+        }
+        return new BaselinePlan(scenario, byDepth);
+    }
+
+    private static Stream<List<Object>> nestedStream(BaselinePlan plan) {
+        return nestedAt(0, new int[plan.scenario.dimensions.size()],
+                new Object[plan.scenario.dimensions.size()], plan);
     }
 
     private static Stream<List<Object>> nestedAt(
-            int depth, int[] indexes, Object[] values, Scenario scenario) {
-        if (depth == scenario.dimensions.size()) {
+            int depth, int[] indexes, Object[] values, BaselinePlan plan) {
+        if (depth == plan.scenario.dimensions.size()) {
             return Stream.of(List.copyOf(Arrays.asList(values.clone())));
         }
 
-        return IntStream.range(0, scenario.dimensions.get(depth).size())
-                .filter(candidate -> validCandidate(depth, candidate, indexes, scenario))
+        return IntStream.range(0, plan.scenario.dimensions.get(depth).size())
+                .filter(candidate -> validCandidate(depth, candidate, indexes, plan))
                 .boxed()
                 .flatMap(candidate -> {
                     indexes[depth] = candidate;
-                    values[depth] = scenario.dimensions.get(depth).get(candidate);
-                    return nestedAt(depth + 1, indexes, values, scenario);
+                    values[depth] = plan.scenario.dimensions.get(depth).get(candidate);
+                    return nestedAt(depth + 1, indexes, values, plan);
                 });
     }
 
-    private static boolean validCandidate(int depth, int candidate, int[] indexes, Scenario scenario) {
-        for (Rule rule : scenario.rules) {
-            int laterDimension = Math.max(rule.triggerDimension, rule.targetDimension);
-            if (laterDimension != depth) continue;
-
+    private static boolean validCandidate(int depth, int candidate, int[] indexes, BaselinePlan plan) {
+        for (Rule rule : plan.rulesByDepth[depth]) {
             int triggerIndex = rule.triggerDimension == depth
                     ? candidate : indexes[rule.triggerDimension];
             int targetIndex = rule.targetDimension == depth
@@ -212,6 +225,16 @@ public class ConditionalProductStrategyBenchmark {
 
     private record Rule(int triggerDimension, BitSet triggerValues,
                         int targetDimension, BitSet allowedValues) { }
+
+    private static final class BaselinePlan {
+        final Scenario scenario;
+        final List<Rule>[] rulesByDepth;
+
+        BaselinePlan(Scenario scenario, List<Rule>[] rulesByDepth) {
+            this.scenario = scenario;
+            this.rulesByDepth = rulesByDepth;
+        }
+    }
 
     private static final class Scenario {
         final Topology topology;
