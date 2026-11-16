@@ -172,6 +172,30 @@ class ConditionalProductBuilderTest {
     }
 
     @Test
+    void persistentRelationUpdatesPreserveEarlierBuildersAndSortedIteration() {
+        var base = cartesianProduct.conditionalProductOf(os).and(browser);
+        var safariRule = base.when(browser).is("Safari").then(os).is("macOS");
+        var safariAndChromeRules = safariRule.when(browser).is("Chrome").then(os).is("Windows");
+        var independentBranch = base.when(browser).is("Firefox").then(os).is("Linux");
+
+        assertEquals(BigInteger.valueOf(9), base.count());
+        assertEquals(BigInteger.valueOf(7), safariRule.count());
+        assertEquals(BigInteger.valueOf(5), safariAndChromeRules.count());
+        assertEquals(BigInteger.valueOf(7), independentBranch.count());
+
+        assertEquals(List.of(
+                List.of("Windows", "Chrome"),
+                List.of("macOS", "Safari"),
+                List.of("Linux", "Firefox")),
+                safariAndChromeRules.lexOrder().stream().toList());
+        assertEquals(List.of(
+                List.of("Windows", "Chrome"),
+                List.of("macOS", "Safari"),
+                List.of("Linux", "Firefox")),
+                independentBranch.lexOrder().stream().toList());
+    }
+
+    @Test
     void snapshotOfTheCallersLists() {
         var mutable = new ArrayList<>(List.of("a", "b"));
         var other = new ArrayList<>(List.of("x", "y"));
