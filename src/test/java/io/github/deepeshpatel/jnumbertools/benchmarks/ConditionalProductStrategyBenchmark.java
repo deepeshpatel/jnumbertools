@@ -339,7 +339,7 @@ public class ConditionalProductStrategyBenchmark {
         private BitSet allowedSet(int dimension, int variant) {
             int size = dimensions.get(dimension).size();
             int allowedCount = switch (selectivity) {
-                case TIGHT -> Math.max(1, (int) Math.floor(size * 0.10));
+                case TIGHT -> Math.max(1, (int) Math.floor(size * 0.01));
                 case HIGH -> Math.max(1, (int) Math.floor(size * 0.20));
                 case MEDIUM -> Math.max(1, (int) Math.floor(size * 0.50));
                 case LOW -> Math.max(1, (int) Math.floor(size * 0.80));
