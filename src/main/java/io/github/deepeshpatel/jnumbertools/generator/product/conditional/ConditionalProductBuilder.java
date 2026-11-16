@@ -70,8 +70,11 @@ import java.util.Set;
  * For all accepted rule sets {@link #count()}, {@link #lexOrder()},
  * {@link #lexOrderMth(BigInteger, BigInteger)}, {@link #byRanks(Iterable)}, {@link #choice(int, Random)}
  * and {@link #sample(int, Random)} work on the valid tuples only, without enumerating the full product.
- * Ranks are positions among the valid tuples in lexicographic order (dimension order, then the order of
- * each list). They change when rules change.</p>
+ * Ordinary {@link #lexOrder()} traversal defaults to {@link LexOrderStrategy#PRUNED}; callers can select
+ * {@link LexOrderStrategy#DP} or use {@link LexOrderStrategy#ADAPTIVE} with an expected traversal size.
+ * The exact counting and rank-based operations always use the DP plan, regardless of the lexicographic
+ * traversal strategy. Ranks are positions among the valid tuples in lexicographic order (dimension order,
+ * then the order of each list). They change when rules change.</p>
  *
  * <p>Instances are immutable and thread-safe. Calls to {@code and(...)} and completed rule chains return
  * new builders; intermediate {@code when(...)} and {@code then(...)} steps do not modify the existing
