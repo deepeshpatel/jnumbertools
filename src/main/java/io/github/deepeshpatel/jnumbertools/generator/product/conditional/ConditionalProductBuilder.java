@@ -129,10 +129,8 @@ import java.util.Random;
 public final class ConditionalProductBuilder implements Builder<Object> {
 
     private final ConstraintModel model;         // immutable shared dimensions and pairwise relations
-    private final List<List<?>> dims;            // private snapshots; unmodifiable (facade transition alias)
     private final List<List<?>> originals;       // the caller's list objects, matched by identity only
     private final RuleCompiler ruleCompiler;
-    private final PersistentRelationMap relations; // persistent AVL map; key(u, v) with u < v (facade transition alias)
     private volatile ConstraintPlan plan;                  // built lazily on first use
 
 
@@ -142,15 +140,14 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @throws NullPointerException if {@code elements} is null or contains a null element
      */
     public ConditionalProductBuilder(List<?> elements) {
-        this(List.<List<?>>of(snapshot(elements)), List.<List<?>>of(elements), PersistentRelationMap.empty());
+        this(new ConstraintModel(List.<List<?>>of(snapshot(elements)), PersistentRelationMap.empty()),
+                List.<List<?>>of(elements));
     }
 
-    private ConditionalProductBuilder(List<List<?>> dims, List<List<?>> originals, PersistentRelationMap relations) {
-        this.model = new ConstraintModel(dims, relations);
-        this.dims = model.dimensions;
+    private ConditionalProductBuilder(ConstraintModel model, List<List<?>> originals) {
+        this.model = model;
         this.originals = originals;
-        this.ruleCompiler = new RuleCompiler(dims, originals);
-        this.relations = (PersistentRelationMap) model.relations;
+        this.ruleCompiler = new RuleCompiler(model.dimensions, originals);
     }
 
     /**
@@ -161,12 +158,10 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     public ConditionalProductBuilder and(List<?> elements) {
         List<?> copy = snapshot(elements);
-        List<List<?>> newDims = new ArrayList<>(dims);
-        newDims.add(copy);
         List<List<?>> newOriginals = new ArrayList<>(originals);
         newOriginals.add(elements);
-        return new ConditionalProductBuilder(
-                Collections.unmodifiableList(newDims), Collections.unmodifiableList(newOriginals), relations);
+        return new ConditionalProductBuilder(model.withDimension(copy),
+                Collections.unmodifiableList(newOriginals));
     }
 
     //Rule Methods
@@ -437,34 +432,14 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
     @Override
     public String toString() {
-        return "ConditionalProductBuilder{dimensions=" + dims + ", linkedPairs=" + relations.size() + '}';
+        return "ConditionalProductBuilder{dimensions=" + model.dimensions + ", linkedPairs=" + model.relations.size() + '}';
     }
 
     // ── Rule application ─────────────────────────────────────────────────────
 
     private ConditionalProductBuilder withRule(int triggerDim, BitSet triggerValues, int targetDim, BitSet allowedTargets) {
-        int u = Math.min(triggerDim, targetDim);
-        int v = Math.max(triggerDim, targetDim);
-        long key = ConstraintGraph.key(u, v);
-        Relation relation = relations.get(key);
-        boolean newLinkedPair = relation == null;
-        if (newLinkedPair) {
-            long cells = (long) dims.get(u).size() * dims.get(v).size();
-            if (cells > ConstraintGraph.MAX_PAIR_CELLS) {
-                throw new IllegalArgumentException("The two dimensions have too many value pairs (" + cells
-                        + ") for a rule; the limit is " + ConstraintGraph.MAX_PAIR_CELLS);
-            }
-            relation = Relation.full(dims.get(u).size(), dims.get(v).size());
-        }
-        Relation updated = relation.restrict(triggerValues, allowedTargets, triggerDim == u);
-        // Path-copy only the AVL search path. Adding another rule to an existing pair is O(log E)
-        // rather than copying all E relation entries; older builders retain their previous root.
-        PersistentRelationMap updatedRelations = relations.with(key, updated);
-        // A new graph edge can change loop blocks; another restriction on an existing edge cannot.
-        if (newLinkedPair) {
-            ConstraintGraph.checkLoopBlocks(dims, updatedRelations.keySet());
-        }
-        return new ConditionalProductBuilder(dims, originals, updatedRelations);
+        return new ConditionalProductBuilder(
+                model.withRule(triggerDim, triggerValues, targetDim, allowedTargets), originals);
     }
 
     private static Object nonNull(Object value) {
@@ -492,7 +467,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
             synchronized (this) {
                 p = plan;
                 if (p == null) {
-                    p = new ConstraintPlan(dims, relations);
+                    p = new ConstraintPlan(model.dimensions, model.relations);
                     plan = p;
                 }
             }
@@ -506,7 +481,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     private List<Object> tuple(int[] val) {
         Object[] result = new Object[val.length];
         for (int i = 0; i < val.length; i++) {
-            result[i] = dims.get(i).get(val[i]);
+            result[i] = model.dimensions.get(i).get(val[i]);
         }
         return Tuple.wrap(result);
     }
@@ -534,7 +509,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * iterator does not perform future-completion lookahead.
      */
     private final class PrunedLexItr implements Iterator<List<Object>> {
-        private final int dimensions = dims.size();
+        private final int dimensions = model.dimensions.size();
         private final int[] val = new int[dimensions];
         private final int[] nextCandidate = new int[dimensions];
         private final int[][] belowDims;
@@ -547,7 +522,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
             ConstraintModel.Rows rows = model.rows();
             belowDims = rows.belowDims;
             belowRows = rows.belowRows;
-            for (List<?> dimension : dims) {
+            for (List<?> dimension : model.dimensions) {
                 if (dimension.isEmpty()) {
                     exhausted = true;
                     break;
@@ -592,7 +567,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         }
 
         private int nextValidCandidate(int dimension, int from) {
-            int size = dims.get(dimension).size();
+            int size = model.dimensions.get(dimension).size();
             if (from >= size) return -1;
 
             int[] earlier = belowDims[dimension];
