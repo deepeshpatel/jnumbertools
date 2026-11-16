@@ -67,6 +67,39 @@ import java.util.Random;
  * traversal strategy. Ranks are positions among the valid tuples in lexicographic order (dimension order,
  * then the order of each list). They change when rules change.</p>
  *
+ * <h2>Practical performance guidance: dimension order</h2>
+ * <p>Dimension declaration order can affect the amount of work required by lexicographic traversal.
+ * The order is the order in which the dimensions are supplied to {@code conditionalProductOf(...)}
+ * and {@link #and(List)}. It also defines the tuple positions and lexicographic encounter order, so
+ * changing it changes the order (and positional meaning) of the generated tuples.</p>
+ *
+ * <p>During prefix-pruned traversal, a rule between two dimensions can be checked when the later of
+ * those dimensions is assigned: the candidate value is tested against dimensions already present in
+ * the prefix. A restrictive relation can therefore prune the remaining search below that point.
+ * As a practical starting point:</p>
+ * <ul>
+ *   <li>Do not automatically put the most restrictive dimension first. First consider which other
+ *       dimensions must already be assigned before its rules can be evaluated.</li>
+ *   <li>Once the dimensions needed by those rules have been assigned, place a highly restrictive
+ *       dimension before dimensions whose combinations it can eliminate. Avoid leaving a dimension
+ *       that rejects many values until the very end, where little downstream work remains to prune.</li>
+ *   <li>Consider the constraint graph as a whole. A dimension connected to several earlier dimensions
+ *       may have more opportunities to reject candidates than one with only a single relation.</li>
+ *   <li>Preserve the order required by your application: reordering dimensions changes tuple positions
+ *       and lexicographic order, even when the set of valid combinations is unchanged.</li>
+ * </ul>
+ *
+ * <p>This is analogous to join ordering and predicate placement in a SQL query: a selective condition
+ * is valuable when it can be applied before large downstream combinations are produced, but its
+ * dependencies must be available first. There is no universally optimal order; dimension sizes,
+ * value distributions, rule dependencies and graph topology all matter. Benchmark representative
+ * inputs when traversal performance is important.</p>
+ *
+ * <p>These ordering hints describe prefix-pruned lexicographic traversal. Exact counting and
+ * rank-based operations use the counting plan and have different cost characteristics. Guidance
+ * for the separate unordered/parallel traversal API will be documented with that API once its
+ * implementation and benchmark results are available.</p>
+ *
  * <p>Instances are immutable and thread-safe. Calls to {@code and(...)} and completed rule chains return
  * new builders; intermediate {@code when(...)} and {@code then(...)} steps do not modify the existing
  * builder.</p>
