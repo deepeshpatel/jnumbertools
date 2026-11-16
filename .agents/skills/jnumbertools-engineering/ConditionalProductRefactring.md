@@ -136,7 +136,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 ### WP4: Parallel
 
 - [x] 4.1 Ordered, lazy spliterator for PRUNED_BITSET and PRUNED_DFS; splits disjoint contiguous first-dimension ranges, preserves encounter order, and stops below the minimum range threshold. Maintainer confirmed the focused regression suite passed (35 tests). Deeper-dimension splitting remains a follow-up if benchmarks show first-dimension partitioning is insufficient.
-- [~] 4.2 Added `DpRankSpliterator`: partitions the exact BigInteger valid-tuple rank interval into disjoint contiguous ranges, lazily unranks each tuple, and preserves ordered encounter semantics. DP parallel-stream regression coverage added; awaiting maintainer verification.
+- [x] 4.2 Added `DpRankSpliterator`: partitions the exact BigInteger valid-tuple rank interval into disjoint contiguous ranges, lazily unranks each tuple, and preserves ordered encounter semantics. Maintainer confirmed the focused regression suite passed (35 tests).
 - [ ] 4.3 Tests: ordered parallel equals sequential for all generators; `unordered()` has the same set of tuples
 
 ### WP5: Benchmarks (maintainer runs them)
@@ -146,11 +146,13 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 - [ ] 5.3 Tier 3: large sizes only if tiers 1 and 2 leave open questions
 - Settings: one fork, fewer iterations; precompute rule inputs outside the timed section; report both traversal-only and end-to-end.
 
-### WP6: Finish
+### WP6: Finish — deferred until the very end
 
-- [ ] 6.1 Javadoc for every strategy, with a plain statement of when to use it
-- [ ] 6.2 README and benchmarks README update; changelog line
-- [ ] 6.3 Benchmark all four retained strategies after the complete flow is ready; tune implementations, defaults, and the `ADAPTIVE` cutoff where evidence supports a change. Do not remove or deprecate any strategy.
+These three deliverables are intentionally postponed until the implementation, parallel work, and benchmark design/results are settled. Do not start them during intermediate work packages.
+
+- [ ] FINAL TODO 1 — Javadoc update: document every strategy and give a plain statement of when to use it.
+- [ ] FINAL TODO 2 — README update: update the main README, benchmarks README, and changelog to reflect the final API, behavior, and measured results.
+- [ ] FINAL TODO 3 — Benchmark update: implement and run the final benchmark classes for all four retained strategies, then use the evidence to tune implementations, defaults, and the ADAPTIVE cutoff where justified. The maintainer will provide the benchmark class design; do not design or implement these classes before receiving those instructions. Never remove or deprecate a strategy.
 
 ## 5. Progress summary
 
@@ -160,7 +162,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 | WP1 setup cost | 3 verified | 3 |
 | WP2 shared model | 4 verified | 4 |
 | WP3 generators | 5 verified; all four strategies retained and dispatched | 5 |
-| WP4 parallel | 1 verified, 1 delivered awaiting verification | 3 |
+| WP4 parallel | 2 verified | 3 |
 | WP5 benchmarks | 0 | 3 |
 | WP6 finish | 0 | 3 |
 
@@ -179,6 +181,8 @@ Update this table whenever an item changes status.
 - Unit tests live next to the existing ones in `ConditionalProductBuilderTest`, `ConditionalProductRuleOrderTest`, and a new differential test per generator.
 
 ## 8. Progress log (newest first)
+
+- 2026-11-17: Maintainer confirmed the focused suite passed after WP4.2: 35 tests. WP4.2 is verified. The test now exercises ordered parallel traversal for DP as well as both pruned generators. The maintainer also requested that three finishing deliverables remain explicit TODOs at the very end of the plan: Javadoc update, README/benchmarks README/changelog update, and benchmark update. Benchmark class design will be supplied by the maintainer; do not begin that work before receiving it.
 
 - 2026-11-17: Started WP4.2. Added `DpRankSpliterator`, which partitions the exact valid-tuple rank interval `[0, counts.total)` using BigInteger midpoint splits. Each partition lazily unranks its next rank and materializes the tuple; lower ranges are returned while the current spliterator retains the upper range, preserving ordered parallel-stream semantics without materializing tuples. Wired DP lex-order streams to this spliterator and expanded the parallel-order/set regression test to include DP. Awaiting the focused test run.
 
