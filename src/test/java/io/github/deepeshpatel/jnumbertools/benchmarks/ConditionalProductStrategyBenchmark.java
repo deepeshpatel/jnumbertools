@@ -14,6 +14,9 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -45,18 +48,23 @@ public class ConditionalProductStrategyBenchmark {
          * STAR_FIRST and STAR_LAST expose the effect of constraint direction relative to dimension order.
          */
         @Param({
-                "STAR_FIRST_5x10_HIGH",
-                "STAR_LAST_5x10_HIGH",
-                "CHAIN_5x10_MEDIUM",
-                "SPARSE_7x4_MEDIUM",
-                "DENSE_7x4_LOW",
-                "DEAD_END_5x10",
-                "EMPTY_3x10",
-                "CHAIN_3x25_MEDIUM",
-                "STAR_FIRST_3x50_LOW",
-                "CHAIN_10x2_LOW",
-                "CHAIN_5x10_TIGHT",
-                "CYCLE_5x6_MEDIUM"
+                "topology/star/Dim2-5_Size10-100/selectivity/high/STAR_FIRST_5x10_HIGH",
+                "topology/star/Dim2-5_Size10-100/selectivity/high/STAR_LAST_5x10_HIGH",
+                "topology/chain/Dim2-5_Size10-100/selectivity/medium/CHAIN_5x10_MEDIUM",
+                "topology/chain/Dim2-5_Size10-100/selectivity/tight/CHAIN_5x10_TIGHT",
+                "topology/chain/Dim2-5_Size10-100/selectivity/medium/CHAIN_3x25_MEDIUM",
+                "topology/star/Dim2-5_Size10-100/selectivity/low/STAR_FIRST_3x50_LOW",
+                "topology/chain/Dim6-10_Size10-100/selectivity/tight/CHAIN_10x10_TIGHT",
+                "topology/chain/Dim11-20_Size10-100/selectivity/tight/CHAIN_15x10_TIGHT",
+                "topology/chain/Dim2-5_Size101-250/selectivity/tight/CHAIN_3x101_TIGHT",
+                "topology/chain/Dim6-10_Size101-250/selectivity/tight/CHAIN_6x101_TIGHT",
+                "topology/chain/Dim11-20_Size101-250/selectivity/tight/CHAIN_11x101_TIGHT",
+                "edge-cases/small-domain/SPARSE_7x4_MEDIUM",
+                "edge-cases/small-domain/DENSE_7x4_LOW",
+                "edge-cases/small-domain/CHAIN_10x2_LOW",
+                "edge-cases/small-domain/CYCLE_5x6_MEDIUM",
+                "edge-cases/dead-end/DEAD_END_5x10",
+                "edge-cases/empty-result/EMPTY_3x10"
         })
         public String scenarioName;
 
@@ -255,22 +263,34 @@ public class ConditionalProductStrategyBenchmark {
             this.rules = createRules();
         }
 
-        static Scenario create(String name) {
-            return switch (name) {
-                case "STAR_FIRST_5x10_HIGH" -> new Scenario(Topology.STAR_FIRST, Selectivity.HIGH, 5, 10, false);
-                case "STAR_LAST_5x10_HIGH" -> new Scenario(Topology.STAR_LAST, Selectivity.HIGH, 5, 10, false);
-                case "CHAIN_5x10_MEDIUM" -> new Scenario(Topology.CHAIN, Selectivity.MEDIUM, 5, 10, false);
-                case "SPARSE_7x4_MEDIUM" -> new Scenario(Topology.SPARSE, Selectivity.MEDIUM, 7, 4, false);
-                case "DENSE_7x4_LOW" -> new Scenario(Topology.DENSE, Selectivity.LOW, 7, 4, false);
-                case "DEAD_END_5x10" -> new Scenario(Topology.DEAD_END, Selectivity.HIGH, 5, 10, false);
-                case "EMPTY_3x10" -> new Scenario(Topology.EMPTY, Selectivity.NONE, 3, 10, true);
-                case "CHAIN_3x25_MEDIUM" -> new Scenario(Topology.CHAIN, Selectivity.MEDIUM, 3, 25, false);
-                case "STAR_FIRST_3x50_LOW" -> new Scenario(Topology.STAR_FIRST, Selectivity.LOW, 3, 50, false);
-                case "CHAIN_10x2_LOW" -> new Scenario(Topology.CHAIN, Selectivity.LOW, 10, 2, false);
-                case "CHAIN_5x10_TIGHT" -> new Scenario(Topology.CHAIN, Selectivity.TIGHT, 5, 10, false);
-                case "CYCLE_5x6_MEDIUM" -> new Scenario(Topology.CYCLE, Selectivity.MEDIUM, 5, 6, false);
-                default -> throw new IllegalArgumentException("Unknown scenario: " + name);
-            };
+        static Scenario create(String caseId) {
+            String resource = "/benchmarks/conditionalproduct/cases/" + caseId + ".properties";
+            Properties properties = new Properties();
+            try (InputStream input = Scenario.class.getResourceAsStream(resource)) {
+                if (input == null) {
+                    throw new IllegalArgumentException("Unknown benchmark case: " + caseId
+                            + " (resource not found: " + resource + ")");
+                }
+                properties.load(input);
+            } catch (IOException exception) {
+                throw new IllegalStateException("Cannot load benchmark case: " + caseId, exception);
+            }
+
+            Topology topology = Topology.valueOf(required(properties, "topology"));
+            Selectivity selectivity = Selectivity.valueOf(required(properties, "selectivity"));
+            int dimensionCount = Integer.parseInt(required(properties, "dimensions"));
+            int listSize = Integer.parseInt(required(properties, "size"));
+            boolean emptyDimension = Boolean.parseBoolean(properties.getProperty("emptyDimension", "false"));
+
+            return new Scenario(topology, selectivity, dimensionCount, listSize, emptyDimension);
+        }
+
+        private static String required(Properties properties, String key) {
+            String value = properties.getProperty(key);
+            if (value == null || value.isBlank()) {
+                throw new IllegalArgumentException("Missing required benchmark case property: " + key);
+            }
+            return value.trim();
         }
 
         private List<Rule> createRules() {
