@@ -1071,7 +1071,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
                 public List<Object> next() {
                     if (!hasNext()) throw new NoSuchElementException();
                     BigInteger rank = rankIt.next();
-                    Plan p = plan();
+                    ConstraintPlan p = plan();
                     if (rank.signum() < 0 || rank.compareTo(p.total) >= 0) {
                         throw new IllegalArgumentException(
                                 "Rank " + rank + " is out of bounds [0, " + p.total + ")");
