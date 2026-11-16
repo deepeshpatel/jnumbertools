@@ -64,6 +64,7 @@ public class ConditionalProductStrategyBenchmark {
 
         Scenario scenario;
         long expectedCount;
+        long expectedChecksum;
         BaselinePlan baselinePlan;
         ConditionalProductBuilder builder;
         Iterable<?> preparedGenerator;
@@ -74,14 +75,16 @@ public class ConditionalProductStrategyBenchmark {
             baselinePlan = buildBaselinePlan(scenario);
             // The exact expected traversal size is scenario metadata for ADAPTIVE, not timed work.
             expectedCount = nestedStream(baselinePlan).count();
+            expectedChecksum = checksum(nestedStream(baselinePlan));
 
-            // Verify on a disposable builder so DP's lazy counting state is not warmed for measurement.
+            // Verify tuple values and encounter order on a disposable builder so DP's lazy
+            // counting state is not warmed for the measured traversal-only generator.
             if (!implementation.equals("NESTED_STREAM")) {
-                long actual = count(createLibraryGenerator(
+                long actualChecksum = checksum(createLibraryGenerator(
                         buildBuilder(scenario), implementation, expectedCount));
-                if (actual != expectedCount) {
+                if (actualChecksum != expectedChecksum) {
                     throw new IllegalStateException(scenarioName + "/" + implementation
-                            + ": expected " + expectedCount + " tuples but got " + actual);
+                            + ": library output differs from the nested-stream baseline");
                 }
             }
 
