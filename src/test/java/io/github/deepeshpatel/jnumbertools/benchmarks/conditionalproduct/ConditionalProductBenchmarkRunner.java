@@ -46,11 +46,11 @@ public final class ConditionalProductBenchmarkRunner {
         Files.createDirectories(outputDirectory);
 
         Path jsonFile = outputDirectory.resolve(BENCHMARK_CLASS + "_results.json");
-        OptionsBuilder options = new OptionsBuilder()
-                .include(benchmarkPattern(arguments.get("method")))
-                .resultFormat(ResultFormatType.JSON)
-                .result(jsonFile.toString())
-                .shouldFailOnError(true);
+        OptionsBuilder options = new OptionsBuilder();
+        options.include(benchmarkPattern(arguments.get("method")));
+        options.resultFormat(ResultFormatType.JSON);
+        options.result(jsonFile.toString());
+        options.shouldFailOnError(true);
 
         if (arguments.containsKey("scenario")) {
             options.param("scenarioName", arguments.get("scenario"));
@@ -114,7 +114,7 @@ public final class ConditionalProductBenchmarkRunner {
     private static String format(RunResult run) {
         Result<?> primary = run.getPrimaryResult();
         StringBuilder text = new StringBuilder(512);
-        text.append("Benchmark: ").append(run.getBenchmark()).append(System.lineSeparator());
+        text.append("Benchmark: ").append(run.getParams().getBenchmark()).append(System.lineSeparator());
         text.append("Primary score: ")
                 .append(String.format(Locale.ROOT, "%.6f ± %.6f %s",
                         primary.getScore(), primary.getScoreError(), primary.getScoreUnit()))
