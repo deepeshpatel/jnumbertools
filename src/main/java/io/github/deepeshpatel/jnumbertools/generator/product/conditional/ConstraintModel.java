@@ -22,6 +22,8 @@ final class ConstraintModel {
     final List<List<?>> dimensions;
     final PersistentRelationMap relations;
     private volatile Rows rows;
+    private volatile DenseRows denseRows;
+    private volatile boolean denseRowsInitialized;
     private volatile ConstraintPlan plan;
 
     ConstraintModel(List<List<?>> dimensions, PersistentRelationMap relations) {
@@ -79,6 +81,57 @@ final class ConstraintModel {
         return Tuple.wrap(values);
     }
 
+
+    /**
+     * Returns dense boolean relation rows when their total cell count is within the configured memory cap.
+     * A null result means the dense representation is too large and callers should use the BitSet rows.
+     */
+    DenseRows denseRows() {
+        if (denseRowsInitialized) return denseRows;
+        synchronized (this) {
+            if (!denseRowsInitialized) {
+                long cells = 0;
+                for (Map.Entry<Long, Relation> entry : relations.entrySet()) {
+                    int u = (int) (entry.getKey() >>> 32);
+                    int v = (int) (long) entry.getKey();
+                    cells += (long) dimensions.get(u).size() * dimensions.get(v).size();
+                    if (cells > DenseRows.MAX_CELLS) break;
+                }
+                if (cells <= DenseRows.MAX_CELLS) {
+                    List<List<Integer>> dimensionLists = new ArrayList<>(dimensions.size());
+                    List<List<boolean[][]>> rowLists = new ArrayList<>(dimensions.size());
+                    for (int d = 0; d < dimensions.size(); d++) {
+                        dimensionLists.add(new ArrayList<>());
+                        rowLists.add(new ArrayList<>());
+                    }
+                    for (Map.Entry<Long, Relation> entry : relations.entrySet()) {
+                        int lower = (int) (entry.getKey() >>> 32);
+                        int higher = (int) (long) entry.getKey();
+                        BitSet[] source = entry.getValue().uToV;
+                        boolean[][] dense = new boolean[source.length][dimensions.get(higher).size()];
+                        for (int i = 0; i < source.length; i++) {
+                            for (int bit = source[i].nextSetBit(0); bit >= 0;
+                                 bit = source[i].nextSetBit(bit + 1)) {
+                                dense[i][bit] = true;
+                            }
+                        }
+                        dimensionLists.get(higher).add(lower);
+                        rowLists.get(higher).add(dense);
+                    }
+                    int[][] belowDims = new int[dimensions.size()][];
+                    boolean[][][][] belowRows = new boolean[dimensions.size()][][][];
+                    for (int d = 0; d < dimensions.size(); d++) {
+                        belowDims[d] = dimensionLists.get(d).stream().mapToInt(Integer::intValue).toArray();
+                        belowRows[d] = rowLists.get(d).toArray(new boolean[0][][]);
+                    }
+                    denseRows = new DenseRows(belowDims, belowRows);
+                }
+                denseRowsInitialized = true;
+            }
+        }
+        return denseRows;
+    }
+
     Rows rows() {
         Rows result = rows;
         if (result == null) {
@@ -125,4 +178,17 @@ final class ConstraintModel {
             return new Rows(belowDims, belowRows);
         }
     }
+
+    static final class DenseRows {
+        static final long MAX_CELLS = 4_000_000L;
+        final int[][] belowDims;
+        final boolean[][][][] belowRows;
+
+        private DenseRows(int[][] belowDims, boolean[][][][] belowRows) {
+            this.belowDims = belowDims;
+            this.belowRows = belowRows;
+        }
+    }
+
+
 }
