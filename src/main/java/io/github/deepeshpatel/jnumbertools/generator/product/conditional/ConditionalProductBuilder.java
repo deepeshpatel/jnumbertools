@@ -1032,7 +1032,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
         @Override
         public Iterator<List<Object>> iterator() {
-            Plan p = plan();
+            ConstraintPlan p = plan();
             return new Iterator<>() {
                 private int produced;
 
