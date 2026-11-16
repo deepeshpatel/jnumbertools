@@ -124,7 +124,7 @@ class ConditionalProductGeneratorTest {
 
         List<CompletableFuture<Set<List<Object>>>> traversals =
                 java.util.stream.IntStream.range(0, 6)
-                        .mapToObj(ignored -> CompletableFuture.supplyAsync(
+                        .mapToObj(ignored -> CompletableFuture.<Set<List<Object>>>supplyAsync(
                                 () -> new HashSet<>(generator.stream().parallel().toList())))
                         .toList();
 
