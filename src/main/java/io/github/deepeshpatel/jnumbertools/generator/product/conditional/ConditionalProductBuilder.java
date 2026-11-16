@@ -539,10 +539,14 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
         int[] discovery = new int[n];
         int[] low = new int[n];
+        int[] parent = new int[n];
+        int[] nextEdge = new int[n];
+        int[] time = {0};
+        Arrays.fill(parent, -1);
         Set<Long> bridges = new HashSet<>();
         for (int vertex = 0; vertex < n; vertex++) {
             if (discovery[vertex] == 0) {
-                findBridges(vertex, adjacency, discovery, low, bridges);
+                findBridges(vertex, adjacency, discovery, low, parent, nextEdge, time, bridges);
             }
         }
 
@@ -567,15 +571,10 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * because {@code relations} stores one combined relation for each pair.
      */
     private static void findBridges(int root, List<List<Integer>> adjacency,
-                                    int[] discovery, int[] low, Set<Long> bridges) {
-        int n = adjacency.size();
-        int[] parent = new int[n];
-        int[] nextEdge = new int[n];
-        Arrays.fill(parent, -1);
-
+                                    int[] discovery, int[] low, int[] parent, int[] nextEdge,
+                                    int[] time, Set<Long> bridges) {
         ArrayDeque<Integer> stack = new ArrayDeque<>();
-        discovery[root] = low[root] = 1;
-        int time = 1;
+        discovery[root] = low[root] = ++time[0];
         stack.push(root);
 
         // Iterative DFS avoids making graph depth a Java call-stack limit.
@@ -589,7 +588,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
                 }
                 if (discovery[next] == 0) {
                     parent[next] = vertex;
-                    discovery[next] = low[next] = ++time;
+                    discovery[next] = low[next] = ++time[0];
                     stack.push(next);
                 } else {
                     low[vertex] = Math.min(low[vertex], discovery[next]);
