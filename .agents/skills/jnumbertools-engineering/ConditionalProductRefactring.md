@@ -115,12 +115,12 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 
 - [~] 1.1 Run the loop check only when a rule adds a new linked pair (verified by the maintainer's full test run; branch change not yet merged)
 - [x] 1.2 Replace repeated edge-removal reachability searches in `blockOf` with one iterative Tarjan bridge traversal; union only non-bridge edges into loop blocks (verified by maintainer: all 24 ConditionalProductBuilderTest tests passed)
-- [~] 1.3 Replace full relation-map copies with a persistent AVL map; updates path-copy O(log E) nodes while preserving immutable builder snapshots and sorted iteration (new regression test added; awaiting maintainer test run)
+- [x] 1.3 Replace full relation-map copies with a persistent AVL map; updates path-copy O(log E) nodes while preserving immutable builder snapshots and sorted iteration (verified by maintainer)
 - Acceptance: lower builder-construction cost on CHAIN and CYCLE; identical tuples and loop-limit decisions on differential checks.
 
 ### WP2: Extract the shared model
 
-- [ ] 2.1 Move `Rule`, `Relation` into package-private files
+- [~] 2.1 Extract the immutable `Relation` into a package-private file. There is no standalone `Rule` type in the current implementation: each rule is immediately compiled into a combined pairwise `Relation`, so do not introduce a redundant `Rule` object without a concrete need (extraction delivered; awaiting maintainer test run)
 - [ ] 2.2 `ConstraintModel` (dimensions, rules, lazy `Rows`)
 - [ ] 2.3 `ConstraintPlan` (feasibility) and `ConstraintCounts` (exact) as separate files
 - [ ] 2.4 `ConditionalProductBuilder` becomes the facade only (target: well under 500 lines)
@@ -157,8 +157,8 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 | Package | Done | Total |
 |---|---|---|
 | WP0 baseline | 0 (3 delivered, unconfirmed) | 3 |
-| WP1 setup cost | 2 verified, 1 delivered pending verification | 3 |
-| WP2 shared model | 0 | 4 |
+| WP1 setup cost | 3 verified | 3 |
+| WP2 shared model | 0 verified, 1 delivered pending verification | 4 |
 | WP3 generators | 0 | 5 |
 | WP4 parallel | 0 | 3 |
 | WP5 benchmarks | 0 | 3 |
@@ -181,6 +181,8 @@ Update this table whenever an item changes status.
 ## 8. Progress log (newest first)
 
 - 2026-11-16: Plan written. WP0 patch (`conditional-compact-rules.patch`) delivered against a4b57d2; benchmark with the plain Java stream row delivered. Maintainer's local tree has `LexOrderStrategy {PRUNED_BITSET, PRUNED_DFS, DP, ADAPTIVE}`; waiting for the push before rebasing WP0 and starting WP1.
+
+- 2026-11-17: Maintainer confirmed the WP1.3 persistent relation-map regression test passed. WP1.3 is now verified. Started WP2.1 by extracting the immutable pairwise `Relation` into package-private `Relation.java`. The current implementation does not retain individual `Rule` objects: each fluent rule is immediately intersected into its pairwise relation. Do not add a redundant rule representation just to match the original target-design wording. Builder behavior is unchanged; awaiting the maintainer's focused test run.
 
 ## 9. Maintainer clarifications (2026-11-17)
 
