@@ -243,6 +243,22 @@ class ConditionalProductBuilderTest {
     }
 
     @Test
+    void addingAnotherRuleToAnExistingPairDoesNotChangeTheLoopStructure() {
+        var builder = cartesianProduct.conditionalProductOf(os).and(browser).and(network)
+                .when(browser).is("Safari").then(os).isOneOf("macOS")
+                .when(network).is("4G").then(browser).isNot("Chrome")
+                .when(network).is("4G").then(os).isNot("Linux")
+                // This further restricts an edge already present in the loop.
+                .when(network).is("4G").then(os).is("macOS");
+
+        var expected = expectedConfigs(true).stream()
+                .filter(tuple -> !tuple.get(2).equals("4G") || tuple.get(0).equals("macOS"))
+                .toList();
+        assertEquals(BigInteger.valueOf(expected.size()), builder.count());
+        assertEquals(expected, builder.lexOrder().stream().toList());
+    }
+
+    @Test
     void aLoopOverTooManyCombinationsIsRejected() {
         var a = new ArrayList<Integer>();
         var b = new ArrayList<Integer>();
