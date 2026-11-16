@@ -142,9 +142,10 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     private static final long MAX_LOOP_COMBINATIONS = 1_000_000L;
 
-    private final List<List<?>> dims;            // private snapshots; unmodifiable
+    private final ConstraintModel model;         // immutable shared dimensions and pairwise relations
+    private final List<List<?>> dims;            // private snapshots; unmodifiable (facade transition alias)
     private final List<List<?>> originals;       // the caller's list objects, matched by identity only
-    private final PersistentRelationMap relations; // persistent AVL map; key(u, v) with u < v
+    private final PersistentRelationMap relations; // persistent AVL map; key(u, v) with u < v (facade transition alias)
     private volatile Plan plan;                  // built lazily on first use
 
 
@@ -158,9 +159,10 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     }
 
     private ConditionalProductBuilder(List<List<?>> dims, List<List<?>> originals, PersistentRelationMap relations) {
-        this.dims = dims;
+        this.model = new ConstraintModel(dims, relations);
+        this.dims = model.dimensions;
         this.originals = originals;
-        this.relations = relations;
+        this.relations = (PersistentRelationMap) model.relations;
     }
 
     /**
@@ -1423,24 +1425,9 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         private boolean exhausted;
 
         PrunedLexItr() {
-            List<List<Integer>> dimensionLists = new ArrayList<>(dimensions);
-            List<List<BitSet[]>> rowLists = new ArrayList<>(dimensions);
-            for (int d = 0; d < dimensions; d++) {
-                dimensionLists.add(new ArrayList<>());
-                rowLists.add(new ArrayList<>());
-            }
-            for (Map.Entry<Long, Relation> entry : relations.entrySet()) {
-                int lower = (int) (entry.getKey() >>> 32);
-                int higher = (int) (long) entry.getKey();
-                dimensionLists.get(higher).add(lower);
-                rowLists.get(higher).add(entry.getValue().uToV);
-            }
-            belowDims = new int[dimensions][];
-            belowRows = new BitSet[dimensions][][];
-            for (int d = 0; d < dimensions; d++) {
-                belowDims[d] = dimensionLists.get(d).stream().mapToInt(Integer::intValue).toArray();
-                belowRows[d] = rowLists.get(d).toArray(new BitSet[0][]);
-            }
+            ConstraintModel.Rows rows = model.rows();
+            belowDims = rows.belowDims;
+            belowRows = rows.belowRows;
             for (List<?> dimension : dims) {
                 if (dimension.isEmpty()) {
                     exhausted = true;
