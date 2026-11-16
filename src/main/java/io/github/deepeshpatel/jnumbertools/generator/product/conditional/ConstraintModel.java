@@ -21,7 +21,7 @@ final class ConstraintModel {
     final Map<Long, Relation> relations;
     private volatile Rows rows;
 
-    ConstraintModel(List<List<?>> dimensions, Map<Long, ?> relations) {
+    ConstraintModel(List<List<?>> dimensions, Map<Long, Relation> relations) {
         this.dimensions = dimensions;
         this.relations = relations;
     }
@@ -49,7 +49,7 @@ final class ConstraintModel {
             this.belowRows = belowRows;
         }
 
-        private static Rows build(int dimensionCount, Map<Long, ?> relations) {
+        private static Rows build(int dimensionCount, Map<Long, Relation> relations) {
             List<List<Integer>> dimensionLists = new ArrayList<>(dimensionCount);
             List<List<BitSet[]>> rowLists = new ArrayList<>(dimensionCount);
             for (int d = 0; d < dimensionCount; d++) {
