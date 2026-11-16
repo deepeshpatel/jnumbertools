@@ -128,7 +128,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 ### WP3: Generators
 
 - [x] 3.1 Extracted `PrunedLexGenerator` (shared depth-first control flow) and `BitSetPrunedGenerator` (BitSet candidate filtering); maintainer confirmed the focused test passed.
-- [~] 3.2 Implemented `DenseDfsGenerator` using lazily materialized, model-shared boolean relation rows with a 4,000,000-cell aggregate cap; larger representations fall back to `BitSetPrunedGenerator`. Added strategy-equivalence and cap-fallback tests. Awaiting focused test verification.
+- [x] 3.2 Implemented `DenseDfsGenerator` using lazily materialized, model-shared boolean relation rows with a 4,000,000-cell aggregate cap; larger representations fall back to `BitSetPrunedGenerator`. Maintainer confirmed the focused test passed.
 - [ ] 3.3 `DpLexGenerator`
 - [ ] 3.4 Facade selects a generator from `LexOrderStrategy`; `ADAPTIVE` kept
 - [ ] 3.5 Rename the enum constants (`PRUNED_BITSET`, `PRUNED_DFS`) if the maintainer's push has not already
@@ -159,7 +159,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 | WP0 baseline | 0 (3 delivered, unconfirmed) | 3 |
 | WP1 setup cost | 3 verified | 3 |
 | WP2 shared model | 4 verified | 4 |
-| WP3 generators | 1 verified, 1 delivered unverified | 5 |
+| WP3 generators | 2 verified | 5 |
 | WP4 parallel | 0 | 3 |
 | WP5 benchmarks | 0 | 3 |
 | WP6 finish | 0 | 3 |
@@ -233,3 +233,5 @@ Update this table whenever an item changes status.
 
 
 - 2026-11-17: Maintainer confirmed the focused ConditionalProductBuilderTest passed after WP3.1. WP3.1 is verified. Delivered WP3.2: PRUNED_DFS now uses DenseDfsGenerator with boolean relation rows cached lazily on ConstraintModel and shared by iterators. Dense materialization is capped at 4,000,000 aggregate relation cells; above the cap the strategy falls back to the BitSet implementation to bound memory. Added a small-case strategy-equivalence assertion and a 4.2-million-cell case that exercises the fallback without traversing the full result. Awaiting focused test verification.
+
+- 2026-11-17: Maintainer confirmed `mvn -Dtest=ConditionalProductBuilderTest test` passed after WP3.2. WP3.2 is verified. Maintainer raised whether repeatedly running the same focused test class is sufficient after many structural commits. Agreed to strengthen verification deliberately: add dedicated generator-level tests and seeded brute-force differential coverage across all four strategies, including empty/dead-end cases, repeated iteration, and lazy-plan behavior where observable. Keep the focused builder suite as regression coverage; do not inflate test count with redundant examples. Decide the exact test split before/alongside WP3.3 rather than delaying it until the end.
