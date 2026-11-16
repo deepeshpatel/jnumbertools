@@ -130,8 +130,8 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 - [x] 3.1 Extracted `PrunedLexGenerator` (shared depth-first control flow) and `BitSetPrunedGenerator` (BitSet candidate filtering); maintainer confirmed the focused test passed.
 - [x] 3.2 Implemented `DenseDfsGenerator` using lazily materialized, model-shared boolean relation rows with a 4,000,000-cell aggregate cap; larger representations fall back to `BitSetPrunedGenerator`. Maintainer confirmed the focused test passed.
 - [~] 3.3 Extracted `DpLexGenerator`; awaiting maintainer verification
-- [ ] 3.4 Facade selects a generator from `LexOrderStrategy`; `ADAPTIVE` kept
-- [ ] 3.5 Rename the enum constants (`PRUNED_BITSET`, `PRUNED_DFS`) if the maintainer's push has not already
+- [x] 3.4 Strategy dispatch reviewed: `PRUNED_BITSET`, `PRUNED_DFS`, and `DP` select their dedicated iterators; `ADAPTIVE` is resolved by the builder and remains available.
+- [x] 3.5 Enum constants are already `PRUNED_BITSET`, `PRUNED_DFS`, `DP`, and `ADAPTIVE`; no rename required.
 
 ### WP4: Parallel
 
@@ -159,7 +159,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 | WP0 baseline | 0 (3 delivered, unconfirmed) | 3 |
 | WP1 setup cost | 3 verified | 3 |
 | WP2 shared model | 4 verified | 4 |
-| WP3 generators | 2 implementation steps verified; DP extraction delivered and awaiting verification; dedicated strategy test suite verified | 5 |
+| WP3 generators | 5 verified; all four strategies retained and dispatched | 5 |
 | WP4 parallel | 0 | 3 |
 | WP5 benchmarks | 0 | 3 |
 | WP6 finish | 0 | 3 |
@@ -243,3 +243,6 @@ Update this table whenever an item changes status.
 
 
 - 2026-11-17: Delivered WP3.3: extracted the DP lexicographic iterator from the private nested `LexItr` in `ConditionalProductGenerators` into package-private `DpLexGenerator`. The iterator retains the same exact-count lookahead through `ConstraintPlan.firstValid`, lexicographic candidate order, lazy `hasNext` advancement, tuple materialization through `ConstraintModel`, and exhaustion behavior. Updated strategy dispatch to instantiate the extracted class. No counting, rank, or sampling code changed. Awaiting maintainer verification with the focused builder, generator differential, and rule-order suites.
+
+
+- 2026-11-17: Maintainer confirmed all 34 tests passed after WP3.3. Reviewed the final strategy wiring for WP3.4: `PRUNED_BITSET`, `PRUNED_DFS`, and `DP` dispatch to their dedicated iterator implementations in `ConditionalProductGenerators`; `ADAPTIVE` is resolved by `ConditionalProductBuilder` using the existing 10,000-tuple threshold, and remains available. Verified WP3.5 requires no enum rename: all four required constants are already present. WP3 is complete. No strategy was removed or deprecated.
