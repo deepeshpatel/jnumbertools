@@ -113,7 +113,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 
 ### WP1: Setup cost
 
-- [ ] 1.1 Run the loop check only when a rule adds a new linked pair
+- [~] 1.1 Run the loop check only when a rule adds a new linked pair (delivered; compile/test confirmation pending)
 - [ ] 1.2 Replace the sorted-set rebuild per rule with a scan for "is this pair already linked"
 - [ ] 1.3 Chain the rules (shared tail) so adding a rule is O(1) instead of copying the list
 - Acceptance: `builderConstructionOnly` clearly lower on CHAIN and CYCLE; identical tuples on the differential check.
@@ -157,7 +157,7 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 | Package | Done | Total |
 |---|---|---|
 | WP0 baseline | 0 (3 delivered, unconfirmed) | 3 |
-| WP1 setup cost | 0 | 3 |
+| WP1 setup cost | 0 (1 delivered, unconfirmed) | 3 |
 | WP2 shared model | 0 | 4 |
 | WP3 generators | 0 | 5 |
 | WP4 parallel | 0 | 3 |
@@ -190,3 +190,5 @@ Update this table whenever an item changes status.
 - 2026-11-17: Created development branch `conditional-product-optimization` from commit `27c2066`. Corrected `ConditionalProductBuilder` references from the obsolete `PRUNED` enum constant to `PRUNED_BITSET`; the plan was expanded with the full-generation versus special-operation objectives and the full strategy table. Compile/tests have not yet been run.
 
 - 2026-11-17: Maintainer explicitly confirmed that no strategy is to be removed. Updated the retention rule, WP3/WP6 expectations, and open questions accordingly: all four strategies remain implemented; benchmark evidence is for optimization/default/cutoff tuning after the full flow is complete, not for dropping algorithms.
+
+- 2026-11-17: WP1.1 delivered. `withRule` now runs `checkLoopBlocks` only when the rule introduces a new dimension-pair edge; adding another restriction to an existing pair cannot change graph connectivity or loop blocks. Added a builder-style regression test that adds a further restriction to an edge after a three-dimension loop has formed and checks exact count and lexicographic output. Compilation and tests have not been run.
