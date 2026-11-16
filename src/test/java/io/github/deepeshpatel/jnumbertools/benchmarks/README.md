@@ -94,6 +94,17 @@ The six numeric range names use inclusive, non-overlapping bounds:
 | `Size10-100` | 10 through 100 values per dimension |
 | `Size101-250` | 101 through 250 values per dimension |
 
+After the selectivity folder, the remaining two hierarchy levels are selected by JMH rather than
+duplicated as resource directories for every workload:
+
+- **Strategy:** the `implementation` parameter: `PRUNED_BITSET`, `PRUNED_DFS`, `DP`,
+  `ADAPTIVE`, or `NESTED_STREAM`.
+- **Measurement:** the benchmark method: `traversalOnly` or `endToEnd`.
+
+This keeps the workload tree concrete while avoiding five copies of every case descriptor and two
+copies of every strategy implementation under every leaf. The JMH selector combination identifies
+the exact leaf workload → strategy → measurement to execute.
+
 The size range describes input-domain size, not the number of valid output tuples. Current case
 descriptors use a uniform size for all dimensions. The `edge-cases` group deliberately holds workloads
 outside these ranges or workloads whose defining property is an empty result or dead end.
@@ -102,6 +113,12 @@ A case descriptor contains `topology`, `selectivity`, `dimensions`, and `size`; 
 is optional. The benchmark loads it from the classpath, so adding a case does not require editing the
 JMH benchmark's scenario factory. The current `TIGHT` profile permits approximately 1% of each target
 dimension (at least one value), keeping the larger range cases bounded.
+
+Important interpretation note: the current rule generator selects every trigger value, so
+the `high`/`medium`/`low`/`tight` profile currently controls the allowed target-value fraction;
+it does not yet vary trigger coverage. These are therefore target-restriction profiles, not a full
+trigger-selectivity study. The separate trigger-coverage dimension should be added before drawing
+conclusions about conditional-trigger selectivity.
 
 The matrix uses one fork, one 500 ms warmup iteration, and two 500 ms measurement iterations. It fully
 consumes each scenario and compares `PRUNED_BITSET`, `PRUNED_DFS`, `DP`, `ADAPTIVE`, and
