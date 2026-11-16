@@ -259,6 +259,32 @@ class ConditionalProductBuilderTest {
     }
 
     @Test
+    void bridgeAttachedDimensionDoesNotExpandTheLoopBlock() {
+        List<Integer> a = new ArrayList<>();
+        List<Integer> b = new ArrayList<>();
+        List<Integer> c = new ArrayList<>();
+        List<Integer> d = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            a.add(i);
+            b.add(i);
+            c.add(i);
+        }
+        for (int i = 0; i < 1001; i++) {
+            d.add(i);
+        }
+
+        // The a-b-c cycle has exactly 1,000,000 combinations. d is attached by a bridge,
+        // so its 1,001 values must not be included in the loop-block limit.
+        var builder = cartesianProduct.conditionalProductOf(a).and(b).and(c).and(d)
+                .when(a).is(0).then(b).is(0)
+                .when(b).is(0).then(c).is(0)
+                .when(c).is(0).then(a).is(0)
+                .when(c).is(0).then(d).is(0);
+
+        assertNotNull(builder);
+    }
+
+    @Test
     void aLoopOverTooManyCombinationsIsRejected() {
         var a = new ArrayList<Integer>();
         var b = new ArrayList<Integer>();
