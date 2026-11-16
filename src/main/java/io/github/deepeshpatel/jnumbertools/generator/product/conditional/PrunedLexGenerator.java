@@ -19,16 +19,24 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
     private final int[] nextCandidate;
     private final int[] candidateLimit;
     private int depth;
+    private final int baseDepth;
     private boolean ready;
     private boolean exhausted;
 
     PrunedLexGenerator(ConstraintModel model) {
-        this(model, 0, model.dimensions.get(0).size());
+        this(model, new int[0], 0, model.dimensions.get(0).size());
     }
 
     PrunedLexGenerator(ConstraintModel model, int firstDimensionFrom, int firstDimensionTo) {
+        this(model, new int[0], firstDimensionFrom, firstDimensionTo);
+    }
+
+    PrunedLexGenerator(ConstraintModel model, int[] prefix, int candidateFrom, int candidateTo) {
         this.model = model;
         this.dimensions = model.dimensions.size();
+        if (prefix.length >= dimensions) {
+            throw new IllegalArgumentException("A traversal prefix must leave at least one dimension");
+        }
         this.val = new int[dimensions];
         this.nextCandidate = new int[dimensions];
         this.candidateLimit = new int[dimensions];
@@ -37,13 +45,21 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
             candidateLimit[d] = size;
             if (size == 0) exhausted = true;
         }
-        if (firstDimensionFrom < 0 || firstDimensionTo < firstDimensionFrom
-                || firstDimensionTo > candidateLimit[0]) {
-            throw new IllegalArgumentException("Invalid first-dimension range");
+        for (int d = 0; d < prefix.length; d++) {
+            if (prefix[d] < 0 || prefix[d] >= candidateLimit[d]) {
+                throw new IllegalArgumentException("Invalid traversal prefix");
+            }
+            val[d] = prefix[d];
         }
-        nextCandidate[0] = firstDimensionFrom;
-        candidateLimit[0] = firstDimensionTo;
-        if (firstDimensionFrom == firstDimensionTo) exhausted = true;
+        this.baseDepth = prefix.length;
+        this.depth = baseDepth;
+        int size = candidateLimit[baseDepth];
+        if (candidateFrom < 0 || candidateTo < candidateFrom || candidateTo > size) {
+            throw new IllegalArgumentException("Invalid candidate range");
+        }
+        nextCandidate[baseDepth] = candidateFrom;
+        candidateLimit[baseDepth] = candidateTo;
+        if (candidateFrom == candidateTo) exhausted = true;
     }
 
     @Override
@@ -67,7 +83,7 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
             int candidate = nextValidCandidate(depth, nextCandidate[depth]);
             if (candidate >= candidateLimit[depth]) candidate = -1;
             if (candidate < 0) {
-                if (depth == 0) return false;
+                if (depth == baseDepth) return false;
                 depth--;
                 nextCandidate[depth] = val[depth] + 1;
                 continue;
