@@ -4,7 +4,6 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
-import java.math.BigInteger;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -215,159 +214,12 @@ final class ConstraintPlan {
             throw new IllegalStateException("dimension not in node");
         }
 
-        /**
-         * Range [lo, hi) of the values of node c that agree with the dimensions already fixed (below k),
-         * packed as lo in the high 32 bits and hi in the low 32 bits. The fixed dimensions of a node are the
-         * first ones in its member list and its values are in lexicographic order, so the agreeing values are
-         * contiguous and are found by binary search.
-         */
-        private long range(int c, int k, int[] val) {
-            int[] mem = members[c];
-            if (mem[0] >= k) return (long) size[c];                 // nothing fixed: [0, size)
-            if (values[c] == null) {
-                int b = val[mem[0]];
-                return ((long) b << 32) | (b + 1);
-            }
-            int fixed = 0;
-            while (fixed < mem.length && mem[fixed] < k) fixed++;
-            int[][] list = values[c];
-            int lo = lowerBound(list, mem, fixed, val, false);
-            int hi = lowerBound(list, mem, fixed, val, true);
-            return ((long) lo << 32) | hi;
-        }
-
-        /** First index whose fixed-prefix is >= the target prefix (or > it when {@code strict}). */
-        private static int lowerBound(int[][] list, int[] mem, int fixed, int[] val, boolean strict) {
-            int lo = 0;
-            int hi = list.length;
-            while (lo < hi) {
-                int mid = (lo + hi) >>> 1;
-                int cmp = 0;
-                for (int pos = 0; pos < fixed && cmp == 0; pos++) {
-                    cmp = Integer.compare(list[mid][pos], val[mem[pos]]);
-                }
-                if (cmp < 0 || (strict && cmp == 0)) lo = mid + 1; else hi = mid;
-            }
-            return lo;
-        }
-
-        /** Sum of count(c, b) over the values b in {@code allowed} (all values if null) that agree with the fixed dimensions. */
-        private BigInteger sumConsistent(int c, BitSet allowed, int k, int[] val) {
-            long r = range(c, k, val);
-            int lo;
-            int hi;
-            if (members[c][0] >= k) {
-                lo = 0;
-                hi = size[c];
-            } else {
-                lo = (int) (r >>> 32);
-                hi = (int) r;
-            }
-            if (lo >= hi) return BigInteger.ZERO;
-            if (allowed == null && minChildSub[c] >= k && counts.freePrefix[c] != null) {
-                // no fixed dimension below c's children: every value counts exactly counts.free[c][b]
-                return counts.freePrefix[c][hi].subtract(counts.freePrefix[c][lo]);
-            }
-            BigInteger sum = BigInteger.ZERO;
-            if (allowed == null) {
-                for (int b = lo; b < hi; b++) sum = sum.add(count(c, b, k, val));
-            } else {
-                for (int b = allowed.nextSetBit(lo); b >= 0 && b < hi; b = allowed.nextSetBit(b + 1)) {
-                    sum = sum.add(count(c, b, k, val));
-                }
-            }
-            return sum;
-        }
-
-        /** True when a uniformly random point of the full product is valid with probability at least 1/4. */
-        boolean mostTuplesValid() {
-            return counts.total.shiftLeft(2).compareTo(counts.fullProduct) >= 0;
-        }
-
         /** Whether a complete tuple satisfies every rule. */
         boolean isValid(int[] val) {
             for (int d = 1; d < dimensions; d++) {
                 if (!agreesWithBelow(d, val[d], val)) return false;
             }
             return true;
-        }
-
-        // ── primitive-long versions of the counting queries (used when counts.lsuffix != null) ──
-
-        private long sumConsistentL(int c, BitSet allowed, int k, int[] val) {
-            long r = range(c, k, val);
-            int lo;
-            int hi;
-            if (members[c][0] >= k) {
-                lo = 0;
-                hi = size[c];
-            } else {
-                lo = (int) (r >>> 32);
-                hi = (int) r;
-            }
-            if (lo >= hi) return 0;
-            if (allowed == null && minChildSub[c] >= k && counts.lfreePrefix[c] != null) {
-                return counts.lfreePrefix[c][hi] - counts.lfreePrefix[c][lo];
-            }
-            long sum = 0;
-            if (allowed == null) {
-                for (int b = lo; b < hi; b++) sum += countL(c, b, k, val);
-            } else {
-                for (int b = allowed.nextSetBit(lo); b >= 0 && b < hi; b = allowed.nextSetBit(b + 1)) {
-                    sum += countL(c, b, k, val);
-                }
-            }
-            return sum;
-        }
-
-        private long completionsL(int k, int[] val) {
-            int fixedRoots = firstRoot[k];
-            long result = counts.lsuffix[fixedRoots];
-            if (result == 0) return 0;
-            for (int i = 0; i < fixedRoots; i++) {
-                long c = sumConsistentL(roots[i], null, k, val);
-                if (c == 0) return 0;
-                result *= c;
-            }
-            return result;
-        }
-
-        private long countL(int v, int a, int k, int[] val) {
-            if (minSub[v] >= k) return counts.lfree[v][a];
-            long result = 1;
-            for (int c : children[v]) {
-                BitSet allowed = fromParent[c][a];
-                long s = minSub[c] >= k ? counts.lmsg[c][a] : sumConsistentL(c, allowed, k, val);
-                if (s == 0) return 0;
-                result *= s;
-            }
-            return result;
-        }
-
-        /** Number of valid ways to choose dimensions k..n-1 when dimensions 0..k-1 have values val[0..k-1]. */
-        BigInteger completions(int k, int[] val) {
-            int fixedRoots = firstRoot[k];
-            BigInteger result = counts.suffix[fixedRoots];
-            if (result.signum() == 0) return BigInteger.ZERO;
-            for (int i = 0; i < fixedRoots; i++) {
-                BigInteger c = sumConsistent(roots[i], null, k, val);
-                if (c.signum() == 0) return BigInteger.ZERO;
-                result = result.multiply(c);
-            }
-            return result;
-        }
-
-        /** Ways to choose v's subtree when v has value a, with dimensions below k fixed. */
-        private BigInteger count(int v, int a, int k, int[] val) {
-            if (minSub[v] >= k) return counts.free[v][a];
-            BigInteger result = BigInteger.ONE;
-            for (int c : children[v]) {
-                BitSet allowed = fromParent[c][a];
-                BigInteger s = minSub[c] >= k ? counts.msg[c][a] : sumConsistent(c, allowed, k, val);
-                if (s.signum() == 0) return BigInteger.ZERO;
-                result = result.multiply(s);
-            }
-            return result;
         }
 
         /** Smallest value index of dimension k, at least {@code from}, that can still be completed; -1 if none. */
@@ -379,7 +231,7 @@ final class ConstraintPlan {
             if (dimsBelow.length == 0) {
                 for (int idx = from; idx < dimSizeK; idx++) {
                     val[k] = idx;
-                    if (last || hasCompletion(k + 1, val)) return idx;
+                    if (last || counts.hasCompletion(k + 1, val)) return idx;
                 }
                 return -1;
             }
@@ -393,7 +245,7 @@ final class ConstraintPlan {
                     if (!rows[i][val[dimsBelow[i]]].get(idx)) continue outer;
                 }
                 val[k] = idx;
-                if (last || hasCompletion(k + 1, val)) return idx;
+                if (last || counts.hasCompletion(k + 1, val)) return idx;
             }
             return -1;
         }
@@ -403,7 +255,7 @@ final class ConstraintPlan {
          * consistent) earlier dimensions holds. Equivalent to {@code completions(n, val) > 0} but needs no
          * walk over the whole tree.
          */
-        private boolean agreesWithBelow(int d, int idx, int[] val) {
+        boolean agreesWithBelow(int d, int idx, int[] val) {
             int[] dimsBelow = belowDims[d];
             BitSet[][] rows = belowRows[d];
             for (int i = 0; i < dimsBelow.length; i++) {
@@ -412,65 +264,10 @@ final class ConstraintPlan {
             return true;
         }
 
-        private boolean hasCompletion(int k, int[] val) {
-            return counts.lsuffix != null ? completionsL(k, val) > 0 : completions(k, val).signum() > 0;
-        }
-
         int dimensionSize(int dim) {
             return dimSize[dim];
         }
 
-        /** Value indexes of the tuple with the given rank among the valid tuples; rank must be in range. */
-        int[] unrank(BigInteger rank) {
-            if (counts.lsuffix != null) return unrankL(rank.longValueExact());
-            int[] val = new int[dimensions];
-            BigInteger remaining = rank;
-            for (int k = 0; k < dimensions; k++) {
-                boolean found = false;
-                int dimSize = dimensionSize(k);
-                for (int idx = 0; idx < dimSize; idx++) {
-                    val[k] = idx;
-                    BigInteger c = k == dimensions - 1
-                            ? (agreesWithBelow(k, idx, val) ? BigInteger.ONE : BigInteger.ZERO)
-                            : completions(k + 1, val);
-                    if (c.signum() == 0) continue;
-                    if (remaining.compareTo(c) < 0) {
-                        found = true;
-                        break;
-                    }
-                    remaining = remaining.subtract(c);
-                }
-                if (!found) {
-                    throw new IllegalStateException("Rank " + rank + " could not be resolved");
-                }
-            }
-            return val;
-        }
 
-        /** {@link #unrank(BigInteger)} in primitive arithmetic; only valid when the long tables exist. */
-        private int[] unrankL(long rank) {
-            int[] val = new int[dimensions];
-            long remaining = rank;
-            for (int k = 0; k < dimensions; k++) {
-                boolean found = false;
-                int size = dimensionSize(k);
-                for (int idx = 0; idx < size; idx++) {
-                    val[k] = idx;
-                    long c = k == dimensions - 1
-                            ? (agreesWithBelow(k, idx, val) ? 1L : 0L)
-                            : completionsL(k + 1, val);
-                    if (c == 0) continue;
-                    if (remaining < c) {
-                        found = true;
-                        break;
-                    }
-                    remaining -= c;
-                }
-                if (!found) {
-                    throw new IllegalStateException("Rank " + rank + " could not be resolved");
-                }
-            }
-            return val;
-        }
     }
 
