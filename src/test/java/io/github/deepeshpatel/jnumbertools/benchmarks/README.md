@@ -48,7 +48,12 @@ and traversal. Change `implementation` to `PRUNED_DFS`, `DP`, `ADAPTIVE`, or `NE
 
 Run all five implementations for one case by omitting `-p implementation=...`. Run both measurement
 methods by using `ConditionalProductStrategyBenchmark` instead of a method-qualified benchmark name.
-Omit both parameter filters to run the complete matrix.
+Omit both parameter filters to run the complete matrix. To save the full result set as JSON:
+
+```bash
+mvn clean test-compile exec:exec -Dexec.executable=java -Dexec.classpathScope=test \
+  -Dexec.args="-cp %classpath org.openjdk.jmh.Main ConditionalProductStrategyBenchmark -prof gc -rf json -rff target/conditional-product-strategy.json"
+```
 
 ### Conditional-product case hierarchy
 
