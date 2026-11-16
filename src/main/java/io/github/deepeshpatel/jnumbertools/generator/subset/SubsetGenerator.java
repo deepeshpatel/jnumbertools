@@ -81,7 +81,7 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
      * @return an iterator over subsets in lexicographical order;
      *         returns an iterator with a single empty subset if fromSize = 0;
      *         returns an empty iterator if fromSize > toSize or fromSize > elements.size()
-     * @see SubsetBuilder#inRange(int, int)
+     * @see SubsetSelector#inRange(int, int)
      */
     @Override
     public Iterator<List<T>> iterator() {

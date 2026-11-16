@@ -18,7 +18,7 @@ import java.util.NoSuchElementException;
  * Generates derangements at a sequence of lexicographical ranks.
  * <p>
  * Each rank in the supplied {@link Iterable} is converted to a derangement via
- * {@link Derangadic#derangement()}  #unrank(BigInteger, int, Calculator)}. Used by
+ * {@link DerangadicAlgorithms#unrank(BigInteger, int)}. Used by
  * {@link DerangementBuilder} to implement {@code lexOrderMth},
  * {@code byRanks}, {@code sample} and {@code choice}.
  * </p>
