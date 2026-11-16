@@ -6,8 +6,6 @@ class has a matching `*BenchmarkOutput.txt` file holding the last committed resu
 | Class | Output file | What it measures |
 |---|---|---|
 | `GeneratorSurveyBenchmark` | `GeneratorSurveyBenchmarkOutput.txt` | `lexOrder`, `lexOrderMth`, `choice`, unranking for every generator family |
-| `ConditionalProductBenchmark` | `ConditionalProductBenchmarkOutput.txt` | `ConditionalProductBuilder` against hand-written code, typical rule sets |
-| `ConditionalProductComplexPathBenchmark` | `ConditionalProductComplexPathBenchmarkOutput.txt` | `ConditionalProductBuilder` on chain, star, tree and cycle rule shapes |
 | `ProductTupleBenchmark` | `ProductTupleBenchmarkOutput.txt` | Cartesian product tuple handling |
 | `OptimisationCandidatesBenchmark` | `OptimisationCandidatesBenchmarkOutput.txt` | Comparisons of candidate optimisations (for example derangement lexOrder) |
 
@@ -25,7 +23,7 @@ They are not absolute speed claims for other hardware, JVMs or operating systems
 | Power | AC power, Low Power Mode off |
 | Library version | 4.1.0 (commit 6d1266f) |
 | JMH | 1.37; `GeneratorSurveyBenchmark`: 2 forks, 5 warmup and 8 measurement iterations of 300 ms each, 1 thread, average time, `-prof gc` |
-| Notes | Fanless laptop, so long runs can be slightly throttled. No other heavy work was running; a browser and a chat app were open but idle. In the survey most rows vary by less than ±3% between iterations; a few are noisier (up to about ±13%). The two `ConditionalProduct*` benchmarks use fewer iterations, so their error bars are wider. |
+| Notes | Fanless laptop, so long runs can be slightly throttled. No other heavy work was running; a browser and a chat app were open but idle. In the survey most rows vary by less than ±3% between iterations; a few are noisier (up to about ±13%). |
 
 ## Running
 
