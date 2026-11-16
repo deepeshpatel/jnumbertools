@@ -4,7 +4,6 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
-import io.github.deepeshpatel.jnumbertools.datastructure.Tuple;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
@@ -130,7 +129,6 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     private final ConstraintModel model;         // immutable shared dimensions and pairwise relations
     private final List<List<?>> originals;       // the caller's list objects, matched by identity only
     private final RuleCompiler ruleCompiler;
-    private volatile ConstraintPlan plan;                  // built lazily on first use
 
 
     /**
@@ -399,7 +397,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     @Override
     public StreamableIterable<Object> choice(int sampleSize, Random random) {
         BigIntegerChoice ranks = new BigIntegerChoice(count(), sampleSize, random); // validates the arguments
-        ConstraintPlan p = plan();
+        ConstraintPlan p = model.plan();
         if (p.counts.mostTuplesValid()) {
             return new RejectionChoiceGenerator(sampleSize, random);
         }
@@ -460,30 +458,8 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     /** Allowed value pairs between dimension u and dimension v (u &lt; v). Immutable once built. */
     // ── Counting plan ────────────────────────────────────────────────────────
 
-    private ConstraintPlan plan() {
-        ConstraintPlan p = plan;
-        if (p == null) {
-            synchronized (this) {
-                p = plan;
-                if (p == null) {
-                    p = new ConstraintPlan(model.dimensions, model.relations);
-                    plan = p;
-                }
-            }
-        }
-        return p;
-    }
-
 
     // ── Generators
-
-    private List<Object> tuple(int[] val) {
-        Object[] result = new Object[val.length];
-        for (int i = 0; i < val.length; i++) {
-            result[i] = model.dimensions.get(i).get(val[i]);
-        }
-        return Tuple.wrap(result);
-    }
 
     private final class LexOrderGenerator extends AbstractGenerator<Object> {
         private final LexOrderStrategy strategy;
@@ -497,7 +473,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         public Iterator<List<Object>> iterator() {
             return strategy == LexOrderStrategy.PRUNED_BITSET
                     ? new PrunedLexItr()
-                    : new LexItr(plan());
+                    : new LexItr(model.plan());
         }
     }
 
@@ -542,7 +518,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         public List<Object> next() {
             if (!hasNext()) throw new NoSuchElementException();
             ready = false;
-            return tuple(val);
+            return model.tuple(val);
         }
 
         private boolean advance() {
@@ -708,7 +684,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
                         throw new IllegalArgumentException(
                                 "Rank " + rank + " is out of bounds [0, " + p.counts.total + ")");
                     }
-                    return tuple(p.counts.unrank(rank));
+                    return model.tuple(p.counts.unrank(rank));
                 }
             };
         }
