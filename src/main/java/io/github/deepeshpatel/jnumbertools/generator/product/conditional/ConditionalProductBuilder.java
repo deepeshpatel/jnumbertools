@@ -456,7 +456,8 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         int v = Math.max(triggerDim, targetDim);
         long key = key(u, v);
         Relation relation = relations.get(key);
-        if (relation == null) {
+        boolean newLinkedPair = relation == null;
+        if (newLinkedPair) {
             long cells = (long) dims.get(u).size() * dims.get(v).size();
             if (cells > MAX_PAIR_CELLS) {
                 throw new IllegalArgumentException("The two dimensions have too many value pairs (" + cells
@@ -484,7 +485,11 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         if (!placed) {
             ordered.put(key, updated);
         }
-        checkLoopBlocks(dims, ordered.keySet());
+        // Adding another rule to an existing pair changes only its relation, not the constraint graph.
+        // The loop-block limit therefore needs to be re-evaluated only when a new graph edge is introduced.
+        if (newLinkedPair) {
+            checkLoopBlocks(dims, ordered.keySet());
+        }
         return new ConditionalProductBuilder(dims, originals, Collections.unmodifiableMap(ordered));
     }
 
