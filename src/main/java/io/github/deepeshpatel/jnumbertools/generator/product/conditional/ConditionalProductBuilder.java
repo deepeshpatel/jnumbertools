@@ -71,7 +71,7 @@ import java.util.Set;
  * For all accepted rule sets {@link #count()}, {@link #lexOrder()},
  * {@link #lexOrderMth(BigInteger, BigInteger)}, {@link #byRanks(Iterable)}, {@link #choice(int, Random)}
  * and {@link #sample(int, Random)} work on the valid tuples only, without enumerating the full product.
- * Ordinary {@link #lexOrder()} traversal defaults to {@link LexOrderStrategy#PRUNED}; callers can select
+ * Ordinary {@link #lexOrder()} traversal defaults to {@link LexOrderStrategy#PRUNED_BITSET}; callers can select
  * {@link LexOrderStrategy#DP} or use {@link LexOrderStrategy#ADAPTIVE} with an expected traversal size.
  * The exact counting and rank-based operations always use the DP plan, regardless of the lexicographic
  * traversal strategy. Ranks are positions among the valid tuples in lexicographic order (dimension order,
@@ -302,7 +302,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
     // Builder interface Methods
     /**
-     * Returns the valid tuples in lexicographic order using the {@link LexOrderStrategy#PRUNED} strategy.
+     * Returns the valid tuples in lexicographic order using the {@link LexOrderStrategy#PRUNED_BITSET} strategy.
      *
      * <p>This is the default and recommended strategy for ordinary traversal, especially when the caller
      * expects to consume only part of the result. It checks constraints against the already selected prefix
@@ -323,7 +323,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * Returns the valid tuples in lexicographic order using the specified traversal strategy.
      *
      * <ul>
-     *   <li>{@link LexOrderStrategy#PRUNED}: performs prefix-based backtracking and checks only the
+     *   <li>{@link LexOrderStrategy#PRUNED_BITSET}: performs prefix-based backtracking and checks only the
      *       constraints between the candidate dimension and dimensions already selected. It avoids
      *       constructing the counting/DP plan and is the default strategy.</li>
      *   <li>{@link LexOrderStrategy#DP}: uses the exact counting plan. Its completion counts allow it to
@@ -356,7 +356,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * Returns the valid tuples in lexicographic order using the adaptive strategy.
      *
      * <p>{@code estimatedLimit} is the expected number of valid tuples the caller intends to consume
-     * from one traversal. The current adaptive policy selects {@link LexOrderStrategy#PRUNED} for
+     * from one traversal. The current adaptive policy selects {@link LexOrderStrategy#PRUNED_BITSET} for
      * estimates below 10,000 tuples and {@link LexOrderStrategy#DP} for estimates of 10,000 tuples or
      * more. The cutoff is a conservative heuristic, not a performance guarantee; workload shape,
      * constraint density and dimension sizes can change the crossover. Benchmark representative data
