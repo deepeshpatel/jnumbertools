@@ -138,7 +138,6 @@ final class PersistentRelationMap extends AbstractMap<Long, Relation> {
 
         private static int height(RelationNode node) { return node == null ? 0 : node.height; }
         private static int size(RelationNode node) { return node == null ? 0 : node.size; }
-    }
 
     private static final class RelationNode {
         final long key;
@@ -157,5 +156,4 @@ final class PersistentRelationMap extends AbstractMap<Long, Relation> {
             this.size = 1 + (left == null ? 0 : left.size) + (right == null ? 0 : right.size);
         }
     }
-
-
+}
