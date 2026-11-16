@@ -83,6 +83,28 @@ class ConditionalProductGeneratorTest {
         assertEquals(builder.lexOrder().stream().toList(), adaptive.stream().toList());
     }
 
+
+    @Test
+    void prunedStrategiesPreserveLexicographicOrderInParallelStreams() {
+        List<Integer> first = java.util.stream.IntStream.range(0, 32).boxed().toList();
+        List<Integer> second = java.util.stream.IntStream.range(0, 7).boxed().toList();
+        List<Integer> third = java.util.stream.IntStream.range(0, 5).boxed().toList();
+        var builder = cartesianProduct.conditionalProductOf(first).and(second).and(third)
+                .when(first).isOneOf(List.of(3, 7, 11, 19, 23, 29))
+                .then(second).isOneOf(List.of(1, 3, 5))
+                .when(second).is(3).then(third).isNot(2);
+
+        for (LexOrderStrategy strategy : List.of(
+                LexOrderStrategy.PRUNED_BITSET, LexOrderStrategy.PRUNED_DFS)) {
+            var iterable = builder.lexOrder(strategy);
+            List<List<Object>> sequential = iterable.stream().toList();
+            List<List<Object>> parallel = iterable.stream().parallel().toList();
+            assertEquals(sequential, parallel, strategy + " parallel encounter order");
+            assertEquals(new HashSet<>(sequential), new HashSet<>(parallel),
+                    strategy + " parallel tuple set");
+        }
+    }
+
     @Test
     void seededRandomRuleSetsMatchBruteForceForEveryStrategy() {
         Random random = new Random(0x5EED_C0DEL);
