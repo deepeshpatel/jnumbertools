@@ -75,8 +75,35 @@ class ConditionalProductGeneratorTest {
         var spliterator = generator.spliterator();
         assertTrue((spliterator.characteristics() & java.util.Spliterator.ORDERED) == 0,
                 "anyOrder must not advertise encounter order");
-        assertEquals(null, spliterator.trySplit(),
-                "the initial anyOrder implementation is deliberately sequential");
+        var split = spliterator.trySplit();
+        assertTrue(split != null, "a sufficiently large first dimension should split");
+        List<List<Object>> splitOutput = new ArrayList<>();
+        split.forEachRemaining(splitOutput::add);
+        spliterator.forEachRemaining(splitOutput::add);
+        assertEquals(new HashSet<>(expected), new HashSet<>(splitOutput));
+        assertEquals(expected.size(), splitOutput.size(), "split partitions must not overlap");
+
+        // A singleton first dimension must not prevent splitting at a deeper dimension.
+        List<Integer> singleton = List.of(99);
+        List<Integer> wide = java.util.stream.IntStream.range(0, 31).boxed().toList();
+        List<Integer> tail = java.util.stream.IntStream.range(0, 5).boxed().toList();
+        var narrowRoot = cartesianProduct.conditionalProductOf(singleton).and(wide).and(tail)
+                .when(wide).isOneOf(List.of(2, 7, 13, 19, 29))
+                .then(tail).isNot(3);
+        var narrowGenerator = narrowRoot.anyOrder();
+        List<List<Object>> narrowExpected = narrowRoot.lexOrder().stream().toList();
+        var narrowSpliterator = narrowGenerator.spliterator();
+        var deeperSplit = narrowSpliterator.trySplit();
+        assertTrue(deeperSplit != null, "splitting must continue below a singleton first dimension");
+        List<List<Object>> deeperOutput = new ArrayList<>();
+        deeperSplit.forEachRemaining(deeperOutput::add);
+        narrowSpliterator.forEachRemaining(deeperOutput::add);
+        assertEquals(new HashSet<>(narrowExpected), new HashSet<>(deeperOutput));
+        assertEquals(narrowExpected.size(), deeperOutput.size());
+
+        Set<List<Object>> parallelOutput = new HashSet<>(narrowGenerator.stream().parallel().toList());
+        assertEquals(new HashSet<>(narrowExpected), parallelOutput,
+                "parallel anyOrder traversal must preserve the complete tuple set");
 
         var empty = cartesianProduct.conditionalProductOf(first).and(List.<Integer>of());
         assertTrue(empty.anyOrder().stream().toList().isEmpty());
