@@ -567,21 +567,43 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * Tarjan's depth-first bridge search. The constraint graph has at most one edge per dimension pair,
      * because {@code relations} stores one combined relation for each pair.
      */
-    private static void findBridges(int vertex, int parent, List<List<Integer>> adjacency,
-                                    int[] discovery, int[] low, int[] time, Set<Long> bridges) {
-        discovery[vertex] = low[vertex] = ++time[0];
-        for (int next : adjacency.get(vertex)) {
-            if (next == parent) {
-                continue;
-            }
-            if (discovery[next] == 0) {
-                findBridges(next, vertex, adjacency, discovery, low, time, bridges);
-                low[vertex] = Math.min(low[vertex], low[next]);
-                if (low[next] > discovery[vertex]) {
-                    bridges.add(key(Math.min(vertex, next), Math.max(vertex, next)));
+    private static void findBridges(int root, List<List<Integer>> adjacency,
+                                    int[] discovery, int[] low, Set<Long> bridges) {
+        int n = adjacency.size();
+        int[] parent = new int[n];
+        int[] nextEdge = new int[n];
+        Arrays.fill(parent, -1);
+
+        ArrayDeque<Integer> stack = new ArrayDeque<>();
+        discovery[root] = low[root] = 1;
+        int time = 1;
+        stack.push(root);
+
+        // Iterative DFS avoids making graph depth a Java call-stack limit.
+        while (!stack.isEmpty()) {
+            int vertex = stack.peek();
+            List<Integer> neighbors = adjacency.get(vertex);
+            if (nextEdge[vertex] < neighbors.size()) {
+                int next = neighbors.get(nextEdge[vertex]++);
+                if (next == parent[vertex]) {
+                    continue;
+                }
+                if (discovery[next] == 0) {
+                    parent[next] = vertex;
+                    discovery[next] = low[next] = ++time;
+                    stack.push(next);
+                } else {
+                    low[vertex] = Math.min(low[vertex], discovery[next]);
                 }
             } else {
-                low[vertex] = Math.min(low[vertex], discovery[next]);
+                stack.pop();
+                int predecessor = parent[vertex];
+                if (predecessor >= 0) {
+                    low[predecessor] = Math.min(low[predecessor], low[vertex]);
+                    if (low[vertex] > discovery[predecessor]) {
+                        bridges.add(key(Math.min(vertex, predecessor), Math.max(vertex, predecessor)));
+                    }
+                }
             }
         }
     }
