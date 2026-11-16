@@ -249,15 +249,15 @@ public class ConditionalProductStrategyBenchmark {
         final List<List<Integer>> dimensions;
         final List<Rule> rules;
 
-        private Scenario(Topology topology, Selectivity selectivity, int dimensionCount,
-                         int listSize, boolean emptyDimension) {
+        private Scenario(Topology topology, Selectivity selectivity, int[] dimensionSizes,
+                         boolean emptyDimension) {
             this.topology = topology;
             this.selectivity = selectivity;
-            this.dimensions = new ArrayList<>(dimensionCount);
-            for (int d = 0; d < dimensionCount; d++) {
+            this.dimensions = new ArrayList<>(dimensionSizes.length);
+            for (int d = 0; d < dimensionSizes.length; d++) {
                 List<Integer> values = emptyDimension && d == 0
                         ? List.of()
-                        : IntStream.range(0, listSize).boxed().toList();
+                        : IntStream.range(0, dimensionSizes[d]).boxed().toList();
                 dimensions.add(values);
             }
             this.rules = createRules();
@@ -279,10 +279,34 @@ public class ConditionalProductStrategyBenchmark {
             Topology topology = Topology.valueOf(required(properties, "topology"));
             Selectivity selectivity = Selectivity.valueOf(required(properties, "selectivity"));
             int dimensionCount = Integer.parseInt(required(properties, "dimensions"));
-            int listSize = Integer.parseInt(required(properties, "size"));
+            int[] dimensionSizes = parseDimensionSizes(properties, dimensionCount);
             boolean emptyDimension = Boolean.parseBoolean(properties.getProperty("emptyDimension", "false"));
 
-            return new Scenario(topology, selectivity, dimensionCount, listSize, emptyDimension);
+            return new Scenario(topology, selectivity, dimensionSizes, emptyDimension);
+        }
+
+        private static int[] parseDimensionSizes(Properties properties, int dimensionCount) {
+            String sizesProperty = properties.getProperty("sizes");
+            int[] sizes = new int[dimensionCount];
+            if (sizesProperty == null || sizesProperty.isBlank()) {
+                int uniformSize = Integer.parseInt(required(properties, "size"));
+                Arrays.fill(sizes, uniformSize);
+            } else {
+                String[] values = sizesProperty.split(",");
+                if (values.length != dimensionCount) {
+                    throw new IllegalArgumentException("Expected " + dimensionCount
+                            + " entries in sizes, found " + values.length);
+                }
+                for (int i = 0; i < values.length; i++) {
+                    sizes[i] = Integer.parseInt(values[i].trim());
+                }
+            }
+            for (int size : sizes) {
+                if (size <= 0) {
+                    throw new IllegalArgumentException("Dimension sizes must be positive");
+                }
+            }
+            return sizes;
         }
 
         private static String required(Properties properties, String key) {
