@@ -66,7 +66,7 @@ final class ConstraintPlan {
             }
 
             // nodes, ordered by their lowest dimension
-            int[] blockOf = ConditionalProductBuilder.blockOf(n, relations.keySet());
+            int[] blockOf = ConstraintGraph.blockOf(n, relations.keySet());
             int[] nodeOfDim = new int[n];
             List<List<Integer>> memberLists = new ArrayList<>();
             int[] nodeOfBlock = new int[n];
@@ -180,7 +180,7 @@ final class ConstraintPlan {
                 current[pos] = idx;
                 boolean ok = true;
                 for (int q = 0; q < pos && ok; q++) {
-                    Relation rel = relations.get(ConditionalProductBuilder.key(dimsOfNode[q], dimsOfNode[pos]));
+                    Relation rel = relations.get(ConstraintGraph.key(dimsOfNode[q], dimsOfNode[pos]));
                     if (rel != null && !rel.uToV[current[q]].get(idx)) ok = false;
                 }
                 if (ok) fill(pos + 1, current, dimsOfNode, dims, relations, out);
