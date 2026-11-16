@@ -185,12 +185,16 @@ class ConditionalProductBuilderTest {
 
         assertEquals(List.of(
                 List.of("Windows", "Chrome"),
+                List.of("Windows", "Firefox"),
                 List.of("macOS", "Safari"),
+                List.of("macOS", "Firefox"),
                 List.of("Linux", "Firefox")),
                 safariAndChromeRules.lexOrder().stream().toList());
         assertEquals(List.of(
                 List.of("Windows", "Chrome"),
+                List.of("macOS", "Chrome"),
                 List.of("macOS", "Safari"),
+                List.of("Linux", "Chrome"),
                 List.of("Linux", "Firefox")),
                 independentBranch.lexOrder().stream().toList());
     }
