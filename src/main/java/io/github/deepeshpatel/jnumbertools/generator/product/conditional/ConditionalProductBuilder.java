@@ -312,6 +312,24 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         }
     }
 
+    /**
+     * Returns all valid tuples through a traversal whose encounter order is unspecified.
+     *
+     * <p>Unlike {@link #lexOrder()}, this API makes no lexicographic ordering guarantee. The
+     * current implementation traverses sequentially; parallel partitioning and automatic
+     * sequential/parallel selection will be introduced separately after their correctness and
+     * performance have been established. The traversal is not randomized: use {@link #choice(int,
+     * Random)} or {@link #sample(int, Random)} when random selection is required.</p>
+     *
+     * <p>The returned generator is lazy and re-iterable. It produces every valid tuple exactly
+     * once, without materializing the complete result set.</p>
+     *
+     * @return a re-iterable generator of all valid tuples, with no encounter-order guarantee
+     */
+    public StreamableIterable<Object> anyOrder() {
+        return ConditionalProductGenerators.anyOrder(model);
+    }
+
     // Builder interface Methods
     /**
      * Returns the valid tuples in lexicographic order using the {@link LexOrderStrategy#PRUNED_BITSET} strategy.
