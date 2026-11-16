@@ -49,7 +49,11 @@ final class ConditionalProductGenerators {
         public Iterator<List<Object>> iterator() {
             return switch (strategy) {
                 case PRUNED_BITSET -> new BitSetPrunedGenerator(model);
-                case PRUNED_DFS, DP -> new LexItr(model, model.plan());
+                case PRUNED_DFS -> {
+                    ConstraintModel.DenseRows rows = model.denseRows();
+                    yield rows == null ? new BitSetPrunedGenerator(model) : new DenseDfsGenerator(model, rows);
+                }
+                case DP -> new LexItr(model, model.plan());
                 case ADAPTIVE -> throw new IllegalArgumentException("ADAPTIVE must be resolved by the builder");
             };
         }
