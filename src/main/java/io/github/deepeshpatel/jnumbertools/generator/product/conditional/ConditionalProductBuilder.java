@@ -417,7 +417,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     @Override
     public StreamableIterable<Object> choice(int sampleSize, Random random) {
         BigIntegerChoice ranks = new BigIntegerChoice(count(), sampleSize, random); // validates the arguments
-        ConstraintPlan p = plan();
+        ConstraintConstraintPlan p = plan();
         if (p.mostTuplesValid()) {
             return new RejectionChoiceGenerator(sampleSize, random);
         }
