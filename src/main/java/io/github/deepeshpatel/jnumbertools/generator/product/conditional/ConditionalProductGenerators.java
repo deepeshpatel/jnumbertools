@@ -13,6 +13,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
+import java.util.Spliterator;
+import java.util.Spliterators;
 
 /**
  * Generator implementations for conditional Cartesian products.
@@ -43,6 +45,15 @@ final class ConditionalProductGenerators {
             super(Collections.emptyList());
             this.model = model;
             this.strategy = strategy;
+        }
+
+        @Override
+        public Spliterator<List<Object>> spliterator() {
+            if (strategy == LexOrderStrategy.PRUNED_BITSET || strategy == LexOrderStrategy.PRUNED_DFS) {
+                return new PrunedLexSpliterator(model, strategy);
+            }
+            return Spliterators.spliteratorUnknownSize(iterator(),
+                    Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE);
         }
 
         @Override
