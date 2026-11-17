@@ -5,7 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.baseline;
 
 import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.scenario.Rule;
-import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.scenario.Scenario;
+import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.scenario.Scenario.ScenarioData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 public final class NestedStreamBaseline {
     private NestedStreamBaseline() { }
 
-    public static Plan compile(Scenario scenario) {
+    public static Plan compile(ScenarioData scenario) {
         @SuppressWarnings("unchecked")
         List<Rule>[] byDepth = new List[scenario.dimensions().size()];
         for (int d = 0; d < byDepth.length; d++) byDepth[d] = new ArrayList<>();
@@ -68,10 +68,10 @@ public final class NestedStreamBaseline {
     }
 
     public static final class Plan {
-        private final Scenario scenario;
+        private final ScenarioData scenario;
         private final List<Rule>[] rulesByDepth;
 
-        private Plan(Scenario scenario, List<Rule>[] rulesByDepth) {
+        private Plan(ScenarioData scenario, List<Rule>[] rulesByDepth) {
             this.scenario = scenario;
             this.rulesByDepth = rulesByDepth;
         }
