@@ -51,11 +51,18 @@ The unified `conditionalproduct/ConditionalProductBenchmark` compares these impl
 - `ADAPTIVE`
 - `NESTED_STREAM` — independent incrementally filtered nested Java Streams baseline
 
-The logical scenario selection combines topology and shape. The supported topologies are
-`CHAIN`, `MANY_VALID`, `COMPLETE`, and `DEAD_END`. Shapes use 3, 5, 7, or 10 dimensions
-and 10, 25, or 50 values per dimension. `DEAD_END` deliberately excludes 10x50 because its
-estimated output exceeds the benchmark budget. The runner generates only valid scenario values,
-so JMH does not attempt invalid topology/shape combinations.
+The standard topology matrix combines `CHAIN`, `MANY_VALID`, `COMPLETE`, and
+`DEAD_END` with 3, 5, 7, or 10 dimensions and 10, 25, or 50 values per dimension.
+`DEAD_END` deliberately excludes 10x50 because its estimated output exceeds the benchmark
+budget. Two additional focused workload families extend that matrix:
+
+- `DEEP_DEAD_END`: late conflicts designed to expose prefixes that appear viable until a
+  later dimension; tested at 5x10, 5x25, 7x10, 7x25, and 10x10.
+- `SMALL_DOMAIN`: many dimensions with small domains and a high proportion of valid tuples;
+  tested at 8x4, 10x4, 12x3, 14x3, and 8x5.
+
+The runner generates only valid scenario values, so JMH does not attempt invalid
+topology/shape combinations.
 
 The benchmark includes builder construction, rule registration, generator creation, and complete
 tuple consumption. Trial setup checks each selected library strategy's tuple count and checksum
@@ -92,6 +99,15 @@ The unified JMH class uses the `scenario` parameter to represent valid topology/
 the `implementation` parameter for the strategy. This avoids invalid cross-products in JMH
 while still letting the console selector present topology, dimensions, and domain size as
 independent choices.
+
+## Historical-result comparability
+
+The initial `DEAD_END` results below were captured during the earlier benchmark work; the
+`CHAIN` and `MANY_VALID` results were captured before benchmark-class consolidation. Retain
+them as historical evidence for those workloads, but do not compare their scores directly with
+the newer focused run unless the benchmark source, workload, JVM/hardware, and measurement
+configuration are shown to be equivalent. The detailed output and metadata for each run should
+remain with its corresponding result file.
 
 ## Dead-end benchmark: initial results
 
@@ -239,62 +255,117 @@ configurations as if they were directly equivalent.
 
 ## Optimization decision log
 
-This is a decision summary, not a raw benchmark archive. Read it before proposing another
-optimization. Keep only the conclusion, the evidence needed to understand it, the decision,
-and the condition for reopening it. Detailed JMH output belongs in benchmark result files.
+This is the concise engineering decision record, not a raw benchmark archive. Each entry connects
+the change, the benchmark configuration, the observed result, and the resulting decision. Detailed
+JMH output belongs in benchmark result files.
 
-### Rules
+### Decision-record rules
 
 1. Check this log before proposing or repeating an optimization.
-2. Do not rerun an unchanged experiment unless the workload, implementation, environment, or
-   measurement quality changes materially. State what changed and what question the rerun answers.
-3. Record conclusions as exploratory or confirmed. Include benchmark configuration and environment
-   only at the level needed to judge reliability.
-4. Compare equivalent workloads; retain tuple-count and checksum validation and the independent,
+2. State what changed and which benchmark configuration tested it.
+3. State the observed result separately from the engineering decision.
+4. Label evidence as screening, provisional, or confirmed. Short runs identify candidates; they
+   do not establish close performance rankings.
+5. Compare equivalent workloads, validate tuple counts and checksums, and retain the independent,
    incrementally-pruned nested-stream baseline.
-5. Do not change the default strategy based on one scenario or a short/noisy run.
-6. Record "no change" decisions and the evidence required to reopen them. Never silently reverse
-   an earlier decision; add a new entry explaining why the evidence changed.
+6. Do not silently reverse a decision. A new entry must identify the new evidence and the earlier
+   decision it supersedes.
 
-### Focused strategy comparison: deep dead-end and small-domain scenarios
+### Default lexicographic strategy and topology-aware lookahead
 
-**Status: exploratory; no implementation or dispatch change justified yet.**
+- **Change:** The current implementation makes `PRUNED_BITSET` the default for
+  `lexOrder()`. It applies prefix pruning and uses topology-triggered feasibility lookahead
+  when the constraint graph contains a loop block. `PRUNED_DFS` uses the corresponding
+  lookahead with dense boolean relation rows.
+- **Benchmark:** The focused JMH comparison used JMH 1.37 on OpenJDK 26.0.1, one 200 ms
+  warmup, one 200 ms measurement, one fork, and the GC profiler. It compared
+  `PRUNED_BITSET`, `PRUNED_DFS`, `DP`, `ADAPTIVE`, and `NESTED_STREAM` across
+  14 deep-dead-end, small-domain, chain, and complete scenarios.
+- **Finding:** DP led four of five deep-dead-end cases; DFS led the remaining 5x10 case.
+  BitSet was close but did not lead consistently. The run was too short to establish reliable
+  rankings between close strategies.
+- **Decision:** Keep `PRUNED_BITSET` as the current default, but classify this as an
+  implementation choice supported by screening evidence—not a benchmark-proven optimal
+  dispatch policy. The focused run does not isolate the incremental benefit of topology-aware
+  lookahead against a version without it.
+- **Status:** Provisional.
+- **Revisit when:** A longer multi-fork run confirms a repeatable strategy advantage across
+  representative topologies, or an isolated before/after benchmark measures the lookahead's
+  contribution and its regressions.
 
-A focused JMH run (JMH 1.37, OpenJDK 26.0.1, one 200 ms warmup, one 200 ms measurement,
-one fork, GC profiler) compared PRUNED_BITSET, PRUNED_DFS, DP, ADAPTIVE, and NESTED_STREAM
-across 14 scenarios.
+### ADAPTIVE behavior
 
-- **Deep dead-end:** DP was fastest in four of five cases; PRUNED_DFS led the remaining 5x10
-  case. PRUNED_BITSET was close but did not establish a consistent lead. ADAPTIVE was steady
-  but did not lead these cases.
-- **Small-domain, chain, and complete cases:** the fastest builder strategy beat the nested-stream
-  baseline in all tested scenarios. The observed advantage was about 3.7x–5.4x outside the
-  extreme deep-dead-end cases.
-- **Extreme deep-dead-end results:** builder speedups ranged from about 5.9x to over 2,000x.
-  Treat these as workload-specific evidence of incremental pruning, not a general performance claim.
-- **Allocation:** builder strategies allocated substantially less in the tested cases. For example,
-  DEEP_DEAD_END-7x25 was about 59 KB/op for the best builder strategy versus about 247 MB/op
-  for nested streams. This is allocated bytes per operation, not retained or peak live heap.
+- **Change:** The current `ADAPTIVE` entry point resolves to `PRUNED_BITSET` with
+  topology-triggered lookahead. Its `estimatedLimit` argument is validated but no longer
+  selects between DP and prefix pruning; callers who want DP must select `DP` explicitly.
+- **Benchmark:** The same 14-scenario focused JMH matrix included `ADAPTIVE` alongside the
+  other strategies.
+- **Finding:** ADAPTIVE did not establish a consistent performance lead. The screening run
+  does not justify an estimate-based DP-versus-pruning threshold.
+- **Decision:** Retain the API entry point and its current BitSet-backed behavior; do not
+  describe it as an independently benchmark-selected strategy or claim that
+  `estimatedLimit` controls algorithm selection.
+- **Status:** Provisional implementation policy.
+- **Revisit when:** A measured policy using representative workload features demonstrates a
+  repeatable advantage over explicit BitSet and DP selection. Any change must update the API
+  documentation and this record together.
 
-The run was too short to provide useful confidence intervals. Small differences between builder
-strategies are not reliable rankings.
+### DP versus prefix-pruned strategies on deep dead ends
 
-**Decision:** retain all four strategies; do not change strategy selection or defaults from this run.
-DP is the leading candidate for further investigation on deep-dead-end workloads, not a confirmed
-winner. The builder approach remains promising against the equivalent nested-stream baseline
-for these tested scenarios.
+- **Change:** Added the `DEEP_DEAD_END` workload family to compare late-conflict traversal
+  strategies, using 5x10, 5x25, 7x10, 7x25, and 10x10 shapes.
+- **Benchmark:** The focused one-fork, 200 ms warmup/measurement JMH run compared DP,
+  BitSet, DFS, ADAPTIVE, and the nested-stream baseline.
+- **Finding:** DP was fastest in four of five cases; DFS led 5x10. BitSet was close to DP.
+  In the tested cases, builder strategies substantially outperformed the nested-stream
+  baseline, with especially large but workload-specific gains on extreme late-conflict cases.
+- **Decision:** Keep DP available as an explicit strategy and as the leading candidate for
+  further deep-dead-end investigation. Do not change the default based on this screening run.
+- **Status:** Screening evidence; no confirmed winner.
+- **Revisit when:** A longer multi-fork run reproduces the DP advantage and checks for
+  regressions on ordinary chain, complete, small-domain, and many-valid workloads.
 
-**Next evidence required:** rerun the same scenario/implementation matrix with at least
-`-wi 5 -i 8 -w 1s -r 1s -f 2 -tu ms -bm avgt -prof gc`. Review score errors, allocation,
-correctness checks, and regressions before changing implementation or dispatch.
+### Builder traversal versus nested Java Streams
+
+- **Change:** Retained an independent nested-stream baseline that checks constraints
+  incrementally while traversing dimensions; it does not build the full Cartesian product and
+  filter only at the end.
+- **Benchmark:** The focused JMH matrix compared complete end-to-end construction and tuple
+  consumption, with tuple-count and checksum validation.
+- **Finding:** The fastest builder strategy beat the nested-stream baseline in all 14 focused
+  scenarios. Outside the extreme deep-dead-end cases, the observed advantage was about
+  3.7x–5.4x. Extreme deep-dead-end ratios ranged from about 5.9x to over 2,000x and are
+  workload-specific. For example, `DEEP_DEAD_END-7x25` allocated about 59 KB/op for the
+  best builder strategy versus about 247 MB/op for nested streams. Allocation is bytes
+  allocated per operation, not retained or peak live heap.
+- **Decision:** Keep the incrementally-pruned nested-stream implementation as the comparison
+  baseline. The results support the builder approach on these tested workloads, but do not
+  justify generalizing the extreme ratios to other constraint distributions.
+- **Status:** Screening evidence for the focused matrix; earlier topology-specific results
+  remain historical evidence.
+- **Revisit when:** An equivalent, correctness-checked workload produces materially different
+  results, or the baseline implementation changes.
+
+### Next confirmation run
+
+Before changing default strategy selection or making a general performance claim, rerun the
+same scenario/implementation matrix with at least:
+
+```text
+-wi 5 -i 8 -w 1s -r 1s -f 2 -tu ms -bm avgt -prof gc
+```
+
+Retain score errors, allocation per operation, correctness checks, exact command, JDK/JVM
+metadata, hardware details, and source commit with the result. Review ordinary and adversarial
+topologies together; do not select a default from one topology alone.
 
 ### Decision register
 
-| Topic | Decision | Reopen when |
+| Topic | Current decision | Reason / evidence needed to reopen |
 |---|---|---|
-| DP vs PRUNED_BITSET on deep dead ends | No change; DP is only a provisional candidate. | A multi-fork run shows a repeatable advantage. |
-| PRUNED_DFS | Retain; it led the exploratory 5x10 case. | Confirmatory results show it is consistently dominated or regresses elsewhere. |
-| ADAPTIVE | Retain; no demonstrated lead in the focused deep-dead-end cases. | A defined policy wins robustly across representative scenarios. |
-| Builder vs nested streams | Builder approach is promising on tested workloads; do not generalize extreme ratios. | Equivalent, verified workloads contradict the result. |
-| Default strategy / dispatch | No change from this exploratory run. | Confirmatory performance evidence and correctness tests justify it. |
-
+| Default lexicographic strategy | Keep `PRUNED_BITSET`; provisional, not proven globally optimal. | Multi-fork results across representative topologies, plus lookahead before/after evidence. |
+| DP on deep dead ends | Keep as an explicit option and leading candidate; no default switch. | Confirm its four-of-five screening lead with longer runs and check other workloads. |
+| PRUNED_DFS | Retain as an explicit option; it led the exploratory 5x10 deep-dead-end case. | Reopen if confirmatory runs show consistent domination or a material regression. |
+| ADAPTIVE | Retain as a BitSet-backed entry point; estimate does not choose DP versus pruning. | Reopen only with a measured policy that beats explicit strategies on representative workloads. |
+| Builder vs nested streams | Keep the independent incrementally-pruned stream baseline; builder won all 14 focused cases. | Reopen with equivalent verified workloads or a material baseline change. |
+| Historical DEAD_END / CHAIN / MANY_VALID results | Retain as historical, topology-specific evidence. | Compare directly only when workload, source, environment, and methodology are equivalent. |
