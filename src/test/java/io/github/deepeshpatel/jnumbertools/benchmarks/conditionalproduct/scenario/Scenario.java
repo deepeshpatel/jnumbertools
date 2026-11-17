@@ -64,7 +64,7 @@ public final class Scenario {
     /**
      * Builds bounded Phase E workloads. MANY_VALID targets at most 75,000 tuples;
      * COMPLETE targets at most 1,000. DEAD_END adds conflicting conditional
-     * restrictions on the final dimension while preserving valid combinations.
+     * restrictions on the third dimension while preserving valid combinations.
      */
     private static Scenario createPhaseE(String caseId) {
         String[] parts = caseId.split("/");
@@ -93,15 +93,22 @@ public final class Scenario {
         if (profile.equals("DEAD_END")) allowedCount = Math.max(2, allowedCount);
 
         List<Rule> rules = new ArrayList<>();
-        for (int d = 0; d < n - 1; d++)
-            rules.add(new Rule(d, range(0, size), d + 1, range(0, allowedCount)));
-
         if (profile.equals("DEAD_END")) {
+            // Keep the only cycle in dimensions 0, 1 and 2. Remaining dimensions
+            // are attached as bridge edges so loop-block validation stays bounded.
+            rules.add(new Rule(0, range(0, size), 1, range(0, allowedCount)));
+            rules.add(new Rule(1, range(0, size), 2, range(0, allowedCount)));
+            for (int d = 3; d < n; d++)
+                rules.add(new Rule(2, range(0, size), d, range(0, allowedCount)));
+
             int triggerCount = Math.max(1, Math.min(allowedCount - 1,
                     (int) Math.floor(allowedCount * 0.80)));
             int midpoint = allowedCount / 2;
-            rules.add(new Rule(0, range(0, triggerCount), n - 1, range(0, midpoint)));
-            rules.add(new Rule(1, range(0, triggerCount), n - 1, range(midpoint, allowedCount)));
+            rules.add(new Rule(0, range(0, triggerCount), 2, range(0, midpoint)));
+            rules.add(new Rule(1, range(0, triggerCount), 2, range(midpoint, allowedCount)));
+        } else {
+            for (int d = 0; d < n - 1; d++)
+                rules.add(new Rule(d, range(0, size), d + 1, range(0, allowedCount)));
         }
         return new Scenario(dimensions, rules);
     }
