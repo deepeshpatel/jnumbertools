@@ -107,8 +107,8 @@ Initial observations:
 - No pruning strategy wins consistently. BITSET leads at 5×50 and 7×25; DFS leads at 5×25
   and 7×50. At 5×10 and 7×10, the three pruning strategies are effectively tied at this precision.
 - DP is slower than the pruning strategies in these six cases.
-- Incrementally filtered nested streams are slower in all six cases, with the gap widening on
-  larger workloads.
+- Incrementally filtered nested streams are slower in all six cases; the absolute time gap becomes
+  substantially larger on the bigger workloads.
 - ADAPTIVE does not consistently match the fastest explicit strategy. Its selection heuristic
   should be evaluated against the full topology matrix before changing it.
 - Doubling domain size from 25 to 50 causes a large increase in work. The growth depends on the
