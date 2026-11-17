@@ -174,7 +174,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     private ConditionalProductBuilder(ConstraintModel model, List<List<?>> originals) {
         this.model = model;
         this.originals = originals;
-        this.ruleCompiler = new RuleCompiler(model.dimensions, originals);
+        this.ruleCompiler = new RuleCompiler(model.dimensions, originals, model.indexes);
     }
 
     /**

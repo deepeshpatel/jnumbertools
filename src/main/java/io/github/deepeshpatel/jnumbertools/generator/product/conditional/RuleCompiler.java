@@ -6,8 +6,9 @@ package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
 import java.util.BitSet;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -17,10 +18,12 @@ import java.util.Set;
 final class RuleCompiler {
     private final List<List<?>> dimensions;
     private final List<List<?>> originals;
+    private final DimensionIndexes indexes;
 
-    RuleCompiler(List<List<?>> dimensions, List<List<?>> originals) {
+    RuleCompiler(List<List<?>> dimensions, List<List<?>> originals, DimensionIndexes indexes) {
         this.dimensions = dimensions;
         this.originals = originals;
+        this.indexes = indexes;
     }
 
     int indexOf(List<?> dimension) {
@@ -49,27 +52,25 @@ final class RuleCompiler {
         if (values.isEmpty()) {
             throw new IllegalArgumentException("At least one value is required");
         }
-        Set<Object> wanted = new HashSet<>();
+        Map<Object, int[]> positions = indexes.of(dim);
+        int size = dimensions.get(dim).size();
+        BitSet result = new BitSet(size);
+        Set<Object> missing = null;
         for (Object value : values) {
-            wanted.add(Objects.requireNonNull(value, "a rule value must not be null"));
-        }
-        List<?> list = dimensions.get(dim);
-        BitSet result = new BitSet(list.size());
-        Set<Object> seen = new HashSet<>();
-        for (int i = 0; i < list.size(); i++) {
-            Object element = list.get(i);
-            if (wanted.contains(element)) {
-                result.set(i);
-                seen.add(element);
+            Objects.requireNonNull(value, "a rule value must not be null");
+            int[] at = positions.get(value);
+            if (at == null) {
+                if (missing == null) missing = new LinkedHashSet<>();
+                missing.add(value);
+            } else {
+                for (int position : at) result.set(position);
             }
         }
-        if (seen.size() < wanted.size()) {
-            Set<Object> missing = new HashSet<>(wanted);
-            missing.removeAll(seen);
+        if (missing != null) {
             throw new IllegalArgumentException("Not a value of that dimension: " + missing);
         }
         if (negate) {
-            result.flip(0, list.size());
+            result.flip(0, size);
         }
         return result;
     }

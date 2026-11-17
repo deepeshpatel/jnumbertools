@@ -4,7 +4,6 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +13,7 @@ import java.util.Map;
  *
  * <p>The relation records the rules written for the pair, and builds the rows only when something reads them.
  * {@link #uToV()} gives, for each value {@code a} of {@code u}, the values of {@code v} allowed with it;
- * {@link #vToU()} gives the reverse. Adding a rule with {@link #restrict} copies a short list of rules and never
+ * {@link #vToU()} gives the reverse. Adding a rule with {@link #restrict} links one more rule onto a shared chain and never
  * touches the rows, so writing rules costs time and space in proportion to the number of values, not to the number
  * of value pairs.</p>
  *
@@ -46,19 +45,32 @@ final class Relation {
 
     private final int du;
     private final int dv;
-    private final Rule[] rules;
+    private final Link last;   // the rules form a chain shared with the relations they were derived from
+    private final int ruleCount;
     private volatile BitSet[] uToV;
     private volatile BitSet[] vToU;
 
-    private Relation(int du, int dv, Rule[] rules) {
+    /** One rule in the chain; a relation and the relation it was derived from share every earlier link. */
+    private static final class Link {
+        final Rule rule;
+        final Link previous;
+
+        Link(Rule rule, Link previous) {
+            this.rule = rule;
+            this.previous = previous;
+        }
+    }
+
+    private Relation(int du, int dv, Link last, int ruleCount) {
         this.du = du;
         this.dv = dv;
-        this.rules = rules;
+        this.last = last;
+        this.ruleCount = ruleCount;
     }
 
     /** The relation that allows every pair of values. */
     static Relation full(int du, int dv) {
-        return new Relation(du, dv, new Rule[0]);
+        return new Relation(du, dv, null, 0);
     }
 
     /**
@@ -66,9 +78,8 @@ final class Relation {
      * copied, so later changes to them do not affect the relation.
      */
     Relation restrict(BitSet triggers, BitSet allowedTargets, boolean triggerIsU) {
-        Rule[] next = Arrays.copyOf(rules, rules.length + 1);
-        next[rules.length] = new Rule(triggerIsU, (BitSet) triggers.clone(), (BitSet) allowedTargets.clone());
-        return new Relation(du, dv, next);
+        Rule rule = new Rule(triggerIsU, (BitSet) triggers.clone(), (BitSet) allowedTargets.clone());
+        return new Relation(du, dv, new Link(rule, last), ruleCount + 1);
     }
 
     /** {@code uToV()[a]}: the values of {@code v} allowed together with value {@code a} of {@code u}. Rows are shared. */
@@ -129,6 +140,9 @@ final class Relation {
         BitSet full = new BitSet(width);
         full.set(0, width);
         BitSet[] rows = new BitSet[count];
+        Rule[] rules = new Rule[ruleCount];
+        int at = ruleCount;
+        for (Link link = last; link != null; link = link.previous) rules[--at] = link.rule;
         boolean share = rules.length <= MAX_SHARED_RULES;
         Map<Long, BitSet> bySignature = share ? new HashMap<>() : null;
         for (int x = 0; x < count; x++) {

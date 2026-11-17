@@ -22,20 +22,27 @@ import java.util.Collections;
 final class ConstraintModel {
     final List<List<?>> dimensions;
     final PersistentRelationMap relations;
+    final DimensionIndexes indexes;
     private volatile Rows rows;
     private volatile DenseRows denseRows;
     private volatile boolean denseRowsInitialized;
     private volatile ConstraintPlan plan;
 
     ConstraintModel(List<List<?>> dimensions, PersistentRelationMap relations) {
+        this(dimensions, relations, new DimensionIndexes(dimensions));
+    }
+
+    private ConstraintModel(List<List<?>> dimensions, PersistentRelationMap relations, DimensionIndexes indexes) {
         this.dimensions = dimensions;
         this.relations = relations;
+        this.indexes = indexes;
     }
 
     ConstraintModel withDimension(List<?> dimension) {
         List<List<?>> updated = new ArrayList<>(dimensions);
         updated.add(dimension);
-        return new ConstraintModel(Collections.unmodifiableList(updated), relations);
+        List<List<?>> extended = Collections.unmodifiableList(updated);
+        return new ConstraintModel(extended, relations, indexes.extendedTo(extended));
     }
 
     ConstraintModel withRule(int triggerDim, BitSet triggerValues, int targetDim, BitSet allowedTargets) {
@@ -57,7 +64,7 @@ final class ConstraintModel {
         if (newLinkedPair) {
             ConstraintGraph.checkLoopBlocks(dimensions, updatedRelations.keySet());
         }
-        return new ConstraintModel(dimensions, updatedRelations);
+        return new ConstraintModel(dimensions, updatedRelations, indexes);
     }
 
     ConstraintPlan plan() {
