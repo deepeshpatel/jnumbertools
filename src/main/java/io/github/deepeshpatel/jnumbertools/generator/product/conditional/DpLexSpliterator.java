@@ -13,10 +13,10 @@ import java.util.function.Consumer;
 /**
  * Ordered spliterator for the {@code DP} strategy.
  *
- * <p>A sequential traversal walks the tuples with {@link DpLexGenerator}, which needs only the feasibility
- * tier of the plan, so it builds no counts. Only when a parallel pipeline asks to split before traversal has
- * started does this spliterator build the exact counts and hand over to {@link DpRankSpliterator}, which
- * divides the rank interval into balanced contiguous ranges.</p>
+ * <p>Sequential traversal walks the tuples with {@link DpLexGenerator}, which needs only the feasibility
+ * tier and does not build exact completion counts. Before traversal starts, either {@link #estimateSize()}
+ * or {@link #trySplit()} may build the exact counts. Splitting then hands traversal over to
+ * {@link DpRankSpliterator}, which divides the valid-tuple rank interval into contiguous ranges.</p>
  */
 final class DpLexSpliterator implements Spliterator<List<Object>> {
     private final ConstraintModel model;
@@ -51,7 +51,7 @@ final class DpLexSpliterator implements Spliterator<List<Object>> {
     public long estimateSize() {
         if (ranks != null) return ranks.estimateSize();
         if (iterator != null) return Long.MAX_VALUE;
-        // Only a parallel pipeline asks before traversal starts; it needs a real size to choose its task size.
+        // A pre-traversal size estimate needs the exact count to report the remaining tuple count.
         if (plan.isEmpty()) return 0;
         BigInteger total = plan.counts().total;
         return total.bitLength() > 62 ? Long.MAX_VALUE : total.longValue();
