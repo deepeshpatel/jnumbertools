@@ -95,7 +95,7 @@ independent choices.
 
 ## Dead-end benchmark: initial results
 
-The first reported end-to-end run of `deadend/ConditionalProductBenchmark` shows the
+The first reported end-to-end run of the (now consolidated) `DEAD_END` topology shows the
 following fastest implementation for each tested shape:
 
 | Shape | Fastest implementation | Score (ms/op) | Nested Stream (ms/op) | Relative result |
@@ -125,7 +125,7 @@ omitted from this suite.
 
 ## Chain benchmark: first full JMH results
 
-The first complete reported run of `chain/ConditionalProductBenchmark` used
+The first complete reported run of the `CHAIN` topology, captured before benchmark-class consolidation, used
 `-wi 5 -i 8 -f 2 -tu ms -bm avgt -prof gc`. It includes end-to-end construction and
 full tuple consumption. The table reports the fastest builder strategy for each shape against
 the independent nested Java Stream baseline.
@@ -164,7 +164,7 @@ formal performance report.
 
 ## Many-valid benchmark: first full JMH results
 
-The first reported end-to-end run of `manyvalid/ConditionalProductBenchmark` used
+The first reported end-to-end run of the `MANY_VALID` topology, captured before benchmark-class consolidation, used
 `-wi 5 -i 8 -f 2 -tu ms -bm avgt -prof gc`. The table shows the fastest measured
 library strategy for each shape against the independent nested Java Stream baseline.
 
@@ -213,7 +213,7 @@ generalizing these results to the `complete` topology.
 and parallel checksums during trial setup. This is a separate comparison: `anyOrder()` is not the
 lexicographic conditional-product strategy parameterized by the topology benchmarks.
 
-## Running conditional-product benchmarks
+## Running benchmarks directly
 
 Build the test classpath once:
 
@@ -221,28 +221,17 @@ Build the test classpath once:
 mvn test-compile dependency:build-classpath -Dmdep.includeScope=test -Dmdep.outputFile=target/test-classpath.txt
 ```
 
-Run all shapes and implementations for one topology:
+For conditional-product benchmarks, use the console selector described above. It generates the
+JMH command with explicit `scenario` and `implementation` parameter values. To run the separate
+any-order parallel comparison directly:
 
 ```bash
 java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
-  org.openjdk.jmh.Main '.*deadend.ConditionalProductBenchmark' -prof gc
+  org.openjdk.jmh.Main '.*AnyOrderParallelBenchmark.*' -wi 5 -i 8 -f 2 -tu ms -bm avgt -prof gc
 ```
 
-Replace `deadend` with `chain`, `manyvalid`, or `complete` to select another topology. Run only the
-any-order comparison with:
-
-```bash
-java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
-  org.openjdk.jmh.Main '.*AnyOrderParallelBenchmark.*' -prof gc
-```
-
-The topology benchmark annotations use short smoke-test defaults (one fork, one 100 ms warmup,
-one 100 ms measurement). Override them for meaningful performance comparisons; for example:
-
-```bash
-java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
-  org.openjdk.jmh.Main '.*deadend.ConditionalProductBenchmark' -wi 5 -i 8 -f 2 -tu ms -bm avgt -prof gc
-```
-
-Do not compare timings from different machines or JVM configurations as if they were directly equivalent.
-Always inspect score error and allocation per operation before drawing conclusions.
+The topology benchmark annotations retain short smoke-test defaults (one fork, one 100 ms warmup,
+one 100 ms measurement). The command selector defaults to 5 warmup iterations, 8 measurement
+iterations, 2 forks, and the GC profiler. Always inspect score error and allocation per operation
+before drawing conclusions, and do not compare timings from different machines or JVM
+configurations as if they were directly equivalent.
