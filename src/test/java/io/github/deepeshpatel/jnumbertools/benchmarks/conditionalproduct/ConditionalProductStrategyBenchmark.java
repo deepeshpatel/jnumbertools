@@ -74,7 +74,7 @@ public class ConditionalProductStrategyBenchmark {
                 "phase-e/COMPLETE/10x10",
                 "phase-e/COMPLETE/10x25",
                 "phase-e/COMPLETE/10x50",
-"topology/star/Dim2-5_Size10-100/selectivity/high/STAR_FIRST_5x10_HIGH",
+                "topology/star/Dim2-5_Size10-100/selectivity/high/STAR_FIRST_5x10_HIGH",
                 "topology/star/Dim2-5_Size10-100/selectivity/high/STAR_LAST_5x10_HIGH",
                 "topology/chain/Dim2-5_Size10-100/selectivity/medium/CHAIN_5x10_MEDIUM",
                 "topology/chain/Dim2-5_Size10-100/selectivity/tight/CHAIN_5x10_TIGHT",
