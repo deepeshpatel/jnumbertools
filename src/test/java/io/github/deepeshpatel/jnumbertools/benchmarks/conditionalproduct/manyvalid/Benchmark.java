@@ -4,19 +4,22 @@
  */
 package io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.manyvalid;
 
-import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.ConditionalProductCaseSupport;
+import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.support.ConditionalProductCaseSupport;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.concurrent.TimeUnit;
 
-/** Fixed MANY_VALID workload: 5 dimensions, 10 values per dimension. */
+/** End-to-end MANY_VALID conditional-product benchmarks across the supported workload shapes. */
 @State(Scope.Thread)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Warmup(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 1, time = 100, timeUnit = TimeUnit.MILLISECONDS)
 @Fork(1)
-public class Benchmark_5by10 {
+public class Benchmark {
+    @Param({"3x10", "3x25", "3x50", "5x10", "5x25", "5x50", "7x10", "7x25", "7x50", "10x10", "10x25", "10x50"})
+    public String shape;
+
     @Param({"PRUNED_BITSET", "PRUNED_DFS", "DP", "ADAPTIVE", "NESTED_STREAM"})
     public String implementation;
 
@@ -25,7 +28,7 @@ public class Benchmark_5by10 {
     @Setup(Level.Trial)
     public void setup() {
         benchmark = new ConditionalProductCaseSupport(
-                "phase-e/MANY_VALID/5x10", implementation);
+                "phase-e/MANY_VALID/" + shape, implementation);
     }
 
     @Benchmark

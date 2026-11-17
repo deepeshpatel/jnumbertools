@@ -2,7 +2,7 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct;
+package io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.anyorder;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.ConditionalProductBuilder;
@@ -21,11 +21,6 @@ import java.util.stream.IntStream;
  *
  * <p>{@code traversalOnly} reuses a builder prepared at trial setup.
  * {@code endToEnd} includes dimension/rule construction, generator creation, and traversal.</p>
- *
- * <p>Run only this benchmark with:
- * {@code mvn exec:java -Dexec.classpathScope=test
- * -Dexec.mainClass=org.openjdk.jmh.Main
- * -Dexec.args="AnyOrderParallelBenchmark.* -wi 3 -i 5 -f 2 -tu ms -bm avgt -prof gc"}.</p>
  */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)

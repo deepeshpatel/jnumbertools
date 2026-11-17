@@ -1,60 +1,81 @@
 # Benchmarks
 
-JMH benchmarks for developers of JNumberTools. They are not part of the published library. Committed
-`*BenchmarkOutput.txt` files hold selected historical results; new benchmark runs may write machine-readable
-results under Maven's `target/` directory.
+JMH benchmarks for JNumberTools maintainers. These classes live under `src/test/java`; they are
+development tools and are not included in the published library.
 
-| Class | Output file | What it measures |
-|---|---|---|
-| `GeneratorSurveyBenchmark` | `GeneratorSurveyBenchmarkOutput.txt` | `lexOrder`, `lexOrderMth`, `choice`, unranking for every generator family |
-| `ProductTupleBenchmark` | `ProductTupleBenchmarkOutput.txt` | Cartesian product tuple handling |
-| `OptimisationCandidatesBenchmark` | `OptimisationCandidatesBenchmarkOutput.txt` | Comparisons of candidate optimisations (for example derangement lexOrder) |
+## Benchmark design rules
 
-## Benchmark environment
+1. Compare each library API implementation with an equivalent Java Stream implementation whenever
+   the operation can reasonably be expressed with streams.
+2. Compare equivalent workloads and consume equivalent results. Validate result counts and a checksum
+   before interpreting performance numbers.
+3. Include setup and construction in an end-to-end benchmark when those costs are part of normal use.
+   Add a separate traversal-only benchmark when isolating iteration is useful.
+4. Record JDK, JVM, hardware, JMH configuration, and allocation data (`-prof gc`). Treat short or
+   noisy runs as exploratory, not publication-quality evidence.
+5. Keep benchmark classes small. Put reusable scenario generation, baselines, and setup logic in
+   named subpackages. Do not put Java source files directly in the `benchmarks/` directory.
 
-The committed results were measured on the machine and JVM below, so they are comparable with each other.
-They are not absolute speed claims for other hardware, JVMs or operating systems.
+A Java Stream baseline is a standing comparison requirement for future benchmark families. The baseline
+should be independent of the library implementation; for conditional products, it incrementally checks
+constraints while recursively traversing dimensions rather than materializing the full Cartesian product
+and filtering only at the end.
 
-| | |
-|---|---|
-| Machine | MacBook Air (Mac17,4), Apple M5, 10 cores (4 performance, 6 efficiency), 16 GB RAM |
-| OS | macOS 26.4 |
-| JDK | OpenJDK 64-Bit Server VM 27.0.1.0.3 (Homebrew), no extra JVM flags |
-| Build target | Java 21 |
-| Power | AC power, Low Power Mode off |
-| Library version | 4.1.0 (commit 6d1266f) |
-| JMH | 1.37; `GeneratorSurveyBenchmark`: 2 forks, 5 warmup and 8 measurement iterations of 300 ms each, 1 thread, average time, `-prof gc` |
-| Notes | Fanless laptop, so long runs can be slightly throttled. No other heavy work was running; a browser and a chat app were open but idle. In the survey most rows vary by less than ±3% between iterations; a few are noisier (up to about ±13%). |
+## Package layout
 
-## Running
-
-Run one benchmark row:
-
-```bash
-mvn clean test-compile exec:exec -Dexec.executable=java -Dexec.classpathScope=test \
-  -Dexec.args="-cp %classpath org.openjdk.jmh.Main GeneratorSurveyBenchmark.lexOrder1000 -p generator=permutation-k -prof gc"
+```text
+benchmarks/
+├── README.md
+└── conditionalproduct/
+    ├── anyorder/
+    ├── baseline/
+    ├── chain/
+    ├── complete/
+    ├── deadend/
+    ├── manyvalid/
+    ├── scenario/
+    └── support/
 ```
+
+Future API families should get their own domain package (for example, `permutation/`,
+`combination/`, `derangement/`, or `product/`) rather than adding unrelated benchmark classes
+to the root.
 
 ## Conditional-product benchmarks
 
-Conditional-product strategy benchmarks are organized by workload topology/profile. Each class fixes one dimension count and one uniform domain size. The `implementation` parameter compares `PRUNED_BITSET`, `PRUNED_DFS`, `DP`, `ADAPTIVE`, and an incrementally filtered nested-stream baseline.
+The parameterized JMH classes compare these implementations:
 
-The source layout is:
+- `PRUNED_BITSET`
+- `PRUNED_DFS`
+- `DP`
+- `ADAPTIVE`
+- `NESTED_STREAM` — independent incrementally filtered nested Java Streams baseline
 
-```text
-conditionalproduct/
-├── ConditionalProductCaseSupport.java
-├── baseline/
-├── scenario/
-├── chain/
-├── manyvalid/
-├── complete/
-└── deadend/
-```
+Each topology has one benchmark class. The `shape` parameter selects 3, 5, 7, or 10 dimensions
+and 10, 25, or 50 values per dimension. The `implementation` parameter selects the library strategy
+or Java Stream baseline. The benchmark includes builder construction, rule registration, generator
+creation, and complete tuple consumption. Trial setup checks each selected library strategy's tuple
+count and checksum against the nested-stream baseline.
 
-Each topology folder contains fixed-case classes named `Benchmark_<dimensions>by<size>.java` for dimensions 3, 5, 7, and 10 and domain sizes 10, 25, and 50. The `deadend` folder omits 10×50 because its estimated output exceeds the one-minute benchmark budget. All other folders include all 12 shapes.
+| Folder | Scenario | Valid-output budget | Shapes |
+|---|---|---:|---|
+| `chain` | Chain-shaped restrictions | 30,000 | All 12 |
+| `manyvalid` | Chain-shaped restrictions with a larger branching factor | 75,000 | All 12 |
+| `complete` | Chain-shaped restrictions with a small output budget | 1,000 | All 12 |
+| `deadend` | Controlled conflicting restrictions | 30,000 | 11 (omits 10×50) |
 
-Each class uses one fork, one 100 ms warmup iteration, and one 100 ms measurement iteration. The benchmark includes builder construction, rule registration, generator creation, and complete consumption. Trial setup independently checks each selected implementation's tuple count and checksum against the nested-stream baseline. The `chain`, `manyvalid`, and `complete` folders represent chain-shaped workloads with different valid-output budgets (30,000, 75,000, and 1,000 tuples respectively); `deadend` uses controlled conflicting restrictions.
+The `deadend` folder omits 10×50 because its estimated output exceeds the intended benchmark budget.
+The scenario definitions and rule data are in `scenario/`; the independent nested-stream implementation
+is in `baseline/`; shared builder and verification logic is in `support/`.
+
+## Any-order parallel benchmark
+
+`anyorder/AnyOrderParallelBenchmark` compares sequential and parallel consumption of
+`anyOrder().stream()`. It includes traversal-only and end-to-end methods and validates sequential
+and parallel checksums during trial setup. This is a separate comparison: `anyOrder()` is not the
+lexicographic conditional-product strategy parameterized by the topology benchmarks.
+
+## Running conditional-product benchmarks
 
 Build the test classpath once:
 
@@ -62,44 +83,28 @@ Build the test classpath once:
 mvn test-compile dependency:build-classpath -Dmdep.includeScope=test -Dmdep.outputFile=target/test-classpath.txt
 ```
 
-Run exactly one fixed case (all five implementations):
+Run all shapes and implementations for one topology:
 
 ```bash
 java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
-  org.openjdk.jmh.Main '.*deadend.Benchmark_5by10'
+  org.openjdk.jmh.Main '.*deadend.Benchmark' -prof gc
 ```
 
-Change the class selector to a class under `chain`, `manyvalid`, or `complete` to run that workload. JMH prints the score for each implementation.
+Replace `deadend` with `chain`, `manyvalid`, or `complete` to select another topology. Run only the
+any-order comparison with:
 
-The nested-stream baseline applies constraints as soon as both participating dimensions have been selected. It does **not** generate the full Cartesian product and apply one final filter.
+```bash
+java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
+  org.openjdk.jmh.Main '.*AnyOrderParallelBenchmark.*' -prof gc
+```
 
-### Current controlled DEAD_END measurements
+The topology benchmark annotations use short smoke-test defaults (one fork, one 100 ms warmup,
+one 100 ms measurement). Override them for meaningful performance comparisons; for example:
 
-These are the maintainer's initial end-to-end results for the controlled dead-end profile, measured with one fork, one warmup iteration, and two 500 ms measurement iterations. Times are ms/op. The results are quick-glance measurements, not publication-grade estimates.
+```bash
+java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
+  org.openjdk.jmh.Main '.*deadend.Benchmark' -wi 5 -i 8 -f 2 -tu ms -bm avgt -prof gc
+```
 
-| Scenario | PRUNED_BITSET | PRUNED_DFS | DP | ADAPTIVE | NESTED_STREAM |
-|---|---:|---:|---:|---:|---:|
-| 5×10 | 0.004 | 0.004 | 0.007 | 0.004 | 0.006 |
-| 5×25 | 0.053 | **0.045** | 0.102 | 0.052 | 0.173 |
-| 5×50 | **0.860** | 0.949 | 1.611 | 1.768 | 3.217 |
-| 7×10 | 0.007 | 0.008 | 0.017 | 0.007 | 0.013 |
-| 7×25 | **1.600** | 1.632 | 2.256 | 1.639 | 5.686 |
-| 7×50 | 157.901 | **141.047** | 167.611 | 167.153 | 432.660 |
-
-Initial observations:
-
-- No pruning strategy wins consistently. BITSET leads at 5×50 and 7×25; DFS leads at 5×25 and 7×50. At 5×10 and 7×10, the three pruning strategies are effectively tied at this precision.
-- DP is slower than the pruning strategies in these six cases.
-- Incrementally filtered nested streams are slower in all six cases; the absolute time gap becomes substantially larger on the bigger workloads.
-- ADAPTIVE does not consistently match the fastest explicit strategy. Its selection heuristic should be evaluated against the full topology matrix before changing it.
-- Doubling domain size from 25 to 50 causes a large increase in work. The growth depends on the number of dimensions and the valid-prefix structure, not just the raw domain size.
-
-These findings apply only to the controlled DEAD_END profile and this machine/JVM. Do not infer a universal strategy ranking from six cases or from two measurement iterations.
-
-## Updating the committed results
-
-- Re-run a benchmark and replace its output file only when the code it measures has changed.
-- Run it on the machine above, with nothing heavy open, and keep `-prof gc` so allocation (`gc.alloc.rate.norm`) is recorded.
-- Allocation per operation is far more stable than time; compare it first when looking for a regression.
-- A row whose error is close to or larger than its score is noise; do not quote it.
-- Update the commit hash in the table above when results are replaced.
+Do not compare timings from different machines or JVM configurations as if they were directly equivalent.
+Always inspect score error and allocation per operation before drawing conclusions.

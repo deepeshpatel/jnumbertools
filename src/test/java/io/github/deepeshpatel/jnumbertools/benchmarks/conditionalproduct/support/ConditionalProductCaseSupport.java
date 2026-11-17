@@ -2,7 +2,7 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct;
+package io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.support;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.baseline.NestedStreamBaseline;
@@ -17,7 +17,7 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.stream.Stream;
 
-/** Shared setup and end-to-end measurement logic for one fixed conditional-product case. */
+/** Shared setup and end-to-end measurement logic for one conditional-product benchmark case. */
 public final class ConditionalProductCaseSupport {
     private final ScenarioData scenario;
     private final List<PreparedRule> preparedRules;
