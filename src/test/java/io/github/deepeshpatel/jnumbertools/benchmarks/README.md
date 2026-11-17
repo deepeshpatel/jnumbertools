@@ -87,7 +87,7 @@ Run all shapes and implementations for one topology:
 
 ```bash
 java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
-  org.openjdk.jmh.Main '.*deadend.Benchmark' -prof gc
+  org.openjdk.jmh.Main '.*deadend.ConditionalProductBenchmark' -prof gc
 ```
 
 Replace `deadend` with `chain`, `manyvalid`, or `complete` to select another topology. Run only the
@@ -103,7 +103,7 @@ one 100 ms measurement). Override them for meaningful performance comparisons; f
 
 ```bash
 java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
-  org.openjdk.jmh.Main '.*deadend.Benchmark' -wi 5 -i 8 -f 2 -tu ms -bm avgt -prof gc
+  org.openjdk.jmh.Main '.*deadend.ConditionalProductBenchmark' -wi 5 -i 8 -f 2 -tu ms -bm avgt -prof gc
 ```
 
 Do not compare timings from different machines or JVM configurations as if they were directly equivalent.
