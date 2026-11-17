@@ -137,6 +137,50 @@ numbers to `manyvalid`, `complete`, or `deadend`. The reported output includes J
 estimates and GC metrics, but not the machine/JVM metadata, so retain that metadata with any
 formal performance report.
 
+## Many-valid benchmark: first full JMH results
+
+The first reported end-to-end run of `manyvalid/ConditionalProductBenchmark` used
+`-wi 5 -i 8 -f 2 -tu ms -bm avgt -prof gc`. The table shows the fastest measured
+library strategy for each shape against the independent nested Java Stream baseline.
+
+| Shape | Fastest builder strategy | Builder (ms/op) | Nested Stream (ms/op) | Speedup |
+|---|---|---:|---:|---:|
+| 3x10 | PRUNED_BITSET / ADAPTIVE | 0.012 | 0.033 | 2.75x |
+| 3x25 | PRUNED_BITSET | 0.165 | 0.426 | 2.58x |
+| 3x50 | PRUNED_BITSET | 0.746 | 1.916 | 2.57x |
+| 5x10 | PRUNED_BITSET | 1.165 | 2.413 | 2.07x |
+| 5x25 | DP | 1.058 | 5.055 | 4.78x |
+| 5x50 | PRUNED_BITSET | 0.900 | 9.746 | 10.83x |
+| 7x10 | PRUNED_DFS | 1.061 | 3.218 | 3.03x |
+| 7x25 | PRUNED_BITSET | 0.569 | 3.566 | 6.27x |
+| 7x50 | PRUNED_BITSET | 0.962 | 6.249 | 6.50x |
+| 10x10 | PRUNED_BITSET / ADAPTIVE | 0.141 | 0.998 | 7.08x |
+| 10x25 | PRUNED_BITSET | 0.343 | 2.340 | 6.82x |
+| 10x50 | PRUNED_BITSET | 0.903 | 7.353 | 8.14x |
+
+In this run, the fastest measured builder strategy beat nested streams in all 12 shapes,
+with observed speedups from 2.07x to 10.83x. `PRUNED_BITSET` was fastest or tied in
+10 shapes; `DP` led 5x25 and `PRUNED_DFS` led 7x10. The 7x10 result is relatively
+close to `PRUNED_BITSET` and has a wide error estimate, so the apparent winner should
+not be treated as conclusive. At 5x25, the `DP` and `PRUNED_BITSET` scores are also
+close relative to their reported errors. `ADAPTIVE` did not consistently select the
+fastest measured strategy in this topology.
+
+The GC profiler's normalized allocation metric (`gc.alloc.rate.norm`) shows that the
+fastest measured builder strategy allocated approximately 6.1x to 15.1x less data per
+operation than nested streams (about 83.6% to 93.4% less). For example, at 5x50,
+`PRUNED_BITSET` allocated about 2.63 MB/op versus 37.88 MB/op for nested streams.
+At 7x25, it allocated about 0.91 MB/op versus 13.73 MB/op. These are per-operation
+allocation measurements, not retained-heap measurements.
+
+This result is important because the builder advantage is not confined to the dead-end
+or chain scenarios: it is also present in this many-valid scenario. However, the measured
+advantage varies substantially by shape, and several builder scores have wide error
+estimates. Treat this as an initial exploratory result, not a publication-quality
+comparison. The pasted output includes JMH errors and GC metrics but not the exact
+machine/JVM metadata. Preserve that metadata with any formal report, and avoid
+generalizing these results to the `complete` topology.
+
 ## Any-order parallel benchmark
 
 `anyorder/AnyOrderParallelBenchmark` compares sequential and parallel consumption of
