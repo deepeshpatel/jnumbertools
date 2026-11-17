@@ -27,6 +27,7 @@ final class ConstraintModel {
     private volatile DenseRows denseRows;
     private volatile boolean denseRowsInitialized;
     private volatile ConstraintPlan plan;
+    private volatile Boolean completionLookaheadUseful;
 
     ConstraintModel(List<List<?>> dimensions, PersistentRelationMap relations) {
         this(dimensions, relations, new DimensionIndexes(dimensions));
@@ -65,6 +66,25 @@ final class ConstraintModel {
             ConstraintGraph.checkLoopBlocks(dimensions, updatedRelations.keySet());
         }
         return new ConstraintModel(dimensions, updatedRelations, indexes);
+    }
+
+    /**
+     * Whether topology-based completion lookahead is worth building for prefix-pruned traversal.
+     * A loop block can make a prefix locally pairwise-valid but globally impossible; acyclic graphs
+     * retain the lightweight relation-only traversal.
+     */
+    boolean completionLookaheadUseful() {
+        Boolean result = completionLookaheadUseful;
+        if (result == null) {
+            synchronized (this) {
+                result = completionLookaheadUseful;
+                if (result == null) {
+                    result = ConstraintGraph.hasLoopBlock(dimensions.size(), relations.keySet());
+                    completionLookaheadUseful = result;
+                }
+            }
+        }
+        return result;
     }
 
     ConstraintPlan plan() {
