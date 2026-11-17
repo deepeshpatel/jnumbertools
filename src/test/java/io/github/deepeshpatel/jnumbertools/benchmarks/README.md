@@ -235,3 +235,130 @@ one 100 ms measurement). The command selector defaults to 5 warmup iterations, 8
 iterations, 2 forks, and the GC profiler. Always inspect score error and allocation per operation
 before drawing conclusions, and do not compare timings from different machines or JVM
 configurations as if they were directly equivalent.
+
+
+## Optimization decision log
+
+This section is the durable record of conditional-product performance experiments and decisions.
+Read it before proposing or implementing another optimization. Update it whenever a benchmark
+result is analyzed or an implementation strategy is changed. The purpose is to prevent repeated
+experiments and contradictory recommendations across contributors and AI assistants.
+
+### Rules for future optimization work
+
+1. **Read this log first.** Search for the proposed optimization, the affected topology, and any
+   previous decision before suggesting code changes.
+2. **Do not repeat a failed or inconclusive experiment unchanged.** A repeat is justified only when
+   the benchmark, workload, implementation, JDK, or measurement quality has materially changed.
+   State exactly what changed and what question the rerun answers.
+3. **Separate evidence from hypotheses.** Label results as exploratory, confirmatory, or rejected.
+   Record the exact benchmark command/configuration, JDK, JVM, hardware when known, and source
+   revision. Never promote a single short run into a general performance claim.
+4. **Preserve the baseline.** Compare equivalent complete workloads and verify tuple counts and
+   checksums. Keep the independent incrementally-pruned nested-stream baseline; do not replace it
+   with a less efficient full-product-then-filter baseline.
+5. **Do not optimize from a single winner.** Compare all relevant scenarios, allocation per operation,
+   score errors, and regressions. A strategy that wins one topology is not automatically the default.
+6. **Record decisions, including "do not change".** For every investigated idea, record the question,
+   evidence, conclusion, decision, and what new evidence would justify reopening it.
+7. **No silent reversals.** If a later result contradicts a recorded decision, add a dated entry
+   explaining the contradiction and superseding evidence. Keep the earlier entry for history.
+
+### Focused strategy comparison: DEEP_DEAD_END and SMALL_DOMAIN
+
+**Status: exploratory; not sufficient to select or change the default strategy.**
+
+A focused run compared PRUNED_BITSET, PRUNED_DFS, DP, ADAPTIVE, and NESTED_STREAM
+across 14 scenarios. Configuration:
+
+- JMH 1.37; OpenJDK 26.0.1, 64-bit Server VM.
+- One warmup iteration and one measurement iteration, each 200 ms; one fork.
+- Average time in milliseconds; GC profiler enabled.
+- Scenarios: DEEP_DEAD_END-5x10, DEEP_DEAD_END-5x25, DEEP_DEAD_END-7x10,
+  DEEP_DEAD_END-7x25, DEEP_DEAD_END-10x10, SMALL_DOMAIN-8x4,
+  SMALL_DOMAIN-10x4, SMALL_DOMAIN-12x3, SMALL_DOMAIN-14x3,
+  SMALL_DOMAIN-8x5, CHAIN-5x10, CHAIN-7x10, COMPLETE-5x10,
+  COMPLETE-7x10.
+- All five implementations were measured.
+- Because this was only one short warmup/measurement and one fork, JMH reported no useful
+  confidence interval. Treat all rankings and ratios below as directional observations only.
+
+#### Deep-dead-end results
+
+| Scenario | PRUNED_BITSET (ms/op) | PRUNED_DFS (ms/op) | DP (ms/op) | ADAPTIVE (ms/op) | Fastest |
+|---|---:|---:|---:|---:|---|
+| 5x10 | 0.196 | 0.187 | 0.205 | 0.224 | PRUNED_DFS |
+| 5x25 | 0.085 | 0.085 | 0.084 | 0.095 | DP |
+| 7x10 | 0.014 | 0.017 | 0.013 | 0.014 | DP |
+| 7x25 | 0.045 | 0.049 | 0.041 | 0.045 | DP |
+| 10x10 | 0.017 | 0.017 | 0.014 | 0.015 | DP |
+
+Observations:
+
+- DP was fastest in four of the five measured deep-dead-end cases; PRUNED_DFS led 5x10.
+- PRUNED_BITSET was close to DP, but did not win these cases except that its 5x10 result
+  was close to the best. The measured gaps are too small and the run too weak to establish a
+  reliable ranking.
+- ADAPTIVE was consistent but did not lead any of these five cases.
+- Allocation also favoured DP in these cases. For example, at 7x25, DP allocated about
+  59 KB/op, compared with about 64 KB/op for PRUNED_BITSET, 67 KB/op for PRUNED_DFS,
+  and 64 KB/op for ADAPTIVE.
+
+**Decision:** Do not change or remove any strategy based on this run. In particular, do not
+assume that topology-aware lookahead makes PRUNED_BITSET the best deep-dead-end strategy.
+The current evidence instead makes DP the candidate to investigate for these cases, but a
+proper multi-fork run is required before any selection or dispatch change.
+
+#### Builder strategies versus nested streams
+
+The fastest of the four builder strategies in each scenario was faster than NESTED_STREAM
+in this exploratory run:
+
+| Scenario | Fastest builder time (ms/op) | Nested Stream (ms/op) | Approx. speedup |
+|---|---:|---:|---:|
+| DEEP_DEAD_END-5x10 | 0.187 | 1.092 | 5.9x |
+| DEEP_DEAD_END-5x25 | 0.084 | 70.829 | 841.9x |
+| DEEP_DEAD_END-7x10 | 0.013 | 30.444 | 2,388.8x |
+| DEEP_DEAD_END-7x25 | 0.041 | 76.106 | 1,868.8x |
+| DEEP_DEAD_END-10x10 | 0.014 | 10.962 | 775.3x |
+| CHAIN-5x10 | 0.336 | 1.446 | 4.3x |
+| CHAIN-7x10 | 0.150 | 0.677 | 4.5x |
+| COMPLETE-5x10 | 0.016 | 0.086 | 5.4x |
+| COMPLETE-7x10 | 0.019 | 0.100 | 5.3x |
+| SMALL_DOMAIN-8x4 | 0.200 | 0.864 | 4.3x |
+| SMALL_DOMAIN-10x4 | 1.877 | 9.108 | 4.9x |
+| SMALL_DOMAIN-12x3 | 0.208 | 1.019 | 4.9x |
+| SMALL_DOMAIN-14x3 | 0.840 | 3.670 | 4.4x |
+| SMALL_DOMAIN-8x5 | 1.590 | 5.950 | 3.7x |
+
+The large deep-dead-end ratios are especially sensitive to how much search the baseline performs.
+They are evidence for the benefit of incremental pruning on these particular workloads, not a
+general speedup promise for all conditional products. Confirm semantic equivalence and inspect
+the scenario construction before using these ratios in external claims.
+
+Normalized allocation (gc.alloc.rate.norm) also showed substantially lower allocation for
+the builder strategies. At DEEP_DEAD_END-7x25, the best builder strategy allocated about
+59 KB/op versus about 247 MB/op for NESTED_STREAM. This is per-operation allocated data,
+not retained heap or peak live memory.
+
+#### Follow-up experiment required
+
+Repeat the same 14 scenarios and five implementations with a statistically stronger configuration
+before making strategy-selection decisions:
+
+    -wi 5 -i 8 -w 1s -r 1s -f 2 -tu ms -bm avgt -prof gc
+
+Retain the complete JMH output, including score errors, allocation metrics, JDK/JVM metadata,
+hardware, exact command, and source commit. Compare the same scenario/implementation pairs.
+Do not change strategy selection until that run has been reviewed.
+
+### Current decision register
+
+| Topic | Current decision | Reopen only when |
+|---|---|---|
+| DP versus PRUNED_BITSET on DEEP_DEAD_END | No change; DP is the provisional candidate, not a confirmed winner. | A multi-fork run confirms a repeatable time/allocation advantage across the relevant cases. |
+| PRUNED_DFS | Retain; it led the exploratory 5x10 case. | Stronger evidence shows it is consistently dominated or has unacceptable regressions. |
+| ADAPTIVE | Retain pending stronger evidence; it was not the fastest in the focused deep-dead-end cases. | A defined adaptive policy demonstrates robust wins across a representative scenario matrix. |
+| Builder versus NESTED_STREAM | Current focused run supports the builder approach for the tested cases; do not generalize the extreme ratios. | Equivalent-workload benchmarks on additional representative workloads or environments contradict this. |
+| Default strategy / dispatch changes | No change based on the short focused run. | Confirmatory JMH evidence plus correctness tests support the change. |
+
