@@ -9,7 +9,6 @@ results under Maven's `target/` directory.
 | `GeneratorSurveyBenchmark` | `GeneratorSurveyBenchmarkOutput.txt` | `lexOrder`, `lexOrderMth`, `choice`, unranking for every generator family |
 | `ProductTupleBenchmark` | `ProductTupleBenchmarkOutput.txt` | Cartesian product tuple handling |
 | `OptimisationCandidatesBenchmark` | `OptimisationCandidatesBenchmarkOutput.txt` | Comparisons of candidate optimisations (for example derangement lexOrder) |
-| `ConditionalProductStrategyBenchmark` | `target/conditional-product-strategy.json` | Full traversal and end-to-end comparison of all four conditional-product strategies against a nested-stream baseline; cases are loaded from the hierarchical resource tree under `src/test/resources/benchmarks/conditionalproduct/cases` |
 
 ## Benchmark environment
 
@@ -137,6 +136,90 @@ case is designed to remain bounded; verify setup's baseline count before adding 
 Keep JMH's normal progress output enabled: it reports run progress and an ETA. Benchmark methods do not
 print. The JSON result file captures scores and `-prof gc` allocation metrics without per-scenario
 console summaries.
+
+## Conditional-product benchmarks
+
+Conditional-product benchmarks are organized by workload family and fixed input shape. Each class
+runs one topology/profile, one dimension count, and one uniform domain size; JMH's
+`implementation` parameter compares `PRUNED_BITSET`, `PRUNED_DFS`, `DP`, `ADAPTIVE`,
+and an incrementally filtered nested-stream baseline.
+
+The source layout is:
+
+```text
+conditionalproduct/
+├── ConditionalProductCaseSupport.java
+├── baseline/
+├── scenario/
+├── deadend/
+│   ├── Benchmark_3by10.java
+│   ├── Benchmark_3by25.java
+│   └── ...
+├── manyvalid/
+│   └── Benchmark_<dimensions>by<size>.java
+└── complete/
+    └── Benchmark_<dimensions>by<size>.java
+```
+
+The fixed-case classes use one fork, one 100 ms warmup iteration, and one 100 ms measurement
+iteration. Each class has one benchmark method and five implementation parameter values. This keeps
+a single class run comfortably below one minute for the supplied bounded workloads. The
+`deadend/Benchmark_10by50.java` case is deliberately omitted: its estimated full output is too
+large for the one-minute limit. The bounded `manyvalid` and `complete` profiles include the
+10-by-50 case.
+
+Build the test classpath once:
+
+```bash
+mvn test-compile dependency:build-classpath -Dmdep.includeScope=test -Dmdep.outputFile=target/test-classpath.txt
+```
+
+Run exactly one fixed case (all five implementations):
+
+```bash
+java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
+  org.openjdk.jmh.Main '.*deadend.Benchmark_5by10'
+```
+
+Change the class selector to any other `Benchmark_<dimensions>by<size>` class under
+`deadend`, `manyvalid`, or `complete`. JMH prints the score for each implementation. The
+benchmark includes builder construction, rule registration, generator creation, and complete
+consumption. Trial setup independently checks the selected implementation's tuple count and
+checksum against the nested-stream baseline.
+
+The nested-stream baseline applies constraints as soon as both participating dimensions have been
+selected. It does **not** generate the full Cartesian product and apply one final filter.
+
+### Current controlled DEAD_END measurements
+
+These are the maintainer's initial end-to-end results for the controlled dead-end profile, measured
+with one fork, one warmup iteration, and two 500 ms measurement iterations. Times are ms/op.
+The results are quick-glance measurements, not publication-grade estimates.
+
+| Scenario | PRUNED_BITSET | PRUNED_DFS | DP | ADAPTIVE | NESTED_STREAM |
+|---|---:|---:|---:|---:|---:|
+| 5×10 | 0.004 | 0.004 | 0.007 | 0.004 | 0.006 |
+| 5×25 | 0.053 | **0.045** | 0.102 | 0.052 | 0.173 |
+| 5×50 | **0.860** | 0.949 | 1.611 | 1.768 | 3.217 |
+| 7×10 | 0.007 | 0.008 | 0.017 | 0.007 | 0.013 |
+| 7×25 | **1.600** | 1.632 | 2.256 | 1.639 | 5.686 |
+| 7×50 | 157.901 | **141.047** | 167.611 | 167.153 | 432.660 |
+
+Initial observations:
+
+- No pruning strategy wins consistently. BITSET leads at 5×50 and 7×25; DFS leads at 5×25
+  and 7×50. At 5×10 and 7×10, the three pruning strategies are effectively tied at this precision.
+- DP is slower than the pruning strategies in these six cases.
+- Incrementally filtered nested streams are slower in all six cases, with the gap widening on
+  larger workloads.
+- ADAPTIVE does not consistently match the fastest explicit strategy. Its selection heuristic
+  should be evaluated against the full topology matrix before changing it.
+- Doubling domain size from 25 to 50 causes a large increase in work. The growth depends on the
+  number of dimensions and the valid-prefix structure, not just the raw domain size.
+
+These findings apply only to this controlled DEAD_END profile and this machine/JVM. Do not infer a
+universal strategy ranking from six cases or from two measurement iterations. The other workload
+families are included to test whether the pattern holds for many-valid and complete-result shapes.
 
 ## Updating the committed results
 
