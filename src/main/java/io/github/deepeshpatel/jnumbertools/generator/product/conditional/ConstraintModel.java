@@ -6,6 +6,7 @@ package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import io.github.deepeshpatel.jnumbertools.datastructure.Tuple;
@@ -107,13 +108,23 @@ final class ConstraintModel {
                     for (Map.Entry<Long, Relation> entry : relations.entrySet()) {
                         int lower = (int) (entry.getKey() >>> 32);
                         int higher = (int) (long) entry.getKey();
-                        BitSet[] source = entry.getValue().uToV;
-                        boolean[][] dense = new boolean[source.length][dimensions.get(higher).size()];
+                        BitSet[] source = entry.getValue().uToV();
+                        int width = dimensions.get(higher).size();
+                        boolean[][] dense = new boolean[source.length][];
+                        // The BitSet rows are shared between the values that have the same constraints, so each
+                        // distinct row is converted once and the dense rows are shared in the same way (read-only).
+                        IdentityHashMap<BitSet, boolean[]> converted = new IdentityHashMap<>();
                         for (int i = 0; i < source.length; i++) {
-                            for (int bit = source[i].nextSetBit(0); bit >= 0;
-                                 bit = source[i].nextSetBit(bit + 1)) {
-                                dense[i][bit] = true;
+                            boolean[] row = converted.get(source[i]);
+                            if (row == null) {
+                                row = new boolean[width];
+                                for (int bit = source[i].nextSetBit(0); bit >= 0;
+                                     bit = source[i].nextSetBit(bit + 1)) {
+                                    row[bit] = true;
+                                }
+                                converted.put(source[i], row);
                             }
+                            dense[i] = row;
                         }
                         dimensionLists.get(higher).add(lower);
                         rowLists.get(higher).add(dense);
@@ -167,7 +178,7 @@ final class ConstraintModel {
                 int higher = (int) (long) entry.getKey();
                 Relation relation = entry.getValue();
                 dimensionLists.get(higher).add(lower);
-                rowLists.get(higher).add(relation.uToV);
+                rowLists.get(higher).add(relation.uToV());
             }
             int[][] belowDims = new int[dimensionCount][];
             BitSet[][][] belowRows = new BitSet[dimensionCount][][];
