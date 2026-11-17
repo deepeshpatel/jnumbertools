@@ -16,6 +16,7 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
     protected final ConstraintModel model;
     protected final int dimensions;
     protected final int[] val;
+    private final ConstraintPlan lookaheadPlan;
     private final int[] nextCandidate;
     private final int[] candidateLimit;
     private int depth;
@@ -34,6 +35,7 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
     PrunedLexGenerator(ConstraintModel model, int[] prefix, int candidateFrom, int candidateTo) {
         this.model = model;
         this.dimensions = model.dimensions.size();
+        this.lookaheadPlan = model.completionLookaheadUseful() ? model.plan() : null;
         if (prefix.length >= dimensions) {
             throw new IllegalArgumentException("A traversal prefix must leave at least one dimension");
         }
@@ -92,6 +94,12 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
             val[depth] = candidate;
             nextCandidate[depth] = candidate + 1;
             if (depth == dimensions - 1) return true;
+
+            // A loop can leave a prefix pairwise-valid but with no globally valid completion.
+            // The feasibility tier rejects that prefix before exploring its remaining suffix.
+            if (lookaheadPlan != null && !lookaheadPlan.hasCompletion(depth + 1, val)) {
+                continue;
+            }
 
             depth++;
             nextCandidate[depth] = 0;
