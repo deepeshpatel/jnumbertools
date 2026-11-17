@@ -155,18 +155,17 @@ conditionalproduct/
 │   ├── Benchmark_3by10.java
 │   ├── Benchmark_3by25.java
 │   └── ...
-├── manyvalid/
-│   └── Benchmark_<dimensions>by<size>.java
-└── complete/
+└── chain/
     └── Benchmark_<dimensions>by<size>.java
 ```
 
 The fixed-case classes use one fork, one 100 ms warmup iteration, and one 100 ms measurement
-iteration. Each class has one benchmark method and five implementation parameter values. This keeps
-a single class run comfortably below one minute for the supplied bounded workloads. The
-`deadend/Benchmark_10by50.java` case is deliberately omitted: its estimated full output is too
-large for the one-minute limit. The bounded `manyvalid` and `complete` profiles include the
-10-by-50 case.
+iteration. Each class has one benchmark method. A `deadend` class has five implementation parameter
+values; a `chain` class has two profile values (`MANY_VALID`, `COMPLETE`) crossed with the five
+implementations. This keeps each supplied class run below one minute for the bounded workloads.
+The `deadend/Benchmark_10by50.java` case is deliberately omitted: its estimated full output is too
+large for the one-minute limit. The `chain` profiles cap full output at 75,000 and 1,000 tuples,
+respectively, including the 10-by-50 case.
 
 Build the test classpath once:
 
@@ -182,7 +181,8 @@ java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
 ```
 
 Change the class selector to any other `Benchmark_<dimensions>by<size>` class under
-`deadend`, `manyvalid`, or `complete`. JMH prints the score for each implementation. The
+`deadend` or `chain`. JMH prints the score for each implementation (and, for `chain`, each
+profile). The
 benchmark includes builder construction, rule registration, generator creation, and complete
 consumption. Trial setup independently checks the selected implementation's tuple count and
 checksum against the nested-stream baseline.
