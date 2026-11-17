@@ -77,7 +77,7 @@ public final class Scenario {
         int size = Integer.parseInt(shape[1]);
         if (!List.of(3, 5, 7, 10).contains(n) || !List.of(10, 25, 50).contains(size))
             throw new IllegalArgumentException("Unsupported Phase E shape: " + parts[2]);
-        if (!List.of("DEAD_END", "MANY_VALID", "COMPLETE").contains(profile))
+        if (!List.of("DEAD_END", "CONTROLLED_DEAD_END", "MANY_VALID", "COMPLETE").contains(profile))
             throw new IllegalArgumentException("Unknown Phase E profile: " + profile);
 
         List<List<Integer>> dimensions = new ArrayList<>(n);
@@ -85,15 +85,19 @@ public final class Scenario {
 
         long budget = switch (profile) {
             case "DEAD_END" -> 30_000L;
+            case "CONTROLLED_DEAD_END" -> 30_000L;
             case "MANY_VALID" -> 75_000L;
             case "COMPLETE" -> 1_000L;
             default -> throw new IllegalStateException(profile);
         };
-        int allowedCount = largestBranchingFactor(size, n, budget);
+        boolean controlledDeadEnd = profile.equals("CONTROLLED_DEAD_END");
+        int allowedCount = controlledDeadEnd
+                ? Math.max(1, (int) Math.ceil(size * 0.20))
+                : largestBranchingFactor(size, n, budget);
         if (profile.equals("DEAD_END")) allowedCount = Math.max(2, allowedCount);
 
         List<Rule> rules = new ArrayList<>();
-        if (profile.equals("DEAD_END")) {
+        if (profile.equals("DEAD_END") || controlledDeadEnd) {
             // Keep the only cycle in dimensions 0, 1 and 2. Remaining dimensions
             // are attached as bridge edges so loop-block validation stays bounded.
             rules.add(new Rule(0, range(0, size), 1, range(0, allowedCount)));
@@ -101,8 +105,10 @@ public final class Scenario {
             for (int d = 3; d < n; d++)
                 rules.add(new Rule(2, range(0, size), d, range(0, allowedCount)));
 
-            int triggerCount = Math.max(1, Math.min(allowedCount - 1,
-                    (int) Math.floor(allowedCount * 0.80)));
+            int triggerCount = controlledDeadEnd
+                    ? Math.max(1, Math.min(size - 1, (int) Math.ceil(size * 0.80)))
+                    : Math.max(1, Math.min(allowedCount - 1,
+                            (int) Math.floor(allowedCount * 0.80)));
             int midpoint = allowedCount / 2;
             rules.add(new Rule(0, range(0, triggerCount), 2, range(0, midpoint)));
             rules.add(new Rule(1, range(0, triggerCount), 2, range(midpoint, allowedCount)));
