@@ -45,7 +45,10 @@ public final class ConditionalProductBenchmarkRunner {
                 .toAbsolutePath().normalize();
         Files.createDirectories(outputDirectory);
 
-        Path jsonFile = outputDirectory.resolve(BENCHMARK_CLASS + "_results.json");
+        String scenarioTag = sanitize(arguments.getOrDefault("scenario", "all-scenarios"));
+        String methodTag = sanitize(arguments.getOrDefault("method", "all-methods"));
+        Path jsonFile = outputDirectory.resolve(
+                BENCHMARK_CLASS + "_" + scenarioTag + "_" + methodTag + "_results.json");
         OptionsBuilder options = new OptionsBuilder();
         options.include(benchmarkPattern(arguments.get("method")));
         options.resultFormat(ResultFormatType.JSON);
@@ -99,16 +102,25 @@ public final class ConditionalProductBenchmarkRunner {
         for (RunResult run : results) {
             String benchmark = run.getParams().getBenchmark();
             String method = benchmark.substring(benchmark.lastIndexOf('.') + 1);
-            summaries.computeIfAbsent(method, ignored -> new ArrayList<>()).add(format(run));
+            String scenario = run.getParams().getParam("scenarioName");
+            String key = method + "_" + sanitize(scenario);
+            summaries.computeIfAbsent(key, ignored -> new ArrayList<>()).add(format(run));
         }
 
         for (Map.Entry<String, List<String>> entry : summaries.entrySet()) {
-            Path output = outputDirectory.resolve(BENCHMARK_CLASS + "." + entry.getKey() + "_output.txt");
+            Path output = outputDirectory.resolve(
+                    BENCHMARK_CLASS + "_" + entry.getKey() + "_output.txt");
             String content = String.join(System.lineSeparator()
                     + System.lineSeparator(), entry.getValue()) + System.lineSeparator();
             Files.writeString(output, content, StandardCharsets.UTF_8);
             System.out.println("Wrote " + output);
         }
+    }
+
+    private static String sanitize(String value) {
+        return value.replaceAll("[^A-Za-z0-9._-]+", "_")
+                .replaceAll("_+", "_")
+                .replaceAll("^_|_$", "");
     }
 
     private static String format(RunResult run) {
