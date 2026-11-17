@@ -335,8 +335,9 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * Returns the valid tuples in lexicographic order using the {@link LexOrderStrategy#PRUNED_BITSET} strategy.
      *
      * <p>This is the default and recommended strategy for ordinary traversal, especially when the caller
-     * expects to consume only part of the result. It checks constraints against the already selected prefix
-     * and does not build the exact counting plan.</p>
+     * expects to consume only part of the result. It checks constraints against the selected prefix and,
+     * when the constraint graph contains a loop block, uses the feasibility tier to reject prefixes that
+     * cannot have a valid completion. It does not build exact completion counts.</p>
      *
      * <p>Use {@link #lexOrder(LexOrderStrategy)} to select {@link LexOrderStrategy#DP} explicitly, or
      * {@link #lexOrder(LexOrderStrategy, long)} to let {@link LexOrderStrategy#ADAPTIVE} choose based on
@@ -353,13 +354,14 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * Returns the valid tuples in lexicographic order using the specified traversal strategy.
      *
      * <ul>
-     *   <li>{@link LexOrderStrategy#PRUNED_BITSET}: performs prefix-based backtracking and checks only the
-     *       constraints between the candidate dimension and dimensions already selected. It avoids
-     *       constructing the counting/DP plan and is the default strategy.</li>
-     *   <li>{@link LexOrderStrategy#DP}: uses the exact counting plan. Its completion counts allow it to
-     *       skip prefixes that cannot lead to a valid tuple. This can be useful when a substantial
-     *       fraction of a large result is expected to be traversed, but plan construction has an upfront
-     *       cost.</li>
+     *   <li>{@link LexOrderStrategy#PRUNED_BITSET}: performs prefix-based backtracking using compact
+     *       relation rows. For acyclic constraint graphs it avoids constructing the constraint plan; when
+     *       the graph contains a loop block it also uses the plan's feasibility tier to reject prefixes
+     *       that cannot have a valid completion. It is the default strategy.</li>
+     *   <li>{@link LexOrderStrategy#PRUNED_DFS}: uses the same topology-triggered feasibility lookahead
+     *       with dense boolean relation rows when the dense representation fits the memory limit.</li>
+     *   <li>{@link LexOrderStrategy#DP}: uses exact completion counts to skip prefixes. It remains
+     *       available explicitly and is also used by exact counting and rank-based operations.</li>
      * </ul>
      *
      * <p>{@link LexOrderStrategy#ADAPTIVE} requires an expected traversal size and must be selected with
@@ -385,15 +387,14 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     /**
      * Returns the valid tuples in lexicographic order using the adaptive strategy.
      *
-     * <p>{@code estimatedLimit} is the expected number of valid tuples the caller intends to consume
-     * from one traversal. The current adaptive policy selects {@link LexOrderStrategy#PRUNED_BITSET} for
-     * estimates below 10,000 tuples and {@link LexOrderStrategy#DP} for estimates of 10,000 tuples or
-     * more. The cutoff is a conservative heuristic, not a performance guarantee; workload shape,
-     * constraint density and dimension sizes can change the crossover. Benchmark representative data
-     * before relying on the adaptive choice for latency-sensitive workloads.</p>
+     * <p>The adaptive policy uses prefix pruning and enables feasibility lookahead only when the
+     * constraint graph contains a loop block. This avoids using the expected tuple count as a proxy for
+     * workload shape: benchmarks show that small result counts can favour DP on looped dead-end workloads,
+     * while large result counts can favour prefix pruning on acyclic small-domain workloads.</p>
      *
-     * <p>The estimate does not limit the number of tuples produced. It is used only to select the
-     * traversal implementation. The returned iterable remains lazy and re-iterable.</p>
+     * <p>{@code estimatedLimit} is retained for API compatibility and validated as non-negative, but it
+     * no longer selects DP versus prefix pruning. Select {@link LexOrderStrategy#DP} explicitly when exact
+     * completion-count traversal is desired. The estimate does not limit the number of tuples produced.</p>
      *
      * @param strategy must be {@link LexOrderStrategy#ADAPTIVE}
      * @param estimatedLimit expected number of tuples to consume in one traversal; must be non-negative
@@ -409,10 +410,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         if (estimatedLimit < 0) {
             throw new IllegalArgumentException("estimatedLimit must be non-negative");
         }
-        LexOrderStrategy selected = estimatedLimit >= 10_000L
-                ? LexOrderStrategy.DP
-                : LexOrderStrategy.PRUNED_BITSET;
-        return ConditionalProductGenerators.lexOrder(model, selected);
+        return ConditionalProductGenerators.lexOrder(model, LexOrderStrategy.PRUNED_BITSET);
     }
 
     /**
