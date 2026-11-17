@@ -68,6 +68,36 @@ The `deadend` folder omits 10×50 because its estimated output exceeds the inten
 The scenario definitions and rule data are in `scenario/`; the independent nested-stream implementation
 is in `baseline/`; shared builder and verification logic is in `support/`.
 
+## Dead-end benchmark: initial results
+
+The first reported end-to-end run of `deadend/ConditionalProductBenchmark` shows the
+following fastest implementation for each tested shape:
+
+| Shape | Fastest implementation | Score (ms/op) | Nested Stream (ms/op) | Relative result |
+|---|---|---:|---:|---:|
+| 3x10 | PRUNED_BITSET | 0.005 | 0.004 | Stream 1.25x faster |
+| 3x25 | ADAPTIVE | 0.008 | 0.026 | Builder 3.25x faster |
+| 3x50 | PRUNED_BITSET | 0.031 | 0.149 | Builder 4.81x faster |
+| 5x10 | PRUNED_DFS | 0.007 | 0.007 | Approximately tied |
+| 5x25 | PRUNED_BITSET | 0.055 | 0.204 | Builder 3.71x faster |
+| 5x50 | PRUNED_BITSET | 1.144 | 3.164 | Builder 2.77x faster |
+| 7x10 | ADAPTIVE | 0.010 | 0.015 | Builder 1.50x faster |
+| 7x25 | PRUNED_BITSET | 1.524 | 4.656 | Builder 3.05x faster |
+| 7x50 | PRUNED_DFS | 105.160 | 453.121 | Builder 4.31x faster |
+| 10x10 | PRUNED_BITSET | 0.031 | 0.103 | Builder 3.32x faster |
+| 10x25 | PRUNED_DFS | 258.326 | 1061.780 | Builder 4.11x faster |
+
+These are end-to-end scores: builder construction, rule registration, generator creation, and complete
+tuple consumption are included. The results suggest that pruning overhead is not always worthwhile for
+the smallest cases (3x10 and 5x10), while the conditional-product implementations outperform the
+nested-stream baseline by roughly 2.8x–4.8x on the larger tested cases.
+
+This is an initial, exploratory result set, not a publication-quality comparison. The pasted output
+contained scores but not the JMH error estimates, allocation profiler results, exact JVM/hardware
+metadata, or full command line. Re-run with `-wi 5 -i 8 -f 2 -tu ms -bm avgt -prof gc` and retain
+the complete output before drawing firm conclusions. The 10x50 dead-end shape is intentionally
+omitted from this suite.
+
 ## Any-order parallel benchmark
 
 `anyorder/AnyOrderParallelBenchmark` compares sequential and parallel consumption of
