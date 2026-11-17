@@ -1,35 +1,64 @@
 # Conditional-product JMH benchmarks
 
-Run the complete scenario/implementation matrix:
+## Run one small benchmark at a time
+
+Build the test classpath once:
 
 ```bash
-mvn test-compile exec:java \
-  -Dexec.classpathScope=test \
-  -Dexec.mainClass=io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.ConditionalProductBenchmarkRunner
+mvn test-compile dependency:build-classpath -Dmdep.includeScope=test -Dmdep.outputFile=target/test-classpath.txt
 ```
 
-Run one method for one scenario and implementation:
+Run one scenario across all five implementations:
 
 ```bash
-mvn test-compile exec:java \
-  -Dexec.classpathScope=test \
-  -Dexec.mainClass=io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.ConditionalProductBenchmarkRunner \
-  -Dexec.args="--method=traversalOnly --scenario=topology/chain/Dim11-20_Size101-250/selectivity/tight/CHAIN_11x101_TIGHT --implementation=PRUNED_BITSET"
+java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
+  io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.ConditionalProductBenchmarkRunner \
+  --method=endToEnd \
+  --scenario=phase-e/CONTROLLED_DEAD_END/7x25 \
+  --no-gc
 ```
 
-Supported selectors:
+The benchmark annotations configure one warmup iteration, two measurement
+iterations, and one fork. This is intended as a quick comparison, not a final
+publication-quality measurement. Remove `--no-gc` when allocation and GC
+profiling are wanted.
 
-- `--method=traversalOnly|endToEnd`
-- `--scenario=<case resource path without .properties>`
-- `--implementation=PRUNED_BITSET|PRUNED_DFS|DP|ADAPTIVE|NESTED_STREAM`
-- `--output-dir=<directory>` (default: `target/benchmarks`)
-- `--no-gc` to disable the default GC profiler
+Each invocation writes its own JSON and text result files under
+`target/benchmarks`, named with the selected scenario and method. Running
+different scenarios therefore does not overwrite earlier scenario results.
 
-The runner leaves JMH progress and diagnostics on the console. It writes the complete JSON result to
-`target/benchmarks/ConditionalProductStrategyBenchmark_results.json` and writes one final summary
-per executed method:
+## Controlled DEAD_END profile
 
-- `ConditionalProductStrategyBenchmark.traversalOnly_output.txt`
-- `ConditionalProductStrategyBenchmark.endToEnd_output.txt`
+The `phase-e/CONTROLLED_DEAD_END/<dimensions>x<size>` cases isolate domain-size and
+dimension-count effects more cleanly than the original bounded `DEAD_END` profile.
 
-The text files contain the final primary score, error, parameters, and secondary profiler metrics.
+The controlled profile holds these ratios constant:
+
+- Allowed values on each constrained dimension: 20% of the domain (rounded up).
+- Trigger values for each conditional restriction: 80% of the domain (rounded up).
+- The two conditional restrictions on dimension 2 allow disjoint halves of the
+  allowed range, preserving the conflicting/dead-end behavior.
+- Dimensions 3 onward remain attached to dimension 2, keeping the same topology
+  across the tested dimension counts.
+
+The original `DEAD_END` profile is retained unchanged. It uses a tuple budget to
+choose its allowed branching factor, so its selectivity varies by shape. It is a
+practical bounded-workload profile, not a controlled scaling experiment.
+
+## Run the full controlled matrix as separate small runs
+
+```bash
+for dimensions in 3 5 7 10; do
+  for size in 10 25 50; do
+    scenario="phase-e/CONTROLLED_DEAD_END/${dimensions}x${size}"
+    java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
+      io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.ConditionalProductBenchmarkRunner \
+      --method=endToEnd \
+      --scenario="$scenario" \
+      --no-gc || exit 1
+  done
+done
+```
+
+This produces 12 independent JSON files and 12 corresponding text files. Each
+scenario is validated against the nested-stream baseline during JMH trial setup.
