@@ -127,7 +127,7 @@ class ConstraintPlanTierTest {
         for (int d = 0; d < 5; d++) dims.add(values(d, 10));
         List<Rule> rules = List.of(
                 new Rule(0, dims.get(0), 1, dims.get(1).subList(0, 5)),
-                new Rule(1, dims.get(1), 2, dims.get(2).subList(0, 5)),
+                new Rule(1, dims.get(1), 2, dims.get(2)),
                 new Rule(2, dims.get(2), 3, dims.get(3).subList(0, 5)),
                 new Rule(3, dims.get(3), 4, dims.get(4).subList(0, 5)),
                 new Rule(2, dims.get(2).subList(0, 9), 4, dims.get(4).subList(5, 10)));
