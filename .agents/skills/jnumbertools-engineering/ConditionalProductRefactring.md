@@ -189,6 +189,7 @@ Work after the original work packages is delivered in lettered phases. Each phas
 | G | Optional: `anyOrder()` dimension reordering (most selective dimension first, values returned in original positions); only if E shows dead ends dominate | not started |
 | H | Counting speed at large sizes; test hardening (larger oracle shapes, concurrent first use) | not started |
 | I | README, benchmarks README, changelog, compact this file, single release | not started |
+| J | Review conditional-rule exclusion vocabulary: current API has `isNoneOf(...)` and `isNotIn(...)` aliases; decide whether `isNotOneOf(...)` is needed or whether existing names are sufficient. If changed, keep trigger/target-chain overloads consistent and add builder tests and Javadoc examples | not started |
 
 ## 5. Progress summary
 
