@@ -140,7 +140,7 @@ public class ConditionalProductStrategyBenchmark {
         if (state.implementation.equals("NESTED_STREAM")) {
             return checksum(NestedStreamBaseline.stream(NestedStreamBaseline.compile(state.scenario)));
         }
-        ConditionalProductBuilder builder = buildBuilder(state.scenario);
+        ConditionalProductBuilder builder = buildBuilder(state.scenario, state.preparedRules);
         return checksum(createLibraryGenerator(builder, state.implementation, state.expectedCount));
     }
 
