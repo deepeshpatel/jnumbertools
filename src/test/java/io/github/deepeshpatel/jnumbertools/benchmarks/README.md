@@ -26,24 +26,24 @@ and filtering only at the end.
 ```text
 benchmarks/
 ├── README.md
+├── runner/
+│   └── BenchmarkCommandGenerator.java
 └── conditionalproduct/
+    ├── ConditionalProductBenchmark.java
     ├── anyorder/
     ├── baseline/
-    ├── chain/
-    ├── complete/
-    ├── deadend/
-    ├── manyvalid/
     ├── scenario/
     └── support/
 ```
 
-Future API families should get their own domain package (for example, `permutation/`,
-`combination/`, `derangement/`, or `product/`) rather than adding unrelated benchmark classes
-to the root.
+The topology benchmarks share one parameterized JMH class. The console command generator is kept
+separate from the benchmark itself: it collects selections, validates them, expands valid
+topology/dimension/domain-size combinations, and prints a command for the user to execute.
+It does not launch JMH.
 
 ## Conditional-product benchmarks
 
-The parameterized JMH classes compare these implementations:
+The unified `conditionalproduct/ConditionalProductBenchmark` compares these implementations:
 
 - `PRUNED_BITSET`
 - `PRUNED_DFS`
@@ -51,22 +51,47 @@ The parameterized JMH classes compare these implementations:
 - `ADAPTIVE`
 - `NESTED_STREAM` — independent incrementally filtered nested Java Streams baseline
 
-Each topology has one benchmark class. The `shape` parameter selects 3, 5, 7, or 10 dimensions
-and 10, 25, or 50 values per dimension. The `implementation` parameter selects the library strategy
-or Java Stream baseline. The benchmark includes builder construction, rule registration, generator
-creation, and complete tuple consumption. Trial setup checks each selected library strategy's tuple
-count and checksum against the nested-stream baseline.
+The logical scenario selection combines topology and shape. The supported topologies are
+`CHAIN`, `MANY_VALID`, `COMPLETE`, and `DEAD_END`. Shapes use 3, 5, 7, or 10 dimensions
+and 10, 25, or 50 values per dimension. `DEAD_END` deliberately excludes 10x50 because its
+estimated output exceeds the benchmark budget. The runner generates only valid scenario values,
+so JMH does not attempt invalid topology/shape combinations.
 
-| Folder | Scenario | Valid-output budget | Shapes |
-|---|---|---:|---|
-| `chain` | Chain-shaped restrictions | 30,000 | All 12 |
-| `manyvalid` | Chain-shaped restrictions with a larger branching factor | 75,000 | All 12 |
-| `complete` | Chain-shaped restrictions with a small output budget | 1,000 | All 12 |
-| `deadend` | Controlled conflicting restrictions | 30,000 | 11 (omits 10×50) |
+The benchmark includes builder construction, rule registration, generator creation, and complete
+tuple consumption. Trial setup checks each selected library strategy's tuple count and checksum
+against the nested-stream baseline. Scenario definitions and rule data are in `scenario/`;
+the independent nested-stream implementation is in `baseline/`; shared builder and verification
+logic are in `support/`.
 
-The `deadend` folder omits 10×50 because its estimated output exceeds the intended benchmark budget.
-The scenario definitions and rule data are in `scenario/`; the independent nested-stream implementation
-is in `baseline/`; shared builder and verification logic is in `support/`.
+### Generating a benchmark command
+
+First build the test classpath:
+
+```bash
+mvn test-compile dependency:build-classpath -Dmdep.includeScope=test -Dmdep.outputFile=target/test-classpath.txt
+```
+
+Run the console selector from the project root:
+
+```bash
+java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
+  io.github.deepeshpatel.jnumbertools.benchmarks.runner.BenchmarkCommandGenerator
+```
+
+At each selection prompt, enter one option (for example, `2`), several comma-separated options
+(for example, `1,3` or `1, 3`), or `All` (or the displayed final option number). Duplicate,
+out-of-range, and malformed selections are rejected and prompted again.
+
+The selector asks for topology, dimensions, domain sizes, implementations, warmup iterations,
+measurement iterations, forks, and profiler (`gc` or `none`). JMH defaults are 5 warmup
+iterations, 8 measurement iterations, and 2 forks; the default profiler is `gc`. It prints the
+resolved selections and generated command, but does not execute it. Copy the generated command
+and run it from the project root.
+
+The unified JMH class uses the `scenario` parameter to represent valid topology/shape pairs and
+the `implementation` parameter for the strategy. This avoids invalid cross-products in JMH
+while still letting the console selector present topology, dimensions, and domain size as
+independent choices.
 
 ## Dead-end benchmark: initial results
 
