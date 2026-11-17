@@ -43,7 +43,13 @@ public class ConditionalProductBenchmark {
             "DEAD_END-3x10", "DEAD_END-3x25", "DEAD_END-3x50",
             "DEAD_END-5x10", "DEAD_END-5x25", "DEAD_END-5x50",
             "DEAD_END-7x10", "DEAD_END-7x25", "DEAD_END-7x50",
-            "DEAD_END-10x10", "DEAD_END-10x25"
+            "DEAD_END-10x10", "DEAD_END-10x25",
+
+            "DEEP_DEAD_END-5x10", "DEEP_DEAD_END-5x25", "DEEP_DEAD_END-7x10", "DEEP_DEAD_END-7x25",
+            "DEEP_DEAD_END-10x10",
+
+            "SMALL_DOMAIN-8x4", "SMALL_DOMAIN-10x4", "SMALL_DOMAIN-12x3", "SMALL_DOMAIN-14x3",
+            "SMALL_DOMAIN-8x5"
     })
     public String scenario;
 

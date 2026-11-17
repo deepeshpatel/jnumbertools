@@ -5,9 +5,11 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.runner;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.function.Function;
@@ -20,14 +22,35 @@ import java.util.stream.Collectors;
 public final class BenchmarkCommandGenerator {
 
     private static final String BENCHMARK_REGEX = "'.*ConditionalProductBenchmark.*'";
-    private static final List<String> TOPOLOGIES =
-            List.of("CHAIN", "MANY_VALID", "COMPLETE", "DEAD_END");
-    private static final List<Integer> DIMENSIONS = List.of(3, 5, 7, 10);
-    private static final List<Integer> DOMAIN_SIZES = List.of(10, 25, 50);
+    /** Valid shapes per topology; must match the {@code scenario} values of ConditionalProductBenchmark. */
+    private static final Map<String, List<String>> SHAPES = new LinkedHashMap<>();
+    static {
+        List<String> grid = new ArrayList<>();
+        for (int d : List.of(3, 5, 7, 10)) {
+            for (int n : List.of(10, 25, 50)) {
+                grid.add(d + "x" + n);
+            }
+        }
+        SHAPES.put("CHAIN", grid);
+        SHAPES.put("MANY_VALID", grid);
+        SHAPES.put("COMPLETE", grid);
+        SHAPES.put("DEAD_END", grid.stream().filter(x -> !x.equals("10x50")).toList());
+        SHAPES.put("DEEP_DEAD_END", List.of("5x10", "5x25", "7x10", "7x25", "10x10"));
+        SHAPES.put("SMALL_DOMAIN", List.of("8x4", "10x4", "12x3", "14x3", "8x5"));
+    }
+    private static final List<String> TOPOLOGIES = List.copyOf(SHAPES.keySet());
+    private static final List<Integer> DIMENSIONS = distinct(0);
+    private static final List<Integer> DOMAIN_SIZES = distinct(1);
     private static final List<String> IMPLEMENTATIONS =
             List.of("PRUNED_BITSET", "PRUNED_DFS", "DP", "ADAPTIVE", "NESTED_STREAM");
 
     private BenchmarkCommandGenerator() {
+    }
+
+    private static List<Integer> distinct(int part) {
+        return SHAPES.values().stream().flatMap(List::stream)
+                .map(shape -> Integer.parseInt(shape.split("x")[part]))
+                .distinct().sorted().toList();
     }
 
     public static void main(String[] args) {
@@ -64,10 +87,8 @@ public final class BenchmarkCommandGenerator {
             System.out.println("Domain sizes    : " + join(domainSizes));
             System.out.println("Implementations : " + String.join(", ", implementations));
             System.out.println("Valid scenarios : " + scenarios.size());
-            if (topologies.contains("DEAD_END")
-                    && dimensions.contains(10) && domainSizes.contains(50)) {
-                System.out.println("Note            : DEAD_END 10x50 is excluded by the benchmark budget.");
-            }
+            System.out.println("Note            : only shapes defined for a topology are generated"
+                    + " (e.g. DEAD_END has no 10x50).");
 
             String command = buildCommand(scenarios, implementations, warmup,
                     measurement, forks, profiler);
@@ -141,12 +162,11 @@ public final class BenchmarkCommandGenerator {
             List<String> topologies, List<Integer> dimensions, List<Integer> domainSizes) {
         List<String> scenarios = new ArrayList<>();
         for (String topology : topologies) {
-            for (int dimension : dimensions) {
-                for (int size : domainSizes) {
-                    if (topology.equals("DEAD_END") && dimension == 10 && size == 50) {
-                        continue;
-                    }
-                    scenarios.add(topology + "-" + dimension + "x" + size);
+            for (String shape : SHAPES.get(topology)) {
+                String[] parts = shape.split("x");
+                if (dimensions.contains(Integer.parseInt(parts[0]))
+                        && domainSizes.contains(Integer.parseInt(parts[1]))) {
+                    scenarios.add(topology + "-" + shape);
                 }
             }
         }

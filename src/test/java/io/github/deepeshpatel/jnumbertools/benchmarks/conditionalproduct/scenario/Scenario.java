@@ -22,10 +22,17 @@ public final class Scenario {
         String[] shape = parts[2].split("x");
         if (shape.length != 2) throw new IllegalArgumentException("Invalid benchmark shape: " + parts[2]);
         int n = Integer.parseInt(shape[0]), size = Integer.parseInt(shape[1]);
+        if (!List.of("CHAIN", "MANY_VALID", "COMPLETE", "DEAD_END", "CONTROLLED_DEAD_END",
+                "DEEP_DEAD_END", "SMALL_DOMAIN").contains(topology))
+            throw new IllegalArgumentException("Unknown benchmark topology: " + topology);
+        if (topology.equals("SMALL_DOMAIN")) {
+            return smallDomain(n, size);
+        }
+        if (topology.equals("DEEP_DEAD_END")) {
+            return deepDeadEnd(n, size);
+        }
         if (!List.of(3, 5, 7, 10).contains(n) || !List.of(10, 25, 50).contains(size))
             throw new IllegalArgumentException("Unsupported benchmark shape: " + parts[2]);
-        if (!List.of("CHAIN", "MANY_VALID", "COMPLETE", "DEAD_END", "CONTROLLED_DEAD_END").contains(topology))
-            throw new IllegalArgumentException("Unknown benchmark topology: " + topology);
 
         List<List<Integer>> dimensions = new ArrayList<>(n);
         for (int d = 0; d < n; d++) dimensions.add(IntStream.range(0, size).boxed().toList());
@@ -58,6 +65,40 @@ public final class Scenario {
             for (int d = 0; d < n - 1; d++)
                 rules.add(new Rule(d, range(0, size), d + 1, range(0, allowedCount)));
         }
+        return new ScenarioData(List.copyOf(dimensions), List.copyOf(rules));
+    }
+
+    /**
+     * Small lists, many dimensions: a chain where each dimension excludes only its last value, so the
+     * output is large relative to the list size (size * (size-1)^(n-1) tuples).
+     */
+    private static ScenarioData smallDomain(int n, int size) {
+        if (n < 8 || size < 3 || size > 5) throw new IllegalArgumentException("Unsupported SMALL_DOMAIN shape");
+        List<List<Integer>> dimensions = new ArrayList<>(n);
+        for (int d = 0; d < n; d++) dimensions.add(IntStream.range(0, size).boxed().toList());
+        List<Rule> rules = new ArrayList<>();
+        for (int d = 0; d < n - 1; d++)
+            rules.add(new Rule(d, range(0, size), d + 1, range(0, size - 1)));
+        return new ScenarioData(List.copyOf(dimensions), List.copyOf(rules));
+    }
+
+    /**
+     * Late conflict: dimension n-2 forces the last dimension into the lower half, while ~90% of the values of
+     * dimension n-3 force it into the upper half. Those prefixes are only found dead at the last dimension, so a
+     * traversal without lookahead explores the whole chain prefix before failing.
+     */
+    private static ScenarioData deepDeadEnd(int n, int size) {
+        if (n < 5 || size < 10) throw new IllegalArgumentException("Unsupported DEEP_DEAD_END shape");
+        List<List<Integer>> dimensions = new ArrayList<>(n);
+        for (int d = 0; d < n; d++) dimensions.add(IntStream.range(0, size).boxed().toList());
+        int allowed = largestBranchingFactor(size, n - 1, 200_000L);
+        int half = size / 2;
+        int killed = Math.max(1, (int) Math.floor(size * 0.9));
+        List<Rule> rules = new ArrayList<>();
+        for (int d = 0; d < n - 2; d++)
+            rules.add(new Rule(d, range(0, size), d + 1, range(0, allowed)));
+        rules.add(new Rule(n - 2, range(0, size), n - 1, range(0, half)));
+        rules.add(new Rule(n - 3, range(0, killed), n - 1, range(half, size)));
         return new ScenarioData(List.copyOf(dimensions), List.copyOf(rules));
     }
 
