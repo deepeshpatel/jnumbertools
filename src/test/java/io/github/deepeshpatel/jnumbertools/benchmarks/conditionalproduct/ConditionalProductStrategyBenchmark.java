@@ -38,7 +38,43 @@ public class ConditionalProductStrategyBenchmark {
     @State(Scope.Thread)
     public static class BenchmarkState {
         @Param({
-                "topology/star/Dim2-5_Size10-100/selectivity/high/STAR_FIRST_5x10_HIGH",
+                "phase-e/DEAD_END/3x10",
+                "phase-e/DEAD_END/3x25",
+                "phase-e/DEAD_END/3x50",
+                "phase-e/DEAD_END/5x10",
+                "phase-e/DEAD_END/5x25",
+                "phase-e/DEAD_END/5x50",
+                "phase-e/DEAD_END/7x10",
+                "phase-e/DEAD_END/7x25",
+                "phase-e/DEAD_END/7x50",
+                "phase-e/DEAD_END/10x10",
+                "phase-e/DEAD_END/10x25",
+                "phase-e/DEAD_END/10x50",
+                "phase-e/MANY_VALID/3x10",
+                "phase-e/MANY_VALID/3x25",
+                "phase-e/MANY_VALID/3x50",
+                "phase-e/MANY_VALID/5x10",
+                "phase-e/MANY_VALID/5x25",
+                "phase-e/MANY_VALID/5x50",
+                "phase-e/MANY_VALID/7x10",
+                "phase-e/MANY_VALID/7x25",
+                "phase-e/MANY_VALID/7x50",
+                "phase-e/MANY_VALID/10x10",
+                "phase-e/MANY_VALID/10x25",
+                "phase-e/MANY_VALID/10x50",
+                "phase-e/COMPLETE/3x10",
+                "phase-e/COMPLETE/3x25",
+                "phase-e/COMPLETE/3x50",
+                "phase-e/COMPLETE/5x10",
+                "phase-e/COMPLETE/5x25",
+                "phase-e/COMPLETE/5x50",
+                "phase-e/COMPLETE/7x10",
+                "phase-e/COMPLETE/7x25",
+                "phase-e/COMPLETE/7x50",
+                "phase-e/COMPLETE/10x10",
+                "phase-e/COMPLETE/10x25",
+                "phase-e/COMPLETE/10x50",
+"topology/star/Dim2-5_Size10-100/selectivity/high/STAR_FIRST_5x10_HIGH",
                 "topology/star/Dim2-5_Size10-100/selectivity/high/STAR_LAST_5x10_HIGH",
                 "topology/chain/Dim2-5_Size10-100/selectivity/medium/CHAIN_5x10_MEDIUM",
                 "topology/chain/Dim2-5_Size10-100/selectivity/tight/CHAIN_5x10_TIGHT",
@@ -66,24 +102,26 @@ public class ConditionalProductStrategyBenchmark {
         NestedStreamBaseline.Plan baselinePlan;
         ConditionalProductBuilder builder;
         Iterable<?> preparedGenerator;
+        List<PreparedRule> preparedRules;
 
         @Setup(Level.Trial)
         public void setup() {
             scenario = Scenario.create(scenarioName);
+            preparedRules = prepareRules(scenario);
             baselinePlan = NestedStreamBaseline.compile(scenario);
             expectedCount = NestedStreamBaseline.stream(baselinePlan).count();
             long expectedChecksum = checksum(NestedStreamBaseline.stream(baselinePlan));
 
             if (!implementation.equals("NESTED_STREAM")) {
                 long actualChecksum = checksum(createLibraryGenerator(
-                        buildBuilder(scenario), implementation, expectedCount));
+                        buildBuilder(scenario, preparedRules), implementation, expectedCount));
                 if (actualChecksum != expectedChecksum) {
                     throw new IllegalStateException(scenarioName + "/" + implementation
                             + ": library output differs from the nested-stream baseline");
                 }
             }
 
-            builder = implementation.equals("NESTED_STREAM") ? null : buildBuilder(scenario);
+            builder = implementation.equals("NESTED_STREAM") ? null : buildBuilder(scenario, preparedRules);
             preparedGenerator = implementation.equals("NESTED_STREAM")
                     ? null : createLibraryGenerator(builder, implementation, expectedCount);
         }
@@ -106,24 +144,40 @@ public class ConditionalProductStrategyBenchmark {
         return checksum(createLibraryGenerator(builder, state.implementation, state.expectedCount));
     }
 
-    private static ConditionalProductBuilder buildBuilder(Scenario scenario) {
+    private static ConditionalProductBuilder buildBuilder(
+            Scenario scenario, List<PreparedRule> preparedRules) {
         List<List<Integer>> dimensions = scenario.dimensions();
         ConditionalProductBuilder builder =
                 JNumberTools.cartesianProduct().conditionalProductOf(dimensions.get(0));
         for (int d = 1; d < dimensions.size(); d++) builder = builder.and(dimensions.get(d));
 
-        for (Rule rule : scenario.rules()) {
-            List<Integer> triggers = values(rule.triggerValues(),
-                    dimensions.get(rule.triggerDimension()).size());
-            List<Integer> allowed = values(rule.allowedValues(),
-                    dimensions.get(rule.targetDimension()).size());
+        for (PreparedRule rule : preparedRules) {
             builder = builder.when(dimensions.get(rule.triggerDimension()))
-                    .isOneOf(triggers)
+                    .isOneOf(rule.triggerValues())
                     .then(dimensions.get(rule.targetDimension()))
-                    .isOneOf(allowed);
+                    .isOneOf(rule.allowedValues());
         }
         return builder;
     }
+
+    private static List<PreparedRule> prepareRules(Scenario scenario) {
+        List<List<Integer>> dimensions = scenario.dimensions();
+        List<PreparedRule> prepared = new ArrayList<>(scenario.rules().size());
+        for (Rule rule : scenario.rules()) {
+            prepared.add(new PreparedRule(
+                    rule.triggerDimension(),
+                    values(rule.triggerValues(), dimensions.get(rule.triggerDimension()).size()),
+                    rule.targetDimension(),
+                    values(rule.allowedValues(), dimensions.get(rule.targetDimension()).size())));
+        }
+        return List.copyOf(prepared);
+    }
+
+    private record PreparedRule(
+            int triggerDimension,
+            List<Integer> triggerValues,
+            int targetDimension,
+            List<Integer> allowedValues) { }
 
     private static Iterable<?> createLibraryGenerator(
             ConditionalProductBuilder builder, String implementation, long expectedCount) {
