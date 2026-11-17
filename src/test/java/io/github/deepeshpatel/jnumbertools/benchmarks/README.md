@@ -98,6 +98,45 @@ metadata, or full command line. Re-run with `-wi 5 -i 8 -f 2 -tu ms -bm avgt -pr
 the complete output before drawing firm conclusions. The 10x50 dead-end shape is intentionally
 omitted from this suite.
 
+## Chain benchmark: first full JMH results
+
+The first complete reported run of `chain/ConditionalProductBenchmark` used
+`-wi 5 -i 8 -f 2 -tu ms -bm avgt -prof gc`. It includes end-to-end construction and
+full tuple consumption. The table reports the fastest builder strategy for each shape against
+the independent nested Java Stream baseline.
+
+| Shape | Fastest builder strategy | Builder (ms/op) | Nested Stream (ms/op) | Speedup |
+|---|---|---:|---:|---:|
+| 3x10 | PRUNED_BITSET | 0.012 | 0.031 | 2.58x |
+| 3x25 | PRUNED_BITSET | 0.165 | 0.423 | 2.56x |
+| 3x50 | PRUNED_DFS | 0.427 | 1.052 | 2.46x |
+| 5x10 | PRUNED_BITSET | 0.325 | 1.026 | 3.16x |
+| 5x25 | PRUNED_BITSET | 0.367 | 1.736 | 4.73x |
+| 5x50 | PRUNED_BITSET | 0.192 | 2.750 | 14.32x |
+| 7x10 | ADAPTIVE | 0.144 | 0.666 | 4.63x |
+| 7x25 | PRUNED_BITSET | 0.460 | 3.500 | 7.61x |
+| 7x50 | PRUNED_BITSET / ADAPTIVE | 0.078 | 1.656 | 21.23x |
+| 10x10 | PRUNED_BITSET | 0.140 | 1.022 | 7.30x |
+| 10x25 | PRUNED_BITSET | 0.341 | 2.347 | 6.88x |
+| 10x50 | PRUNED_BITSET | 1.118 | 10.870 | 9.72x |
+
+In this run, a builder strategy was faster than the nested-stream baseline in every tested shape.
+`PRUNED_BITSET` was fastest or tied for fastest in 10 of 12 shapes; `PRUNED_DFS` led 3x50,
+and `ADAPTIVE` led 7x10 (with a tie at 7x50). The observed speedup ranged from 2.46x to 21.23x.
+
+The GC profiler's normalized allocation metric (`gc.alloc.rate.norm`) also shows a substantial
+difference. For the fastest builder in each shape, allocation per operation was approximately
+6.1x to 22.5x lower than nested streams (about 83.6% to 95.6% less allocated data). For example,
+at 10x50, `PRUNED_BITSET` allocated about 1.51 MB/op versus 30.90 MB/op for nested streams.
+These are per-operation allocation measurements, not retained-heap measurements.
+
+The scores are scenario-specific and should not be expected to increase monotonically with the
+number of dimensions or values: the number and distribution of valid tuples and the pruning
+opportunities also affect the amount of work. This is one topology only; do not generalize these
+numbers to `manyvalid`, `complete`, or `deadend`. The reported output includes JMH error
+estimates and GC metrics, but not the machine/JVM metadata, so retain that metadata with any
+formal performance report.
+
 ## Any-order parallel benchmark
 
 `anyorder/AnyOrderParallelBenchmark` compares sequential and parallel consumption of
