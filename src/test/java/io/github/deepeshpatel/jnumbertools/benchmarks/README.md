@@ -37,9 +37,7 @@ mvn clean test-compile exec:exec -Dexec.executable=java -Dexec.classpathScope=te
 
 ## Conditional-product benchmarks
 
-Conditional-product benchmarks are organized by topology and fixed input shape. Each class
-fixes one dimension count and one uniform domain size; JMH's `implementation` parameter compares `PRUNED_BITSET`, `PRUNED_DFS`, `DP`, `ADAPTIVE`,
-and an incrementally filtered nested-stream baseline.
+Conditional-product strategy benchmarks are organized by workload topology/profile. Each class fixes one dimension count and one uniform domain size. The `implementation` parameter compares `PRUNED_BITSET`, `PRUNED_DFS`, `DP`, `ADAPTIVE`, and an incrementally filtered nested-stream baseline.
 
 The source layout is:
 
@@ -48,21 +46,15 @@ conditionalproduct/
 ├── ConditionalProductCaseSupport.java
 ├── baseline/
 ├── scenario/
-├── deadend/
-│   ├── Benchmark_3by10.java
-│   ├── Benchmark_3by25.java
-│   └── ...
-└── chain/
-    └── Benchmark_<dimensions>by<size>.java
+├── chain/
+├── manyvalid/
+├── complete/
+└── deadend/
 ```
 
-The fixed-case classes use one fork, one 100 ms warmup iteration, and one 100 ms measurement
-iteration. Each class has one benchmark method. A `deadend` class has five implementation parameter
-values; a `chain` class has two profile values (`MANY_VALID`, `COMPLETE`) crossed with the five
-implementations. This keeps each supplied class run below one minute for the bounded workloads.
-The `deadend/Benchmark_10by50.java` case is deliberately omitted: its estimated full output is too
-large for the one-minute limit. The `chain` profiles cap full output at 75,000 and 1,000 tuples,
-respectively, including the 10-by-50 case.
+Each topology folder contains fixed-case classes named `Benchmark_<dimensions>by<size>.java` for dimensions 3, 5, 7, and 10 and domain sizes 10, 25, and 50. The `deadend` folder omits 10×50 because its estimated output exceeds the one-minute benchmark budget. All other folders include all 12 shapes.
+
+Each class uses one fork, one 100 ms warmup iteration, and one 100 ms measurement iteration. The benchmark includes builder construction, rule registration, generator creation, and complete consumption. Trial setup independently checks each selected implementation's tuple count and checksum against the nested-stream baseline. The `chain`, `manyvalid`, and `complete` folders represent chain-shaped workloads with different valid-output budgets (30,000, 75,000, and 1,000 tuples respectively); `deadend` uses controlled conflicting restrictions.
 
 Build the test classpath once:
 
@@ -77,21 +69,13 @@ java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
   org.openjdk.jmh.Main '.*deadend.Benchmark_5by10'
 ```
 
-Change the class selector to any other `Benchmark_<dimensions>by<size>` class under
-`deadend` or `chain`. JMH prints the score for each implementation (and, for `chain`, each
-profile). The
-benchmark includes builder construction, rule registration, generator creation, and complete
-consumption. Trial setup independently checks the selected implementation's tuple count and
-checksum against the nested-stream baseline.
+Change the class selector to a class under `chain`, `manyvalid`, or `complete` to run that workload. JMH prints the score for each implementation.
 
-The nested-stream baseline applies constraints as soon as both participating dimensions have been
-selected. It does **not** generate the full Cartesian product and apply one final filter.
+The nested-stream baseline applies constraints as soon as both participating dimensions have been selected. It does **not** generate the full Cartesian product and apply one final filter.
 
 ### Current controlled DEAD_END measurements
 
-These are the maintainer's initial end-to-end results for the controlled dead-end profile, measured
-with one fork, one warmup iteration, and two 500 ms measurement iterations. Times are ms/op.
-The results are quick-glance measurements, not publication-grade estimates.
+These are the maintainer's initial end-to-end results for the controlled dead-end profile, measured with one fork, one warmup iteration, and two 500 ms measurement iterations. Times are ms/op. The results are quick-glance measurements, not publication-grade estimates.
 
 | Scenario | PRUNED_BITSET | PRUNED_DFS | DP | ADAPTIVE | NESTED_STREAM |
 |---|---:|---:|---:|---:|---:|
@@ -104,19 +88,13 @@ The results are quick-glance measurements, not publication-grade estimates.
 
 Initial observations:
 
-- No pruning strategy wins consistently. BITSET leads at 5×50 and 7×25; DFS leads at 5×25
-  and 7×50. At 5×10 and 7×10, the three pruning strategies are effectively tied at this precision.
+- No pruning strategy wins consistently. BITSET leads at 5×50 and 7×25; DFS leads at 5×25 and 7×50. At 5×10 and 7×10, the three pruning strategies are effectively tied at this precision.
 - DP is slower than the pruning strategies in these six cases.
-- Incrementally filtered nested streams are slower in all six cases; the absolute time gap becomes
-  substantially larger on the bigger workloads.
-- ADAPTIVE does not consistently match the fastest explicit strategy. Its selection heuristic
-  should be evaluated against the full topology matrix before changing it.
-- Doubling domain size from 25 to 50 causes a large increase in work. The growth depends on the
-  number of dimensions and the valid-prefix structure, not just the raw domain size.
+- Incrementally filtered nested streams are slower in all six cases; the absolute time gap becomes substantially larger on the bigger workloads.
+- ADAPTIVE does not consistently match the fastest explicit strategy. Its selection heuristic should be evaluated against the full topology matrix before changing it.
+- Doubling domain size from 25 to 50 causes a large increase in work. The growth depends on the number of dimensions and the valid-prefix structure, not just the raw domain size.
 
-These findings apply only to this controlled DEAD_END profile and this machine/JVM. Do not infer a
-universal strategy ranking from six cases or from two measurement iterations. The other workload
-families are included to test whether the pattern holds for many-valid and complete-result shapes.
+These findings apply only to the controlled DEAD_END profile and this machine/JVM. Do not infer a universal strategy ranking from six cases or from two measurement iterations.
 
 ## Updating the committed results
 

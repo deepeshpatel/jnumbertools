@@ -8,6 +8,7 @@ import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.baseline.NestedStreamBaseline;
 import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.scenario.Rule;
 import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.scenario.Scenario;
+import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.scenario.Scenario.ScenarioData;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.ConditionalProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.LexOrderStrategy;
 
@@ -18,7 +19,7 @@ import java.util.stream.Stream;
 
 /** Shared setup and end-to-end measurement logic for one fixed conditional-product case. */
 public final class ConditionalProductCaseSupport {
-    private final Scenario scenario;
+    private final ScenarioData scenario;
     private final List<PreparedRule> preparedRules;
     private final NestedStreamBaseline.Plan baselinePlan;
     private final long expectedCount;
@@ -52,7 +53,7 @@ public final class ConditionalProductCaseSupport {
     }
 
     private static ConditionalProductBuilder buildBuilder(
-            Scenario scenario, List<PreparedRule> preparedRules) {
+            ScenarioData scenario, List<PreparedRule> preparedRules) {
         List<List<Integer>> dimensions = scenario.dimensions();
         ConditionalProductBuilder builder =
                 JNumberTools.cartesianProduct().conditionalProductOf(dimensions.get(0));
@@ -68,7 +69,7 @@ public final class ConditionalProductCaseSupport {
         return builder;
     }
 
-    private static List<PreparedRule> prepareRules(Scenario scenario) {
+    private static List<PreparedRule> prepareRules(ScenarioData scenario) {
         List<List<Integer>> dimensions = scenario.dimensions();
         List<PreparedRule> prepared = new ArrayList<>(scenario.rules().size());
         for (Rule rule : scenario.rules()) {
