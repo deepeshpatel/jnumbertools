@@ -33,7 +33,13 @@ public final class Scenario {
         rules = createRules(topology, selectivity);
     }
 
+    private Scenario(List<List<Integer>> dimensions, List<Rule> rules) {
+        this.dimensions = List.copyOf(dimensions);
+        this.rules = List.copyOf(rules);
+    }
+
     public static Scenario create(String caseId) {
+        if (caseId.startsWith("phase-e/")) return createPhaseE(caseId);
         String resource = "/benchmarks/conditionalproduct/cases/" + caseId + ".properties";
         Properties properties = new Properties();
         try (InputStream input = Scenario.class.getResourceAsStream(resource)) {
@@ -52,6 +58,72 @@ public final class Scenario {
         int[] dimensionSizes = parseDimensionSizes(properties, dimensionCount);
         boolean emptyDimension = Boolean.parseBoolean(properties.getProperty("emptyDimension", "false"));
         return new Scenario(dimensionSizes, emptyDimension, topology, selectivity);
+    }
+
+
+    /**
+     * Builds bounded Phase E workloads. MANY_VALID targets at most 75,000 tuples;
+     * COMPLETE targets at most 1,000. DEAD_END adds conflicting conditional
+     * restrictions on the final dimension while preserving valid combinations.
+     */
+    private static Scenario createPhaseE(String caseId) {
+        String[] parts = caseId.split("/");
+        if (parts.length != 3) throw new IllegalArgumentException(
+                "Expected phase-e/<PROFILE>/<DIMENSIONS>x<SIZE>: " + caseId);
+        String profile = parts[1];
+        String[] shape = parts[2].split("x");
+        if (shape.length != 2) throw new IllegalArgumentException("Invalid Phase E shape: " + parts[2]);
+        int n = Integer.parseInt(shape[0]);
+        int size = Integer.parseInt(shape[1]);
+        if (!List.of(3, 5, 7, 10).contains(n) || !List.of(10, 25, 50).contains(size))
+            throw new IllegalArgumentException("Unsupported Phase E shape: " + parts[2]);
+        if (!List.of("DEAD_END", "MANY_VALID", "COMPLETE").contains(profile))
+            throw new IllegalArgumentException("Unknown Phase E profile: " + profile);
+
+        List<List<Integer>> dimensions = new ArrayList<>(n);
+        for (int d = 0; d < n; d++) dimensions.add(IntStream.range(0, size).boxed().toList());
+
+        long budget = switch (profile) {
+            case "DEAD_END" -> 30_000L;
+            case "MANY_VALID" -> 75_000L;
+            case "COMPLETE" -> 1_000L;
+            default -> throw new IllegalStateException(profile);
+        };
+        int allowedCount = largestBranchingFactor(size, n, budget);
+        if (profile.equals("DEAD_END")) allowedCount = Math.max(2, allowedCount);
+
+        List<Rule> rules = new ArrayList<>();
+        for (int d = 0; d < n - 1; d++)
+            rules.add(new Rule(d, range(0, size), d + 1, range(0, allowedCount)));
+
+        if (profile.equals("DEAD_END")) {
+            int triggerCount = Math.max(1, Math.min(allowedCount - 1,
+                    (int) Math.floor(allowedCount * 0.80)));
+            int midpoint = allowedCount / 2;
+            rules.add(new Rule(0, range(0, triggerCount), n - 1, range(0, midpoint)));
+            rules.add(new Rule(1, range(0, triggerCount), n - 1, range(midpoint, allowedCount)));
+        }
+        return new Scenario(dimensions, rules);
+    }
+
+    private static int largestBranchingFactor(int size, int dimensions, long budget) {
+        int best = 1;
+        for (int candidate = 1; candidate <= size; candidate++) {
+            long count = size;
+            for (int d = 1; d < dimensions && count <= budget; d++) {
+                if (count > budget / candidate) { count = budget + 1; break; }
+                count *= candidate;
+            }
+            if (count <= budget) best = candidate;
+            else break;
+        }
+        return best;
+    }
+
+    private static BitSet range(int from, int to) {
+        BitSet result = new BitSet(to);
+        result.set(from, to);
+        return result;
     }
 
     public List<List<Integer>> dimensions() { return dimensions; }
