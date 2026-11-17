@@ -37,9 +37,8 @@ mvn clean test-compile exec:exec -Dexec.executable=java -Dexec.classpathScope=te
 
 ## Conditional-product benchmarks
 
-Conditional-product benchmarks are organized by workload family and fixed input shape. Each class
-runs one topology/profile, one dimension count, and one uniform domain size; JMH's
-`implementation` parameter compares `PRUNED_BITSET`, `PRUNED_DFS`, `DP`, `ADAPTIVE`,
+Conditional-product benchmarks are organized by topology and fixed input shape. Each class
+fixes one dimension count and one uniform domain size; JMH's `implementation` parameter compares `PRUNED_BITSET`, `PRUNED_DFS`, `DP`, `ADAPTIVE`,
 and an incrementally filtered nested-stream baseline.
 
 The source layout is:
