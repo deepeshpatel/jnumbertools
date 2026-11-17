@@ -13,17 +13,18 @@ import java.util.Spliterator;
 import java.util.function.Consumer;
 
 /**
- * Unordered, lazily partitionable traversal of a conditional Cartesian product.
+ * Traversal of a conditional Cartesian product with no encounter-order guarantee.
  *
- * <p>Splits represent disjoint ranges below a fixed prefix. When a dimension
- * offers only one candidate in a partition, splitting advances the prefix and
- * continues at the next dimension. This allows parallel streams to expose work
- * even when the first dimension is small.</p>
+ * <p>The traversal prioritizes efficient execution rather than lexicographic ordering. Its spliterator
+ * can partition disjoint ranges below a fixed prefix, allowing a caller's parallel stream to expose
+ * independent work. This is an execution opportunity, not a promise that traversal will run in parallel;
+ * sequential iteration remains supported and does not invoke splitting.</p>
  *
- * <p>A partition is split only while the work it may contain, bounded by the number of candidate tuples below its
- * prefix, exceeds {@link #SPLIT_WORK_THRESHOLD}. Smaller partitions are traversed sequentially, so a parallel
- * pipeline never creates tasks that cost more than the tuples they produce. The bound ignores pruning, so it is
- * an upper bound: it is also what {@code estimateSize()} reports, which lets the JDK choose its own task size.</p>
+ * <p>When a dimension offers only one candidate in a partition, splitting advances the prefix and
+ * continues at the next dimension. A partition is split only while the candidate-tuple upper bound
+ * below its prefix exceeds {@link #SPLIT_WORK_THRESHOLD}. The bound ignores pruning and is also
+ * reported by {@code estimateSize()}, allowing the stream implementation to estimate the amount of
+ * work available in the partition. Smaller partitions are left for sequential traversal.</p>
  */
 final class AnyOrderGenerator extends AbstractGenerator<Object> {
     /** A partition is not split further when it holds at most this many candidate tuples. */
