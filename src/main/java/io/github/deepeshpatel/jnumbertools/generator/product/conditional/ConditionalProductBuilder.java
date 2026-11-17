@@ -58,13 +58,16 @@ import java.util.Random;
  * product exceeds 1,000,000 ({@code MAX_LOOP_COMBINATIONS}). Each pair of dimensions connected by a rule
  * also requires a relation table; a rule is rejected if that table would exceed 50,000,000 value pairs
  * ({@code MAX_PAIR_CELLS}).
- * For all accepted rule sets {@link #count()}, {@link #lexOrder()},
+ * For all accepted rule sets, {@link #count()}, {@link #lexOrder()},
  * {@link #lexOrderMth(BigInteger, BigInteger)}, {@link #byRanks(Iterable)}, {@link #choice(int, Random)}
- * and {@link #sample(int, Random)} work on the valid tuples only, without enumerating the full product.
+ * and {@link #sample(int, Random)} operate on valid tuples without materializing the complete Cartesian
+ * product. {@link #choice(int, Random)} may use rejection sampling, which draws candidates from the full
+ * product and discards those that violate a rule.
  * Ordinary {@link #lexOrder()} traversal defaults to {@link LexOrderStrategy#PRUNED_BITSET}; callers can select
- * {@link LexOrderStrategy#DP} or use {@link LexOrderStrategy#ADAPTIVE} with an expected traversal size.
- * The exact counting and rank-based operations always use the DP plan, regardless of the lexicographic
- * traversal strategy. Ranks are positions among the valid tuples in lexicographic order (dimension order,
+ * {@link LexOrderStrategy#DP} explicitly or use {@link LexOrderStrategy#ADAPTIVE} with a non-negative estimate.
+ * ADAPTIVE currently resolves to topology-aware BitSet prefix pruning; the estimate is retained for API
+ * compatibility and does not select between traversal strategies.
+ * Exact counting and rank-based operations use the DP plan, regardless of the lexicographic traversal strategy. Ranks are positions among the valid tuples in lexicographic order (dimension order,
  * then the order of each list). They change when rules change.</p>
  *
  * <h2>Practical performance guidance: dimension order</h2>
@@ -96,9 +99,10 @@ import java.util.Random;
  * inputs when traversal performance is important.</p>
  *
  * <p>These ordering hints describe prefix-pruned lexicographic traversal. Exact counting and
- * rank-based operations use the counting plan and have different cost characteristics. Guidance
- * for the separate unordered/parallel traversal API will be documented with that API once its
- * implementation and benchmark results are available.</p>
+ * rank-based operations use the counting plan and have different cost characteristics. The separate
+ * {@link #anyOrder()} traversal does not preserve lexicographic order and prioritizes efficient execution;
+ * it may benefit from partitioned execution when used with a parallel stream, but does not require or
+ * guarantee parallel execution.</p>
  *
  * <p>Instances are immutable and thread-safe. Calls to {@code and(...)} and completed rule chains return
  * new builders; intermediate {@code when(...)} and {@code then(...)} steps do not modify the existing
@@ -313,16 +317,19 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     }
 
     /**
-     * Returns all valid tuples through a traversal whose encounter order is unspecified.
+     * Returns all valid tuples using a traversal that makes no encounter-order guarantee and
+     * prioritizes efficient execution over lexicographic ordering.
      *
-     * <p>Unlike {@link #lexOrder()}, this API makes no lexicographic ordering guarantee. The
-     * current implementation traverses sequentially; parallel partitioning and automatic
-     * sequential/parallel selection will be introduced separately after their correctness and
-     * performance have been established. The traversal is not randomized: use {@link #choice(int,
-     * Random)} or {@link #sample(int, Random)} when random selection is required.</p>
+     * <p>Unlike {@link #lexOrder()}, this API does not guarantee lexicographic order. Its traversal
+     * strategy is free to choose an efficient order of exploration. The returned spliterator can
+     * partition work when the caller uses a parallel stream, but parallel execution is neither
+     * required nor guaranteed; ordinary sequential iteration is also supported. The method itself
+     * does not select or start parallel execution.</p>
      *
-     * <p>The returned generator is lazy and re-iterable. It produces every valid tuple exactly
-     * once, without materializing the complete result set.</p>
+     * <p>The traversal is not randomized: use {@link #choice(int, Random)} or
+     * {@link #sample(int, Random)} when random selection is required. The returned generator is
+     * lazy and re-iterable, and produces every valid tuple exactly once without materializing the
+     * complete result set.</p>
      *
      * @return a re-iterable generator of all valid tuples, with no encounter-order guarantee
      */
@@ -340,8 +347,9 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * cannot have a valid completion. It does not build exact completion counts.</p>
      *
      * <p>Use {@link #lexOrder(LexOrderStrategy)} to select {@link LexOrderStrategy#DP} explicitly, or
-     * {@link #lexOrder(LexOrderStrategy, long)} to let {@link LexOrderStrategy#ADAPTIVE} choose based on
-     * an expected traversal size.</p>
+     * {@link #lexOrder(LexOrderStrategy, long)} to select the topology-aware
+     * {@link LexOrderStrategy#ADAPTIVE} entry point. The estimate is currently retained for API
+     * compatibility and does not change the selected prefix-pruning implementation.</p>
      *
      * @return a re-iterable generator of valid tuples in lexicographic order
      */
@@ -359,13 +367,17 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      *       the graph contains a loop block it also uses the plan's feasibility tier to reject prefixes
      *       that cannot have a valid completion. It is the default strategy.</li>
      *   <li>{@link LexOrderStrategy#PRUNED_DFS}: uses the same topology-triggered feasibility lookahead
-     *       with dense boolean relation rows when the dense representation fits the memory limit.</li>
-     *   <li>{@link LexOrderStrategy#DP}: uses exact completion counts to skip prefixes. It remains
-     *       available explicitly and is also used by exact counting and rank-based operations.</li>
+     *       with dense boolean relation rows when that representation fits the memory limit; otherwise
+     *       it falls back to {@code PRUNED_BITSET}.</li>
+     *   <li>{@link LexOrderStrategy#DP}: uses the feasibility tier to find the next valid value during
+     *       sequential traversal. Its parallel spliterator uses exact completion counts to partition
+     *       the valid tuples into contiguous rank ranges. Exact counting and rank-based operations also
+     *       use the DP plan.</li>
      * </ul>
      *
-     * <p>{@link LexOrderStrategy#ADAPTIVE} requires an expected traversal size and must be selected with
-     * {@link #lexOrder(LexOrderStrategy, long)}.</p>
+     * <p>{@link LexOrderStrategy#ADAPTIVE} must be selected with
+     * {@link #lexOrder(LexOrderStrategy, long)}. The estimate is validated but currently does not
+     * select a different traversal strategy; ADAPTIVE resolves to topology-aware BitSet prefix pruning.</p>
      *
      * <p>This setting affects only this lexicographic traversal. Exact-count and rank-based operations,
      * including {@link #count()}, {@link #lexOrderMth(BigInteger, BigInteger)}, {@link #byRanks(Iterable)},
@@ -385,19 +397,19 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     }
 
     /**
-     * Returns the valid tuples in lexicographic order using the adaptive strategy.
+     * Returns the valid tuples in lexicographic order using the topology-aware prefix-pruning
+     * implementation exposed by {@link LexOrderStrategy#ADAPTIVE}.
      *
-     * <p>The adaptive policy uses prefix pruning and enables feasibility lookahead only when the
-     * constraint graph contains a loop block. This avoids using the expected tuple count as a proxy for
-     * workload shape: benchmarks show that small result counts can favour DP on looped dead-end workloads,
-     * while large result counts can favour prefix pruning on acyclic small-domain workloads.</p>
+     * <p>This policy uses prefix pruning and enables feasibility lookahead only when the constraint
+     * graph contains a loop block. It does not choose between DP and prefix pruning based on the
+     * estimated traversal size. Select {@link LexOrderStrategy#DP} explicitly to use the DP traversal
+     * strategy.</p>
      *
-     * <p>{@code estimatedLimit} is retained for API compatibility and validated as non-negative, but it
-     * no longer selects DP versus prefix pruning. Select {@link LexOrderStrategy#DP} explicitly when exact
-     * completion-count traversal is desired. The estimate does not limit the number of tuples produced.</p>
+     * <p>{@code estimatedLimit} is retained for API compatibility and validated as non-negative. It
+     * does not affect traversal strategy selection or limit the number of tuples produced.</p>
      *
      * @param strategy must be {@link LexOrderStrategy#ADAPTIVE}
-     * @param estimatedLimit expected number of tuples to consume in one traversal; must be non-negative
+     * @param estimatedLimit retained for API compatibility; must be non-negative and does not affect strategy selection
      * @return a re-iterable generator of valid tuples in lexicographic order
      * @throws NullPointerException if {@code strategy} is null
      * @throws IllegalArgumentException if the strategy is not {@code ADAPTIVE} or the estimate is negative
