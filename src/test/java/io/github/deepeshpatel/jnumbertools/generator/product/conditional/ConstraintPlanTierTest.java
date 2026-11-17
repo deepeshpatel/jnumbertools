@@ -122,6 +122,47 @@ class ConstraintPlanTierTest {
     }
 
     @Test
+    void prunedStrategiesUseLoopLookaheadWithoutBuildingExactCounts() throws Exception {
+        List<List<Integer>> dims = new ArrayList<>();
+        for (int d = 0; d < 5; d++) dims.add(values(d, 10));
+        List<Rule> rules = List.of(
+                new Rule(0, dims.get(0), 1, dims.get(1).subList(0, 5)),
+                new Rule(1, dims.get(1), 2, dims.get(2).subList(0, 5)),
+                new Rule(2, dims.get(2), 3, dims.get(3).subList(0, 5)),
+                new Rule(3, dims.get(3), 4, dims.get(4).subList(0, 5)),
+                new Rule(2, dims.get(2).subList(0, 9), 4, dims.get(4).subList(5, 10)));
+        var builder = build(dims, rules);
+        ConstraintPlan plan = planOf(builder);
+        List<List<Object>> expected = bruteForce(dims, rules);
+
+        assertFalse(expected.isEmpty());
+        assertEquals(expected, builder.lexOrder(LexOrderStrategy.PRUNED_BITSET).stream().toList());
+        assertEquals(expected, builder.lexOrder(LexOrderStrategy.PRUNED_DFS).stream().toList());
+        assertEquals(expected, builder.lexOrder(LexOrderStrategy.ADAPTIVE, 100_000).stream().toList());
+        assertFalse(plan.countsBuilt(), "feasibility lookahead must not build exact completion counts");
+    }
+
+    @Test
+    void adaptiveAcyclicTraversalDoesNotConstructConstraintPlan() throws Exception {
+        List<List<Integer>> dims = new ArrayList<>();
+        for (int d = 0; d < 8; d++) dims.add(values(d, 3));
+        List<Rule> rules = new ArrayList<>();
+        for (int d = 0; d < 7; d++) {
+            rules.add(new Rule(d, dims.get(d), d + 1, dims.get(d + 1).subList(0, 2)));
+        }
+        var builder = build(dims, rules);
+        Field modelField = ConditionalProductBuilder.class.getDeclaredField("model");
+        modelField.setAccessible(true);
+        ConstraintModel model = (ConstraintModel) modelField.get(builder);
+
+        assertEquals(1, builder.lexOrder(LexOrderStrategy.ADAPTIVE, 100_000).stream().limit(1).count());
+        Field planField = ConstraintModel.class.getDeclaredField("plan");
+        planField.setAccessible(true);
+        assertEquals(null, planField.get(model),
+                "acyclic adaptive traversal should not construct the feasibility/counting plan");
+    }
+
+    @Test
     void randomRuleSetsAgreeWithBruteForceOnEveryDpPath() throws Exception {
         Random random = new Random(20261117L);
         for (int round = 0; round < 400; round++) {
