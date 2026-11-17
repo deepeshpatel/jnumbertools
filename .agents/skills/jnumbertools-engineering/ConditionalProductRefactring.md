@@ -174,6 +174,22 @@ These deliverables are intentionally postponed until implementation, parallel wo
 - [ ] 6.2 Documentation: update the main README, benchmarks README, and changelog to reflect the final API, behavior, benchmark methodology, and measured results.
 - [ ] 6.3 Final benchmark decisions: use the complete benchmark evidence to tune implementations, defaults, and the ADAPTIVE cutoff where justified. Record the final results and rationale. Never remove or deprecate a strategy.
 
+## 4B. Phase roadmap (A to I)
+
+Work after the original work packages is delivered in lettered phases. Each phase is a small patch against the latest pushed head and stands alone. Update the status here and the log in section 8 with every patch.
+
+| Phase | Content | Status |
+|---|---|---|
+| A | Compact relation rows (`Relation` stores rules, builds rows lazily, shares rows) | merged |
+| B | Feasibility tier and lazy counts; `DP` stream no longer unranks each tuple (`DpLexSpliterator`) | merged |
+| C | `anyOrder()` splitting work threshold (`SPLIT_WORK_THRESHOLD`) and upper-bound `estimateSize()` | delivered, awaiting maintainer verification |
+| D | Setup cost at large sizes: measure one rule per value at 3x1000 and 3x5000; if it still grows with value pairs, index rules by trigger value, chain rules instead of copying, share rows beyond 62 rules | not started |
+| E | Trimmed benchmark run by the maintainer (dimensions 3, 5, 7, 10; sizes 10, 25, 50; dead ends; small lists with many tuples; complete consumption) | not started |
+| F | Strategy decisions from E: `ADAPTIVE` rule based on measured shape (for example loop blocks present means pruned), default choice, `PRUNED_DFS` tuning. No strategy is removed | not started |
+| G | Optional: `anyOrder()` dimension reordering (most selective dimension first, values returned in original positions); only if E shows dead ends dominate | not started |
+| H | Counting speed at large sizes; test hardening (larger oracle shapes, concurrent first use) | not started |
+| I | README, benchmarks README, changelog, compact this file, single release | not started |
+
 ## 5. Progress summary
 
 | Package | Done | Total |
@@ -204,6 +220,8 @@ Update this table whenever an item changes status.
 - Unit tests live next to the existing ones in `ConditionalProductBuilderTest`, `ConditionalProductRuleOrderTest`, and a new differential test per generator.
 
 ## 8. Progress log (newest first)
+
+- 2026-11-17: Phase C delivered, awaiting maintainer verification. `AnyOrderGenerator.AnyOrderSpliterator` now splits a partition only while its upper work bound (candidates below the prefix: remaining range size times the sizes of the deeper dimensions, saturating) exceeds `SPLIT_WORK_THRESHOLD` (1024); smaller partitions run sequentially, so a parallel stream no longer creates a task per tuple. `estimateSize()` reports that bound instead of `Long.MAX_VALUE`, so the JDK sizes its tasks from it. Two existing anyOrder tests were given larger shapes so they still reach the splitting path. New `AnyOrderSplittingTest`: full splitting stays near the threshold and covers every tuple once, a 125-candidate product is not split, and the estimate is an upper bound (0 for an empty dimension). 45 conditional-product tests passed in the sandbox stub runner (`RelationTest` excluded there). The threshold is a first value and must be tuned with `AnyOrderParallelBenchmark`.
 
 - 2026-11-17: Phase B delivered (feasibility tier and lazy counts), awaiting maintainer verification. `ConstraintPlan` now builds `canComplete` (a yes/no table per node) with the topology; `isEmpty()`, `hasCompletion` and `firstValid` use it and keep no counts. The exact counting tier is built on first use through `ConstraintPlan.counts()` (`count`, ranks, `choice`, `sample`, `lexOrderMth`). The `DP` stream no longer unranks every tuple: `DpLexSpliterator` walks sequentially with `DpLexGenerator` (no counts built) and switches to rank-range splitting only when a parallel pipeline splits it; `DpRankSpliterator` unranks once per range and then steps incrementally. New `ConstraintPlanTierTest`: counts not built by iteration or `isEmpty()`, dead end detection, 400 seeded random rule sets against a brute-force oracle on every DP path (iterator, sequential stream, parallel ordered stream, ranks), and rank-split order. Open follow-ups from review: `anyOrder()` spliterator needs a work threshold (it reports `Long.MAX_VALUE` and splits to single candidates); `Relation` shares rows only for up to 62 rules per pair and copies its rule array per added rule, so measure one-rule-per-value shapes at large sizes.
 

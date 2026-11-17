@@ -19,8 +19,16 @@ import java.util.function.Consumer;
  * offers only one candidate in a partition, splitting advances the prefix and
  * continues at the next dimension. This allows parallel streams to expose work
  * even when the first dimension is small.</p>
+ *
+ * <p>A partition is split only while the work it may contain, bounded by the number of candidate tuples below its
+ * prefix, exceeds {@link #SPLIT_WORK_THRESHOLD}. Smaller partitions are traversed sequentially, so a parallel
+ * pipeline never creates tasks that cost more than the tuples they produce. The bound ignores pruning, so it is
+ * an upper bound: it is also what {@code estimateSize()} reports, which lets the JDK choose its own task size.</p>
  */
 final class AnyOrderGenerator extends AbstractGenerator<Object> {
+    /** A partition is not split further when it holds at most this many candidate tuples. */
+    static final long SPLIT_WORK_THRESHOLD = 1024;
+
     private final ConstraintModel model;
 
     AnyOrderGenerator(ConstraintModel model) {
@@ -64,7 +72,7 @@ final class AnyOrderGenerator extends AbstractGenerator<Object> {
         @Override
         public Spliterator<List<Object>> trySplit() {
             // Do not split after traversal starts: the iterator owns the remaining subtree.
-            if (iterator != null) return null;
+            if (iterator != null || workBound() <= SPLIT_WORK_THRESHOLD) return null;
 
             int dimensions = model.dimensions.size();
             while (to - from <= 1 && prefix.length < dimensions - 1) {
@@ -80,7 +88,7 @@ final class AnyOrderGenerator extends AbstractGenerator<Object> {
                 to = model.dimensions.get(prefix.length).size();
             }
 
-            if (to - from <= 1) return null;
+            if (to - from <= 1 || workBound() <= SPLIT_WORK_THRESHOLD) return null;
 
             int midpoint = from + (to - from) / 2;
             AnyOrderSpliterator lower = new AnyOrderSpliterator(model, prefix, from, midpoint);
@@ -88,10 +96,21 @@ final class AnyOrderGenerator extends AbstractGenerator<Object> {
             return lower;
         }
 
+        /** Candidate tuples below the current prefix in the current range, before any pruning (saturating). */
+        private long workBound() {
+            long bound = to - from;
+            for (int d = prefix.length + 1; d < model.dimensions.size(); d++) {
+                long size = model.dimensions.get(d).size();
+                if (size != 0 && bound > Long.MAX_VALUE / size) return Long.MAX_VALUE;
+                bound *= size;
+            }
+            return bound;
+        }
+
         @Override
         public long estimateSize() {
-            // Constraints can eliminate an arbitrary number of tuples from each partition.
-            return Long.MAX_VALUE;
+            // An upper bound: constraints can eliminate an arbitrary number of tuples from each partition.
+            return workBound();
         }
 
         @Override

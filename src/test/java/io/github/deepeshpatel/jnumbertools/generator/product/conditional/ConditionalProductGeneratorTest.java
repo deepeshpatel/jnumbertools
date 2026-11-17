@@ -57,7 +57,7 @@ class ConditionalProductGeneratorTest {
     @Test
     void anyOrderProducesEveryValidTupleOnceWithoutAnOrderGuarantee() {
         List<Integer> first = java.util.stream.IntStream.range(0, 18).boxed().toList();
-        List<Integer> second = java.util.stream.IntStream.range(0, 7).boxed().toList();
+        List<Integer> second = java.util.stream.IntStream.range(0, 60).boxed().toList();
         List<Integer> third = java.util.stream.IntStream.range(0, 5).boxed().toList();
         var builder = cartesianProduct.conditionalProductOf(first).and(second).and(third)
                 .when(first).isOneOf(List.of(2, 5, 8, 13, 17))
@@ -86,7 +86,7 @@ class ConditionalProductGeneratorTest {
 
         // A singleton first dimension must not prevent splitting at a deeper dimension.
         List<Integer> singleton = List.of(99);
-        List<Integer> wide = java.util.stream.IntStream.range(0, 31).boxed().toList();
+        List<Integer> wide = java.util.stream.IntStream.range(0, 300).boxed().toList();
         List<Integer> tail = java.util.stream.IntStream.range(0, 5).boxed().toList();
         var narrowRoot = cartesianProduct.conditionalProductOf(singleton).and(wide).and(tail)
                 .when(wide).isOneOf(List.of(2, 7, 13, 19, 29))
