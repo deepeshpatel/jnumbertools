@@ -1,8 +1,7 @@
-# JNumberTools Benchmarks
+# Benchmarks
 
-This is a standalone Maven module containing JMH benchmarks for JNumberTools maintainers. Benchmark
-code and JMH dependencies are isolated from the library's production and test source sets; they are
-not included in the published library artifact.
+JMH benchmarks for JNumberTools maintainers. These classes live under `src/test/java`; they are
+development tools and are not included in the published library.
 
 ## Benchmark design rules
 
@@ -26,18 +25,16 @@ and filtering only at the end.
 
 ```text
 benchmarks/
-├── pom.xml
 ├── README.md
-└── src/main/java/io/github/deepeshpatel/jnumbertools/benchmarks/
-    └── conditionalproduct/
-        ├── anyorder/
-        ├── baseline/
-        ├── chain/
-        ├── complete/
-        ├── deadend/
-        ├── manyvalid/
-        ├── scenario/
-        └── support/
+└── conditionalproduct/
+    ├── anyorder/
+    ├── baseline/
+    ├── chain/
+    ├── complete/
+    ├── deadend/
+    ├── manyvalid/
+    ├── scenario/
+    └── support/
 ```
 
 Future API families should get their own domain package (for example, `permutation/`,
@@ -147,46 +144,36 @@ formal performance report.
 and parallel checksums during trial setup. This is a separate comparison: `anyOrder()` is not the
 lexicographic conditional-product strategy parameterized by the topology benchmarks.
 
-## Building and running benchmarks
+## Running conditional-product benchmarks
 
-The benchmark module depends on the matching JNumberTools artifact version. From the repository root,
-install the library into the local Maven repository first:
+Build the test classpath once:
 
 ```bash
-mvn clean install -DskipTests
+mvn test-compile dependency:build-classpath -Dmdep.includeScope=test -Dmdep.outputFile=target/test-classpath.txt
 ```
 
-Then build the standalone JMH module:
+Run all shapes and implementations for one topology:
 
 ```bash
-mvn -f benchmarks/pom.xml clean package
+java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
+  org.openjdk.jmh.Main '.*deadend.ConditionalProductBenchmark' -prof gc
 ```
 
-This creates the executable JMH jar at `benchmarks/target/benchmarks.jar`. Run all shapes and
-implementations for one topology:
+Replace `deadend` with `chain`, `manyvalid`, or `complete` to select another topology. Run only the
+any-order comparison with:
 
 ```bash
-java -jar benchmarks/target/benchmarks.jar '.*deadend.ConditionalProductBenchmark' -prof gc
-```
-
-Replace `deadend` with `chain`, `manyvalid`, or `complete` to select another topology. Run only
-the any-order comparison with:
-
-```bash
-java -jar benchmarks/target/benchmarks.jar '.*AnyOrderParallelBenchmark.*' -prof gc
+java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
+  org.openjdk.jmh.Main '.*AnyOrderParallelBenchmark.*' -prof gc
 ```
 
 The topology benchmark annotations use short smoke-test defaults (one fork, one 100 ms warmup,
 one 100 ms measurement). Override them for meaningful performance comparisons; for example:
 
 ```bash
-java -jar benchmarks/target/benchmarks.jar '.*deadend.ConditionalProductBenchmark' \
-  -wi 5 -i 8 -f 2 -tu ms -bm avgt -prof gc
+java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
+  org.openjdk.jmh.Main '.*deadend.ConditionalProductBenchmark' -wi 5 -i 8 -f 2 -tu ms -bm avgt -prof gc
 ```
-
-The benchmark module is intentionally independent of the root Maven lifecycle. If the library version
-changes, update `jnumbertools.version` in `benchmarks/pom.xml` to match the root project version,
-then reinstall the library before rebuilding the benchmarks.
 
 Do not compare timings from different machines or JVM configurations as if they were directly equivalent.
 Always inspect score error and allocation per operation before drawing conclusions.
