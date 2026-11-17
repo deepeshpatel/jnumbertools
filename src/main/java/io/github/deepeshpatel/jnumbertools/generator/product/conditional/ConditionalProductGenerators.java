@@ -57,8 +57,7 @@ final class ConditionalProductGenerators {
                 return new PrunedLexSpliterator(model, strategy);
             }
             if (strategy == LexOrderStrategy.DP) {
-                ConstraintPlan plan = model.plan();
-                return new DpRankSpliterator(model, plan, BigInteger.ZERO, plan.counts.total);
+                return new DpLexSpliterator(model, model.plan());
             }
             return Spliterators.spliteratorUnknownSize(iterator(),
                     Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE);
@@ -139,11 +138,11 @@ final class ConditionalProductGenerators {
                     if (!hasNext()) throw new NoSuchElementException();
                     BigInteger rank = rankIt.next();
                     ConstraintPlan p = model.plan();
-                    if (rank.signum() < 0 || rank.compareTo(p.counts.total) >= 0) {
+                    if (rank.signum() < 0 || rank.compareTo(p.counts().total) >= 0) {
                         throw new IllegalArgumentException(
-                                "Rank " + rank + " is out of bounds [0, " + p.counts.total + ")");
+                                "Rank " + rank + " is out of bounds [0, " + p.counts().total + ")");
                     }
-                    return model.tuple(p.counts.unrank(rank));
+                    return model.tuple(p.counts().unrank(rank));
                 }
             };
         }

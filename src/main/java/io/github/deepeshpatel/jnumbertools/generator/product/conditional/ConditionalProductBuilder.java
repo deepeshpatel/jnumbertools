@@ -446,7 +446,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     public StreamableIterable<Object> choice(int sampleSize, Random random) {
         BigIntegerChoice ranks = new BigIntegerChoice(count(), sampleSize, random); // validates the arguments
         ConstraintPlan p = model.plan();
-        if (p.counts.mostTuplesValid()) {
+        if (p.counts().mostTuplesValid()) {
             return ConditionalProductGenerators.rejectionChoice(model, sampleSize, random);
         }
         return ConditionalProductGenerators.rankBased(model, ranks);
@@ -467,12 +467,12 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     @Override
     public BigInteger count() {
-        return model.plan().counts.total;
+        return model.plan().counts().total;
     }
 
     @Override
     public boolean isEmpty() {
-        return count().signum() == 0;
+        return model.plan().isEmpty();
     }
 
     @Override

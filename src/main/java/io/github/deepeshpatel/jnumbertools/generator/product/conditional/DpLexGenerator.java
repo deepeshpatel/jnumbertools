@@ -28,7 +28,17 @@ final class DpLexGenerator implements Iterator<List<Object>> {
         this.model = model;
         this.plan = plan;
         this.values = new int[plan.dimensions];
-        this.exhausted = plan.counts.total.signum() == 0;
+        this.exhausted = plan.isEmpty();
+    }
+
+    /** An iterator whose first tuple is {@code first}; later tuples follow in lexicographic order. */
+    static DpLexGenerator startingAt(ConstraintModel model, ConstraintPlan plan, int[] first) {
+        DpLexGenerator generator = new DpLexGenerator(model, plan);
+        System.arraycopy(first, 0, generator.values, 0, first.length);
+        generator.started = true;
+        generator.ready = true;
+        generator.exhausted = false;
+        return generator;
     }
 
     @Override

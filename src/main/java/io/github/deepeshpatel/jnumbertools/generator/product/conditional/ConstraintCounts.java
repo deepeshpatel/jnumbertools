@@ -109,45 +109,9 @@ final class ConstraintCounts {
         return result;
     }
 
-    /**
-     * Range [lo, hi) of the values of node c that agree with the dimensions already fixed (below k),
-     * packed as lo in the high 32 bits and hi in the low 32 bits. The fixed dimensions of a node are the
-     * first ones in its member list and its values are in lexicographic order, so the agreeing values are
-     * contiguous and are found by binary search.
-     */
-    private long range(int c, int k, int[] val) {
-        int[] mem = plan.members[c];
-        if (mem[0] >= k) return (long) plan.size[c];                 // nothing fixed: [0, plan.size)
-        if (plan.values[c] == null) {
-            int b = val[mem[0]];
-            return ((long) b << 32) | (b + 1);
-        }
-        int fixed = 0;
-        while (fixed < mem.length && mem[fixed] < k) fixed++;
-        int[][] list = plan.values[c];
-        int lo = lowerBound(list, mem, fixed, val, false);
-        int hi = lowerBound(list, mem, fixed, val, true);
-        return ((long) lo << 32) | hi;
-    }
-
-    /** First index whose fixed-prefix is >= the target prefix (or > it when {@code strict}). */
-    private static int lowerBound(int[][] list, int[] mem, int fixed, int[] val, boolean strict) {
-        int lo = 0;
-        int hi = list.length;
-        while (lo < hi) {
-            int mid = (lo + hi) >>> 1;
-            int cmp = 0;
-            for (int pos = 0; pos < fixed && cmp == 0; pos++) {
-                cmp = Integer.compare(list[mid][pos], val[mem[pos]]);
-            }
-            if (cmp < 0 || (strict && cmp == 0)) lo = mid + 1; else hi = mid;
-        }
-        return lo;
-    }
-
     /** Sum of count(c, b) over the values b in {@code allowed} (all values if null) that agree with the fixed dimensions. */
     private BigInteger sumConsistent(int c, BitSet allowed, int k, int[] val) {
-        long r = range(c, k, val);
+        long r = plan.range(c, k, val);
         int lo;
         int hi;
         if (plan.members[c][0] >= k) {
@@ -181,7 +145,7 @@ final class ConstraintCounts {
     // ── primitive-long versions of the counting queries (used when lsuffix != null) ──
 
     private long sumConsistentL(int c, BitSet allowed, int k, int[] val) {
-        long r = range(c, k, val);
+        long r = plan.range(c, k, val);
         int lo;
         int hi;
         if (plan.members[c][0] >= k) {
