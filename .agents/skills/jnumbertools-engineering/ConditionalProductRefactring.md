@@ -59,7 +59,7 @@ The implementation has two distinct optimization targets. Do not optimize one by
 | `DP` | Feasibility-guided sequential traversal; exact counts are available for rank-range splitting and special operations | Required implementation; optimize setup and traversal for its workload, including cyclic/loop-heavy constraints |
 | `ADAPTIVE` | Named implementation policy; current dispatch maps to `PRUNED_BITSET` | Required API entry point. The algorithm selected for a workload and the selection criteria are not API guarantees and may change between versions. |
 
-**Retention rule: all four enum constants and their corresponding implementations must remain available throughout this work. No strategy is to be removed or deprecated as part of these work packages.** If a strategy performs poorly, improve its implementation and tests. Only after the complete flow is implemented and correctness-verified should the full benchmark suite be used to tune implementations, defaults, or the `ADAPTIVE` cutoff. Benchmark results may inform later maintainer decisions, but this plan does not authorize removing a strategy.
+**Retention rule: all four enum constants and their corresponding implementations must remain available throughout this work. No strategy is to be removed or deprecated as part of these work packages.** If a strategy performs poorly, improve its implementation and tests. Only after the complete flow is implemented and correctness-verified should the full benchmark suite be used to tune implementations and defaults, or to evaluate a genuinely adaptive policy if one is introduced. Benchmark results may inform later maintainer decisions, but this plan does not authorize removing a strategy.
 
 ADAPTIVE currently has no tuple-count cutoff: its `estimatedLimit` argument is validated but ignored for selection. The implementation currently dispatches to `PRUNED_BITSET`. Keep this as a maintainer implementation note, not a public API guarantee. The full-generation target is complete consumption, so benchmark coverage must include full traversal rather than infer the best strategy from first-N microbenchmarks.
 
@@ -185,7 +185,7 @@ Work after the original work packages is delivered in lettered phases. Each phas
 | C | `anyOrder()` splitting work threshold (`SPLIT_WORK_THRESHOLD`) and upper-bound `estimateSize()` | merged |
 | D | Setup cost at large sizes: measured; shared value-to-position index for rule compilation (`DimensionIndexes`), rules chained instead of copied in `Relation` | delivered, awaiting maintainer verification |
 | E | Added a 36-case generated matrix (dimensions 3, 5, 7, 10; sizes 10, 25, 50; DEAD_END, MANY_VALID, COMPLETE), preserved the 17 historical property cases, and moved BitSet-to-rule-list preparation outside timed methods | delivered; maintainer ran DEAD_END, CHAIN, MANY_VALID, COMPLETE (findings in §8, 2026-11-17 second entry). Follow-up: DEEP_DEAD_END and SMALL_DOMAIN topologies added, awaiting maintainer JMH run |
-| F | Strategy decisions from E: `ADAPTIVE` rule based on measured shape (for example loop blocks present means pruned), default choice, `PRUNED_DFS` tuning. No strategy is removed | not started |
+| F | Strategy decisions from E: default choice, `PRUNED_DFS` tuning, and whether to implement a genuinely adaptive policy. No strategy is removed and no workload-to-algorithm mapping is promised by the API | not started |
 | G | Optional: `anyOrder()` dimension reordering (most selective dimension first, values returned in original positions); only if E shows dead ends dominate | not started |
 | H | Counting speed at large sizes; test hardening (larger oracle shapes, concurrent first use) | not started |
 | I | README, benchmarks README, changelog, compact this file, single release | not started |
@@ -210,7 +210,7 @@ Update this table whenever an item changes status.
 ## 6. Open questions for the maintainer
 
 - Keep the new generator classes package-private in `...generator.product.conditional`, or move them into a subpackage?
-- Final default and the `ADAPTIVE` cutoff may be tuned after WP5; all four strategies remain available.
+- Final default may be tuned after WP5; all four strategies remain available. ADAPTIVE's internal policy may be improved, but its implementation mapping is not an API guarantee.
 - The benchmark code is currently concentrated in one Java class. The maintainer has agreed to defer its package/class decomposition until after the current benchmark results are analyzed.
 
 ## 7. Verification method
