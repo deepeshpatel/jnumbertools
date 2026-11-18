@@ -83,8 +83,8 @@ public final class Scenario {
     }
 
     /**
-     * Late conflict: dimension n-2 forces the last dimension into the lower half, while ~90% of the values of
-     * dimension n-3 force it into the upper half. Those prefixes are only found dead at the last dimension, so a
+     * Late conflict: dimension n-2 forces the last dimension into the lower half, while ~90% of the values
+     * dimension n-3 can take force it into the upper half (the rest stay valid, so the product is not empty). Those prefixes are only found dead at the last dimension, so a
      * traversal without lookahead explores the whole chain prefix before failing.
      */
     private static ScenarioData deepDeadEnd(int n, int size) {
@@ -93,7 +93,8 @@ public final class Scenario {
         for (int d = 0; d < n; d++) dimensions.add(IntStream.range(0, size).boxed().toList());
         int allowed = largestBranchingFactor(size, n - 1, 200_000L);
         int half = size / 2;
-        int killed = Math.max(1, (int) Math.floor(size * 0.9));
+        // ~90% of the values dimension n-3 can actually take (the chain limits it to [0,allowed)) are dead
+        int killed = Math.max(1, Math.min(allowed - 1, (int) Math.floor(allowed * 0.9)));
         List<Rule> rules = new ArrayList<>();
         for (int d = 0; d < n - 2; d++)
             rules.add(new Rule(d, range(0, size), d + 1, range(0, allowed)));
