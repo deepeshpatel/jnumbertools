@@ -163,6 +163,26 @@ class ConstraintPlanTierTest {
     }
 
     @Test
+    void loopLookaheadIsLimitedToPrefixesThatCutThroughAnAncestorBlock() throws Exception {
+        List<List<Integer>> dims = new ArrayList<>();
+        for (int d = 0; d < 5; d++) dims.add(values(d, 3));
+        // Dimensions 0, 2, and 3 form a loop block. Dimension 1 is a child of that block,
+        // so prefixes of length 2 and 3 fix a descendant before the whole block is assigned.
+        List<Rule> rules = List.of(
+                new Rule(0, dims.get(0), 1, dims.get(1)),
+                new Rule(0, dims.get(0), 2, dims.get(2)),
+                new Rule(0, dims.get(0), 3, dims.get(3)),
+                new Rule(2, dims.get(2), 3, dims.get(3)),
+                new Rule(3, dims.get(3), 4, dims.get(4)));
+        ConstraintPlan plan = planOf(build(dims, rules));
+
+        assertFalse(plan.needsCompletionLookahead(1), "no descendant has been fixed yet");
+        assertTrue(plan.needsCompletionLookahead(2), "dimension 1 is fixed while the loop block is incomplete");
+        assertTrue(plan.needsCompletionLookahead(3), "the loop block is still incomplete");
+        assertFalse(plan.needsCompletionLookahead(4), "the loop block is fully assigned");
+    }
+
+    @Test
     void randomRuleSetsAgreeWithBruteForceOnEveryDpPath() throws Exception {
         Random random = new Random(20261117L);
         for (int round = 0; round < 400; round++) {

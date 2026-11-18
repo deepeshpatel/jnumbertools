@@ -97,7 +97,10 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
 
             // A loop can leave a prefix pairwise-valid but with no globally valid completion.
             // The feasibility tier rejects that prefix before exploring its remaining suffix.
-            if (lookaheadPlan != null && !lookaheadPlan.hasCompletion(depth + 1, val)) {
+            int prefixLength = depth + 1;
+            if (lookaheadPlan != null
+                    && lookaheadPlan.needsCompletionLookahead(prefixLength)
+                    && !lookaheadPlan.hasCompletion(prefixLength, val)) {
                 continue;
             }
 

@@ -202,6 +202,24 @@ final class ConstraintPlan {
         return result;
     }
 
+    /**
+     * Whether prefix length {@code k} cuts through a loop block after one of its descendant
+     * dimensions has already been fixed. Only then can pairwise-valid assignments in the
+     * prefix hide a conflict between the partially fixed loop block and its fixed descendants.
+     */
+    boolean needsCompletionLookahead(int k) {
+        if (k <= 0 || k >= dimensions) return false;
+        for (int v = 0; v < members.length; v++) {
+            int[] nodeMembers = members[v];
+            if (nodeMembers.length > 1
+                    && nodeMembers[nodeMembers.length - 1] >= k
+                    && minChildSub[v] < k) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** Whether the counting tier has been built (for tests of the lazy tiering). */
     boolean countsBuilt() {
         return countsTier != null;
