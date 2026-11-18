@@ -282,12 +282,14 @@ benchmark result files. Read this section before proposing another optimization.
 5. Do not silently reverse a decision. Record the new evidence and identify the decision it
    supersedes.
 
-### Default lexicographic strategy and topology-aware lookahead
+### Default lexicographic strategy and work-triggered lookahead
 
 - **Change:** The current implementation makes `PRUNED_BITSET` the default for
-  `lexOrder()`. It applies prefix pruning and uses topology-triggered feasibility lookahead
-  when the constraint graph contains a loop block. `PRUNED_DFS` uses the corresponding
-  lookahead with dense boolean relation rows.
+  `lexOrder()`. It applies prefix pruning and lazily enables feasibility lookahead after traversal work
+  indicates substantial dead-end exploration. The trigger is based on descents relative to
+  emitted tuples, not graph topology, so it can help with looped and acyclic dead ends.
+  `PRUNED_DFS` uses the same lookahead control flow with dense boolean relation rows when
+  that representation fits the memory limit.
 - **Benchmark:** The uploaded historical `CHAIN`, `MANY_VALID`, and `COMPLETE` runs
   used the earlier shape-parameterized benchmark. The later focused JSON run used JMH 1.37,
   OpenJDK 26.0.1, one 200 ms warmup, one 200 ms measurement, one fork, and 14 scenarios.
@@ -307,7 +309,7 @@ benchmark result files. Read this section before proposing another optimization.
   unified, current-source comparison across the full workload matrix.
 - **Revisit when:** A full multi-fork run of the consolidated benchmark compares current
   implementations across representative topologies, and an isolated before/after run measures
-  the incremental benefit and cost of topology-aware lookahead.
+  the incremental benefit and cost of work-triggered lookahead.
 
 ### DP on deep-dead-end workloads
 
@@ -357,9 +359,10 @@ benchmark result files. Read this section before proposing another optimization.
 
 ### ADAPTIVE behavior and API description
 
-- **Change:** The current `ADAPTIVE` entry point resolves to `PRUNED_BITSET` with
-  topology-triggered lookahead. Its `estimatedLimit` argument is validated but does not
-  choose between DP and prefix pruning.
+- **Change:** The current `ADAPTIVE` entry point resolves to `PRUNED_BITSET`. The shared
+  pruned traversal lazily enables work-triggered feasibility lookahead; this trigger is not
+  based on graph topology. Its `estimatedLimit` argument is validated but does not affect
+  strategy selection.
 - **Benchmark:** Older shape-parameterized runs reported ADAPTIVE as the lowest-time
   implementation in selected CHAIN, MANY_VALID, and COMPLETE cases. The later focused
   run included ADAPTIVE, but it was a short one-fork screening run.
@@ -367,9 +370,11 @@ benchmark result files. Read this section before proposing another optimization.
   and do not establish that the current ADAPTIVE entry point is an independent adaptive
   selector. The current implementation's behavior is determined by the source, not by
   historical benchmark labels.
-- **Decision:** Keep the API behavior as currently implemented, but document clearly that
-  `estimatedLimit` does not select DP versus prefix pruning. Do not claim that ADAPTIVE
-  dynamically chooses the fastest strategy.
+- **Decision:** Treat ADAPTIVE as an implementation policy, not a promise that a particular
+  algorithm is used for a particular workload or condition. Its internal selection policy may
+  change between versions. Record the actual dispatch in this maintainer decision log; at this
+  revision it maps to `PRUNED_BITSET`, and `estimatedLimit` is validated but ignored for selection.
+  Do not claim that ADAPTIVE dynamically chooses the fastest strategy.
 - **Status:** Implementation behavior is explicit; performance rationale is not confirmed.
 - **Revisit when:** A genuinely adaptive policy is implemented and benchmarked against
   explicit BitSet and DP on the same current-source scenario matrix.
