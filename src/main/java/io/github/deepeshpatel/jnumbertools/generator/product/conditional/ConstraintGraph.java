@@ -53,20 +53,6 @@ final class ConstraintGraph {
     }
 
     /**
-     * Whether the constraint graph contains a loop block. This uses only the graph topology and does
-     * not enumerate any value combinations or construct a constraint plan.
-     */
-    static boolean hasLoopBlock(int n, Collection<Long> keys) {
-        int[] block = blockOf(n, keys);
-        boolean[] seen = new boolean[n];
-        for (int b : block) {
-            if (seen[b]) return true;
-            seen[b] = true;
-        }
-        return false;
-    }
-
-    /**
      * Groups the dimensions: two dimensions are in the same block when rules link them through a loop
      * (an edge that lies on a cycle). Dimensions linked only by single "bridge" rules stay apart, so the
      * blocks and the bridges between them form a forest. Returns, per dimension, the lowest dimension

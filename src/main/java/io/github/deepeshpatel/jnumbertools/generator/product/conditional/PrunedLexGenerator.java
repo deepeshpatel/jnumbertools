@@ -16,7 +16,19 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
     protected final ConstraintModel model;
     protected final int dimensions;
     protected final int[] val;
-    private final ConstraintPlan lookaheadPlan;
+    /**
+     * Completion lookahead (feasibility tier). Pairwise pruning cannot see a prefix that is consistent so far but has
+     * no valid completion (a loop, or a rule between distant dimensions that no value combination can satisfy), and
+     * enumerates the free dimensions below it before failing. Checking every candidate costs more than it saves when
+     * few prefixes are dead, so lookahead starts off and is switched on once the traversal has descended far more
+     * often than it has produced tuples. Building the feasibility plan is then worth its cost, and an empty plan ends
+     * the traversal at once.
+     */
+    private ConstraintPlan lookaheadPlan;
+    private long descents;
+    private long emitted;
+    private static final long WASTE_FLOOR = 1024;
+    private static final long WASTE_RATIO = 4;
     private final int[] nextCandidate;
     private final int[] candidateLimit;
     private int depth;
@@ -35,7 +47,6 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
     PrunedLexGenerator(ConstraintModel model, int[] prefix, int candidateFrom, int candidateTo) {
         this.model = model;
         this.dimensions = model.dimensions.size();
-        this.lookaheadPlan = model.completionLookaheadUseful() ? model.plan() : null;
         if (prefix.length >= dimensions) {
             throw new IllegalArgumentException("A traversal prefix must leave at least one dimension");
         }
@@ -62,6 +73,11 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
         nextCandidate[baseDepth] = candidateFrom;
         candidateLimit[baseDepth] = candidateTo;
         if (candidateFrom == candidateTo) exhausted = true;
+    }
+
+    /** Whether completion lookahead is active (for tests). */
+    final boolean lookaheadEnabled() {
+        return lookaheadPlan != null;
     }
 
     @Override
@@ -93,14 +109,17 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
 
             val[depth] = candidate;
             nextCandidate[depth] = candidate + 1;
-            if (depth == dimensions - 1) return true;
+            if (depth == dimensions - 1) {
+                emitted++;
+                return true;
+            }
+            if (lookaheadPlan == null && ++descents > WASTE_FLOOR + WASTE_RATIO * emitted) {
+                lookaheadPlan = model.plan();
+                if (lookaheadPlan.isEmpty()) return false;
+            }
 
-            // A loop can leave a prefix pairwise-valid but with no globally valid completion.
-            // The feasibility tier rejects that prefix before exploring its remaining suffix.
-            int prefixLength = depth + 1;
-            if (lookaheadPlan != null
-                    && lookaheadPlan.needsCompletionLookahead(prefixLength)
-                    && !lookaheadPlan.hasCompletion(prefixLength, val)) {
+            // The feasibility tier rejects a prefix with no valid completion before its suffix is explored.
+            if (lookaheadPlan != null && !lookaheadPlan.hasCompletion(depth + 1, val)) {
                 continue;
             }
 
