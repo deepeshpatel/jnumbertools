@@ -343,13 +343,12 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      *
      * <p>This is the default and recommended strategy for ordinary traversal, especially when the caller
      * expects to consume only part of the result. It checks constraints against the selected prefix and,
-     * when the constraint graph contains a loop block, uses the feasibility tier to reject prefixes that
-     * cannot have a valid completion. It does not build exact completion counts.</p>
+     * lazily enables feasibility lookahead when traversal work indicates that pairwise prefix pruning has
+     * explored substantial dead-end work. This can help with looped and acyclic constraint graphs. It does not build exact completion counts.</p>
      *
      * <p>Use {@link #lexOrder(LexOrderStrategy)} to select {@link LexOrderStrategy#DP} explicitly, or
-     * {@link #lexOrder(LexOrderStrategy, long)} to select the topology-aware
-     * {@link LexOrderStrategy#ADAPTIVE} entry point. The estimate is currently retained for API
-     * compatibility and does not change the selected prefix-pruning implementation.</p>
+     * {@link #lexOrder(LexOrderStrategy, long)} to use the {@link LexOrderStrategy#ADAPTIVE} policy.
+     * Lookahead activation details are implementation choices, not API guarantees.</p>
      *
      * @return a re-iterable generator of valid tuples in lexicographic order
      */
@@ -363,11 +362,10 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      *
      * <ul>
      *   <li>{@link LexOrderStrategy#PRUNED_BITSET}: performs prefix-based backtracking using compact
-     *       relation rows. For acyclic constraint graphs it avoids constructing the constraint plan; when
-     *       the graph contains a loop block it also uses the plan's feasibility tier to reject prefixes
-     *       that cannot have a valid completion. It is the default strategy.</li>
-     *   <li>{@link LexOrderStrategy#PRUNED_DFS}: uses the same topology-triggered feasibility lookahead
-     *       with dense boolean relation rows when that representation fits the memory limit; otherwise
+     *       relation rows and lazily enables feasibility lookahead after substantial dead-end work. It is
+     *       the default strategy.</li>
+     *   <li>{@link LexOrderStrategy#PRUNED_DFS}: uses the same prefix-pruned traversal and lazy work-triggered feasibility lookahead, with dense
+     *       boolean relation rows when that representation fits the memory limit; otherwise
      *       it falls back to {@code PRUNED_BITSET}.</li>
      *   <li>{@link LexOrderStrategy#DP}: uses the feasibility tier to find the next valid value during
      *       sequential traversal. Its parallel spliterator uses exact completion counts to partition
@@ -376,8 +374,10 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * </ul>
      *
      * <p>{@link LexOrderStrategy#ADAPTIVE} must be selected with
-     * {@link #lexOrder(LexOrderStrategy, long)}. The estimate is validated but currently does not
-     * select a different traversal strategy; ADAPTIVE resolves to topology-aware BitSet prefix pruning.</p>
+     * {@link #lexOrder(LexOrderStrategy, long)}. ADAPTIVE is an implementation policy: the API does not guarantee which internal algorithm is used
+     * for any workload or which conditions drive that choice. Those details may change between versions.
+     * In this version it resolves to {@code PRUNED_BITSET}; the estimate is validated but does not affect
+     * strategy selection.</p>
      *
      * <p>This setting affects only this lexicographic traversal. Exact-count and rank-based operations,
      * including {@link #count()}, {@link #lexOrderMth(BigInteger, BigInteger)}, {@link #byRanks(Iterable)},
@@ -397,19 +397,19 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     }
 
     /**
-     * Returns the valid tuples in lexicographic order using the topology-aware prefix-pruning
-     * implementation exposed by {@link LexOrderStrategy#ADAPTIVE}.
+     * Returns the valid tuples in lexicographic order using the implementation policy exposed by
+     * {@link LexOrderStrategy#ADAPTIVE}.
      *
-     * <p>This policy uses prefix pruning and enables feasibility lookahead only when the constraint
-     * graph contains a loop block. It does not choose between DP and prefix pruning based on the
-     * estimated traversal size. Select {@link LexOrderStrategy#DP} explicitly to use the DP traversal
-     * strategy.</p>
+     * <p>ADAPTIVE does not guarantee a particular internal algorithm or a mapping from workload
+     * conditions to algorithms. Its selection policy may change between versions. In this version,
+     * it resolves to {@code PRUNED_BITSET}; select {@link LexOrderStrategy#DP} explicitly when the DP
+     * traversal is required.</p>
      *
-     * <p>{@code estimatedLimit} is retained for API compatibility and validated as non-negative. It
-     * does not affect traversal strategy selection or limit the number of tuples produced.</p>
+     * <p>{@code estimatedLimit} is validated as non-negative but currently does not affect strategy
+     * selection or limit the number of tuples produced.</p>
      *
      * @param strategy must be {@link LexOrderStrategy#ADAPTIVE}
-     * @param estimatedLimit retained for API compatibility; must be non-negative and does not affect strategy selection
+     * @param estimatedLimit non-negative estimate; currently validated but not used for strategy selection
      * @return a re-iterable generator of valid tuples in lexicographic order
      * @throws NullPointerException if {@code strategy} is null
      * @throws IllegalArgumentException if the strategy is not {@code ADAPTIVE} or the estimate is negative
