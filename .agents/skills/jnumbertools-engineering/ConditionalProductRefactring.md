@@ -172,7 +172,7 @@ These deliverables are intentionally postponed until implementation, parallel wo
 
 - [x] 6.1 Added practical dimension-ordering guidance to `ConditionalProductBuilder` Javadocs: explain when pairwise constraints become evaluable, how selective dimensions can prune downstream work, why dependency order matters, and the SQL join-order/predicate-placement analogy. Guidance for `anyOrder()` parallel execution is deliberately deferred until that API and its measured behavior exist.
 - [ ] 6.2 Documentation: update the main README, benchmarks README, and changelog to reflect the final API, behavior, benchmark methodology, and measured results.
-- [ ] 6.3 Final benchmark decisions: use the complete benchmark evidence to tune implementations, defaults, and the ADAPTIVE cutoff where justified. Record the final results and rationale. Never remove or deprecate a strategy.
+- [ ] 6.3 Final benchmark decisions: use the complete benchmark evidence to tune implementations and defaults, and decide whether a genuinely adaptive dispatch policy is justified. Record the actual implementation in this maintainer plan without promising a workload-to-algorithm mapping in the public API. Never remove or deprecate a strategy.
 
 ## 4B. Phase roadmap (A to I)
 
