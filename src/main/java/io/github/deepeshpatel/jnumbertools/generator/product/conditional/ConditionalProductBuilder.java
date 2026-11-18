@@ -65,8 +65,9 @@ import java.util.Random;
  * product and discards those that violate a rule.
  * Ordinary {@link #lexOrder()} traversal defaults to {@link LexOrderStrategy#PRUNED_BITSET}; callers can select
  * {@link LexOrderStrategy#DP} explicitly or use {@link LexOrderStrategy#ADAPTIVE} with a non-negative estimate.
- * ADAPTIVE currently resolves to topology-aware BitSet prefix pruning; the estimate is retained for API
- * compatibility and does not select between traversal strategies.
+ * ADAPTIVE is an implementation policy, not a promise about which algorithm is selected for a given workload.
+ * Its internal selection and selection criteria may change between versions. In this version it resolves to
+ * {@link LexOrderStrategy#PRUNED_BITSET}; the estimate is validated but does not affect that choice.
  * Exact counting and rank-based operations use the DP plan, regardless of the lexicographic traversal strategy. Ranks are positions among the valid tuples in lexicographic order (dimension order,
  * then the order of each list). They change when rules change.</p>
  *
@@ -364,8 +365,9 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      *   <li>{@link LexOrderStrategy#PRUNED_BITSET}: performs prefix-based backtracking using compact
      *       relation rows and lazily enables feasibility lookahead after substantial dead-end work. It is
      *       the default strategy.</li>
-     *   <li>{@link LexOrderStrategy#PRUNED_DFS}: uses the same prefix-pruned traversal and lazy work-triggered feasibility lookahead, with dense
-     *       boolean relation rows when that representation fits the memory limit; otherwise
+     *   <li>{@link LexOrderStrategy#PRUNED_DFS}: uses the same prefix-pruned traversal and lazy
+     *       work-triggered feasibility lookahead, with dense boolean relation rows when that
+     *       representation fits the memory limit; otherwise
      *       it falls back to {@code PRUNED_BITSET}.</li>
      *   <li>{@link LexOrderStrategy#DP}: uses the feasibility tier to find the next valid value during
      *       sequential traversal. Its parallel spliterator uses exact completion counts to partition
@@ -374,8 +376,9 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * </ul>
      *
      * <p>{@link LexOrderStrategy#ADAPTIVE} must be selected with
-     * {@link #lexOrder(LexOrderStrategy, long)}. ADAPTIVE is an implementation policy: the API does not guarantee which internal algorithm is used
-     * for any workload or which conditions drive that choice. Those details may change between versions.
+     * {@link #lexOrder(LexOrderStrategy, long)}. ADAPTIVE is an implementation policy: the API does not
+     * guarantee which internal algorithm is used for any workload or which conditions drive that choice.
+     * Those details may change between versions.
      * In this version it resolves to {@code PRUNED_BITSET}; the estimate is validated but does not affect
      * strategy selection.</p>
      *
