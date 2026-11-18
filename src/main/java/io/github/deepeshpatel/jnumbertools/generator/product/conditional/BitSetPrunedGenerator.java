@@ -34,41 +34,64 @@ final class BitSetPrunedGenerator extends PrunedLexGenerator {
 
     static int nextValidCandidate(ConstraintModel model, int[] prefix, int dimension, int from) {
         ConstraintModel.Rows relationRows = model.rows();
-        int[] earlier = relationRows.belowDims[dimension];
-        int size = model.dimensions.get(dimension).size();
-        if (from >= size) return -1;
-        if (earlier.length == 0) return from;
-
-        BitSet[][] rows = relationRows.belowRows[dimension];
-        BitSet firstAllowed = rows[0][prefix[earlier[0]]];
-        candidateLoop:
-        for (int candidate = firstAllowed.nextSetBit(from);
-             candidate >= 0 && candidate < size;
-             candidate = firstAllowed.nextSetBit(candidate + 1)) {
-            for (int i = 1; i < earlier.length; i++) {
-                if (!rows[i][prefix[earlier[i]]].get(candidate)) continue candidateLoop;
-            }
-            return candidate;
-        }
-        return -1;
+        return nextValidCandidate(
+                relationRows.belowDims[dimension],
+                relationRows.belowRows[dimension],
+                prefix,
+                model.dimensions.get(dimension).size(),
+                from);
     }
 
     @Override
     protected int nextValidCandidate(int dimension, int from) {
-        int size = model.dimensions.get(dimension).size();
-        if (from >= size) return -1;
+        return nextValidCandidate(
+                belowDims[dimension],
+                belowRows[dimension],
+                val,
+                model.dimensions.get(dimension).size(),
+                from);
+    }
 
-        int[] earlier = belowDims[dimension];
+    /**
+     * Iterates candidates from the most selective relation row.
+     * Intersecting the constraints is order-independent; nextSetBit keeps
+     * candidates in ascending order.
+     */
+    private static int nextValidCandidate(
+            int[] earlier, BitSet[][] rows, int[] prefix, int size, int from) {
+        if (from >= size) return -1;
         if (earlier.length == 0) return from;
 
-        BitSet[][] rows = belowRows[dimension];
-        BitSet firstAllowed = rows[0][val[earlier[0]]];
+        BitSet pivot = rows[0][prefix[earlier[0]]];
+        if (earlier.length == 1) {
+            int candidate = pivot.nextSetBit(from);
+            return candidate >= 0 && candidate < size ? candidate : -1;
+        }
+
+        int pivotIndex = 0;
+        int smallestCardinality = pivot.cardinality();
+        for (int i = 1; i < earlier.length; i++) {
+            BitSet allowed = rows[i][prefix[earlier[i]]];
+            int cardinality = allowed.cardinality();
+            if (cardinality < smallestCardinality) {
+                pivot = allowed;
+                pivotIndex = i;
+                smallestCardinality = cardinality;
+                if (cardinality == 0) return -1;
+            }
+        }
+
+        if (smallestCardinality == 0) return -1;
+
         candidateLoop:
-        for (int candidate = firstAllowed.nextSetBit(from);
+        for (int candidate = pivot.nextSetBit(from);
              candidate >= 0 && candidate < size;
-             candidate = firstAllowed.nextSetBit(candidate + 1)) {
-            for (int i = 1; i < earlier.length; i++) {
-                if (!rows[i][val[earlier[i]]].get(candidate)) continue candidateLoop;
+             candidate = pivot.nextSetBit(candidate + 1)) {
+            for (int i = 0; i < earlier.length; i++) {
+                if (i == pivotIndex) continue;
+                if (!rows[i][prefix[earlier[i]]].get(candidate)) {
+                    continue candidateLoop;
+                }
             }
             return candidate;
         }
