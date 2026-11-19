@@ -63,6 +63,69 @@ The implementation has two distinct optimization targets. Do not optimize one by
 
 The current adaptive threshold (10,000 tuples) is provisional. The full-generation target is complete consumption, so benchmark coverage must include full traversal rather than infer the best strategy from first-N microbenchmarks.
 
+## 1B. Future direction: compile once, execute multiple times
+
+### Motivation
+
+Explore a reusable `CompiledProduct` abstraction that separates product definition from product execution.
+
+All three Cartesian product builders — **Simple**, **Constrained**, and **Conditional** — should eventually expose a `.compile()` method that produces a reusable compiled representation.
+
+This direction is motivated by a common application workload: the same product structure and rules are applied repeatedly to different input datasets. The definition remains stable while the concrete values change between executions. Compiling the definition once and binding new data for each execution could avoid repeating structural analysis and other reusable preparation.
+
+The intended usage follows the general model of Java regular expressions:
+
+- `Pattern.compile(...)` prepares a reusable pattern.
+- `Pattern.matcher(input)` applies that pattern to different input data.
+
+Similarly, a compiled product would represent the reusable product definition, while binding would supply the concrete dimension data for one execution. This could make the library's performance advantages more apparent in repeated application workloads compared with rebuilding equivalent stream/filter pipelines for every dataset.
+
+### Illustrative API (not a final design)
+
+The following example communicates the intended direction only. Class names, method names, types, and signatures are provisional.
+
+```java
+// Compile once: define dimensions and rules without concrete value lists.
+CompiledConditionalProduct plan = JNumberTools.cartesianProduct()
+    .conditionalProduct()
+    .dim("os")
+    .dim("browser")
+    .dim("network")
+    .when("browser").is("Safari")
+        .then("os").isOneOf("macOS")
+    .when("network").is("4G")
+        .then("os").isNoneOf("Linux")
+    .compile();
+
+// Reuse the compiled plan with different datasets.
+void handle(List<?> os, List<?> browser, List<?> network) {
+    var result = plan.bind(os, browser, network);
+
+    long n = result.count();              // Exact count without generating the full product.
+    result.lexOrder().forEach(...);       // Other traversal operations may also be available.
+}
+```
+
+### Expected benefits
+
+- **Amortized preparation:** perform structural analysis and reusable preparation once instead of repeating it for every dataset.
+- **Lower repeated-execution overhead:** bind new data without reconstructing the product definition.
+- **Application-oriented performance:** target workloads that repeatedly apply the same rules to changing datasets, where setup cost can materially affect the comparison with Java streams and filters.
+- **Separation of concerns:** keep product definitions and rules independent of concrete input data.
+- **Reusable plans:** allow one compiled definition to serve multiple independent executions, subject to appropriate immutability and thread-safety guarantees.
+
+### Architectural considerations
+
+Keep these conceptual stages distinct:
+
+1. **Compilation:** resolve dimension definitions, process rules, validate the definition, and prepare reusable structural information.
+2. **Binding:** accept concrete datasets, validate and snapshot inputs as required, build data-dependent indexes or structures, and create an execution instance.
+3. **Execution:** perform counting, ranking, unranking, and tuple traversal against the bound data.
+
+The compiled definition should not retain concrete input datasets or mutable state belonging to an individual execution. Bound executions should be independent; the compiled plan should be reusable and, if designed as immutable, safely shareable.
+
+**This section records an architectural direction for future development, not an approved implementation specification.** AI assistants working on this engineering plan should take this direction into account when proposing changes, but must not treat the illustrative API or class names as finalized. Evaluate the design against all three existing product builders, current generator/model boundaries, data-dependent preparation costs, and measured performance before implementation.
+
 ## 2. Target design
 
 ```
@@ -224,6 +287,8 @@ Update this table whenever an item changes status.
 - Unit tests live next to the existing ones in `ConditionalProductBuilderTest`, `ConditionalProductRuleOrderTest`, and a new differential test per generator.
 
 ## 8. Progress log (newest first)
+
+- 2026-11-19: Recorded a future architectural direction for a reusable compiled-product abstraction. The Simple, Constrained, and Conditional product builders should eventually support `.compile()`; a compiled definition would be bound to different datasets for repeated executions, following the compile-once/apply-many model of Java regular expressions. Added an illustrative conditional-product API and separated compilation, binding, and execution responsibilities. This is a design hint for future AI-assisted work, not a finalized API or implementation mandate.
 
 - 2026-11-19 (L results): Maintainer ran the `special` preset (JMH 1.37, OpenJDK 26.0.1, one fork, 3 x 100 ms warmup, 5 x 100 ms measurement; environment file not supplied). Library beat enumeration by about 13x to 78x on count, lexOrderMth, byRanks, choice and sample for CHAIN, MANY_VALID, SMALL_DOMAIN and DEEP_DEAD_END; handled 1e39 tuples in 0.2 to 1.9 ms (sample 0.5 to 11.5 ms). Enumeration won `isEmpty` everywhere (biased: all bounded workloads are non-empty, so enumeration stops at the first tuple; an empty-product workload is needed) and won every rank and sampling operation on DEAD_END-5x25 (library 0.54x to 0.65x). Allocation is the main cost: `count` allocates 66 KB to 1.1 MB per call on bounded workloads and 1.5 MB to 13 MB on LARGE; `sample` allocates 24 MB (20x50) and 57 MB (20x100). Findings feed item 8 (counting speed): table construction allocation, `sample`, and fixed setup cost on small products. Summary table added to the benchmarks README (screening quality).
 
