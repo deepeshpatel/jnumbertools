@@ -48,6 +48,7 @@ fi
 BASE_SHORT="$(git rev-parse --short "$BASE_SHA")"
 
 # Build one tree and run the preset there; the JMH JSON, log and environment file are copied to $OUT.
+# For the local tree the files are already in $OUT, so nothing is copied (cp would fail on identical files).
 run_tree() {
   local dir="$1" label="$2"
   echo
@@ -60,7 +61,7 @@ run_tree() {
     CMD="$(java -cp "$CP" "$GEN" --print "$PRESET" "$label-$STAMP")" &&
     echo "$CMD" &&
     bash -c "set -o pipefail; $CMD" &&
-    cp benchmark-results/"$label-$STAMP".* "$OUT"/
+    { [ "$dir" = "$ROOT" ] || cp benchmark-results/"$label-$STAMP".* "$OUT"/; }   # <-- the fix
   )
 }
 
