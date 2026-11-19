@@ -9,12 +9,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Lexicographic iterator that uses exact DP completion counts to skip prefixes
- * that cannot lead to a valid tuple.
+ * Lexicographic iterator that uses boolean feasibility lookahead to skip
+ * prefixes that cannot lead to a valid tuple.
  *
  * <p>The iterator preserves the dimension order and candidate order of the
- * prefix-pruned generators. The counting plan is shared by the model and is
- * constructed lazily when this generator is requested.</p>
+ * prefix-pruned generators. It uses the feasibility tier of the constraint
+ * plan to test whether a candidate can be completed. This tier uses
+ * precomputed feasibility bit sets and does not require the exact completion
+ * counts maintained by the separate, lazily initialized counting tier.</p>
  */
 final class DpLexGenerator implements Iterator<List<Object>> {
     private final ConstraintPlan plan;
