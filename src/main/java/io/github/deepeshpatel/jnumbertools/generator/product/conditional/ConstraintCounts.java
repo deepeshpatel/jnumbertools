@@ -238,15 +238,20 @@ final class ConstraintCounts {
             // no fixed dimension below c's children: every value counts exactly free[c][b]
             return this.freePrefix[c][hi].subtract(this.freePrefix[c][lo]);
         }
-        BigInteger sum = BigInteger.ZERO;
+        // the first term is taken as it is: a single agreeing value (every fixed node) then allocates nothing here
+        BigInteger sum = null;
         if (allowed == null) {
-            for (int b = lo; b < hi; b++) sum = sum.add(count(c, b, k, val));
+            for (int b = lo; b < hi; b++) {
+                BigInteger term = count(c, b, k, val);
+                sum = sum == null ? term : sum.add(term);
+            }
         } else {
             for (int b = allowed.nextSetBit(lo); b >= 0 && b < hi; b = allowed.nextSetBit(b + 1)) {
-                sum = sum.add(count(c, b, k, val));
+                BigInteger term = count(c, b, k, val);
+                sum = sum == null ? term : sum.add(term);
             }
         }
-        return sum;
+        return sum == null ? BigInteger.ZERO : sum;
     }
 
     /** True when a uniformly random point of the full product is valid with probability at least 1/4. */
@@ -317,7 +322,7 @@ final class ConstraintCounts {
         for (int i = 0; i < fixedRoots; i++) {
             BigInteger c = sumConsistent(plan.roots[i], null, k, val);
             if (c.signum() == 0) return BigInteger.ZERO;
-            result = result.multiply(c);
+            result = result.equals(BigInteger.ONE) ? c : result.multiply(c);
         }
         return result;
     }
@@ -325,14 +330,14 @@ final class ConstraintCounts {
     /** Ways to choose v's subtree when v has value a, with dimensions below k fixed. */
     private BigInteger count(int v, int a, int k, int[] val) {
         if (plan.minSub[v] >= k) return this.free[v][a];
-        BigInteger result = BigInteger.ONE;
+        BigInteger result = null;
         for (int c : plan.children[v]) {
             BitSet allowed = plan.fromParent[c][a];
             BigInteger s = plan.minSub[c] >= k ? this.msg[c][a] : sumConsistent(c, allowed, k, val);
             if (s.signum() == 0) return BigInteger.ZERO;
-            result = result.multiply(s);
+            result = result == null ? s : result.multiply(s);
         }
-        return result;
+        return result == null ? BigInteger.ONE : result;
     }
 
     boolean hasCompletion(int k, int[] val) {

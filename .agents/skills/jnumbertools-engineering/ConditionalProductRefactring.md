@@ -384,3 +384,9 @@ Update this table whenever an item changes status.
 - 2026-11-19 (H1): item 8 first step. `ConstraintCounts` long-first construction with BigInteger fallback, shared
   row sums, prefix sums for single-run rows. count() allocation on LARGE shapes 1.5-13 MB -> 0.1-0.6 MB (sandbox).
   Open: `sample` at counts above 2^62 (21-45 MB per call), small-product setup cost, empty-product isEmpty workload.
+- 2026-11-19 (H1 confirmed, H3): H1 pushed as 73e253b. JMH special: LARGE count 5x-11x faster, choice/byRanks up to 10x/4x,
+  sample only 0.7-0.8x. H3: BigInteger counting queries skip identity multiply/add; sandbox sample allocation at
+  20x50 21.5 -> 2.0 MB, 20x100 44.7 -> 4.1 MB. Awaiting JMH confirmation. Open: small-product setup cost, empty-product isEmpty workload.
+- 2026-11-19 (H1 confirmed, H3): H1 pushed as 73e253b. JMH special: LARGE count 5x-11x faster, choice/byRanks up to 10x/4x,
+  sample only 0.7-0.8x. H3: BigInteger counting queries skip identity multiply/add; sandbox sample allocation at
+  20x50 21.5 -> 2.0 MB, 20x100 44.7 -> 4.1 MB. Awaiting JMH confirmation. Open: small-product setup cost, empty-product isEmpty workload.

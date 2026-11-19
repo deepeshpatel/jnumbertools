@@ -527,3 +527,35 @@ Sandbox allocation per `count()` call (indicative, not JMH): LARGE-10x50 111 KB,
 LARGE-20x100 635 KB (before: 1.5 MB to 13 MB). `sample` on LARGE-20x50 and 20x100 is still 21 MB and 45 MB per call
 because those counts exceed a long and each of the 50 unranks walks BigInteger completions; that is the next target.
 Please confirm with `scripts/benchmark-compare.sh <SHA> quick` or the `special` preset.
+
+### H1 results (JMH `special` preset, smoke settings, before versus H1)
+
+Bounded shapes: 5 faster, 0 slower, 38 same, 17 inconclusive; ENUMERATION controls within about 5%.
+Large shapes (LIBRARY): `count` 205 -> 23 us (10x50), 431 -> 85 us (20x50), 1,507 -> 139 us (20x100);
+`choice` 1,529 -> 152 us and `byRanks` 1,757 -> 429 us at 20x100; `isEmpty` unchanged. `sample` improved only
+0.67x to 0.81x (4.6 ms at 20x50, 9.3 ms at 20x100 for 50 ranks).
+
+## Unrank without identity big-integer operations (patch h3)
+
+The BigInteger counting queries no longer multiply by the neutral ONE or add to ZERO: the first factor or term is
+taken as it is. A fixed node has exactly one agreeing value, so the per-candidate walk up the fixed chain now allocates
+almost nothing. Sandbox allocation per call (indicative, not JMH): `sample` LARGE-20x50 21.5 MB -> 2.0 MB and
+20x100 44.7 MB -> 4.1 MB; `byRanks` 1.47 MB -> 0.52 MB and 1.97 MB -> 0.84 MB. Output is unchanged.
+Still open: the small-product setup cost (`byRanks`/`sample` on DEAD_END-5x25 lose to enumeration), and an
+empty-product `isEmpty` workload.
+
+### H1 results (JMH `special` preset, smoke settings, before versus H1)
+
+Bounded shapes: 5 faster, 0 slower, 38 same, 17 inconclusive; ENUMERATION controls within about 5%.
+Large shapes (LIBRARY): `count` 205 -> 23 us (10x50), 431 -> 85 us (20x50), 1,507 -> 139 us (20x100);
+`choice` 1,529 -> 152 us and `byRanks` 1,757 -> 429 us at 20x100; `isEmpty` unchanged. `sample` improved only
+0.67x to 0.81x (4.6 ms at 20x50, 9.3 ms at 20x100 for 50 ranks).
+
+## Unrank without identity big-integer operations (patch h3)
+
+The BigInteger counting queries no longer multiply by the neutral ONE or add to ZERO: the first factor or term is
+taken as it is. A fixed node has exactly one agreeing value, so the per-candidate walk up the fixed chain now allocates
+almost nothing. Sandbox allocation per call (indicative, not JMH): `sample` LARGE-20x50 21.5 MB -> 2.0 MB and
+20x100 44.7 MB -> 4.1 MB; `byRanks` 1.47 MB -> 0.52 MB and 1.97 MB -> 0.84 MB. Output is unchanged.
+Still open: the small-product setup cost (`byRanks`/`sample` on DEAD_END-5x25 lose to enumeration), and an
+empty-product `isEmpty` workload.
