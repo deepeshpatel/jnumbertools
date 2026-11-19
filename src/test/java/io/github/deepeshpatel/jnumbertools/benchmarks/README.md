@@ -516,46 +516,54 @@ generation before changing default strategy selection.
 | Historical topology results | Retain as topology-specific evidence; do not compare across benchmark generations without equivalent setup. | Re-run under the consolidated benchmark with environment metadata. |
 
 
-## Counting tier construction (patch h1)
 
-`ConstraintCounts` now builds its tables in primitive longs first (checked against 2^62) and falls back to the
-BigInteger tables only when some count does not fit. Equal relation rows share one sum per child, and a row that is a
-single run of values is summed from prefix sums. Results are identical; the BigInteger path is covered by
-`ConstraintPlanTierTest` (12 dimensions of 60 values, count above 2^62, rank checked against the mixed-radix closed form).
+## Counting tier (patches H1 and H3)
+
+### H1: long-first table construction
+
+`ConstraintCounts` builds its tables in primitive longs first (checked against 2^62) and falls back to the BigInteger
+tables only when some count does not fit. Equal relation rows share one sum per child, and a row that is a single run
+of values is summed from prefix sums. Results are identical; the BigInteger path is covered by `ConstraintPlanTierTest`
+(12 dimensions of 60 values, count above 2^62, rank checked against the mixed-radix closed form).
 
 Sandbox allocation per `count()` call (indicative, not JMH): LARGE-10x50 111 KB, LARGE-20x50 422 KB,
-LARGE-20x100 635 KB (before: 1.5 MB to 13 MB). `sample` on LARGE-20x50 and 20x100 is still 21 MB and 45 MB per call
-because those counts exceed a long and each of the 50 unranks walks BigInteger completions; that is the next target.
-Please confirm with `scripts/benchmark-compare.sh <SHA> quick` or the `special` preset.
+LARGE-20x100 635 KB (before: 1.5 MB to 13 MB).
 
-### H1 results (JMH `special` preset, smoke settings, before versus H1)
-
-Bounded shapes: 5 faster, 0 slower, 38 same, 17 inconclusive; ENUMERATION controls within about 5%.
-Large shapes (LIBRARY): `count` 205 -> 23 us (10x50), 431 -> 85 us (20x50), 1,507 -> 139 us (20x100);
-`choice` 1,529 -> 152 us and `byRanks` 1,757 -> 429 us at 20x100; `isEmpty` unchanged. `sample` improved only
-0.67x to 0.81x (4.6 ms at 20x50, 9.3 ms at 20x100 for 50 ranks).
-
-## Unrank without identity big-integer operations (patch h3)
+### H3: no identity big-integer operations in the queries
 
 The BigInteger counting queries no longer multiply by the neutral ONE or add to ZERO: the first factor or term is
 taken as it is. A fixed node has exactly one agreeing value, so the per-candidate walk up the fixed chain now allocates
-almost nothing. Sandbox allocation per call (indicative, not JMH): `sample` LARGE-20x50 21.5 MB -> 2.0 MB and
-20x100 44.7 MB -> 4.1 MB; `byRanks` 1.47 MB -> 0.52 MB and 1.97 MB -> 0.84 MB. Output is unchanged.
-Still open: the small-product setup cost (`byRanks`/`sample` on DEAD_END-5x25 lose to enumeration), and an
-empty-product `isEmpty` workload.
+almost nothing. Sandbox allocation per call: `sample` LARGE-20x50 21.5 MB -> 2.0 MB and 20x100 44.7 MB -> 4.1 MB;
+`byRanks` 1.47 MB -> 0.52 MB and 1.97 MB -> 0.84 MB. Output is unchanged.
 
-### H1 results (JMH `special` preset, smoke settings, before versus H1)
+### Results (JMH `special` preset, smoke settings: 1 fork, 3 warmup and 5 measurement iterations of 100 ms)
 
-Bounded shapes: 5 faster, 0 slower, 38 same, 17 inconclusive; ENUMERATION controls within about 5%.
-Large shapes (LIBRARY): `count` 205 -> 23 us (10x50), 431 -> 85 us (20x50), 1,507 -> 139 us (20x100);
-`choice` 1,529 -> 152 us and `byRanks` 1,757 -> 429 us at 20x100; `isEmpty` unchanged. `sample` improved only
-0.67x to 0.81x (4.6 ms at 20x50, 9.3 ms at 20x100 for 50 ranks).
+Environment: Apple M5, JDK 26.0.1, 2026-11-19. Differences under about 10% are noise at these settings; verdicts
+marked inconclusive have overlapping error bars.
 
-## Unrank without identity big-integer operations (patch h3)
+Bounded shapes, before H1 versus H1: 5 faster, 0 slower, 38 same, 17 inconclusive. The ENUMERATION controls stayed
+within about 5%, so the machine was steady. DEEP_DEAD_END-5x25: `count` 243 -> 143 us, `lexOrderMth` 334 -> 243 us,
+`byRanks` 339 -> 242 us, `choice` 402 -> 308 us.
 
-The BigInteger counting queries no longer multiply by the neutral ONE or add to ZERO: the first factor or term is
-taken as it is. A fixed node has exactly one agreeing value, so the per-candidate walk up the fixed chain now allocates
-almost nothing. Sandbox allocation per call (indicative, not JMH): `sample` LARGE-20x50 21.5 MB -> 2.0 MB and
-20x100 44.7 MB -> 4.1 MB; `byRanks` 1.47 MB -> 0.52 MB and 1.97 MB -> 0.84 MB. Output is unchanged.
-Still open: the small-product setup cost (`byRanks`/`sample` on DEAD_END-5x25 lose to enumeration), and an
+Large shapes, LIBRARY only (50 ranks per call for `byRanks`, `choice` and `sample`):
+
+| Operation | Shape | Before H1 | H1 | H3 |
+|---|---|---:|---:|---:|
+| count | LARGE-10x50 | 205 us | 22.8 us | 23.1 us |
+| count | LARGE-20x50 | 431 us | 84.7 us | 85.3 us |
+| count | LARGE-20x100 | 1,507 us | 138.7 us | 147.7 us |
+| lexOrderMth | LARGE-20x50 | 702 us | 365 us | 170 us |
+| lexOrderMth | LARGE-20x100 | 1,914 us | 470 us | 225 us |
+| byRanks | LARGE-20x50 | 600 us | 308 us | 165 us |
+| byRanks | LARGE-20x100 | 1,757 us | 429 us | 241 us |
+| choice | LARGE-20x100 | 1,529 us | 152 us | 150 us |
+| sample | LARGE-20x50 | 6,029 us | 4,588 us | 1,969 us |
+| sample | LARGE-20x100 | 11,479 us | 9,254 us | 4,257 us |
+
+`isEmpty` is unchanged by both patches (20 to 80 us on LARGE) because it uses only the feasibility tier. H3 shows no
+slower result anywhere; the roughly 2x gains on the BigInteger paths (`lexOrderMth`, `byRanks`, `sample` at 20x50 and
+20x100) are consistent across all six rows, although only `byRanks` at 20x50 is flagged significant by the report.
+10x50 counts fit a long and are unaffected, as expected.
+
+Still open: the small-product setup cost (`byRanks` and `sample` on DEAD_END-5x25 lose to enumeration) and an
 empty-product `isEmpty` workload.
