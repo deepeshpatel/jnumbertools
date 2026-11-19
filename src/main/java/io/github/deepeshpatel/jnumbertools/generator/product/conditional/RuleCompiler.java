@@ -46,7 +46,11 @@ final class RuleCompiler {
         return found;
     }
 
-    /** Indexes of the values of dimension {@code dim} that equal one of {@code values} (or the others). */
+    /**
+     * Returns the indexes of values in dimension {@code dim} that match
+     * {@code values}. If {@code negate} is true, returns the complement:
+     * indexes of values that do not match any of the supplied values.
+     */
     BitSet matching(int dim, Collection<?> values, boolean negate) {
         Objects.requireNonNull(values, "values must not be null");
         if (values.isEmpty()) {
