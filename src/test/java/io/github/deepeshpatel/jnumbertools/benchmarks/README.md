@@ -514,3 +514,16 @@ generation before changing default strategy selection.
 | Hand-written baselines | Added `IMPERATIVE_ALLOCATING` and `IMPERATIVE_REUSE` beside `NESTED_STREAM` (additive; nothing replaced). They separate the cost of the algorithm from the cost of result objects and streams. | Reopen if either baseline stops being a fair hand-written equivalent, for example a clearly faster hand-written formulation. |
 | Special operations | Measured separately from traversal: bounded workloads against enumeration, `LARGE` workloads library-only. | Reopen with a run recorded on a fixed environment; sandbox timings are indicative only. |
 | Historical topology results | Retain as topology-specific evidence; do not compare across benchmark generations without equivalent setup. | Re-run under the consolidated benchmark with environment metadata. |
+
+
+## Counting tier construction (patch h1)
+
+`ConstraintCounts` now builds its tables in primitive longs first (checked against 2^62) and falls back to the
+BigInteger tables only when some count does not fit. Equal relation rows share one sum per child, and a row that is a
+single run of values is summed from prefix sums. Results are identical; the BigInteger path is covered by
+`ConstraintPlanTierTest` (12 dimensions of 60 values, count above 2^62, rank checked against the mixed-radix closed form).
+
+Sandbox allocation per `count()` call (indicative, not JMH): LARGE-10x50 111 KB, LARGE-20x50 422 KB,
+LARGE-20x100 635 KB (before: 1.5 MB to 13 MB). `sample` on LARGE-20x50 and 20x100 is still 21 MB and 45 MB per call
+because those counts exceed a long and each of the 50 unranks walks BigInteger completions; that is the next target.
+Please confirm with `scripts/benchmark-compare.sh <SHA> quick` or the `special` preset.

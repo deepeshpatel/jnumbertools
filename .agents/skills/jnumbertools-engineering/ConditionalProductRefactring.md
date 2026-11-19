@@ -380,3 +380,7 @@ Update this table whenever an item changes status.
 - 2026-11-17: Maintainer confirmed the focused `ConditionalProductGeneratorTest` passed after adding prefix-frontier splitting. Added a further concurrency regression: six independent parallel traversals share the same `anyOrder()` generator/model and each must match the complete expected tuple set. This specifically exercises safe lazy publication of shared relation rows under concurrent first use. Awaiting focused test execution before benchmark work.
 
 - 2026-11-17: Added `AnyOrderParallelBenchmark` as a focused JMH comparison of complete sequential versus parallel `anyOrder()` traversal. It covers wide, singleton, narrow, and skewed prefix roots; validates an order-independent checksum between both modes during trial setup; and separates traversal-only timing from end-to-end builder/rule construction plus traversal. No automatic parallel threshold or production execution-policy change is included. Awaiting maintainer compilation and benchmark results.
+
+- 2026-11-19 (H1): item 8 first step. `ConstraintCounts` long-first construction with BigInteger fallback, shared
+  row sums, prefix sums for single-run rows. count() allocation on LARGE shapes 1.5-13 MB -> 0.1-0.6 MB (sandbox).
+  Open: `sample` at counts above 2^62 (21-45 MB per call), small-product setup cost, empty-product isEmpty workload.

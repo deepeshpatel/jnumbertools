@@ -220,4 +220,56 @@ class ConstraintPlanTierTest {
         if (chosen.isEmpty()) chosen.add(from.get(random.nextInt(from.size())));
         return chosen;
     }
+
+    @Test
+    void countsAboveTheLongRangeUseTheBigIntegerTablesAndStayExact() throws Exception {
+        // chain of 12 dimensions of 60 values; every rule lets the next dimension use only its first 50 values,
+        // so the exact count 60 * 50^11 (about 1.5e20) is far above 2^62 and the long tables cannot be used
+        int n = 12;
+        List<List<Integer>> dims = new ArrayList<>();
+        for (int d = 0; d < n; d++) dims.add(values(d, 60));
+        List<Rule> rules = new ArrayList<>();
+        for (int d = 0; d + 1 < n; d++) {
+            rules.add(new Rule(d, dims.get(d), d + 1, dims.get(d + 1).subList(0, 50)));
+        }
+        var builder = build(dims, rules);
+        BigInteger fifty11 = BigInteger.valueOf(50).pow(11);
+        BigInteger expected = fifty11.multiply(BigInteger.valueOf(60));
+        assertTrue(expected.bitLength() > 62);
+        assertEquals(expected, builder.count());
+        ConstraintCounts counts = planOf(builder).counts();
+        assertTrue(counts.lsuffix == null && counts.suffix != null, "the exact tables are BigInteger");
+
+        // rank = mixed radix number: dimension 0 has 60 digits, every later dimension 50
+        Random random = new Random(5);
+        List<BigInteger> ranks = new ArrayList<>(List.of(BigInteger.ZERO, expected.subtract(BigInteger.ONE)));
+        for (int i = 0; i < 20; i++) ranks.add(new BigInteger(expected.bitLength(), random).mod(expected));
+        for (BigInteger rank : ranks) {
+            List<Object> want = new ArrayList<>();
+            BigInteger rest = rank;
+            int[] digit = new int[n];
+            for (int d = n - 1; d >= 1; d--) {
+                BigInteger[] qr = rest.divideAndRemainder(BigInteger.valueOf(50));
+                digit[d] = qr[1].intValue();
+                rest = qr[0];
+            }
+            digit[0] = rest.intValueExact();
+            for (int d = 0; d < n; d++) want.add(d * 100 + digit[d]);
+            assertEquals(want, builder.byRanks(List.of(rank)).stream().findFirst().orElseThrow(), "rank " + rank);
+        }
+    }
+
+    @Test
+    void countsJustBelowAndJustAboveTheLongLimitAgree() throws Exception {
+        // 63^10 is about 9.8e17 (fits a long table) and 63^11 about 6.2e19 (does not)
+        for (int dimensions : new int[]{10, 11, 12}) {
+            List<List<Integer>> dims = new ArrayList<>();
+            for (int d = 0; d < dimensions; d++) dims.add(values(d, 63));
+            BigInteger expected = BigInteger.valueOf(63).pow(dimensions);   // 63^10 < 2^62 < 63^11
+            var builder = build(dims, List.of());
+            assertEquals(expected, builder.count(), dimensions + " dimensions");
+            ConstraintCounts counts = planOf(builder).counts();
+            assertEquals(expected.bitLength() <= 62, counts.lsuffix != null, dimensions + " dimensions");
+        }
+    }
 }

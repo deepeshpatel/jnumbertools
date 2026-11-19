@@ -7,6 +7,8 @@ package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Exact subtree and root completion-count tables for a {@link ConstraintPlan}.
@@ -15,13 +17,18 @@ import java.util.BitSet;
  * tables and their primitive-long fast-path representation.</p>
  */
 final class ConstraintCounts {
+    /** Counts below this stay in primitive longs; a table value at or above it switches to BigInteger. */
+    private static final long LIMIT = 1L << 62;
+
     private final ConstraintPlan plan;
+    private final int[] dimSize;
+    // BigInteger tables: built only when some count does not fit a long, otherwise null
     final BigInteger[][] free;
     final BigInteger[][] msg;
     final BigInteger[][] freePrefix;
     final BigInteger[] suffix;
     final BigInteger total;
-    final BigInteger fullProduct;
+    // primitive-long tables: built first, and the only ones when every count fits (the common case), otherwise null
     final long[][] lfree;
     final long[][] lmsg;
     final long[][] lfreePrefix;
@@ -29,84 +36,189 @@ final class ConstraintCounts {
 
     ConstraintCounts(ConstraintPlan plan, int[] order, int[] dimSize) {
         this.plan = plan;
+        this.dimSize = dimSize;
         int nodes = plan.members.length;
-        free = new BigInteger[nodes][];
-        msg = new BigInteger[nodes][];
+        long[][] f = new long[nodes][];
+        long[][] m = new long[nodes][];
+        long[][] p = new long[nodes][];
+        long[] suf = buildLong(plan, order, f, m, p);
+        if (suf != null) {
+            lfree = f;
+            lmsg = m;
+            lfreePrefix = p;
+            lsuffix = suf;
+            free = null;
+            msg = null;
+            freePrefix = null;
+            suffix = null;
+            total = BigInteger.valueOf(suf[0]);
+        } else {
+            BigInteger[][] bf = new BigInteger[nodes][];
+            BigInteger[][] bm = new BigInteger[nodes][];
+            BigInteger[][] bp = new BigInteger[nodes][];
+            BigInteger[] bs = buildBig(plan, order, bf, bm, bp);
+            free = bf;
+            msg = bm;
+            freePrefix = bp;
+            suffix = bs;
+            total = bs[0];
+            lfree = null;
+            lmsg = null;
+            lfreePrefix = null;
+            lsuffix = null;
+        }
+    }
 
+    // ── table construction ──
+
+    /**
+     * Fills the long tables, or returns null when any stored count reaches {@link #LIMIT}. Rows of the relation to a
+     * child that are equal share one sum, and a row that is a single run of values is summed from prefix sums.
+     */
+    private static long[] buildLong(ConstraintPlan plan, int[] order, long[][] free, long[][] msg, long[][] freePrefix) {
+        for (int idx = order.length - 1; idx >= 0; idx--) {
+            int v = order[idx];
+            long[] f = new long[plan.size[v]];
+            Arrays.fill(f, 1L);
+            for (int c : plan.children[v]) {
+                long[] message = messagesLong(plan.fromParent[c], plan.size[v], free[c]);
+                if (message == null) return null;
+                for (int a = 0; a < f.length; a++) {
+                    f[a] = multiply(f[a], message[a]);
+                    if (f[a] < 0) return null;
+                }
+                msg[c] = message;
+            }
+            free[v] = f;
+        }
+        for (int x = 0; x < free.length; x++) {
+            if (plan.values[x] != null) {
+                long[] prefix = new long[plan.size[x] + 1];
+                for (int i = 0; i < plan.size[x]; i++) {
+                    prefix[i + 1] = add(prefix[i], free[x][i]);
+                    if (prefix[i + 1] < 0) return null;
+                }
+                freePrefix[x] = prefix;
+            }
+        }
+        long[] suffix = new long[plan.roots.length + 1];
+        suffix[plan.roots.length] = 1;
+        for (int i = plan.roots.length - 1; i >= 0; i--) {
+            long rootTotal = 0;
+            for (long weight : free[plan.roots[i]]) {
+                rootTotal = add(rootTotal, weight);
+                if (rootTotal < 0) return null;
+            }
+            suffix[i] = multiply(suffix[i + 1], rootTotal);
+            if (suffix[i] < 0) return null;
+        }
+        return suffix;
+    }
+
+    /** message[a] = sum of {@code childFree[b]} over the values b allowed by {@code rows[a]}; null on overflow. */
+    private static long[] messagesLong(BitSet[] rows, int parentSize, long[] childFree) {
+        long[] prefix = new long[childFree.length + 1];
+        boolean prefixValid = true;
+        for (int i = 0; i < childFree.length && prefixValid; i++) {
+            prefix[i + 1] = add(prefix[i], childFree[i]);
+            prefixValid = prefix[i + 1] >= 0;
+        }
+        long[] message = new long[parentSize];
+        Map<BitSet, Long> sums = new HashMap<>();
+        for (int a = 0; a < parentSize; a++) {
+            BitSet allowed = rows[a];
+            Long known = sums.get(allowed);
+            if (known == null) {
+                long sum = 0;
+                int lo = allowed.nextSetBit(0);
+                int hi = lo < 0 ? 0 : allowed.nextClearBit(lo);
+                if (lo < 0) {
+                    sum = 0;
+                } else if (prefixValid && allowed.nextSetBit(hi) < 0) {
+                    sum = prefix[hi] - prefix[lo];                      // one run of values
+                } else {
+                    for (int b = lo; b >= 0; b = allowed.nextSetBit(b + 1)) {
+                        sum = add(sum, childFree[b]);
+                        if (sum < 0) return null;
+                    }
+                }
+                known = sum;
+                sums.put(allowed, known);
+            }
+            message[a] = known;
+        }
+        return message;
+    }
+
+    private static BigInteger[] buildBig(ConstraintPlan plan, int[] order,
+                                         BigInteger[][] free, BigInteger[][] msg, BigInteger[][] freePrefix) {
         for (int idx = order.length - 1; idx >= 0; idx--) {
             int v = order[idx];
             BigInteger[] f = new BigInteger[plan.size[v]];
             Arrays.fill(f, BigInteger.ONE);
             for (int c : plan.children[v]) {
-                BigInteger[] msgToParent = new BigInteger[plan.size[v]];
-                for (int a = 0; a < plan.size[v]; a++) {
-                    BitSet allowed = plan.fromParent[c][a];
-                    BigInteger sum = BigInteger.ZERO;
-                    for (int b = allowed.nextSetBit(0); b >= 0; b = allowed.nextSetBit(b + 1)) {
-                        sum = sum.add(free[c][b]);
-                    }
-                    msgToParent[a] = sum;
-                    f[a] = f[a].multiply(sum);
-                }
-                msg[c] = msgToParent;
+                BigInteger[] message = messagesBig(plan.fromParent[c], plan.size[v], free[c]);
+                for (int a = 0; a < f.length; a++) f[a] = f[a].multiply(message[a]);
+                msg[c] = message;
             }
             free[v] = f;
         }
-
-        freePrefix = new BigInteger[nodes][];
-        for (int x = 0; x < nodes; x++) {
+        for (int x = 0; x < free.length; x++) {
             if (plan.values[x] != null) {
                 BigInteger[] prefix = new BigInteger[plan.size[x] + 1];
                 prefix[0] = BigInteger.ZERO;
-                for (int i = 0; i < plan.size[x]; i++) {
-                    prefix[i + 1] = prefix[i].add(free[x][i]);
-                }
+                for (int i = 0; i < plan.size[x]; i++) prefix[i + 1] = prefix[i].add(free[x][i]);
                 freePrefix[x] = prefix;
             }
         }
-
-        suffix = new BigInteger[plan.roots.length + 1];
+        BigInteger[] suffix = new BigInteger[plan.roots.length + 1];
         suffix[plan.roots.length] = BigInteger.ONE;
         for (int i = plan.roots.length - 1; i >= 0; i--) {
             BigInteger rootTotal = BigInteger.ZERO;
             for (BigInteger weight : free[plan.roots[i]]) rootTotal = rootTotal.add(weight);
             suffix[i] = suffix[i + 1].multiply(rootTotal);
         }
-        total = suffix[0];
-
-        BigInteger product = BigInteger.ONE;
-        for (int size : dimSize) product = product.multiply(BigInteger.valueOf(size));
-        fullProduct = product;
-
-        boolean fits = fitsLong(free) && fitsLong(msg) && fitsLong(freePrefix) && fitsLong(suffix);
-        lfree = fits ? toLong(free) : null;
-        lmsg = fits ? toLong(msg) : null;
-        lfreePrefix = fits ? toLong(freePrefix) : null;
-        lsuffix = fits ? toLong(suffix) : null;
+        return suffix;
     }
 
-    private static boolean fitsLong(BigInteger[] row) {
-        if (row == null) return true;
-        for (BigInteger value : row) if (value.bitLength() > 62) return false;
-        return true;
+    private static BigInteger[] messagesBig(BitSet[] rows, int parentSize, BigInteger[] childFree) {
+        BigInteger[] prefix = new BigInteger[childFree.length + 1];
+        prefix[0] = BigInteger.ZERO;
+        for (int i = 0; i < childFree.length; i++) prefix[i + 1] = prefix[i].add(childFree[i]);
+        BigInteger[] message = new BigInteger[parentSize];
+        Map<BitSet, BigInteger> sums = new HashMap<>();
+        for (int a = 0; a < parentSize; a++) {
+            BitSet allowed = rows[a];
+            BigInteger known = sums.get(allowed);
+            if (known == null) {
+                int lo = allowed.nextSetBit(0);
+                int hi = lo < 0 ? 0 : allowed.nextClearBit(lo);
+                if (lo < 0) {
+                    known = BigInteger.ZERO;
+                } else if (allowed.nextSetBit(hi) < 0) {
+                    known = prefix[hi].subtract(prefix[lo]);            // one run of values
+                } else {
+                    known = BigInteger.ZERO;
+                    for (int b = lo; b >= 0; b = allowed.nextSetBit(b + 1)) known = known.add(childFree[b]);
+                }
+                sums.put(allowed, known);
+            }
+            message[a] = known;
+        }
+        return message;
     }
 
-    private static boolean fitsLong(BigInteger[][] rows) {
-        for (BigInteger[] row : rows) if (!fitsLong(row)) return false;
-        return true;
+    /** a + b for a, b in [0, LIMIT); -1 when the sum reaches LIMIT. */
+    private static long add(long a, long b) {
+        long sum = a + b;
+        return sum >= LIMIT ? -1 : sum;
     }
 
-    private static long[] toLong(BigInteger[] row) {
-        if (row == null) return null;
-        long[] result = new long[row.length];
-        for (int i = 0; i < result.length; i++) result[i] = row[i].longValue();
-        return result;
-    }
-
-    private static long[][] toLong(BigInteger[][] rows) {
-        long[][] result = new long[rows.length][];
-        for (int i = 0; i < result.length; i++) result[i] = toLong(rows[i]);
-        return result;
+    /** a * b for a, b in [0, LIMIT); -1 when the product reaches LIMIT. */
+    private static long multiply(long a, long b) {
+        if (a == 0 || b == 0) return 0;
+        if (a > (LIMIT - 1) / b) return -1;
+        return a * b;
     }
 
     /** Sum of count(c, b) over the values b in {@code allowed} (all values if null) that agree with the fixed dimensions. */
@@ -139,7 +251,9 @@ final class ConstraintCounts {
 
     /** True when a uniformly random point of the full product is valid with probability at least 1/4. */
     boolean mostTuplesValid() {
-        return this.total.shiftLeft(2).compareTo(this.fullProduct) >= 0;
+        BigInteger fullProduct = BigInteger.ONE;
+        for (int size : dimSize) fullProduct = fullProduct.multiply(BigInteger.valueOf(size));
+        return this.total.shiftLeft(2).compareTo(fullProduct) >= 0;
     }
 
     // ── primitive-long versions of the counting queries (used when lsuffix != null) ──
@@ -196,6 +310,7 @@ final class ConstraintCounts {
 
     /** Number of valid ways to choose dimensions k..n-1 when dimensions 0..k-1 have values val[0..k-1]. */
     BigInteger completions(int k, int[] val) {
+        if (this.lsuffix != null) return BigInteger.valueOf(completionsL(k, val));
         int fixedRoots = plan.firstRoot[k];
         BigInteger result = this.suffix[fixedRoots];
         if (result.signum() == 0) return BigInteger.ZERO;
