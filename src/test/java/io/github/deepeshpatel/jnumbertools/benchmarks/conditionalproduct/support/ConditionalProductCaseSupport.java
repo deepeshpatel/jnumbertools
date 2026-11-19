@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.support;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.baseline.ImperativeBacktrackingBaseline;
 import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.baseline.NestedStreamBaseline;
 import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.scenario.Rule;
 import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.scenario.Scenario;
@@ -32,7 +33,13 @@ public final class ConditionalProductCaseSupport {
         Summary expected = summarize(NestedStreamBaseline.stream(baselinePlan));
         expectedCount = expected.count();
 
-        if (!implementation.equals("NESTED_STREAM")) {
+        if (implementation.equals(IMPERATIVE_ALLOCATING) || implementation.equals(IMPERATIVE_REUSE)) {
+            long[] actual = imperative(implementation, ImperativeBacktrackingBaseline.compile(scenario));
+            if (actual[0] != expected.count() || actual[1] != expected.checksum()) {
+                throw new IllegalStateException(caseId + "/" + implementation
+                        + ": imperative baseline differs from the incrementally filtered nested-stream baseline");
+            }
+        } else if (!implementation.equals("NESTED_STREAM")) {
             Summary actual = summarize(createLibraryGenerator(
                     buildBuilder(scenario, preparedRules), implementation, expectedCount));
             if (!actual.equals(expected)) {
@@ -42,8 +49,22 @@ public final class ConditionalProductCaseSupport {
         }
     }
 
+    /** Imperative backtracking, one {@code Object[]} wrapped as a list per result (like a library tuple). */
+    public static final String IMPERATIVE_ALLOCATING = "IMPERATIVE_ALLOCATING";
+    /** Imperative backtracking over one reused index array; allocates nothing per result. */
+    public static final String IMPERATIVE_REUSE = "IMPERATIVE_REUSE";
+
+    private static long[] imperative(String implementation, ImperativeBacktrackingBaseline.Plan plan) {
+        return implementation.equals(IMPERATIVE_ALLOCATING)
+                ? ImperativeBacktrackingBaseline.allocating(plan)
+                : ImperativeBacktrackingBaseline.reuse(plan);
+    }
+
     /** Includes builder/rule construction, generator creation, and complete tuple consumption. */
     public long endToEnd(String implementation) {
+        if (implementation.equals(IMPERATIVE_ALLOCATING) || implementation.equals(IMPERATIVE_REUSE)) {
+            return imperative(implementation, ImperativeBacktrackingBaseline.compile(scenario))[1];
+        }
         if (implementation.equals("NESTED_STREAM")) {
             return summarize(NestedStreamBaseline.stream(
                     NestedStreamBaseline.compile(scenario))).checksum();
@@ -52,7 +73,7 @@ public final class ConditionalProductCaseSupport {
         return summarize(createLibraryGenerator(builder, implementation, expectedCount)).checksum();
     }
 
-    private static ConditionalProductBuilder buildBuilder(
+    static ConditionalProductBuilder buildBuilder(
             ScenarioData scenario, List<PreparedRule> preparedRules) {
         List<List<Integer>> dimensions = scenario.dimensions();
         ConditionalProductBuilder builder =
@@ -69,7 +90,7 @@ public final class ConditionalProductCaseSupport {
         return builder;
     }
 
-    private static List<PreparedRule> prepareRules(ScenarioData scenario) {
+    static List<PreparedRule> prepareRules(ScenarioData scenario) {
         List<List<Integer>> dimensions = scenario.dimensions();
         List<PreparedRule> prepared = new ArrayList<>(scenario.rules().size());
         for (Rule rule : scenario.rules()) {
@@ -82,7 +103,7 @@ public final class ConditionalProductCaseSupport {
         return List.copyOf(prepared);
     }
 
-    private static Iterable<?> createLibraryGenerator(
+    static Iterable<?> createLibraryGenerator(
             ConditionalProductBuilder builder, String implementation, long expectedCount) {
         if (implementation.equals("ADAPTIVE")) {
             return builder.lexOrder(LexOrderStrategy.ADAPTIVE, expectedCount);
@@ -127,7 +148,7 @@ public final class ConditionalProductCaseSupport {
         return List.copyOf(result);
     }
 
-    private record PreparedRule(
+    record PreparedRule(
             int triggerDimension,
             List<Integer> triggerValues,
             int targetDimension,

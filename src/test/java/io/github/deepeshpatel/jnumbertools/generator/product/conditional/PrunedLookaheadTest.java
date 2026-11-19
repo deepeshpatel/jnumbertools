@@ -141,6 +141,68 @@ class PrunedLookaheadTest {
         }
     }
 
+    /**
+     * Live prefixes first, then a block of dead prefixes, then live prefixes again. The dead block wastes far more
+     * than 1,024 + 4 x emitted descents, so the switch happens in the middle of the iteration, with tuples
+     * already emitted before it and more emitted after it.
+     */
+    private static ConditionalProductBuilder liveDeadLive() {
+        var d = dims(N, SIZE);
+        return base(d)
+                .when(d.get(0)).isOneOf(range(1, 9)).then(d.get(N - 1)).isOneOf(range(0, 6))
+                .when(d.get(1)).isOneOf(range(0, SIZE)).then(d.get(N - 1)).isOneOf(range(11, 12));
+    }
+
+    private static List<List<Object>> liveDeadLiveOracle() {
+        List<List<Object>> result = new ArrayList<>();
+        for (int a : new int[]{0, 9, 10, 11})
+            for (int b = 0; b < SIZE; b++)
+                for (int c = 0; c < SIZE; c++)
+                    for (int e = 0; e < SIZE; e++) result.add(List.of(a, b, c, e, 11));
+        return result;
+    }
+
+    @Test
+    void switchingLookaheadOnMidIterationKeepsOutputAndOrder() {
+        var b = liveDeadLive();
+        var expected = liveDeadLiveOracle();
+        assertEquals(4 * 12 * 12 * 12, expected.size());
+
+        for (LexOrderStrategy s : List.of(LexOrderStrategy.PRUNED_BITSET, LexOrderStrategy.PRUNED_DFS)) {
+            var it = b.lexOrder(s).iterator();
+            var generator = (PrunedLexGenerator) it;
+            var seen = new ArrayList<Object>();
+            int switchedAfter = -1;
+            while (it.hasNext()) {
+                if (switchedAfter < 0 && generator.lookaheadEnabled()) switchedAfter = seen.size();
+                seen.add(it.next());
+            }
+            assertEquals(expected, seen, s.name() + ": same tuples in the same order");
+            assertTrue(switchedAfter > 0, s.name() + ": tuples were emitted before the switch");
+            assertTrue(switchedAfter < expected.size(), s.name() + ": tuples were emitted after the switch");
+        }
+    }
+
+    @Test
+    void anyOrderWithLookaheadMatchesOracleSequentiallyAndInParallel() {
+        for (var shape : List.of(liveDeadLive(), acyclicDeadEnd(11), loopedDeadEnd(11))) {
+            var expected = new HashSet<>(shape.lexOrder(LexOrderStrategy.DP).stream().toList());
+
+            var sequential = shape.anyOrder().stream().toList();
+            assertEquals(expected.size(), sequential.size(), "sequential count");
+            assertEquals(expected, new HashSet<>(sequential), "sequential");
+
+            var parallel = shape.anyOrder().stream().parallel().toList();
+            assertEquals(expected.size(), parallel.size(), "parallel count");
+            assertEquals(expected, new HashSet<>(parallel), "parallel");
+
+            var it = shape.anyOrder().iterator();
+            drain(it);
+            assertTrue(it instanceof PrunedLexGenerator);
+            assertTrue(((PrunedLexGenerator) it).lookaheadEnabled(), "anyOrder traversal switches lookahead on too");
+        }
+    }
+
     @Test
     void emptyProductsDiscoveredByLookaheadYieldNothing() {
         for (var shape : List.of(acyclicDeadEnd(SIZE), loopedDeadEnd(SIZE))) {

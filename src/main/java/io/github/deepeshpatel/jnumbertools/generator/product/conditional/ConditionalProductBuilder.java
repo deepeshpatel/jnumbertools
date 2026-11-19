@@ -345,11 +345,13 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * <p>This is the default and recommended strategy for ordinary traversal, especially when the caller
      * expects to consume only part of the result. It checks constraints against the selected prefix and,
      * lazily enables feasibility lookahead when traversal work indicates that pairwise prefix pruning has
-     * explored substantial dead-end work. This can help with looped and acyclic constraint graphs. It does not build exact completion counts.</p>
+     * explored substantial dead-end work (more than 1,024 plus four times the tuples emitted so far; the trigger does
+     * not depend on the constraint graph's shape). Lookahead never changes the tuples returned or their order.
+     * It does not build exact completion counts.</p>
      *
      * <p>Use {@link #lexOrder(LexOrderStrategy)} to select {@link LexOrderStrategy#DP} explicitly, or
      * {@link #lexOrder(LexOrderStrategy, long)} to use the {@link LexOrderStrategy#ADAPTIVE} policy.
-     * Lookahead activation details are implementation choices, not API guarantees.</p>
+     * The lookahead threshold is an implementation choice and may change between versions.</p>
      *
      * @return a re-iterable generator of valid tuples in lexicographic order
      */

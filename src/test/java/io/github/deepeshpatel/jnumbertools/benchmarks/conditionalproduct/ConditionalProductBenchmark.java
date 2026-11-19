@@ -53,7 +53,8 @@ public class ConditionalProductBenchmark {
     })
     public String scenario;
 
-    @Param({"PRUNED_BITSET", "PRUNED_DFS", "DP", "ADAPTIVE", "NESTED_STREAM"})
+    @Param({"PRUNED_BITSET", "PRUNED_DFS", "DP", "ADAPTIVE", "NESTED_STREAM",
+            "IMPERATIVE_ALLOCATING", "IMPERATIVE_REUSE"})
     public String implementation;
 
     private ConditionalProductCaseSupport benchmark;

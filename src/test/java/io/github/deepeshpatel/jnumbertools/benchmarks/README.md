@@ -50,6 +50,10 @@ The unified `conditionalproduct/ConditionalProductBenchmark` compares these impl
 - `DP`
 - `ADAPTIVE`
 - `NESTED_STREAM` — independent incrementally filtered nested Java Streams baseline
+- `IMPERATIVE_ALLOCATING` — hand-written recursive backtracking that allocates one `Object[]`
+  (wrapped as a list) per result, like a library tuple
+- `IMPERATIVE_REUSE` — the same backtracking over one reused index array; allocates nothing per
+  result, so it bounds from below what the library's result objects cost
 
 The standard topology matrix combines `CHAIN`, `MANY_VALID`, `COMPLETE`, and
 `DEAD_END` with 3, 5, 7, or 10 dimensions and 10, 25, or 50 values per dimension.
@@ -57,7 +61,9 @@ The standard topology matrix combines `CHAIN`, `MANY_VALID`, `COMPLETE`, and
 budget. Two additional focused workload families extend that matrix:
 
 - `DEEP_DEAD_END`: late conflicts designed to expose prefixes that appear viable until a
-  later dimension; tested at 5x10, 5x25, 7x10, 7x25, and 10x10.
+  later dimension; tested at 5x10, 5x25, 7x10, 7x25, and 10x10. Before the Phase F2 fix four of
+  these five shapes produced an empty product, so results recorded before that fix do not
+  describe partial dead ends and must not be reused.
 - `SMALL_DOMAIN`: many dimensions with small domains and a high proportion of valid tuples;
   tested at 8x4, 10x4, 12x3, 14x3, and 8x5.
 
@@ -99,6 +105,112 @@ The unified JMH class uses the `scenario` parameter to represent valid topology/
 the `implementation` parameter for the strategy. This avoids invalid cross-products in JMH
 while still letting the console selector present topology, dimensions, and domain size as
 independent choices.
+
+### Special operations
+
+Full traversal is only part of the library: `count`, `isEmpty`, `lexOrderMth`, `byRanks`, `choice`
+and `sample` use the exact counting tier, which is where the largest gains over enumeration are
+expected. Two classes measure them (preset `special-ops`, which runs both and writes two JSON files):
+
+- `ConditionalProductSpecialOperationsBenchmark`: five bounded workloads (`CHAIN-5x25`,
+  `MANY_VALID-5x25`, `DEAD_END-5x25`, `DEEP_DEAD_END-5x25`, `SMALL_DOMAIN-10x4`) with `LIBRARY`
+  against `ENUMERATION`, the best a caller can do without the library: a non-allocating
+  imperative enumeration, materialising every tuple first where sampling needs them.
+- `ConditionalProductScalingBenchmark`: `LARGE-10x50` (about 1e17 tuples), `LARGE-20x50` (about
+  5e33) and `LARGE-20x100` (about 2e39), library only, since no enumeration can finish.
+
+Every measured call includes builder and rule construction. Trial setup verifies the library
+result before anything is timed: counts against the enumeration (or the closed form
+`size * (size-1)^(n-1)` for `LARGE`), `lexOrderMth` and `byRanks` against the enumeration on
+bounded workloads, and for all workloads that every returned tuple satisfies the rules, rank
+operations return ascending tuples, and `sample` returns distinct tuples.
+
+#### Special operations: first results (screening)
+
+JMH 1.37, OpenJDK 26.0.1, one fork, 3 warmup and 5 measurement iterations of 100 ms, GC profiler.
+The environment file was not supplied, so hardware is not recorded. Single-fork short runs: many rows
+had a score error above 10%, so read ratios of about 1.5x or less as ties.
+
+Library speedup over the enumeration baseline (above 1 the library is faster, below 1 enumeration is):
+
+| Workload | count | isEmpty | lexOrderMth | byRanks | choice | sample |
+|---|---:|---:|---:|---:|---:|---:|
+| CHAIN-5x25 | 25.5x | 0.03x | 12.6x | 13.1x | 16.2x | 16.7x |
+| MANY_VALID-5x25 | 62.4x | 0.03x | 25.8x | 28.9x | 38.9x | 39.8x |
+| DEAD_END-5x25 | 1.4x | 0.33x | 0.54x | 0.56x | 0.65x | 0.65x |
+| DEEP_DEAD_END-5x25 | 78.3x | 0.24x | 58.2x | 55.7x | 52.0x | 48.4x |
+| SMALL_DOMAIN-10x4 | 48.8x | 0.02x | 16.3x | 17.9x | 36.3x | 38.5x |
+
+Library only, microseconds per call (builder construction included):
+
+| Workload | count | isEmpty | lexOrderMth | byRanks | choice | sample |
+|---|---:|---:|---:|---:|---:|---:|
+| LARGE-10x50 (about 1e17 tuples) | 205 | 21 | 241 | 240 | 203 | 536 |
+| LARGE-20x50 (about 5e33) | 431 | 52 | 702 | 600 | 414 | 6,029 |
+| LARGE-20x100 (about 2e39) | 1,507 | 76 | 1,914 | 1,757 | 1,529 | 11,479 |
+
+What the numbers do and do not show:
+
+- Counting and rank operations beat enumeration by roughly 13x to 78x on four of the five bounded
+  workloads, and handle products of 1e39 tuples in milliseconds.
+- `isEmpty` loses to enumeration everywhere, but the comparison is biased: every bounded workload is
+  non-empty, so enumeration stops at its first tuple. A workload whose product is empty must be added
+  before drawing a conclusion. `isEmpty` itself is cheap on `LARGE` (21 to 76 us), because it uses the
+  feasibility tier and builds no counts.
+- On the small `DEAD_END-5x25` shape enumeration wins every rank and sampling operation (library at
+  0.54x to 0.65x) and `count` is only about 1.4x faster: setting up the counting tier costs more than
+  enumerating a product this small.
+- Allocation is the clearest cost. `count` allocates about 66 KB to 1.1 MB per call on the bounded
+  workloads against about 1.5 KB for enumeration, and 1.5 MB to 13 MB on `LARGE`. `sample` allocates
+  several times more than `byRanks` (24 MB against 4.5 MB at 20x50; 57 MB at 20x100) and is the slowest
+  operation at large sizes.
+- Status: screening. These support Phase H item 8 (counting speed) as the next target.
+
+### Presets, result files and environment record
+
+The selector first offers three presets:
+
+- **quick** (about 1-2 minutes): `CHAIN-5x25`, `MANY_VALID-5x25`, `DEAD_END-5x25`,
+  `DEEP_DEAD_END-5x25`, `SMALL_DOMAIN-10x4` with `PRUNED_BITSET` and `DP`, 2 warmup and
+  3 measurement iterations, one fork. It is a regression screen for uncommitted code: it exposes
+  changes of roughly 20% or more and cannot rank close strategies.
+- **full-matrix**: every topology, shape and implementation in one benchmark generation, with
+  5 warmup iterations, 8 measurement iterations and 2 forks. This is the confirmation run the
+  decision log requires; it takes a long time.
+- **special-ops**: the two special-operations benchmarks above.
+- **custom**: the interactive selections above.
+
+Every generated command also records the run. Files go to `benchmark-results/` (git-ignored; only
+the final summary table is committed to this README):
+
+- `<run>.env.txt`: commit, branch, whether the tree had uncommitted changes, JDK and JVM, JVM
+  arguments, OS, CPU model, logical CPUs, physical memory and maximum heap
+  (`BenchmarkEnvironment`).
+- `<run>.json`: JMH JSON (`-rf json -rff`), which also carries the JMH version, forks and iteration
+  settings, and the GC profiler's allocation per operation.
+- `<run>.log`: the complete console output.
+
+Scripts print the same command without prompting:
+`... BenchmarkCommandGenerator --print quick <run-name>` (or `full`).
+
+### Report tables and comparing against an earlier commit
+
+`scripts/BenchmarkReport.java` is a single-file JDK program that needs no dependencies.
+
+```bash
+# README-ready table: fastest strategy, speedup vs the stream baseline and vs the next-best builder,
+# allocation per operation vs the baseline, and a flag when the score error exceeds 10% of the score
+java scripts/BenchmarkReport.java report benchmark-results/<run>.json benchmark-results/<run>.env.txt
+```
+
+`scripts/benchmark-compare.sh <SHA>` answers "did my uncommitted change help one case and hurt
+another?". It builds the old commit in a temporary git worktree (your working tree is not
+touched and no branch is switched), copies the current benchmark sources into it so both sides
+run identical benchmark code, runs the quick preset on both, and prints a per-shape table with
+verdicts: within 10% is "same", a larger change with overlapping error bars is "inconclusive",
+otherwise "FASTER" or "SLOWER". It finishes by printing the branch and commit you are on.
+Pass `full` as the second argument for the full matrix. A clean result means "no regression
+found", not "proven faster".
 
 ## Historical-result comparability
 
@@ -286,8 +398,10 @@ benchmark result files. Read this section before proposing another optimization.
 
 - **Change:** The current implementation makes `PRUNED_BITSET` the default for
   `lexOrder()`. It applies prefix pruning and lazily enables feasibility lookahead after traversal work
-  indicates substantial dead-end exploration. The trigger is based on descents relative to
-  emitted tuples, not graph topology, so it can help with looped and acyclic dead ends.
+  indicates substantial dead-end exploration. Lookahead switches on once descents exceed
+  1,024 + 4 x emitted tuples. The trigger is independent of graph topology, so it applies
+  to looped and acyclic dead ends alike. Once on it stays on for that traversal and does not
+  change the tuples returned or their order.
   `PRUNED_DFS` uses the same lookahead control flow with dense boolean relation rows when
   that representation fits the memory limit.
 - **Benchmark:** The uploaded historical `CHAIN`, `MANY_VALID`, and `COMPLETE` runs
@@ -296,8 +410,9 @@ benchmark result files. Read this section before proposing another optimization.
   A separate follow-up used five warmup iterations, eight measurement iterations, and two
   forks for five deep-dead-end and five small-domain scenarios; its text output does not
   include JDK/JVM metadata.
-- **Finding:** No single strategy won across all topologies. DP won all five deep-dead-end
-  cases in the two-fork follow-up; small-domain winners varied. In the earlier chain and
+- **Finding:** No single strategy won across all topologies. (The earlier claim that DP won
+  all five deep-dead-end cases came from the pre-F2 shapes, four of which were empty products;
+  see the superseding entry below.) Small-domain winners varied. In the earlier chain and
   many-valid runs, BitSet was generally competitive, but DFS, DP, and ADAPTIVE each won
   selected shapes. The historical COMPLETE run recorded ADAPTIVE as the lowest score in
   11 of 12 shapes, often with small differences and overlapping errors.
@@ -314,25 +429,26 @@ benchmark result files. Read this section before proposing another optimization.
 ### DP on deep-dead-end workloads
 
 - **Change:** Added the `DEEP_DEAD_END` workload family to expose late conflicts that can
-  leave long prefixes apparently viable before they fail.
-- **Benchmark:** The follow-up run compared all five implementations on
-  `DEEP_DEAD_END-5x10`, `5x25`, `7x10`, `7x25`, and `10x10`, plus five
-  `SMALL_DOMAIN` scenarios. Command configuration:
-  `-wi 5 -i 8 -f 2 -tu ms -bm avgt -prof gc`.
-- **Finding:** DP recorded the lowest time in all five deep-dead-end cases. Its advantage
-  was modest at 5x10 and very large in the other four late-conflict cases. In the five
-  small-domain cases, the lowest-time strategy varied: BitSet won two, DFS won two, and
-  ADAPTIVE won one. The fastest builder beat nested streams in all ten scenarios; the
-  measured speedup ranged from about 3.6x to over 2,000x. These are scenario-specific
-  end-to-end results, not a universal speedup claim.
-- **Decision:** Keep DP as an explicit strategy and treat it as the leading choice for the
-  tested deep-dead-end workload family. Do not change the global default: the small-domain
-  results show that the deep-dead-end result does not generalize to every topology.
-- **Status:** Stronger two-fork evidence for this workload family, but still provisional
-  because the uploaded output lacks JDK/JVM metadata and the full consolidated matrix was
-  not rerun in the same command.
-- **Revisit when:** The same scenarios are rerun with environment metadata recorded and
-  included alongside chain, many-valid, complete, and ordinary dead-end cases.
+  leave long prefixes apparently viable before they fail. Phase F2 corrected the shapes: the
+  first version produced an empty product for four of five cases, so the earlier comparison
+  measured how quickly each strategy discovers emptiness, not partial dead ends.
+- **Benchmark:** Superseding screening run on the corrected shapes, all five implementations,
+  `DEEP_DEAD_END-5x10`, `5x25`, `7x10`, `7x25`, `10x10`; command
+  `-wi 2 -i 2 -f 2 -tu ms -bm avgt -prof gc` with the short annotation iteration times
+  (screening quality; JDK/JVM metadata not recorded).
+- **Finding:** With work-triggered lookahead, `PRUNED_BITSET` ran at 1.46x, 1.44x, 1.01x, 1.01x
+  and 0.72x the DP time (5x10, 5x25, 7x10, 7x25, 10x10): DP was ahead by at most about 1.5x
+  and pruned was ahead on 10x10. The fastest builder beat the nested-stream baseline in all
+  five cases by roughly 4x to 12x. On ordinary `DEAD_END` and `SMALL_DOMAIN` shapes
+  `PRUNED_BITSET` was faster than DP in every case (0.14x to 0.76x of the DP time).
+  These are scenario-specific end-to-end results, not a universal speedup claim.
+- **Decision:** Supersedes the earlier "DP is the leading candidate for deep dead ends" entry.
+  Keep DP as an explicit strategy; do not change the default. Because pruned plus lookahead is
+  within about 1.5x of DP on the corrected shapes, Phase G (dimension reordering) is not
+  justified unless a multi-fork run contradicts this.
+- **Status:** Screening only; short runs cannot establish close rankings.
+- **Revisit when:** The confirmation run (below) with environment metadata contradicts the
+  ratios above or includes shapes where pruned is more than 2x slower than DP.
 
 ### Builder traversal versus nested Java Streams
 
@@ -343,12 +459,11 @@ benchmark result files. Read this section before proposing another optimization.
   consumption. The focused follow-up includes the GC profiler and correctness validation
   performed by the benchmark setup.
 - **Finding:** The builder approach beat the independent nested-stream baseline in all
-  12 historical COMPLETE, all 12 CHAIN, all 12 MANY_VALID, and all ten newer
-  DEEP_DEAD_END/SMALL_DOMAIN scenarios. The magnitude varied substantially by workload.
-  Allocation was also lower in the uploaded runs; for example, in
-  `DEEP_DEAD_END-7x25`, the best builder allocated about 57 KiB/op versus about
-  114 MiB/op for nested streams. These are allocation-per-operation figures, not
-  retained-heap measurements.
+  12 historical COMPLETE, all 12 CHAIN, all 12 MANY_VALID, and, in the corrected
+  screening run, all ten DEEP_DEAD_END/SMALL_DOMAIN scenarios. The magnitude varied
+  substantially by workload. Allocation was also lower in the uploaded runs. Figures quoted
+  before the Phase F2 fix for `DEEP_DEAD_END` are withdrawn because those shapes were empty.
+  Allocation figures are per operation, not retained-heap measurements.
 - **Decision:** Keep the incrementally-pruned nested-stream implementation as the baseline.
   The results support the builder approach across the tested workloads; do not generalize
   the extreme late-conflict speedups to ordinary products.
@@ -392,8 +507,10 @@ generation before changing default strategy selection.
 | Topic | Current decision | Reason / evidence needed to reopen |
 |---|---|---|
 | Default lexicographic strategy | Keep `PRUNED_BITSET`; provisional, not proven globally optimal. | Unified current-source multi-fork comparison and isolated lookahead before/after results. |
-| DP on deep dead ends | Keep as explicit strategy and leading candidate for this workload family. | Reproduce the five-of-five result with environment metadata and compare against ordinary topologies. |
+| DP on deep dead ends | Keep as explicit strategy; no longer the leading candidate. Pruned plus lookahead is within about 1.5x of DP on corrected shapes (screening). | Multi-fork run showing pruned more than 2x slower than DP; then consider Phase G. |
 | PRUNED_DFS | Retain as an explicit option; it won selected small-domain and historical many-valid cases. | Reopen if current-source runs show consistent domination or a material workload-specific advantage. |
-| ADAPTIVE | Current implementation maps to BitSet-backed pruning; `estimatedLimit` does not choose DP. | Reopen with an implemented and measured adaptive policy. |
+| ADAPTIVE | Documented as an implementation policy with no guarantee of which algorithm runs when; at this revision it maps to BitSet-backed pruning and `estimatedLimit` does not choose DP. | Reopen with an implemented and measured adaptive policy; decide name/parameter before release. |
 | Builder vs nested streams | Keep the independent incrementally-pruned stream baseline; builders won all uploaded tested cases. | Reopen with equivalent verified workloads or a material baseline change. |
+| Hand-written baselines | Added `IMPERATIVE_ALLOCATING` and `IMPERATIVE_REUSE` beside `NESTED_STREAM` (additive; nothing replaced). They separate the cost of the algorithm from the cost of result objects and streams. | Reopen if either baseline stops being a fair hand-written equivalent, for example a clearly faster hand-written formulation. |
+| Special operations | Measured separately from traversal: bounded workloads against enumeration, `LARGE` workloads library-only. | Reopen with a run recorded on a fixed environment; sandbox timings are indicative only. |
 | Historical topology results | Retain as topology-specific evidence; do not compare across benchmark generations without equivalent setup. | Re-run under the consolidated benchmark with environment metadata. |

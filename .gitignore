@@ -11,3 +11,6 @@ buildNumber.properties
 # https://github.com/takari/maven-wrapper#usage-without-binary-jar
 .mvn/wrapper/maven-wrapper.jar
 *.iml
+
+# JMH result files (only the final summary tables are committed)
+benchmark-results/

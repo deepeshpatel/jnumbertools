@@ -23,10 +23,13 @@ public final class Scenario {
         if (shape.length != 2) throw new IllegalArgumentException("Invalid benchmark shape: " + parts[2]);
         int n = Integer.parseInt(shape[0]), size = Integer.parseInt(shape[1]);
         if (!List.of("CHAIN", "MANY_VALID", "COMPLETE", "DEAD_END", "CONTROLLED_DEAD_END",
-                "DEEP_DEAD_END", "SMALL_DOMAIN").contains(topology))
+                "DEEP_DEAD_END", "SMALL_DOMAIN", "LARGE").contains(topology))
             throw new IllegalArgumentException("Unknown benchmark topology: " + topology);
         if (topology.equals("SMALL_DOMAIN")) {
             return smallDomain(n, size);
+        }
+        if (topology.equals("LARGE")) {
+            return large(n, size);
         }
         if (topology.equals("DEEP_DEAD_END")) {
             return deepDeadEnd(n, size);
@@ -74,6 +77,21 @@ public final class Scenario {
      */
     private static ScenarioData smallDomain(int n, int size) {
         if (n < 8 || size < 3 || size > 5) throw new IllegalArgumentException("Unsupported SMALL_DOMAIN shape");
+        List<List<Integer>> dimensions = new ArrayList<>(n);
+        for (int d = 0; d < n; d++) dimensions.add(IntStream.range(0, size).boxed().toList());
+        List<Rule> rules = new ArrayList<>();
+        for (int d = 0; d < n - 1; d++)
+            rules.add(new Rule(d, range(0, size), d + 1, range(0, size - 1)));
+        return new ScenarioData(List.copyOf(dimensions), List.copyOf(rules));
+    }
+
+    /**
+     * Scaling workload for the special operations: a chain where each dimension excludes only the last value of
+     * the next one, so there are {@code size * (size-1)^(n-1)} valid tuples (about 1e17 for 10x50, about 5e33 for
+     * 20x50). Far too many to enumerate; only count, rank and sampling operations are meaningful here.
+     */
+    private static ScenarioData large(int n, int size) {
+        if (n < 8 || size < 10) throw new IllegalArgumentException("Unsupported LARGE shape");
         List<List<Integer>> dimensions = new ArrayList<>(n);
         for (int d = 0; d < n; d++) dimensions.add(IntStream.range(0, size).boxed().toList());
         List<Rule> rules = new ArrayList<>();

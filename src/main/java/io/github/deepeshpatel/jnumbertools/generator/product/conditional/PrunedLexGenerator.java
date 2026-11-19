@@ -20,9 +20,11 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
      * Completion lookahead (feasibility tier). Pairwise pruning cannot see a prefix that is consistent so far but has
      * no valid completion (a loop, or a rule between distant dimensions that no value combination can satisfy), and
      * enumerates the free dimensions below it before failing. Checking every candidate costs more than it saves when
-     * few prefixes are dead, so lookahead starts off and is switched on once the traversal has descended far more
-     * often than it has produced tuples. Building the feasibility plan is then worth its cost, and an empty plan ends
-     * the traversal at once.
+     * few prefixes are dead, so lookahead starts off for every constraint graph (loop or acyclic alike). It is switched on
+     * as soon as the number of descents exceeds {@code WASTE_FLOOR + WASTE_RATIO * emitted}, that is 1,024 plus four
+     * times the tuples emitted so far; the rule looks only at observed work, never at the graph's shape. Building the
+     * feasibility plan is then worth its cost, and an empty plan ends the traversal at once. Once on, lookahead stays on
+     * for the rest of that traversal and does not change which tuples are returned or their order.
      */
     private ConstraintPlan lookaheadPlan;
     private long descents;

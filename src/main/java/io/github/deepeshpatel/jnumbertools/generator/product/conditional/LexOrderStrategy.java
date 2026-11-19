@@ -12,6 +12,10 @@ public enum LexOrderStrategy {
     PRUNED_DFS,
     /** Feasibility-guided sequential traversal with exact completion counts available for parallel rank-range splitting. */
     DP,
-    /** Implementation policy whose internal algorithm selection is not an API guarantee and may change between versions. */
+    /**
+     * Lets the library choose the algorithm. There is no guarantee about which algorithm runs for which workload or
+     * condition, and the choice may change between versions; each version's actual choice is documented in the
+     * changelog and the maintainer decision log. Use an explicit strategy when a specific algorithm is required.
+     */
     ADAPTIVE
 }

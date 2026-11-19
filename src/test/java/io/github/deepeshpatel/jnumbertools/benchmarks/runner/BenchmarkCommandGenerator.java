@@ -1,6 +1,8 @@
 
 package io.github.deepeshpatel.jnumbertools.benchmarks.runner;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -72,8 +74,26 @@ public final class BenchmarkCommandGenerator {
                     "PRUNED_DFS",
                     "DP",
                     "ADAPTIVE",
-                    "NESTED_STREAM"
+                    "NESTED_STREAM",
+                    "IMPERATIVE_ALLOCATING",
+                    "IMPERATIVE_REUSE"
             );
+
+    /** Directory (relative to the project root) for result files; it is git-ignored. */
+    static final String RESULTS_DIR = "benchmark-results";
+
+    /**
+     * Quick preset: a 1-2 minute regression screen for uncommitted code. One fork and short iterations
+     * cannot rank close strategies; it only exposes changes of roughly 20% or more.
+     */
+    private static final List<String> QUICK_SCENARIOS = List.of(
+            "CHAIN-5x25",
+            "MANY_VALID-5x25",
+            "DEAD_END-5x25",
+            "DEEP_DEAD_END-5x25",
+            "SMALL_DOMAIN-10x4"
+    );
+    private static final List<String> QUICK_IMPLEMENTATIONS = List.of("PRUNED_BITSET", "DP");
 
     private BenchmarkCommandGenerator() {
     }
@@ -82,6 +102,11 @@ public final class BenchmarkCommandGenerator {
      * Standalone entry point.
      */
     public static void main(String[] args) {
+        // Non-interactive form used by scripts: --print <quick|full> <run-name>
+        if (args.length == 3 && args[0].equals("--print")) {
+            System.out.println(presetCommand(args[1], args[2]));
+            return;
+        }
         try (Scanner scanner = new Scanner(System.in)) {
             String command = generateCommand(scanner);
 
@@ -114,6 +139,14 @@ public final class BenchmarkCommandGenerator {
         System.out.println("==============================================");
         System.out.println(" Conditional Product Benchmark Command Builder");
         System.out.println("==============================================");
+
+        String preset = readPreset(scanner);
+        if (!preset.equals("custom")) {
+            String command = presetCommand(preset, runName(preset));
+            System.out.println();
+            System.out.println("Preset: " + preset);
+            return command;
+        }
 
         // Select topology first.
         List<String> topologies = select(
@@ -200,6 +233,7 @@ public final class BenchmarkCommandGenerator {
         scenarios.forEach(System.out::println);
 
         return buildCommand(
+                runName("custom"),
                 scenarios,
                 implementations,
                 warmup,
@@ -207,6 +241,74 @@ public final class BenchmarkCommandGenerator {
                 forks,
                 profiler
         );
+    }
+
+    private static String runName(String preset) {
+        return preset + "-"
+                + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
+    }
+
+    private static String readPreset(Scanner scanner) {
+        while (true) {
+            System.out.println();
+            System.out.println("Preset:");
+            System.out.println("  1. quick       (about 1-2 minutes; 5 shapes, PRUNED_BITSET and DP; regression screen only)");
+            System.out.println("  2. full-matrix (every topology, shape and implementation; 5 warmup, 8 measurement, 2 forks; long)");
+            System.out.println("  3. special-ops (count, isEmpty, lexOrderMth, byRanks, choice, sample; bounded and LARGE workloads)");
+            System.out.println("  4. custom      (choose topologies, shapes and implementations)");
+            System.out.print("Your choice [4]: ");
+
+            switch (scanner.nextLine().trim()) {
+                case "1":
+                    return "quick";
+                case "2":
+                    return "full";
+                case "3":
+                    return "special";
+                case "", "4":
+                    return "custom";
+                default:
+                    System.out.println("Enter 1, 2, 3 or 4.");
+            }
+        }
+    }
+
+    /**
+     * Command for a named preset. The full matrix lists ordinary and adversarial topologies in one
+     * benchmark generation, as the decision log requires before any default is revisited.
+     */
+    static String presetCommand(String preset, String runName) {
+        switch (preset) {
+            case "quick":
+                return buildCommand(runName, QUICK_SCENARIOS, QUICK_IMPLEMENTATIONS, 2, 3, 1, "gc");
+            case "full":
+                List<String> all = buildScenarios(
+                        TOPOLOGIES,
+                        distinct(TOPOLOGIES, 0),
+                        distinct(TOPOLOGIES, 1));
+                return buildCommand(runName, all, IMPLEMENTATIONS, 5, 8, 2, "gc");
+            case "special":
+                return specialOperationsCommand(runName);
+            default:
+                throw new IllegalArgumentException("Unknown preset: " + preset);
+        }
+    }
+
+    /**
+     * Special operations are measured by two classes with different parameter sets (bounded workloads with an
+     * enumeration baseline, and LARGE library-only workloads), so this preset runs both and writes two result files.
+     */
+    private static String specialOperationsCommand(String runName) {
+        String classpath = shellQuote(System.getProperty("java.class.path"));
+        String base = RESULTS_DIR + "/" + runName;
+        String options = " -wi 3 -i 5 -f 1 -tu us -bm avgt -prof gc";
+        return "mkdir -p " + RESULTS_DIR + "\n"
+                + "java -cp " + classpath + " "
+                + BenchmarkEnvironment.class.getName() + " > " + base + ".env.txt\n"
+                + "java -cp " + classpath + " org.openjdk.jmh.Main '.*ConditionalProductSpecialOperationsBenchmark.*'"
+                + options + " -rf json -rff " + base + "-bounded.json 2>&1 | tee " + base + "-bounded.log\n"
+                + "java -cp " + classpath + " org.openjdk.jmh.Main '.*ConditionalProductScalingBenchmark.*'"
+                + options + " -rf json -rff " + base + "-scaling.json 2>&1 | tee " + base + "-scaling.log";
     }
 
     /**
@@ -360,6 +462,7 @@ public final class BenchmarkCommandGenerator {
     }
 
     private static String buildCommand(
+            String runName,
             List<String> scenarios,
             List<String> implementations,
             int warmup,
@@ -369,9 +472,15 @@ public final class BenchmarkCommandGenerator {
 
         // Reuse the classpath of the JVM running this generator.
         // This supports both terminal and IntelliJ execution.
-        String classpath = System.getProperty("java.class.path");
+        String classpath = shellQuote(System.getProperty("java.class.path"));
+        String base = RESULTS_DIR + "/" + runName;
 
-        return "java -cp " + shellQuote(classpath) + " \\\n"
+        // 1) environment record, 2) JMH with JSON output, full console output kept in a log.
+        // Result files are git-ignored; only the final summary table is committed.
+        return "mkdir -p " + RESULTS_DIR + "\n"
+                + "java -cp " + classpath + " "
+                + BenchmarkEnvironment.class.getName() + " > " + base + ".env.txt\n"
+                + "java -cp " + classpath + " \\\n"
                 + "  org.openjdk.jmh.Main " + BENCHMARK_REGEX + " \\\n"
                 + "  -p scenario=" + String.join(",", scenarios) + " \\\n"
                 + "  -p implementation="
@@ -380,7 +489,9 @@ public final class BenchmarkCommandGenerator {
                 + " -i " + measurement
                 + " -f " + forks
                 + " -tu ms -bm avgt"
-                + (profiler.equals("none") ? "" : " -prof " + profiler);
+                + (profiler.equals("none") ? "" : " -prof " + profiler)
+                + " \\\n  -rf json -rff " + base + ".json"
+                + " 2>&1 | tee " + base + ".log";
     }
 
     private static String shellQuote(String value) {
