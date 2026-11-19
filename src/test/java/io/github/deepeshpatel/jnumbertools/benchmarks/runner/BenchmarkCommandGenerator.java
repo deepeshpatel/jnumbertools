@@ -296,7 +296,7 @@ public final class BenchmarkCommandGenerator {
 
     /**
      * Special operations are measured by two classes with different parameter sets (bounded workloads with an
-     * enumeration baseline, and LARGE library-only workloads), so this preset runs both and writes two result files.
+     * enumeration baseline, and LARGE library-only workloads), plus the empty-product count/isEmpty workload, so this preset runs all three and writes three result files.
      */
     private static String specialOperationsCommand(String runName) {
         String classpath = shellQuote(System.getProperty("java.class.path"));
@@ -308,7 +308,9 @@ public final class BenchmarkCommandGenerator {
                 + "java -cp " + classpath + " org.openjdk.jmh.Main '.*ConditionalProductSpecialOperationsBenchmark.*'"
                 + options + " -rf json -rff " + base + "-bounded.json 2>&1 | tee " + base + "-bounded.log\n"
                 + "java -cp " + classpath + " org.openjdk.jmh.Main '.*ConditionalProductScalingBenchmark.*'"
-                + options + " -rf json -rff " + base + "-scaling.json 2>&1 | tee " + base + "-scaling.log";
+                + options + " -rf json -rff " + base + "-scaling.json 2>&1 | tee " + base + "-scaling.log\n"
+                + "java -cp " + classpath + " org.openjdk.jmh.Main '.*ConditionalProductEmptyProductBenchmark.*'"
+                + options + " -rf json -rff " + base + "-empty.json 2>&1 | tee " + base + "-empty.log";
     }
 
     /**

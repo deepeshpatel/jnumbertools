@@ -33,6 +33,8 @@ final class ConstraintCounts {
     final long[][] lmsg;
     final long[][] lfreePrefix;
     final long[] lsuffix;
+    // product of all dimension sizes; computed on first use by mostTuplesValid()
+    private BigInteger fullProduct;
 
     ConstraintCounts(ConstraintPlan plan, int[] order, int[] dimSize) {
         this.plan = plan;
@@ -256,13 +258,22 @@ final class ConstraintCounts {
 
     /** True when a uniformly random point of the full product is valid with probability at least 1/4. */
     boolean mostTuplesValid() {
-        BigInteger fullProduct = BigInteger.ONE;
-        for (int size : dimSize) fullProduct = fullProduct.multiply(BigInteger.valueOf(size));
-        return this.total.shiftLeft(2).compareTo(fullProduct) >= 0;
+        BigInteger product = fullProduct;
+        if (product == null) {
+            product = BigInteger.ONE;
+            for (int size : dimSize) product = product.multiply(BigInteger.valueOf(size));
+            fullProduct = product;      // immutable value: two threads racing here compute the same number
+        }
+        return this.total.shiftLeft(2).compareTo(product) >= 0;
     }
 
     // ── primitive-long versions of the counting queries (used when lsuffix != null) ──
 
+    // Overflow safety of the long queries (sumConsistentL, countL, completionsL): they use plain arithmetic with no
+    // check. That is sound only because buildLong already checked every partial product, in the same child and root
+    // order, against LIMIT, and a query factor is never larger than the corresponding table factor (fixing a
+    // dimension can only remove values from a sum). So every intermediate value here is at most a value that was
+    // verified to fit. Any change to the build order, or a query that can return more than its table entry, breaks this.
     private long sumConsistentL(int c, BitSet allowed, int k, int[] val) {
         long r = plan.range(c, k, val);
         int lo;

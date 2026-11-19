@@ -567,3 +567,18 @@ slower result anywhere; the roughly 2x gains on the BigInteger paths (`lexOrderM
 
 Still open: the small-product setup cost (`byRanks` and `sample` on DEAD_END-5x25 lose to enumeration) and an
 empty-product `isEmpty` workload.
+
+### Empty-product workload and small-product setup cost (patch h4)
+
+`ConditionalProductEmptyProductBenchmark` (scenario `EMPTY_DEEP-5x25`, operations `count` and `isEmpty`, LIBRARY against
+ENUMERATION) measures an empty product whose emptiness only the last dimension reveals. The earlier `isEmpty`
+comparison used non-empty products, where enumeration stops at the first tuple, which favoured it. The `special`
+preset now writes a third file, `<run-name>-empty.json`. JMH smoke result (Apple M5, JDK 26.0.1, 2026-11-19):
+`count` 93.9 us against 17,934 us for enumeration (190.9x, 43.6x less allocation) and `isEmpty` 92.5 us against
+17,922 us (193.8x, 33.0x less allocation). The two library operations cost the same because the time is builder and
+plan construction, not the question asked.
+
+Small-product setup cost: on DEAD_END-5x25 the library is about 1.3x slower than enumeration for `byRanks`, `sample`
+and `choice` (sandbox 154 / 168 / 145 us against 121 / 122 / 117 us). The counting tier adds only about 10 KB per call;
+about 66 KB is the cost of building the plan itself, which `isEmpty` and every traversal also pay. Reducing it would be a
+change to plan construction, not to the counting tier, so it is recorded here and deferred.

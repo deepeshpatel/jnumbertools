@@ -75,6 +75,11 @@ final class AnyOrderGenerator extends AbstractGenerator<Object> {
             // Do not split after traversal starts: the iterator owns the remaining subtree.
             if (iterator != null || workBound() <= SPLIT_WORK_THRESHOLD) return null;
 
+            // When at most one value remains at the current level, the only way to split is to descend: fix that
+            // value into the prefix and continue at the next level, whose range starts out as all of its values.
+            // The prefix array is replaced, never modified in place, so the spliterator returned below and this one
+            // can share it. If the loop gives up (returns null) the state is still an equivalent description of the
+            // same remaining tuples.
             int dimensions = model.dimensions.size();
             while (to - from <= 1 && prefix.length < dimensions - 1) {
                 if (from == to) return null;

@@ -23,7 +23,7 @@ public final class Scenario {
         if (shape.length != 2) throw new IllegalArgumentException("Invalid benchmark shape: " + parts[2]);
         int n = Integer.parseInt(shape[0]), size = Integer.parseInt(shape[1]);
         if (!List.of("CHAIN", "MANY_VALID", "COMPLETE", "DEAD_END", "CONTROLLED_DEAD_END",
-                "DEEP_DEAD_END", "SMALL_DOMAIN", "LARGE").contains(topology))
+                "DEEP_DEAD_END", "EMPTY_DEEP", "SMALL_DOMAIN", "LARGE").contains(topology))
             throw new IllegalArgumentException("Unknown benchmark topology: " + topology);
         if (topology.equals("SMALL_DOMAIN")) {
             return smallDomain(n, size);
@@ -32,7 +32,10 @@ public final class Scenario {
             return large(n, size);
         }
         if (topology.equals("DEEP_DEAD_END")) {
-            return deepDeadEnd(n, size);
+            return deepDeadEnd(n, size, false);
+        }
+        if (topology.equals("EMPTY_DEEP")) {
+            return deepDeadEnd(n, size, true);
         }
         if (!List.of(3, 5, 7, 10).contains(n) || !List.of(10, 25, 50).contains(size))
             throw new IllegalArgumentException("Unsupported benchmark shape: " + parts[2]);
@@ -101,18 +104,19 @@ public final class Scenario {
     }
 
     /**
-     * Late conflict: dimension n-2 forces the last dimension into the lower half, while ~90% of the values
+     * Late conflict (EMPTY_DEEP is the same shape with every prefix dead, so the product is empty): dimension n-2 forces the last dimension into the lower half, while ~90% of the values
      * dimension n-3 can take force it into the upper half (the rest stay valid, so the product is not empty). Those prefixes are only found dead at the last dimension, so a
      * traversal without lookahead explores the whole chain prefix before failing.
      */
-    private static ScenarioData deepDeadEnd(int n, int size) {
+    private static ScenarioData deepDeadEnd(int n, int size, boolean empty) {
         if (n < 5 || size < 10) throw new IllegalArgumentException("Unsupported DEEP_DEAD_END shape");
         List<List<Integer>> dimensions = new ArrayList<>(n);
         for (int d = 0; d < n; d++) dimensions.add(IntStream.range(0, size).boxed().toList());
         int allowed = largestBranchingFactor(size, n - 1, 200_000L);
         int half = size / 2;
         // ~90% of the values dimension n-3 can actually take (the chain limits it to [0,allowed)) are dead
-        int killed = Math.max(1, Math.min(allowed - 1, (int) Math.floor(allowed * 0.9)));
+        // EMPTY_DEEP kills every value, so no tuple is valid: the empty product that only the last dimension reveals
+        int killed = empty ? allowed : Math.max(1, Math.min(allowed - 1, (int) Math.floor(allowed * 0.9)));
         List<Rule> rules = new ArrayList<>();
         for (int d = 0; d < n - 2; d++)
             rules.add(new Rule(d, range(0, size), d + 1, range(0, allowed)));

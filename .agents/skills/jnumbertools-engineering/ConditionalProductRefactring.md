@@ -390,3 +390,10 @@ Update this table whenever an item changes status.
 - 2026-11-19 (H1 confirmed, H3): H1 pushed as 73e253b. JMH special: LARGE count 5x-11x faster, choice/byRanks up to 10x/4x,
   sample only 0.7-0.8x. H3: BigInteger counting queries skip identity multiply/add; sandbox sample allocation at
   20x50 21.5 -> 2.0 MB, 20x100 44.7 -> 4.1 MB. Awaiting JMH confirmation. Open: small-product setup cost, empty-product isEmpty workload.
+- 2026-11-19 (H4): item 8 leftovers. Added the long-query overflow-invariant comment, cached the full product in
+  `mostTuplesValid`, documented the `AnyOrderGenerator.trySplit` invariant, added the concurrent first-use test of the
+  counting tier and the empty-product benchmark (`EMPTY_DEEP-5x25`, third file in the `special` preset). Small-product
+  setup cost traced to plan construction (about 66 KB per call at 5x25), not counting; deferred. H3 JMH: sample, byRanks,
+  lexOrderMth about 2x faster at LARGE-20x50/20x100. Review items declined: cheap `estimateSize` (would cap parallel DP),
+  lookahead when the plan exists (costs time on healthy shapes). Open: multi-relation shape to measure `cardinality()` in
+  `BitSetPrunedGenerator` (review finding 4), then the item 7 confirmation run.

@@ -272,4 +272,41 @@ class ConstraintPlanTierTest {
             assertEquals(expected.bitLength() <= 62, counts.lsuffix != null, dimensions + " dimensions");
         }
     }
+
+    @Test
+    void concurrentFirstUseOfTheCountingTierBuildsOneSharedInstance() throws Exception {
+        List<List<Integer>> dims = List.of(values(0, 6), values(1, 6), values(2, 6), values(3, 6));
+        List<Rule> rules = List.of(
+                new Rule(0, List.of(0, 1, 2), 1, List.of(100, 101, 102)),
+                new Rule(1, List.of(100, 101), 2, List.of(201, 203, 205)),
+                new Rule(3, List.of(300, 303), 2, List.of(200, 202)));
+        List<List<Object>> expected = bruteForce(dims, rules);
+        BigInteger want = BigInteger.valueOf(expected.size());
+        int threads = 8;
+        java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(threads);
+        try {
+            for (int round = 0; round < 200; round++) {
+                var builder = build(dims, rules);                 // a fresh model: counts not yet built
+                ConstraintPlan plan = planOf(builder);
+                assertFalse(plan.countsBuilt());
+                java.util.concurrent.CyclicBarrier start = new java.util.concurrent.CyclicBarrier(threads);
+                List<java.util.concurrent.Future<ConstraintCounts>> seen = new ArrayList<>();
+                for (int t = 0; t < threads; t++) {
+                    final int which = t;
+                    seen.add(pool.submit(() -> {
+                        start.await();
+                        // half the threads count, the others unrank, so both entry points race on the first build
+                        if (which % 2 == 0) assertEquals(want, builder.count());
+                        else assertEquals(expected.get(0), builder.byRanks(List.of(BigInteger.ZERO)).stream()
+                                .findFirst().orElseThrow());
+                        return plan.counts();
+                    }));
+                }
+                ConstraintCounts first = seen.get(0).get();
+                for (var future : seen) assertTrue(future.get() == first, "every thread sees the same counting tier");
+            }
+        } finally {
+            pool.shutdownNow();
+        }
+    }
 }
