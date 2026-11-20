@@ -48,14 +48,14 @@ import java.util.Random;
  * is {@code x}, the value chosen from {@code B} must be {@code y} or {@code z}. Every completed
  * pairwise rule is combined with the other rules using AND. Dimensions are identified by the same
  * list instance passed to {@code conditionalProductOf} or {@code and}. For compound AND/OR trigger
- * expressions, use {@link CompoundCompoundProductEngineBuilder} through
+ * expressions, use {@link CompoundConditionalProductBuilder} through
  * {@code compoundConditionalProductOf(...)}.</p>
  *
  * <h2>What is supported</h2>
  * <p>This builder supports pairwise rules expressed with {@code when(...).then(...)}.
  * It provides lexicographic and any-order traversal, exact counting, rank-based traversal,
  * and random choice and sampling. Compound trigger expressions using {@code .and(...)} or
- * {@code .or(...)} are exposed separately by {@link CompoundCompoundProductEngineBuilder}; that
+ * {@code .or(...)} are exposed separately by {@link CompoundConditionalProductBuilder}; that
  * builder intentionally provides generation, counting and emptiness checks without exposing
  * rank-based or lexicographic operations.</p>
  *

@@ -37,7 +37,7 @@ import java.util.List;
  *
  * @author Deepesh Patel
  */
-public final class CompoundCompoundProductEngineBuilder {
+public final class CompoundConditionalProductBuilder {
 
     private final CompoundProductEngineBuilder delegate;
 
@@ -46,11 +46,11 @@ public final class CompoundCompoundProductEngineBuilder {
      *
      * @param elements first dimension; copied
      */
-    public CompoundCompoundProductEngineBuilder(List<?> elements) {
+    public CompoundConditionalProductBuilder(List<?> elements) {
         this(new CompoundProductEngineBuilder(elements));
     }
 
-    private CompoundCompoundProductEngineBuilder(CompoundProductEngineBuilder delegate) {
+    private CompoundConditionalProductBuilder(CompoundProductEngineBuilder delegate) {
         this.delegate = delegate;
     }
 
@@ -60,8 +60,8 @@ public final class CompoundCompoundProductEngineBuilder {
      * @param elements the next dimension; copied
      * @return a new immutable builder
      */
-    public CompoundCompoundProductEngineBuilder and(List<?> elements) {
-        return new CompoundCompoundProductEngineBuilder(delegate.and(elements));
+    public CompoundConditionalProductBuilder and(List<?> elements) {
+        return new CompoundConditionalProductBuilder(delegate.and(elements));
     }
 
     /**
@@ -121,29 +121,29 @@ public final class CompoundCompoundProductEngineBuilder {
             this.step = step;
         }
 
-        public CompoundCompoundProductEngineBuilder is(Object value) {
-            return new CompoundCompoundProductEngineBuilder(step.is(value));
+        public CompoundConditionalProductBuilder is(Object value) {
+            return new CompoundConditionalProductBuilder(step.is(value));
         }
-        public CompoundCompoundProductEngineBuilder isNot(Object value) {
-            return new CompoundCompoundProductEngineBuilder(step.isNot(value));
+        public CompoundConditionalProductBuilder isNot(Object value) {
+            return new CompoundConditionalProductBuilder(step.isNot(value));
         }
-        public CompoundCompoundProductEngineBuilder isOneOf(Object... values) {
-            return new CompoundCompoundProductEngineBuilder(step.isOneOf(values));
+        public CompoundConditionalProductBuilder isOneOf(Object... values) {
+            return new CompoundConditionalProductBuilder(step.isOneOf(values));
         }
-        public CompoundCompoundProductEngineBuilder isOneOf(Collection<?> values) {
-            return new CompoundCompoundProductEngineBuilder(step.isOneOf(values));
+        public CompoundConditionalProductBuilder isOneOf(Collection<?> values) {
+            return new CompoundConditionalProductBuilder(step.isOneOf(values));
         }
-        public CompoundCompoundProductEngineBuilder isNoneOf(Object... values) {
-            return new CompoundCompoundProductEngineBuilder(step.isNoneOf(values));
+        public CompoundConditionalProductBuilder isNoneOf(Object... values) {
+            return new CompoundConditionalProductBuilder(step.isNoneOf(values));
         }
-        public CompoundCompoundProductEngineBuilder isNoneOf(Collection<?> values) {
-            return new CompoundCompoundProductEngineBuilder(step.isNoneOf(values));
+        public CompoundConditionalProductBuilder isNoneOf(Collection<?> values) {
+            return new CompoundConditionalProductBuilder(step.isNoneOf(values));
         }
-        public CompoundCompoundProductEngineBuilder isNotIn(Object... values) {
-            return new CompoundCompoundProductEngineBuilder(step.isNotIn(values));
+        public CompoundConditionalProductBuilder isNotIn(Object... values) {
+            return new CompoundConditionalProductBuilder(step.isNotIn(values));
         }
-        public CompoundCompoundProductEngineBuilder isNotIn(Collection<?> values) {
-            return new CompoundCompoundProductEngineBuilder(step.isNotIn(values));
+        public CompoundConditionalProductBuilder isNotIn(Collection<?> values) {
+            return new CompoundConditionalProductBuilder(step.isNotIn(values));
         }
     }
 
