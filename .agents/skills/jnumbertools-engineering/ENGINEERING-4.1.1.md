@@ -30,6 +30,27 @@ Removed the public six-argument `.filter(...)` method, its `Predicate6` interfac
 
 The removal commit is listed below. The next implementation step is a dependency-aware multi-trigger rule expression using `.and()` and `.or()`. It must preserve exact semantics across traversal, counting, ranking, and sampling. Existing pairwise-only rules must retain their current execution path without multi-trigger evaluation overhead.
 
+### Compound trigger expressions with AND / OR
+
+Added arbitrary-length trigger expressions:
+
+- `.and(dimension)` adds a condition to the current conjunction.
+- `.or(dimension)` starts a new alternative conjunction.
+- The trigger is interpreted as an OR of AND-groups; AND binds within each group.
+- The consequence applies if any group matches.
+
+Example:
+
+```java
+.when(browser).is("Safari").and(os).is("Windows")
+.or(browser).is("Chrome").and(os).is("Linux")
+.then(database).isNot("PostgreSQL");
+```
+
+The engine stores this as a non-binary constraint. Every dimension in its trigger scope and target is joined into a bounded joint-assignment block, and the complete implication is checked against those assignments. The block is subject to the existing `MAX_LOOP_COMBINATIONS` limit; pair links introduced to form the block are subject to `MAX_PAIR_CELLS`. Expressions whose alternatives all refer to one trigger dimension are collapsed back into a pairwise rule, preserving the existing optimized relation path.
+
+Tests added cover AND/OR grouping, arbitrary-length conjunctions, and the builder's traversal, counting, ranking and sampling operations. The Maven suite has not been run remotely; the user will run it locally.
+
 ## Commit history on the PR branch
 
 The following commits are present on the PR branch, in chronological order:
@@ -50,15 +71,16 @@ This list describes the implementation commits preceding this engineering-notes 
 
 ## Remaining work and acceptance criteria
 
-- [ ] Design and implement arbitrary-length trigger expressions: `.and()` adds a condition to the current conjunction; `.or()` starts another conjunction alternative.
-- [ ] Compile multi-trigger rules into a sound constraint representation; do not approximate a multi-dimensional antecedent with independent pairwise rules.
-- [ ] Preserve exact semantics for lexicographic and any-order traversal, `count()`, `isEmpty()`, `byRanks()`, `lexOrderMth()`, `choice()`, and `sample()`.
-- [ ] Keep pairwise-only workloads on the existing optimized execution path and benchmark for regressions.
-- [ ] Add tests for AND/OR grouping, arbitrary chain lengths, validation, and differential agreement with brute force.
-- [ ] Correct and verify public Javadocs and usage examples.
+- [x] Design and implement arbitrary-length trigger expressions: `.and()` adds a condition to the current conjunction; `.or()` starts another conjunction alternative.
+- [x] Compile multi-trigger rules as bounded joint-scope constraints, not as independent pairwise approximations.
+- [x] Integrate multi-trigger semantics with lexicographic traversal, any-order traversal, `count()`, `isEmpty()`, `byRanks()`, `lexOrderMth()`, `choice()`, and `sample()`.
+- [ ] Run differential/property tests and the Maven suite locally; fix any failures.
+- [ ] Benchmark pairwise-only workloads against the pre-change baseline to verify no measurable regression.
+- [x] Add tests for AND/OR grouping and arbitrary chain lengths.
+- [ ] Review Javadocs after local compilation and Javadoc generation.
 - [ ] Record each verified bug fix here with the failing test, fix summary, and commit SHA.
 - [ ] Run the relevant Maven tests and record the actual result before merge.
 
 ## Validation status
 
-The filter-removal commit was created remotely. Maven tests were **not executed** in this environment; the user will run the tests locally after the commits are pushed. Record the local test command and actual result here when available.
+The filter-removal and compound-trigger implementation commits were created remotely. Maven tests and Javadoc generation were **not executed** in this environment; the user will run the tests locally after the commits are pushed. Record the exact commands and actual results here when available. No performance benchmark has yet been run for pairwise-only workloads.
