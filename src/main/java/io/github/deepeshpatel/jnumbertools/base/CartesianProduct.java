@@ -19,7 +19,7 @@ import java.util.List;
  * <ul>
  *   <li><b>Simple Product</b>: Aⁿ where A is a single set repeated n times</li>
  *   <li><b>Constrained Product</b>: A₁ × A₂ × ... × Aₖ where each Aᵢ can be a set, combination, or subset with constraints</li>
- *   <li><b>Conditional Product</b>: a simple product restricted by rules between two dimensions</li>
+ *   <li><b>Conditional Product</b>: a simple product restricted by pairwise rules or compound AND/OR trigger rules</li>
  * </ul>
  *
  * <h2>Usage Examples</h2>
@@ -126,13 +126,15 @@ public final class CartesianProduct {
     }
 
     /**
-     * Creates a builder for a Cartesian product whose dimensions are linked by rules such as
-     * {@code when(browser).is("Safari").then(os).isOneOf("macOS")}.
+     * Creates a builder for a Cartesian product whose dimensions are linked by pairwise or compound rules,
+     * such as {@code when(browser).is("Safari").then(os).isOneOf("macOS")}.
      * <p>
-     * Add further dimensions with {@code and(list)} and rules with {@code when(list)...then(list)...}.
-     * Counting, ranking and sampling work on the valid tuples only, without enumerating the full product.
-     * Rules refer to a dimension by the same list instance that was passed in. See
-     * {@link ConditionalProductBuilder} for the rule vocabulary and its limits.
+     * Add further dimensions with {@code and(list)}. A trigger may combine conditions with
+     * {@code .and(otherDimension).is(value)} and alternative conjunctions with
+     * {@code .or(otherDimension).is(value)} before naming the restricted dimension with {@code then(list)}.
+     * OR separates AND-groups, so AND binds more tightly than OR. Counting, ranking and sampling work
+     * on valid tuples only. Rules refer to dimensions by the same list instances passed to this builder.
+     * See {@link ConditionalProductBuilder} for examples, rule semantics and constraint-size limits.
      * </p>
      *
      * @param elements the first dimension; copied. An empty list is allowed and makes the product empty.
