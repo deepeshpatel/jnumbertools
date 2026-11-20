@@ -32,7 +32,7 @@ public class ConditionalProductSpeedBenchmark {
     public void verifyCorrectness() {
 
         var builderResult = JNumberTools.cartesianProduct()
-                .conditionalProductOf(os)
+                .conditional().ofList(os)
                 .and(browser)
                 .and(database)
                 .and(deployment)
@@ -65,7 +65,7 @@ public class ConditionalProductSpeedBenchmark {
     public long jnumberTools() {
 
         var builder = JNumberTools.cartesianProduct()
-                .conditionalProductOf(os)
+                .conditional().ofList(os)
                 .and(browser)
                 .and(database)
                 .and(deployment)
