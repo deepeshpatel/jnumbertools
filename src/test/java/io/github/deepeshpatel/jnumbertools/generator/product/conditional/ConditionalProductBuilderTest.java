@@ -80,20 +80,23 @@ class ConditionalProductBuilderTest {
                 .then(database).isNot("PostgreSQL");
 
         List<List<Object>> expected = List.of(
-                List.of("Windows", "Safari", "Oracle"),
+                // Windows: Chrome, Safari, Firefox
                 List.of("Windows", "Chrome", "PostgreSQL"),
                 List.of("Windows", "Chrome", "Oracle"),
+                List.of("Windows", "Safari", "Oracle"),
                 List.of("Windows", "Firefox", "PostgreSQL"),
                 List.of("Windows", "Firefox", "Oracle"),
-                List.of("macOS", "Safari", "PostgreSQL"),
-                List.of("macOS", "Safari", "Oracle"),
+                // macOS: Chrome, Safari, Firefox
                 List.of("macOS", "Chrome", "PostgreSQL"),
                 List.of("macOS", "Chrome", "Oracle"),
+                List.of("macOS", "Safari", "PostgreSQL"),
+                List.of("macOS", "Safari", "Oracle"),
                 List.of("macOS", "Firefox", "PostgreSQL"),
                 List.of("macOS", "Firefox", "Oracle"),
+                // Linux: Chrome, Safari, Firefox
+                List.of("Linux", "Chrome", "Oracle"),
                 List.of("Linux", "Safari", "PostgreSQL"),
                 List.of("Linux", "Safari", "Oracle"),
-                List.of("Linux", "Chrome", "Oracle"),
                 List.of("Linux", "Firefox", "PostgreSQL"),
                 List.of("Linux", "Firefox", "Oracle")
         );
