@@ -15,7 +15,7 @@ import java.util.Collections;
 /**
  * Immutable shared input model for a conditional Cartesian product.
  *
- * <p>The dimension snapshots, pairwise relations and compound rules are immutable inputs to the builder's generators.
+ * <p>The dimension snapshots and pairwise relations are immutable inputs to the builder's generators.
  * The compact rows used by prefix-pruned traversal are materialized lazily and then
  * safely published for reuse by every generator created from this model.</p>
  */
@@ -23,29 +23,26 @@ final class ConstraintModel {
     final List<List<?>> dimensions;
     final PersistentRelationMap relations;
     final DimensionIndexes indexes;
-    final List<MultiTriggerRule> multiRules;
     private volatile Rows rows;
     private volatile DenseRows denseRows;
     private volatile boolean denseRowsInitialized;
     private volatile ConstraintPlan plan;
 
     ConstraintModel(List<List<?>> dimensions, PersistentRelationMap relations) {
-        this(dimensions, relations, new DimensionIndexes(dimensions), List.of());
+        this(dimensions, relations, new DimensionIndexes(dimensions));
     }
 
-    private ConstraintModel(List<List<?>> dimensions, PersistentRelationMap relations,
-                            DimensionIndexes indexes, List<MultiTriggerRule> multiRules) {
+    private ConstraintModel(List<List<?>> dimensions, PersistentRelationMap relations, DimensionIndexes indexes) {
         this.dimensions = dimensions;
         this.relations = relations;
         this.indexes = indexes;
-        this.multiRules = multiRules;
     }
 
     ConstraintModel withDimension(List<?> dimension) {
         List<List<?>> updated = new ArrayList<>(dimensions);
         updated.add(dimension);
         List<List<?>> extended = Collections.unmodifiableList(updated);
-        return new ConstraintModel(extended, relations, indexes.extendedTo(extended), multiRules);
+        return new ConstraintModel(extended, relations, indexes.extendedTo(extended));
     }
 
     ConstraintModel withRule(int triggerDim, BitSet triggerValues, int targetDim, BitSet allowedTargets) {
@@ -67,47 +64,7 @@ final class ConstraintModel {
         if (newLinkedPair) {
             ConstraintGraph.checkLoopBlocks(dimensions, updatedRelations.keySet());
         }
-        return new ConstraintModel(dimensions, updatedRelations, indexes, multiRules);
-    }
-
-    /**
-     * Adds a non-binary implication. A full-relation clique joins every dimension in the rule's
-     * scope into one enumerated constraint block; the rule itself is checked on complete block
-     * assignments. Existing pairwise relations are left unchanged.
-     */
-    ConstraintModel withMultiRule(MultiTriggerRule rule) {
-        PersistentRelationMap updated = relations;
-        int[] scope = rule.scope;
-        boolean addedEdge = false;
-        for (int i = 0; i < scope.length; i++) {
-            for (int j = i + 1; j < scope.length; j++) {
-                int u = scope[i];
-                int v = scope[j];
-                long key = ConstraintGraph.key(u, v);
-                if (updated.get(key) == null) {
-                    long cells = (long) dimensions.get(u).size() * dimensions.get(v).size();
-                    if (cells > ConstraintGraph.MAX_PAIR_CELLS) {
-                        throw new IllegalArgumentException("The two dimensions in a multi-trigger rule have too many "
-                                + "value pairs (" + cells + "); the limit is " + ConstraintGraph.MAX_PAIR_CELLS);
-                    }
-                    updated = updated.with(key, Relation.full(dimensions.get(u).size(), dimensions.get(v).size()));
-                    addedEdge = true;
-                }
-            }
-        }
-        if (addedEdge) ConstraintGraph.checkLoopBlocks(dimensions, updated.keySet());
-        List<MultiTriggerRule> rules = new ArrayList<>(multiRules);
-        rules.add(rule);
-        return new ConstraintModel(dimensions, updated, indexes, Collections.unmodifiableList(rules));
-    }
-
-    /** Checks a compound implication once every dimension in its scope has been assigned. */
-    boolean acceptsPrefix(int assignedThrough, int[] values) {
-        if (multiRules.isEmpty()) return true;
-        for (MultiTriggerRule rule : multiRules) {
-            if (!rule.acceptsPrefix(assignedThrough, values)) return false;
-        }
-        return true;
+        return new ConstraintModel(dimensions, updatedRelations, indexes);
     }
 
     ConstraintPlan plan() {
@@ -116,7 +73,7 @@ final class ConstraintModel {
             synchronized (this) {
                 result = plan;
                 if (result == null) {
-                    result = new ConstraintPlan(dimensions, relations, multiRules);
+                    result = new ConstraintPlan(dimensions, relations);
                     plan = result;
                 }
             }

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Constraint topology, bounded compound-rule blocks and the two lookahead tiers built on them. The dimensions are grouped into <em>nodes</em>: a dimension that is on no loop of
+ * Constraint topology and the two lookahead tiers built on it. The dimensions are grouped into <em>nodes</em>: a dimension that is on no loop of
  * rules is a node by itself; the dimensions of a loop (a block) form one node whose values are the
  * valid joint assignments of its dimensions. Nodes and the single rules between them form a forest;
  * each tree is rooted at its node with the lowest dimension index.
@@ -49,10 +49,8 @@ final class ConstraintPlan {
     private final boolean[] suffixFeasible;  // suffixFeasible[i]: every tree from roots[i] on can be completed
     private final int[] nodeOrder;     // nodes, parents before children
     private volatile ConstraintCounts countsTier;
-    private final List<MultiTriggerRule> multiRules;
 
-    ConstraintPlan(List<List<?>> dims, Map<Long, Relation> relations, List<MultiTriggerRule> multiRules) {
-        this.multiRules = multiRules;
+    ConstraintPlan(List<List<?>> dims, Map<Long, Relation> relations) {
         dimensions = dims.size();
         int n = dimensions;
         dimSize = new int[n];
@@ -100,7 +98,7 @@ final class ConstraintPlan {
             if (members[x].length == 1) {
                 size[x] = dims.get(members[x][0]).size();
             } else {
-                values[x] = enumerate(members[x], dims, relations, multiRules);
+                values[x] = enumerate(members[x], dims, relations);
                 size[x] = values[x].length;
             }
         }
@@ -310,27 +308,17 @@ final class ConstraintPlan {
     }
 
     /** All assignments of the dimensions in {@code dimsOfNode} that satisfy every rule among them. */
-    private static int[][] enumerate(int[] dimsOfNode, List<List<?>> dims, Map<Long, Relation> relations,
-                                      List<MultiTriggerRule> multiRules) {
+    private static int[][] enumerate(int[] dimsOfNode, List<List<?>> dims, Map<Long, Relation> relations) {
         int len = dimsOfNode.length;
         List<int[]> out = new ArrayList<>();
         int[] current = new int[len];
-        List<MultiTriggerRule> blockRules;
-        if (multiRules.isEmpty()) {
-            blockRules = List.of();
-        } else {
-            blockRules = multiRules.stream().filter(rule -> rule.isInBlock(dimsOfNode)).toList();
-        }
-        fill(0, current, dimsOfNode, dims, relations, blockRules, out);
+        fill(0, current, dimsOfNode, dims, relations, out);
         return out.toArray(new int[0][]);
     }
 
     private static void fill(int pos, int[] current, int[] dimsOfNode, List<List<?>> dims,
-                             Map<Long, Relation> relations, List<MultiTriggerRule> blockRules, List<int[]> out) {
+                             Map<Long, Relation> relations, List<int[]> out) {
         if (pos == dimsOfNode.length) {
-            for (MultiTriggerRule rule : blockRules) {
-                if (!rule.isSatisfied(dimsOfNode, current)) return;
-            }
             out.add(current.clone());
             return;
         }
@@ -342,7 +330,7 @@ final class ConstraintPlan {
                 Relation rel = relations.get(ConstraintGraph.key(dimsOfNode[q], dimsOfNode[pos]));
                 if (rel != null && !rel.uToV()[current[q]].get(idx)) ok = false;
             }
-            if (ok) fill(pos + 1, current, dimsOfNode, dims, relations, blockRules, out);
+            if (ok) fill(pos + 1, current, dimsOfNode, dims, relations, out);
         }
     }
 
@@ -378,11 +366,6 @@ final class ConstraintPlan {
         for (int d = 1; d < dimensions; d++) {
             if (!agreesWithBelow(d, val[d], val)) return false;
         }
-        if (!multiRules.isEmpty()) {
-            for (MultiTriggerRule rule : multiRules) {
-                if (!rule.isSatisfied(val)) return false;
-            }
-        }
         return true;
     }
 
@@ -395,7 +378,7 @@ final class ConstraintPlan {
         if (dimsBelow.length == 0) {
             for (int idx = from; idx < dimSizeK; idx++) {
                 val[k] = idx;
-                if ((last && multiRules.isEmpty()) || hasCompletion(k + 1, val)) return idx;
+                if (last || hasCompletion(k + 1, val)) return idx;
             }
             return -1;
         }
@@ -409,15 +392,15 @@ final class ConstraintPlan {
                 if (!rows[i][val[dimsBelow[i]]].get(idx)) continue outer;
             }
             val[k] = idx;
-            if ((last && multiRules.isEmpty()) || hasCompletion(k + 1, val)) return idx;
+            if (last || hasCompletion(k + 1, val)) return idx;
         }
         return -1;
     }
 
     /**
-     * Checks the last dimension against its earlier pairwise neighbours. When compound rules are present,
-     * {@link #firstValid(int, int, int[])} also checks the completed joint assignment through the feasibility
-     * plan, because a multi-trigger implication cannot be decided from pairwise rows alone.
+     * For the last dimension only: value idx is valid iff every rule between it and the (already
+     * consistent) earlier dimensions holds. Equivalent to {@code completions(n, val) > 0} but needs no
+     * walk over the whole tree.
      */
     boolean agreesWithBelow(int d, int idx, int[] val) {
         int[] dimsBelow = belowDims[d];
