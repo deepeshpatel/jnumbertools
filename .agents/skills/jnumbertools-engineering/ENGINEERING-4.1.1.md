@@ -75,6 +75,8 @@ The following commits are present on the PR branch, in chronological order:
 | [`c134885`](https://github.com/deepeshpatel/jnumbertools/commit/c1348857122c55fd414c8245661ba94468ab6943) | Apply compound-rule feasibility checks at final DP dimension | Correctness fix; local validation pending |
 | [`c451593`](https://github.com/deepeshpatel/jnumbertools/commit/c451593dbfa937851f4ac98616ecb4b45a32581e) | Record final-dimension compound-rule fix | Completed |
 | [`8227caf`](https://github.com/deepeshpatel/jnumbertools/commit/8227cafda93952ed644583d3620eeefb80c072a4) | Expand compound-rule traversal and empty-product tests | Added PRUNED_DFS, parallel-DP and empty-product coverage |
+| [`3b0380d`](https://github.com/deepeshpatel/jnumbertools/commit/3b0380decf7c4ba37d34303c46673c5d75416688) | Record compound-rule validation coverage in engineering notes | Completed |
+| [`da9736f`](https://github.com/deepeshpatel/jnumbertools/commit/da9736f354ff689ee35441996a9496c2888361b3) | Document compound conditional rules in CartesianProduct Javadocs | Updated overview and entry-point documentation |
 
 This list records the PR branch's implementation and engineering-note commits. It does not imply that local validation or performance acceptance is complete.
 
@@ -86,7 +88,8 @@ This list records the PR branch's implementation and engineering-note commits. I
 - [ ] Run differential/property tests and the Maven suite locally; fix any failures.
 - [ ] Benchmark pairwise-only workloads against the pre-change baseline to verify no measurable regression; source-level fast-path preservation is not a substitute for measurement.
 - [x] Add tests for AND/OR grouping and arbitrary chain lengths.
-- [ ] Review Javadocs after local compilation and Javadoc generation.
+- [x] Update the public `ConditionalProductBuilder` and `CartesianProduct` Javadocs for AND/OR grouping and constraint limits.
+- [ ] Compile and generate Javadocs locally to catch doclint or link errors.
 - [ ] Record each verified bug fix here with the failing test, fix summary, and commit SHA.
 - [ ] Run the relevant Maven tests and record the actual result before merge.
 
