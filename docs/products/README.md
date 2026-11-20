@@ -157,6 +157,31 @@ configs.byRanks(List.of(BigInteger.TWO));
 configs.choice(2, new Random(42));  // uniform over the valid tuples
 ```
 
+
+**Reusable compiled conditional products.** When the same rules are applied to many datasets, declare the dimensions by name and compile the rule definition once. Bind one concrete list per dimension, in declaration order, for each execution:
+
+```java
+var compiled = JNumberTools.cartesianProduct()
+        .conditional()
+        .compiledForDimensions("os", "browser", "database")
+        .when("browser").is("Safari").then("os").isOneOf("macOS")
+        .when("os").is("Linux").then("database").isOneOf("PostgreSQL", "Oracle")
+        .compile();
+
+// Reuse the compiled rules with different dimension lists.
+var first = compiled.bind(os1, browser1, database1);
+var second = compiled.bind(os2, browser2, database2);
+
+first.lexOrder().stream().forEach(System.out::println);
+second.count();
+```
+
+Dimension names are unique and their declaration order defines the order of lists passed to `bind(...)`.
+The compiled definition stores the rule structure and values, not the supplied dimensions or their positions.
+At each bind, lists are snapshotted and rule values are resolved against them; a rule value missing from its
+corresponding dimension is rejected at bind time. The returned `ConditionalProductBuilder` supports the same
+generation, counting, ranking and sampling operations as the ordinary conditional builder.
+
 **Reading a rule.** `when(A).is(x).then(B).isOneOf(y, z)` means: whenever the value chosen from `A` is `x`,
 the value chosen from `B` must be `y` or `z`. It says nothing about tuples where `A` is not `x`. All rules must
 hold together. The condition side offers `is`, `isNot`, `isOneOf`, `isNoneOf` and `isNotIn`, and so does the
