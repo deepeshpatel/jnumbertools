@@ -397,6 +397,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     @Override
     public StreamableIterable<Object> lexOrder() {
+        requirePairwiseRulesForLexOrder();
         return lexOrder(LexOrderStrategy.PRUNED_BITSET);
     }
 
@@ -433,6 +434,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @throws IllegalArgumentException if {@code strategy} is {@code ADAPTIVE}
      */
     public StreamableIterable<Object> lexOrder(LexOrderStrategy strategy) {
+        requirePairwiseRulesForLexOrder();
         Objects.requireNonNull(strategy, "strategy");
         if (strategy == LexOrderStrategy.ADAPTIVE) {
             throw new IllegalArgumentException("ADAPTIVE requires an estimated traversal limit; use lexOrder(strategy, estimatedLimit)");
@@ -459,6 +461,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @throws IllegalArgumentException if the strategy is not {@code ADAPTIVE} or the estimate is negative
      */
     public StreamableIterable<Object> lexOrder(LexOrderStrategy strategy, long estimatedLimit) {
+        requirePairwiseRulesForLexOrder();
         Objects.requireNonNull(strategy, "strategy");
         if (strategy != LexOrderStrategy.ADAPTIVE) {
             throw new IllegalArgumentException("An estimated traversal limit is supported only with ADAPTIVE");
@@ -535,6 +538,14 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     @Override
     public String toString() {
         return "ConditionalProductBuilder{dimensions=" + model.dimensions + ", linkedPairs=" + model.relations.size() + '}';
+    }
+
+    private void requirePairwiseRulesForLexOrder() {
+        if (!model.multiRules.isEmpty()) {
+            throw new UnsupportedOperationException(
+                    "lexOrder() is not supported for compound operations (rules using .and() or .or() inside when()); " +
+                    "use anyOrder() instead. lexOrder() is available only for when().then() pairwise rules.");
+        }
     }
 
     // ── Rule application ─────────────────────────────────────────────────────

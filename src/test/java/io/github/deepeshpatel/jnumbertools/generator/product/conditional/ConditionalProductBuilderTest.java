@@ -72,7 +72,7 @@ class ConditionalProductBuilderTest {
     }
 
     @Test
-    void multiTriggerAndOrGroupsUseAndPrecedenceAcrossAllOperations() {
+    void multiTriggerAndOrGroupsUseAndPrecedenceWithAnyOrder() {
         List<String> database = List.of("PostgreSQL", "Oracle");
         var product = cartesianProduct.conditionalProductOf(os, browser, database)
                 .when(browser).is("Safari").and(os).is("Windows")
@@ -101,19 +101,15 @@ class ConditionalProductBuilderTest {
                 List.of("Linux", "Firefox", "Oracle")
         );
         assertEquals(BigInteger.valueOf(16), product.count());
-        assertEquals(expected, product.lexOrder().stream().toList());
-        assertEquals(expected, product.lexOrder(LexOrderStrategy.DP).stream().toList());
-        assertEquals(expected, product.lexOrder(LexOrderStrategy.PRUNED_DFS).stream().toList());
-        assertEquals(expected, product.lexOrder(LexOrderStrategy.DP).stream().parallel().toList());
         assertEquals(new HashSet<>(expected), new HashSet<>(product.anyOrder().stream().toList()));
-        assertEquals(List.of(expected.get(0), expected.get(3), expected.get(6),
-                        expected.get(9), expected.get(12), expected.get(15)),
-                product.lexOrderMth(3, 0).stream().toList());
+        UnsupportedOperationException error = assertThrows(UnsupportedOperationException.class, product::lexOrder);
+        assertTrue(error.getMessage().contains("compound operations"));
+        assertTrue(error.getMessage().contains("anyOrder()"));
+        assertThrows(UnsupportedOperationException.class, () -> product.lexOrder(LexOrderStrategy.DP));
+        assertThrows(UnsupportedOperationException.class,
+                () -> product.lexOrder(LexOrderStrategy.ADAPTIVE, 100));
         Set<List<Object>> valid = new HashSet<>(expected);
         assertTrue(valid.containsAll(product.choice(20, new Random(19)).stream().toList()));
-        assertTrue(valid.containsAll(product.sample(5, new Random(23)).stream().toList()));
-        assertEquals(expected.subList(0, 3),
-                product.byRanks(List.of(BigInteger.ZERO, BigInteger.ONE, BigInteger.TWO)).stream().toList());
     }
 
     @Test
@@ -145,10 +141,8 @@ class ConditionalProductBuilderTest {
                 .then(target).is("y");
 
         assertEquals(BigInteger.valueOf(31), product.count());
-        assertEquals(31, product.lexOrder().stream().count());
-        assertEquals(BigInteger.valueOf(31), BigInteger.valueOf(product.byRanks(
-                java.util.stream.IntStream.range(0, 31).mapToObj(BigInteger::valueOf).toList())
-                .stream().count()));
+        assertEquals(31, product.anyOrder().stream().count());
+        assertThrows(UnsupportedOperationException.class, product::lexOrder);
         assertFalse(product.isEmpty());
     }
 
@@ -163,8 +157,8 @@ class ConditionalProductBuilderTest {
 
         assertEquals(BigInteger.ZERO, product.count());
         assertTrue(product.isEmpty());
-        assertTrue(product.lexOrder().stream().toList().isEmpty());
-        assertTrue(product.lexOrder(LexOrderStrategy.DP).stream().toList().isEmpty());
+        assertThrows(UnsupportedOperationException.class, product::lexOrder);
+        assertThrows(UnsupportedOperationException.class, () -> product.lexOrder(LexOrderStrategy.DP));
         assertTrue(product.anyOrder().stream().toList().isEmpty());
     }
 
