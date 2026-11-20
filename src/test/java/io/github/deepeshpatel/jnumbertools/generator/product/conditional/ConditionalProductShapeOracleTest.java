@@ -163,7 +163,7 @@ class ConditionalProductShapeOracleTest {
     // ------------------------------------------------------------------ oracle
 
     private static ConditionalProductBuilder build(Shape shape) {
-        var builder = cartesianProduct.conditionalProductOf(shape.dims().get(0));
+        var builder = cartesianProduct.conditional().ofList(shape.dims().get(0));
         for (int d = 1; d < shape.dims().size(); d++) builder = builder.and(shape.dims().get(d));
         for (Rule r : shape.rules()) {
             builder = builder.when(shape.dims().get(r.trigger())).isOneOf(r.triggerValues())
