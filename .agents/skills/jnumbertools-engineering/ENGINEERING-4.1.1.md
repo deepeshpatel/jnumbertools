@@ -47,7 +47,7 @@ Example:
 .then(database).isNot("PostgreSQL");
 ```
 
-The engine stores this as a non-binary constraint. Every dimension in its trigger scope and target is joined into a bounded joint-assignment block, and the complete implication is checked against those assignments. The block is subject to the existing `MAX_LOOP_COMBINATIONS` limit; pair links introduced to form the block are subject to `MAX_PAIR_CELLS`. Expressions whose alternatives all refer to one trigger dimension are collapsed back into a pairwise rule, preserving the existing optimized relation path. The plan builder also bypasses compound-rule block filtering entirely when the rule list is empty. Prefix-pruned traversal checks compound rules only when their complete scope has been assigned.
+The engine stores this as a non-binary constraint. Every dimension in its trigger scope and target is joined into a bounded joint-assignment block, and the complete implication is checked against those assignments. The block is subject to the existing `MAX_LOOP_COMBINATIONS` limit; pair links introduced to form the block are subject to `MAX_PAIR_CELLS`. Expressions whose alternatives all refer to one trigger dimension are collapsed back into a pairwise rule, preserving the existing optimized relation path. The plan builder also bypasses compound-rule block filtering entirely when the rule list is empty. Prefix-pruned traversal checks compound rules only when their complete scope has been assigned. The DP lexicographic path also performs a final feasibility check on the last dimension when compound rules exist; without it, the normal pairwise fast path would have skipped that final check.
 
 Tests added cover AND/OR grouping, arbitrary-length conjunctions, and the builder's traversal, counting, ranking and sampling operations. The Maven suite has not been run remotely; the user will run it locally.
 
@@ -72,6 +72,7 @@ The following commits are present on the PR branch, in chronological order:
 | [`38d7266`](https://github.com/deepeshpatel/jnumbertools/commit/38d72665c960751be82a8a43555590215ecb3e0e) | Update engineering notes for compound trigger rules | Completed |
 | [`cc384fa`](https://github.com/deepeshpatel/jnumbertools/commit/cc384fa1983b09b236cf74fbea1f0ffd107cccd6) | Preserve the pairwise fast path for compound rule planning | Added empty-rule fast path and single-dimension OR test |
 | [`50d08f8`](https://github.com/deepeshpatel/jnumbertools/commit/50d08f84ea5969be607efbf4894a8e93f858714f) | Record pairwise fast-path follow-up in engineering notes | Completed |
+| [`c134885`](https://github.com/deepeshpatel/jnumbertools/commit/c1348857122c55fd414c8245661ba94468ab6943) | Apply compound-rule feasibility checks at final DP dimension | Correctness fix; local validation pending |
 
 This list records the PR branch's implementation and engineering-note commits. It does not imply that local validation or performance acceptance is complete.
 
