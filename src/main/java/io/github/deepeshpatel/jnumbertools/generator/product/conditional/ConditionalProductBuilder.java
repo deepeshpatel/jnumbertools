@@ -210,6 +210,9 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @throws NullPointerException if {@code elements} is null or contains a null element
      */
     public ConditionalProductBuilder and(List<?> elements) {
+        if (!filters.isEmpty()) {
+            throw new IllegalStateException("All dimensions must be added before whole-tuple filters");
+        }
         List<?> copy = snapshot(elements);
         List<List<?>> newOriginals = new ArrayList<>(originals);
         newOriginals.add(elements);
@@ -428,9 +431,10 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * In this version it resolves to {@code PRUNED_BITSET}; the estimate is validated but does not affect
      * strategy selection.</p>
      *
-     * <p>This setting affects only this lexicographic traversal. Exact-count and rank-based operations,
-     * including {@link #count()}, {@link #lexOrderMth(BigInteger, BigInteger)}, {@link #byRanks(Iterable)},
-     * {@link #choice(int, Random)} and {@link #sample(int, Random)}, continue to use the DP plan.</p>
+     * <p>This setting affects only this lexicographic traversal. Without whole-tuple filters, exact-count
+     * and rank-based operations use the DP plan. When a {@link #filter(Predicate6)} is configured, those
+     * operations evaluate the filter over generated tuples because arbitrary predicates cannot be compiled
+     * into the pairwise constraint plan.</p>
      *
      * @param strategy traversal strategy; must not be {@code null} or {@link LexOrderStrategy#ADAPTIVE}
      * @return a re-iterable generator of valid tuples in lexicographic order
@@ -527,7 +531,12 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     }
 
     /**
-     * Number of valid tuples, computed from the rules without enumerating the product.
+     * Number of valid tuples.
+     *
+     * <p>When no whole-tuple filters are configured, the count is computed from the rules without
+     * enumerating the product. With filters, tuples are generated and tested because an arbitrary
+     * six-argument predicate cannot be incorporated into the pairwise counting plan.</p>
+     *
      * @return the exact count
      */
     @Override
