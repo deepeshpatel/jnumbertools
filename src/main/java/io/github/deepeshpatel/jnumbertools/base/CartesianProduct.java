@@ -145,6 +145,32 @@ public final class CartesianProduct {
     }
 
     /**
+     * Creates a builder for a conditional Cartesian product with two or more dimensions.
+     * <p>
+     * This is a convenience overload equivalent to calling {@link #conditionalProductOf(List)}
+     * with the first dimension and then adding each remaining dimension through
+     * {@link ConditionalProductBuilder#and(List)}. The dimensions retain the supplied order.
+     * </p>
+     *
+     * @param first the first dimension
+     * @param second the second dimension
+     * @param additional any further dimensions, in product order
+     * @return a conditional product builder containing all supplied dimensions
+     * @throws NullPointerException if any dimension is null or contains a null element
+     */
+    public ConditionalProductBuilder conditionalProductOf(
+            List<?> first, List<?> second, List<?>... additional) {
+        Util.validateInput(first);
+        Util.validateInput(second);
+
+        ConditionalProductBuilder builder = new ConditionalProductBuilder(first).and(second);
+        for (List<?> dimension : additional) {
+            builder = builder.and(dimension);
+        }
+        return builder;
+    }
+
+    /**
      * Creates a builder for constrained Cartesian products with a specified tuple length.
      * <p>
      * Generates the product A₁ × A₂ × ... × Aₖ where each dimension can be constrained using
