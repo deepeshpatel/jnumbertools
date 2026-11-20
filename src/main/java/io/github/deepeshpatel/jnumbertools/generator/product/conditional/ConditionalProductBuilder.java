@@ -176,7 +176,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
                 List.<List<?>>of(elements));
     }
 
-    private ConditionalProductBuilder(ConstraintModel model, List<List<?>> originals) {
+    ConditionalProductBuilder(ConstraintModel model, List<List<?>> originals) {
         this.model = model;
         this.originals = originals;
         this.ruleCompiler = new RuleCompiler(model.dimensions, originals, model.indexes);
@@ -194,6 +194,10 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         newOriginals.add(elements);
         return new ConditionalProductBuilder(model.withDimension(copy),
                 Collections.unmodifiableList(newOriginals));
+    }
+
+    static ConditionalProductBuilder fromCompiledModel(ConstraintModel model, List<List<?>> originals) {
+        return new ConditionalProductBuilder(model, Collections.unmodifiableList(new ArrayList<>(originals)));
     }
 
     //Rule Methods
