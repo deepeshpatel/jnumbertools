@@ -16,11 +16,11 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Compares complete sequential generation by the independent compound and pairwise
- * implementations for the same data and equivalent pairwise rules.
+ * implementations, including both pairwise traversal modes for the same data and equivalent pairwise rules.
  *
  * <p>Builder construction and rule registration happen in trial setup, outside the
  * timed methods. Each invocation creates the generator and consumes every tuple.
- * Encounter order is intentionally ignored.</p>
+ * The correctness guard compares result summaries without requiring equal encounter order.</p>
  *
  * <p>The shared rule shape is a chain: whenever dimension i contains 0, dimension
  * i+1 must not contain 0. Both APIs receive exactly these rules.</p>
@@ -75,11 +75,14 @@ public class CompoundVsPairwiseGenerationBenchmark {
         // Correctness guard: both generators must produce the same tuples, irrespective
         // of their unspecified/different encounter orders.
         GenerationSummary compound = summarize(compoundBuilder.generate());
-        GenerationSummary pairwise = summarize(conditionalBuilder.anyOrder());
-        if (!compound.equals(pairwise)) {
+        GenerationSummary pairwiseAnyOrder = summarize(conditionalBuilder.anyOrder());
+        GenerationSummary pairwiseLexOrder = summarize(conditionalBuilder.lexOrder());
+        if (!compound.equals(pairwiseAnyOrder) || !compound.equals(pairwiseLexOrder)) {
             throw new IllegalStateException(
                     "Implementations produced different results for " + scenario
-                            + ": compound=" + compound + ", pairwise=" + pairwise);
+                            + ": compound=" + compound
+                            + ", pairwiseAnyOrder=" + pairwiseAnyOrder
+                            + ", pairwiseLexOrder=" + pairwiseLexOrder);
         }
     }
 
@@ -97,6 +100,16 @@ public class CompoundVsPairwiseGenerationBenchmark {
     public long conditionalAnyOrder(Blackhole blackhole) {
         long count = 0;
         for (List<Object> tuple : conditionalBuilder.anyOrder()) {
+            blackhole.consume(tuple);
+            count++;
+        }
+        return count;
+    }
+
+    @Benchmark
+    public long conditionalLexOrder(Blackhole blackhole) {
+        long count = 0;
+        for (List<Object> tuple : conditionalBuilder.lexOrder()) {
             blackhole.consume(tuple);
             count++;
         }
