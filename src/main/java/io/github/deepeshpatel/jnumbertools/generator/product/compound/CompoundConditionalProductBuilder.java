@@ -37,20 +37,20 @@ import java.util.List;
  *
  * @author Deepesh Patel
  */
-public final class CompoundConditionalProductBuilder {
+public final class CompoundCompoundProductEngineBuilder {
 
-    private final ConditionalProductBuilder delegate;
+    private final CompoundProductEngineBuilder delegate;
 
     /**
      * Creates a compound conditional product builder with one dimension.
      *
      * @param elements first dimension; copied
      */
-    public CompoundConditionalProductBuilder(List<?> elements) {
-        this(new ConditionalProductBuilder(elements));
+    public CompoundCompoundProductEngineBuilder(List<?> elements) {
+        this(new CompoundProductEngineBuilder(elements));
     }
 
-    private CompoundConditionalProductBuilder(ConditionalProductBuilder delegate) {
+    private CompoundCompoundProductEngineBuilder(CompoundProductEngineBuilder delegate) {
         this.delegate = delegate;
     }
 
@@ -60,8 +60,8 @@ public final class CompoundConditionalProductBuilder {
      * @param elements the next dimension; copied
      * @return a new immutable builder
      */
-    public CompoundConditionalProductBuilder and(List<?> elements) {
-        return new CompoundConditionalProductBuilder(delegate.and(elements));
+    public CompoundCompoundProductEngineBuilder and(List<?> elements) {
+        return new CompoundCompoundProductEngineBuilder(delegate.and(elements));
     }
 
     /**
@@ -76,9 +76,9 @@ public final class CompoundConditionalProductBuilder {
 
     /** First condition of a trigger expression. */
     public final class WhenDimension {
-        private final ConditionalProductBuilder.WhenDimension step;
+        private final CompoundProductEngineBuilder.WhenDimension step;
 
-        private WhenDimension(ConditionalProductBuilder.WhenDimension step) {
+        private WhenDimension(CompoundProductEngineBuilder.WhenDimension step) {
             this.step = step;
         }
 
@@ -94,9 +94,9 @@ public final class CompoundConditionalProductBuilder {
 
     /** A completed condition that can be extended with AND/OR or followed by a consequence. */
     public final class Trigger {
-        private final ConditionalProductBuilder.Trigger step;
+        private final CompoundProductEngineBuilder.Trigger step;
 
-        private Trigger(ConditionalProductBuilder.Trigger step) {
+        private Trigger(CompoundProductEngineBuilder.Trigger step) {
             this.step = step;
         }
 
@@ -115,35 +115,35 @@ public final class CompoundConditionalProductBuilder {
 
     /** Consequence of a compound trigger expression. */
     public final class ThenDimension {
-        private final ConditionalProductBuilder.ThenDimension step;
+        private final CompoundProductEngineBuilder.ThenDimension step;
 
-        private ThenDimension(ConditionalProductBuilder.ThenDimension step) {
+        private ThenDimension(CompoundProductEngineBuilder.ThenDimension step) {
             this.step = step;
         }
 
-        public CompoundConditionalProductBuilder is(Object value) {
-            return new CompoundConditionalProductBuilder(step.is(value));
+        public CompoundCompoundProductEngineBuilder is(Object value) {
+            return new CompoundCompoundProductEngineBuilder(step.is(value));
         }
-        public CompoundConditionalProductBuilder isNot(Object value) {
-            return new CompoundConditionalProductBuilder(step.isNot(value));
+        public CompoundCompoundProductEngineBuilder isNot(Object value) {
+            return new CompoundCompoundProductEngineBuilder(step.isNot(value));
         }
-        public CompoundConditionalProductBuilder isOneOf(Object... values) {
-            return new CompoundConditionalProductBuilder(step.isOneOf(values));
+        public CompoundCompoundProductEngineBuilder isOneOf(Object... values) {
+            return new CompoundCompoundProductEngineBuilder(step.isOneOf(values));
         }
-        public CompoundConditionalProductBuilder isOneOf(Collection<?> values) {
-            return new CompoundConditionalProductBuilder(step.isOneOf(values));
+        public CompoundCompoundProductEngineBuilder isOneOf(Collection<?> values) {
+            return new CompoundCompoundProductEngineBuilder(step.isOneOf(values));
         }
-        public CompoundConditionalProductBuilder isNoneOf(Object... values) {
-            return new CompoundConditionalProductBuilder(step.isNoneOf(values));
+        public CompoundCompoundProductEngineBuilder isNoneOf(Object... values) {
+            return new CompoundCompoundProductEngineBuilder(step.isNoneOf(values));
         }
-        public CompoundConditionalProductBuilder isNoneOf(Collection<?> values) {
-            return new CompoundConditionalProductBuilder(step.isNoneOf(values));
+        public CompoundCompoundProductEngineBuilder isNoneOf(Collection<?> values) {
+            return new CompoundCompoundProductEngineBuilder(step.isNoneOf(values));
         }
-        public CompoundConditionalProductBuilder isNotIn(Object... values) {
-            return new CompoundConditionalProductBuilder(step.isNotIn(values));
+        public CompoundCompoundProductEngineBuilder isNotIn(Object... values) {
+            return new CompoundCompoundProductEngineBuilder(step.isNotIn(values));
         }
-        public CompoundConditionalProductBuilder isNotIn(Collection<?> values) {
-            return new CompoundConditionalProductBuilder(step.isNotIn(values));
+        public CompoundCompoundProductEngineBuilder isNotIn(Collection<?> values) {
+            return new CompoundCompoundProductEngineBuilder(step.isNotIn(values));
         }
     }
 

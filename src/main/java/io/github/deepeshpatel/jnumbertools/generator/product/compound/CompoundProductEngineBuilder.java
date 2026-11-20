@@ -48,14 +48,14 @@ import java.util.Random;
  * is {@code x}, the value chosen from {@code B} must be {@code y} or {@code z}. Every completed
  * pairwise rule is combined with the other rules using AND. Dimensions are identified by the same
  * list instance passed to {@code conditionalProductOf} or {@code and}. For compound AND/OR trigger
- * expressions, use {@link CompoundConditionalProductBuilder} through
+ * expressions, use {@link CompoundCompoundProductEngineBuilder} through
  * {@code compoundConditionalProductOf(...)}.</p>
  *
  * <h2>What is supported</h2>
  * <p>This builder supports pairwise rules expressed with {@code when(...).then(...)}.
  * It provides lexicographic and any-order traversal, exact counting, rank-based traversal,
  * and random choice and sampling. Compound trigger expressions using {@code .and(...)} or
- * {@code .or(...)} are exposed separately by {@link CompoundConditionalProductBuilder}; that
+ * {@code .or(...)} are exposed separately by {@link CompoundCompoundProductEngineBuilder}; that
  * builder intentionally provides generation, counting and emptiness checks without exposing
  * rank-based or lexicographic operations.</p>
  *
@@ -147,7 +147,7 @@ import java.util.Random;
  *
  * @author Deepesh Patel
  */
-public final class ConditionalProductBuilder implements Builder<Object> {
+final class CompoundProductEngineBuilder implements Builder<Object> {
 
     private final ConstraintModel model;         // immutable shared dimensions and pairwise relations
     private final List<List<?>> originals;       // the caller's list objects, matched by identity only
@@ -158,12 +158,12 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @param elements first dimension; copied. An empty list is allowed and makes the product empty.
      * @throws NullPointerException if {@code elements} is null or contains a null element
      */
-    public ConditionalProductBuilder(List<?> elements) {
+    CompoundProductEngineBuilder(List<?> elements) {
         this(new ConstraintModel(List.<List<?>>of(snapshot(elements)), PersistentRelationMap.empty()),
                 List.<List<?>>of(elements));
     }
 
-    private ConditionalProductBuilder(ConstraintModel model, List<List<?>> originals) {
+    private CompoundProductEngineBuilder(ConstraintModel model, List<List<?>> originals) {
         this.model = model;
         this.originals = originals;
         this.ruleCompiler = new RuleCompiler(model.dimensions, originals, model.indexes);
@@ -175,11 +175,11 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @return new immutable builder
      * @throws NullPointerException if {@code elements} is null or contains a null element
      */
-    public ConditionalProductBuilder and(List<?> elements) {
+    public CompoundProductEngineBuilder and(List<?> elements) {
         List<?> copy = snapshot(elements);
         List<List<?>> newOriginals = new ArrayList<>(originals);
         newOriginals.add(elements);
-        return new ConditionalProductBuilder(model.withDimension(copy),
+        return new CompoundProductEngineBuilder(model.withDimension(copy),
                 Collections.unmodifiableList(newOriginals));
     }
 
@@ -300,23 +300,23 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         }
 
         /** The value must equal {@code value}. */
-        public ConditionalProductBuilder is(Object value) { return apply(List.of(nonNull(value)), false); }
+        public CompoundProductEngineBuilder is(Object value) { return apply(List.of(nonNull(value)), false); }
         /** The value must be anything except {@code value}. */
-        public ConditionalProductBuilder isNot(Object value) { return apply(List.of(nonNull(value)), true); }
+        public CompoundProductEngineBuilder isNot(Object value) { return apply(List.of(nonNull(value)), true); }
         /** The value must be one of {@code values} (at least one is required). */
-        public ConditionalProductBuilder isOneOf(Object... values) { return apply(asList(values), false); }
+        public CompoundProductEngineBuilder isOneOf(Object... values) { return apply(asList(values), false); }
         /** The value must be one of {@code values} (at least one is required). */
-        public ConditionalProductBuilder isOneOf(Collection<?> values) { return apply(values, false); }
+        public CompoundProductEngineBuilder isOneOf(Collection<?> values) { return apply(values, false); }
         /** The value must be none of {@code values} (at least one is required). */
-        public ConditionalProductBuilder isNoneOf(Object... values) { return apply(asList(values), true); }
+        public CompoundProductEngineBuilder isNoneOf(Object... values) { return apply(asList(values), true); }
         /** The value must be none of {@code values} (at least one is required). */
-        public ConditionalProductBuilder isNoneOf(Collection<?> values) { return apply(values, true); }
+        public CompoundProductEngineBuilder isNoneOf(Collection<?> values) { return apply(values, true); }
         /** Alias of {@link #isNoneOf(Object...)}. */
-        public ConditionalProductBuilder isNotIn(Object... values) { return isNoneOf(values); }
+        public CompoundProductEngineBuilder isNotIn(Object... values) { return isNoneOf(values); }
         /** Alias of {@link #isNoneOf(Collection)}. */
-        public ConditionalProductBuilder isNotIn(Collection<?> values) { return isNoneOf(values); }
+        public CompoundProductEngineBuilder isNotIn(Collection<?> values) { return isNoneOf(values); }
 
-        private ConditionalProductBuilder apply(Collection<?> values, boolean negate) {
+        private CompoundProductEngineBuilder apply(Collection<?> values, boolean negate) {
             BitSet allowed = ruleCompiler.matching(targetDim, values, negate);
             int singleTriggerDimension = -1;
             BitSet combinedTriggers = new BitSet();
@@ -336,7 +336,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
                 if (groupValues != null) combinedTriggers.or(groupValues);
             }
             if (pairwise) return withRule(singleTriggerDimension, combinedTriggers, targetDim, allowed);
-            return new ConditionalProductBuilder(
+            return new CompoundProductEngineBuilder(
                     model.withMultiRule(new MultiTriggerRule(groups, targetDim, allowed)), originals);
         }
     }
@@ -521,7 +521,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
     @Override
     public String toString() {
-        return "ConditionalProductBuilder{dimensions=" + model.dimensions + ", linkedPairs=" + model.relations.size() + '}';
+        return "CompoundProductEngineBuilder{dimensions=" + model.dimensions + ", linkedPairs=" + model.relations.size() + '}';
     }
 
     private void requirePairwiseRulesForLexOrder() {
@@ -534,8 +534,8 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
     // ── Rule application ─────────────────────────────────────────────────────
 
-    private ConditionalProductBuilder withRule(int triggerDim, BitSet triggerValues, int targetDim, BitSet allowedTargets) {
-        return new ConditionalProductBuilder(
+    private CompoundProductEngineBuilder withRule(int triggerDim, BitSet triggerValues, int targetDim, BitSet allowedTargets) {
+        return new CompoundProductEngineBuilder(
                 model.withRule(triggerDim, triggerValues, targetDim, allowedTargets), originals);
     }
 
