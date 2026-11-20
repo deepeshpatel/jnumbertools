@@ -2,15 +2,15 @@
 
 Working plan and progress tracker. **Read this file first when resuming. Update the Progress section after every step.**
 
-## 0. How to work on this (rules for the AI assistant)
+## 0. How to work on this (maintainer workflow)
 
-1. Read sections 1 to 6, then the Progress table. Continue from the first unchecked item. Do not redo checked items.
-2. Work only when the maintainer says "go ahead". Each go-ahead delivers one or two small items (a patch plus tests), then updates the Progress table and log in this file as part of the same patch.
-3. Do **not** run JMH, and do not run the full test suite unless asked. Compile with `javac`, and run only the narrow checks the maintainer allows. The maintainer runs `mvn test` and the benchmarks and shares the output.
-4. Deliver changes as a patch against the maintainer's latest pushed commit. If the repository state is unknown or newer than the last log entry, ask for a push first. Do not build on a stale base.
-5. Never change behaviour silently. Every generator must produce exactly the same tuples in the same order as the reference (see section 7).
-6. Keep the number of releases low. Changes are batched into one release; do not tag.
-7. Naming: strategies are called **generators** (`XGenerator`), not builders. The builder is the one class that collects rules.
+1. Read `SKILL.md` and `ValidationRules.md` before changing public behavior, validation, builders, generators, or tests.
+2. Continue from the current branch state and the latest progress entry. Do not revive completed work packages without a concrete reason.
+3. Run tests or JMH only when the maintainer asks for them. Never claim a test, build, or benchmark passed unless it was actually run and its result observed.
+4. Push only when explicitly authorized. Keep the pull request open and do not merge unless the maintainer separately authorizes a merge.
+5. Preserve the public behavioral contract and exact tuple set/order unless an API change is explicitly approved. Do not make public API changes silently.
+6. Batch related release work; do not create release tags as part of engineering changes.
+7. Keep strategies as generators (`XGenerator`), not builders. The public builder owns the fluent rule DSL; implementation collaborators remain package-private unless a public API need is established.
 
 ## 1. Why
 
@@ -63,68 +63,13 @@ The implementation has two distinct optimization targets. Do not optimize one by
 
 The current adaptive threshold (10,000 tuples) is provisional. The full-generation target is complete consumption, so benchmark coverage must include full traversal rather than infer the best strategy from first-N microbenchmarks.
 
-## 1B. Future direction: compile once, execute multiple times
+## 1B. Reusable compiled-product API: evaluated and deferred
 
-### Motivation
+A compile-once/bind-many API was explored as a possible way to amortize product-definition preparation across repeated datasets. The proposed API was only illustrative; it was not approved as a public contract.
 
-Explore a reusable `CompiledProduct` abstraction that separates product definition from product execution.
+The end-to-end JMH comparison of the compiled conditional-product prototype against the ordinary builder showed no demonstrated benefit: the compiled path was near a tie for the smallest cases and slower for dimensions 15–25, while allocations were nearly identical. The ordinary builder therefore remains the supported API, and the compiled-product proposal is parked.
 
-All three Cartesian product builders — **Simple**, **Constrained**, and **Conditional** — should eventually expose a `.compile()` method that produces a reusable compiled representation.
-
-This direction is motivated by a common application workload: the same product structure and rules are applied repeatedly to different input datasets. The definition remains stable while the concrete values change between executions. Compiling the definition once and binding new data for each execution could avoid repeating structural analysis and other reusable preparation.
-
-The intended usage follows the general model of Java regular expressions:
-
-- `Pattern.compile(...)` prepares a reusable pattern.
-- `Pattern.matcher(input)` applies that pattern to different input data.
-
-Similarly, a compiled product would represent the reusable product definition, while binding would supply the concrete dimension data for one execution. This could make the library's performance advantages more apparent in repeated application workloads compared with rebuilding equivalent stream/filter pipelines for every dataset.
-
-### Illustrative API (not a final design)
-
-The following example communicates the intended direction only. Class names, method names, types, and signatures are provisional.
-
-```java
-// Compile once: define dimensions and rules without concrete value lists.
-CompiledConditionalProduct plan = JNumberTools.cartesianProduct()
-    .conditionalProduct()
-    .dim("os")
-    .dim("browser")
-    .dim("network")
-    .when("browser").is("Safari")
-        .then("os").isOneOf("macOS")
-    .when("network").is("4G")
-        .then("os").isNoneOf("Linux")
-    .compile();
-
-// Reuse the compiled plan with different datasets.
-void handle(List<?> os, List<?> browser, List<?> network) {
-    var result = plan.bind(os, browser, network);
-
-    long n = result.count();              // Exact count without generating the full product.
-    result.lexOrder().forEach(...);       // Other traversal operations may also be available.
-}
-```
-
-### Expected benefits
-
-- **Amortized preparation:** perform structural analysis and reusable preparation once instead of repeating it for every dataset.
-- **Lower repeated-execution overhead:** bind new data without reconstructing the product definition.
-- **Application-oriented performance:** target workloads that repeatedly apply the same rules to changing datasets, where setup cost can materially affect the comparison with Java streams and filters.
-- **Separation of concerns:** keep product definitions and rules independent of concrete input data.
-- **Reusable plans:** allow one compiled definition to serve multiple independent executions, subject to appropriate immutability and thread-safety guarantees.
-
-### Architectural considerations
-
-Keep these conceptual stages distinct:
-
-1. **Compilation:** resolve dimension definitions, process rules, validate the definition, and prepare reusable structural information.
-2. **Binding:** accept concrete datasets, validate and snapshot inputs as required, build data-dependent indexes or structures, and create an execution instance.
-3. **Execution:** perform counting, ranking, unranking, and tuple traversal against the bound data.
-
-The compiled definition should not retain concrete input datasets or mutable state belonging to an individual execution. Bound executions should be independent; the compiled plan should be reusable and, if designed as immutable, safely shareable.
-
-**This section records an architectural direction for future development, not an approved implementation specification.** AI assistants working on this engineering plan should take this direction into account when proposing changes, but must not treat the illustrative API or class names as finalized. Evaluate the design against all three existing product builders, current generator/model boundaries, data-dependent preparation costs, and measured performance before implementation.
+Do not implement or expose a compiled-product API as part of this work. Reopen the idea only if a representative repeated-dataset workload demonstrates a measurable end-to-end benefit after including binding and result consumption. Do not infer an advantage from reduced setup alone.
 
 ## 2. Target design
 
@@ -205,79 +150,81 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 - [x] 4.2 Added `DpRankSpliterator`: partitions the exact BigInteger valid-tuple rank interval into disjoint contiguous ranges, lazily unranks each tuple, and preserves ordered encounter semantics. Maintainer confirmed the focused regression suite passed (35 tests).
 - [x] 4.3 Added unordered parallel-stream tuple-set checks for PRUNED_BITSET, PRUNED_DFS, DP, and ADAPTIVE; maintainer confirmed the focused suite passed (36 tests). Ordered encounter-order equality remains covered for all explicit generators.
 
-### WP4 follow-up: separate unordered traversal (deferred; not part of the completed WP4 lexicographic work)
+### WP4 follow-up: separate unordered traversal
 
-- [x] 4.4 Agreed and exposed the public `anyOrder()` contract: full valid tuple set exactly once, unspecified encounter order, lazy and re-iterable; no random-selection semantics.
-- [x] 4.5 Delivered the public `anyOrder()` API and sequential iterator baseline. The maintainer confirmed its focused tuple-set, uniqueness, re-iteration, and empty-product test passed.
-- [~] 4.6 Delivered lazy prefix-frontier splitting for `anyOrder()`. Partitions are disjoint candidate ranges below a fixed prefix; when a range has at most one candidate, `trySplit()` fixes that candidate and advances to the next dimension. This exposes parallel work below singleton/small leading dimensions without eager tuple materialization. `stream().parallel()` can use the spliterator; default `stream()` remains sequential until a benchmark-supported automatic policy is designed. Awaiting maintainer compilation and focused tests.
-- [~] 4.7 Added focused tests for disjoint split coverage, no duplicates, deeper splitting below a singleton first dimension, and parallel tuple-set equality. Differential, repeated-iteration and concurrency coverage for the final parallel implementation remain to be completed. Keep `lexOrder()` unchanged.
-- [ ] 4.8 Benchmark complete `anyOrder()` consumption against its sequential counterpart and representative baselines; derive any automatic parallel threshold from measured results.
-- [ ] 4.9 Only after 4.4–4.8 are complete, tests pass and benchmarks show a real benefit, consider whether any separate `lexOrder()` parallel work is justified.
+- [x] 4.4 Public `anyOrder()` contract: full valid tuple set exactly once, unspecified encounter order, lazy and re-iterable; no random-selection semantics.
+- [x] 4.5 Public `anyOrder()` API and sequential iterator baseline delivered; focused tuple-set, uniqueness, re-iteration and empty-product checks were confirmed by the maintainer.
+- [x] 4.6 Lazy prefix-frontier splitting delivered. Partitions are disjoint candidate ranges below a fixed prefix; splitting can descend below singleton/small leading dimensions without eagerly materializing tuples. Parallel execution remains opt-in through `stream().parallel()`.
+- [~] 4.7 Split coverage, uniqueness, deeper splitting and parallel tuple-set tests delivered. Keep the concurrent/repeated-iteration verification status tied to the maintainer's test run; do not claim unrun tests passed.
+- [ ] 4.8 Benchmark complete `anyOrder()` consumption against sequential traversal and representative baselines before considering an automatic parallel threshold.
+- [ ] 4.9 Do not change `lexOrder()` parallel policy based on any-order measurements; consider it only with separate evidence.
 
-### WP5: Benchmarks (maintainer runs them)
+### WP5: Benchmarks
 
-- [~] 5.1 Delivered `ConditionalProductStrategyBenchmark` with case definitions externalized as classpath `.properties` resources. JMH's `scenarioName` parameter is the case's relative resource path, so a single case can be selected without editing Java source. All four library strategies are compared with the nested-stream baseline; traversal-only and end-to-end are separate benchmark methods.
-- [~] 5.2 Delivered the hierarchical case tree: topology → numeric dimension/size range → selectivity → case. Numeric ranges are inclusive and non-overlapping: `Dim2-5`, `Dim6-10`, `Dim11-20`; `Size10-100`, `Size101-250`. STAR, CHAIN, SPARSE, DENSE, CYCLE, DEAD_END, and EMPTY coverage is retained. Workloads outside the numeric ranges are isolated under `edge-cases`.
-- Benchmark limitation recorded: current rules select every trigger value. The selectivity profile therefore varies allowed target values, not trigger coverage; do not interpret these results as a trigger-selectivity study. Add trigger-coverage as a separate workload axis in a later benchmark slice.
-- [~] 5.3 Added the initial large-size tier for all three dimension bands and both size bands. Large cases use the TIGHT profile (approximately 1% of target values, minimum one) to keep complete traversal bounded. These cases still require maintainer compilation and benchmark execution.
-- [~] 5.4 Added a dedicated JMH launcher that keeps progress/errors on the console, writes the complete JMH JSON result, and emits one final text summary per benchmark method. Remaining console cleanup (tracing unrelated intermediate diagnostics) is still pending. Console-output cleanup: identify and suppress unintended intermediate/diagnostic output emitted during benchmark setup or traversal. Preserve JMH's own progress/ETA and final result output; do not silence useful errors. Trace each message to its source rather than assuming it originates in the benchmark class.
-- [ ] 5.5 Benchmark analysis: inspect the full JSON matrix (all scenarios, implementations, and both methods); compare latency and allocation; identify strategy-specific workload regions; evaluate ADAPTIVE selection; and make only evidence-supported tuning changes. Run targeted JMH comparisons only for unresolved questions, not the full matrix again.
-- Settings: one fork, 500 ms warmup, two 500 ms measurement iterations; precompute dimensions/rule inputs outside timed methods; report traversal-only and end-to-end. Timed benchmark methods should not print. Use JMH progress/ETA output and write detailed results as JSON.
+- [x] 5.1 Consolidated the conditional-product JMH benchmark around a single scenario-parameterized benchmark class. It compares all four library strategies with independent nested-stream and imperative backtracking baselines, and separates traversal-only from end-to-end timing where applicable.
+- [x] 5.2 Added the standard topology/shape matrix plus `DEEP_DEAD_END` and `SMALL_DOMAIN` cases. Trial setup validates tuple counts and checksums against independent baselines.
+- [x] 5.3 Added special-operation and scaling benchmarks for `count`, `isEmpty`, `lexOrderMth`, `byRanks`, `choice`, and `sample`; bounded cases use an enumeration baseline and very large cases are library-only with closed-form validation.
+- [x] 5.4 Added quick/full command presets, JSON output, environment capture, and README-ready report generation.
+- [~] 5.5 Benchmark analysis is recorded in the benchmark README and decision register. A full multi-fork run across the consolidated matrix remains the evidence needed before making global strategy-ranking or automatic-dispatch claims.
+
+Benchmark rules: include builder construction and rule registration in end-to-end measurements; validate counts/checksums; retain the independent incrementally-pruned nested-stream baseline; report score error and allocation per operation; record source SHA, JMH/JDK/JVM, hardware and arguments. Treat short runs as screening evidence, not publication-quality rankings.
 
 ### WP5 follow-up: benchmark maintainability
 
-- [~] Split the benchmark into `benchmarks.conditionalproduct`, `scenario`, and `baseline` packages. `Scenario`/`Rule` own property-driven workload construction, `NestedStreamBaseline` owns the independent stream reference, the JMH class owns timed methods, and `ConditionalProductBenchmarkRunner` owns execution and result persistence. Retained the properties-based case hierarchy and benchmark semantics. Awaiting maintainer compilation and a focused launcher run.
+- [x] Split scenario generation, independent baselines, benchmark support and command tooling into named packages.
+- [x] Added `BenchmarkCommandGenerator` (interactive and preset command generation), `BenchmarkCommandExecutor` (interactive or pasted command execution), and `BenchmarkEnvironment` (machine/JDK/JVM/git metadata).
+- [x] Added `scripts/BenchmarkReport.java` for per-run reports and baseline/local comparisons.
+- [x] Added `scripts/benchmark-compare.sh` to compare the local working tree, including uncommitted changes, with a supplied SHA using a temporary worktree and identical benchmark sources. Supported commands:
+  `scripts/benchmark-compare.sh <GIVEN_SHA>` and `scripts/benchmark-compare.sh <GIVEN_SHA> full`.
 
-### WP6: Documentation and release finish — remaining items deferred
+### WP6: Documentation and release finish
 
+- [x] 6.1 Updated conditional-product builder Javadocs for dimension ordering, traversal strategies, and the current `ADAPTIVE` behavior.
+- [x] 6.2 Updated the public README dependency examples to 4.2.0, expanded the Cartesian-product user guide for `anyOrder()` and strategy selection, and documented `isNotIn(...)` as an alias of `isNoneOf(...)`.
+- [x] 6.3 Updated the benchmark README with the current runner/tool layout and local-versus-SHA comparison workflow; added the 4.2.0 changelog section.
+- [ ] Final release verification remains separate: maintainer test suite, Javadoc/source-jar release build, and any final benchmark confirmation requested before publishing. No release tag or publication is part of this plan.
 
-These deliverables are intentionally postponed until implementation, parallel work, and benchmark analysis are settled.
+## 4B. Phase roadmap (A to M)
 
-- [x] 6.1 Added practical dimension-ordering guidance to `ConditionalProductBuilder` Javadocs: explain when pairwise constraints become evaluable, how selective dimensions can prune downstream work, why dependency order matters, and the SQL join-order/predicate-placement analogy. Guidance for `anyOrder()` parallel execution is deliberately deferred until that API and its measured behavior exist.
-- [ ] 6.2 Documentation: update the main README, benchmarks README, and changelog to reflect the final API, behavior, benchmark methodology, and measured results.
-- [ ] 6.3 Final benchmark decisions: use the complete benchmark evidence to tune implementations, defaults, and the ADAPTIVE cutoff where justified. Record the final results and rationale. Never remove or deprecate a strategy.
-
-## 4B. Phase roadmap (A to I)
-
-Work after the original work packages is delivered in lettered phases. Each phase is a small patch against the latest pushed head and stands alone. Update the status here and the log in section 8 with every patch.
+The work is on the `conditional-product-optimization` branch and is tracked by PR #6. "Delivered" below means present on that branch; it does not mean merged to `main`.
 
 | Phase | Content | Status |
 |---|---|---|
-| A | Compact relation rows (`Relation` stores rules, builds rows lazily, shares rows) | merged |
-| B | Feasibility tier and lazy counts; `DP` stream no longer unranks each tuple (`DpLexSpliterator`) | merged |
-| C | `anyOrder()` splitting work threshold (`SPLIT_WORK_THRESHOLD`) and upper-bound `estimateSize()` | merged |
-| D | Setup cost at large sizes: measured; shared value-to-position index for rule compilation (`DimensionIndexes`), rules chained instead of copied in `Relation` | merged |
-| E | Added a 36-case generated matrix (dimensions 3, 5, 7, 10; sizes 10, 25, 50; DEAD_END, MANY_VALID, COMPLETE), preserved the 17 historical property cases, and moved BitSet-to-rule-list preparation outside timed methods | delivered; maintainer ran DEAD_END, CHAIN, MANY_VALID, COMPLETE (findings in §8, 2026-11-17 second entry). Follow-up: DEEP_DEAD_END and SMALL_DOMAIN topologies added, awaiting maintainer JMH run |
-| F | Strategy decisions from E. F1: waste-triggered completion lookahead (descents > 1,024 + 4 x emitted, topology independent), merged and verified by maintainer JMH. F2: `DEEP_DEAD_END` benchmark shape fix, merged. Remaining: decide `ADAPTIVE` (name/parameter) after the confirmation run; `PRUNED_DFS` tuning. No strategy is removed | F1, F2 merged; ADAPTIVE decision pending |
-| G | Optional: `anyOrder()` dimension reordering (most selective dimension first, values returned in original positions). Screening shows pruned plus lookahead within about 1.5x of DP on corrected `DEEP_DEAD_END`, so G is not justified unless the confirmation run shows pruned more than 2x slower than DP | on hold |
-| H | Counting speed at large sizes; test hardening (larger oracle shapes, concurrent first use) | not started |
-| I | README, benchmarks README, changelog, compact this file, single release | not started |
-| J | Review conditional-rule exclusion vocabulary: current API has `isNoneOf(...)` and `isNotIn(...)` aliases; decide whether `isNotOneOf(...)` is needed or whether existing names are sufficient. If changed, keep trigger/target-chain overloads consistent and add builder tests and Javadoc examples | not started |
-| K | Benchmark tooling: generator adds `quick` (2-3 min) and full-matrix presets, `-rf json -rff`, and an environment block; a script compares the local tree with a given SHA using a temporary git worktree; a report script turns JMH JSON into the README tables (fastest strategy, speedup vs stream and vs best builder, allocation ratio, error above 10% flag) | delivered 2026-11-18 (presets, JSON/environment output, `BenchmarkReport` report and compare modes, `benchmark-compare.sh`); awaiting maintainer use |
-| L | Special-operations benchmark (`count`, `isEmpty`, `lexOrderMth`, `byRanks`, `choice`, `sample`): bounded workloads against an enumeration baseline, `LARGE` workloads (up to about 2e39 tuples) library-only; imperative-backtracking baselines (`IMPERATIVE_ALLOCATING`, `IMPERATIVE_REUSE`) added to the traversal benchmark, additive and logged in the decision register | delivered 2026-11-19, awaiting maintainer JMH run |
-| M | Test hardening: `ConditionalProductShapeOracleTest` checks star-last, star-first, shuffled trees, cycle plus tail, duplicate values, very unequal sizes, empty dimensions and 120 larger random graphs against an independent oracle on every strategy, `anyOrder()` (sequential and parallel) and the rank and sampling operations; `PrunedLookaheadTest` covers `anyOrder()` with lookahead. Remaining: concurrent first use of the counting tier | mostly delivered 2026-11-19 |
+| A | Compact relation rows and lazy shared row materialization | delivered on PR branch |
+| B | Feasibility tier, lazy counts and `DpLexSpliterator` | delivered on PR branch |
+| C | `anyOrder()` splitting threshold and upper-bound `estimateSize()` | delivered on PR branch |
+| D | Setup-cost work: shared value-to-position indexes and chained relation updates | delivered on PR branch |
+| E | Generated topology/shape matrix and benchmark setup improvements | delivered; maintainer ran representative DEAD_END, CHAIN, MANY_VALID and COMPLETE cases |
+| F | Work-triggered completion lookahead and corrected DEEP_DEAD_END shapes | F1/F2 delivered and maintainer-verified; `ADAPTIVE` is documented as a policy that currently maps to BitSet |
+| G | Optional `anyOrder()` dimension reordering | on hold; current evidence does not justify it |
+| H | Counting speed and test hardening | H1/H3/H4 delivered; special-operation JMH results recorded; small-product plan-construction cost deferred |
+| I | User documentation, engineering documentation and 4.2.0 version metadata | delivered on PR branch; release verification pending |
+| J | Conditional-rule exclusion vocabulary | decision complete: retain `isNotIn(...)` as an alias of `isNoneOf(...)`; do not add another synonym or remove a public method |
+| K | Benchmark presets, report generation, environment capture and SHA comparison script | delivered; maintainer has used the quick/full comparison workflow |
+| L | Special-operation benchmarks and imperative traversal baselines | delivered; maintainer ran the special preset and recorded screening results |
+| M | Independent shape oracle, generator strategy checks, parallel and counting-tier concurrency coverage | delivered; final test verification remains with the maintainer |
 
 ## 5. Progress summary
 
-| Package | Done | Total |
-|---|---:|---:|
-| WP0 baseline | 0 (3 delivered, unconfirmed) | 3 |
-| WP1 setup cost | 3 verified | 3 |
-| WP2 shared model | 4 verified | 4 |
-| WP3 generators | 5 verified; all four strategies retained and dispatched | 5 |
-| WP4 parallel | 3 verified | 3 |
-| WP5 benchmark delivery | 3 delivered, unverified | 3 |
-| WP5 benchmark cleanup/analysis | 1 delivered, unverified | 2 |
-| WP5 maintainability follow-up | 1 delivered, unverified | 1 |
-| WP6 documentation/finish | 1 delivered, 2 pending | 3 |
+| Area | Current status |
+|---|---|
+| Setup and shared model extraction | Delivered; focused tests were confirmed by the maintainer during implementation |
+| Lexicographic generators and strategies | Delivered; all four strategies remain available |
+| `anyOrder()` and parallel splitting | Delivered; automatic parallel policy is intentionally not enabled |
+| Benchmark infrastructure | Delivered; quick/full presets, JSON, environment, reports and SHA comparison are available |
+| Benchmark analysis | Representative results recorded; a full consolidated multi-fork matrix remains optional confirmation, not a blocker to the documentation patch |
+| Public documentation and Javadocs | Updated for the 4.2.0 target |
+| Release verification | Pending maintainer test and release-build execution |
 
-Update this table whenever an item changes status.
 
-## 6. Open questions for the maintainer
 
-- Keep the new generator classes package-private in `...generator.product.conditional`, or move them into a subpackage?
-- Final default and the `ADAPTIVE` cutoff may be tuned after WP5; all four strategies remain available.
-- The benchmark code is currently concentrated in one Java class. The maintainer has agreed to defer its package/class decomposition until after the current benchmark results are analyzed.
+## 6. Open questions and deferred work
+
+- A full consolidated multi-fork benchmark can provide stronger evidence before changing strategy defaults or making broad performance claims.
+- Do not add an automatic parallel threshold for `anyOrder()` until complete-consumption benchmarks demonstrate a benefit across representative shapes.
+- Small-product conditional-operation overhead is primarily plan-construction cost; it is deferred rather than addressed with a speculative shortcut.
+- The compiled-product API is parked after the end-to-end prototype failed to show a performance advantage (see §1B).
+- No unresolved public API naming decision remains for `isNotIn`: retain it as an alias of `isNoneOf`.
 
 ## 7. Verification method
 
@@ -287,6 +234,11 @@ Update this table whenever an item changes status.
 - Unit tests live next to the existing ones in `ConditionalProductBuilderTest`, `ConditionalProductRuleOrderTest`, and a new differential test per generator.
 
 ## 8. Progress log (newest first)
+
+- 2026-11-20: Release-documentation pass for the 4.2.0 target. Updated Maven and README version references, the public Cartesian-product guide (`anyOrder()`, lexicographic strategies, rank-order semantics and the `isNotIn` alias), conditional-product Javadocs, benchmark tooling instructions, and the 4.2.0 changelog. The PR remains open; no merge or release publication is authorized.
+
+- 2026-11-20: Maintainer clarified that the naming question is specifically `isNotIn(...)` versus `isNoneOf(...)`. Keep both overload families; `isNotIn(...)` is an alias of `isNoneOf(...)`. Do not remove a public method, add `isNotOneOf(...)`, or make a major-version decision based on this alias.
+
 
 - 2026-11-19: Recorded a future architectural direction for a reusable compiled-product abstraction. The Simple, Constrained, and Conditional product builders should eventually support `.compile()`; a compiled definition would be bound to different datasets for repeated executions, following the compile-once/apply-many model of Java regular expressions. Added an illustrative conditional-product API and separated compilation, binding, and execution responsibilities. This is a design hint for future AI-assisted work, not a finalized API or implementation mandate.
 
@@ -344,6 +296,9 @@ Update this table whenever an item changes status.
 - 2026-11-17: Maintainer confirmed all 34 tests passed after WP3.3. Reviewed the final strategy wiring for WP3.4: `PRUNED_BITSET`, `PRUNED_DFS`, and `DP` dispatch to their dedicated iterator implementations in `ConditionalProductGenerators`; `ADAPTIVE` is resolved by `ConditionalProductBuilder` using the existing 10,000-tuple threshold, and remains available. Verified WP3.5 requires no enum rename: all four required constants are already present. WP3 is complete. No strategy was removed or deprecated.
 
 ## 9. Maintainer clarifications (2026-11-17)
+
+- 2026-11-20: `isNotIn(...)` and `isNoneOf(...)` are the compared methods. Retain both varargs and collection overloads; document `isNotIn` as an alias. Target version for this work is 4.2.0. Keep the replacement PR open and do not merge.
+
 
 - Full-result `lexOrder()` and any-order full generation are optimized for consuming the complete result set. Do not choose an implementation solely because it wins a short-prefix benchmark.
 - Special operations (`count`, `isEmpty`, `lexOrderMth`, `byRanks`, `choice`, `sample`, etc.) may pay the exact-plan/counting cost. Their end-to-end benchmarks include builder construction and rule registration.

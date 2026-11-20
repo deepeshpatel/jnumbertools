@@ -13,9 +13,9 @@ public enum LexOrderStrategy {
     /** Feasibility-guided sequential traversal with exact completion counts available for parallel rank-range splitting. */
     DP,
     /**
-     * Lets the library choose the algorithm. There is no guarantee about which algorithm runs for which workload or
-     * condition, and the choice may change between versions; each version's actual choice is documented in the
-     * changelog and the maintainer decision log. Use an explicit strategy when a specific algorithm is required.
+     * Implementation-policy entry point. The API makes no guarantee about which algorithm runs for a workload
+     * or condition; the policy may change between versions. In this version it resolves to PRUNED_BITSET.
+     * Use an explicit strategy when a specific algorithm is required.
      */
     ADAPTIVE
 }

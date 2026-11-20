@@ -157,10 +157,29 @@ configs.byRanks(List.of(BigInteger.TWO));
 configs.choice(2, new Random(42));  // uniform over the valid tuples
 ```
 
+**Traversal options.**
+
+- `lexOrder()` is the default and returns every valid tuple in lexicographic order.
+- `anyOrder()` returns every valid tuple exactly once, lazily and without an encounter-order guarantee.
+  It is useful when tuple order is not important. Its spliterator can partition work when consumed with
+  `stream().parallel()`; parallel execution is opt-in and is not guaranteed to use multiple workers.
+- `lexOrder(LexOrderStrategy.PRUNED_DFS)` selects dense relation rows when they fit the implementation's
+  memory cap, otherwise it falls back to `PRUNED_BITSET`.
+- `lexOrder(LexOrderStrategy.DP)` selects feasibility-guided traversal. The DP plan is also used for
+  exact counting and rank-based operations.
+- `lexOrder(LexOrderStrategy.ADAPTIVE, estimatedLimit)` selects the implementation-policy entry point.
+  In this version it resolves to `PRUNED_BITSET`; `estimatedLimit` is validated but does not select a
+  different strategy. This internal policy may change in later versions.
+
+The lexicographic strategy affects `lexOrder()` only. It does not change the semantics of
+`count()`, `byRanks(...)`, `lexOrderMth(...)`, `choice(...)` or `sample(...)`.
+
+
 **Reading a rule.** `when(A).is(x).then(B).isOneOf(y, z)` means: whenever the value chosen from `A` is `x`,
 the value chosen from `B` must be `y` or `z`. It says nothing about tuples where `A` is not `x`. All rules must
 hold together. The condition side offers `is`, `isNot`, `isOneOf`, `isNoneOf` and `isNotIn`, and so does the
-`then` side; each takes values or a collection of values. Several rules may share the same trigger.
+`then` side; the multi-value methods accept either varargs or a collection. `isNotIn(...)` is an alias
+of `isNoneOf(...)` and is retained as a familiar alternative name. Several rules may share the same trigger.
 
 **Dimensions are identified by list instance.** `when(...)` and `then(...)` take the same `List` object that was
 passed to `conditionalProductOf` or `and`. Using one list instance for two dimensions is ambiguous and is rejected.
@@ -173,7 +192,7 @@ dimension and itself.
   aggregate, or an arbitrary predicate is not supported; counting those requires evaluating every tuple.
 - Rules that link dimensions in a loop are solved together as one block, so such a block is limited to 1,000,000
   value combinations, and any two dimensions to 50,000,000 value pairs.
-- The order is always lexicographic. A rank is a position among the valid tuples, so ranks change when rules change.
+- `lexOrder()` returns valid tuples in lexicographic order. `anyOrder()` returns the same valid tuple set exactly once but makes no encounter-order guarantee. Ranks used by `byRanks(...)` and `lexOrderMth(...)` are always positions in lexicographic order, so ranks change when rules change.
 - When almost every tuple is valid, a plain filter over a simple product is about as fast. The advantage grows as
   the rules remove more of the space.
 

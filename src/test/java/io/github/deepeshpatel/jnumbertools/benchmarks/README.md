@@ -27,7 +27,9 @@ and filtering only at the end.
 benchmarks/
 ├── README.md
 ├── runner/
-│   └── BenchmarkCommandGenerator.java
+│   ├── BenchmarkCommandGenerator.java
+│   ├── BenchmarkCommandExecutor.java
+│   └── BenchmarkEnvironment.java
 └── conditionalproduct/
     ├── ConditionalProductBenchmark.java
     ├── anyorder/
@@ -36,10 +38,12 @@ benchmarks/
     └── support/
 ```
 
-The topology benchmarks share one parameterized JMH class. The console command generator is kept
+The topology benchmarks share one parameterized JMH class. The command generator is kept
 separate from the benchmark itself: it collects selections, validates them, expands valid
-topology/dimension/domain-size combinations, and prints a command for the user to execute.
-It does not launch JMH.
+topology/dimension/domain-size combinations, and prints a command. The
+`BenchmarkCommandExecutor` can either generate a command interactively or accept a pasted command,
+then execute it and stream JMH output to the console. `BenchmarkEnvironment` records commit,
+branch/working-tree state, JDK/JVM, OS, CPU and memory metadata.
 
 ## Conditional-product benchmarks
 
@@ -105,6 +109,32 @@ The unified JMH class uses the `scenario` parameter to represent valid topology/
 the `implementation` parameter for the strategy. This avoids invalid cross-products in JMH
 while still letting the console selector present topology, dimensions, and domain size as
 independent choices.
+
+### Comparing a local tree with a given commit
+
+From the repository root, run:
+
+```bash
+scripts/benchmark-compare.sh <GIVEN_SHA>
+scripts/benchmark-compare.sh <GIVEN_SHA> full
+```
+
+The first command uses the quick regression preset; the second uses the full matrix. The script
+creates a temporary detached worktree for the supplied commit, copies the current benchmark
+sources into that worktree, and runs both the baseline and local production code with identical
+benchmark code. It includes uncommitted changes in the local run, does not switch the current
+branch, and writes JSON, logs, environment records and a comparison summary under the
+git-ignored `benchmark-results/` directory. A quick run is a regression screen, not proof that
+one implementation is faster; rerun close or inconclusive cases with longer JMH settings.
+
+To generate a README-ready report from one JMH result:
+
+```bash
+java scripts/BenchmarkReport.java report benchmark-results/<run>.json benchmark-results/<run>.env.txt
+```
+
+The report includes the fastest library implementation, speedup against the relevant baseline,
+allocation per operation, and a warning when score error exceeds 10% of the score.
 
 ### Special operations
 

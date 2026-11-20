@@ -64,7 +64,8 @@ import java.util.Random;
  * product. {@link #choice(int, Random)} may use rejection sampling, which draws candidates from the full
  * product and discards those that violate a rule.
  * Ordinary {@link #lexOrder()} traversal defaults to {@link LexOrderStrategy#PRUNED_BITSET}; callers can select
- * {@link LexOrderStrategy#DP} explicitly or use {@link LexOrderStrategy#ADAPTIVE} with a non-negative estimate.
+ * {@link LexOrderStrategy#PRUNED_DFS} or {@link LexOrderStrategy#DP} explicitly, or use
+ * {@link LexOrderStrategy#ADAPTIVE} with a non-negative estimate.
  * ADAPTIVE is an implementation policy, not a promise about which algorithm is selected for a given workload.
  * Its internal selection and selection criteria may change between versions. In this version it resolves to
  * {@link LexOrderStrategy#PRUNED_BITSET}; the estimate is validated but does not affect that choice.
@@ -342,8 +343,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     /**
      * Returns the valid tuples in lexicographic order using the {@link LexOrderStrategy#PRUNED_BITSET} strategy.
      *
-     * <p>This is the default and recommended strategy for ordinary traversal, especially when the caller
-     * expects to consume only part of the result. It checks constraints against the selected prefix and,
+     * <p>This is the default and recommended strategy for ordinary lexicographic traversal. It checks constraints against the selected prefix and,
      * lazily enables feasibility lookahead when traversal work indicates that pairwise prefix pruning has
      * explored substantial dead-end work (more than 1,024 plus four times the tuples emitted so far; the trigger does
      * not depend on the constraint graph's shape). Lookahead never changes the tuples returned or their order.

@@ -5,6 +5,36 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ## [Unreleased]
 
+## [4.2.0] - Unreleased
+
+### Added
+
+- Added `anyOrder()` for lazy, re-iterable generation of every valid conditional-product tuple exactly once,
+  without an encounter-order guarantee. Its spliterator can partition work for parallel streams.
+- Added explicit conditional-product lexicographic traversal strategies: `PRUNED_BITSET` (the default),
+  `PRUNED_DFS`, `DP`, and the implementation-policy entry point `ADAPTIVE`.
+
+### Changed
+
+- Conditional-product lexicographic traversal now uses shared, lazy work-triggered completion lookahead
+  in the two prefix-pruned strategies. It does not change the tuples or their lexicographic order.
+- The conditional-product implementation is split into a fluent public builder and package-private
+  model, relation, planning, and generator collaborators.
+
+### Performance
+
+- Conditional-product counting tables use primitive `long` storage when intermediate counts fit within
+  the supported bound, with an exact `BigInteger` fallback. Counting queries also avoid identity
+  `BigInteger` operations.
+- The benchmark suite now covers full traversal, any-order sequential/parallel traversal, and special
+  operations, with reusable quick/full presets and comparison tooling.
+
+### Compatibility
+
+- `isNotIn(...)` remains available as an alias of `isNoneOf(...)`; both varargs and collection overloads
+  are retained. No breaking API change is introduced by this alias decision.
+
+
 ## [4.1.0] - 2026-11-15
 
 ### Added
