@@ -18,8 +18,13 @@ import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Builder for a Cartesian product whose dimensions are linked by <em>rules</em>, written as plain
@@ -165,7 +170,16 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     private final ConstraintModel model;         // immutable shared dimensions and pairwise relations
     private final List<List<?>> originals;       // the caller's list objects, matched by identity only
     private final RuleCompiler ruleCompiler;
+    private final List<Predicate6> filters;
 
+    /**
+     * Predicate over a six-dimensional tuple. Each argument corresponds to a dimension
+     * in the order in which it was supplied to {@code conditionalProductOf(...)} and {@code and(...)}.
+     */
+    @FunctionalInterface
+    public interface Predicate6 {
+        boolean test(Object first, Object second, Object third, Object fourth, Object fifth, Object sixth);
+    }
 
     /**
      * Creates a builder with a single dimension.
@@ -178,9 +192,15 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     }
 
     private ConditionalProductBuilder(ConstraintModel model, List<List<?>> originals) {
+        this(model, originals, List.of());
+    }
+
+    private ConditionalProductBuilder(
+            ConstraintModel model, List<List<?>> originals, List<Predicate6> filters) {
         this.model = model;
         this.originals = originals;
         this.ruleCompiler = new RuleCompiler(model.dimensions, originals, model.indexes);
+        this.filters = filters;
     }
 
     /**
@@ -194,7 +214,31 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         List<List<?>> newOriginals = new ArrayList<>(originals);
         newOriginals.add(elements);
         return new ConditionalProductBuilder(model.withDimension(copy),
-                Collections.unmodifiableList(newOriginals));
+                Collections.unmodifiableList(newOriginals), filters);
+    }
+
+    /**
+     * Adds a predicate over the complete six-dimensional tuple.
+     *
+     * <p>The predicate receives values in dimension declaration order. Multiple calls to
+     * {@code filter} are combined with logical AND. Unlike pairwise rules configured through
+     * {@link #when(List)}, an arbitrary predicate is evaluated only after a complete tuple has
+     * been generated; it does not participate in constraint-plan pruning or dynamic-programming
+     * counts.</p>
+     *
+     * @param predicate predicate that accepts a tuple when it returns {@code true}
+     * @return a new builder with the predicate appended
+     * @throws NullPointerException if {@code predicate} is null
+     * @throws IllegalStateException if this product does not have exactly six dimensions
+     */
+    public ConditionalProductBuilder filter(Predicate6 predicate) {
+        Objects.requireNonNull(predicate, "predicate");
+        if (model.dimensions.size() != 6) {
+            throw new IllegalStateException("A six-argument filter requires exactly six dimensions");
+        }
+        List<Predicate6> newFilters = new ArrayList<>(filters);
+        newFilters.add(predicate);
+        return new ConditionalProductBuilder(model, originals, Collections.unmodifiableList(newFilters));
     }
 
     //Rule Methods
@@ -336,7 +380,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @return a re-iterable generator of all valid tuples, with no encounter-order guarantee
      */
     public StreamableIterable<Object> anyOrder() {
-        return ConditionalProductGenerators.anyOrder(model);
+        return applyFilters(ConditionalProductGenerators.anyOrder(model));
     }
 
     // Builder interface Methods
@@ -398,7 +442,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         if (strategy == LexOrderStrategy.ADAPTIVE) {
             throw new IllegalArgumentException("ADAPTIVE requires an estimated traversal limit; use lexOrder(strategy, estimatedLimit)");
         }
-        return ConditionalProductGenerators.lexOrder(model, strategy);
+        return applyFilters(ConditionalProductGenerators.lexOrder(model, strategy));
     }
 
     /**
@@ -439,7 +483,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     public StreamableIterable<Object> lexOrderMth(BigInteger m, BigInteger start) {
         BigInteger count = count();
         Util.validateLexOrderMthParams(m, start, count);
-        return ConditionalProductGenerators.rankBased(model, new EveryMthIterable(start, m, count));
+        return byRanks(new EveryMthIterable(start, m, count));
     }
 
     /**
@@ -450,7 +494,10 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     @Override
     public StreamableIterable<Object> byRanks(Iterable<BigInteger> ranks) {
         Util.validateByRanksParams(ranks);
-        return ConditionalProductGenerators.rankBased(model, ranks);
+        if (filters.isEmpty()) {
+            return ConditionalProductGenerators.rankBased(model, ranks);
+        }
+        return filteredByRanks(ranks);
     }
 
     /**
@@ -460,6 +507,9 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     @Override
     public StreamableIterable<Object> choice(int sampleSize, Random random) {
         BigIntegerChoice ranks = new BigIntegerChoice(count(), sampleSize, random); // validates the arguments
+        if (!filters.isEmpty()) {
+            return byRanks(ranks);
+        }
         ConstraintPlan p = model.plan();
         if (p.counts().mostTuplesValid()) {
             return ConditionalProductGenerators.rejectionChoice(model, sampleSize, random);
@@ -473,7 +523,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     @Override
     public StreamableIterable<Object> sample(int sampleSize, Random random) {
-        return ConditionalProductGenerators.rankBased(model, new BigIntegerSample(count(), sampleSize, random));
+        return byRanks(new BigIntegerSample(count(), sampleSize, random));
     }
 
     /**
@@ -482,12 +532,19 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     @Override
     public BigInteger count() {
-        return model.plan().counts().total;
+        if (filters.isEmpty()) {
+            return model.plan().counts().total;
+        }
+        BigInteger result = BigInteger.ZERO;
+        for (List<Object> ignored : lexOrder()) {
+            result = result.add(BigInteger.ONE);
+        }
+        return result;
     }
 
     @Override
     public boolean isEmpty() {
-        return model.plan().isEmpty();
+        return filters.isEmpty() ? model.plan().isEmpty() : !lexOrder().iterator().hasNext();
     }
 
     @Override
@@ -499,7 +556,115 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
     private ConditionalProductBuilder withRule(int triggerDim, BitSet triggerValues, int targetDim, BitSet allowedTargets) {
         return new ConditionalProductBuilder(
-                model.withRule(triggerDim, triggerValues, targetDim, allowedTargets), originals);
+                model.withRule(triggerDim, triggerValues, targetDim, allowedTargets), originals, filters);
+    }
+
+    private boolean accepts(List<Object> tuple) {
+        for (Predicate6 filter : filters) {
+            if (!filter.test(tuple.get(0), tuple.get(1), tuple.get(2),
+                    tuple.get(3), tuple.get(4), tuple.get(5))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private StreamableIterable<Object> applyFilters(StreamableIterable<Object> source) {
+        if (filters.isEmpty()) {
+            return source;
+        }
+        return new StreamableIterable<>() {
+            @Override
+            public java.util.Iterator<List<Object>> iterator() {
+                java.util.Iterator<List<Object>> sourceIterator = source.iterator();
+                return new java.util.Iterator<>() {
+                    private List<Object> next;
+                    private boolean ready;
+
+                    @Override
+                    public boolean hasNext() {
+                        while (!ready && sourceIterator.hasNext()) {
+                            List<Object> candidate = sourceIterator.next();
+                            if (accepts(candidate)) {
+                                next = candidate;
+                                ready = true;
+                            }
+                        }
+                        return ready;
+                    }
+
+                    @Override
+                    public List<Object> next() {
+                        if (!hasNext()) {
+                            throw new NoSuchElementException();
+                        }
+                        List<Object> result = next;
+                        next = null;
+                        ready = false;
+                        return result;
+                    }
+                };
+            }
+
+            @Override
+            public Stream<List<Object>> stream() {
+                return StreamSupport.stream(spliterator(), false);
+            }
+
+            @Override
+            public Spliterator<List<Object>> spliterator() {
+                return Spliterators.spliteratorUnknownSize(iterator(),
+                        Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE);
+            }
+        };
+    }
+
+    private StreamableIterable<Object> filteredByRanks(Iterable<BigInteger> ranks) {
+        return new StreamableIterable<>() {
+            @Override
+            public java.util.Iterator<List<Object>> iterator() {
+                java.util.Iterator<BigInteger> rankIterator = ranks.iterator();
+                return new java.util.Iterator<>() {
+                    @Override
+                    public boolean hasNext() {
+                        return rankIterator.hasNext();
+                    }
+
+                    @Override
+                    public List<Object> next() {
+                        if (!hasNext()) {
+                            throw new NoSuchElementException();
+                        }
+                        BigInteger requestedRank = rankIterator.next();
+                        if (requestedRank == null || requestedRank.signum() < 0) {
+                            throw new IllegalArgumentException("Rank must be non-negative: " + requestedRank);
+                        }
+                        BigInteger currentRank = BigInteger.ZERO;
+                        java.util.Iterator<List<Object>> tuples = lexOrder().iterator();
+                        while (tuples.hasNext()) {
+                            List<Object> tuple = tuples.next();
+                            if (currentRank.equals(requestedRank)) {
+                                return tuple;
+                            }
+                            currentRank = currentRank.add(BigInteger.ONE);
+                        }
+                        throw new IllegalArgumentException(
+                                "Rank " + requestedRank + " is out of bounds [0, " + currentRank + ")");
+                    }
+                };
+            }
+
+            @Override
+            public Stream<List<Object>> stream() {
+                return StreamSupport.stream(spliterator(), false);
+            }
+
+            @Override
+            public Spliterator<List<Object>> spliterator() {
+                return Spliterators.spliteratorUnknownSize(iterator(),
+                        Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE);
+            }
+        };
     }
 
     private static Object nonNull(Object value) {
