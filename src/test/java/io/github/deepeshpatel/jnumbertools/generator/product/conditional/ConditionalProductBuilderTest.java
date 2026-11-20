@@ -73,6 +73,37 @@ class ConditionalProductBuilderTest {
     }
 
     @Test
+    void wholeTupleFiltersMatchEquivalentExplicitRules() {
+        List<String> database = List.of("PostgreSQL", "Oracle");
+        List<String> deployment = List.of("Cloud", "On-Prem");
+        List<String> region = List.of("US", "EU");
+
+        var filtered = cartesianProduct
+                .conditionalProductOf(os, browser, network, database, deployment, region)
+                .filter((o, b, n, d, dep, r) ->
+                        !(n.equals("4G") && o.equals("Linux")))
+                .filter((o, b, n, d, dep, r) ->
+                        !(b.equals("Safari") && !o.equals("macOS")))
+                .filter((o, b, n, d, dep, r) ->
+                        !(d.equals("Oracle") && !dep.equals("Cloud")));
+
+        var explicitRules = cartesianProduct
+                .conditionalProductOf(os, browser, network, database, deployment, region)
+                .when(network).is("4G").then(os).isNot("Linux")
+                .when(browser).is("Safari").then(os).is("macOS")
+                .when(database).is("Oracle").then(deployment).is("Cloud");
+
+        assertEquals(explicitRules.count(), filtered.count());
+        assertEquals(explicitRules.lexOrder().stream().toList(), filtered.lexOrder().stream().toList());
+        assertEquals(explicitRules.lexOrderMth(3, 1).stream().toList(),
+                filtered.lexOrderMth(3, 1).stream().toList());
+        assertEquals(explicitRules.byRanks(List.of(BigInteger.ZERO, BigInteger.valueOf(3),
+                        explicitRules.count().subtract(BigInteger.ONE))).stream().toList(),
+                filtered.byRanks(List.of(BigInteger.ZERO, BigInteger.valueOf(3),
+                        filtered.count().subtract(BigInteger.ONE))).stream().toList());
+    }
+
+    @Test
     void twoRulesOnTheSameTrigger() {
         var builder = twoRules();
         assertEquals(BigInteger.valueOf(13), builder.count());
