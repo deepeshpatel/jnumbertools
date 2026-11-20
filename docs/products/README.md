@@ -141,7 +141,7 @@ var browser = List.of("Chrome", "Safari", "Firefox");
 var network = List.of("WiFi", "4G");
 
 var configs = JNumberTools.cartesianProduct()
-        .conditionalProductOf(os)
+        .conditional().ofList(os)
         .and(browser)
         .and(network)
         .when(browser).is("Safari").then(os).isOneOf("macOS")
@@ -163,7 +163,7 @@ hold together. The condition side offers `is`, `isNot`, `isOneOf`, `isNoneOf` an
 `then` side; each takes values or a collection of values. Several rules may share the same trigger.
 
 **Dimensions are identified by list instance.** `when(...)` and `then(...)` take the same `List` object that was
-passed to `conditionalProductOf` or `and`. Using one list instance for two dimensions is ambiguous and is rejected.
+passed to `conditional().ofList` or `and`. Using one list instance for two dimensions is ambiguous and is rejected.
 A rule value that is not in the dimension, or an empty list of values, is rejected, and so is a rule between a
 dimension and itself.
 
