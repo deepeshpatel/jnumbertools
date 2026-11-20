@@ -176,7 +176,7 @@ public final class CompiledConditionalProductDefinition {
         return Collections.unmodifiableList(copy);
     }
 
-    static final class CompiledConditionalProduct {
+    public static final class CompiledConditionalProduct {
         private final List<String> names;
         private final List<RuleSpec> rules;
         private final int[] triggerDims;
