@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 @Threads(1)
 public class CompoundVsPairwiseGenerationBenchmark {
 
-    @Param({"3x10", "5x10", "7x5", "10x3", "5x15", "4x25", "5x18"})
+    @Param({"3x10", "5x10", "7x5", "10x3", "5x15", "4x30", "5x18"})
     public String scenario;
 
     private CompoundConditionalProductBuilder compoundBuilder;
