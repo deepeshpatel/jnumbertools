@@ -471,7 +471,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         if (estimatedLimit < 0) {
             throw new IllegalArgumentException("estimatedLimit must be non-negative");
         }
-        return ConditionalProductGenerators.lexOrder(model, LexOrderStrategy.PRUNED_BITSET);
+        return applyFilters(ConditionalProductGenerators.lexOrder(model, LexOrderStrategy.PRUNED_BITSET));
     }
 
     /**
