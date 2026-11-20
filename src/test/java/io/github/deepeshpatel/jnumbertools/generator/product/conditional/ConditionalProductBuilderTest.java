@@ -72,6 +72,66 @@ class ConditionalProductBuilderTest {
     }
 
     @Test
+    void multiTriggerAndOrGroupsUseAndPrecedenceAcrossAllOperations() {
+        List<String> database = List.of("PostgreSQL", "Oracle");
+        var product = cartesianProduct.conditionalProductOf(os, browser, database)
+                .when(browser).is("Safari").and(os).is("Windows")
+                .or(browser).is("Chrome").and(os).is("Linux")
+                .then(database).isNot("PostgreSQL");
+
+        List<List<Object>> expected = List.of(
+                List.of("Windows", "Safari", "Oracle"),
+                List.of("Windows", "Chrome", "PostgreSQL"),
+                List.of("Windows", "Chrome", "Oracle"),
+                List.of("Windows", "Firefox", "PostgreSQL"),
+                List.of("Windows", "Firefox", "Oracle"),
+                List.of("macOS", "Safari", "PostgreSQL"),
+                List.of("macOS", "Safari", "Oracle"),
+                List.of("macOS", "Chrome", "PostgreSQL"),
+                List.of("macOS", "Chrome", "Oracle"),
+                List.of("macOS", "Firefox", "PostgreSQL"),
+                List.of("macOS", "Firefox", "Oracle"),
+                List.of("Linux", "Safari", "PostgreSQL"),
+                List.of("Linux", "Safari", "Oracle"),
+                List.of("Linux", "Chrome", "Oracle"),
+                List.of("Linux", "Firefox", "PostgreSQL"),
+                List.of("Linux", "Firefox", "Oracle")
+        );
+        assertEquals(BigInteger.valueOf(16), product.count());
+        assertEquals(expected, product.lexOrder().stream().toList());
+        assertEquals(expected, product.lexOrder(LexOrderStrategy.DP).stream().toList());
+        assertEquals(new HashSet<>(expected), new HashSet<>(product.anyOrder().stream().toList()));
+        assertEquals(List.of(expected.get(0), expected.get(3), expected.get(6),
+                        expected.get(9), expected.get(12), expected.get(15)),
+                product.lexOrderMth(3, 0).stream().toList());
+        Set<List<Object>> valid = new HashSet<>(expected);
+        assertTrue(valid.containsAll(product.choice(20, new Random(19)).stream().toList()));
+        assertTrue(valid.containsAll(product.sample(5, new Random(23)).stream().toList()));
+        assertEquals(expected.subList(0, 3),
+                product.byRanks(List.of(BigInteger.ZERO, BigInteger.ONE, BigInteger.TWO)).stream().toList());
+    }
+
+    @Test
+    void multiTriggerSupportsAnArbitraryLengthConjunction() {
+        List<String> a = List.of("a0", "a1");
+        List<String> b = List.of("b0", "b1");
+        List<String> c = List.of("c0", "c1");
+        List<String> d = List.of("d0", "d1");
+        List<String> target = List.of("x", "y");
+
+        var product = cartesianProduct.conditionalProductOf(a, b, c, d, target)
+                .when(a).is("a1").and(b).is("b1").and(c).is("c1").and(d).is("d1")
+                .then(target).is("y");
+
+        assertEquals(BigInteger.valueOf(31), product.count());
+        assertEquals(31, product.lexOrder().stream().count());
+        assertEquals(BigInteger.valueOf(31), BigInteger.valueOf(product.byRanks(
+                java.util.stream.IntStream.range(0, 31).mapToObj(BigInteger::valueOf).toList())
+                .stream().count()));
+        assertFalse(product.isEmpty());
+    }
+
+    @Test
     void twoRulesOnTheSameTrigger() {
         var builder = twoRules();
         assertEquals(BigInteger.valueOf(13), builder.count());

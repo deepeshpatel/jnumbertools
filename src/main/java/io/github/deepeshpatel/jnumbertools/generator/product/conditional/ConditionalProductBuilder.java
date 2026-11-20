@@ -35,7 +35,10 @@ import java.util.Random;
  *         .and(network)
  *         .when(browser).is("Safari").then(os).isOneOf("macOS")
  *         .when(os).is("Linux").then(browser).isNoneOf("Chrome")
- *         .when(network).is("4G").then(os).isNoneOf("Linux");
+ *         .when(network).is("4G").then(os).isNoneOf("Linux")
+ *         .when(browser).is("Safari").and(os).is("Windows")
+ *             .or(browser).is("Chrome").and(os).is("Linux")
+ *             .then(network).isNot("4G");
  *
  * configs.count();                       // exact, without listing the tuples
  * configs.lexOrder().stream().forEach(System.out::println); // all valid tuples, in lexicographic order
@@ -45,19 +48,20 @@ import java.util.Random;
  *
  * <h2>Meaning of a rule</h2>
  * <p>{@code when(A).is(x).then(B).isOneOf(y, z)} means: whenever the value chosen from {@code A}
- * is {@code x}, the value chosen from {@code B} must be {@code y} or {@code z}. The rule does not say
- * anything about tuples where {@code A} is not {@code x}. All rules must hold together ("and").
- * {@code when(...)} and {@code then(...)} take the same {@link List} instance that was passed to
- * {@code conditionalProductOf} or {@code and} (matched by identity).</p>
+ * is {@code x}, the value chosen from {@code B} must be {@code y} or {@code z}. Multi-trigger rules
+ * support arbitrary-length conjunctions: {@code .when(A).is(x).and(B).is(y)}. Calling {@code .or(C)}
+ * starts another conjunction alternative, so {@code (A=x AND B=y) OR (C=z)} activates the same
+ * consequence. AND binds within each group; OR separates groups. The consequence applies when any
+ * group matches. Every completed rule is combined with other rules using AND. Dimensions are identified
+ * by the same list instance passed to {@code conditionalProductOf} or {@code and}.</p>
  *
  * <h2>What is supported, and what is not</h2>
- * <p>Rules are evaluated on pairs of values, never on whole tuples. Dimensions linked by rules in a tree
- * shape are handled with a small table per dimension. Dimensions that rules link in a <em>loop</em> (for
- * example rules between A and B, B and C, and C and A) are solved together as one block, so the work for
- * such a block grows with the product of the sizes of its dimensions. A loop block is rejected if that
- * product exceeds 1,000,000 ({@code MAX_LOOP_COMBINATIONS}). Each pair of dimensions connected by a rule
- * also requires a relation table; a rule is rejected if that table would exceed 50,000,000 value pairs
- * ({@code MAX_PAIR_CELLS}).
+ * <p>Pairwise rules are represented as relations between two dimensions and retain the optimized
+ * tree/loop solver. Multi-trigger rules are non-binary constraints: all dimensions in the trigger
+ * alternatives and target are joined into one joint-assignment block. Its assignments are checked
+ * against the complete rule. Such a block is subject to the 1,000,000 combination limit
+ * ({@code MAX_LOOP_COMBINATIONS}); each pair introduced to connect the block is subject to the
+ * 50,000,000 value-pair limit ({@code MAX_PAIR_CELLS}).
  * For all accepted rule sets, {@link #count()}, {@link #lexOrder()},
  * {@link #lexOrderMth(BigInteger, BigInteger)}, {@link #byRanks(Iterable)}, {@link #choice(int, Random)}
  * and {@link #sample(int, Random)} operate on valid tuples without materializing the complete Cartesian
@@ -111,9 +115,9 @@ import java.util.Random;
  * builder.</p>
  *
  * <h2>Algorithm &amp; Complexity</h2>
- * <p>Internally, this builder models rule-constrained Cartesian products as a binary
- * <strong>Constraint Satisfaction Problem (CSP)</strong> and compiles the rules into an exact counting
- * and generation plan:</p>
+ * <p>Internally, this builder models rule-constrained Cartesian products as a constraint satisfaction
+ * problem (CSP). Pairwise rules use the binary constraint graph; multi-trigger rules form bounded
+ * joint-assignment blocks. Both are compiled into an exact counting and generation plan:</p>
  * <ul>
  *   <li><strong>Cycle Contraction &amp; Forest Decomposition</strong>
  *       <em>(related to Freuder 1982; Dechter &amp; Pearl 1987)</em>:
@@ -209,111 +213,148 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      *                                  list instance was used for more than one dimension
      */
     public WhenDimension when(List<?> dimension) {
-        return new WhenDimension(ruleCompiler.indexOf(dimension));
+        return new WhenDimension(ruleCompiler.indexOf(dimension), List.of(), false);
     }
 
-    /** First step of a rule: what the chosen value of the "when" dimension must be. */
+    /** First step of a trigger condition; use {@link Trigger#and(List)} or {@link Trigger#or(List)} to add conditions. */
     public final class WhenDimension {
         private final int dim;
+        private final List<List<MultiTriggerRule.Condition>> groups;
+        private final boolean startsAlternative;
 
-        private WhenDimension(int dim) { this.dim = dim; }
+        private WhenDimension(int dim, List<List<MultiTriggerRule.Condition>> groups, boolean startsAlternative) {
+            this.dim = dim;
+            this.groups = groups;
+            this.startsAlternative = startsAlternative;
+        }
 
         /** The chosen value equals {@code value}. */
         public Trigger is(Object value) { return trigger(List.of(nonNull(value)), false); }
-
         /** The chosen value is anything except {@code value}. */
         public Trigger isNot(Object value) { return trigger(List.of(nonNull(value)), true); }
-
         /** The chosen value is one of {@code values} (at least one is required). */
         public Trigger isOneOf(Object... values) { return trigger(asList(values), false); }
-
         /** The chosen value is one of {@code values} (at least one is required). */
         public Trigger isOneOf(Collection<?> values) { return trigger(values, false); }
-
         /** The chosen value is none of {@code values} (at least one is required). */
         public Trigger isNoneOf(Object... values) { return trigger(asList(values), true); }
-
         /** The chosen value is none of {@code values} (at least one is required). */
         public Trigger isNoneOf(Collection<?> values) { return trigger(values, true); }
-
         /** Alias of {@link #isNoneOf(Object...)}. */
         public Trigger isNotIn(Object... values) { return isNoneOf(values); }
-
         /** Alias of {@link #isNoneOf(Collection)}. */
         public Trigger isNotIn(Collection<?> values) { return isNoneOf(values); }
 
         private Trigger trigger(Collection<?> values, boolean negate) {
-            return new Trigger(dim, ruleCompiler.matching(dim, values, negate));
+            List<List<MultiTriggerRule.Condition>> updated = new ArrayList<>();
+            for (List<MultiTriggerRule.Condition> group : groups) updated.add(new ArrayList<>(group));
+            if (updated.isEmpty() || startsAlternative) updated.add(new ArrayList<>());
+            updated.get(updated.size() - 1).add(
+                    new MultiTriggerRule.Condition(dim, ruleCompiler.matching(dim, values, negate)));
+            return new Trigger(MultiTriggerRule.copyGroups(updated));
         }
     }
 
-    /** Second step of a rule: the condition is known, now name the dimension that is restricted. */
+    /**
+     * A completed trigger expression. {@link #and(List)} appends a condition to the current AND group;
+     * {@link #or(List)} starts another alternative AND group. Thus
+     * {@code .when(A).is(a).and(B).is(b).or(C).is(c)} means
+     * {@code (A=a AND B=b) OR (C=c)}. AND binds within each group.
+     */
     public final class Trigger {
-        private final int dim;
-        private final BitSet values;
+        private final List<List<MultiTriggerRule.Condition>> groups;
 
-        private Trigger(int dim, BitSet values) {
-            this.dim = dim;
-            this.values = values;
+        private Trigger(List<List<MultiTriggerRule.Condition>> groups) {
+            this.groups = groups;
         }
 
         /**
-         * Names the restricted dimension.
-         *
-         * @param dimension the same list instance that was passed to {@code conditionalProductOf} or
-         *                  {@code and}; must be a different dimension from the one in {@code when}
+         * Adds a condition to the current conjunction.
+         * @param dimension a product dimension, identified by its original list instance
+         * @return the next condition in the same AND group
+         */
+        public WhenDimension and(List<?> dimension) {
+            return new WhenDimension(ruleCompiler.indexOf(dimension), groups, false);
+        }
+
+        /**
+         * Starts another alternative conjunction. The complete trigger is the OR of all groups.
+         * @param dimension a product dimension, identified by its original list instance
+         * @return the first condition in a new OR group
+         */
+        public WhenDimension or(List<?> dimension) {
+            return new WhenDimension(ruleCompiler.indexOf(dimension), groups, true);
+        }
+
+        /**
+         * Names the dimension restricted by this trigger expression.
+         * @param dimension target dimension; must not occur in any trigger condition
          * @return the final step of the rule
-         * @throws NullPointerException     if {@code dimension} is null
-         * @throws IllegalArgumentException if the list is not a dimension of this product, is ambiguous, or
-         *                                  is the dimension used in {@code when}
+         * @throws NullPointerException if {@code dimension} is null
+         * @throws IllegalArgumentException if the dimension is not part of this product or is used by the trigger
          */
         public ThenDimension then(List<?> dimension) {
             int target = ruleCompiler.indexOf(dimension);
-            if (target == dim) {
-                throw new IllegalArgumentException("A rule needs two different dimensions");
+            for (List<MultiTriggerRule.Condition> group : groups) {
+                for (MultiTriggerRule.Condition condition : group) {
+                    if (condition.dimension == target) {
+                        throw new IllegalArgumentException("The target dimension must differ from every trigger dimension");
+                    }
+                }
             }
-            return new ThenDimension(dim, values, target);
+            return new ThenDimension(groups, target);
         }
     }
 
     /** Final step of a rule: what the restricted dimension may be. Returns the new builder. */
     public final class ThenDimension {
-        private final int triggerDim;
-        private final BitSet triggerValues;
+        private final List<List<MultiTriggerRule.Condition>> groups;
         private final int targetDim;
 
-        private ThenDimension(int triggerDim, BitSet triggerValues, int targetDim) {
-            this.triggerDim = triggerDim;
-            this.triggerValues = triggerValues;
+        private ThenDimension(List<List<MultiTriggerRule.Condition>> groups, int targetDim) {
+            this.groups = groups;
             this.targetDim = targetDim;
         }
 
         /** The value must equal {@code value}. */
         public ConditionalProductBuilder is(Object value) { return apply(List.of(nonNull(value)), false); }
-
         /** The value must be anything except {@code value}. */
         public ConditionalProductBuilder isNot(Object value) { return apply(List.of(nonNull(value)), true); }
-
         /** The value must be one of {@code values} (at least one is required). */
         public ConditionalProductBuilder isOneOf(Object... values) { return apply(asList(values), false); }
-
         /** The value must be one of {@code values} (at least one is required). */
         public ConditionalProductBuilder isOneOf(Collection<?> values) { return apply(values, false); }
-
         /** The value must be none of {@code values} (at least one is required). */
         public ConditionalProductBuilder isNoneOf(Object... values) { return apply(asList(values), true); }
-
         /** The value must be none of {@code values} (at least one is required). */
         public ConditionalProductBuilder isNoneOf(Collection<?> values) { return apply(values, true); }
-
         /** Alias of {@link #isNoneOf(Object...)}. */
         public ConditionalProductBuilder isNotIn(Object... values) { return isNoneOf(values); }
-
         /** Alias of {@link #isNoneOf(Collection)}. */
         public ConditionalProductBuilder isNotIn(Collection<?> values) { return isNoneOf(values); }
 
         private ConditionalProductBuilder apply(Collection<?> values, boolean negate) {
-            return withRule(triggerDim, triggerValues, targetDim, ruleCompiler.matching(targetDim, values, negate));
+            BitSet allowed = ruleCompiler.matching(targetDim, values, negate);
+            int singleTriggerDimension = -1;
+            BitSet combinedTriggers = new BitSet();
+            boolean pairwise = true;
+            for (List<MultiTriggerRule.Condition> group : groups) {
+                BitSet groupValues = null;
+                for (MultiTriggerRule.Condition condition : group) {
+                    if (singleTriggerDimension < 0) singleTriggerDimension = condition.dimension;
+                    if (singleTriggerDimension != condition.dimension) {
+                        pairwise = false;
+                        break;
+                    }
+                    if (groupValues == null) groupValues = (BitSet) condition.values.clone();
+                    else groupValues.and(condition.values);
+                }
+                if (!pairwise) break;
+                if (groupValues != null) combinedTriggers.or(groupValues);
+            }
+            if (pairwise) return withRule(singleTriggerDimension, combinedTriggers, targetDim, allowed);
+            return new ConditionalProductBuilder(
+                    model.withMultiRule(new MultiTriggerRule(groups, targetDim, allowed)), originals);
         }
     }
 

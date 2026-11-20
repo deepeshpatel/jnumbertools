@@ -111,6 +111,7 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
 
             val[depth] = candidate;
             nextCandidate[depth] = candidate + 1;
+            if (!model.multiRules.isEmpty() && !model.acceptsPrefix(depth, val)) continue;
             if (depth == dimensions - 1) {
                 emitted++;
                 return true;
