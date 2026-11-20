@@ -80,7 +80,7 @@ public class AnyOrderParallelBenchmark {
                 first = range(64);
                 second = range(48);
                 third = range(24);
-                return JNumberTools.cartesianProduct().conditionalProductOf(first).and(second).and(third)
+                return JNumberTools.cartesianProduct().conditional().ofList(first).and(second).and(third)
                         .when(first).isOneOf(range(32)).then(second).isOneOf(range(12))
                         .when(second).isOneOf(range(12)).then(third).isOneOf(range(6));
             }
@@ -88,14 +88,14 @@ public class AnyOrderParallelBenchmark {
                 first = range(1);
                 second = range(96);
                 third = range(32);
-                return JNumberTools.cartesianProduct().conditionalProductOf(first).and(second).and(third)
+                return JNumberTools.cartesianProduct().conditional().ofList(first).and(second).and(third)
                         .when(second).isOneOf(range(48)).then(third).isOneOf(range(8));
             }
             case "NARROW_ROOT" -> {
                 first = range(2);
                 second = range(96);
                 third = range(32);
-                return JNumberTools.cartesianProduct().conditionalProductOf(first).and(second).and(third)
+                return JNumberTools.cartesianProduct().conditional().ofList(first).and(second).and(third)
                         .when(first).is(0).then(second).isOneOf(range(4))
                         .when(first).is(1).then(second).isOneOf(range(92, 96))
                         .when(second).isOneOf(range(4)).then(third).isOneOf(range(8))
@@ -105,7 +105,7 @@ public class AnyOrderParallelBenchmark {
                 first = range(32);
                 second = range(48);
                 third = range(24);
-                return JNumberTools.cartesianProduct().conditionalProductOf(first).and(second).and(third)
+                return JNumberTools.cartesianProduct().conditional().ofList(first).and(second).and(third)
                         .when(first).isOneOf(range(28)).then(second).is(0)
                         .when(second).is(0).then(third).isOneOf(range(2));
             }
