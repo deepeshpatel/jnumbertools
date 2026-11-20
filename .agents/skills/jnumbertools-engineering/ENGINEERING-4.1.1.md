@@ -28,7 +28,7 @@ The existing single-list entry point and the `.and(...)` chaining API remain ava
 
 Removed the public six-argument `.filter(...)` method, its `Predicate6` interface, the post-generation filtering wrappers, and the filter-specific test. The builder now consistently uses the existing constraint plan for counting, emptiness, rank selection, and traversal. This restores the original optimized path and removes the post-generation scan fallback.
 
-The removal commit is listed below. The next implementation step is a dependency-aware multi-trigger rule expression using `.and()` and `.or()`. It must preserve exact semantics across traversal, counting, ranking, and sampling. Existing pairwise-only rules must retain their current execution path without multi-trigger evaluation overhead.
+The removal commit is listed below. The compound `.and()` / `.or()` expression is now implemented in the same PR branch. Existing pairwise-only rules remain on the original relation path; performance still needs confirmation with JMH.
 
 ### Compound trigger expressions with AND / OR
 
@@ -65,9 +65,15 @@ The following commits are present on the PR branch, in chronological order:
 | [`e28ec73`](https://github.com/deepeshpatel/jnumbertools/commit/e28ec73eb52a2e8f251ac3754d4c7b9ba5fcb472) | Test whole-tuple filters against equivalent conditional rules | Test coverage for the experimental implementation; does not establish pruning |
 | [`8ed8d1e`](https://github.com/deepeshpatel/jnumbertools/commit/8ed8d1ea70442e04ae53cf2cad94decd553916c3) | Clarify filter evaluation and dimension ordering | Documentation for the experimental implementation |
 | [`f028358`](https://github.com/deepeshpatel/jnumbertools/commit/f028358b94aca9edca1904ba6fe8dcba305380a6) | Document dimension ordering for tuple filters | Documentation for the experimental implementation |
-| [`8a28574`](https://github.com/deepeshpatel/jnumbertools/commit/8a285746949640defa5f352f3a66dae81066ca17) | Preserve traversal characteristics when applying tuple filters | Does not resolve the lack of partial-assignment pruning |
+| [`8a28574`](https://github.com/deepeshpatel/jnumbertools/commit/8a285746949640defa5f352f3a66dae81066ca17) | Preserve traversal characteristics when applying tuple filters | Experimental implementation, subsequently removed |
+| [`1a40b1a`](https://github.com/deepeshpatel/jnumbertools/commit/1a40b1ae9d208771509239749917a1e663300e5f) | Remove experimental whole-tuple filter API | Completed |
+| [`ab08e86`](https://github.com/deepeshpatel/jnumbertools/commit/ab08e86c860784aeccd471341ec2c7d2676d8280) | Update engineering notes after filter removal | Completed |
+| [`ac92786`](https://github.com/deepeshpatel/jnumbertools/commit/ac92786900a73fb9eba664c9475e3265111d11a1) | Add compound AND/OR conditional trigger rules | Implemented; local validation pending |
+| [`38d7266`](https://github.com/deepeshpatel/jnumbertools/commit/38d72665c960751be82a8a43555590215ecb3e0e) | Update engineering notes for compound trigger rules | Completed |
+| [`cc384fa`](https://github.com/deepeshpatel/jnumbertools/commit/cc384fa1983b09b236cf74fbea1f0ffd107cccd6) | Preserve the pairwise fast path for compound rule planning | Added empty-rule fast path and single-dimension OR test |
+| [`50d08f8`](https://github.com/deepeshpatel/jnumbertools/commit/50d08f84ea5969be607efbf4894a8e93f858714f) | Record pairwise fast-path follow-up in engineering notes | Completed |
 
-This list describes the implementation commits preceding this engineering-notes commit. It does not imply that every change is approved for release.
+This list records the PR branch's implementation and engineering-note commits. It does not imply that local validation or performance acceptance is complete.
 
 ## Remaining work and acceptance criteria
 
