@@ -5,7 +5,7 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ## [Unreleased]
 
-## [4.1.0] - Unreleased
+## [4.1.0] - Released 2026-11-20
 
 ### Added
 
