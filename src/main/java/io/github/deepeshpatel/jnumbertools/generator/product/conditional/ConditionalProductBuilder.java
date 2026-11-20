@@ -208,6 +208,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @param elements the new dimension; copied. An empty list is allowed and makes the product empty.
      * @return new immutable builder
      * @throws NullPointerException if {@code elements} is null or contains a null element
+     * @throws IllegalStateException if a whole-tuple filter has already been configured
      */
     public ConditionalProductBuilder and(List<?> elements) {
         if (!filters.isEmpty()) {
