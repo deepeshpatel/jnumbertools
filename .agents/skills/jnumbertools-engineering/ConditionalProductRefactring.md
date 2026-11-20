@@ -14,13 +14,13 @@ Working plan and progress tracker. **Read this file first when resuming. Update 
 
 ## 1. Why
 
-Benchmark evidence (JMH, maintainer's machine, `ConditionalProductStrategyBenchmark`, 3 to 5 dimensions, lists of 25 to 100):
+Historical benchmark observations (JMH, maintainer's machine, `ConditionalProductStrategyBenchmark`, 3 to 5 dimensions, lists of 25 to 100). Treat these as provisional until the revised, equivalent-setup benchmarks are rerun:
 
 | Finding | Numbers |
 |---|---|
-| Walking tuples is already fast | library pruned traversal is 3.4 to 5.7x faster than a nested Java stream (e.g. CHAIN 10,000 rows: 137 us vs 786 us) |
+| Traversal-only performance | Earlier measurements suggested library prefix-pruned traversal can outperform nested Java streams; the comparison setup was later found not fully equivalent. Re-measure before relying on the ratio. |
 | Setup dominates small jobs | builder construction is about 491 us (CHAIN), 76 us (STAR), 1.1 ms (CYCLE): 63 to 100% of the end-to-end time at 1,000 rows |
-| End-to-end crossover | library beats a nested stream from about 10,000 rows (CHAIN tie, STAR 2.6x faster, CYCLE nested stream still 1.4x faster); below that the stream wins by 1.2 to 4.5x |
+| End-to-end crossover | Earlier first-N results suggested workload-dependent crossovers, but setup costs were not equivalent. Re-measure with builder/rule construction included for every implementation. |
 | `DP` loses on cycles | CYCLE end to end: 13 ms vs 1.1 ms (loop block enumeration, about 17 MB per run) |
 | `ADAPTIVE` cutoff is unproven | from 10,000 tuples it picks `DP`, which is 12x worse on CYCLE |
 | `PRUNED_DFS` has no winning region yet | traversal 2x slower than BitSet at 10,000 rows, 2.3x more allocation; kept until the many-small-lists shapes are measured |
@@ -28,6 +28,103 @@ Benchmark evidence (JMH, maintainer's machine, `ConditionalProductStrategyBenchm
 Hypothesis for the setup cost (not yet profiled): every `withRule` copies the whole rule list, rebuilds a sorted set of linked pairs and re-runs the loop check, so building R rules costs O(R^2).
 
 Goals: (1) cut setup cost for every strategy; (2) one shared constraint model, several interchangeable generators; (3) parallel traversal through the normal `stream().parallel()`.
+
+## 1A. Performance objectives and operation boundaries
+
+The implementation has two distinct optimization targets. Do not optimize one by making the other slower without measuring both.
+
+### Full-result generation
+
+- `lexOrder()` and any public any-order/full-generation operation must be optimized primarily for consuming the complete result set, not just the first few tuples.
+- Sequential full traversal should avoid constructing exact-counting/DP state unless that state is genuinely needed by the selected generator.
+- Preserve laziness and re-iterability; full-generation optimization does not permit eager materialization of all tuples.
+- Measure traversal-only cost separately from end-to-end cost. A traversal-only benchmark may construct the builder and immutable rule model in trial setup; an end-to-end benchmark must include builder/rule construction, generator creation, and complete consumption.
+- The public API currently exposes lexicographic generation and rank/random operations. Do not invent an any-order API as part of documentation: if an any-order full-generation API is added or already exists elsewhere, give it the same full-consumption performance objective and document its semantics explicitly.
+
+### Special operations
+
+- `count()`, `isEmpty()`, `lexOrderMth(...)`, `byRanks(...)`, `choice(...)`, and `sample(...)` are special operations, not ordinary full traversal.
+- These operations may build and use the exact feasibility/counting plan, including loop-block processing and BigInteger/primitive count tables.
+- Their end-to-end performance measurement must include builder construction and rule registration as well as the special operation. Also report operation-only measurements where useful, but never substitute those for end-to-end results.
+- `isEmpty()` should use the least expensive exact feasibility mechanism that preserves semantics; it need not calculate full counts if a separate feasibility tier is sufficient.
+
+### Public lexicographic strategy enum
+
+`LexOrderStrategy` controls only ordinary lexicographic traversal. It does not select the implementation of `count`, rank, choice, or sample operations.
+
+| Enum constant | Intended implementation | Contract / status |
+|---|---|---|
+| `PRUNED_BITSET` | Prefix-pruned DFS using compact BitSet relation rows | Required implementation; default candidate; avoids exact counting plan for ordinary traversal |
+| `PRUNED_DFS` | Prefix-pruned indexed DFS using dense boolean relation rows | Required implementation; optimize it for its workload rather than removing it based on an early benchmark |
+| `DP` | Exact DP completion-count lookahead | Required implementation; optimize setup and traversal for its workload, including cyclic/loop-heavy constraints |
+| `ADAPTIVE` | Implementation policy; documented with no guarantee of which algorithm runs when (changes are recorded in the changelog and decision log). At present it resolves to `PRUNED_BITSET`; the estimated-limit argument is validated but unused | Entry point retained; decide whether to keep the parameter or rename before release (item 7 of the 2026-11-18 plan) |
+
+**Retention rule: all four enum constants and their corresponding implementations must remain available throughout this work. No strategy is to be removed or deprecated as part of these work packages.** If a strategy performs poorly, improve its implementation and tests. Only after the complete flow is implemented and correctness-verified should the full benchmark suite be used to tune implementations, defaults, or the `ADAPTIVE` cutoff. Benchmark results may inform later maintainer decisions, but this plan does not authorize removing a strategy.
+
+The current adaptive threshold (10,000 tuples) is provisional. The full-generation target is complete consumption, so benchmark coverage must include full traversal rather than infer the best strategy from first-N microbenchmarks.
+
+## 1B. Future direction: compile once, execute multiple times
+
+### Motivation
+
+Explore a reusable `CompiledProduct` abstraction that separates product definition from product execution.
+
+All three Cartesian product builders — **Simple**, **Constrained**, and **Conditional** — should eventually expose a `.compile()` method that produces a reusable compiled representation.
+
+This direction is motivated by a common application workload: the same product structure and rules are applied repeatedly to different input datasets. The definition remains stable while the concrete values change between executions. Compiling the definition once and binding new data for each execution could avoid repeating structural analysis and other reusable preparation.
+
+The intended usage follows the general model of Java regular expressions:
+
+- `Pattern.compile(...)` prepares a reusable pattern.
+- `Pattern.matcher(input)` applies that pattern to different input data.
+
+Similarly, a compiled product would represent the reusable product definition, while binding would supply the concrete dimension data for one execution. This could make the library's performance advantages more apparent in repeated application workloads compared with rebuilding equivalent stream/filter pipelines for every dataset.
+
+### Illustrative API (not a final design)
+
+The following example communicates the intended direction only. Class names, method names, types, and signatures are provisional.
+
+```java
+// Compile once: define dimensions and rules without concrete value lists.
+CompiledConditionalProduct plan = JNumberTools.cartesianProduct()
+    .conditionalProduct()
+    .dim("os")
+    .dim("browser")
+    .dim("network")
+    .when("browser").is("Safari")
+        .then("os").isOneOf("macOS")
+    .when("network").is("4G")
+        .then("os").isNoneOf("Linux")
+    .compile();
+
+// Reuse the compiled plan with different datasets.
+void handle(List<?> os, List<?> browser, List<?> network) {
+    var result = plan.bind(os, browser, network);
+
+    long n = result.count();              // Exact count without generating the full product.
+    result.lexOrder().forEach(...);       // Other traversal operations may also be available.
+}
+```
+
+### Expected benefits
+
+- **Amortized preparation:** perform structural analysis and reusable preparation once instead of repeating it for every dataset.
+- **Lower repeated-execution overhead:** bind new data without reconstructing the product definition.
+- **Application-oriented performance:** target workloads that repeatedly apply the same rules to changing datasets, where setup cost can materially affect the comparison with Java streams and filters.
+- **Separation of concerns:** keep product definitions and rules independent of concrete input data.
+- **Reusable plans:** allow one compiled definition to serve multiple independent executions, subject to appropriate immutability and thread-safety guarantees.
+
+### Architectural considerations
+
+Keep these conceptual stages distinct:
+
+1. **Compilation:** resolve dimension definitions, process rules, validate the definition, and prepare reusable structural information.
+2. **Binding:** accept concrete datasets, validate and snapshot inputs as required, build data-dependent indexes or structures, and create an execution instance.
+3. **Execution:** perform counting, ranking, unranking, and tuple traversal against the bound data.
+
+The compiled definition should not retain concrete input datasets or mutable state belonging to an individual execution. Bound executions should be independent; the compiled plan should be reusable and, if designed as immutable, safely shareable.
+
+**This section records an architectural direction for future development, not an approved implementation specification.** AI assistants working on this engineering plan should take this direction into account when proposing changes, but must not treat the illustrative API or class names as finalized. Evaluate the design against all three existing product builders, current generator/model boundaries, data-dependent preparation costs, and measured performance before implementation.
 
 ## 2. Target design
 
@@ -52,10 +149,13 @@ Lex generators (package-private)
 Decisions already made:
 
 - Public enum `LexOrderStrategy`: `PRUNED_BITSET` (default), `PRUNED_DFS`, `DP`, `ADAPTIVE`. `ADAPTIVE` stays until a benchmark with dead-end shapes decides its cutoff.
-- No stream-based generator: the nested stream wins at small sizes only because the benchmark hands it raw tables; a generator behind the public rule API cannot reproduce that, and it is 3 to 6x slower per tuple.
-- Do not drop `PRUNED_DFS` early (a user may have thousands of tuples over small lists).
-- Parallel is opt-in through `stream().parallel()`; the default stays sequential. No automatic parallel selection (the real output size is unknown without counting).
-- Parallel splitting: custom `Spliterator` whose `trySplit` cuts by prefix (contiguous ranges of the first dimension, then further dimensions if needed). Pieces are lexicographically ordered, so ordered parallel results stay correct; `.unordered()` drops the ordering cost. It stops splitting below a work threshold. `DpLexGenerator` can split by rank range with exact sizes (costs the counting plan).
+- No stream-based generator is currently planned. Nested-stream baselines are useful for comparison, but must be benchmarked with equivalent rule/setup costs; they do not define the library's public generator architecture.
+- Keep `PRUNED_DFS` as a permanent member of the strategy set during this work; optimize it for workloads such as thousands of tuples over small lists.
+- Existing `lexOrder()` behaviour is out of scope for the new unordered traversal work. Do not extend or redesign its parallel implementation as part of the `anyOrder()` work; revisit it only after `anyOrder()` is complete, tested, and benchmarked.
+- `anyOrder()` is a separate full-generation API for optimization, not randomization. Its contract will yield every valid tuple exactly once without promising encounter order. `choice()` and `sample()` remain the random-selection APIs.
+- The intended `anyOrder()` policy is automatic sequential-versus-parallel selection using a workload threshold. The threshold and workload estimate must be supported by benchmark evidence; do not assume that first-dimension size alone is a sufficient estimate.
+- Its parallel splitting design must expose useful independent work even when the first dimension has too few values. Evaluate deeper prefix/frontier splitting or another disjoint partitioning strategy. Avoid eager materialization and preserve lazy, re-iterable traversal.
+- Keep the existing `lexOrder()` and its current spliterators stable during this work. The existing ordered lexicographic parallel tests remain regression coverage, not a mandate to add further `lexOrder()` parallel features.
 - Exact counting and rank operations (`count`, `lexOrderMth`, `byRanks`, `choice`, `sample`) always use the counting plan, independent of the traversal strategy.
 
 ## 3. Constraints to preserve
@@ -79,63 +179,105 @@ Status legend: `[ ]` not started, `[~]` delivered as a patch but not yet confirm
 
 ### WP1: Setup cost
 
-- [ ] 1.1 Run the loop check only when a rule adds a new linked pair
-- [ ] 1.2 Replace the sorted-set rebuild per rule with a scan for "is this pair already linked"
-- [ ] 1.3 Chain the rules (shared tail) so adding a rule is O(1) instead of copying the list
-- Acceptance: `builderConstructionOnly` clearly lower on CHAIN and CYCLE; identical tuples on the differential check.
+- [~] 1.1 Run the loop check only when a rule adds a new linked pair (verified by the maintainer's full test run; branch change not yet merged)
+- [x] 1.2 Replace repeated edge-removal reachability searches in `blockOf` with one iterative Tarjan bridge traversal; union only non-bridge edges into loop blocks (verified by maintainer: all 24 ConditionalProductBuilderTest tests passed)
+- [x] 1.3 Replace full relation-map copies with a persistent AVL map; updates path-copy O(log E) nodes while preserving immutable builder snapshots and sorted iteration (verified by maintainer)
+- Acceptance: lower builder-construction cost on CHAIN and CYCLE; identical tuples and loop-limit decisions on differential checks.
 
 ### WP2: Extract the shared model
 
-- [ ] 2.1 Move `Rule`, `Relation` into package-private files
-- [ ] 2.2 `ConstraintModel` (dimensions, rules, lazy `Rows`)
-- [ ] 2.3 `ConstraintPlan` (feasibility) and `ConstraintCounts` (exact) as separate files
-- [ ] 2.4 `ConditionalProductBuilder` becomes the facade only (target: well under 500 lines)
+- [x] 2.1 Extract the immutable `Relation` into a package-private file. There is no standalone `Rule` type in the current implementation: each rule is immediately compiled into a combined pairwise `Relation`, so do not introduce a redundant `Rule` object without a concrete need (verified by maintainer)
+- [x] 2.2 Extract `ConstraintModel` to own immutable dimensions and pairwise relations; materialize prefix-pruned `Rows` lazily and share them across generators from the same builder (verified: all 25 `ConditionalProductBuilderTest` tests passed)
+- [x] 2.3 Extracted the former nested `Plan` into package-private `ConstraintPlan`. `ConstraintCounts` owns the derived BigInteger/long count tables, prefix-completion queries, primitive-long fast path, and unranking operations; `ConstraintPlan` retains topology, feasibility checks, and candidate selection (verified: all 25 `ConditionalProductBuilderTest` tests passed).
+- [x] 2.4 Reduced `ConditionalProductBuilder` to the immutable fluent/API facade. Persistent relation storage, graph validation, rule compilation, immutable model transitions, lazy plan/tuple access, and generator mechanics are delegated to package-private collaborators. The builder is 460 lines, including its public fluent DSL and API documentation; maintainer verified the generator extraction with the focused test.
 
 ### WP3: Generators
 
-- [ ] 3.1 `PrunedLexGenerator` (abstract control flow) and `BitSetPrunedGenerator`
-- [ ] 3.2 `DenseDfsGenerator` (dense boolean rows, size cap, falls back to BitSet beyond the cap)
-- [ ] 3.3 `DpLexGenerator`
-- [ ] 3.4 Facade selects a generator from `LexOrderStrategy`; `ADAPTIVE` kept
-- [ ] 3.5 Rename the enum constants (`PRUNED_BITSET`, `PRUNED_DFS`) if the maintainer's push has not already
+- [x] 3.1 Extracted `PrunedLexGenerator` (shared depth-first control flow) and `BitSetPrunedGenerator` (BitSet candidate filtering); maintainer confirmed the focused test passed.
+- [x] 3.2 Implemented `DenseDfsGenerator` using lazily materialized, model-shared boolean relation rows with a 4,000,000-cell aggregate cap; larger representations fall back to `BitSetPrunedGenerator`. Maintainer confirmed the focused test passed.
+- [x] 3.3 Extracted `DpLexGenerator`; maintainer confirmed the focused strategy/differential suite passed.
+- [x] 3.4 Strategy dispatch reviewed: `PRUNED_BITSET`, `PRUNED_DFS`, and `DP` select their dedicated iterators; `ADAPTIVE` is resolved by the builder and remains available.
+- [x] 3.5 Enum constants are already `PRUNED_BITSET`, `PRUNED_DFS`, `DP`, and `ADAPTIVE`; no rename required.
 
 ### WP4: Parallel
 
-- [ ] 4.1 Splittable spliterator for the pruned generators (prefix split, ordered, size threshold)
-- [ ] 4.2 Rank-range split for `DpLexGenerator`
-- [ ] 4.3 Tests: ordered parallel equals sequential for all generators; `unordered()` has the same set of tuples
+- [x] 4.1 Ordered, lazy spliterator for PRUNED_BITSET and PRUNED_DFS; splits disjoint contiguous first-dimension ranges, preserves encounter order, and stops below the minimum range threshold. Maintainer confirmed the focused regression suite passed (35 tests). Deeper-dimension splitting remains a follow-up if benchmarks show first-dimension partitioning is insufficient.
+- [x] 4.2 Added `DpRankSpliterator`: partitions the exact BigInteger valid-tuple rank interval into disjoint contiguous ranges, lazily unranks each tuple, and preserves ordered encounter semantics. Maintainer confirmed the focused regression suite passed (35 tests).
+- [x] 4.3 Added unordered parallel-stream tuple-set checks for PRUNED_BITSET, PRUNED_DFS, DP, and ADAPTIVE; maintainer confirmed the focused suite passed (36 tests). Ordered encounter-order equality remains covered for all explicit generators.
+
+### WP4 follow-up: separate unordered traversal (deferred; not part of the completed WP4 lexicographic work)
+
+- [x] 4.4 Agreed and exposed the public `anyOrder()` contract: full valid tuple set exactly once, unspecified encounter order, lazy and re-iterable; no random-selection semantics.
+- [x] 4.5 Delivered the public `anyOrder()` API and sequential iterator baseline. The maintainer confirmed its focused tuple-set, uniqueness, re-iteration, and empty-product test passed.
+- [~] 4.6 Delivered lazy prefix-frontier splitting for `anyOrder()`. Partitions are disjoint candidate ranges below a fixed prefix; when a range has at most one candidate, `trySplit()` fixes that candidate and advances to the next dimension. This exposes parallel work below singleton/small leading dimensions without eager tuple materialization. `stream().parallel()` can use the spliterator; default `stream()` remains sequential until a benchmark-supported automatic policy is designed. Awaiting maintainer compilation and focused tests.
+- [~] 4.7 Added focused tests for disjoint split coverage, no duplicates, deeper splitting below a singleton first dimension, and parallel tuple-set equality. Differential, repeated-iteration and concurrency coverage for the final parallel implementation remain to be completed. Keep `lexOrder()` unchanged.
+- [ ] 4.8 Benchmark complete `anyOrder()` consumption against its sequential counterpart and representative baselines; derive any automatic parallel threshold from measured results.
+- [ ] 4.9 Only after 4.4–4.8 are complete, tests pass and benchmarks show a real benefit, consider whether any separate `lexOrder()` parallel work is justified.
 
 ### WP5: Benchmarks (maintainer runs them)
 
-- [ ] 5.1 Tier 1: dimensions 3, 5, 7, 10 x list sizes 10, 25, 50, fully consumed up to about 100,000 rows; include many small lists
-- [ ] 5.2 Tier 2: dead-end shapes (`STAR_LAST`, 5 to 10% density chain, empty product)
-- [ ] 5.3 Tier 3: large sizes only if tiers 1 and 2 leave open questions
-- Settings: one fork, fewer iterations; precompute rule inputs outside the timed section; report both traversal-only and end-to-end.
+- [~] 5.1 Delivered `ConditionalProductStrategyBenchmark` with case definitions externalized as classpath `.properties` resources. JMH's `scenarioName` parameter is the case's relative resource path, so a single case can be selected without editing Java source. All four library strategies are compared with the nested-stream baseline; traversal-only and end-to-end are separate benchmark methods.
+- [~] 5.2 Delivered the hierarchical case tree: topology → numeric dimension/size range → selectivity → case. Numeric ranges are inclusive and non-overlapping: `Dim2-5`, `Dim6-10`, `Dim11-20`; `Size10-100`, `Size101-250`. STAR, CHAIN, SPARSE, DENSE, CYCLE, DEAD_END, and EMPTY coverage is retained. Workloads outside the numeric ranges are isolated under `edge-cases`.
+- Benchmark limitation recorded: current rules select every trigger value. The selectivity profile therefore varies allowed target values, not trigger coverage; do not interpret these results as a trigger-selectivity study. Add trigger-coverage as a separate workload axis in a later benchmark slice.
+- [~] 5.3 Added the initial large-size tier for all three dimension bands and both size bands. Large cases use the TIGHT profile (approximately 1% of target values, minimum one) to keep complete traversal bounded. These cases still require maintainer compilation and benchmark execution.
+- [~] 5.4 Added a dedicated JMH launcher that keeps progress/errors on the console, writes the complete JMH JSON result, and emits one final text summary per benchmark method. Remaining console cleanup (tracing unrelated intermediate diagnostics) is still pending. Console-output cleanup: identify and suppress unintended intermediate/diagnostic output emitted during benchmark setup or traversal. Preserve JMH's own progress/ETA and final result output; do not silence useful errors. Trace each message to its source rather than assuming it originates in the benchmark class.
+- [ ] 5.5 Benchmark analysis: inspect the full JSON matrix (all scenarios, implementations, and both methods); compare latency and allocation; identify strategy-specific workload regions; evaluate ADAPTIVE selection; and make only evidence-supported tuning changes. Run targeted JMH comparisons only for unresolved questions, not the full matrix again.
+- Settings: one fork, 500 ms warmup, two 500 ms measurement iterations; precompute dimensions/rule inputs outside timed methods; report traversal-only and end-to-end. Timed benchmark methods should not print. Use JMH progress/ETA output and write detailed results as JSON.
 
-### WP6: Finish
+### WP5 follow-up: benchmark maintainability
 
-- [ ] 6.1 Javadoc for every strategy, with a plain statement of when to use it
-- [ ] 6.2 README and benchmarks README update; changelog line
-- [ ] 6.3 Decide `PRUNED_DFS` and `ADAPTIVE` from benchmark data (keep, change cutoff, or remove)
+- [~] Split the benchmark into `benchmarks.conditionalproduct`, `scenario`, and `baseline` packages. `Scenario`/`Rule` own property-driven workload construction, `NestedStreamBaseline` owns the independent stream reference, the JMH class owns timed methods, and `ConditionalProductBenchmarkRunner` owns execution and result persistence. Retained the properties-based case hierarchy and benchmark semantics. Awaiting maintainer compilation and a focused launcher run.
+
+### WP6: Documentation and release finish — remaining items deferred
+
+
+These deliverables are intentionally postponed until implementation, parallel work, and benchmark analysis are settled.
+
+- [x] 6.1 Added practical dimension-ordering guidance to `ConditionalProductBuilder` Javadocs: explain when pairwise constraints become evaluable, how selective dimensions can prune downstream work, why dependency order matters, and the SQL join-order/predicate-placement analogy. Guidance for `anyOrder()` parallel execution is deliberately deferred until that API and its measured behavior exist.
+- [ ] 6.2 Documentation: update the main README, benchmarks README, and changelog to reflect the final API, behavior, benchmark methodology, and measured results.
+- [ ] 6.3 Final benchmark decisions: use the complete benchmark evidence to tune implementations, defaults, and the ADAPTIVE cutoff where justified. Record the final results and rationale. Never remove or deprecate a strategy.
+
+## 4B. Phase roadmap (A to I)
+
+Work after the original work packages is delivered in lettered phases. Each phase is a small patch against the latest pushed head and stands alone. Update the status here and the log in section 8 with every patch.
+
+| Phase | Content | Status |
+|---|---|---|
+| A | Compact relation rows (`Relation` stores rules, builds rows lazily, shares rows) | merged |
+| B | Feasibility tier and lazy counts; `DP` stream no longer unranks each tuple (`DpLexSpliterator`) | merged |
+| C | `anyOrder()` splitting work threshold (`SPLIT_WORK_THRESHOLD`) and upper-bound `estimateSize()` | merged |
+| D | Setup cost at large sizes: measured; shared value-to-position index for rule compilation (`DimensionIndexes`), rules chained instead of copied in `Relation` | merged |
+| E | Added a 36-case generated matrix (dimensions 3, 5, 7, 10; sizes 10, 25, 50; DEAD_END, MANY_VALID, COMPLETE), preserved the 17 historical property cases, and moved BitSet-to-rule-list preparation outside timed methods | delivered; maintainer ran DEAD_END, CHAIN, MANY_VALID, COMPLETE (findings in §8, 2026-11-17 second entry). Follow-up: DEEP_DEAD_END and SMALL_DOMAIN topologies added, awaiting maintainer JMH run |
+| F | Strategy decisions from E. F1: waste-triggered completion lookahead (descents > 1,024 + 4 x emitted, topology independent), merged and verified by maintainer JMH. F2: `DEEP_DEAD_END` benchmark shape fix, merged. Remaining: decide `ADAPTIVE` (name/parameter) after the confirmation run; `PRUNED_DFS` tuning. No strategy is removed | F1, F2 merged; ADAPTIVE decision pending |
+| G | Optional: `anyOrder()` dimension reordering (most selective dimension first, values returned in original positions). Screening shows pruned plus lookahead within about 1.5x of DP on corrected `DEEP_DEAD_END`, so G is not justified unless the confirmation run shows pruned more than 2x slower than DP | on hold |
+| H | Counting speed at large sizes; test hardening (larger oracle shapes, concurrent first use) | not started |
+| I | README, benchmarks README, changelog, compact this file, single release | not started |
+| J | Review conditional-rule exclusion vocabulary: current API has `isNoneOf(...)` and `isNotIn(...)` aliases; decide whether `isNotOneOf(...)` is needed or whether existing names are sufficient. If changed, keep trigger/target-chain overloads consistent and add builder tests and Javadoc examples | not started |
+| K | Benchmark tooling: generator adds `quick` (2-3 min) and full-matrix presets, `-rf json -rff`, and an environment block; a script compares the local tree with a given SHA using a temporary git worktree; a report script turns JMH JSON into the README tables (fastest strategy, speedup vs stream and vs best builder, allocation ratio, error above 10% flag) | delivered 2026-11-18 (presets, JSON/environment output, `BenchmarkReport` report and compare modes, `benchmark-compare.sh`); awaiting maintainer use |
+| L | Special-operations benchmark (`count`, `isEmpty`, `lexOrderMth`, `byRanks`, `choice`, `sample`): bounded workloads against an enumeration baseline, `LARGE` workloads (up to about 2e39 tuples) library-only; imperative-backtracking baselines (`IMPERATIVE_ALLOCATING`, `IMPERATIVE_REUSE`) added to the traversal benchmark, additive and logged in the decision register | delivered 2026-11-19, awaiting maintainer JMH run |
+| M | Test hardening: `ConditionalProductShapeOracleTest` checks star-last, star-first, shuffled trees, cycle plus tail, duplicate values, very unequal sizes, empty dimensions and 120 larger random graphs against an independent oracle on every strategy, `anyOrder()` (sequential and parallel) and the rank and sampling operations; `PrunedLookaheadTest` covers `anyOrder()` with lookahead. Remaining: concurrent first use of the counting tier | mostly delivered 2026-11-19 |
 
 ## 5. Progress summary
 
 | Package | Done | Total |
-|---|---|---|
+|---|---:|---:|
 | WP0 baseline | 0 (3 delivered, unconfirmed) | 3 |
-| WP1 setup cost | 0 | 3 |
-| WP2 shared model | 0 | 4 |
-| WP3 generators | 0 | 5 |
-| WP4 parallel | 0 | 3 |
-| WP5 benchmarks | 0 | 3 |
-| WP6 finish | 0 | 3 |
+| WP1 setup cost | 3 verified | 3 |
+| WP2 shared model | 4 verified | 4 |
+| WP3 generators | 5 verified; all four strategies retained and dispatched | 5 |
+| WP4 parallel | 3 verified | 3 |
+| WP5 benchmark delivery | 3 delivered, unverified | 3 |
+| WP5 benchmark cleanup/analysis | 1 delivered, unverified | 2 |
+| WP5 maintainability follow-up | 1 delivered, unverified | 1 |
+| WP6 documentation/finish | 1 delivered, 2 pending | 3 |
 
 Update this table whenever an item changes status.
 
 ## 6. Open questions for the maintainer
 
 - Keep the new generator classes package-private in `...generator.product.conditional`, or move them into a subpackage?
-- Final default and the fate of `PRUNED_DFS` / `ADAPTIVE`: decided by WP5 data, not before.
+- Final default and the `ADAPTIVE` cutoff may be tuned after WP5; all four strategies remain available.
+- The benchmark code is currently concentrated in one Java class. The maintainer has agreed to defer its package/class decomposition until after the current benchmark results are analyzed.
 
 ## 7. Verification method
 
@@ -146,4 +288,112 @@ Update this table whenever an item changes status.
 
 ## 8. Progress log (newest first)
 
+- 2026-11-19: Recorded a future architectural direction for a reusable compiled-product abstraction. The Simple, Constrained, and Conditional product builders should eventually support `.compile()`; a compiled definition would be bound to different datasets for repeated executions, following the compile-once/apply-many model of Java regular expressions. Added an illustrative conditional-product API and separated compilation, binding, and execution responsibilities. This is a design hint for future AI-assisted work, not a finalized API or implementation mandate.
+
+- 2026-11-19 (L results): Maintainer ran the `special` preset (JMH 1.37, OpenJDK 26.0.1, one fork, 3 x 100 ms warmup, 5 x 100 ms measurement; environment file not supplied). Library beat enumeration by about 13x to 78x on count, lexOrderMth, byRanks, choice and sample for CHAIN, MANY_VALID, SMALL_DOMAIN and DEEP_DEAD_END; handled 1e39 tuples in 0.2 to 1.9 ms (sample 0.5 to 11.5 ms). Enumeration won `isEmpty` everywhere (biased: all bounded workloads are non-empty, so enumeration stops at the first tuple; an empty-product workload is needed) and won every rank and sampling operation on DEAD_END-5x25 (library 0.54x to 0.65x). Allocation is the main cost: `count` allocates 66 KB to 1.1 MB per call on bounded workloads and 1.5 MB to 13 MB on LARGE; `sample` allocates 24 MB (20x50) and 57 MB (20x100). Findings feed item 8 (counting speed): table construction allocation, `sample`, and fixed setup cost on small products. Summary table added to the benchmarks README (screening quality).
+
+- 2026-11-19 (L, M): Added the special-operations benchmarks (`ConditionalProductSpecialOperationsBenchmark`, `ConditionalProductScalingBenchmark`, `SpecialOperationsCase`, new `LARGE` scenario family), the two imperative backtracking baselines (`IMPERATIVE_ALLOCATING`, `IMPERATIVE_REUSE`, available as `implementation` values and in the full-matrix preset), a `special-ops` generator preset, and report support for them. Added `ConditionalProductShapeOracleTest` (seven structured families, about 6 s). The first version of the duplicate-values test chose rule values from a shared pool; the library correctly rejected values that are not in the named dimension, so the test now chooses from each dimension's own values. Sandbox timings (2 cores, no JMH, indicative only; builder construction included): the library beat enumeration by roughly 5x to 130x on `count`, `lexOrderMth`, `byRanks`, `choice` and `sample` for CHAIN, MANY_VALID, SMALL_DOMAIN and DEEP_DEAD_END (for example DEEP_DEAD_END-5x25 `count` about 0.33 ms against 41 ms), and handled `LARGE-20x100` (about 2e39 tuples) in about 3 ms for `count` and about 15 ms for `sample`. Enumeration was faster in two places: `isEmpty`, because it stops at the first tuple (0.2 to 0.6 us against 9 to 22 us, the library paying for plan construction), and the small `DEAD_END-5x25` shape (rank operations about 190 us against 108 us). Both point at plan and counting setup cost for small products, which is item 8 (counting speed). `sample` on `LARGE` is the slowest operation (about 6 ms at 20x50, 15 ms at 20x100) and the first thing to profile. These need a maintainer JMH run before anything is concluded.
+
+- 2026-11-18 (docs, tooling): Corrected the documentation drift: `PrunedLexGenerator` and builder Javadoc and the decision log now state the exact rule (lookahead on when descents exceed 1,024 + 4 x emitted tuples, independent of topology, stays on for the traversal, never changes output or order); `LexOrderStrategy.ADAPTIVE` documents that no algorithm choice is guaranteed. Phase table updated (D merged, F1/F2 merged, G on hold, K/L/M added). The benchmarks README DEEP_DEAD_END entries are superseded: the earlier "DP wins five of five" and the nested-stream allocation figures came from the pre-F2 shapes, four of which were empty products. Screening run on corrected shapes (maintainer, smoke settings): `PRUNED_BITSET` is 1.46x, 1.44x, 1.01x, 1.01x, 0.72x the DP time on DEEP_DEAD_END 5x10, 5x25, 7x10, 7x25, 10x10, and 0.14x to 0.76x on DEAD_END and SMALL_DOMAIN. The maintainer's pivot-cardinality patch in `BitSetPrunedGenerator.nextValidCandidate` showed no regression (geomean 0.944x on `PRUNED_BITSET`, SMALL_DOMAIN-14x3 43% faster, dead-end allocation about 30% lower). Exact-count `anyOrder()` splitting was prototyped and rejected: it made small shapes about 5x slower in parallel (NARROW_ROOT 8.8 to 44.7 us end to end) because counting setup costs more than the split saves; nothing was delivered. `PrunedLookaheadTest` extended with a mid-iteration switch (output and order unchanged) and `anyOrder()` with lookahead. Tooling delivered in the same patch: `quick` (about 1-2 minutes) and `full` presets in `BenchmarkCommandGenerator`, `-rf json -rff` plus a console log and an environment record under git-ignored `benchmark-results/`, `scripts/BenchmarkReport.java` (report and compare modes) and `scripts/benchmark-compare.sh <SHA>` (temporary worktree, same benchmark source on both sides, verdicts within 10% / inconclusive / faster / slower; error paths tested with a stub, JMH not run). Next: special-operations benchmark and imperative baselines (L), then larger-shape oracles (M).
+
+- 2026-11-18 (F1): Replaced the loop-topology completion lookahead with a single waste-triggered one in `PrunedLexGenerator`. Lookahead starts off for every graph; once descents exceed 1,024 + 4 x emitted tuples it builds the feasibility plan and checks every prefix, and an empty plan ends the traversal at once. Reasons: the topology rule missed acyclic dead ends (a rule between distant dimensions whose values conflict, found only after the free dimensions between them are enumerated; pruned was about 2x slower than DP there) and it built the plan for every loop graph even when nothing was dead (+1.3 KB, about 6.5% allocation on the 66-tuple practical benchmark, 19,632 -> 20,992 B/op). Removed `ConstraintModel.completionLookaheadUseful`, `ConstraintGraph.hasLoopBlock`, `ConstraintPlan.needsCompletionLookahead` and its test. Sandbox (not JMH): practical shape 19,616 B/op; acyclic dead end 7x10 35.8 -> 16.4 ms (DP 16.0); healthy shapes unchanged. Tests: `PrunedLookaheadTest` (brute-force oracle on acyclic and looped dead-end shapes, ordered and unordered parallel, empty products, healthy chains never switch on). The benchmark fairness question (stream-side `compile` timed, library rule conversion not) was measured: compile costs about 0.4 us, so the benchmark code is kept. Awaiting maintainer `mvn test` and JMH rerun of DEEP_DEAD_END, SMALL_DOMAIN, CHAIN, COMPLETE and the practical benchmark.
+- 2026-11-17 (E follow-up): Reviewed the maintainer's four JMH outputs. PRUNED_BITSET is fastest or tied nearly everywhere and 3-11x faster than the nested stream with 10-20x less allocation; DP and PRUNED_DFS never beat it materially on CHAIN, MANY_VALID and COMPLETE; ADAPTIVE (cutoff 10,000) is slower than BITSET in the cells where it picks DP. The existing DEAD_END (CONTROLLED_DEAD_END) topology does not stress dead ends: it ignores the 30,000 budget (about 5 million tuples at 7x50) and its dead prefixes are pruned at depth 2, and it ran with the 100 ms smoke defaults. Added DEEP_DEAD_END (late conflict at the last dimension) and SMALL_DOMAIN (8-14 dimensions, 3-5 values) topologies. A sandbox smoke run (not JMH) showed DP 10-30x faster than both pruned strategies on DEEP_DEAD_END, so Phase F must not simply point ADAPTIVE at BITSET; the pruned generators likely need completion lookahead, or ADAPTIVE must detect dead-end-prone shapes. Decide after the maintainer's JMH run.
+- 2026-11-17: Phase E benchmark expansion delivered to the branch. Added 36 generated cases across 3/5/7/10 dimensions and sizes 10/25/50 for DEAD_END, MANY_VALID (up to 75,000 tuples), and COMPLETE (up to 1,000 tuples); retained all 17 historical resource cases. Rule BitSet-to-list conversion is precomputed in trial setup so end-to-end timings include builder/rule registration but not repeated benchmark-input conversion. The maintainer must compile, smoke-check representative profiles, and run the JMH matrix before results are accepted.
+
+- 2026-11-17: Phase D delivered, awaiting maintainer verification. Measured in a sandbox timing harness (not JMH; 3 dimensions, one rule per value with about 50% of the targets allowed, rule registration only, three runs after a warm-up): size 1000 took 150 ms and 788 MB before Phase A, 66 ms and 104 MB at head 222f5b6; size 5000 took 10 to 15 s and 70 GB before Phase A, 1.5 s and 2.4 GB at head. The remaining cost was `RuleCompiler.matching`, which built two hash sets per rule (about 240 KB each at size 5000), and `Relation.restrict`, which copied the rule array per rule (quadratic). Added `DimensionIndexes` (lazy value to positions map per dimension, shared by derived builders through `ConstraintModel`) so compiling a rule costs time in proportion to the values it names; `Relation` now links rules in a shared chain and builds an array only when its rows are built. After the change: size 1000 about 9 ms and 2.5 MB, size 5000 about 165 to 250 ms and 33 MB. The first traversal builds the rows lazily: about 4 ms at 1000 and 140 to 210 ms at 5000 (the rows hold 25 million cells, so this is close to the size of the data); `isEmpty()` takes 1 to 4 ms. Remaining cost is inherent to the API: the caller passes lists of about half the dimension per rule. New `RuleCompilerTest`: repeated values in a dimension, unknown and repeated values, rules after `and()` use the extended index, concurrent derivation from one base. 49 conditional-product tests passed in the sandbox stub runner (`RelationTest` excluded there).
+
+- 2026-11-17: Phase C delivered, awaiting maintainer verification. `AnyOrderGenerator.AnyOrderSpliterator` now splits a partition only while its upper work bound (candidates below the prefix: remaining range size times the sizes of the deeper dimensions, saturating) exceeds `SPLIT_WORK_THRESHOLD` (1024); smaller partitions run sequentially, so a parallel stream no longer creates a task per tuple. `estimateSize()` reports that bound instead of `Long.MAX_VALUE`, so the JDK sizes its tasks from it. Two existing anyOrder tests were given larger shapes so they still reach the splitting path. New `AnyOrderSplittingTest`: full splitting stays near the threshold and covers every tuple once, a 125-candidate product is not split, and the estimate is an upper bound (0 for an empty dimension). 45 conditional-product tests passed in the sandbox stub runner (`RelationTest` excluded there). The threshold is a first value and must be tuned with `AnyOrderParallelBenchmark`.
+
+- 2026-11-17: Phase B delivered (feasibility tier and lazy counts), awaiting maintainer verification. `ConstraintPlan` now builds `canComplete` (a yes/no table per node) with the topology; `isEmpty()`, `hasCompletion` and `firstValid` use it and keep no counts. The exact counting tier is built on first use through `ConstraintPlan.counts()` (`count`, ranks, `choice`, `sample`, `lexOrderMth`). The `DP` stream no longer unranks every tuple: `DpLexSpliterator` walks sequentially with `DpLexGenerator` (no counts built) and switches to rank-range splitting only when a parallel pipeline splits it; `DpRankSpliterator` unranks once per range and then steps incrementally. New `ConstraintPlanTierTest`: counts not built by iteration or `isEmpty()`, dead end detection, 400 seeded random rule sets against a brute-force oracle on every DP path (iterator, sequential stream, parallel ordered stream, ranks), and rank-split order. Open follow-ups from review: `anyOrder()` spliterator needs a work threshold (it reports `Long.MAX_VALUE` and splits to single candidates); `Relation` shares rows only for up to 62 rules per pair and copies its rule array per added rule, so measure one-rule-per-value shapes at large sizes.
+
+- 2026-11-17: Started the separate `anyOrder()` API. Added its public contract to `ConditionalProductBuilder`: it returns every valid tuple once, is lazy/re-iterable, makes no encounter-order guarantee, and is not random selection (`choice`/`sample` retain that role). Added `AnyOrderGenerator` as an initial sequential implementation using the existing prefix-pruned BitSet iterator; its spliterator omits `ORDERED` and refuses splitting so this stage introduces no accidental parallel execution. Added a focused test for tuple-set equality, duplicate-free output, re-iteration, empty output, and the unordered/non-splitting spliterator contract. Awaiting maintainer compilation and test execution. Automatic parallel selection and splitting remain separate follow-up work; `lexOrder()` is unchanged.
+
+- 2026-11-17: Delivered the first documentation slice ahead of the `anyOrder()` implementation. Added practical dimension-ordering guidance to `ConditionalProductBuilder` Javadocs, including constraint-evaluation dependencies, selective-dimension pruning, tuple-position/lexicographic-order consequences, and the SQL join-order analogy. Updated the target design to keep existing `lexOrder()` behavior out of scope and recorded the staged, separate `anyOrder()` work package: contract, sequential traversal, automatic parallel traversal, correctness tests, then benchmark-based threshold selection. No traversal code or behavior changed.
+
+- 2026-11-17: Added explicit benchmark follow-ups to WP5: remove unintended intermediate console output while retaining JMH progress/results and useful errors; analyze the complete JSON matrix for latency, allocation, strategy crossover, and ADAPTIVE quality; use targeted reruns only for unresolved comparisons. Added a deferred benchmark-maintainability task to split the currently consolidated Java benchmark class into cohesive classes/packages after results analysis. The maintainer observed and is currently clearing intermediate console output; exact sources still need to be traced and addressed.
+- 2026-11-17: Extended case descriptors to support heterogeneous dimension sizes through a comma-separated `sizes` property; `size` remains the uniform-size shorthand. Documented that new case paths must also be added to the JMH `@Param` list. The physical case hierarchy represents workload axes; strategy and measurement are selected through JMH's `implementation` parameter and benchmark method to avoid duplicating every workload directory for every strategy.
+- 2026-11-17: Reorganized conditional-product benchmark cases into classpath resources under `src/test/resources/benchmarks/conditionalproduct/cases`. The physical case hierarchy is topology → numeric dimension/size range → selectivity; each resource path is directly usable as the JMH `scenarioName` parameter. Added all six agreed non-overlapping range groups across dimension bands 2–5, 6–10, 11–20 and size bands 10–100, 101–250, plus isolated edge cases. Added a 1%-minimum-one TIGHT profile for bounded large cases and documented exact single-case/strategy/measurement commands. Compilation and benchmark execution are pending maintainer verification.
+- 2026-11-17: Removed the two legacy conditional-product JMH benchmark classes and their committed output snapshots. Delivered `ConditionalProductStrategyBenchmark` with bounded full-traversal scenarios, all four library strategies, a prefix-pruned nested-stream baseline, tuple/order verification, and separate traversal-only/end-to-end methods. Added the benchmark README entry and JSON output command. Timed methods contain no console output; JMH's normal progress/ETA display stays enabled and detailed results are written to JSON. WP5.1 and WP5.2 are delivered but await maintainer compilation and benchmark runs.
+- 2026-11-17: Maintainer confirmed the focused suite passed after WP4.3: 36 tests. WP4 is complete. The new unordered parallel test passed for all four strategies, comparing tuple sets with sequential traversal; ordered encounter-order checks remain in place for the three explicit generators.
+- 2026-11-17: Delivered WP4.3 test coverage. Added an unordered parallel-stream regression test that compares the tuple set against sequential default traversal for PRUNED_BITSET, PRUNED_DFS, DP, and ADAPTIVE. The existing ordered-parallel test continues to compare exact encounter order for the three explicit generators. Awaiting the maintainer's focused test run.
+- 2026-11-17: Maintainer confirmed the focused suite passed after WP4.2: 35 tests. WP4.2 is verified. The test now exercises ordered parallel traversal for DP as well as both pruned generators. The maintainer also requested that three finishing deliverables remain explicit TODOs at the very end of the plan: Javadoc update, README/benchmarks README/changelog update, and benchmark update. Benchmark class design will be supplied by the maintainer; do not begin that work before receiving it.
+- 2026-11-17: Started WP4.2. Added `DpRankSpliterator`, which partitions the exact valid-tuple rank interval `[0, counts.total)` using BigInteger midpoint splits. Each partition lazily unranks its next rank and materializes the tuple; lower ranges are returned while the current spliterator retains the upper range, preserving ordered parallel-stream semantics without materializing tuples. Wired DP lex-order streams to this spliterator and expanded the parallel-order/set regression test to include DP. Awaiting the focused test run.
+- 2026-11-17: WP4.1 verified by maintainer. `mvn -Dtest=ConditionalProductBuilderTest,ConditionalProductGeneratorTest,ConditionalProductRuleOrderTest test` passed: 35 tests. Ordered parallel traversal test passed for PRUNED_BITSET and PRUNED_DFS. No DP parallel splitting was included in this step.
+- 2026-11-17: Started WP4.1. Added PrunedLexSpliterator for PRUNED_BITSET and PRUNED_DFS. It lazily creates independent bounded iterators over disjoint contiguous first-dimension ranges; trySplit returns the lower range and retains the upper range, preserving ordered encounter semantics. Splitting stops once a range contains at most two first-dimension indices or traversal has begun. DP remains on its existing iterator spliterator path for WP4.2. Added a parallel-stream regression test that compares both order and tuple set with sequential traversal. Awaiting maintainer execution of the focused test classes.
 - 2026-11-16: Plan written. WP0 patch (`conditional-compact-rules.patch`) delivered against a4b57d2; benchmark with the plain Java stream row delivered. Maintainer's local tree has `LexOrderStrategy {PRUNED_BITSET, PRUNED_DFS, DP, ADAPTIVE}`; waiting for the push before rebasing WP0 and starting WP1.
+- 2026-11-17: Maintainer confirmed the WP1.3 persistent relation-map regression test passed. WP1.3 is now verified. Started WP2.1 by extracting the immutable pairwise `Relation` into package-private `Relation.java`. The current implementation does not retain individual `Rule` objects: each fluent rule is immediately intersected into its pairwise relation. Do not add a redundant rule representation just to match the original target-design wording. Builder behavior is unchanged; awaiting the maintainer's focused test run.
+- 2026-11-17: Maintainer confirmed the WP2.1 `Relation` extraction passed `ConditionalProductBuilderTest`. WP2.1 is verified. Delivered WP2.2: introduced package-private `ConstraintModel` to own the immutable dimension snapshots and pairwise relation map; its prefix-pruned `Rows` are built lazily with safe publication and reused by generators from the same builder. `PrunedLexItr` now consumes those shared rows instead of rebuilding its adjacency arrays for every iterator. Awaiting focused test run.
+- 2026-11-17: Maintainer confirmed all 25 `ConditionalProductBuilderTest` tests passed after WP2.2. WP2.2 is verified. Started WP2.3 by extracting the nested exact completion plan into package-private `ConstraintPlan`; this is intentionally a first mechanical step. Exact-count tables and operations remain in `ConstraintPlan` for now and must be moved into `ConstraintCounts` in the next stage before WP2.3 can be considered complete. Awaiting focused test run for the extraction.
+- 2026-11-17: Maintainer confirmed all 25 `ConditionalProductBuilderTest` tests passed after the `ConstraintCounts` table extraction. The derived BigInteger/primitive-long tables and their construction are now verified in `ConstraintCounts`. WP2.3 remains partial: prefix-completion and unranking query methods still live in `ConstraintPlan`; the next slice will move those operations into `ConstraintCounts`, leaving topology and feasibility traversal in `ConstraintPlan`.
+- 2026-11-17: Continued WP2.3: moved prefix-range lookup, subtree/root completion counting, primitive-long completion counting, and rank unranking from `ConstraintPlan` into `ConstraintCounts`. `ConstraintPlan` now retains the graph/tree topology and feasibility operations (`firstValid`, `isValid`, and the earlier-dimension relation checks); it delegates prefix feasibility lookahead to `ConstraintCounts`. The builder's adaptive-density and unranking call sites now use the count holder directly. Awaiting `ConditionalProductBuilderTest` verification.
+- 2026-11-17: Maintainer confirmed all 25 `ConditionalProductBuilderTest` tests passed after the final WP2.3 query-method extraction and the subsequent `ConstraintCounts` reference fixes (`values`/`dimensions` now resolve through `plan`). WP2.3 is verified. The shared model extraction is complete through WP2.3; next is WP2.4, reducing `ConditionalProductBuilder` to the immutable public facade before starting generator extraction.
+- 2026-11-17: Started WP2.4 by extracting the immutable AVL relation map and its tree nodes from `ConditionalProductBuilder` into package-private `PersistentRelationMap.java`. The builder retains only the map reference and update calls; balancing, path-copy insertion, lookup, and ordered iteration now live outside the facade. This is the first WP2.4 slice, not completion: graph validation, rule compilation helpers, and generator implementations still need to move out. Awaiting the maintainer's focused test run.
+- 2026-11-17: Continued WP2.4: extracted constraint-graph validation into package-private `ConstraintGraph`. It owns the unchanged pair-cell and loop-block limits, iterative Tarjan bridge detection, non-bridge union-find grouping, and canonical dimension-pair key encoding. Updated `ConditionalProductBuilder` and `ConstraintPlan` to delegate to it. Awaiting the maintainer's focused test run.
+- 2026-11-17: Continued WP2.4: extracted caller-list identity resolution and value-to-index predicate compilation into `RuleCompiler`. The fluent builder delegates `when(...)`, `then(...)`, and trigger/target matching while preserving validation messages and BitSet semantics. The maintainer confirmed the focused `ConditionalProductBuilderTest` passed.
+- 2026-11-17: Continued WP2.4: moved immutable state transitions (`withDimension` and `withRule`) into `ConstraintModel`. The model now owns dimension snapshots, the persistent relation map, pair-cell validation, relation restriction, and new-edge loop-block validation. `ConditionalProductBuilder` no longer keeps duplicate `dims`/`relations` aliases; `and(...)` and completed rule chains delegate to the model and create a new facade. The maintainer confirmed the focused test passed.
+- 2026-11-17: Continued WP2.4: moved lazy `ConstraintPlan` construction/publication and tuple materialization into `ConstraintModel`. Each immutable model snapshot now owns its own safely published lazy plan, while generators share the same model-level tuple conversion. The builder no longer owns a duplicate plan field, plan factory, or tuple-conversion helper. The maintainer confirmed the focused test passed.
+- 2026-11-17: Continued WP2.4 / prepared WP3: extracted lexicographic, rejection-choice, and rank-based generator implementations into package-private `ConditionalProductGenerators`. `ConditionalProductBuilder` now delegates generator creation and is reduced to 460 lines. This is a mechanical extraction: strategy dispatch and iterator algorithms are intentionally unchanged; in particular, the dedicated `PRUNED_DFS` implementation remains a planned WP3 task, not silently removed or substituted in this change. Awaiting focused test verification.
+- 2026-11-17: Maintainer confirmed `mvn -Dtest=ConditionalProductBuilderTest test` passed after the `ConditionalProductGenerators` extraction. The generator extraction slice is verified. WP2.4 remains in progress pending a facade review and any remaining cohesive extractions; WP3 strategy-specific implementations have not started.
+- 2026-11-17: Maintainer confirmed the focused ConditionalProductBuilderTest passed after extracting ConditionalProductGenerators. Reviewed the remaining 460-line builder: the remaining code is the public fluent rule DSL, public builder operations, immutable facade state, and API documentation; no further extraction is justified without changing public API structure. WP2.4 is complete.
+- 2026-11-17: Started WP3.1. Extracted the shared prefix-pruned depth-first iterator control flow into PrunedLexGenerator and its BitSet candidate-selection implementation into BitSetPrunedGenerator. ConditionalProductGenerators now dispatches PRUNED_BITSET to the extracted implementation. PRUNED_DFS is deliberately still pending WP3.2; for this intermediate commit it retains the previous non-BitSet fallback behavior. Awaiting ConditionalProductBuilderTest verification.
+- 2026-11-17: Maintainer confirmed the focused ConditionalProductBuilderTest passed after WP3.1. WP3.1 is verified. Delivered WP3.2: PRUNED_DFS now uses DenseDfsGenerator with boolean relation rows cached lazily on ConstraintModel and shared by iterators. Dense materialization is capped at 4,000,000 aggregate relation cells; above the cap the strategy falls back to the BitSet implementation to bound memory. Added a small-case strategy-equivalence assertion and a 4.2-million-cell case that exercises the fallback without traversing the full result. Awaiting focused test verification.
+- 2026-11-17: Maintainer confirmed `mvn -Dtest=ConditionalProductBuilderTest test` passed after WP3.2. WP3.2 is verified. Maintainer raised whether repeatedly running the same focused test class is sufficient after many structural commits. Agreed to strengthen verification deliberately: add dedicated generator-level tests and seeded brute-force differential coverage across all four strategies, including empty/dead-end cases, repeated iteration, and lazy-plan behavior where observable. Keep the focused builder suite as regression coverage; do not inflate test count with redundant examples. Decide the exact test split before/alongside WP3.3 rather than delaying it until the end.
+- 2026-11-17: In response to the maintainer's request for stronger test coverage beyond repeatedly running the existing builder suite, added `ConditionalProductGeneratorTest`. It independently brute-forces small Cartesian products and compares ordered output for PRUNED_BITSET, PRUNED_DFS, DP, and ADAPTIVE across 300 fixed-seed random rule sets. It also covers unconstrained products, empty dimensions, a fully dead-ended product, repeated iteration, idempotent `hasNext`, exhaustion, and `next` after exhaustion. Existing `ConditionalProductBuilderTest` remains the public API and broader builder regression suite. Awaiting focused execution of both classes.
+- 2026-11-17: Maintainer reported three failures in `ConditionalProductRuleOrderTest`, all caused by its reflection helper looking for the former `relations` field directly on `ConditionalProductBuilder`. Updated the test helper to follow the extracted ownership path (`builder.model.relations`); no production code changed. Maintainer confirmed 34 tests passed after the correction. The dedicated generator-level strategy/differential tests and the rule-order regression suite are now verified. WP3.3 remains the next implementation step; do not start it until the maintainer says to proceed.
+- 2026-11-17: Delivered WP3.3: extracted the DP lexicographic iterator from the private nested `LexItr` in `ConditionalProductGenerators` into package-private `DpLexGenerator`. The iterator retains the same exact-count lookahead through `ConstraintPlan.firstValid`, lexicographic candidate order, lazy `hasNext` advancement, tuple materialization through `ConstraintModel`, and exhaustion behavior. Updated strategy dispatch to instantiate the extracted class. No counting, rank, or sampling code changed. Awaiting maintainer verification with the focused builder, generator differential, and rule-order suites.
+- 2026-11-17: Maintainer confirmed all 34 tests passed after WP3.3. Reviewed the final strategy wiring for WP3.4: `PRUNED_BITSET`, `PRUNED_DFS`, and `DP` dispatch to their dedicated iterator implementations in `ConditionalProductGenerators`; `ADAPTIVE` is resolved by `ConditionalProductBuilder` using the existing 10,000-tuple threshold, and remains available. Verified WP3.5 requires no enum rename: all four required constants are already present. WP3 is complete. No strategy was removed or deprecated.
+
+## 9. Maintainer clarifications (2026-11-17)
+
+- Full-result `lexOrder()` and any-order full generation are optimized for consuming the complete result set. Do not choose an implementation solely because it wins a short-prefix benchmark.
+- Special operations (`count`, `isEmpty`, `lexOrderMth`, `byRanks`, `choice`, `sample`, etc.) may pay the exact-plan/counting cost. Their end-to-end benchmarks include builder construction and rule registration.
+- The complete lexicographic enum strategy set is `PRUNED_BITSET`, `PRUNED_DFS`, `DP`, and `ADAPTIVE`. All four strategies must remain implemented and available. If one is inefficient, optimize it; do not remove or deprecate it during implementation. Benchmark only after the complete flow is ready, then tune implementations/defaults/cutoffs without dropping a strategy.
+- 2026-11-17: Created development branch `conditional-product-optimization` from commit `27c2066`. Corrected `ConditionalProductBuilder` references from the obsolete `PRUNED` enum constant to `PRUNED_BITSET`; the plan was expanded with the full-generation versus special-operation objectives and the full strategy table. Compile/tests have not yet been run.
+- 2026-11-17: Maintainer explicitly confirmed that no strategy is to be removed. Updated the retention rule, WP3/WP6 expectations, and open questions accordingly: all four strategies remain implemented; benchmark evidence is for optimization/default/cutoff tuning after the full flow is complete, not for dropping algorithms.
+- 2026-11-17: WP1.1 delivered and verified by the maintainer's full test run. `withRule` runs `checkLoopBlocks` only when the rule introduces a new dimension-pair edge; adding another restriction to an existing pair cannot change graph connectivity or loop blocks. A builder-style regression test checks exact count and lexicographic output after adding a further restriction to an edge in a three-dimension loop.
+- 2026-11-17: WP1.2 delivered. The previous `blockOf` implementation removed each edge and reran graph reachability, doing repeated work for every new linked pair. Replaced it with iterative Tarjan bridge detection in one DFS traversal (avoiding graph-depth dependence on the Java call stack), then unioned only non-bridge edges to form loop blocks. Added a builder-style regression test proving that a 1,001-value dimension attached to a 1,000,000-combination cycle by a bridge is excluded from that cycle's loop-block product. The maintainer should run the test suite before this item is marked verified.
+- 2026-11-17: Maintainer confirmed all 24 `ConditionalProductBuilderTest` tests passed, including the iterative Tarjan bridge regression. WP1.2 is now verified.
+- 2026-11-17: WP1.3 delivered. Replaced the full `LinkedHashMap` copy in `withRule` with an immutable AVL relation map. Updating an existing dimension pair now path-copies O(log E) nodes instead of copying all E entries; iteration remains sorted by pair key, and old builder instances retain their original map root. Added a builder-style regression covering repeated same-pair updates, independent branches, exact counts, and lexicographic output. Awaiting maintainer test run.
+- 2026-11-17: Continued WP2.3: extracted exact subtree/root count-table construction and BigInteger/primitive-long table storage into package-private `ConstraintCounts`. `ConstraintPlan` retains graph topology, loop-block assignments, prefix feasibility, and currently still hosts the prefix-completion/rank query methods, which are the next extraction slice. Updated builder count/rank consumers to read the count holder. Awaiting focused test run.
+- 2026-11-17: Maintainer confirmed all 25 `ConditionalProductBuilderTest` tests passed after the final WP2.3 query-method extraction and the subsequent `ConstraintCounts` reference fixes (`values`/`dimensions` now resolve through `plan`). WP2.3 is verified. The shared model extraction is complete through WP2.3; next is WP2.4, reducing `ConditionalProductBuilder` to the immutable public facade before starting generator extraction.
+- 2026-11-17: Started WP2.4 by extracting the immutable AVL relation map and its tree nodes from `ConditionalProductBuilder` into package-private `PersistentRelationMap.java`. The builder retains only the map reference and update calls; balancing, path-copy insertion, lookup, and ordered iteration now live outside the facade. This is the first WP2.4 slice, not completion: graph validation, rule compilation helpers, and generator implementations still need to move out. Awaiting the maintainer's focused test run.
+- 2026-11-17: Continued WP2.4: extracted constraint-graph validation into package-private `ConstraintGraph`. It owns the unchanged pair-cell and loop-block limits, iterative Tarjan bridge detection, non-bridge union-find grouping, and canonical dimension-pair key encoding. Updated `ConditionalProductBuilder` and `ConstraintPlan` to delegate to it. Awaiting the maintainer's focused test run.
+- 2026-11-17: Continued WP2.4: extracted caller-list identity resolution and value-to-index predicate compilation into `RuleCompiler`. The fluent builder delegates `when(...)`, `then(...)`, and trigger/target matching while preserving validation messages and BitSet semantics. The maintainer confirmed the focused `ConditionalProductBuilderTest` passed.
+- 2026-11-17: Continued WP2.4: moved immutable state transitions (`withDimension` and `withRule`) into `ConstraintModel`. The model now owns dimension snapshots, the persistent relation map, pair-cell validation, relation restriction, and new-edge loop-block validation. `ConditionalProductBuilder` no longer keeps duplicate `dims`/`relations` aliases; `and(...)` and completed rule chains delegate to the model and create a new facade. The maintainer confirmed the focused test passed.
+- 2026-11-17: Continued WP2.4: moved lazy `ConstraintPlan` construction/publication and tuple materialization into `ConstraintModel`. Each immutable model snapshot now owns its own safely published lazy plan, while generators share the same model-level tuple conversion. The builder no longer owns a duplicate plan field, plan factory, or tuple-conversion helper. The maintainer confirmed the focused test passed.
+- 2026-11-17: Continued WP2.4 / prepared WP3: extracted lexicographic, rejection-choice, and rank-based generator implementations into package-private `ConditionalProductGenerators`. `ConditionalProductBuilder` now delegates generator creation and is reduced to 460 lines. This is a mechanical extraction: strategy dispatch and iterator algorithms are intentionally unchanged; in particular, the dedicated `PRUNED_DFS` implementation remains a planned WP3 task, not silently removed or substituted in this change. Awaiting focused test verification.
+- 2026-11-17: Maintainer confirmed `mvn -Dtest=ConditionalProductBuilderTest test` passed after the `ConditionalProductGenerators` extraction. The generator extraction slice is verified. WP2.4 remains in progress pending a facade review and any remaining cohesive extractions; WP3 strategy-specific implementations have not started.
+- 2026-11-17: Maintainer confirmed the focused ConditionalProductBuilderTest passed after extracting ConditionalProductGenerators. Reviewed the remaining 460-line builder: the remaining code is the public fluent rule DSL, public builder operations, immutable facade state, and API documentation; no further extraction is justified without changing public API structure. WP2.4 is complete.
+- 2026-11-17: Started WP3.1. Extracted the shared prefix-pruned depth-first iterator control flow into PrunedLexGenerator and its BitSet candidate-selection implementation into BitSetPrunedGenerator. ConditionalProductGenerators now dispatches PRUNED_BITSET to the extracted implementation. PRUNED_DFS is deliberately still pending WP3.2; for this intermediate commit it retains the previous non-BitSet fallback behavior. Awaiting ConditionalProductBuilderTest verification.
+- 2026-11-17: Maintainer confirmed the focused ConditionalProductBuilderTest passed after WP3.1. WP3.1 is verified. Delivered WP3.2: PRUNED_DFS now uses DenseDfsGenerator with boolean relation rows cached lazily on ConstraintModel and shared by iterators. Dense materialization is capped at 4,000,000 aggregate relation cells; above the cap the strategy falls back to the BitSet implementation to bound memory. Added a small-case strategy-equivalence assertion and a 4.2-million-cell case that exercises the fallback without traversing the full result. Awaiting focused test verification.
+- 2026-11-17: Maintainer confirmed `mvn -Dtest=ConditionalProductBuilderTest test` passed after WP3.2. WP3.2 is verified. Maintainer raised whether repeatedly running the same focused test class is sufficient after many structural commits. Agreed to strengthen verification deliberately: add dedicated generator-level tests and seeded brute-force differential coverage across all four strategies, including empty/dead-end cases, repeated iteration, and lazy-plan behavior where observable. Keep the focused builder suite as regression coverage; do not inflate test count with redundant examples. Decide the exact test split before/alongside WP3.3 rather than delaying it until the end.
+- 2026-11-17: In response to the maintainer's request for stronger test coverage beyond repeatedly running the existing builder suite, added `ConditionalProductGeneratorTest`. It independently brute-forces small Cartesian products and compares ordered output for PRUNED_BITSET, PRUNED_DFS, DP, and ADAPTIVE across 300 fixed-seed random rule sets. It also covers unconstrained products, empty dimensions, a fully dead-ended product, repeated iteration, idempotent `hasNext`, exhaustion, and `next` after exhaustion. Existing `ConditionalProductBuilderTest` remains the public API and broader builder regression suite. Awaiting focused execution of both classes.
+- 2026-11-17: Maintainer reported three failures in `ConditionalProductRuleOrderTest`, all caused by its reflection helper looking for the former `relations` field directly on `ConditionalProductBuilder`. Updated the test helper to follow the extracted ownership path (`builder.model.relations`); no production code changed. Maintainer confirmed 34 tests passed after the correction. The dedicated generator-level strategy/differential tests and the rule-order regression suite are now verified. WP3.3 remains the next implementation step; do not start it until the maintainer says to proceed.
+- 2026-11-17: Delivered WP3.3: extracted the DP lexicographic iterator from the private nested `LexItr` in `ConditionalProductGenerators` into package-private `DpLexGenerator`. The iterator retains the same exact-count lookahead through `ConstraintPlan.firstValid`, lexicographic candidate order, lazy `hasNext` advancement, tuple materialization through `ConstraintModel`, and exhaustion behavior. Updated strategy dispatch to instantiate the extracted class. No counting, rank, or sampling code changed. Awaiting maintainer verification with the focused builder, generator differential, and rule-order suites.
+- 2026-11-17: Maintainer confirmed all 34 tests passed after WP3.3. Reviewed the final strategy wiring for WP3.4: `PRUNED_BITSET`, `PRUNED_DFS`, and `DP` dispatch to their dedicated iterator implementations in `ConditionalProductGenerators`; `ADAPTIVE` is resolved by `ConditionalProductBuilder` using the existing 10,000-tuple threshold, and remains available. Verified WP3.5 requires no enum rename: all four required constants are already present. WP3 is complete. No strategy was removed or deprecated.
+
+
+- 2026-11-17: Refactored the conditional-product benchmark into `benchmarks.conditionalproduct`, with separate `scenario` and `baseline` packages. Moved declarative case loading/rule construction into `Scenario` and `Rule`, and the nested-stream reference implementation into `NestedStreamBaseline`; the JMH benchmark retains the same 17 case parameters, five implementations, checksum validation, and two timing boundaries. Added `ConditionalProductBenchmarkRunner`, which runs JMH programmatically, preserves console progress/errors, writes complete JSON to `target/benchmarks/ConditionalProductStrategyBenchmark_results.json`, and writes one final text summary per method (`ConditionalProductStrategyBenchmark.traversalOnly_output.txt` and `...endToEnd_output.txt`). Supports optional method, scenario, implementation, output-directory selectors; GC profiling is on by default. This is delivered but not yet compiled or run by the maintainer.
+
+- 2026-11-17: Continued WP4 follow-up for `anyOrder()`: extended `PrunedLexGenerator`/`BitSetPrunedGenerator` to start from a fixed prefix and a candidate range at the next dimension. Replaced the deliberately unsplittable `AnyOrderGenerator` spliterator with a lazy prefix-frontier spliterator. It splits disjoint candidate ranges and, when the current range contains at most one candidate, fixes that candidate and descends to the next dimension before attempting another split. Added tests for split partition coverage/uniqueness, splitting beneath a singleton first dimension, and parallel stream tuple-set equality. No automatic parallel threshold or default-stream parallelism was enabled; those decisions remain benchmark-gated. `lexOrder()` was not changed. Awaiting maintainer compilation and focused test execution.
+
+- 2026-11-17: Maintainer confirmed the focused `ConditionalProductGeneratorTest` passed after adding prefix-frontier splitting. Added a further concurrency regression: six independent parallel traversals share the same `anyOrder()` generator/model and each must match the complete expected tuple set. This specifically exercises safe lazy publication of shared relation rows under concurrent first use. Awaiting focused test execution before benchmark work.
+
+- 2026-11-17: Added `AnyOrderParallelBenchmark` as a focused JMH comparison of complete sequential versus parallel `anyOrder()` traversal. It covers wide, singleton, narrow, and skewed prefix roots; validates an order-independent checksum between both modes during trial setup; and separates traversal-only timing from end-to-end builder/rule construction plus traversal. No automatic parallel threshold or production execution-policy change is included. Awaiting maintainer compilation and benchmark results.
+
+- 2026-11-19 (H1): item 8 first step. `ConstraintCounts` long-first construction with BigInteger fallback, shared
+  row sums, prefix sums for single-run rows. count() allocation on LARGE shapes 1.5-13 MB -> 0.1-0.6 MB (sandbox).
+  Open: `sample` at counts above 2^62 (21-45 MB per call), small-product setup cost, empty-product isEmpty workload.
+- 2026-11-19 (H1 confirmed, H3): H1 pushed as 73e253b. JMH special: LARGE count 5x-11x faster, choice/byRanks up to 10x/4x,
+  sample only 0.7-0.8x. H3: BigInteger counting queries skip identity multiply/add; sandbox sample allocation at
+  20x50 21.5 -> 2.0 MB, 20x100 44.7 -> 4.1 MB. Awaiting JMH confirmation. Open: small-product setup cost, empty-product isEmpty workload.
+- 2026-11-19 (H1 confirmed, H3): H1 pushed as 73e253b. JMH special: LARGE count 5x-11x faster, choice/byRanks up to 10x/4x,
+  sample only 0.7-0.8x. H3: BigInteger counting queries skip identity multiply/add; sandbox sample allocation at
+  20x50 21.5 -> 2.0 MB, 20x100 44.7 -> 4.1 MB. Awaiting JMH confirmation. Open: small-product setup cost, empty-product isEmpty workload.
+- 2026-11-19 (H4): item 8 leftovers. Added the long-query overflow-invariant comment, cached the full product in
+  `mostTuplesValid`, documented the `AnyOrderGenerator.trySplit` invariant, added the concurrent first-use test of the
+  counting tier and the empty-product benchmark (`EMPTY_DEEP-5x25`, third file in the `special` preset). Small-product
+  setup cost traced to plan construction (about 66 KB per call at 5x25), not counting; deferred. H3 JMH: sample, byRanks,
+  lexOrderMth about 2x faster at LARGE-20x50/20x100. Review items declined: cheap `estimateSize` (would cap parallel DP),
+  lookahead when the plan exists (costs time on healthy shapes). Open: multi-relation shape to measure `cardinality()` in
+  `BitSetPrunedGenerator` (review finding 4), then the item 7 confirmation run.

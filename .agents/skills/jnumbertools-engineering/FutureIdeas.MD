@@ -1,0 +1,77 @@
+# Future Ideas
+
+This file records potential future directions for JNumberTools. These are exploration notes, not approved features or final API contracts.
+
+## SAT Solver and SAT Enumerator
+
+Explore adding a Boolean satisfiability (SAT) capability to JNumberTools. A SAT formula consists of Boolean variables and logical constraints (typically represented in conjunctive normal form, CNF). The capability could expose three distinct operations: finding one satisfying assignment, enumerating every satisfying assignment, and counting satisfying assignments.
+
+Illustrative API shape:
+
+```java
+// Boolean satisfiability: find one satisfying assignment
+JNumberTools.SAT().solve(formula);
+
+// Enumerate all satisfying assignments
+JNumberTools.SAT().allSolutions(formula);
+
+// Count satisfying assignments (#SAT)
+JNumberTools.SAT().count(formula);
+```
+
+These names and signatures are illustrative only. They are not a proposed final API contract. The eventual design should follow JNumberTools' builder conventions and be informed by the formula model, solver architecture, result semantics, and performance requirements.
+
+### Separate problem types
+
+Initially consider these as separate operations because their objectives, algorithms, costs, and result types differ.
+
+| API concept | Purpose | Expected result |
+|---|---|---|
+| `solve()` | Determine whether a formula is satisfiable | SAT/UNSAT status and, when satisfiable, possibly one satisfying assignment |
+| `allSolutions()` | Generate every satisfying assignment | Lazy stream/iterable of assignments |
+| `count()` | Count all satisfying assignments (#SAT) | `BigInteger` |
+
+Important semantic points to settle during design:
+
+- `solve()` should distinguish UNSAT from SAT and make the satisfying assignment available when one exists. Decide whether this is represented by a result object, an optional assignment, or another explicit type.
+- `allSolutions()` should ideally be lazy, avoid retaining all assignments, and define a stable variable ordering and assignment representation. Enumeration may take exponential time because the output itself can be exponential.
+- `count()` must use `BigInteger`; the number of satisfying assignments can exceed primitive integer ranges. Counting should not be implemented by materializing the stream from `allSolutions()`.
+- Define behaviour for an empty formula, an empty clause, unused variables, duplicate clauses, contradictory constraints, and variables that do not occur in the formula.
+- Establish whether the initial formula representation is restricted to CNF and how literals, clauses, and variable identifiers are modelled.
+
+### Relationship to existing JNumberTools capabilities
+
+The Boolean assignment space for (n) variables is a Cartesian product of (n) binary domains, with (2^n) possible assignments. Existing Cartesian-product generation provides a useful conceptual baseline for representing this search space.
+
+Conditional Cartesian products may express some pairwise restrictions and can help explore small constrained instances. However, general SAT clauses can involve multiple variables simultaneously, and a practical SAT solver needs dedicated propagation, branching, conflict handling, and related search techniques. A general SAT implementation should therefore be designed as its own capability rather than treated as a thin wrapper around conditional-product generation.
+
+Keep the responsibilities distinct:
+
+1. **SAT solving:** search for one satisfying assignment or establish that none exists.
+2. **SAT enumeration:** systematically generate all satisfying assignments without requiring the caller to construct the full Cartesian product.
+3. **#SAT counting:** count satisfying assignments using a dedicated counting algorithm, not by assuming enumeration is affordable.
+
+The theoretical breakthrough discussed in recent work on counting satisfying assignments is not itself a practical SAT solver implementation. JNumberTools should not claim to reproduce such a result merely by adding these APIs.
+
+### Possible later specializations
+
+After a general formula model and the three core operations have been evaluated, consider specialized entry points or algorithm choices for:
+
+- **3-SAT:** formulas whose clauses contain at most three literals.
+- **k-SAT:** formulas whose clauses have a bounded or specified number of literals.
+- **Weighted Max-SAT:** find an assignment that maximizes the total weight of satisfied clauses (or otherwise satisfies a clearly defined optimization objective).
+
+These should be treated as later extensions, not requirements for the first SAT capability. In particular, weighted Max-SAT is an optimization problem and should have result semantics distinct from SAT/UNSAT and #SAT.
+
+### Suggested investigation sequence
+
+1. Define a small, immutable Boolean formula model and its CNF semantics.
+2. Specify assignment, SAT/UNSAT, enumeration, and counting result contracts.
+3. Build correctness tests against exhaustive enumeration for small formulas.
+4. Prototype `solve()` independently and compare it with a straightforward brute-force baseline.
+5. Prototype lazy `allSolutions()`, verifying completeness, uniqueness, and deterministic ordering.
+6. Prototype `count()` as a separate algorithm and cross-check its results against enumeration on small formulas.
+7. Benchmark representative formula structures and sizes; record runtime and allocation, not just asymptotic expectations.
+8. Evaluate whether specialized 3-SAT, k-SAT, or weighted Max-SAT APIs are justified by demonstrated use cases.
+
+No implementation approach, final API naming, or release target is decided by this note.
