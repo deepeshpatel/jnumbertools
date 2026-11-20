@@ -75,3 +75,36 @@ These should be treated as later extensions, not requirements for the first SAT 
 8. Evaluate whether specialized 3-SAT, k-SAT, or weighted Max-SAT APIs are justified by demonstrated use cases.
 
 No implementation approach, final API naming, or release target is decided by this note.
+
+## Conditional product: deferred work and rejected ideas (from the 4.1.0 optimisation work)
+
+Notes carried over from the retired `ConditionalProductRefactring.md`. They are not approved features.
+
+### Deferred
+
+- **Compiled / reusable product API** (declare dimension names and rules once, bind different lists later;
+  `.compile()` and `.bind(...)`, for the Simple, Constrained and Conditional products). A test-source prototype
+  matched the ordinary builder exactly. One JMH run (100 datasets, setup-dominated operations) showed 25 to 50%
+  less time on `isEmpty`, `count` and `first100`, and only 5 to 12% on long enumerations, but a later end-to-end
+  test by the maintainer showed no gain, so it is parked. Reopen only if a representative repeated-dataset workload
+  shows a measurable end-to-end gain including binding and consuming results. If it returns: rule values are
+  fixed at compile time, a missing value fails at bind time, and the uncompiled path must not change.
+- **Small-product setup cost.** Fixed cost on small products is plan construction (about 66 KB per call at 5x25),
+  not counting. Unprofiled hypothesis: each `withRule` copies the rule list and re-runs the loop check.
+- **Automatic parallel policy for `anyOrder()`.** Needs complete-consumption benchmarks across representative shapes
+  and must not change `lexOrder()` parallel behaviour. `anyOrder()` dimension reordering is on hold.
+- **`ADAPTIVE` and its `estimatedLimit` argument.** `ADAPTIVE` resolves to `PRUNED_BITSET` and the argument is
+  validated but unused. Decide whether to give it a real cutoff (needs dead-end benchmark evidence) or remove it
+  in a major version.
+- **`Relation` row sharing** only covers up to 62 rules per pair and copies its rule array per added rule. Measure
+  one-rule-per-value shapes at large sizes before changing it.
+- **Optional confirmation:** a full multi-fork JMH matrix before making broad performance claims.
+- **Library-wide leftovers** (the earlier "item 10"), to be done on a separate branch and verified with the shim suite.
+
+### Tried and rejected (do not retry without new evidence)
+
+- A cheap `estimateSize` in `DpLexSpliterator`: it makes the first split's children leaves and caps parallel DP at about 2.
+- Enabling completion lookahead whenever the plan exists: it costs time on healthy shapes.
+- Exact-count `anyOrder()` splitting: about 5x slower on small shapes in parallel (counting setup costs more than the split saves).
+- Pivot by `cardinality()` (STAR_LAST experiment): no advantage when tested.
+- Do not treat a bimodal allocation figure on JIT-sensitive paths (for example DEEP_DEAD_END, 9.6 vs 15.4 MB) as a regression.
