@@ -38,7 +38,7 @@ class AnyOrderSplittingTest {
         List<Integer> a = range(40);
         List<Integer> b = range(40);
         List<Integer> c = range(40);
-        var product = cartesianProduct.conditionalProductOf(a).and(b).and(c)
+        var product = cartesianProduct.conditional().ofList(a).and(b).and(c)
                 .when(a).isOneOf(List.of(1, 5, 9, 33)).then(b).isOneOf(List.of(2, 4, 8, 16, 32));
         List<List<Object>> expected = product.lexOrder().stream().toList();
 
@@ -61,7 +61,7 @@ class AnyOrderSplittingTest {
         List<Integer> a = range(5);
         List<Integer> b = range(5);
         List<Integer> c = range(5);
-        var product = cartesianProduct.conditionalProductOf(a).and(b).and(c).when(a).is(1).then(b).isNot(2);
+        var product = cartesianProduct.conditional().ofList(a).and(b).and(c).when(a).is(1).then(b).isNot(2);
         Spliterator<List<Object>> spliterator = product.anyOrder().spliterator();
         assertTrue(spliterator.trySplit() == null, "125 candidates are below the threshold");
         List<List<Object>> actual = new ArrayList<>();
@@ -76,13 +76,13 @@ class AnyOrderSplittingTest {
         List<Integer> a = range(4);
         List<Integer> b = range(5);
         List<Integer> c = range(6);
-        var product = cartesianProduct.conditionalProductOf(a).and(b).and(c).when(a).is(1).then(b).isNot(2);
+        var product = cartesianProduct.conditional().ofList(a).and(b).and(c).when(a).is(1).then(b).isNot(2);
         long valid = product.lexOrder().stream().count();
         long estimate = product.anyOrder().spliterator().estimateSize();
         assertEquals(4L * 5 * 6, estimate);
         assertTrue(estimate >= valid);
 
-        var empty = cartesianProduct.conditionalProductOf(a).and(List.<Integer>of()).and(c);
+        var empty = cartesianProduct.conditional().ofList(a).and(List.<Integer>of()).and(c);
         assertEquals(0L, empty.anyOrder().spliterator().estimateSize());
     }
 }
