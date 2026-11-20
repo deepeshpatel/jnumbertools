@@ -393,7 +393,7 @@ final class ConstraintPlan {
         if (dimsBelow.length == 0) {
             for (int idx = from; idx < dimSizeK; idx++) {
                 val[k] = idx;
-                if (last || hasCompletion(k + 1, val)) return idx;
+                if ((last && multiRules.isEmpty()) || hasCompletion(k + 1, val)) return idx;
             }
             return -1;
         }
@@ -407,7 +407,7 @@ final class ConstraintPlan {
                 if (!rows[i][val[dimsBelow[i]]].get(idx)) continue outer;
             }
             val[k] = idx;
-            if (last || hasCompletion(k + 1, val)) return idx;
+            if ((last && multiRules.isEmpty()) || hasCompletion(k + 1, val)) return idx;
         }
         return -1;
     }
