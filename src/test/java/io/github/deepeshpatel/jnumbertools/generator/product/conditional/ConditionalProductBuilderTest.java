@@ -42,6 +42,37 @@ class ConditionalProductBuilderTest {
     }
 
     @Test
+    void multipleListOverloadMatchesAndChaining() {
+        List<String> database = List.of("PostgreSQL", "Oracle");
+        List<String> deployment = List.of("Cloud", "On-Prem");
+        List<String> region = List.of("US", "EU");
+
+        var overloaded = cartesianProduct
+                .conditionalProductOf(os, browser, network, database, deployment, region)
+                .when(browser).is("Safari").then(os).isOneOf("macOS")
+                .when(network).is("4G").then(os).isNoneOf("Linux")
+                .when(network).is("4G").then(browser).isNoneOf("Chrome")
+                .when(database).is("Oracle").then(deployment).isOneOf("Cloud")
+                .when(region).is("EU").then(deployment).isNoneOf("On-Prem");
+
+        var chained = cartesianProduct
+                .conditionalProductOf(os)
+                .and(browser)
+                .and(network)
+                .and(database)
+                .and(deployment)
+                .and(region)
+                .when(browser).is("Safari").then(os).isOneOf("macOS")
+                .when(network).is("4G").then(os).isNoneOf("Linux")
+                .when(network).is("4G").then(browser).isNoneOf("Chrome")
+                .when(database).is("Oracle").then(deployment).isOneOf("Cloud")
+                .when(region).is("EU").then(deployment).isNoneOf("On-Prem");
+
+        assertEquals(chained.count(), overloaded.count());
+        assertEquals(chained.lexOrder().stream().toList(), overloaded.lexOrder().stream().toList());
+    }
+
+    @Test
     void twoRulesOnTheSameTrigger() {
         var builder = twoRules();
         assertEquals(BigInteger.valueOf(13), builder.count());
