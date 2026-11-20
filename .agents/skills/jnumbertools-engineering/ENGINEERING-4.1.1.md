@@ -24,15 +24,11 @@ conditionalProductOf(List<?> first, List<?> second, List<?>... additional)
 
 The existing single-list entry point and the `.and(...)` chaining API remain available. A test compares the overload's generated structure with the equivalent builder assembled through `.and(...)`.
 
-### Whole-tuple `.filter(...)`: experimental, not accepted
+### Experimental whole-tuple `.filter(...)` API removed
 
-A six-argument whole-tuple filter API and related tests were added to the branch. The current implementation evaluates each predicate only after a complete tuple has been generated. It therefore does not prune partial assignments and may scan many tuples that will ultimately be rejected. Filtered counting and rank-based operations also scan filtered lexicographic results.
+Removed the public six-argument `.filter(...)` method, its `Predicate6` interface, the post-generation filtering wrappers, and the filter-specific test. The builder now consistently uses the existing constraint plan for counting, emptiness, rank selection, and traversal. This restores the original optimized path and removes the post-generation scan fallback.
 
-**This implementation is not good enough for the 4.1.1 API and must not be treated as release-ready. Do not push or merge a post-generation-only `.filter(...)` implementation as the final feature.** The current implementation has already been pushed to the PR branch in the commits listed below; this note records that state.
-
-Before this feature can be accepted, redesign it so predicates can reject a partial assignment as soon as all dimensions on which they depend have been assigned. The design must preserve correct behaviour and ordering across the builder's supported operations, not just `lexOrder()`. In particular, assess `count()`, `isEmpty()`, `byRanks()`, `lexOrderMth()`, `choice()`, and `sample()`. The predicate API must make dependencies explicit or otherwise provide a sound partial-evaluation contract; do not attempt to infer argument dependencies from arbitrary Java lambda bytecode.
-
-Until a pruning-capable design and corresponding tests are complete, the whole-tuple filter implementation remains **experimental and must be removed or replaced before PR #7 is considered complete**. Existing pairwise `.when(...).then(...)` rules remain the optimized pruning mechanism.
+The removal commit is listed below. The next implementation step is a dependency-aware multi-trigger rule expression using `.and()` and `.or()`. It must preserve exact semantics across traversal, counting, ranking, and sampling. Existing pairwise-only rules must retain their current execution path without multi-trigger evaluation overhead.
 
 ## Commit history on the PR branch
 
@@ -54,15 +50,15 @@ This list describes the implementation commits preceding this engineering-notes 
 
 ## Remaining work and acceptance criteria
 
-- [ ] Design a pruning-capable filter contract with explicit, sound predicate dependencies.
-- [ ] Implement partial-assignment pruning; do not evaluate a predicate only after a complete tuple when its dependencies are already known.
-- [ ] Verify consistent semantics for lexicographic and any-order traversal, counting, emptiness, rank selection, every-Mth traversal, choice, and sampling.
-- [ ] Add tests proving early rejection/pruning as well as output equivalence with the corresponding explicit constraints.
-- [ ] Benchmark the pruned implementation against equivalent pairwise rules and a stream-filter baseline. Report end-to-end costs, including builder construction and counting where applicable.
-- [ ] Remove or replace the current post-generation-only filter implementation before treating the feature as complete.
+- [ ] Design and implement arbitrary-length trigger expressions: `.and()` adds a condition to the current conjunction; `.or()` starts another conjunction alternative.
+- [ ] Compile multi-trigger rules into a sound constraint representation; do not approximate a multi-dimensional antecedent with independent pairwise rules.
+- [ ] Preserve exact semantics for lexicographic and any-order traversal, `count()`, `isEmpty()`, `byRanks()`, `lexOrderMth()`, `choice()`, and `sample()`.
+- [ ] Keep pairwise-only workloads on the existing optimized execution path and benchmark for regressions.
+- [ ] Add tests for AND/OR grouping, arbitrary chain lengths, validation, and differential agreement with brute force.
+- [ ] Correct and verify public Javadocs and usage examples.
 - [ ] Record each verified bug fix here with the failing test, fix summary, and commit SHA.
 - [ ] Run the relevant Maven tests and record the actual result before merge.
 
 ## Validation status
 
-The PR description records that tests were added but were **not executed** as part of the remote changes. Do not describe the branch as fully tested until the relevant test suite has actually been run and its result recorded here.
+The filter-removal commit was created remotely. Maven tests were **not executed** in this environment; the user will run the tests locally after the commits are pushed. Record the local test command and actual result here when available.
