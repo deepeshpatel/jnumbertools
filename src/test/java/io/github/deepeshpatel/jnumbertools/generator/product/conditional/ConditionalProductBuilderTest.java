@@ -63,6 +63,7 @@ class ConditionalProductBuilderTest {
 
         assertEquals(expected, builder.lexOrder().stream().toList());
         assertEquals(expected, builder.lexOrder(LexOrderStrategy.PRUNED_BITSET).stream().toList());
+        assertEquals(expected, builder.lexOrder(LexOrderStrategy.PRUNED_DFS).stream().toList());
         assertEquals(expected, builder.lexOrder(LexOrderStrategy.DP).stream().toList());
         assertEquals(expected, builder.lexOrder(LexOrderStrategy.ADAPTIVE, 9_999).stream().toList());
         assertEquals(expected, builder.lexOrder(LexOrderStrategy.ADAPTIVE, 10_000).stream().toList());
@@ -70,6 +71,19 @@ class ConditionalProductBuilderTest {
         var adaptive = builder.lexOrder(LexOrderStrategy.ADAPTIVE, 10_000);
         assertEquals(expected, adaptive.stream().toList());
         assertEquals(expected, adaptive.stream().toList(), "the returned iterable must be re-iterable");
+    }
+
+
+    @Test
+    void prunedDfsFallsBackToBitSetWhenDenseRowsExceedTheMemoryCap() {
+        List<Integer> left = java.util.stream.IntStream.range(0, 2_100).boxed().toList();
+        List<Integer> right = java.util.stream.IntStream.range(0, 2_000).boxed().toList();
+        var builder = cartesianProduct.conditionalProductOf(left).and(right)
+                .when(left).is(0).then(right).is(0);
+
+        var expectedPrefix = builder.lexOrder(LexOrderStrategy.PRUNED_BITSET).stream().limit(20).toList();
+        var actualPrefix = builder.lexOrder(LexOrderStrategy.PRUNED_DFS).stream().limit(20).toList();
+        assertEquals(expectedPrefix, actualPrefix);
     }
 
     @Test
@@ -172,6 +186,36 @@ class ConditionalProductBuilderTest {
     }
 
     @Test
+    void persistentRelationUpdatesPreserveEarlierBuildersAndSortedIteration() {
+        var base = cartesianProduct.conditionalProductOf(os).and(browser);
+        var safariRule = base.when(browser).is("Safari").then(os).is("macOS");
+        var safariAndChromeRules = safariRule.when(browser).is("Chrome").then(os).is("Windows");
+        var independentBranch = base.when(browser).is("Firefox").then(os).is("Linux");
+
+        assertEquals(BigInteger.valueOf(9), base.count());
+        assertEquals(BigInteger.valueOf(7), safariRule.count());
+        assertEquals(BigInteger.valueOf(5), safariAndChromeRules.count());
+        assertEquals(BigInteger.valueOf(7), independentBranch.count());
+
+        assertEquals(List.of(
+                List.of("Windows", "Chrome"),
+                List.of("Windows", "Firefox"),
+                List.of("macOS", "Safari"),
+                List.of("macOS", "Firefox"),
+                List.of("Linux", "Firefox")),
+                safariAndChromeRules.lexOrder().stream().toList());
+        assertEquals(List.of(
+                List.of("Windows", "Chrome"),
+                List.of("Windows", "Safari"),
+                List.of("macOS", "Chrome"),
+                List.of("macOS", "Safari"),
+                List.of("Linux", "Chrome"),
+                List.of("Linux", "Safari"),
+                List.of("Linux", "Firefox")),
+                independentBranch.lexOrder().stream().toList());
+    }
+
+    @Test
     void snapshotOfTheCallersLists() {
         var mutable = new ArrayList<>(List.of("a", "b"));
         var other = new ArrayList<>(List.of("x", "y"));
@@ -240,6 +284,48 @@ class ConditionalProductBuilderTest {
                 .when(network).is("4G").then(os).isNot("Linux");   // closes the loop os - browser - network
         assertEquals(BigInteger.valueOf(10), builder.count());
         assertEquals(expectedConfigs(true), builder.lexOrder().stream().toList());
+    }
+
+    @Test
+    void addingAnotherRuleToAnExistingPairDoesNotChangeTheLoopStructure() {
+        var builder = cartesianProduct.conditionalProductOf(os).and(browser).and(network)
+                .when(browser).is("Safari").then(os).isOneOf("macOS")
+                .when(network).is("4G").then(browser).isNot("Chrome")
+                .when(network).is("4G").then(os).isNot("Linux")
+                // This further restricts an edge already present in the loop.
+                .when(network).is("4G").then(os).is("macOS");
+
+        var expected = expectedConfigs(true).stream()
+                .filter(tuple -> !tuple.get(2).equals("4G") || tuple.get(0).equals("macOS"))
+                .toList();
+        assertEquals(BigInteger.valueOf(expected.size()), builder.count());
+        assertEquals(expected, builder.lexOrder().stream().toList());
+    }
+
+    @Test
+    void bridgeAttachedDimensionDoesNotExpandTheLoopBlock() {
+        List<Integer> a = new ArrayList<>();
+        List<Integer> b = new ArrayList<>();
+        List<Integer> c = new ArrayList<>();
+        List<Integer> d = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            a.add(i);
+            b.add(i);
+            c.add(i);
+        }
+        for (int i = 0; i < 1001; i++) {
+            d.add(i);
+        }
+
+        // The a-b-c cycle has exactly 1,000,000 combinations. d is attached by a bridge,
+        // so its 1,001 values must not be included in the loop-block limit.
+        var builder = cartesianProduct.conditionalProductOf(a).and(b).and(c).and(d)
+                .when(a).is(0).then(b).is(0)
+                .when(b).is(0).then(c).is(0)
+                .when(c).is(0).then(a).is(0)
+                .when(c).is(0).then(d).is(0);
+
+        assertNotNull(builder);
     }
 
     @Test

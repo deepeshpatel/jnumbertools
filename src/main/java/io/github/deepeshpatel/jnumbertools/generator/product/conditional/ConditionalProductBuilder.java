@@ -4,8 +4,6 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
-import io.github.deepeshpatel.jnumbertools.datastructure.Tuple;
-import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
@@ -14,21 +12,14 @@ import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
 
 import java.math.BigInteger;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Random;
-import java.util.Set;
 
 /**
  * Builder for a Cartesian product whose dimensions are linked by <em>rules</em>, written as plain
@@ -67,14 +58,53 @@ import java.util.Set;
  * product exceeds 1,000,000 ({@code MAX_LOOP_COMBINATIONS}). Each pair of dimensions connected by a rule
  * also requires a relation table; a rule is rejected if that table would exceed 50,000,000 value pairs
  * ({@code MAX_PAIR_CELLS}).
- * For all accepted rule sets {@link #count()}, {@link #lexOrder()},
+ * For all accepted rule sets, {@link #count()}, {@link #lexOrder()},
  * {@link #lexOrderMth(BigInteger, BigInteger)}, {@link #byRanks(Iterable)}, {@link #choice(int, Random)}
- * and {@link #sample(int, Random)} work on the valid tuples only, without enumerating the full product.
- * Ordinary {@link #lexOrder()} traversal defaults to {@link LexOrderStrategy#PRUNED}; callers can select
- * {@link LexOrderStrategy#DP} or use {@link LexOrderStrategy#ADAPTIVE} with an expected traversal size.
- * The exact counting and rank-based operations always use the DP plan, regardless of the lexicographic
- * traversal strategy. Ranks are positions among the valid tuples in lexicographic order (dimension order,
+ * and {@link #sample(int, Random)} operate on valid tuples without materializing the complete Cartesian
+ * product. {@link #choice(int, Random)} may use rejection sampling, which draws candidates from the full
+ * product and discards those that violate a rule.
+ * Ordinary {@link #lexOrder()} traversal defaults to {@link LexOrderStrategy#PRUNED_BITSET}; callers can select
+ * {@link LexOrderStrategy#PRUNED_DFS} or {@link LexOrderStrategy#DP} explicitly, or use
+ * {@link LexOrderStrategy#ADAPTIVE} with a non-negative estimate.
+ * ADAPTIVE is an implementation policy, not a promise about which algorithm is selected for a given workload.
+ * Its internal selection and selection criteria may change between versions. In this version it resolves to
+ * {@link LexOrderStrategy#PRUNED_BITSET}; the estimate is validated but does not affect that choice.
+ * Exact counting and rank-based operations use the DP plan, regardless of the lexicographic traversal strategy. Ranks are positions among the valid tuples in lexicographic order (dimension order,
  * then the order of each list). They change when rules change.</p>
+ *
+ * <h2>Practical performance guidance: dimension order</h2>
+ * <p>Dimension declaration order can affect the amount of work required by lexicographic traversal.
+ * The order is the order in which the dimensions are supplied to {@code conditionalProductOf(...)}
+ * and {@link #and(List)}. It also defines the tuple positions and lexicographic encounter order, so
+ * changing it changes the order (and positional meaning) of the generated tuples.</p>
+ *
+ * <p>During prefix-pruned traversal, a rule between two dimensions can be checked when the later of
+ * those dimensions is assigned: the candidate value is tested against dimensions already present in
+ * the prefix. A restrictive relation can therefore prune the remaining search below that point.
+ * As a practical starting point:</p>
+ * <ul>
+ *   <li>Do not automatically put the most restrictive dimension first. First consider which other
+ *       dimensions must already be assigned before its rules can be evaluated.</li>
+ *   <li>Once the dimensions needed by those rules have been assigned, place a highly restrictive
+ *       dimension before dimensions whose combinations it can eliminate. Avoid leaving a dimension
+ *       that rejects many values until the very end, where little downstream work remains to prune.</li>
+ *   <li>Consider the constraint graph as a whole. A dimension connected to several earlier dimensions
+ *       may have more opportunities to reject candidates than one with only a single relation.</li>
+ *   <li>Preserve the order required by your application: reordering dimensions changes tuple positions
+ *       and lexicographic order, even when the set of valid combinations is unchanged.</li>
+ * </ul>
+ *
+ * <p>This is analogous to join ordering and predicate placement in a SQL query: a selective condition
+ * is valuable when it can be applied before large downstream combinations are produced, but its
+ * dependencies must be available first. There is no universally optimal order; dimension sizes,
+ * value distributions, rule dependencies and graph topology all matter. Benchmark representative
+ * inputs when traversal performance is important.</p>
+ *
+ * <p>These ordering hints describe prefix-pruned lexicographic traversal. Exact counting and
+ * rank-based operations use the counting plan and have different cost characteristics. The separate
+ * {@link #anyOrder()} traversal does not preserve lexicographic order and prioritizes efficient execution;
+ * it may benefit from partitioned execution when used with a parallel stream, but does not require or
+ * guarantee parallel execution.</p>
  *
  * <p>Instances are immutable and thread-safe. Calls to {@code and(...)} and completed rule chains return
  * new builders; intermediate {@code when(...)} and {@code then(...)} steps do not modify the existing
@@ -132,19 +162,9 @@ import java.util.Set;
  */
 public final class ConditionalProductBuilder implements Builder<Object> {
 
-    /** Largest number of value pairs one pair of dimensions may have (guards memory of the rule tables). */
-    private static final long MAX_PAIR_CELLS = 50_000_000L;
-
-    /**
-     * Largest product of the sizes of the dimensions that rules link in a loop (they are solved together,
-     * so this bounds the work and memory for such a group).
-     */
-    private static final long MAX_LOOP_COMBINATIONS = 1_000_000L;
-
-    private final List<List<?>> dims;            // private snapshots; unmodifiable
+    private final ConstraintModel model;         // immutable shared dimensions and pairwise relations
     private final List<List<?>> originals;       // the caller's list objects, matched by identity only
-    private final Map<Long, Relation> relations; // key(u, v) with u < v; immutable values
-    private volatile Plan plan;                  // built lazily on first use
+    private final RuleCompiler ruleCompiler;
 
 
     /**
@@ -153,13 +173,14 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @throws NullPointerException if {@code elements} is null or contains a null element
      */
     public ConditionalProductBuilder(List<?> elements) {
-        this(List.<List<?>>of(snapshot(elements)), List.<List<?>>of(elements), Map.of());
+        this(new ConstraintModel(List.<List<?>>of(snapshot(elements)), PersistentRelationMap.empty()),
+                List.<List<?>>of(elements));
     }
 
-    private ConditionalProductBuilder(List<List<?>> dims, List<List<?>> originals, Map<Long, Relation> relations) {
-        this.dims = dims;
+    private ConditionalProductBuilder(ConstraintModel model, List<List<?>> originals) {
+        this.model = model;
         this.originals = originals;
-        this.relations = relations;
+        this.ruleCompiler = new RuleCompiler(model.dimensions, originals, model.indexes);
     }
 
     /**
@@ -170,12 +191,10 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     public ConditionalProductBuilder and(List<?> elements) {
         List<?> copy = snapshot(elements);
-        List<List<?>> newDims = new ArrayList<>(dims);
-        newDims.add(copy);
         List<List<?>> newOriginals = new ArrayList<>(originals);
         newOriginals.add(elements);
-        return new ConditionalProductBuilder(
-                Collections.unmodifiableList(newDims), Collections.unmodifiableList(newOriginals), relations);
+        return new ConditionalProductBuilder(model.withDimension(copy),
+                Collections.unmodifiableList(newOriginals));
     }
 
     //Rule Methods
@@ -191,7 +210,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      *                                  list instance was used for more than one dimension
      */
     public WhenDimension when(List<?> dimension) {
-        return new WhenDimension(indexOf(dimension));
+        return new WhenDimension(ruleCompiler.indexOf(dimension));
     }
 
     /** First step of a rule: what the chosen value of the "when" dimension must be. */
@@ -225,7 +244,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         public Trigger isNotIn(Collection<?> values) { return isNoneOf(values); }
 
         private Trigger trigger(Collection<?> values, boolean negate) {
-            return new Trigger(dim, matching(dim, values, negate));
+            return new Trigger(dim, ruleCompiler.matching(dim, values, negate));
         }
     }
 
@@ -250,7 +269,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
          *                                  is the dimension used in {@code when}
          */
         public ThenDimension then(List<?> dimension) {
-            int target = indexOf(dimension);
+            int target = ruleCompiler.indexOf(dimension);
             if (target == dim) {
                 throw new IllegalArgumentException("A rule needs two different dimensions");
             }
@@ -295,44 +314,75 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         public ConditionalProductBuilder isNotIn(Collection<?> values) { return isNoneOf(values); }
 
         private ConditionalProductBuilder apply(Collection<?> values, boolean negate) {
-            return withRule(triggerDim, triggerValues, targetDim, matching(targetDim, values, negate));
+            return withRule(triggerDim, triggerValues, targetDim, ruleCompiler.matching(targetDim, values, negate));
         }
+    }
+
+    /**
+     * Returns all valid tuples using a traversal that makes no encounter-order guarantee and
+     * prioritizes efficient execution over lexicographic ordering.
+     *
+     * <p>Unlike {@link #lexOrder()}, this API does not guarantee lexicographic order. Its traversal
+     * strategy is free to choose an efficient order of exploration. The returned spliterator can
+     * partition work when the caller uses a parallel stream, but parallel execution is neither
+     * required nor guaranteed; ordinary sequential iteration is also supported. The method itself
+     * does not select or start parallel execution.</p>
+     *
+     * <p>The traversal is not randomized: use {@link #choice(int, Random)} or
+     * {@link #sample(int, Random)} when random selection is required. The returned generator is
+     * lazy and re-iterable, and produces every valid tuple exactly once without materializing the
+     * complete result set.</p>
+     *
+     * @return a re-iterable generator of all valid tuples, with no encounter-order guarantee
+     */
+    public StreamableIterable<Object> anyOrder() {
+        return ConditionalProductGenerators.anyOrder(model);
     }
 
     // Builder interface Methods
     /**
-     * Returns the valid tuples in lexicographic order using the {@link LexOrderStrategy#PRUNED} strategy.
+     * Returns the valid tuples in lexicographic order using the {@link LexOrderStrategy#PRUNED_BITSET} strategy.
      *
-     * <p>This is the default and recommended strategy for ordinary traversal, especially when the caller
-     * expects to consume only part of the result. It checks constraints against the already selected prefix
-     * and does not build the exact counting plan.</p>
+     * <p>This is the default and recommended strategy for ordinary lexicographic traversal. It checks constraints against the selected prefix and,
+     * lazily enables feasibility lookahead when traversal work indicates that pairwise prefix pruning has
+     * explored substantial dead-end work (more than 1,024 plus four times the tuples emitted so far; the trigger does
+     * not depend on the constraint graph's shape). Lookahead never changes the tuples returned or their order.
+     * It does not build exact completion counts.</p>
      *
      * <p>Use {@link #lexOrder(LexOrderStrategy)} to select {@link LexOrderStrategy#DP} explicitly, or
-     * {@link #lexOrder(LexOrderStrategy, long)} to let {@link LexOrderStrategy#ADAPTIVE} choose based on
-     * an expected traversal size.</p>
+     * {@link #lexOrder(LexOrderStrategy, long)} to use the {@link LexOrderStrategy#ADAPTIVE} policy.
+     * The lookahead threshold is an implementation choice and may change between versions.</p>
      *
      * @return a re-iterable generator of valid tuples in lexicographic order
      */
     @Override
     public StreamableIterable<Object> lexOrder() {
-        return lexOrder(LexOrderStrategy.PRUNED);
+        return lexOrder(LexOrderStrategy.PRUNED_BITSET);
     }
 
     /**
      * Returns the valid tuples in lexicographic order using the specified traversal strategy.
      *
      * <ul>
-     *   <li>{@link LexOrderStrategy#PRUNED}: performs prefix-based backtracking and checks only the
-     *       constraints between the candidate dimension and dimensions already selected. It avoids
-     *       constructing the counting/DP plan and is the default strategy.</li>
-     *   <li>{@link LexOrderStrategy#DP}: uses the exact counting plan. Its completion counts allow it to
-     *       skip prefixes that cannot lead to a valid tuple. This can be useful when a substantial
-     *       fraction of a large result is expected to be traversed, but plan construction has an upfront
-     *       cost.</li>
+     *   <li>{@link LexOrderStrategy#PRUNED_BITSET}: performs prefix-based backtracking using compact
+     *       relation rows and lazily enables feasibility lookahead after substantial dead-end work. It is
+     *       the default strategy.</li>
+     *   <li>{@link LexOrderStrategy#PRUNED_DFS}: uses the same prefix-pruned traversal and lazy
+     *       work-triggered feasibility lookahead, with dense boolean relation rows when that
+     *       representation fits the memory limit; otherwise
+     *       it falls back to {@code PRUNED_BITSET}.</li>
+     *   <li>{@link LexOrderStrategy#DP}: uses the feasibility tier to find the next valid value during
+     *       sequential traversal. Its parallel spliterator uses exact completion counts to partition
+     *       the valid tuples into contiguous rank ranges. Exact counting and rank-based operations also
+     *       use the DP plan.</li>
      * </ul>
      *
-     * <p>{@link LexOrderStrategy#ADAPTIVE} requires an expected traversal size and must be selected with
-     * {@link #lexOrder(LexOrderStrategy, long)}.</p>
+     * <p>{@link LexOrderStrategy#ADAPTIVE} must be selected with
+     * {@link #lexOrder(LexOrderStrategy, long)}. ADAPTIVE is an implementation policy: the API does not
+     * guarantee which internal algorithm is used for any workload or which conditions drive that choice.
+     * Those details may change between versions.
+     * In this version it resolves to {@code PRUNED_BITSET}; the estimate is validated but does not affect
+     * strategy selection.</p>
      *
      * <p>This setting affects only this lexicographic traversal. Exact-count and rank-based operations,
      * including {@link #count()}, {@link #lexOrderMth(BigInteger, BigInteger)}, {@link #byRanks(Iterable)},
@@ -348,24 +398,23 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         if (strategy == LexOrderStrategy.ADAPTIVE) {
             throw new IllegalArgumentException("ADAPTIVE requires an estimated traversal limit; use lexOrder(strategy, estimatedLimit)");
         }
-        return new LexOrderGenerator(strategy);
+        return ConditionalProductGenerators.lexOrder(model, strategy);
     }
 
     /**
-     * Returns the valid tuples in lexicographic order using the adaptive strategy.
+     * Returns the valid tuples in lexicographic order using the implementation policy exposed by
+     * {@link LexOrderStrategy#ADAPTIVE}.
      *
-     * <p>{@code estimatedLimit} is the expected number of valid tuples the caller intends to consume
-     * from one traversal. The current adaptive policy selects {@link LexOrderStrategy#PRUNED} for
-     * estimates below 10,000 tuples and {@link LexOrderStrategy#DP} for estimates of 10,000 tuples or
-     * more. The cutoff is a conservative heuristic, not a performance guarantee; workload shape,
-     * constraint density and dimension sizes can change the crossover. Benchmark representative data
-     * before relying on the adaptive choice for latency-sensitive workloads.</p>
+     * <p>ADAPTIVE does not guarantee a particular internal algorithm or a mapping from workload
+     * conditions to algorithms. Its selection policy may change between versions. In this version,
+     * it resolves to {@code PRUNED_BITSET}; select {@link LexOrderStrategy#DP} explicitly when the DP
+     * traversal is required.</p>
      *
-     * <p>The estimate does not limit the number of tuples produced. It is used only to select the
-     * traversal implementation. The returned iterable remains lazy and re-iterable.</p>
+     * <p>{@code estimatedLimit} is validated as non-negative but currently does not affect strategy
+     * selection or limit the number of tuples produced.</p>
      *
      * @param strategy must be {@link LexOrderStrategy#ADAPTIVE}
-     * @param estimatedLimit expected number of tuples to consume in one traversal; must be non-negative
+     * @param estimatedLimit non-negative estimate; currently validated but not used for strategy selection
      * @return a re-iterable generator of valid tuples in lexicographic order
      * @throws NullPointerException if {@code strategy} is null
      * @throws IllegalArgumentException if the strategy is not {@code ADAPTIVE} or the estimate is negative
@@ -378,10 +427,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         if (estimatedLimit < 0) {
             throw new IllegalArgumentException("estimatedLimit must be non-negative");
         }
-        LexOrderStrategy selected = estimatedLimit >= 10_000L
-                ? LexOrderStrategy.DP
-                : LexOrderStrategy.PRUNED;
-        return new LexOrderGenerator(selected);
+        return ConditionalProductGenerators.lexOrder(model, LexOrderStrategy.PRUNED_BITSET);
     }
 
     /**
@@ -393,7 +439,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     public StreamableIterable<Object> lexOrderMth(BigInteger m, BigInteger start) {
         BigInteger count = count();
         Util.validateLexOrderMthParams(m, start, count);
-        return new RankBasedGenerator(new EveryMthIterable(start, m, count));
+        return ConditionalProductGenerators.rankBased(model, new EveryMthIterable(start, m, count));
     }
 
     /**
@@ -404,7 +450,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     @Override
     public StreamableIterable<Object> byRanks(Iterable<BigInteger> ranks) {
         Util.validateByRanksParams(ranks);
-        return new RankBasedGenerator(ranks);
+        return ConditionalProductGenerators.rankBased(model, ranks);
     }
 
     /**
@@ -414,11 +460,11 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     @Override
     public StreamableIterable<Object> choice(int sampleSize, Random random) {
         BigIntegerChoice ranks = new BigIntegerChoice(count(), sampleSize, random); // validates the arguments
-        Plan p = plan();
-        if (p.mostTuplesValid()) {
-            return new RejectionChoiceGenerator(sampleSize, random);
+        ConstraintPlan p = model.plan();
+        if (p.counts().mostTuplesValid()) {
+            return ConditionalProductGenerators.rejectionChoice(model, sampleSize, random);
         }
-        return new RankBasedGenerator(ranks);
+        return ConditionalProductGenerators.rankBased(model, ranks);
     }
 
     /**
@@ -427,7 +473,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     @Override
     public StreamableIterable<Object> sample(int sampleSize, Random random) {
-        return new RankBasedGenerator(new BigIntegerSample(count(), sampleSize, random));
+        return ConditionalProductGenerators.rankBased(model, new BigIntegerSample(count(), sampleSize, random));
     }
 
     /**
@@ -436,194 +482,24 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     @Override
     public BigInteger count() {
-        return plan().total;
+        return model.plan().counts().total;
     }
 
     @Override
     public boolean isEmpty() {
-        return count().signum() == 0;
+        return model.plan().isEmpty();
     }
 
     @Override
     public String toString() {
-        return "ConditionalProductBuilder{dimensions=" + dims + ", linkedPairs=" + relations.size() + '}';
+        return "ConditionalProductBuilder{dimensions=" + model.dimensions + ", linkedPairs=" + model.relations.size() + '}';
     }
 
     // ── Rule application ─────────────────────────────────────────────────────
 
     private ConditionalProductBuilder withRule(int triggerDim, BitSet triggerValues, int targetDim, BitSet allowedTargets) {
-        int u = Math.min(triggerDim, targetDim);
-        int v = Math.max(triggerDim, targetDim);
-        long key = key(u, v);
-        Relation relation = relations.get(key);
-        if (relation == null) {
-            long cells = (long) dims.get(u).size() * dims.get(v).size();
-            if (cells > MAX_PAIR_CELLS) {
-                throw new IllegalArgumentException("The two dimensions have too many value pairs (" + cells
-                        + ") for a rule; the limit is " + MAX_PAIR_CELLS);
-            }
-            relation = Relation.full(dims.get(u).size(), dims.get(v).size());
-        }
-        Relation updated = relation.restrict(triggerValues, allowedTargets, triggerDim == u);
-        // Every relations map comes from here (or is empty), so it is always in ascending key order (lower
-        // dimension, then higher). Inserting the new key in its place keeps that order, so the plan is built the
-        // same way on every run; Map.copyOf would iterate in an order that changes from one JVM run to the next.
-        // One pass over the existing entries, with no intermediate HashMap or TreeMap.
-        Map<Long, Relation> ordered = new LinkedHashMap<>(relations.size() * 2 + 2);
-        boolean placed = false;
-        for (Map.Entry<Long, Relation> e : relations.entrySet()) {
-            if (!placed && key <= e.getKey()) {
-                ordered.put(key, updated);
-                placed = true;
-                if (key == e.getKey()) {
-                    continue;                           // replaces the existing relation for this pair
-                }
-            }
-            ordered.put(e.getKey(), e.getValue());
-        }
-        if (!placed) {
-            ordered.put(key, updated);
-        }
-        checkLoopBlocks(dims, ordered.keySet());
-        return new ConditionalProductBuilder(dims, originals, Collections.unmodifiableMap(ordered));
-    }
-
-    /** Rejects a rule set in which a group of dimensions linked in loops has too many combinations. */
-    private static void checkLoopBlocks(List<List<?>> dims, Collection<Long> keys) {
-        int[] block = blockOf(dims.size(), keys);
-        long[] product = new long[dims.size()];
-        int[] members = new int[dims.size()];
-        Arrays.fill(product, 1L);
-        for (int d = 0; d < dims.size(); d++) {
-            int b = block[d];
-            members[b]++;
-            long size = dims.get(d).size();
-            if (size == 0) {
-                product[b] = 0;
-            } else if (product[b] > MAX_LOOP_COMBINATIONS / size) {
-                product[b] = MAX_LOOP_COMBINATIONS + 1;
-            } else {
-                product[b] *= size;
-            }
-        }
-        for (int b = 0; b < members.length; b++) {
-            if (members[b] > 1 && product[b] > MAX_LOOP_COMBINATIONS) {
-                throw new IllegalArgumentException("These rules link dimensions in a loop whose dimensions have "
-                        + "too many value combinations together; the limit is " + MAX_LOOP_COMBINATIONS);
-            }
-        }
-    }
-
-    /**
-     * Groups the dimensions: two dimensions are in the same block when rules link them through a loop
-     * (an edge that lies on a cycle). Dimensions linked only by single "bridge" rules stay apart, so the
-     * blocks and the bridges between them form a forest. Returns, per dimension, the lowest dimension
-     * index of its block.
-     */
-    private static int[] blockOf(int n, Collection<Long> keys) {
-        List<int[]> edges = new ArrayList<>(keys.size());
-        for (long key : keys) edges.add(new int[]{(int) (key >>> 32), (int) key});
-        int[] parent = new int[n];
-        for (int i = 0; i < n; i++) parent[i] = i;
-        for (int skip = 0; skip < edges.size(); skip++) {
-            int[] e = edges.get(skip);
-            if (reachable(n, edges, skip, e[0], e[1])) {   // still connected without this edge: not a bridge
-                union(parent, e[0], e[1]);
-            }
-        }
-        int[] block = new int[n];
-        for (int i = 0; i < n; i++) block[i] = find(parent, i);
-        return block;
-    }
-
-    private static boolean reachable(int n, List<int[]> edges, int skip, int from, int to) {
-        boolean[] seen = new boolean[n];
-        ArrayDeque<Integer> stack = new ArrayDeque<>();
-        stack.push(from);
-        seen[from] = true;
-        while (!stack.isEmpty()) {
-            int x = stack.pop();
-            if (x == to) return true;
-            for (int i = 0; i < edges.size(); i++) {
-                if (i == skip) continue;
-                int[] e = edges.get(i);
-                int other = e[0] == x ? e[1] : e[1] == x ? e[0] : -1;
-                if (other >= 0 && !seen[other]) {
-                    seen[other] = true;
-                    stack.push(other);
-                }
-            }
-        }
-        return false;
-    }
-
-    private static void union(int[] parent, int a, int b) {
-        int ra = find(parent, a);
-        int rb = find(parent, b);
-        if (ra < rb) parent[rb] = ra; else if (rb < ra) parent[ra] = rb;
-    }
-
-    private static int find(int[] parent, int x) {
-        while (parent[x] != x) {
-            parent[x] = parent[parent[x]];
-            x = parent[x];
-        }
-        return x;
-    }
-
-    private static long key(int u, int v) {
-        return ((long) u << 32) | v;
-    }
-
-    private int indexOf(List<?> dimension) {
-        Objects.requireNonNull(dimension, "dimension must not be null");
-        int found = -1;
-        for (int i = 0; i < originals.size(); i++) {
-            if (originals.get(i) == dimension) {
-                if (found >= 0) {
-                    throw new IllegalArgumentException("The same list instance is used for more than one "
-                            + "dimension (positions " + found + " and " + i + "), so the rule is ambiguous; "
-                            + "pass distinct list instances");
-                }
-                found = i;
-            }
-        }
-        if (found < 0) {
-            throw new IllegalArgumentException("The list is not a dimension of this product; pass the same "
-                    + "List instance that was given to conditionalProductOf(...) or and(...)");
-        }
-        return found;
-    }
-
-    /** Indexes of the values of dimension {@code dim} that equal one of {@code values} (or the others). */
-    private BitSet matching(int dim, Collection<?> values, boolean negate) {
-        Objects.requireNonNull(values, "values must not be null");
-        if (values.isEmpty()) {
-            throw new IllegalArgumentException("At least one value is required");
-        }
-        Set<Object> wanted = new HashSet<>();
-        for (Object value : values) {
-            wanted.add(nonNull(value));
-        }
-        List<?> list = dims.get(dim);
-        BitSet result = new BitSet(list.size());
-        Set<Object> seen = new HashSet<>();
-        for (int i = 0; i < list.size(); i++) {
-            Object element = list.get(i);
-            if (wanted.contains(element)) {
-                result.set(i);
-                seen.add(element);
-            }
-        }
-        if (seen.size() < wanted.size()) {
-            Set<Object> missing = new HashSet<>(wanted);
-            missing.removeAll(seen);
-            throw new IllegalArgumentException("Not a value of that dimension: " + missing);
-        }
-        if (negate) {
-            result.flip(0, list.size());
-        }
-        return result;
+        return new ConditionalProductBuilder(
+                model.withRule(triggerDim, triggerValues, targetDim, allowedTargets), originals);
     }
 
     private static Object nonNull(Object value) {
@@ -643,862 +519,8 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     // ── Rule tables ──────────────────────────────────────────────────────────
 
     /** Allowed value pairs between dimension u and dimension v (u &lt; v). Immutable once built. */
-    private static final class Relation {
-        final BitSet[] uToV; // uToV[a] = values of v allowed together with value a of u
-        final BitSet[] vToU; // vToU[b] = values of u allowed together with value b of v
-
-        private Relation(BitSet[] uToV, BitSet[] vToU) {
-            this.uToV = uToV;
-            this.vToU = vToU;
-        }
-
-        static Relation full(int du, int dv) {
-            BitSet[] uv = new BitSet[du];
-            for (int a = 0; a < du; a++) {
-                uv[a] = new BitSet(dv);
-                uv[a].set(0, dv);
-            }
-            BitSet[] vu = new BitSet[dv];
-            for (int b = 0; b < dv; b++) {
-                vu[b] = new BitSet(du);
-                vu[b].set(0, du);
-            }
-            return new Relation(uv, vu);
-        }
-
-        /** Copy in which every value of the trigger dimension in {@code triggers} allows only {@code allowedTargets}. */
-        Relation restrict(BitSet triggers, BitSet allowedTargets, boolean triggerIsU) {
-            BitSet[] uv = deepCopy(uToV);
-            BitSet[] vu = deepCopy(vToU);
-            int targetSize = triggerIsU ? vu.length : uv.length;
-            for (int a = triggers.nextSetBit(0); a >= 0; a = triggers.nextSetBit(a + 1)) {
-                for (int b = allowedTargets.nextClearBit(0); b < targetSize; b = allowedTargets.nextClearBit(b + 1)) {
-                    if (triggerIsU) {
-                        uv[a].clear(b);
-                        vu[b].clear(a);
-                    } else {
-                        vu[a].clear(b);
-                        uv[b].clear(a);
-                    }
-                }
-            }
-            return new Relation(uv, vu);
-        }
-
-        private static BitSet[] deepCopy(BitSet[] rows) {
-            BitSet[] copy = new BitSet[rows.length];
-            for (int i = 0; i < rows.length; i++) copy[i] = (BitSet) rows[i].clone();
-            return copy;
-        }
-    }
-
     // ── Counting plan ────────────────────────────────────────────────────────
 
-    private Plan plan() {
-        Plan p = plan;
-        if (p == null) {
-            synchronized (this) {
-                p = plan;
-                if (p == null) {
-                    p = new Plan(dims, relations);
-                    plan = p;
-                }
-            }
-        }
-        return p;
-    }
 
-    /**
-     * Counting tables. The dimensions are grouped into <em>nodes</em>: a dimension that is on no loop of
-     * rules is a node by itself; the dimensions of a loop (a block) form one node whose values are the
-     * valid joint assignments of its dimensions. Nodes and the single rules between them form a forest;
-     * each tree is rooted at its node with the lowest dimension index.
-     * <ul>
-     *   <li>{@code free[v][a]}: ways to choose the values of v's subtree when v has value a.</li>
-     *   <li>{@code msg[c][a]}: ways to choose c's subtree when c's parent has value a.</li>
-     * </ul>
-     * The number of completions of a prefix (the first k dimensions fixed) is a product over the trees; a
-     * tree without a fixed dimension uses the tables directly, a tree with fixed dimensions is evaluated
-     * along the paths to them only, counting only the node values that agree with the fixed dimensions.
-     */
-    private static final class Plan {
-        final int[][] members;         // members[node]: dimensions of the node, ascending
-        final int[] size;              // number of values of the node
-        final int[][][] values;        // values[node][a][pos]: value of members[node][pos]; null for a single dimension
-        final int[][] children;
-        final BitSet[][] fromParent;   // fromParent[c][a]: values of c allowed when c's parent has value a
-        final int[] minSub;            // lowest dimension index in the subtree
-        final BigInteger[][] free;
-        final BigInteger[][] msg;
-        final BigInteger[][] freePrefix; // freePrefix[v][i] = sum of free[v][0..i-1]; only for multi-dimension nodes
-        final int[] minChildSub;        // lowest dimension index among the children's subtrees (MAX_VALUE if none)
-        final int[] roots;             // ascending
-        final BigInteger[] suffix;     // suffix[i] = product of the free totals of roots[i..]
-        final int[] firstRoot;         // firstRoot[k] = index in roots of the first root whose lowest dimension is >= k
-        final int dimensions;
-        final int[] dimSize;           // number of values of each dimension
-        final int[][] belowDims;       // belowDims[d]: lower-numbered dimensions linked to d by a rule
-        final BitSet[][][] belowRows;  // belowRows[d][i][a]: values of d allowed when belowDims[d][i] has value a
-        final BigInteger total;
-        final BigInteger fullProduct;   // product of all dimension sizes, ignoring the rules
-        // Same tables as above in primitive form; null unless every table entry fits in a long. When they do,
-        // every intermediate count computed at query time is bounded by a table entry, so no overflow is possible.
-        final long[][] lfree;
-        final long[][] lmsg;
-        final long[][] lfreePrefix;
-        final long[] lsuffix;
 
-        Plan(List<List<?>> dims, Map<Long, Relation> relations) {
-            dimensions = dims.size();
-            int n = dimensions;
-            dimSize = new int[n];
-            for (int d = 0; d < n; d++) dimSize[d] = dims.get(d).size();
-            List<List<Integer>> belowList = new ArrayList<>(n);
-            List<List<BitSet[]>> belowRowList = new ArrayList<>(n);
-            for (int d = 0; d < n; d++) {
-                belowList.add(new ArrayList<>());
-                belowRowList.add(new ArrayList<>());
-            }
-            for (Map.Entry<Long, Relation> e : relations.entrySet()) {
-                int u = (int) (e.getKey() >>> 32);
-                int v = (int) (long) e.getKey();
-                belowList.get(v).add(u);
-                belowRowList.get(v).add(e.getValue().uToV);
-            }
-            belowDims = new int[n][];
-            belowRows = new BitSet[n][][];
-            for (int d = 0; d < n; d++) {
-                belowDims[d] = belowList.get(d).stream().mapToInt(Integer::intValue).toArray();
-                belowRows[d] = belowRowList.get(d).toArray(new BitSet[0][]);
-            }
-
-            // nodes, ordered by their lowest dimension
-            int[] blockOf = blockOf(n, relations.keySet());
-            int[] nodeOfDim = new int[n];
-            List<List<Integer>> memberLists = new ArrayList<>();
-            int[] nodeOfBlock = new int[n];
-            Arrays.fill(nodeOfBlock, -1);
-            for (int d = 0; d < n; d++) {
-                int b = blockOf[d];
-                if (nodeOfBlock[b] < 0) {
-                    nodeOfBlock[b] = memberLists.size();
-                    memberLists.add(new ArrayList<>());
-                }
-                nodeOfDim[d] = nodeOfBlock[b];
-                memberLists.get(nodeOfBlock[b]).add(d);
-            }
-            int m = memberLists.size();
-            members = new int[m][];
-            size = new int[m];
-            values = new int[m][][];
-            for (int x = 0; x < m; x++) {
-                members[x] = memberLists.get(x).stream().mapToInt(Integer::intValue).toArray();
-                if (members[x].length == 1) {
-                    size[x] = dims.get(members[x][0]).size();
-                } else {
-                    values[x] = enumerate(members[x], dims, relations);
-                    size[x] = values[x].length;
-                }
-            }
-
-            // single rules between different nodes
-            List<List<Object[]>> adjacency = new ArrayList<>(m);
-            for (int x = 0; x < m; x++) adjacency.add(new ArrayList<>());
-            for (Map.Entry<Long, Relation> e : relations.entrySet()) {
-                int u = (int) (e.getKey() >>> 32);
-                int v = (int) (long) e.getKey();
-                if (nodeOfDim[u] == nodeOfDim[v]) continue;
-                adjacency.get(nodeOfDim[u]).add(new Object[]{nodeOfDim[v], u, v, e.getValue(), true});
-                adjacency.get(nodeOfDim[v]).add(new Object[]{nodeOfDim[u], v, u, e.getValue(), false});
-            }
-
-            fromParent = new BitSet[m][];
-            List<List<Integer>> childLists = new ArrayList<>(m);
-            for (int x = 0; x < m; x++) childLists.add(new ArrayList<>());
-            boolean[] visited = new boolean[m];
-            List<Integer> rootList = new ArrayList<>();
-            List<Integer> order = new ArrayList<>(m);
-            for (int r = 0; r < m; r++) {
-                if (visited[r]) continue;
-                rootList.add(r);
-                visited[r] = true;
-                ArrayDeque<Integer> queue = new ArrayDeque<>();
-                queue.add(r);
-                while (!queue.isEmpty()) {
-                    int x = queue.poll();
-                    order.add(x);
-                    for (Object[] edge : adjacency.get(x)) {
-                        int other = (Integer) edge[0];
-                        if (visited[other]) continue;
-                        visited[other] = true;
-                        fromParent[other] = rowsBetween(x, (Integer) edge[1], other, (Integer) edge[2],
-                                (Relation) edge[3], (Boolean) edge[4]);
-                        childLists.get(x).add(other);
-                        queue.add(other);
-                    }
-                }
-            }
-            children = new int[m][];
-            for (int x = 0; x < m; x++) {
-                children[x] = childLists.get(x).stream().mapToInt(Integer::intValue).toArray();
-            }
-
-            free = new BigInteger[m][];
-            msg = new BigInteger[m][];
-            minSub = new int[m];
-            for (int idx = order.size() - 1; idx >= 0; idx--) {
-                int v = order.get(idx);
-                BigInteger[] f = new BigInteger[size[v]];
-                Arrays.fill(f, BigInteger.ONE);
-                minSub[v] = members[v][0];
-                for (int c : children[v]) {
-                    BigInteger[] msgToParent = new BigInteger[size[v]];
-                    for (int a = 0; a < size[v]; a++) {
-                        BitSet allowed = fromParent[c][a];
-                        BigInteger sum = BigInteger.ZERO;
-                        for (int b = allowed.nextSetBit(0); b >= 0; b = allowed.nextSetBit(b + 1)) {
-                            sum = sum.add(free[c][b]);
-                        }
-                        msgToParent[a] = sum;
-                        f[a] = f[a].multiply(sum);
-                    }
-                    msg[c] = msgToParent;
-                    minSub[v] = Math.min(minSub[v], minSub[c]);
-                }
-                free[v] = f;
-            }
-
-            freePrefix = new BigInteger[m][];
-            minChildSub = new int[m];
-            for (int x = 0; x < m; x++) {
-                int low = Integer.MAX_VALUE;
-                for (int c : children[x]) low = Math.min(low, minSub[c]);
-                minChildSub[x] = low;
-                if (values[x] != null) {
-                    BigInteger[] prefix = new BigInteger[size[x] + 1];
-                    prefix[0] = BigInteger.ZERO;
-                    for (int i = 0; i < size[x]; i++) prefix[i + 1] = prefix[i].add(free[x][i]);
-                    freePrefix[x] = prefix;
-                }
-            }
-
-            roots = rootList.stream().mapToInt(Integer::intValue).toArray();
-            BigInteger[] rootTotal = new BigInteger[roots.length];
-            for (int i = 0; i < roots.length; i++) {
-                BigInteger sum = BigInteger.ZERO;
-                for (BigInteger w : free[roots[i]]) sum = sum.add(w);
-                rootTotal[i] = sum;
-            }
-            suffix = new BigInteger[roots.length + 1];
-            suffix[roots.length] = BigInteger.ONE;
-            for (int i = roots.length - 1; i >= 0; i--) suffix[i] = suffix[i + 1].multiply(rootTotal[i]);
-            total = suffix[0];
-            BigInteger product = BigInteger.ONE;
-            for (int d = 0; d < n; d++) product = product.multiply(BigInteger.valueOf(dimSize[d]));
-            fullProduct = product;
-
-            boolean fits = fitsLong(free) && fitsLong(msg) && fitsLong(freePrefix) && fitsLong(suffix);
-            lfree = fits ? toLong(free) : null;
-            lmsg = fits ? toLong(msg) : null;
-            lfreePrefix = fits ? toLong(freePrefix) : null;
-            lsuffix = fits ? toLong(suffix) : null;
-
-            firstRoot = new int[n + 1];
-            int ri = 0;
-            for (int k = 0; k <= n; k++) {
-                while (ri < roots.length && members[roots[ri]][0] < k) ri++;
-                firstRoot[k] = ri;
-            }
-        }
-
-        /** All assignments of the dimensions in {@code dimsOfNode} that satisfy every rule among them. */
-        private static int[][] enumerate(int[] dimsOfNode, List<List<?>> dims, Map<Long, Relation> relations) {
-            int len = dimsOfNode.length;
-            List<int[]> out = new ArrayList<>();
-            int[] current = new int[len];
-            fill(0, current, dimsOfNode, dims, relations, out);
-            return out.toArray(new int[0][]);
-        }
-
-        private static void fill(int pos, int[] current, int[] dimsOfNode, List<List<?>> dims,
-                                 Map<Long, Relation> relations, List<int[]> out) {
-            if (pos == dimsOfNode.length) {
-                out.add(current.clone());
-                return;
-            }
-            int size = dims.get(dimsOfNode[pos]).size();
-            for (int idx = 0; idx < size; idx++) {
-                current[pos] = idx;
-                boolean ok = true;
-                for (int q = 0; q < pos && ok; q++) {
-                    Relation rel = relations.get(key(dimsOfNode[q], dimsOfNode[pos]));
-                    if (rel != null && !rel.uToV[current[q]].get(idx)) ok = false;
-                }
-                if (ok) fill(pos + 1, current, dimsOfNode, dims, relations, out);
-            }
-        }
-
-        /** Rows[a] = values of {@code child} allowed when {@code parent} has value a, through the one rule between them. */
-        private BitSet[] rowsBetween(int parent, int parentDim, int child, int childDim, Relation rel,
-                                     boolean parentIsLow) {
-            BitSet[] rowsOfDim = parentIsLow ? rel.uToV : rel.vToU;   // by the parent's dimension value
-            if (values[parent] == null && values[child] == null) {
-                return rowsOfDim;                                      // single dimensions: use the rows as they are
-            }
-            int parentPos = position(members[parent], parentDim);
-            int childPos = position(members[child], childDim);
-            BitSet[] rows = new BitSet[size[parent]];
-            for (int a = 0; a < size[parent]; a++) {
-                int parentValue = values[parent] == null ? a : values[parent][a][parentPos];
-                BitSet row = new BitSet(size[child]);
-                for (int b = 0; b < size[child]; b++) {
-                    int childValue = values[child] == null ? b : values[child][b][childPos];
-                    if (rowsOfDim[parentValue].get(childValue)) row.set(b);
-                }
-                rows[a] = row;
-            }
-            return rows;
-        }
-
-        private static int position(int[] dimsOfNode, int dim) {
-            for (int i = 0; i < dimsOfNode.length; i++) if (dimsOfNode[i] == dim) return i;
-            throw new IllegalStateException("dimension not in node");
-        }
-
-        /**
-         * Range [lo, hi) of the values of node c that agree with the dimensions already fixed (below k),
-         * packed as lo in the high 32 bits and hi in the low 32 bits. The fixed dimensions of a node are the
-         * first ones in its member list and its values are in lexicographic order, so the agreeing values are
-         * contiguous and are found by binary search.
-         */
-        private long range(int c, int k, int[] val) {
-            int[] mem = members[c];
-            if (mem[0] >= k) return (long) size[c];                 // nothing fixed: [0, size)
-            if (values[c] == null) {
-                int b = val[mem[0]];
-                return ((long) b << 32) | (b + 1);
-            }
-            int fixed = 0;
-            while (fixed < mem.length && mem[fixed] < k) fixed++;
-            int[][] list = values[c];
-            int lo = lowerBound(list, mem, fixed, val, false);
-            int hi = lowerBound(list, mem, fixed, val, true);
-            return ((long) lo << 32) | hi;
-        }
-
-        /** First index whose fixed-prefix is >= the target prefix (or > it when {@code strict}). */
-        private static int lowerBound(int[][] list, int[] mem, int fixed, int[] val, boolean strict) {
-            int lo = 0;
-            int hi = list.length;
-            while (lo < hi) {
-                int mid = (lo + hi) >>> 1;
-                int cmp = 0;
-                for (int pos = 0; pos < fixed && cmp == 0; pos++) {
-                    cmp = Integer.compare(list[mid][pos], val[mem[pos]]);
-                }
-                if (cmp < 0 || (strict && cmp == 0)) lo = mid + 1; else hi = mid;
-            }
-            return lo;
-        }
-
-        /** Sum of count(c, b) over the values b in {@code allowed} (all values if null) that agree with the fixed dimensions. */
-        private BigInteger sumConsistent(int c, BitSet allowed, int k, int[] val) {
-            long r = range(c, k, val);
-            int lo;
-            int hi;
-            if (members[c][0] >= k) {
-                lo = 0;
-                hi = size[c];
-            } else {
-                lo = (int) (r >>> 32);
-                hi = (int) r;
-            }
-            if (lo >= hi) return BigInteger.ZERO;
-            if (allowed == null && minChildSub[c] >= k && freePrefix[c] != null) {
-                // no fixed dimension below c's children: every value counts exactly free[c][b]
-                return freePrefix[c][hi].subtract(freePrefix[c][lo]);
-            }
-            BigInteger sum = BigInteger.ZERO;
-            if (allowed == null) {
-                for (int b = lo; b < hi; b++) sum = sum.add(count(c, b, k, val));
-            } else {
-                for (int b = allowed.nextSetBit(lo); b >= 0 && b < hi; b = allowed.nextSetBit(b + 1)) {
-                    sum = sum.add(count(c, b, k, val));
-                }
-            }
-            return sum;
-        }
-
-        private static boolean fitsLong(BigInteger[] row) {
-            if (row == null) return true;
-            for (BigInteger b : row) if (b.bitLength() > 62) return false;
-            return true;
-        }
-
-        private static boolean fitsLong(BigInteger[][] rows) {
-            for (BigInteger[] row : rows) if (!fitsLong(row)) return false;
-            return true;
-        }
-
-        private static long[] toLong(BigInteger[] row) {
-            if (row == null) return null;
-            long[] r = new long[row.length];
-            for (int i = 0; i < r.length; i++) r[i] = row[i].longValue();
-            return r;
-        }
-
-        private static long[][] toLong(BigInteger[][] rows) {
-            long[][] r = new long[rows.length][];
-            for (int i = 0; i < rows.length; i++) r[i] = toLong(rows[i]);
-            return r;
-        }
-
-        /** True when a uniformly random point of the full product is valid with probability at least 1/4. */
-        boolean mostTuplesValid() {
-            return total.shiftLeft(2).compareTo(fullProduct) >= 0;
-        }
-
-        /** Whether a complete tuple satisfies every rule. */
-        boolean isValid(int[] val) {
-            for (int d = 1; d < dimensions; d++) {
-                if (!agreesWithBelow(d, val[d], val)) return false;
-            }
-            return true;
-        }
-
-        // ── primitive-long versions of the counting queries (used when lsuffix != null) ──
-
-        private long sumConsistentL(int c, BitSet allowed, int k, int[] val) {
-            long r = range(c, k, val);
-            int lo;
-            int hi;
-            if (members[c][0] >= k) {
-                lo = 0;
-                hi = size[c];
-            } else {
-                lo = (int) (r >>> 32);
-                hi = (int) r;
-            }
-            if (lo >= hi) return 0;
-            if (allowed == null && minChildSub[c] >= k && lfreePrefix[c] != null) {
-                return lfreePrefix[c][hi] - lfreePrefix[c][lo];
-            }
-            long sum = 0;
-            if (allowed == null) {
-                for (int b = lo; b < hi; b++) sum += countL(c, b, k, val);
-            } else {
-                for (int b = allowed.nextSetBit(lo); b >= 0 && b < hi; b = allowed.nextSetBit(b + 1)) {
-                    sum += countL(c, b, k, val);
-                }
-            }
-            return sum;
-        }
-
-        private long completionsL(int k, int[] val) {
-            int fixedRoots = firstRoot[k];
-            long result = lsuffix[fixedRoots];
-            if (result == 0) return 0;
-            for (int i = 0; i < fixedRoots; i++) {
-                long c = sumConsistentL(roots[i], null, k, val);
-                if (c == 0) return 0;
-                result *= c;
-            }
-            return result;
-        }
-
-        private long countL(int v, int a, int k, int[] val) {
-            if (minSub[v] >= k) return lfree[v][a];
-            long result = 1;
-            for (int c : children[v]) {
-                BitSet allowed = fromParent[c][a];
-                long s = minSub[c] >= k ? lmsg[c][a] : sumConsistentL(c, allowed, k, val);
-                if (s == 0) return 0;
-                result *= s;
-            }
-            return result;
-        }
-
-        /** Number of valid ways to choose dimensions k..n-1 when dimensions 0..k-1 have values val[0..k-1]. */
-        BigInteger completions(int k, int[] val) {
-            int fixedRoots = firstRoot[k];
-            BigInteger result = suffix[fixedRoots];
-            if (result.signum() == 0) return BigInteger.ZERO;
-            for (int i = 0; i < fixedRoots; i++) {
-                BigInteger c = sumConsistent(roots[i], null, k, val);
-                if (c.signum() == 0) return BigInteger.ZERO;
-                result = result.multiply(c);
-            }
-            return result;
-        }
-
-        /** Ways to choose v's subtree when v has value a, with dimensions below k fixed. */
-        private BigInteger count(int v, int a, int k, int[] val) {
-            if (minSub[v] >= k) return free[v][a];
-            BigInteger result = BigInteger.ONE;
-            for (int c : children[v]) {
-                BitSet allowed = fromParent[c][a];
-                BigInteger s = minSub[c] >= k ? msg[c][a] : sumConsistent(c, allowed, k, val);
-                if (s.signum() == 0) return BigInteger.ZERO;
-                result = result.multiply(s);
-            }
-            return result;
-        }
-
-        /** Smallest value index of dimension k, at least {@code from}, that can still be completed; -1 if none. */
-        int firstValid(int k, int from, int[] val) {
-            int dimSizeK = dimensionSize(k);
-            if (from >= dimSizeK) return -1;
-            boolean last = k == dimensions - 1;
-            int[] dimsBelow = belowDims[k];
-            if (dimsBelow.length == 0) {
-                for (int idx = from; idx < dimSizeK; idx++) {
-                    val[k] = idx;
-                    if (last || hasCompletion(k + 1, val)) return idx;
-                }
-                return -1;
-            }
-            // Candidates must satisfy every rule with an earlier dimension: walk the set bits of the first
-            // row and test the others, so invalid values are skipped a machine word at a time.
-            BitSet[][] rows = belowRows[k];
-            BitSet first = rows[0][val[dimsBelow[0]]];
-            outer:
-            for (int idx = first.nextSetBit(from); idx >= 0 && idx < dimSizeK; idx = first.nextSetBit(idx + 1)) {
-                for (int i = 1; i < dimsBelow.length; i++) {
-                    if (!rows[i][val[dimsBelow[i]]].get(idx)) continue outer;
-                }
-                val[k] = idx;
-                if (last || hasCompletion(k + 1, val)) return idx;
-            }
-            return -1;
-        }
-
-        /**
-         * For the last dimension only: value idx is valid iff every rule between it and the (already
-         * consistent) earlier dimensions holds. Equivalent to {@code completions(n, val) > 0} but needs no
-         * walk over the whole tree.
-         */
-        private boolean agreesWithBelow(int d, int idx, int[] val) {
-            int[] dimsBelow = belowDims[d];
-            BitSet[][] rows = belowRows[d];
-            for (int i = 0; i < dimsBelow.length; i++) {
-                if (!rows[i][val[dimsBelow[i]]].get(idx)) return false;
-            }
-            return true;
-        }
-
-        private boolean hasCompletion(int k, int[] val) {
-            return lsuffix != null ? completionsL(k, val) > 0 : completions(k, val).signum() > 0;
-        }
-
-        int dimensionSize(int dim) {
-            return dimSize[dim];
-        }
-
-        /** Value indexes of the tuple with the given rank among the valid tuples; rank must be in range. */
-        int[] unrank(BigInteger rank) {
-            if (lsuffix != null) return unrankL(rank.longValueExact());
-            int[] val = new int[dimensions];
-            BigInteger remaining = rank;
-            for (int k = 0; k < dimensions; k++) {
-                boolean found = false;
-                int dimSize = dimensionSize(k);
-                for (int idx = 0; idx < dimSize; idx++) {
-                    val[k] = idx;
-                    BigInteger c = k == dimensions - 1
-                            ? (agreesWithBelow(k, idx, val) ? BigInteger.ONE : BigInteger.ZERO)
-                            : completions(k + 1, val);
-                    if (c.signum() == 0) continue;
-                    if (remaining.compareTo(c) < 0) {
-                        found = true;
-                        break;
-                    }
-                    remaining = remaining.subtract(c);
-                }
-                if (!found) {
-                    throw new IllegalStateException("Rank " + rank + " could not be resolved");
-                }
-            }
-            return val;
-        }
-
-        /** {@link #unrank(BigInteger)} in primitive arithmetic; only valid when the long tables exist. */
-        private int[] unrankL(long rank) {
-            int[] val = new int[dimensions];
-            long remaining = rank;
-            for (int k = 0; k < dimensions; k++) {
-                boolean found = false;
-                int size = dimensionSize(k);
-                for (int idx = 0; idx < size; idx++) {
-                    val[k] = idx;
-                    long c = k == dimensions - 1
-                            ? (agreesWithBelow(k, idx, val) ? 1L : 0L)
-                            : completionsL(k + 1, val);
-                    if (c == 0) continue;
-                    if (remaining < c) {
-                        found = true;
-                        break;
-                    }
-                    remaining -= c;
-                }
-                if (!found) {
-                    throw new IllegalStateException("Rank " + rank + " could not be resolved");
-                }
-            }
-            return val;
-        }
-    }
-
-    // ── Generators
-
-    private List<Object> tuple(int[] val) {
-        Object[] result = new Object[val.length];
-        for (int i = 0; i < val.length; i++) {
-            result[i] = dims.get(i).get(val[i]);
-        }
-        return Tuple.wrap(result);
-    }
-
-    private final class LexOrderGenerator extends AbstractGenerator<Object> {
-        private final LexOrderStrategy strategy;
-
-        LexOrderGenerator(LexOrderStrategy strategy) {
-            super(Collections.emptyList());
-            this.strategy = strategy;
-        }
-
-        @Override
-        public Iterator<List<Object>> iterator() {
-            return strategy == LexOrderStrategy.PRUNED
-                    ? new PrunedLexItr()
-                    : new LexItr(plan());
-        }
-    }
-
-    /**
-     * Lexicographic depth-first traversal without the counting plan. At each dimension, candidates are
-     * filtered against all earlier dimensions connected to it by a rule. A prefix that has no completion
-     * may still be explored until the conflicting later dimension is reached; unlike the DP iterator, this
-     * iterator does not perform future-completion lookahead.
-     */
-    private final class PrunedLexItr implements Iterator<List<Object>> {
-        private final int dimensions = dims.size();
-        private final int[] val = new int[dimensions];
-        private final int[] nextCandidate = new int[dimensions];
-        private final int[][] belowDims;
-        private final BitSet[][][] belowRows;
-        private int depth;
-        private boolean ready;
-        private boolean exhausted;
-
-        PrunedLexItr() {
-            List<List<Integer>> dimensionLists = new ArrayList<>(dimensions);
-            List<List<BitSet[]>> rowLists = new ArrayList<>(dimensions);
-            for (int d = 0; d < dimensions; d++) {
-                dimensionLists.add(new ArrayList<>());
-                rowLists.add(new ArrayList<>());
-            }
-            for (Map.Entry<Long, Relation> entry : relations.entrySet()) {
-                int lower = (int) (entry.getKey() >>> 32);
-                int higher = (int) (long) entry.getKey();
-                dimensionLists.get(higher).add(lower);
-                rowLists.get(higher).add(entry.getValue().uToV);
-            }
-            belowDims = new int[dimensions][];
-            belowRows = new BitSet[dimensions][][];
-            for (int d = 0; d < dimensions; d++) {
-                belowDims[d] = dimensionLists.get(d).stream().mapToInt(Integer::intValue).toArray();
-                belowRows[d] = rowLists.get(d).toArray(new BitSet[0][]);
-            }
-            for (List<?> dimension : dims) {
-                if (dimension.isEmpty()) {
-                    exhausted = true;
-                    break;
-                }
-            }
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (!ready && !exhausted) {
-                ready = advance();
-                if (!ready) exhausted = true;
-            }
-            return ready;
-        }
-
-        @Override
-        public List<Object> next() {
-            if (!hasNext()) throw new NoSuchElementException();
-            ready = false;
-            return tuple(val);
-        }
-
-        private boolean advance() {
-            while (depth >= 0) {
-                int candidate = nextValidCandidate(depth, nextCandidate[depth]);
-                if (candidate < 0) {
-                    if (depth == 0) return false;
-                    depth--;
-                    nextCandidate[depth] = val[depth] + 1;
-                    continue;
-                }
-
-                val[depth] = candidate;
-                nextCandidate[depth] = candidate + 1;
-                if (depth == dimensions - 1) return true;
-
-                depth++;
-                nextCandidate[depth] = 0;
-            }
-            return false;
-        }
-
-        private int nextValidCandidate(int dimension, int from) {
-            int size = dims.get(dimension).size();
-            if (from >= size) return -1;
-
-            int[] earlier = belowDims[dimension];
-            if (earlier.length == 0) return from;
-
-            BitSet[][] rows = belowRows[dimension];
-            BitSet firstAllowed = rows[0][val[earlier[0]]];
-            candidateLoop:
-            for (int candidate = firstAllowed.nextSetBit(from);
-                 candidate >= 0 && candidate < size;
-                 candidate = firstAllowed.nextSetBit(candidate + 1)) {
-                for (int i = 1; i < earlier.length; i++) {
-                    if (!rows[i][val[earlier[i]]].get(candidate)) continue candidateLoop;
-                }
-                return candidate;
-            }
-            return -1;
-        }
-    }
-
-    /** Walks the valid tuples in lexicographic order; branches without any valid completion are skipped. */
-    private final class LexItr implements Iterator<List<Object>> {
-        private final Plan p;
-        private final int[] val;
-        private boolean started;
-        private boolean ready;
-        private boolean exhausted;
-
-        LexItr(Plan p) {
-            this.p = p;
-            this.val = new int[p.dimensions];
-            this.exhausted = p.total.signum() == 0;
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (!ready && !exhausted) {
-                if (advance()) {
-                    ready = true;
-                } else {
-                    exhausted = true;
-                }
-            }
-            return ready;
-        }
-
-        @Override
-        public List<Object> next() {
-            if (!hasNext()) throw new NoSuchElementException();
-            ready = false;
-            return tuple(val);
-        }
-
-        private boolean advance() {
-            int k;
-            int from;
-            if (!started) {
-                started = true;
-                k = 0;
-                from = 0;
-            } else {
-                k = p.dimensions - 1;
-                from = val[k] + 1;
-            }
-            while (true) {
-                int idx = p.firstValid(k, from, val);
-                if (idx < 0) {
-                    k--;
-                    if (k < 0) return false;
-                    from = val[k] + 1;
-                } else {
-                    val[k] = idx;
-                    k++;
-                    if (k == p.dimensions) return true;
-                    from = 0;
-                }
-            }
-        }
-    }
-
-    /**
-     * Uniform choice with replacement by rejection: draw a random point of the full product and keep it if it
-     * satisfies every rule. Exact (each valid tuple is equally likely) and used only when at least a quarter
-     * of the product is valid, so a draw is accepted after four attempts on average.
-     */
-    private final class RejectionChoiceGenerator extends AbstractGenerator<Object> {
-        private final int sampleSize;
-        private final Random random;
-
-        RejectionChoiceGenerator(int sampleSize, Random random) {
-            super(Collections.emptyList());
-            this.sampleSize = sampleSize;
-            this.random = random;
-        }
-
-        @Override
-        public Iterator<List<Object>> iterator() {
-            Plan p = plan();
-            return new Iterator<>() {
-                private int produced;
-
-                @Override public boolean hasNext() { return produced < sampleSize; }
-
-                @Override
-                public List<Object> next() {
-                    if (!hasNext()) throw new NoSuchElementException();
-                    produced++;
-                    int[] val = new int[p.dimensions];
-                    do {
-                        for (int d = 0; d < val.length; d++) val[d] = random.nextInt(p.dimSize[d]);
-                    } while (!p.isValid(val));
-                    return tuple(val);
-                }
-            };
-        }
-    }
-
-    /** Resolves each rank to a tuple through the counting tables. Ranks are consumed lazily. */
-    private final class RankBasedGenerator extends AbstractGenerator<Object> {
-        private final Iterable<BigInteger> ranks;
-
-        RankBasedGenerator(Iterable<BigInteger> ranks) {
-            super(Collections.emptyList());
-            this.ranks = ranks;
-        }
-
-        @Override
-        public Iterator<List<Object>> iterator() {
-            Iterator<BigInteger> rankIt = ranks.iterator();
-            return new Iterator<>() {
-                @Override public boolean hasNext() { return rankIt.hasNext(); }
-
-                @Override
-                public List<Object> next() {
-                    if (!hasNext()) throw new NoSuchElementException();
-                    BigInteger rank = rankIt.next();
-                    Plan p = plan();
-                    if (rank.signum() < 0 || rank.compareTo(p.total) >= 0) {
-                        throw new IllegalArgumentException(
-                                "Rank " + rank + " is out of bounds [0, " + p.total + ")");
-                    }
-                    return tuple(p.unrank(rank));
-                }
-            };
-        }
-    }
 }

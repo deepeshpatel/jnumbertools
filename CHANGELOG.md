@@ -5,9 +5,16 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ## [Unreleased]
 
-## [4.1.0] - 2026-11-15
+## [4.1.0] - Released 2026-11-20
 
 ### Added
+
+- Added `anyOrder()` for lazy, re-iterable generation of every valid conditional-product tuple exactly once,
+  without an encounter-order guarantee. Its spliterator can partition work for parallel streams.
+- Added explicit conditional-product lexicographic traversal strategies: `PRUNED_BITSET` (the default),
+  `PRUNED_DFS`, `DP`, and the implementation-policy entry point `ADAPTIVE`, which currently resolves to
+  `PRUNED_BITSET` (no guarantee about which algorithm runs; the `estimatedLimit` argument is validated
+  but does not change the choice).
 
 - Conditional Cartesian product, started with `cartesianProduct().conditionalProductOf(list)` and
   extended with `.and(list)` for more dimensions and `.when(list).is(...).then(list).isOneOf(...)` for
@@ -19,12 +26,23 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ### Changed
 
+- Conditional-product lexicographic traversal now uses shared, lazy work-triggered completion lookahead
+  in the two prefix-pruned strategies. It does not change the tuples or their lexicographic order.
+- The conditional-product implementation is split into a fluent public builder and package-private
+  model, relation, planning, and generator collaborators.
+
 - The simple, constrained and conditional products now return each tuple as one small immutable list
   object (`io.github.deepeshpatel.jnumbertools.datastructure.Tuple`) instead of
   `Collections.unmodifiableList(Arrays.asList(...))`, which creates two objects per tuple. Tuples still
   follow the `List` contract (`equals`, `hashCode`, `toString`, immutability, serialization).
 
 ### Performance
+
+- Conditional-product counting tables use primitive `long` storage when intermediate counts fit within
+  the supported bound, with an exact `BigInteger` fallback. Counting queries also avoid identity
+  `BigInteger` operations.
+- The benchmark suite now covers full traversal, any-order sequential/parallel traversal, and special
+  operations, with reusable quick/full presets and comparison tooling.
 
 No change in results or order; these changes only reduce time and allocation.
 
@@ -66,6 +84,11 @@ No change in results or order; these changes only reduce time and allocation.
 - Multiset combinations now return their result maps in the order of the options they were created with,
   on every path (`lexOrder`, `lexOrderMth`, `byRanks`, `choice`, `sample`). Previously the order could
   differ from one JVM run to the next, so seeded output was not reproducible.
+
+### Compatibility
+
+- `isNotIn(...)` remains available as an alias of `isNoneOf(...)`; both varargs and collection overloads
+  are retained. No breaking API change is introduced by this alias decision.
 
 ### Changed (breaking)
 
