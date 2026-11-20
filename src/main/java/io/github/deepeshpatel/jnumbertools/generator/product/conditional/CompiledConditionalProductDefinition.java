@@ -132,6 +132,16 @@ public final class CompiledConditionalProductDefinition {
             this.target = target;
         }
 
+        /** The target value must equal {@code value}. */
+        public CompiledConditionalProductDefinition is(Object value) {
+            return isOneOf(List.of(Objects.requireNonNull(value, "value")));
+        }
+
+        /** The target value must be anything except {@code value}. */
+        public CompiledConditionalProductDefinition isNot(Object value) {
+            return isNoneOf(List.of(Objects.requireNonNull(value, "value")));
+        }
+
         /** The target value must be one of {@code allowedValues}. */
         public CompiledConditionalProductDefinition isOneOf(Object... allowedValues) {
             return isOneOf(asValues(allowedValues));
