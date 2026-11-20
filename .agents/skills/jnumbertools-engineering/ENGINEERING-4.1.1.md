@@ -47,7 +47,7 @@ Example:
 .then(database).isNot("PostgreSQL");
 ```
 
-The engine stores this as a non-binary constraint. Every dimension in its trigger scope and target is joined into a bounded joint-assignment block, and the complete implication is checked against those assignments. The block is subject to the existing `MAX_LOOP_COMBINATIONS` limit; pair links introduced to form the block are subject to `MAX_PAIR_CELLS`. Expressions whose alternatives all refer to one trigger dimension are collapsed back into a pairwise rule, preserving the existing optimized relation path.
+The engine stores this as a non-binary constraint. Every dimension in its trigger scope and target is joined into a bounded joint-assignment block, and the complete implication is checked against those assignments. The block is subject to the existing `MAX_LOOP_COMBINATIONS` limit; pair links introduced to form the block are subject to `MAX_PAIR_CELLS`. Expressions whose alternatives all refer to one trigger dimension are collapsed back into a pairwise rule, preserving the existing optimized relation path. The plan builder also bypasses compound-rule block filtering entirely when the rule list is empty. Prefix-pruned traversal checks compound rules only when their complete scope has been assigned.
 
 Tests added cover AND/OR grouping, arbitrary-length conjunctions, and the builder's traversal, counting, ranking and sampling operations. The Maven suite has not been run remotely; the user will run it locally.
 
@@ -75,7 +75,7 @@ This list describes the implementation commits preceding this engineering-notes 
 - [x] Compile multi-trigger rules as bounded joint-scope constraints, not as independent pairwise approximations.
 - [x] Integrate multi-trigger semantics with lexicographic traversal, any-order traversal, `count()`, `isEmpty()`, `byRanks()`, `lexOrderMth()`, `choice()`, and `sample()`.
 - [ ] Run differential/property tests and the Maven suite locally; fix any failures.
-- [ ] Benchmark pairwise-only workloads against the pre-change baseline to verify no measurable regression.
+- [ ] Benchmark pairwise-only workloads against the pre-change baseline to verify no measurable regression; source-level fast-path preservation is not a substitute for measurement.
 - [x] Add tests for AND/OR grouping and arbitrary chain lengths.
 - [ ] Review Javadocs after local compilation and Javadoc generation.
 - [ ] Record each verified bug fix here with the failing test, fix summary, and commit SHA.
