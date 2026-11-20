@@ -106,7 +106,7 @@ public final class CompiledShapes {
         return def.compile();
     }
 
-    public static ConditionalProductBuilder bind(CompiledConditionalProductDefinition compiled,
+    public static ConditionalProductBuilder bind(CompiledConditionalProductDefinition.CompiledConditionalProduct compiled,
                                                                  List<List<Integer>> dims) {
         return compiled.bind(dims.toArray(new List<?>[0]));
     }
