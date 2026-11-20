@@ -5,7 +5,6 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
-import io.github.deepeshpatel.jnumbertools.base.ConditionalProduct;
 import io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder;
 
