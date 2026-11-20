@@ -8,22 +8,27 @@ import io.github.deepeshpatel.jnumbertools.base.CartesianProduct;
 import io.github.deepeshpatel.jnumbertools.generator.product.compound.CompoundConditionalProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.ConditionalProductBuilder;
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Compares complete sequential generation by the independent compound and pairwise
- * implementations, including both pairwise traversal modes for the same data and equivalent pairwise rules.
+ * Compares complete generation by the independent compound and pairwise implementations.
  *
- * <p>Builder construction and rule registration happen in trial setup, outside the
- * timed methods. Each invocation creates the generator and consumes every tuple.
- * The correctness guard compares result summaries without requiring equal encounter order.</p>
+ * <p>Both sequential and parallel stream execution are measured. The parallel cases explicitly
+ * call {@code stream().parallel()}, because {@code StreamableIterable.stream()} creates a
+ * sequential stream by default. JMH uses one benchmark thread; parallelism is provided by the
+ * stream's common ForkJoinPool.</p>
  *
- * <p>The shared rule shape is a chain: whenever dimension i contains 0, dimension
- * i+1 must not contain 0. Both APIs receive exactly these rules.</p>
+ * <p>Builder construction and rule registration happen in trial setup, outside the timed
+ * methods. Each invocation creates the generator and consumes every tuple through the same
+ * hash reduction. The correctness guard compares result summaries without requiring equal
+ * encounter order.</p>
+ *
+ * <p>The shared rule shape is a chain: whenever dimension i contains 0, dimension i+1 must
+ * not contain 0. Both APIs receive exactly these rules. The larger scenarios increase the
+ * domain size so the unordered spliterators have enough candidate work to expose splitting.</p>
  */
 @State(Scope.Thread)
 @BenchmarkMode(Mode.AverageTime)
@@ -31,9 +36,10 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 5, time = 1)
 @Measurement(iterations = 8, time = 1)
 @Fork(2)
+@Threads(1)
 public class CompoundVsPairwiseGenerationBenchmark {
 
-    @Param({"3x10", "5x10", "7x5", "10x3", "5x15"})
+    @Param({"3x10", "5x10", "7x5", "10x3", "5x15", "4x25", "5x18"})
     public String scenario;
 
     private CompoundConditionalProductBuilder compoundBuilder;
@@ -72,8 +78,6 @@ public class CompoundVsPairwiseGenerationBenchmark {
                     .then(target).isNot(0);
         }
 
-        // Correctness guard: both generators must produce the same tuples, irrespective
-        // of their unspecified/different encounter orders.
         GenerationSummary compound = summarize(compoundBuilder.generate());
         GenerationSummary pairwiseAnyOrder = summarize(conditionalBuilder.anyOrder());
         GenerationSummary pairwiseLexOrder = summarize(conditionalBuilder.lexOrder());
@@ -87,33 +91,45 @@ public class CompoundVsPairwiseGenerationBenchmark {
     }
 
     @Benchmark
-    public long compoundGenerate(Blackhole blackhole) {
-        long count = 0;
-        for (List<Object> tuple : compoundBuilder.generate()) {
-            blackhole.consume(tuple);
-            count++;
-        }
-        return count;
+    public long compoundGenerate() {
+        return compoundBuilder.generate().stream()
+                .mapToLong(List::hashCode)
+                .sum();
     }
 
     @Benchmark
-    public long conditionalAnyOrder(Blackhole blackhole) {
-        long count = 0;
-        for (List<Object> tuple : conditionalBuilder.anyOrder()) {
-            blackhole.consume(tuple);
-            count++;
-        }
-        return count;
+    public long conditionalAnyOrder() {
+        return conditionalBuilder.anyOrder().stream()
+                .mapToLong(List::hashCode)
+                .sum();
     }
 
     @Benchmark
-    public long conditionalLexOrder(Blackhole blackhole) {
-        long count = 0;
-        for (List<Object> tuple : conditionalBuilder.lexOrder()) {
-            blackhole.consume(tuple);
-            count++;
-        }
-        return count;
+    public long conditionalLexOrder() {
+        return conditionalBuilder.lexOrder().stream()
+                .mapToLong(List::hashCode)
+                .sum();
+    }
+
+    @Benchmark
+    public long compoundGenerateParallel() {
+        return compoundBuilder.generate().stream().parallel()
+                .mapToLong(List::hashCode)
+                .sum();
+    }
+
+    @Benchmark
+    public long conditionalAnyOrderParallel() {
+        return conditionalBuilder.anyOrder().stream().parallel()
+                .mapToLong(List::hashCode)
+                .sum();
+    }
+
+    @Benchmark
+    public long conditionalLexOrderParallel() {
+        return conditionalBuilder.lexOrder().stream().parallel()
+                .mapToLong(List::hashCode)
+                .sum();
     }
 
     private static GenerationSummary summarize(Iterable<List<Object>> tuples) {
