@@ -47,9 +47,9 @@ Example:
 .then(database).isNot("PostgreSQL");
 ```
 
-The engine stores this as a non-binary constraint. Every dimension in its trigger scope and target is joined into a bounded joint-assignment block, and the complete implication is checked against those assignments. The block is subject to the existing `MAX_LOOP_COMBINATIONS` limit; pair links introduced to form the block are subject to `MAX_PAIR_CELLS`. Expressions whose alternatives all refer to one trigger dimension are collapsed back into a pairwise rule, preserving the existing optimized relation path. The plan builder also bypasses compound-rule block filtering entirely when the rule list is empty. Prefix-pruned traversal checks compound rules only when their complete scope has been assigned. The DP lexicographic iterator also performs a final feasibility check on the last dimension when compound rules exist; without it, the normal pairwise fast path would have skipped that final check. The DP spliterator must not use rank-based splitting for compound-rule products: the current exact-count/unranking tables model pairwise relations only. Parallel stream consumers therefore use the ordered DP iterator without splitting when compound rules are present; this is a deliberate correctness-first fallback until compound rules are incorporated into rank counts.
+The engine stores this as a non-binary constraint. Every dimension in its trigger scope and target is joined into a bounded joint-assignment block, and the complete implication is checked against those assignments. The block is subject to the existing `MAX_LOOP_COMBINATIONS` limit; pair links introduced to form the block are subject to `MAX_PAIR_CELLS`. Expressions whose alternatives all refer to one trigger dimension are collapsed back into a pairwise rule, preserving the existing optimized relation path. The plan builder also bypasses compound-rule block filtering entirely when the rule list is empty. Prefix-pruned traversal checks compound rules only when their complete scope has been assigned. Compound-rule products support `anyOrder()` traversal and exact counting; lexicographic traversal and rank-based selection are not supported for compound rules.
 
-Tests added cover AND/OR grouping, arbitrary-length conjunctions, empty products, PRUNED_BITSET, PRUNED_DFS, DP (including parallel traversal), any-order traversal, counting, ranking, every-Mth selection and sampling. The Maven suite has not been run remotely; the user is running it locally. A local test failure then exposed that parallel DP traversal used rank-range splitting, whose count/unrank path omitted compound rules. The DP spliterator now disables rank splitting and exact-size estimation for compound-rule products, delegating to the same compound-rule-aware ordered iterator used by sequential DP traversal. The first reported failure was a test-fixture ordering mistake: the expected tuples listed Safari before Chrome, contrary to the declared browser dimension order (Chrome, Safari, Firefox). The expected list was corrected to match lexicographic dimension order.
+Tests added cover AND/OR grouping, arbitrary-length conjunctions, empty products, any-order traversal, counting, and pairwise lexicographic/rank-based behavior. Compound-rule lexicographic traversal and rank-based selection are explicitly unsupported. The first reported failure was a test-fixture ordering mistake: the expected tuples listed Safari before Chrome, contrary to the declared browser dimension order (Chrome, Safari, Firefox). The expected list was corrected to match the declared dimension order. The Maven suite has not been run remotely; the user is running it locally.
 
 ## Commit history on the PR branch
 
@@ -84,13 +84,13 @@ This list records the PR branch's implementation and engineering-note commits. I
 
 - [x] Design and implement arbitrary-length trigger expressions: `.and()` adds a condition to the current conjunction; `.or()` starts another conjunction alternative.
 - [x] Compile multi-trigger rules as bounded joint-scope constraints, not as independent pairwise approximations.
-- [x] Integrate multi-trigger semantics with lexicographic traversal, any-order traversal, `count()`, `isEmpty()`, `byRanks()`, `lexOrderMth()`, `choice()`, and `sample()`.
+- [x] Integrate multi-trigger semantics with any-order traversal, `count()`, and `isEmpty()`; explicitly reject unsupported lexicographic and rank-based operations.
 - [ ] Run differential/property tests and the Maven suite locally; fix any failures.
 - [ ] Benchmark pairwise-only workloads against the pre-change baseline to verify no measurable regression; source-level fast-path preservation is not a substitute for measurement.
 - [x] Add tests for AND/OR grouping and arbitrary chain lengths.
 - [x] Update the public `ConditionalProductBuilder` and `CartesianProduct` Javadocs for AND/OR grouping and constraint limits.
 - [ ] Compile and generate Javadocs locally to catch doclint or link errors.
-- [x] Fix parallel DP traversal for compound rules by disabling pairwise-only rank splitting; verify locally with the existing parallel-DP assertion. Commit SHA to be recorded after push.
+- [x] Keep the DP spliterator's original pairwise-only rank-splitting implementation. Compound-rule products reject lexicographic traversal, so no compound-specific DP spliterator fallback is needed.
 - [ ] Run the relevant Maven tests and record the actual result before merge.
 
 ## Validation status

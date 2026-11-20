@@ -13,12 +13,10 @@ import java.util.function.Consumer;
 /**
  * Ordered spliterator for the {@code DP} strategy.
  *
- * <p>Sequential traversal walks the tuples with {@link DpLexGenerator}, which checks the complete
- * compound-rule semantics. Pairwise-only products may split into rank ranges using exact completion
- * counts. Compound-rule products deliberately remain unsplit: the current rank-count tables do not
- * incorporate non-binary rules, so using them to partition the stream can produce invalid tuples and
- * omit valid ones. This preserves correctness for parallel stream consumers, at the cost of sequential
- * execution for this strategy when compound rules are present.</p>
+ * <p>Sequential traversal walks the tuples with {@link DpLexGenerator}, which needs only the feasibility
+ * tier and does not build exact completion counts. Before traversal starts, either {@link #estimateSize()}
+ * or {@link #trySplit()} may build the exact counts. Splitting then hands traversal over to
+ * {@link DpRankSpliterator}, which divides the valid-tuple rank interval into contiguous ranges.</p>
  */
 final class DpLexSpliterator implements Spliterator<List<Object>> {
     private final ConstraintModel model;
@@ -44,8 +42,7 @@ final class DpLexSpliterator implements Spliterator<List<Object>> {
     @Override
     public Spliterator<List<Object>> trySplit() {
         if (ranks != null) return ranks.trySplit();
-        if (iterator != null || plan.isEmpty() || !model.multiRules.isEmpty()) return null;
-        // Rank counts currently model pairwise relations only; compound rules must use the exact iterator.
+        if (iterator != null || plan.isEmpty()) return null;   // the iterator owns what remains
         ranks = new DpRankSpliterator(model, plan, BigInteger.ZERO, plan.counts().total);
         return ranks.trySplit();
     }
@@ -53,7 +50,7 @@ final class DpLexSpliterator implements Spliterator<List<Object>> {
     @Override
     public long estimateSize() {
         if (ranks != null) return ranks.estimateSize();
-        if (iterator != null || !model.multiRules.isEmpty()) return Long.MAX_VALUE;
+        if (iterator != null) return Long.MAX_VALUE;
         // A pre-traversal size estimate needs the exact count to report the remaining tuple count.
         if (plan.isEmpty()) return 0;
         BigInteger total = plan.counts().total;
