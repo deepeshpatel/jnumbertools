@@ -30,7 +30,7 @@ import java.util.Random;
  * var network = List.of("WiFi", "4G");
  *
  * var configs = JNumberTools.cartesianProduct()
- *         .conditionalProductOf(os)
+ *         .conditional().ofList(os)
  *         .and(browser)
  *         .and(network)
  *         .when(browser).is("Safari").then(os).isOneOf("macOS")
@@ -48,7 +48,7 @@ import java.util.Random;
  * is {@code x}, the value chosen from {@code B} must be {@code y} or {@code z}. The rule does not say
  * anything about tuples where {@code A} is not {@code x}. All rules must hold together ("and").
  * {@code when(...)} and {@code then(...)} take the same {@link List} instance that was passed to
- * {@code conditionalProductOf} or {@code and} (matched by identity).</p>
+ * {@code conditional().ofList} or {@code and} (matched by identity).</p>
  *
  * <h2>What is supported, and what is not</h2>
  * <p>Rules are evaluated on pairs of values, never on whole tuples. Dimensions linked by rules in a tree
@@ -73,7 +73,7 @@ import java.util.Random;
  *
  * <h2>Practical performance guidance: dimension order</h2>
  * <p>Dimension declaration order can affect the amount of work required by lexicographic traversal.
- * The order is the order in which the dimensions are supplied to {@code conditionalProductOf(...)}
+ * The order is the order in which the dimensions are supplied to {@code conditional().ofList(...)}
  * and {@link #and(List)}. It also defines the tuple positions and lexicographic encounter order, so
  * changing it changes the order (and positional meaning) of the generated tuples.</p>
  *
@@ -205,7 +205,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     /**
      * Starts a rule: {@code when(A).is(x).then(B).isOneOf(y, z)}.
      *
-     * @param dimension the same list instance that was passed to {@code conditionalProductOf} or
+     * @param dimension the same list instance that was passed to {@code conditional().ofList} or
      *                  {@code and}
      * @return the next step of the rule
      * @throws NullPointerException     if {@code dimension} is null
@@ -264,7 +264,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         /**
          * Names the restricted dimension.
          *
-         * @param dimension the same list instance that was passed to {@code conditionalProductOf} or
+         * @param dimension the same list instance that was passed to {@code conditional().ofList} or
          *                  {@code and}; must be a different dimension from the one in {@code when}
          * @return the final step of the rule
          * @throws NullPointerException     if {@code dimension} is null
