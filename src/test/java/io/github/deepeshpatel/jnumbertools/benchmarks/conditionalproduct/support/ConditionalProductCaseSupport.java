@@ -77,7 +77,7 @@ public final class ConditionalProductCaseSupport {
             ScenarioData scenario, List<PreparedRule> preparedRules) {
         List<List<Integer>> dimensions = scenario.dimensions();
         ConditionalProductBuilder builder =
-                JNumberTools.cartesianProduct().conditionalProductOf(dimensions.get(0));
+                JNumberTools.cartesianProduct().conditional().ofList(dimensions.get(0));
         for (int d = 1; d < dimensions.size(); d++) {
             builder = builder.and(dimensions.get(d));
         }
