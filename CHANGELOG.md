@@ -9,7 +9,7 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ### Added
 
-- Conditional Cartesian product, started with `cartesianProduct().conditionalProductOf(list)` and
+- Conditional Cartesian product, started with `cartesianProduct().conditional().ofList(list)` and
   extended with `.and(list)` for more dimensions and `.when(list).is(...).then(list).isOneOf(...)` for
   rules between two dimensions (`is`, `isNot`, `isOneOf`, `isNoneOf`, `isNotIn`). All rules must hold.
   `count()`, `isEmpty()`, `lexOrder()`, `lexOrderMth(...)`, `byRanks(...)`, `choice(...)` and `sample(...)`
