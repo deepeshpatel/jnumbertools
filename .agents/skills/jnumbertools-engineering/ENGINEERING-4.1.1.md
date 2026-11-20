@@ -49,7 +49,7 @@ Example:
 
 The engine stores this as a non-binary constraint. Every dimension in its trigger scope and target is joined into a bounded joint-assignment block, and the complete implication is checked against those assignments. The block is subject to the existing `MAX_LOOP_COMBINATIONS` limit; pair links introduced to form the block are subject to `MAX_PAIR_CELLS`. Expressions whose alternatives all refer to one trigger dimension are collapsed back into a pairwise rule, preserving the existing optimized relation path. The plan builder also bypasses compound-rule block filtering entirely when the rule list is empty. Prefix-pruned traversal checks compound rules only when their complete scope has been assigned. The DP lexicographic path also performs a final feasibility check on the last dimension when compound rules exist; without it, the normal pairwise fast path would have skipped that final check.
 
-Tests added cover AND/OR grouping, arbitrary-length conjunctions, and the builder's traversal, counting, ranking and sampling operations. The Maven suite has not been run remotely; the user will run it locally.
+Tests added cover AND/OR grouping, arbitrary-length conjunctions, empty products, PRUNED_BITSET, PRUNED_DFS, DP (including parallel traversal), any-order traversal, counting, ranking, every-Mth selection and sampling. The Maven suite has not been run remotely; the user will run it locally.
 
 ## Commit history on the PR branch
 
@@ -73,6 +73,8 @@ The following commits are present on the PR branch, in chronological order:
 | [`cc384fa`](https://github.com/deepeshpatel/jnumbertools/commit/cc384fa1983b09b236cf74fbea1f0ffd107cccd6) | Preserve the pairwise fast path for compound rule planning | Added empty-rule fast path and single-dimension OR test |
 | [`50d08f8`](https://github.com/deepeshpatel/jnumbertools/commit/50d08f84ea5969be607efbf4894a8e93f858714f) | Record pairwise fast-path follow-up in engineering notes | Completed |
 | [`c134885`](https://github.com/deepeshpatel/jnumbertools/commit/c1348857122c55fd414c8245661ba94468ab6943) | Apply compound-rule feasibility checks at final DP dimension | Correctness fix; local validation pending |
+| [`c451593`](https://github.com/deepeshpatel/jnumbertools/commit/c451593dbfa937851f4ac98616ecb4b45a32581e) | Record final-dimension compound-rule fix | Completed |
+| [`8227caf`](https://github.com/deepeshpatel/jnumbertools/commit/8227cafda93952ed644583d3620eeefb80c072a4) | Expand compound-rule traversal and empty-product tests | Added PRUNED_DFS, parallel-DP and empty-product coverage |
 
 This list records the PR branch's implementation and engineering-note commits. It does not imply that local validation or performance acceptance is complete.
 
