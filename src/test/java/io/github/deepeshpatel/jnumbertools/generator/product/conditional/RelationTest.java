@@ -235,7 +235,7 @@ class RelationTest {
             }
             List<Integer> trigger = new ArrayList<>();
             for (int i = 0; i < size / 10; i++) trigger.add(i);
-            ConditionalProductBuilder builder = JNumberTools.cartesianProduct().conditionalProductOf(dimensions.get(0))
+            ConditionalProductBuilder builder = JNumberTools.cartesianProduct().conditional().ofList(dimensions.get(0))
                     .and(dimensions.get(1)).and(dimensions.get(2));
             for (int d = 0; d + 1 < 3; d++) {
                 builder = builder.when(dimensions.get(d)).isOneOf(trigger).then(dimensions.get(d + 1)).is(0);
