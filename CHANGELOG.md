@@ -5,7 +5,7 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ## [Unreleased]
 
-## [4.2.0] - Unreleased
+## [4.1.0] - Unreleased
 
 ### Added
 
@@ -33,9 +33,6 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 - `isNotIn(...)` remains available as an alias of `isNoneOf(...)`; both varargs and collection overloads
   are retained. No breaking API change is introduced by this alias decision.
-
-
-## [4.1.0] - 2026-11-15
 
 ### Added
 
