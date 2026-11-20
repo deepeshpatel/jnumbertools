@@ -36,9 +36,6 @@ import java.util.Random;
  *         .when(browser).is("Safari").then(os).isOneOf("macOS")
  *         .when(os).is("Linux").then(browser).isNoneOf("Chrome")
  *         .when(network).is("4G").then(os).isNoneOf("Linux")
- *         .when(browser).is("Safari").and(os).is("Windows")
- *             .or(browser).is("Chrome").and(os).is("Linux")
- *             .then(network).isNot("4G");
  *
  * configs.count();                       // exact, without listing the tuples
  * configs.lexOrder().stream().forEach(System.out::println); // all valid tuples, in lexicographic order
@@ -48,34 +45,19 @@ import java.util.Random;
  *
  * <h2>Meaning of a rule</h2>
  * <p>{@code when(A).is(x).then(B).isOneOf(y, z)} means: whenever the value chosen from {@code A}
- * is {@code x}, the value chosen from {@code B} must be {@code y} or {@code z}. Multi-trigger rules
- * support arbitrary-length conjunctions: {@code .when(A).is(x).and(B).is(y)}. Calling {@code .or(C)}
- * starts another conjunction alternative, so {@code (A=x AND B=y) OR (C=z)} activates the same
- * consequence. AND binds within each group; OR separates groups. The consequence applies when any
- * group matches. Every completed rule is combined with other rules using AND. Dimensions are identified
- * by the same list instance passed to {@code conditionalProductOf} or {@code and}.</p>
+ * is {@code x}, the value chosen from {@code B} must be {@code y} or {@code z}. Every completed
+ * pairwise rule is combined with the other rules using AND. Dimensions are identified by the same
+ * list instance passed to {@code conditionalProductOf} or {@code and}. For compound AND/OR trigger
+ * expressions, use {@link CompoundConditionalProductBuilder} through
+ * {@code compoundConditionalProductOf(...)}.</p>
  *
- * <h2>What is supported, and what is not</h2>
- * <p>Pairwise rules are represented as relations between two dimensions and retain the optimized
- * tree/loop solver. Multi-trigger rules are non-binary constraints: all dimensions in the trigger
- * alternatives and target are joined into one joint-assignment block. Its assignments are checked
- * against the complete rule. Such a block is subject to the 1,000,000 combination limit
- * ({@code MAX_LOOP_COMBINATIONS}); each pair introduced to connect the block is subject to the
- * 50,000,000 value-pair limit ({@code MAX_PAIR_CELLS}).
- * Exact counting is supported for both pairwise and compound rules. Lexicographic traversal
- * ({@link #lexOrder()}) is supported only for pairwise rules expressed with {@code when(...).then(...)}.
- * Products containing compound trigger expressions (using {@code .and(...)} or {@code .or(...)} inside
- * {@code when(...)}) must use {@link #anyOrder()} for traversal; calling {@code lexOrder()} throws
- * {@link UnsupportedOperationException}. Rank-based operations are not described here as a substitute
- * for compound-rule traversal.
- * Ordinary {@link #lexOrder()} traversal defaults to {@link LexOrderStrategy#PRUNED_BITSET}; callers can select
- * {@link LexOrderStrategy#PRUNED_DFS} or {@link LexOrderStrategy#DP} explicitly, or use
- * {@link LexOrderStrategy#ADAPTIVE} with a non-negative estimate.
- * ADAPTIVE is an implementation policy, not a promise about which algorithm is selected for a given workload.
- * Its internal selection and selection criteria may change between versions. In this version it resolves to
- * {@link LexOrderStrategy#PRUNED_BITSET}; the estimate is validated but does not affect that choice.
- * Exact counting and rank-based operations use the DP plan, regardless of the lexicographic traversal strategy. Ranks are positions among the valid tuples in lexicographic order (dimension order,
- * then the order of each list). They change when rules change.</p>
+ * <h2>What is supported</h2>
+ * <p>This builder supports pairwise rules expressed with {@code when(...).then(...)}.
+ * It provides lexicographic and any-order traversal, exact counting, rank-based traversal,
+ * and random choice and sampling. Compound trigger expressions using {@code .and(...)} or
+ * {@code .or(...)} are exposed separately by {@link CompoundConditionalProductBuilder}; that
+ * builder intentionally provides generation, counting and emptiness checks without exposing
+ * rank-based or lexicographic operations.</p>
  *
  * <h2>Practical performance guidance: dimension order</h2>
  * <p>Dimension declaration order can affect the amount of work required by lexicographic traversal.
@@ -274,7 +256,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
          * @param dimension a product dimension, identified by its original list instance
          * @return the next condition in the same AND group
          */
-        public WhenDimension and(List<?> dimension) {
+        WhenDimension and(List<?> dimension) {
             return new WhenDimension(ruleCompiler.indexOf(dimension), groups, false);
         }
 
@@ -283,7 +265,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
          * @param dimension a product dimension, identified by its original list instance
          * @return the first condition in a new OR group
          */
-        public WhenDimension or(List<?> dimension) {
+        WhenDimension or(List<?> dimension) {
             return new WhenDimension(ruleCompiler.indexOf(dimension), groups, true);
         }
 

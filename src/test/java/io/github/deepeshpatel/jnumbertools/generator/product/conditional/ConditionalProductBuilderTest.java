@@ -74,7 +74,7 @@ class ConditionalProductBuilderTest {
     @Test
     void multiTriggerAndOrGroupsUseAndPrecedenceWithAnyOrder() {
         List<String> database = List.of("PostgreSQL", "Oracle");
-        var product = cartesianProduct.conditionalProductOf(os, browser, database)
+        var product = cartesianProduct.compoundConditionalProductOf(os, browser, database)
                 .when(browser).is("Safari").and(os).is("Windows")
                 .or(browser).is("Chrome").and(os).is("Linux")
                 .then(database).isNot("PostgreSQL");
@@ -101,31 +101,25 @@ class ConditionalProductBuilderTest {
                 List.of("Linux", "Firefox", "Oracle")
         );
         assertEquals(BigInteger.valueOf(16), product.count());
-        assertEquals(new HashSet<>(expected), new HashSet<>(product.anyOrder().stream().toList()));
-        UnsupportedOperationException error = assertThrows(UnsupportedOperationException.class, product::lexOrder);
-        assertTrue(error.getMessage().contains("compound operations"));
-        assertTrue(error.getMessage().contains("anyOrder()"));
-        assertThrows(UnsupportedOperationException.class, () -> product.lexOrder(LexOrderStrategy.DP));
-        assertThrows(UnsupportedOperationException.class,
-                () -> product.lexOrder(LexOrderStrategy.ADAPTIVE, 100));
-        Set<List<Object>> valid = new HashSet<>(expected);
-        assertTrue(valid.containsAll(product.choice(20, new Random(19)).stream().toList()));
+        assertEquals(new HashSet<>(expected), new HashSet<>(product.generate().stream().toList()));
+        assertFalse(product.isEmpty());
     }
 
     @Test
     void orAlternativesOnOneDimensionRetainThePairwiseRulePath() {
-        var product = cartesianProduct.conditionalProductOf(os, browser)
+        var product = cartesianProduct.compoundConditionalProductOf(os, browser)
                 .when(browser).is("Safari").or(browser).is("Chrome")
                 .then(os).is("Windows");
 
         assertEquals(BigInteger.valueOf(5), product.count());
-        assertEquals(List.of(
+        List<List<Object>> expected = List.of(
                 List.of("Windows", "Chrome"),
                 List.of("Windows", "Safari"),
                 List.of("Windows", "Firefox"),
                 List.of("macOS", "Firefox"),
                 List.of("Linux", "Firefox")
-        ), product.lexOrder().stream().toList());
+        );
+        assertEquals(new HashSet<>(expected), new HashSet<>(product.generate().stream().toList()));
     }
 
     @Test
@@ -136,13 +130,12 @@ class ConditionalProductBuilderTest {
         List<String> d = List.of("d0", "d1");
         List<String> target = List.of("x", "y");
 
-        var product = cartesianProduct.conditionalProductOf(a, b, c, d, target)
+        var product = cartesianProduct.compoundConditionalProductOf(a, b, c, d, target)
                 .when(a).is("a1").and(b).is("b1").and(c).is("c1").and(d).is("d1")
                 .then(target).is("y");
 
         assertEquals(BigInteger.valueOf(31), product.count());
-        assertEquals(31, product.anyOrder().stream().count());
-        assertThrows(UnsupportedOperationException.class, product::lexOrder);
+        assertEquals(31, product.generate().stream().count());
         assertFalse(product.isEmpty());
     }
 
@@ -151,15 +144,13 @@ class ConditionalProductBuilderTest {
         List<String> a = List.of("a");
         List<String> b = List.of("b");
         List<String> target = List.of("x", "y");
-        var product = cartesianProduct.conditionalProductOf(a, b, target)
+        var product = cartesianProduct.compoundConditionalProductOf(a, b, target)
                 .when(a).is("a").and(b).is("b")
                 .then(target).isNoneOf("x", "y");
 
         assertEquals(BigInteger.ZERO, product.count());
         assertTrue(product.isEmpty());
-        assertThrows(UnsupportedOperationException.class, product::lexOrder);
-        assertThrows(UnsupportedOperationException.class, () -> product.lexOrder(LexOrderStrategy.DP));
-        assertTrue(product.anyOrder().stream().toList().isEmpty());
+        assertTrue(product.generate().stream().toList().isEmpty());
     }
 
     @Test

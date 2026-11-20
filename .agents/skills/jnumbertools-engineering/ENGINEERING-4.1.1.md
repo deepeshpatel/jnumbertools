@@ -28,9 +28,11 @@ The existing single-list entry point and the `.and(...)` chaining API remain ava
 
 Removed the public six-argument `.filter(...)` method, its `Predicate6` interface, the post-generation filtering wrappers, and the filter-specific test. The builder now consistently uses the existing constraint plan for counting, emptiness, rank selection, and traversal. This restores the original optimized path and removes the post-generation scan fallback.
 
-The removal commit is listed below. The compound `.and()` / `.or()` expression is now implemented in the same PR branch. Existing pairwise-only rules remain on the original relation path; performance still needs confirmation with JMH.
+The removal commit is listed below. Compound `.and()` / `.or()` expressions are implemented through a separate `compoundConditionalProductOf(...)` entry point; existing pairwise-only rules remain on the original relation path. Performance still needs confirmation with JMH.
 
 ### Compound trigger expressions with AND / OR
+
+Added a separate concrete `CompoundConditionalProductBuilder`, returned by `compoundConditionalProductOf(...)`, for arbitrary-length trigger expressions. The existing `ConditionalProductBuilder` remains the pairwise API; it does not expose trigger `.and(...)` / `.or(...)` methods. No compound-builder interface was added because there is currently only one implementation. The compound builder delegates to the shared conditional-product engine internally and exposes only `generate()`, `count()` and `isEmpty()`.
 
 Added arbitrary-length trigger expressions:
 
@@ -47,7 +49,7 @@ Example:
 .then(database).isNot("PostgreSQL");
 ```
 
-The engine stores this as a non-binary constraint. Every dimension in its trigger scope and target is joined into a bounded joint-assignment block, and the complete implication is checked against those assignments. The block is subject to the existing `MAX_LOOP_COMBINATIONS` limit; pair links introduced to form the block are subject to `MAX_PAIR_CELLS`. Expressions whose alternatives all refer to one trigger dimension are collapsed back into a pairwise rule, preserving the existing optimized relation path. The plan builder also bypasses compound-rule block filtering entirely when the rule list is empty. Prefix-pruned traversal checks compound rules only when their complete scope has been assigned. Compound-rule products support `anyOrder()` traversal and exact counting; lexicographic traversal and rank-based selection are not supported for compound rules.
+The example is built from `compoundConditionalProductOf(...)`. The engine stores this as a non-binary constraint. Every dimension in its trigger scope and target is joined into a bounded joint-assignment block, and the complete implication is checked against those assignments. The block is subject to the existing `MAX_LOOP_COMBINATIONS` limit; pair links introduced to form the block are subject to `MAX_PAIR_CELLS`. Expressions whose alternatives all refer to one trigger dimension are collapsed back into a pairwise rule, preserving the existing optimized relation path. The plan builder also bypasses compound-rule block filtering entirely when the rule list is empty. Prefix-pruned traversal checks compound rules only when their complete scope has been assigned. Compound-rule products expose lazy `generate()` traversal, exact `count()` and `isEmpty()`; lexicographic traversal, rank-based selection, `choice()` and `sample()` are not exposed by the compound builder.
 
 Tests added cover AND/OR grouping, arbitrary-length conjunctions, empty products, any-order traversal, counting, and pairwise lexicographic/rank-based behavior. Compound-rule lexicographic traversal and rank-based selection are explicitly unsupported. The first reported failure was a test-fixture ordering mistake: the expected tuples listed Safari before Chrome, contrary to the declared browser dimension order (Chrome, Safari, Firefox). The expected list was corrected to match the declared dimension order. The Maven suite has not been run remotely; the user is running it locally.
 
@@ -84,15 +86,15 @@ This list records the PR branch's implementation and engineering-note commits. I
 
 - [x] Design and implement arbitrary-length trigger expressions: `.and()` adds a condition to the current conjunction; `.or()` starts another conjunction alternative.
 - [x] Compile multi-trigger rules as bounded joint-scope constraints, not as independent pairwise approximations.
-- [x] Integrate multi-trigger semantics with any-order traversal, `count()`, and `isEmpty()`; explicitly reject unsupported lexicographic and rank-based operations.
+- [x] Integrate multi-trigger semantics with `generate()`, `count()`, and `isEmpty()`; keep unsupported lexicographic, rank-based and sampling operations off the compound builder's public API.
 - [ ] Run differential/property tests and the Maven suite locally; fix any failures.
 - [ ] Benchmark pairwise-only workloads against the pre-change baseline to verify no measurable regression; source-level fast-path preservation is not a substitute for measurement.
 - [x] Add tests for AND/OR grouping and arbitrary chain lengths.
-- [x] Update the public `ConditionalProductBuilder` and `CartesianProduct` Javadocs for AND/OR grouping and constraint limits.
+- [x] Document the separate compound entry point, builder capabilities and constraint limits in public Javadocs.
 - [ ] Compile and generate Javadocs locally to catch doclint or link errors.
 - [x] Keep the DP spliterator's original pairwise-only rank-splitting implementation. Compound-rule products reject lexicographic traversal, so no compound-specific DP spliterator fallback is needed.
 - [ ] Run the relevant Maven tests and record the actual result before merge.
 
 ## Validation status
 
-The filter-removal and compound-trigger implementation commits were created remotely. Maven tests and Javadoc generation were **not executed** in this environment; the user will run the tests locally after the commits are pushed. Record the exact commands and actual results here when available. No performance benchmark has yet been run for pairwise-only workloads.
+The filter-removal, compound-trigger engine, and separate compound-builder API commits were created remotely. Maven tests and Javadoc generation were **not executed** in this environment; the user will run the tests locally after the commits are pushed. Record the exact commands and actual results here when available. No performance benchmark has yet been run for pairwise-only workloads.
