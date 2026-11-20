@@ -378,8 +378,10 @@ final class ConstraintPlan {
         for (int d = 1; d < dimensions; d++) {
             if (!agreesWithBelow(d, val[d], val)) return false;
         }
-        for (MultiTriggerRule rule : multiRules) {
-            if (!rule.isSatisfied(val)) return false;
+        if (!multiRules.isEmpty()) {
+            for (MultiTriggerRule rule : multiRules) {
+                if (!rule.isSatisfied(val)) return false;
+            }
         }
         return true;
     }
@@ -413,9 +415,9 @@ final class ConstraintPlan {
     }
 
     /**
-     * For the last dimension only: value idx is valid iff every rule between it and the (already
-     * consistent) earlier dimensions holds. Equivalent to {@code completions(n, val) > 0} but needs no
-     * walk over the whole tree.
+     * Checks the last dimension against its earlier pairwise neighbours. When compound rules are present,
+     * {@link #firstValid(int, int, int[])} also checks the completed joint assignment through the feasibility
+     * plan, because a multi-trigger implication cannot be decided from pairwise rows alone.
      */
     boolean agreesWithBelow(int d, int idx, int[] val) {
         int[] dimsBelow = belowDims[d];

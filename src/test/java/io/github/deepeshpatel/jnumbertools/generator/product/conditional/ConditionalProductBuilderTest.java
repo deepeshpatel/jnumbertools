@@ -100,6 +100,8 @@ class ConditionalProductBuilderTest {
         assertEquals(BigInteger.valueOf(16), product.count());
         assertEquals(expected, product.lexOrder().stream().toList());
         assertEquals(expected, product.lexOrder(LexOrderStrategy.DP).stream().toList());
+        assertEquals(expected, product.lexOrder(LexOrderStrategy.PRUNED_DFS).stream().toList());
+        assertEquals(expected, product.lexOrder(LexOrderStrategy.DP).stream().parallel().toList());
         assertEquals(new HashSet<>(expected), new HashSet<>(product.anyOrder().stream().toList()));
         assertEquals(List.of(expected.get(0), expected.get(3), expected.get(6),
                         expected.get(9), expected.get(12), expected.get(15)),
@@ -145,6 +147,22 @@ class ConditionalProductBuilderTest {
                 java.util.stream.IntStream.range(0, 31).mapToObj(BigInteger::valueOf).toList())
                 .stream().count()));
         assertFalse(product.isEmpty());
+    }
+
+    @Test
+    void multiTriggerCanMakeTheEntireProductEmpty() {
+        List<String> a = List.of("a");
+        List<String> b = List.of("b");
+        List<String> target = List.of("x", "y");
+        var product = cartesianProduct.conditionalProductOf(a, b, target)
+                .when(a).is("a").and(b).is("b")
+                .then(target).isNoneOf("x", "y");
+
+        assertEquals(BigInteger.ZERO, product.count());
+        assertTrue(product.isEmpty());
+        assertTrue(product.lexOrder().stream().toList().isEmpty());
+        assertTrue(product.lexOrder(LexOrderStrategy.DP).stream().toList().isEmpty());
+        assertTrue(product.anyOrder().stream().toList().isEmpty());
     }
 
     @Test
