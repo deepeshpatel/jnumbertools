@@ -623,8 +623,9 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
             @Override
             public Spliterator<List<Object>> spliterator() {
-                return Spliterators.spliteratorUnknownSize(iterator(),
-                        Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE);
+                int characteristics = source.spliterator().characteristics()
+                        & (Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE);
+                return Spliterators.spliteratorUnknownSize(iterator(), characteristics);
             }
         };
     }
