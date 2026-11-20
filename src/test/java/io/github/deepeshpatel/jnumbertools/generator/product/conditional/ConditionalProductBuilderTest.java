@@ -112,6 +112,22 @@ class ConditionalProductBuilderTest {
     }
 
     @Test
+    void orAlternativesOnOneDimensionRetainThePairwiseRulePath() {
+        var product = cartesianProduct.conditionalProductOf(os, browser)
+                .when(browser).is("Safari").or(browser).is("Chrome")
+                .then(os).is("Windows");
+
+        assertEquals(BigInteger.valueOf(5), product.count());
+        assertEquals(List.of(
+                List.of("Windows", "Chrome"),
+                List.of("Windows", "Safari"),
+                List.of("Windows", "Firefox"),
+                List.of("macOS", "Firefox"),
+                List.of("Linux", "Firefox")
+        ), product.lexOrder().stream().toList());
+    }
+
+    @Test
     void multiTriggerSupportsAnArbitraryLengthConjunction() {
         List<String> a = List.of("a0", "a1");
         List<String> b = List.of("b0", "b1");

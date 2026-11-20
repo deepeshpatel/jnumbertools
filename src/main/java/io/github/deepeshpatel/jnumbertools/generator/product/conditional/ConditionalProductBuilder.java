@@ -82,9 +82,9 @@ import java.util.Random;
  * and {@link #and(List)}. It also defines the tuple positions and lexicographic encounter order, so
  * changing it changes the order (and positional meaning) of the generated tuples.</p>
  *
- * <p>During prefix-pruned traversal, a rule between two dimensions can be checked when the later of
- * those dimensions is assigned: the candidate value is tested against dimensions already present in
- * the prefix. A restrictive relation can therefore prune the remaining search below that point.
+ * <p>During prefix-pruned traversal, a pairwise rule can be checked when the later of its two dimensions
+ * is assigned. A multi-trigger rule can be checked as soon as every dimension in its trigger and target
+ * scope has been assigned. A restrictive rule can therefore prune the remaining search below that point.
  * As a practical starting point:</p>
  * <ul>
  *   <li>Do not automatically put the most restrictive dimension first. First consider which other

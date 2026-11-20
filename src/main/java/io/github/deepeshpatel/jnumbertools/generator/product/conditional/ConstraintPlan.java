@@ -315,9 +315,12 @@ final class ConstraintPlan {
         int len = dimsOfNode.length;
         List<int[]> out = new ArrayList<>();
         int[] current = new int[len];
-        List<MultiTriggerRule> blockRules = multiRules.stream()
-                .filter(rule -> rule.isInBlock(dimsOfNode))
-                .toList();
+        List<MultiTriggerRule> blockRules;
+        if (multiRules.isEmpty()) {
+            blockRules = List.of();
+        } else {
+            blockRules = multiRules.stream().filter(rule -> rule.isInBlock(dimsOfNode)).toList();
+        }
         fill(0, current, dimsOfNode, dims, relations, blockRules, out);
         return out.toArray(new int[0][]);
     }
