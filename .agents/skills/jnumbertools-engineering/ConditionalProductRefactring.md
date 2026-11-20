@@ -180,8 +180,8 @@ Benchmark rules: include builder construction and rule registration in end-to-en
 ### WP6: Documentation and release finish
 
 - [x] 6.1 Updated conditional-product builder Javadocs for dimension ordering, traversal strategies, and the current `ADAPTIVE` behavior.
-- [x] 6.2 Updated the public README dependency examples to 4.2.0, expanded the Cartesian-product user guide for `anyOrder()` and strategy selection, and documented `isNotIn(...)` as an alias of `isNoneOf(...)`.
-- [x] 6.3 Updated the benchmark README with the current runner/tool layout and local-versus-SHA comparison workflow; added the 4.2.0 changelog section.
+- [x] 6.2 Updated the public README dependency examples to 4.1.0, expanded the Cartesian-product user guide for `anyOrder()` and strategy selection, and documented `isNotIn(...)` as an alias of `isNoneOf(...)`.
+- [x] 6.3 Updated the benchmark README with the current runner/tool layout and local-versus-SHA comparison workflow; added the 4.1.0 changelog section.
 - [ ] Final release verification remains separate: maintainer test suite, Javadoc/source-jar release build, and any final benchmark confirmation requested before publishing. No release tag or publication is part of this plan.
 
 ## 4B. Phase roadmap (A to M)
@@ -198,7 +198,7 @@ The work is on the `conditional-product-optimization` branch and is tracked by P
 | F | Work-triggered completion lookahead and corrected DEEP_DEAD_END shapes | F1/F2 delivered and maintainer-verified; `ADAPTIVE` is documented as a policy that currently maps to BitSet |
 | G | Optional `anyOrder()` dimension reordering | on hold; current evidence does not justify it |
 | H | Counting speed and test hardening | H1/H3/H4 delivered; special-operation JMH results recorded; small-product plan-construction cost deferred |
-| I | User documentation, engineering documentation and 4.2.0 version metadata | delivered on PR branch; release verification pending |
+| I | User documentation, engineering documentation and 4.1.0 version metadata | delivered on PR branch; release verification pending |
 | J | Conditional-rule exclusion vocabulary | decision complete: retain `isNotIn(...)` as an alias of `isNoneOf(...)`; do not add another synonym or remove a public method |
 | K | Benchmark presets, report generation, environment capture and SHA comparison script | delivered; maintainer has used the quick/full comparison workflow |
 | L | Special-operation benchmarks and imperative traversal baselines | delivered; maintainer ran the special preset and recorded screening results |
@@ -213,7 +213,7 @@ The work is on the `conditional-product-optimization` branch and is tracked by P
 | `anyOrder()` and parallel splitting | Delivered; automatic parallel policy is intentionally not enabled |
 | Benchmark infrastructure | Delivered; quick/full presets, JSON, environment, reports and SHA comparison are available |
 | Benchmark analysis | Representative results recorded; a full consolidated multi-fork matrix remains optional confirmation, not a blocker to the documentation patch |
-| Public documentation and Javadocs | Updated for the 4.2.0 target |
+| Public documentation and Javadocs | Updated for the 4.1.0 target |
 | Release verification | Pending maintainer test and release-build execution |
 
 
@@ -235,7 +235,7 @@ The work is on the `conditional-product-optimization` branch and is tracked by P
 
 ## 8. Progress log (newest first)
 
-- 2026-11-20: Release-documentation pass for the 4.2.0 target. Updated Maven and README version references, the public Cartesian-product guide (`anyOrder()`, lexicographic strategies, rank-order semantics and the `isNotIn` alias), conditional-product Javadocs, benchmark tooling instructions, and the 4.2.0 changelog. The PR remains open; no merge or release publication is authorized.
+- 2026-11-20: Release-documentation pass for the 4.1.0 target. Updated Maven and README version references, the public Cartesian-product guide (`anyOrder()`, lexicographic strategies, rank-order semantics and the `isNotIn` alias), conditional-product Javadocs, benchmark tooling instructions, and the 4.1.0 changelog. The PR remains open; no merge or release publication is authorized.
 
 - 2026-11-20: Maintainer clarified that the naming question is specifically `isNotIn(...)` versus `isNoneOf(...)`. Keep both overload families; `isNotIn(...)` is an alias of `isNoneOf(...)`. Do not remove a public method, add `isNotOneOf(...)`, or make a major-version decision based on this alias.
 
@@ -297,7 +297,7 @@ The work is on the `conditional-product-optimization` branch and is tracked by P
 
 ## 9. Maintainer clarifications (2026-11-17)
 
-- 2026-11-20: `isNotIn(...)` and `isNoneOf(...)` are the compared methods. Retain both varargs and collection overloads; document `isNotIn` as an alias. Target version for this work is 4.2.0. Keep the replacement PR open and do not merge.
+- 2026-11-20: `isNotIn(...)` and `isNoneOf(...)` are the compared methods. Retain both varargs and collection overloads; document `isNotIn` as an alias. Target version for this work is 4.1.0. Keep the replacement PR open and do not merge.
 
 
 - Full-result `lexOrder()` and any-order full generation are optimized for consuming the complete result set. Do not choose an implementation solely because it wins a short-prefix benchmark.
