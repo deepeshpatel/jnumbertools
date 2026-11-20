@@ -5,7 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.compiled;
 
 import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.compiled.CompiledShapes.Shape;
-import io.github.deepeshpatel.jnumbertools.generator.product.conditional.CompiledConditionalProductDefinition.CompiledConditionalProduct;
+import io.github.deepeshpatel.jnumbertools.generator.product.conditional.CompiledConditionalProductDefinition;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.ConditionalProductBuilder;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
