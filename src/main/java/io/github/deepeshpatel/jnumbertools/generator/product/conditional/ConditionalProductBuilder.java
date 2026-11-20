@@ -62,11 +62,12 @@ import java.util.Random;
  * against the complete rule. Such a block is subject to the 1,000,000 combination limit
  * ({@code MAX_LOOP_COMBINATIONS}); each pair introduced to connect the block is subject to the
  * 50,000,000 value-pair limit ({@code MAX_PAIR_CELLS}).
- * For all accepted rule sets, {@link #count()}, {@link #lexOrder()},
- * {@link #lexOrderMth(BigInteger, BigInteger)}, {@link #byRanks(Iterable)}, {@link #choice(int, Random)}
- * and {@link #sample(int, Random)} operate on valid tuples without materializing the complete Cartesian
- * product. {@link #choice(int, Random)} may use rejection sampling, which draws candidates from the full
- * product and discards those that violate a rule.
+ * Exact counting is supported for both pairwise and compound rules. Lexicographic traversal
+ * ({@link #lexOrder()}) is supported only for pairwise rules expressed with {@code when(...).then(...)}.
+ * Products containing compound trigger expressions (using {@code .and(...)} or {@code .or(...)} inside
+ * {@code when(...)}) must use {@link #anyOrder()} for traversal; calling {@code lexOrder()} throws
+ * {@link UnsupportedOperationException}. Rank-based operations are not described here as a substitute
+ * for compound-rule traversal.
  * Ordinary {@link #lexOrder()} traversal defaults to {@link LexOrderStrategy#PRUNED_BITSET}; callers can select
  * {@link LexOrderStrategy#PRUNED_DFS} or {@link LexOrderStrategy#DP} explicitly, or use
  * {@link LexOrderStrategy#ADAPTIVE} with a non-negative estimate.
@@ -394,6 +395,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * The lookahead threshold is an implementation choice and may change between versions.</p>
      *
      * @return a re-iterable generator of valid tuples in lexicographic order
+     * @throws UnsupportedOperationException if the product contains a compound trigger rule
      */
     @Override
     public StreamableIterable<Object> lexOrder() {
