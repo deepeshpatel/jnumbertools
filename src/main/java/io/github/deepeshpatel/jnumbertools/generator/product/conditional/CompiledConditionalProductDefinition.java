@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
+import io.github.deepeshpatel.jnumbertools.generator.base.Util;
+
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
@@ -189,18 +191,9 @@ public final class CompiledConditionalProductDefinition {
     public static final class CompiledConditionalProduct {
         private final List<String> names;
         private final List<RuleSpec> rules;
-        private final int[] triggerDims;
-        private final int[] targetDims;
-
         private CompiledConditionalProduct(List<String> names, List<RuleSpec> rules) {
             this.names = names;
             this.rules = rules;
-            triggerDims = new int[rules.size()];
-            targetDims = new int[rules.size()];
-            for (int i = 0; i < rules.size(); i++) {
-                triggerDims[i] = rules.get(i).trigger();
-                targetDims[i] = rules.get(i).target();
-            }
         }
 
         /** Binds one list per declared dimension, in declaration order. */
