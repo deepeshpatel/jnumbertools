@@ -36,7 +36,7 @@ class ConditionalProductGeneratorTest {
         List<Integer> b = List.of(10, 11, 12);
         List<Integer> c = List.of(20, 21);
 
-        var unconstrained = cartesianProduct.conditionalProductOf(a).and(b).and(c);
+        var unconstrained = cartesianProduct.conditional().ofList(a).and(b).and(c);
         assertAllStrategies(unconstrained, List.of(
                 List.of(0, 10, 20), List.of(0, 10, 21),
                 List.of(0, 11, 20), List.of(0, 11, 21),
@@ -45,11 +45,11 @@ class ConditionalProductGeneratorTest {
                 List.of(1, 11, 20), List.of(1, 11, 21),
                 List.of(1, 12, 20), List.of(1, 12, 21)));
 
-        var empty = cartesianProduct.conditionalProductOf(a).and(List.<Integer>of()).and(c);
+        var empty = cartesianProduct.conditional().ofList(a).and(List.<Integer>of()).and(c);
         assertAllStrategies(empty, List.of());
 
         // Every prefix selected from A is a dead end because it permits no value from B.
-        var deadEnd = cartesianProduct.conditionalProductOf(a).and(b).and(c)
+        var deadEnd = cartesianProduct.conditional().ofList(a).and(b).and(c)
                 .when(a).isOneOf(a).then(b).isNoneOf(b);
         assertAllStrategies(deadEnd, List.of());
     }
@@ -59,7 +59,7 @@ class ConditionalProductGeneratorTest {
         List<Integer> first = java.util.stream.IntStream.range(0, 18).boxed().toList();
         List<Integer> second = java.util.stream.IntStream.range(0, 60).boxed().toList();
         List<Integer> third = java.util.stream.IntStream.range(0, 5).boxed().toList();
-        var builder = cartesianProduct.conditionalProductOf(first).and(second).and(third)
+        var builder = cartesianProduct.conditional().ofList(first).and(second).and(third)
                 .when(first).isOneOf(List.of(2, 5, 8, 13, 17))
                 .then(second).isOneOf(List.of(0, 3, 6))
                 .when(second).is(3).then(third).isNot(4);
@@ -88,7 +88,7 @@ class ConditionalProductGeneratorTest {
         List<Integer> singleton = List.of(99);
         List<Integer> wide = java.util.stream.IntStream.range(0, 300).boxed().toList();
         List<Integer> tail = java.util.stream.IntStream.range(0, 5).boxed().toList();
-        var narrowRoot = cartesianProduct.conditionalProductOf(singleton).and(wide).and(tail)
+        var narrowRoot = cartesianProduct.conditional().ofList(singleton).and(wide).and(tail)
                 .when(wide).isOneOf(List.of(2, 7, 13, 19, 29))
                 .then(tail).isNot(3);
         var narrowGenerator = narrowRoot.anyOrder();
@@ -106,7 +106,7 @@ class ConditionalProductGeneratorTest {
         assertEquals(new HashSet<>(narrowExpected), parallelOutput,
                 "parallel anyOrder traversal must preserve the complete tuple set");
 
-        var empty = cartesianProduct.conditionalProductOf(first).and(List.<Integer>of());
+        var empty = cartesianProduct.conditional().ofList(first).and(List.<Integer>of());
         assertTrue(empty.anyOrder().stream().toList().isEmpty());
     }
 
@@ -115,7 +115,7 @@ class ConditionalProductGeneratorTest {
         List<Integer> first = java.util.stream.IntStream.range(0, 17).boxed().toList();
         List<Integer> second = java.util.stream.IntStream.range(0, 13).boxed().toList();
         List<Integer> third = java.util.stream.IntStream.range(0, 9).boxed().toList();
-        var builder = cartesianProduct.conditionalProductOf(first).and(second).and(third)
+        var builder = cartesianProduct.conditional().ofList(first).and(second).and(third)
                 .when(first).isOneOf(List.of(1, 4, 7, 10, 13, 16))
                 .then(second).isOneOf(List.of(0, 3, 6, 9, 12))
                 .when(second).is(6).then(third).isNot(4);
@@ -139,7 +139,7 @@ class ConditionalProductGeneratorTest {
         List<String> os = List.of("Windows", "macOS", "Linux");
         List<String> browsers = List.of("Chrome", "Safari", "Firefox");
         List<String> networks = List.of("WiFi", "4G");
-        var builder = cartesianProduct.conditionalProductOf(os).and(browsers).and(networks)
+        var builder = cartesianProduct.conditional().ofList(os).and(browsers).and(networks)
                 .when(browsers).is("Safari").then(os).isOneOf("macOS")
                 .when(networks).is("4G").then(browsers).isNot("Chrome");
 
@@ -171,7 +171,7 @@ class ConditionalProductGeneratorTest {
         List<Integer> first = java.util.stream.IntStream.range(0, 32).boxed().toList();
         List<Integer> second = java.util.stream.IntStream.range(0, 7).boxed().toList();
         List<Integer> third = java.util.stream.IntStream.range(0, 5).boxed().toList();
-        var builder = cartesianProduct.conditionalProductOf(first).and(second).and(third)
+        var builder = cartesianProduct.conditional().ofList(first).and(second).and(third)
                 .when(first).isOneOf(List.of(3, 7, 11, 19, 23, 29))
                 .then(second).isOneOf(List.of(1, 3, 5))
                 .when(second).is(3).then(third).isNot(2);
@@ -191,7 +191,7 @@ class ConditionalProductGeneratorTest {
         List<Integer> first = java.util.stream.IntStream.range(0, 24).boxed().toList();
         List<Integer> second = java.util.stream.IntStream.range(0, 9).boxed().toList();
         List<Integer> third = java.util.stream.IntStream.range(0, 6).boxed().toList();
-        var builder = cartesianProduct.conditionalProductOf(first).and(second).and(third)
+        var builder = cartesianProduct.conditional().ofList(first).and(second).and(third)
                 .when(first).isOneOf(List.of(2, 5, 8, 13, 17, 21))
                 .then(second).isOneOf(List.of(0, 3, 6, 8))
                 .when(second).is(3).then(third).isNot(4);
@@ -250,7 +250,7 @@ class ConditionalProductGeneratorTest {
             dimensions.add(List.copyOf(values));
         }
 
-        ConditionalProductBuilder builder = cartesianProduct.conditionalProductOf(dimensions.get(0));
+        ConditionalProductBuilder builder = cartesianProduct.conditional().ofList(dimensions.get(0));
         for (int d = 1; d < dimensionCount; d++) builder = builder.and(dimensions.get(d));
 
         List<Rule> rules = new ArrayList<>();
