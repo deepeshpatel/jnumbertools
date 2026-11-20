@@ -5,6 +5,18 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Reusable compiled conditional products: declare named dimensions with
+  `cartesianProduct().conditional().compiledForDimensions(...)`, add rules by dimension name,
+  call `compile()` once, and bind different dimension lists with `bind(...)`. Binding resolves
+  rule values against each supplied dataset and returns the regular conditional-product builder.
+
+### Changed (breaking)
+
+- The conditional-product entry point `conditionalProductOf(list)` is replaced by
+  `conditional().ofList(list)`. Existing `.and(list)` and rule operations are unchanged.
+
 ## [4.1.0] - 2026-11-15
 
 ### Added
