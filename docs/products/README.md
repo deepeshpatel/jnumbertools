@@ -1,9 +1,9 @@
+
 [Home](../../README.md)
 </br>[Permutation Generators](../permutations/README.md)
 </br>[Derangement Generators](../derangements/README.md)
 </br>[Combination Generators](../combinations/README.md)
 </br>[Set/Subset Generators](../sets/README.md)
-</br>[Cartesian Product Generators](../products/README.md)
 </br>[Math Functions](../calculator/README.md)
 </br>[Ranking Algorithms](../ranking/README.md)
 </br>[Number System Algorithms](../numbersystem/README.md)
@@ -15,16 +15,18 @@ JNumberTools provides the following generators for Cartesian products. All m<sup
 **Currently Available Algorithms**
 
 1. [Simple Cartesian Product](#1-simple-cartesian-product)
-   1. [Simple Cartesian product in lex order](#11-simple-cartesian-product-in-lex-order)
-   2. [Every m<sup>th</sup> simple Cartesian product in lex order](#12-m-th-simple-cartesian-product)
+    1. [Simple Cartesian product in lex order](#11-simple-cartesian-product-in-lex-order)
+    2. [Every m<sup>th</sup> simple Cartesian product in lex order](#12-m-th-simple-cartesian-product)
 
 2. [Constrained Cartesian Product](#2-constrained-cartesian-product)
-   1. [Constrained Cartesian product in lex order](#21-constrained-cartesian-product-in-lex-order)
-   2. [Every m<sup>th</sup> constrained Cartesian product in lex order](#22-m-th-constrained-cartesian-product)
+    1. [Constrained Cartesian product in lex order](#21-constrained-cartesian-product-in-lex-order)
+    2. [Every m<sup>th</sup> constrained Cartesian product in lex order](#22-m-th-constrained-cartesian-product)
 
 3. [Conditional Cartesian Product](#3-conditional-cartesian-product)
 
-4. [Products of ranks, random choice and random sample](#4-products-of-ranks-random-choice-and-random-sample)
+4. [Compound Conditional Cartesian Product](#4-compound-conditional-cartesian-product)
+
+5. [Products of ranks, random choice and random sample](#5-products-of-ranks-random-choice-and-random-sample)
 
 ---
 
@@ -141,9 +143,7 @@ var browser = List.of("Chrome", "Safari", "Firefox");
 var network = List.of("WiFi", "4G");
 
 var configs = JNumberTools.cartesianProduct()
-        .conditionalProductOf(os)
-        .and(browser)
-        .and(network)
+        .conditionalProductOf(os, browser, network)
         .when(browser).is("Safari").then(os).isOneOf("macOS")
         .when(network).is("4G").then(os).isNoneOf("Linux")
         .when(network).is("4G").then(browser).isNoneOf("Chrome");
@@ -182,7 +182,7 @@ hold together. The condition side offers `is`, `isNot`, `isOneOf`, `isNoneOf` an
 of `isNoneOf(...)` and is retained as a familiar alternative name. Several rules may share the same trigger.
 
 **Dimensions are identified by list instance.** `when(...)` and `then(...)` take the same `List` object that was
-passed to `conditionalProductOf` or `and` (or to `compoundConditionalProductOf` / its `and`). Using one list instance for two dimensions is ambiguous and is rejected.
+passed to `conditionalProductOf` or to `compoundConditionalProductOf(...)`. Using one list instance for two dimensions is ambiguous and is rejected.
 A rule value that is not in the dimension, or an empty list of values, is rejected, and so is a rule between a
 dimension and itself.
 
@@ -196,7 +196,7 @@ dimension and itself.
 - When almost every tuple is valid, a plain filter over a simple product is about as fast. The advantage grows as
   the rules remove more of the space.
 
-### Compound conditional Cartesian product
+### 4. Compound Conditional Cartesian Product
 
 For rules whose trigger depends on multiple dimensions, use the separate
 `compoundConditionalProductOf(...)` entry point. Its concrete
@@ -238,7 +238,7 @@ into the scope. Each node is subject to the same combination limit, and the pair
 the 50,000,000 value-pair limit (`MAX_PAIR_CELLS`). When a chain passes through the scopes
 of several compound rules, the dimensions on that cycle are enumerated together.
 
-### 4. Products of ranks, random choice and random sample
+### 5. Products of ranks, random choice and random sample
 
 Simple, constrained and conditional products support the same `byRanks`, `choice` and `sample` operations as the other generators. `byRanks` returns the products at the given ranks, `choice` draws random products with replacement (duplicates possible), and `sample` draws random distinct products.
 
@@ -271,7 +271,6 @@ The number of products is available from `product.count()` (6 here).
 </br>[Derangement Generators](../derangements/README.md)
 </br>[Combination Generators](../combinations/README.md)
 </br>[Set/Subset Generators](../sets/README.md)
-</br>[Cartesian Product Generators](../products/README.md)
 </br>[Math Functions](../calculator/README.md)
 </br>[Ranking Algorithms](../ranking/README.md)
 </br>[Number System Algorithms](../numbersystem/README.md)

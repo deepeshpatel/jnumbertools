@@ -1,13 +1,13 @@
-# Engineering Notes — JNumberTools 4.1.1
+# Engineering Notes — JNumberTools 4.2.1
 
 ## Purpose and scope
 
-PR #7 is the working PR for the **4.1.1 API enhancement and bug-fixing release**. This file tracks implementation decisions, completed changes, outstanding work, and commit history.
+PR #7 is the working PR for the **4.2.0 API enhancement and bug-fixing release**. This file tracks implementation decisions, completed changes, outstanding work, and commit history.
 
 - Pull request: https://github.com/deepeshpatel/jnumbertools/pull/7
 - Branch: `feature/conditional-product-multi-list-4.1.1`
 - Base branch: `main`
-- Target project version: `4.1.1`
+- Target project version: `4.2.0`
 - PR status: open; not merged.
 
 The PR is intended for API enhancements and relevant bug fixes. The commits below establish the current API-enhancement work. No separate bug-fix commit is identified in the current PR history yet; add each verified bug fix here with its test and commit.
@@ -63,27 +63,27 @@ Fix: `withMultiRule` no longer adds edges. `ConstraintGraph.nodeOf` places each 
 
 The following commits are present on the PR branch, in chronological order:
 
-| Commit | Change | Status / notes |
-|---|---|---|
-| [`5913345`](https://github.com/deepeshpatel/jnumbertools/commit/591334529331e138f939da1292bef0a7a27d6656) | Add multi-dimension `conditionalProductOf` overload | Completed |
-| [`545499f`](https://github.com/deepeshpatel/jnumbertools/commit/545499fb077bb6bb4dc86b64c27bff709f687eb4) | Test multi-dimension overload against chaining | Completed |
-| [`47f8576`](https://github.com/deepeshpatel/jnumbertools/commit/47f8576a002821f33e484be6d08d3466dbfd230d) | Set project version to 4.1.1 | Completed |
-| [`9fa0784`](https://github.com/deepeshpatel/jnumbertools/commit/9fa0784805a10334f9bd8714769d7f808b54c834) | Add whole-tuple filter support | Experimental; post-generation filtering is not acceptable as the final implementation |
-| [`a128ca1`](https://github.com/deepeshpatel/jnumbertools/commit/a128ca1385dd899555d97b5a9e8406a91b2476d5) | Apply tuple filters to adaptive lexicographic traversal | Experimental; part of the current filter implementation |
-| [`e28ec73`](https://github.com/deepeshpatel/jnumbertools/commit/e28ec73eb52a2e8f251ac3754d4c7b9ba5fcb472) | Test whole-tuple filters against equivalent conditional rules | Test coverage for the experimental implementation; does not establish pruning |
-| [`8ed8d1e`](https://github.com/deepeshpatel/jnumbertools/commit/8ed8d1ea70442e04ae53cf2cad94decd553916c3) | Clarify filter evaluation and dimension ordering | Documentation for the experimental implementation |
-| [`f028358`](https://github.com/deepeshpatel/jnumbertools/commit/f028358b94aca9edca1904ba6fe8dcba305380a6) | Document dimension ordering for tuple filters | Documentation for the experimental implementation |
-| [`8a28574`](https://github.com/deepeshpatel/jnumbertools/commit/8a285746949640defa5f352f3a66dae81066ca17) | Preserve traversal characteristics when applying tuple filters | Experimental implementation, subsequently removed |
-| [`1a40b1a`](https://github.com/deepeshpatel/jnumbertools/commit/1a40b1ae9d208771509239749917a1e663300e5f) | Remove experimental whole-tuple filter API | Completed |
-| [`ab08e86`](https://github.com/deepeshpatel/jnumbertools/commit/ab08e86c860784aeccd471341ec2c7d2676d8280) | Update engineering notes after filter removal | Completed |
-| [`ac92786`](https://github.com/deepeshpatel/jnumbertools/commit/ac92786900a73fb9eba664c9475e3265111d11a1) | Add compound AND/OR conditional trigger rules | Implemented; local validation pending |
-| [`38d7266`](https://github.com/deepeshpatel/jnumbertools/commit/38d72665c960751be82a8a43555590215ecb3e0e) | Update engineering notes for compound trigger rules | Completed |
-| [`cc384fa`](https://github.com/deepeshpatel/jnumbertools/commit/cc384fa1983b09b236cf74fbea1f0ffd107cccd6) | Preserve the pairwise fast path for compound rule planning | Added empty-rule fast path and single-dimension OR test |
-| [`50d08f8`](https://github.com/deepeshpatel/jnumbertools/commit/50d08f84ea5969be607efbf4894a8e93f858714f) | Record pairwise fast-path follow-up in engineering notes | Completed |
-| [`c134885`](https://github.com/deepeshpatel/jnumbertools/commit/c1348857122c55fd414c8245661ba94468ab6943) | Apply compound-rule feasibility checks at final DP dimension | Correctness fix; local validation pending |
-| [`c451593`](https://github.com/deepeshpatel/jnumbertools/commit/c451593dbfa937851f4ac98616ecb4b45a32581e) | Record final-dimension compound-rule fix | Completed |
-| [`8227caf`](https://github.com/deepeshpatel/jnumbertools/commit/8227cafda93952ed644583d3620eeefb80c072a4) | Expand compound-rule traversal and empty-product tests | Added PRUNED_DFS, parallel-DP and empty-product coverage |
-| [`3b0380d`](https://github.com/deepeshpatel/jnumbertools/commit/3b0380decf7c4ba37d34303c46673c5d75416688) | Record compound-rule validation coverage in engineering notes | Completed |
+| Commit | Change                                                           | Status / notes |
+|---|------------------------------------------------------------------|---|
+| [`5913345`](https://github.com/deepeshpatel/jnumbertools/commit/591334529331e138f939da1292bef0a7a27d6656) | Add multi-dimension `conditionalProductOf` overload              | Completed |
+| [`545499f`](https://github.com/deepeshpatel/jnumbertools/commit/545499fb077bb6bb4dc86b64c27bff709f687eb4) | Test multi-dimension overload against chaining                   | Completed |
+| [`47f8576`](https://github.com/deepeshpatel/jnumbertools/commit/47f8576a002821f33e484be6d08d3466dbfd230d) | Set project version to 4.2.0                                     | Completed |
+| [`9fa0784`](https://github.com/deepeshpatel/jnumbertools/commit/9fa0784805a10334f9bd8714769d7f808b54c834) | Add whole-tuple filter support                                   | Experimental; post-generation filtering is not acceptable as the final implementation |
+| [`a128ca1`](https://github.com/deepeshpatel/jnumbertools/commit/a128ca1385dd899555d97b5a9e8406a91b2476d5) | Apply tuple filters to adaptive lexicographic traversal          | Experimental; part of the current filter implementation |
+| [`e28ec73`](https://github.com/deepeshpatel/jnumbertools/commit/e28ec73eb52a2e8f251ac3754d4c7b9ba5fcb472) | Test whole-tuple filters against equivalent conditional rules    | Test coverage for the experimental implementation; does not establish pruning |
+| [`8ed8d1e`](https://github.com/deepeshpatel/jnumbertools/commit/8ed8d1ea70442e04ae53cf2cad94decd553916c3) | Clarify filter evaluation and dimension ordering                 | Documentation for the experimental implementation |
+| [`f028358`](https://github.com/deepeshpatel/jnumbertools/commit/f028358b94aca9edca1904ba6fe8dcba305380a6) | Document dimension ordering for tuple filters                    | Documentation for the experimental implementation |
+| [`8a28574`](https://github.com/deepeshpatel/jnumbertools/commit/8a285746949640defa5f352f3a66dae81066ca17) | Preserve traversal characteristics when applying tuple filters   | Experimental implementation, subsequently removed |
+| [`1a40b1a`](https://github.com/deepeshpatel/jnumbertools/commit/1a40b1ae9d208771509239749917a1e663300e5f) | Remove experimental whole-tuple filter API                       | Completed |
+| [`ab08e86`](https://github.com/deepeshpatel/jnumbertools/commit/ab08e86c860784aeccd471341ec2c7d2676d8280) | Update engineering notes after filter removal                    | Completed |
+| [`ac92786`](https://github.com/deepeshpatel/jnumbertools/commit/ac92786900a73fb9eba664c9475e3265111d11a1) | Add compound AND/OR conditional trigger rules                    | Implemented; local validation pending |
+| [`38d7266`](https://github.com/deepeshpatel/jnumbertools/commit/38d72665c960751be82a8a43555590215ecb3e0e) | Update engineering notes for compound trigger rules              | Completed |
+| [`cc384fa`](https://github.com/deepeshpatel/jnumbertools/commit/cc384fa1983b09b236cf74fbea1f0ffd107cccd6) | Preserve the pairwise fast path for compound rule planning       | Added empty-rule fast path and single-dimension OR test |
+| [`50d08f8`](https://github.com/deepeshpatel/jnumbertools/commit/50d08f84ea5969be607efbf4894a8e93f858714f) | Record pairwise fast-path follow-up in engineering notes         | Completed |
+| [`c134885`](https://github.com/deepeshpatel/jnumbertools/commit/c1348857122c55fd414c8245661ba94468ab6943) | Apply compound-rule feasibility checks at final DP dimension     | Correctness fix; local validation pending |
+| [`c451593`](https://github.com/deepeshpatel/jnumbertools/commit/c451593dbfa937851f4ac98616ecb4b45a32581e) | Record final-dimension compound-rule fix                         | Completed |
+| [`8227caf`](https://github.com/deepeshpatel/jnumbertools/commit/8227cafda93952ed644583d3620eeefb80c072a4) | Expand compound-rule traversal and empty-product tests           | Added PRUNED_DFS, parallel-DP and empty-product coverage |
+| [`3b0380d`](https://github.com/deepeshpatel/jnumbertools/commit/3b0380decf7c4ba37d34303c46673c5d75416688) | Record compound-rule validation coverage in engineering notes    | Completed |
 | [`da9736f`](https://github.com/deepeshpatel/jnumbertools/commit/da9736f354ff689ee35441996a9496c2888361b3) | Document compound conditional rules in CartesianProduct Javadocs | Updated overview and entry-point documentation |
 
 This list records the PR branch's implementation and engineering-note commits. It does not imply that local validation or performance acceptance is complete.
