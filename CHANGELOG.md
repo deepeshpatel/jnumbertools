@@ -3,18 +3,35 @@
 All notable changes to JNumberTools are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [4.2.0] - Released 2026-11-21
 
-- Added a separate `compoundConditionalProductOf(...)` entry point and concrete
-  `CompoundConditionalProductBuilder` for compound AND/OR trigger expressions. The builder exposes
-  lazy `generate()`, exact `count()` and `isEmpty()`; lexicographic traversal, rank-based operations,
-  random choice and sampling are not part of its public API. Existing `conditionalProductOf(...)`
-  remains the pairwise-rule API with its existing traversal and sampling operations.
+### Added
+
+- Added a multi-list `conditionalProductOf(first, second, additional...)` overload alongside the
+  existing single-list entry point and `.and(...)` chaining.
+- Added compound AND/OR trigger expressions: `.when(dim).is(v).and(dim2).is(v2).or(dim3)...then(dim4).is(v4)`,
+  interpreted as an OR of AND-groups, with AND binding more tightly than OR. These are available directly
+  on `conditionalProductOf(...)`'s builder, and also through a separate `compoundConditionalProductOf(...)`
+  entry point whose `CompoundConditionalProductBuilder` exposes only `generate()`, `count()` and `isEmpty()`.
+  `lexOrder()`, `lexOrderMth()`, `byRanks()`, `choice()` and `sample()` are available on the full builder and
+  throw `UnsupportedOperationException` when the product contains a rule that does not collapse to a pairwise
+  restriction.
+
+### Fixed
+
 - Fixed compound rules whose scope overlaps a chain of pairwise rules. The chain was merged with the
   scope into one enumerated block, which made counting far slower than the same chain without the
   compound rule and rejected models that contain no loop. The chain between the scope's dimensions
   is now a separate node joined to the scope by the rules between them, so each node is enumerated and
   bounded on its own.
+
+### Changed
+
+- Unified the compound and pairwise conditional-product engines. `conditionalProductOf(...)` and
+  `compoundConditionalProductOf(...)` now share one implementation; the previously separate, fully
+  duplicated `compound` package is gone. No public API changed as a result, other than the
+  `conditionalProductOf(...)` builder now also accepting `.and(...)/.or(...)` compound trigger
+  expressions directly.
 
 
 ## [4.1.0] - Released 2026-11-20

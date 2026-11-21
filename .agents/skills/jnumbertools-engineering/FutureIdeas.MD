@@ -108,3 +108,25 @@ Notes carried over from the retired `ConditionalProductRefactring.md`. They are 
 - Exact-count `anyOrder()` splitting: about 5x slower on small shapes in parallel (counting setup costs more than the split saves).
 - Pivot by `cardinality()` (STAR_LAST experiment): no advantage when tested.
 - Do not treat a bimodal allocation figure on JIT-sensitive paths (for example DEEP_DEAD_END, 9.6 vs 15.4 MB) as a regression.
+
+## Conditional product: carried over from 4.2.0 (compound/pairwise engine unification)
+
+Notes carried over from the retired `ENGINEERING-4.1.1.md`. They are not approved features.
+
+- **Whether `compoundConditionalProductOf(...)` / `CompoundConditionalProductBuilder` should still exist.**
+  Since the compound and pairwise engines were unified, `conditionalProductOf(...)`'s builder already
+  accepts the same `.and(...)/.or(...)` trigger syntax and additionally exposes `lexOrder()`,
+  `lexOrderMth()`, `byRanks()`, `choice()` and `sample()` (throwing `UnsupportedOperationException` only
+  when a rule doesn't collapse to pairwise). The separate compound entry point is now a strict subset of
+  the full builder's capability. Options: (a) remove it and point everyone at `conditionalProductOf(...)`;
+  (b) keep it as an intentionally narrower, simpler entry point for callers who only want
+  `generate()/count()/isEmpty()`. No decision made; the current code keeps both.
+- **A diagnostic/introspection method** (`.explain()` or similar) reporting the constraint plan's node
+  structure: how many dimensions ended up in each node, and which rules caused dimensions to merge into
+  one block. The block-merging bug that `0e47496` fixed is the kind of thing that's invisible from the
+  public API until `count()` gets slow or throws; a cheap read-only report of the node/block structure
+  would let a caller see it coming instead of discovering it empirically.
+- **Validation gap:** a compound rule's AND-group isn't checked for referencing the same dimension twice
+  with conflicting values (e.g. `.when(x).is(1).and(x).is(2)...`), which is unsatisfiable by construction
+  and currently just silently compiles into a group that can never match. Worth a one-line check with a
+  clear error message rather than a silent always-false rule.
