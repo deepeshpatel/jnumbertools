@@ -343,13 +343,21 @@ final class ConstraintPlan {
         }
         int parentPos = position(members[parent], parentDim);
         int childPos = position(members[child], childDim);
+        // Values of the parent node that agree on the linked dimension have the same row: build each distinct
+        // row once and share it (rows are only read). A node of many joint assignments linked through one
+        // dimension then needs one row per value of that dimension, not one per assignment.
+        BitSet[] rowOfParentValue = new BitSet[rowsOfDim.length];
         BitSet[] rows = new BitSet[size[parent]];
         for (int a = 0; a < size[parent]; a++) {
             int parentValue = values[parent] == null ? a : values[parent][a][parentPos];
-            BitSet row = new BitSet(size[child]);
-            for (int b = 0; b < size[child]; b++) {
-                int childValue = values[child] == null ? b : values[child][b][childPos];
-                if (rowsOfDim[parentValue].get(childValue)) row.set(b);
+            BitSet row = rowOfParentValue[parentValue];
+            if (row == null) {
+                row = new BitSet(size[child]);
+                for (int b = 0; b < size[child]; b++) {
+                    int childValue = values[child] == null ? b : values[child][b][childPos];
+                    if (rowsOfDim[parentValue].get(childValue)) row.set(b);
+                }
+                rowOfParentValue[parentValue] = row;
             }
             rows[a] = row;
         }
