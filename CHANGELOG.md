@@ -5,6 +5,18 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ## [Unreleased]
 
+- Added a separate `compoundConditionalProductOf(...)` entry point and concrete
+  `CompoundConditionalProductBuilder` for compound AND/OR trigger expressions. The builder exposes
+  lazy `generate()`, exact `count()` and `isEmpty()`; lexicographic traversal, rank-based operations,
+  random choice and sampling are not part of its public API. Existing `conditionalProductOf(...)`
+  remains the pairwise-rule API with its existing traversal and sampling operations.
+- Fixed compound rules whose scope overlaps a chain of pairwise rules. The chain was merged with the
+  scope into one enumerated block, which made counting far slower than the same chain without the
+  compound rule and rejected models that contain no loop. The chain between the scope's dimensions
+  is now a separate node joined to the scope by the rules between them, so each node is enumerated and
+  bounded on its own.
+
+
 ## [4.1.0] - Released 2026-11-20
 
 ### Added

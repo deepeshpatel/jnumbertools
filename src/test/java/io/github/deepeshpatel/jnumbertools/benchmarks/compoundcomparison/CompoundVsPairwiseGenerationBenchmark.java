@@ -1,0 +1,158 @@
+/*
+ * Copyright (c) 2021-2026 Deepesh Patel
+ * SPDX-License-Identifier: Apache-2.0
+ */
+package io.github.deepeshpatel.jnumbertools.benchmarks.compoundcomparison;
+
+import io.github.deepeshpatel.jnumbertools.base.CartesianProduct;
+import io.github.deepeshpatel.jnumbertools.generator.product.compound.CompoundConditionalProductBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.product.conditional.ConditionalProductBuilder;
+import org.openjdk.jmh.annotations.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Compares complete generation by the independent compound and pairwise implementations.
+ *
+ * <p>Both sequential and parallel stream execution are measured. The parallel cases explicitly
+ * call {@code stream().parallel()}, because {@code StreamableIterable.stream()} creates a
+ * sequential stream by default. JMH uses one benchmark thread; parallelism is provided by the
+ * stream's common ForkJoinPool.</p>
+ *
+ * <p>Builder construction and rule registration happen in trial setup, outside the timed
+ * methods. Each invocation creates the generator and consumes every tuple through the same
+ * hash reduction. The correctness guard compares result summaries without requiring equal
+ * encounter order.</p>
+ *
+ * <p>The shared rule shape is a chain: whenever dimension i contains 0, dimension i+1 must
+ * not contain 0. Both APIs receive exactly these rules. The larger scenarios increase the
+ * domain size so the unordered spliterators have enough candidate work to expose splitting.</p>
+ */
+@State(Scope.Thread)
+@BenchmarkMode(Mode.AverageTime)
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@Warmup(iterations = 5, time = 1)
+@Measurement(iterations = 8, time = 1)
+@Fork(2)
+@Threads(1)
+public class CompoundVsPairwiseGenerationBenchmark {
+
+    @Param({"3x10", "5x10", "7x5", "10x3", "5x15", "4x30", "5x18"})
+    public String scenario;
+
+    private CompoundConditionalProductBuilder compoundBuilder;
+    private ConditionalProductBuilder conditionalBuilder;
+
+    @Setup(Level.Trial)
+    public void setup() {
+        String[] parts = scenario.split("x");
+        int dimensionsCount = Integer.parseInt(parts[0]);
+        int domainSize = Integer.parseInt(parts[1]);
+
+        List<List<Integer>> dimensions = new ArrayList<>(dimensionsCount);
+        for (int i = 0; i < dimensionsCount; i++) {
+            List<Integer> values = new ArrayList<>(domainSize);
+            for (int value = 0; value < domainSize; value++) {
+                values.add(value);
+            }
+            dimensions.add(List.copyOf(values));
+        }
+
+        CartesianProduct products = new CartesianProduct();
+        compoundBuilder = products.compoundConditionalProductOf(
+                dimensions.get(0), dimensions.get(1),
+                dimensions.subList(2, dimensionsCount).toArray(List<?>[]::new));
+        conditionalBuilder = products.conditionalProductOf(
+                dimensions.get(0), dimensions.get(1),
+                dimensions.subList(2, dimensionsCount).toArray(List<?>[]::new));
+
+        for (int i = 0; i < dimensionsCount - 1; i++) {
+            List<Integer> trigger = dimensions.get(i);
+            List<Integer> target = dimensions.get(i + 1);
+
+            compoundBuilder = compoundBuilder.when(trigger).is(0)
+                    .then(target).isNot(0);
+            conditionalBuilder = conditionalBuilder.when(trigger).is(0)
+                    .then(target).isNot(0);
+        }
+
+        GenerationSummary compound = summarize(compoundBuilder.generate());
+        GenerationSummary pairwiseAnyOrder = summarize(conditionalBuilder.anyOrder());
+        GenerationSummary pairwiseLexOrder = summarize(conditionalBuilder.lexOrder());
+        if (!compound.equals(pairwiseAnyOrder) || !compound.equals(pairwiseLexOrder)) {
+            throw new IllegalStateException(
+                    "Implementations produced different results for " + scenario
+                            + ": compound=" + compound
+                            + ", pairwiseAnyOrder=" + pairwiseAnyOrder
+                            + ", pairwiseLexOrder=" + pairwiseLexOrder);
+        }
+    }
+
+    @Benchmark
+    public long compoundGenerate() {
+        return compoundBuilder.generate().stream()
+                .mapToLong(List::hashCode)
+                .sum();
+    }
+
+    @Benchmark
+    public long conditionalAnyOrder() {
+        return conditionalBuilder.anyOrder().stream()
+                .mapToLong(List::hashCode)
+                .sum();
+    }
+
+    @Benchmark
+    public long conditionalLexOrder() {
+        return conditionalBuilder.lexOrder().stream()
+                .mapToLong(List::hashCode)
+                .sum();
+    }
+
+    @Benchmark
+    public long compoundGenerateParallel() {
+        return compoundBuilder.generate().stream().parallel()
+                .mapToLong(List::hashCode)
+                .sum();
+    }
+
+    @Benchmark
+    public long conditionalAnyOrderParallel() {
+        return conditionalBuilder.anyOrder().stream().parallel()
+                .mapToLong(List::hashCode)
+                .sum();
+    }
+
+    @Benchmark
+    public long conditionalLexOrderParallel() {
+        return conditionalBuilder.lexOrder().stream().parallel()
+                .mapToLong(List::hashCode)
+                .sum();
+    }
+
+    private static GenerationSummary summarize(Iterable<List<Object>> tuples) {
+        long count = 0;
+        long sum = 0;
+        long xor = 0;
+
+        for (List<Object> tuple : tuples) {
+            long hash = mix64(tuple.hashCode());
+            count++;
+            sum += hash;
+            xor ^= Long.rotateLeft(hash, (int) (hash & 63));
+        }
+
+        return new GenerationSummary(count, sum, xor);
+    }
+
+    private static long mix64(long value) {
+        value = (value ^ (value >>> 30)) * 0xbf58476d1ce4e5b9L;
+        value = (value ^ (value >>> 27)) * 0x94d049bb133111ebL;
+        return value ^ (value >>> 31);
+    }
+
+    private record GenerationSummary(long count, long sum, long xor) {
+    }
+}

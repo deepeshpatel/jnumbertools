@@ -182,7 +182,7 @@ hold together. The condition side offers `is`, `isNot`, `isOneOf`, `isNoneOf` an
 of `isNoneOf(...)` and is retained as a familiar alternative name. Several rules may share the same trigger.
 
 **Dimensions are identified by list instance.** `when(...)` and `then(...)` take the same `List` object that was
-passed to `conditionalProductOf` or `and`. Using one list instance for two dimensions is ambiguous and is rejected.
+passed to `conditionalProductOf` or `and` (or to `compoundConditionalProductOf` / its `and`). Using one list instance for two dimensions is ambiguous and is rejected.
 A rule value that is not in the dimension, or an empty list of values, is rejected, and so is a rule between a
 dimension and itself.
 
@@ -195,6 +195,48 @@ dimension and itself.
 - `lexOrder()` returns valid tuples in lexicographic order. `anyOrder()` returns the same valid tuple set exactly once but makes no encounter-order guarantee. Ranks used by `byRanks(...)` and `lexOrderMth(...)` are always positions in lexicographic order, so ranks change when rules change.
 - When almost every tuple is valid, a plain filter over a simple product is about as fast. The advantage grows as
   the rules remove more of the space.
+
+### Compound conditional Cartesian product
+
+For rules whose trigger depends on multiple dimensions, use the separate
+`compoundConditionalProductOf(...)` entry point. Its concrete
+`CompoundConditionalProductBuilder` exposes only the operations supported by this
+execution model: lazy generation, exact counting and emptiness checks.
+
+```java
+var os = List.of("Windows", "macOS", "Linux");
+var browser = List.of("Chrome", "Safari", "Firefox");
+var database = List.of("PostgreSQL", "Oracle");
+
+var products = JNumberTools.cartesianProduct()
+        .compoundConditionalProductOf(os, browser, database)
+        .when(browser).is("Safari").and(os).is("Windows")
+        .or(browser).is("Chrome").and(os).is("Linux")
+        .then(database).isNot("PostgreSQL");
+
+products.count();                     // exact count, without generating tuples
+products.isEmpty();                   // whether any valid tuple exists
+products.generate().stream().forEach(System.out::println);
+```
+
+AND binds more tightly than OR, so the trigger above means
+`(browser = Safari AND os = Windows) OR (browser = Chrome AND os = Linux)`.
+The consequence applies when either conjunction matches. Multiple completed rules are
+combined with AND.
+
+`generate()` returns a lazy, re-iterable generator. It produces each valid tuple once,
+but makes no encounter-order guarantee. Lexicographic traversal, rank-based operations,
+random choice and sampling are deliberately not exposed by this builder. Use
+`conditionalProductOf(...)` for pairwise rules and its lexicographic/rank-based APIs.
+
+Compound trigger scopes are compiled as bounded joint-assignment nodes. The dimensions in
+a rule's scope are enumerated together, so the product of their sizes is subject to the
+1,000,000 combination limit (`MAX_LOOP_COMBINATIONS`). If two of those dimensions are also
+linked by a chain of pairwise rules, the dimensions of that chain are enumerated as a
+separate node, joined to the scope's node by the rules between them: the chain is not merged
+into the scope. Each node is subject to the same combination limit, and the pair of nodes to
+the 50,000,000 value-pair limit (`MAX_PAIR_CELLS`). When a chain passes through the scopes
+of several compound rules, the dimensions on that cycle are enumerated together.
 
 ### 4. Products of ranks, random choice and random sample
 
