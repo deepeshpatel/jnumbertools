@@ -114,13 +114,19 @@ Notes carried over from the retired `ConditionalProductRefactring.md`. They are 
 Notes carried over from the retired `ENGINEERING-4.1.1.md`. They are not approved features.
 
 - **Whether `compoundConditionalProductOf(...)` / `CompoundConditionalProductBuilder` should still exist.**
-  Since the compound and pairwise engines were unified, `conditionalProductOf(...)`'s builder already
-  accepts the same `.and(...)/.or(...)` trigger syntax and additionally exposes `lexOrder()`,
-  `lexOrderMth()`, `byRanks()`, `choice()` and `sample()` (throwing `UnsupportedOperationException` only
-  when a rule doesn't collapse to pairwise). The separate compound entry point is now a strict subset of
-  the full builder's capability. Options: (a) remove it and point everyone at `conditionalProductOf(...)`;
-  (b) keep it as an intentionally narrower, simpler entry point for callers who only want
-  `generate()/count()/isEmpty()`. No decision made; the current code keeps both.
+  The compound and pairwise engines were unified under the hood: both now share one `ConditionalProductBuilder`
+  and one constraint model. But the public surfaces were not unified. `ConditionalProductBuilder.Trigger.and()`
+  and `.or()` are package-private, so `conditionalProductOf(...)` only ever gives a caller single-condition
+  pairwise rules (`.when(x).is(v).then(y).is(w)`); the `.and(...)/.or(...)` compound syntax is reachable only
+  through `compoundConditionalProductOf(...)` / `CompoundConditionalProductBuilder`, which is itself limited to
+  `generate()`, `count()` and `isEmpty()` and does not expose `lexOrder()`, `lexOrderMth()`, `byRanks()`,
+  `choice()` or `sample()` even when a rule set happens to collapse to pairwise. So today there are two
+  builders, each with a capability the other lacks, and neither is a strict subset of the other. Worth deciding
+  deliberately: either (a) make `and()/or()` public on `ConditionalProductBuilder.Trigger` so one builder has
+  the full set (compound syntax plus every traversal/rank/sample operation, throwing
+  `UnsupportedOperationException` only when a rule doesn't collapse to pairwise) and retire the separate
+  compound entry point; or (b) keep two deliberately different builders, but document the actual capability
+  split precisely instead of describing one as a subset of the other.
 - **A diagnostic/introspection method** (`.explain()` or similar) reporting the constraint plan's node
   structure: how many dimensions ended up in each node, and which rules caused dimensions to merge into
   one block. The block-merging bug that `0e47496` fixed is the kind of thing that's invisible from the

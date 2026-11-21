@@ -384,7 +384,11 @@ final class ConstraintPlan {
     /**
      * Rows[a] = values of {@code child} allowed when {@code parent} has value a: the values for which every rule
      * between the two nodes allows the pair. Parent values that agree on all the dimensions the rules touch share
-     * one row, which is only read.
+     * one row, which is computed once and only read afterwards. Distinct rows are cheap to produce when they are
+     * few (bounded by how many distinct combinations of values the rules' own dimensions actually take), even
+     * when the nodes themselves are large; {@link ConstraintGraph#checkLoopBlocks} cannot predict that count
+     * ahead of time without duplicating the choice of which node is {@code parent}, so it is measured here instead,
+     * as rows are actually built, and bounded by {@link ConstraintGraph#MAX_PAIR_CELLS}.
      */
     private BitSet[] rowsBetween(int parent, int child, List<Link> links) {
         if (links.size() == 1 && values[parent] == null && values[child] == null) {
@@ -399,6 +403,7 @@ final class ConstraintPlan {
         }
         java.util.Map<ValuesKey, BitSet> known = new java.util.HashMap<>();
         BitSet[] rows = new BitSet[size[parent]];
+        long cellsBuilt = 0;
         for (int a = 0; a < size[parent]; a++) {
             int[] parentValues = new int[count];
             for (int i = 0; i < count; i++) {
@@ -407,6 +412,11 @@ final class ConstraintPlan {
             ValuesKey key = new ValuesKey(parentValues);
             BitSet row = known.get(key);
             if (row == null) {
+                cellsBuilt += size[child];
+                if (cellsBuilt > ConstraintGraph.MAX_PAIR_CELLS) {
+                    throw new IllegalArgumentException("Two groups of dimensions linked by rules have too many "
+                            + "value pairs together; the limit is " + ConstraintGraph.MAX_PAIR_CELLS);
+                }
                 row = new BitSet(size[child]);
                 for (int b = 0; b < size[child]; b++) {
                     boolean allowed = true;

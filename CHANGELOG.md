@@ -9,13 +9,11 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 - Added a multi-list `conditionalProductOf(first, second, additional...)` overload alongside the
   existing single-list entry point and `.and(...)` chaining.
-- Added compound AND/OR trigger expressions: `.when(dim).is(v).and(dim2).is(v2).or(dim3)...then(dim4).is(v4)`,
-  interpreted as an OR of AND-groups, with AND binding more tightly than OR. These are available directly
-  on `conditionalProductOf(...)`'s builder, and also through a separate `compoundConditionalProductOf(...)`
-  entry point whose `CompoundConditionalProductBuilder` exposes only `generate()`, `count()` and `isEmpty()`.
-  `lexOrder()`, `lexOrderMth()`, `byRanks()`, `choice()` and `sample()` are available on the full builder and
-  throw `UnsupportedOperationException` when the product contains a rule that does not collapse to a pairwise
-  restriction.
+- Added compound AND/OR trigger expressions through a separate `compoundConditionalProductOf(...)` entry
+  point: `.when(dim).is(v).and(dim2).is(v2).or(dim3)...then(dim4).is(v4)`, interpreted as an OR of AND-groups,
+  with AND binding more tightly than OR. Its `CompoundConditionalProductBuilder` exposes `generate()`,
+  `count()` and `isEmpty()`. `conditionalProductOf(...)` remains the pairwise-only entry point and additionally
+  exposes `lexOrder()`, `lexOrderMth()`, `byRanks()`, `choice()` and `sample()`.
 
 ### Fixed
 
@@ -24,6 +22,15 @@ All notable changes to JNumberTools are recorded here. The format follows
   compound rule and rejected models that contain no loop. The chain between the scope's dimensions
   is now a separate node joined to the scope by the rules between them, so each node is enumerated and
   bounded on its own.
+- Fixed a gap where a node-to-node relation table built between two multi-dimension nodes (a compound
+  scope, or an ordinary pairwise loop of three or more dimensions) joined by a single rule was not
+  size-checked at all; only tables built from two or more rules between the same pair of nodes were.
+  The real cost of such a table depends on how many distinct combinations of values the linking rules'
+  own dimensions actually take, which can be far smaller than either node's full size once rows that
+  project to the same values are shared, so the check is applied as the table is actually being built,
+  bounding the work by `MAX_PAIR_CELLS` directly rather than by an estimate from the nodes' sizes. An
+  earlier version of this fix checked the nodes' full sizes instead and rejected some legitimate, cheap
+  rule sets as a result; it was replaced with this one before release.
 
 ### Changed
 
