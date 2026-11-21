@@ -428,15 +428,10 @@ final class ConstraintPlan {
         throw new IllegalStateException("dimension not in node");
     }
 
-    /** Whether a complete tuple satisfies every rule. */
+    /** Whether a complete tuple satisfies every pairwise rule (used by pairwise rejection sampling). */
     boolean isValid(int[] val) {
         for (int d = 1; d < dimensions; d++) {
             if (!agreesWithBelow(d, val[d], val)) return false;
-        }
-        if (!multiRules.isEmpty()) {
-            for (MultiTriggerRule rule : multiRules) {
-                if (!rule.isSatisfied(val)) return false;
-            }
         }
         return true;
     }
@@ -450,7 +445,7 @@ final class ConstraintPlan {
         if (dimsBelow.length == 0) {
             for (int idx = from; idx < dimSizeK; idx++) {
                 val[k] = idx;
-                if ((last && multiRules.isEmpty()) || hasCompletion(k + 1, val)) return idx;
+                if (last || hasCompletion(k + 1, val)) return idx;
             }
             return -1;
         }
@@ -464,7 +459,7 @@ final class ConstraintPlan {
                 if (!rows[i][val[dimsBelow[i]]].get(idx)) continue outer;
             }
             val[k] = idx;
-            if ((last && multiRules.isEmpty()) || hasCompletion(k + 1, val)) return idx;
+            if (last || hasCompletion(k + 1, val)) return idx;
         }
         return -1;
     }
