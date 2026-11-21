@@ -109,7 +109,9 @@ import java.util.Random;
  *       assignments of each block are enumerated once, subject to the
  *       {@code MAX_LOOP_COMBINATIONS} limit (1,000,000) on the product of the original dimension sizes in that
  *       block. The remaining bridge edges form a forest (of treewidth at most 1), enabling dynamic
- *       programming across the resulting trees.</li>
+ *       programming across the resulting trees. The dimensions of a multi-trigger rule's scope are
+ *       always one block. A chain of pairwise rules that links two of them is a second block, joined to
+ *       the first by the rules between them, rather than part of the scope's block.</li>
  *
  *   <li><strong>Bottom-Up Tree DP / Sum-Product Counting</strong>
  *       <em>(related to Pearl 1988; Dechter 1999)</em>:

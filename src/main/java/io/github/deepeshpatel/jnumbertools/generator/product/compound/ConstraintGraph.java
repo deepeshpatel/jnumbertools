@@ -26,9 +26,12 @@ final class ConstraintGraph {
     private ConstraintGraph() {
     }
 
-    /** Rejects a rule set in which a group of dimensions linked in loops has too many combinations. */
-    static void checkLoopBlocks(List<List<?>> dims, Collection<Long> keys) {
-        int[] block = blockOf(dims.size(), keys);
+    /**
+     * Rejects a rule set in which a group of dimensions that must be enumerated together has too many
+     * combinations. The groups are the nodes returned by {@link #nodeOf}.
+     */
+    static void checkLoopBlocks(List<List<?>> dims, Collection<Long> keys, List<MultiTriggerRule> multiRules) {
+        int[] block = nodeOf(dims.size(), keys, multiRules);
         long[] product = new long[dims.size()];
         int[] members = new int[dims.size()];
         Arrays.fill(product, 1L);
@@ -48,6 +51,26 @@ final class ConstraintGraph {
             if (members[b] > 1 && product[b] > MAX_LOOP_COMBINATIONS) {
                 throw new IllegalArgumentException("These rules link dimensions in a loop whose dimensions have "
                         + "too many value combinations together; the limit is " + MAX_LOOP_COMBINATIONS);
+            }
+        }
+        if (multiRules.isEmpty()) return;
+
+        // Two nodes joined by several rules (which happens when a compound rule splits a loop into two nodes)
+        // are related through one combined table with a cell for every pair of node values. Bound its size by
+        // the product of the nodes' domain sizes, as a pairwise rule's table is bounded by MAX_PAIR_CELLS.
+        java.util.Map<Long, Integer> linksBetweenNodes = new java.util.HashMap<>();
+        for (long edge : keys) {
+            int a = block[(int) (edge >>> 32)];
+            int b = block[(int) edge];
+            if (a != b) linksBetweenNodes.merge(key(Math.min(a, b), Math.max(a, b)), 1, Integer::sum);
+        }
+        for (java.util.Map.Entry<Long, Integer> pair : linksBetweenNodes.entrySet()) {
+            if (pair.getValue() < 2) continue;
+            long pa = product[(int) (pair.getKey() >>> 32)];
+            long pb = product[(int) (long) pair.getKey()];
+            if (pa != 0 && pb > MAX_PAIR_CELLS / pa) {
+                throw new IllegalArgumentException("A compound rule joins two groups of dimensions that have too many "
+                        + "value pairs together; the limit is " + MAX_PAIR_CELLS);
             }
         }
     }
@@ -97,6 +120,93 @@ final class ConstraintGraph {
             block[i] = find(block, i);
         }
         return block;
+    }
+
+    /**
+     * Groups the dimensions into the nodes of the counting plan. Returns, per dimension, the lowest dimension
+     * index of its node.
+     *
+     * <p>Without compound rules the nodes are the loop blocks of {@link #blockOf}. A compound rule needs every
+     * dimension in its scope in one node, because the rule is checked on complete assignments of a node. Joining
+     * the scope can close a cycle through rules that were a plain chain, as in
+     * {@code A-B-C-D-E} plus a rule over {@code A, E, F}. Merging that whole cycle into one node would
+     * enumerate the product of all its dimensions, although the chain {@code B, C, D} has no loop of its own.
+     * Instead the dimensions of the cycle other than the rule's scope form a second node that is related to the
+     * scope's node through the conjunction of the rules between them, so the nodes still form a forest and each
+     * is enumerated separately. When a cycle passes through more than one compound-rule scope, the whole cycle
+     * is merged into one node.</p>
+     */
+    static int[] nodeOf(int n, Collection<Long> keys, List<MultiTriggerRule> multiRules) {
+        int[] node = blockOf(n, keys);
+        if (multiRules.isEmpty()) return node;
+
+        // 1. every compound rule's scope lies in one node
+        for (MultiTriggerRule rule : multiRules) {
+            int target = node[rule.scope[0]];
+            for (int dimension : rule.scope) {
+                int other = node[dimension];
+                if (other == target) continue;
+                int lower = Math.min(target, other);
+                int higher = Math.max(target, other);
+                for (int d = 0; d < n; d++) if (node[d] == higher) node[d] = lower;
+                target = lower;
+            }
+        }
+
+        // 2. joining scopes may have closed cycles between nodes: split each one around its scope node
+        while (true) {
+            int[] indexOfNode = new int[n];
+            Arrays.fill(indexOfNode, -1);
+            List<Integer> reps = new ArrayList<>();
+            for (int d = 0; d < n; d++) {
+                if (indexOfNode[node[d]] < 0) {
+                    indexOfNode[node[d]] = reps.size();
+                    reps.add(node[d]);
+                }
+            }
+            int q = reps.size();
+            boolean[] special = new boolean[q];
+            for (MultiTriggerRule rule : multiRules) special[indexOfNode[node[rule.scope[0]]]] = true;
+
+            Set<Long> quotientEdges = new HashSet<>();
+            for (long edge : keys) {
+                int a = indexOfNode[node[(int) (edge >>> 32)]];
+                int b = indexOfNode[node[(int) edge]];
+                if (a != b) quotientEdges.add(key(Math.min(a, b), Math.max(a, b)));
+            }
+            // nodes lying on a cycle of the quotient graph (parallel links between two nodes are not a cycle)
+            int[] cycle = blockOf(q, quotientEdges);
+            int[] size = new int[q];
+            int[] specials = new int[q];
+            for (int i = 0; i < q; i++) {
+                size[cycle[i]]++;
+                if (special[i]) specials[cycle[i]]++;
+            }
+
+            // Within a cycle component that holds exactly one scope node, the other nodes that are connected to each
+            // other become one node per connected group. Any other cycle component is merged as a whole.
+            int[] merge = new int[q];
+            for (int i = 0; i < q; i++) merge[i] = i;
+            for (long edge : quotientEdges) {
+                int a = (int) (edge >>> 32);
+                int b = (int) edge;
+                int c = cycle[a];
+                if (c == cycle[b] && size[c] > 1 && specials[c] == 1 && !special[a] && !special[b]) union(merge, a, b);
+            }
+            for (int i = 0; i < q; i++) {
+                int c = cycle[i];
+                if (size[c] > 1 && specials[c] != 1) union(merge, i, c);
+            }
+            boolean changed = false;
+            int[] newNode = new int[q];
+            for (int i = 0; i < q; i++) {
+                int root = find(merge, i);
+                if (root != i) changed = true;
+                newNode[i] = reps.get(root);   // the root is the lowest index, which is the lowest dimension
+            }
+            if (!changed) return node;
+            for (int d = 0; d < n; d++) node[d] = newNode[indexOfNode[node[d]]];
+        }
     }
 
     /**

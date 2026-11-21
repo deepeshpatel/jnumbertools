@@ -65,40 +65,24 @@ final class ConstraintModel {
         Relation updated = relation.restrict(triggerValues, allowedTargets, triggerDim == u);
         PersistentRelationMap updatedRelations = relations.with(key, updated);
         if (newLinkedPair) {
-            ConstraintGraph.checkLoopBlocks(dimensions, updatedRelations.keySet());
+            ConstraintGraph.checkLoopBlocks(dimensions, updatedRelations.keySet(), multiRules);
         }
         return new ConstraintModel(dimensions, updatedRelations, indexes, multiRules);
     }
 
     /**
-     * Adds a non-binary implication. A full-relation clique joins every dimension in the rule's
-     * scope into one enumerated constraint block; the rule itself is checked on complete block
-     * assignments. Existing pairwise relations are left unchanged.
+     * Adds a non-binary implication. No pairwise relations are added for it: the dimensions of its scope are
+     * enumerated together as one node of the counting plan and the rule is checked on that node's complete
+     * assignments (see {@link ConstraintGraph#nodeOf}). Existing pairwise relations are left unchanged. Where
+     * the scope's dimensions are already linked by a chain of pairwise rules, the chain becomes a second node
+     * rather than being merged into the scope's node.
      */
     ConstraintModel withMultiRule(MultiTriggerRule rule) {
-        PersistentRelationMap updated = relations;
-        int[] scope = rule.scope;
-        boolean addedEdge = false;
-        for (int i = 0; i < scope.length; i++) {
-            for (int j = i + 1; j < scope.length; j++) {
-                int u = scope[i];
-                int v = scope[j];
-                long key = ConstraintGraph.key(u, v);
-                if (updated.get(key) == null) {
-                    long cells = (long) dimensions.get(u).size() * dimensions.get(v).size();
-                    if (cells > ConstraintGraph.MAX_PAIR_CELLS) {
-                        throw new IllegalArgumentException("The two dimensions in a multi-trigger rule have too many "
-                                + "value pairs (" + cells + "); the limit is " + ConstraintGraph.MAX_PAIR_CELLS);
-                    }
-                    updated = updated.with(key, Relation.full(dimensions.get(u).size(), dimensions.get(v).size()));
-                    addedEdge = true;
-                }
-            }
-        }
-        if (addedEdge) ConstraintGraph.checkLoopBlocks(dimensions, updated.keySet());
         List<MultiTriggerRule> rules = new ArrayList<>(multiRules);
         rules.add(rule);
-        return new ConstraintModel(dimensions, updated, indexes, Collections.unmodifiableList(rules));
+        List<MultiTriggerRule> updated = Collections.unmodifiableList(rules);
+        ConstraintGraph.checkLoopBlocks(dimensions, relations.keySet(), updated);
+        return new ConstraintModel(dimensions, relations, indexes, updated);
     }
 
     /** Checks a compound implication once every dimension in its scope has been assigned. */

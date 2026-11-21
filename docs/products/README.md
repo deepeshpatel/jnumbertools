@@ -229,10 +229,14 @@ but makes no encounter-order guarantee. Lexicographic traversal, rank-based oper
 random choice and sampling are deliberately not exposed by this builder. Use
 `conditionalProductOf(...)` for pairwise rules and its lexicographic/rank-based APIs.
 
-Compound trigger scopes are compiled as bounded joint-assignment blocks. Each block is
-subject to the 1,000,000 combination limit (`MAX_LOOP_COMBINATIONS`), and each pair
-introduced to connect the scope is subject to the 50,000,000 value-pair limit
-(`MAX_PAIR_CELLS`).
+Compound trigger scopes are compiled as bounded joint-assignment nodes. The dimensions in
+a rule's scope are enumerated together, so the product of their sizes is subject to the
+1,000,000 combination limit (`MAX_LOOP_COMBINATIONS`). If two of those dimensions are also
+linked by a chain of pairwise rules, the dimensions of that chain are enumerated as a
+separate node, joined to the scope's node by the rules between them: the chain is not merged
+into the scope. Each node is subject to the same combination limit, and the pair of nodes to
+the 50,000,000 value-pair limit (`MAX_PAIR_CELLS`). When a chain passes through the scopes
+of several compound rules, the dimensions on that cycle are enumerated together.
 
 ### 4. Products of ranks, random choice and random sample
 

@@ -2,17 +2,17 @@
 
 ## 1. Where JNumberTools has an advantage
 
-| Capability | JNumberTools | PySAT | Advantage |
-|---|---|---|---|
-| Work with non-Boolean dimensions | Native support for arbitrary lists of values | Primarily Boolean variables; other domains require encoding | **JNumberTools** |
-| Express conditional product rules | Direct API: `.when().is().then().is()` | Requires conversion to Boolean clauses or another encoding | **JNumberTools** |
-| Represent constrained Cartesian products | Native concept | Not its primary abstraction | **JNumberTools** |
-| Exact count of valid combinations | Native `count()` | Possible through exhaustive model enumeration, but no equivalent native exact-count operation in the basic solver API | **JNumberTools** |
-| Retrieve an assignment at a specified rank | Native `byRanks()` | No equivalent direct rank-based model retrieval API | **JNumberTools** |
-| Retrieve selected ranks without enumerating all preceding solutions | Direct rank lookup | Generally requires enumeration or an additional counting/selection strategy | **JNumberTools** |
-| Generate valid combinations as tuples | Native product stream | Produces Boolean models that must be decoded into application values | **JNumberTools** |
-| Work with multiple values per dimension | Directly supported | Requires Boolean encoding, potentially with additional constraints | **JNumberTools** |
-| Navigate a large solution space by rank | Designed for this use case | Not a built-in SAT solver operation | **JNumberTools** |
+| Capability | JNumberTools | PySAT                                                                                                                                                                                                 | Advantage |
+|---|---|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---|
+| Work with non-Boolean dimensions | Native support for arbitrary lists of values | Primarily Boolean variables; other domains require encoding                                                                                                                                           | **JNumberTools** |
+| Express conditional product rules | Direct API: `.when().is().then().is()` | Requires conversion to Boolean clauses or another encoding                                                                                                                                            | **JNumberTools** |
+| Represent constrained Cartesian products | Native concept | Not its primary abstraction                                                                                                                                                                           | **JNumberTools** |
+| Exact count of valid combinations | Native `count()` | Possible through exhaustive model enumeration, but no native exact model counting; exact counting requires full enumeration or an external #SAT tool. Approximate counting is available via ApproxMC integration (pysat.allies.approxmc) | **JNumberTools** |
+| Retrieve an assignment at a specified rank | Native `byRanks()` | No equivalent direct rank-based model retrieval API                                                                                                                                                   | **JNumberTools** |
+| Retrieve selected ranks without enumerating all preceding solutions | Direct rank lookup | Generally requires enumeration or an additional counting/selection strategy                                                                                                                           | **JNumberTools** |
+| Generate valid combinations as tuples | Native product stream | Produces Boolean models that must be decoded into application values                                                                                                                                  | **JNumberTools** |
+| Work with multiple values per dimension | Directly supported | Requires Boolean encoding, potentially with additional constraints                                                                                                                                    | **JNumberTools** |
+| Navigate a large solution space by rank | Designed for this use case | Not a built-in SAT solver operation                                                                                                                                                                   | **JNumberTools** |
 
 PySAT is primarily designed as a SAT-solving interface. It provides solving, model extraction, assumptions, model enumeration and unsatisfiable-core extraction.
 
