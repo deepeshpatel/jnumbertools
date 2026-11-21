@@ -465,9 +465,8 @@ final class ConstraintPlan {
     }
 
     /**
-     * Checks the last dimension against its earlier pairwise neighbours. When compound rules are present,
-     * {@link #firstValid(int, int, int[])} also checks the completed joint assignment through the feasibility
-     * plan, because a multi-trigger implication cannot be decided from pairwise rows alone.
+     * Checks a dimension against its earlier pairwise neighbours. Compound-rule validation is handled by the
+     * compound traversal, not by this pairwise plan operation.
      */
     boolean agreesWithBelow(int d, int idx, int[] val) {
         int[] dimsBelow = belowDims[d];
