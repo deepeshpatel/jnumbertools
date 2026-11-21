@@ -5,7 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.compoundcomparison;
 
 import io.github.deepeshpatel.jnumbertools.base.CartesianProduct;
-import io.github.deepeshpatel.jnumbertools.generator.product.compound.CompoundConditionalProductBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.product.conditional.CompoundConditionalProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.ConditionalProductBuilder;
 import org.openjdk.jmh.annotations.*;
 
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Compares complete generation by the independent compound and pairwise implementations.
+ * Compares complete generation through the compound and pairwise APIs backed by the shared conditional-product engine.
  *
  * <p>Both sequential and parallel stream execution are measured. The parallel cases explicitly
  * call {@code stream().parallel()}, because {@code StreamableIterable.stream()} creates a

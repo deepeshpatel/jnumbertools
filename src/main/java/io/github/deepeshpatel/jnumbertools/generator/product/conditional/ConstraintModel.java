@@ -15,7 +15,7 @@ import java.util.Collections;
 /**
  * Immutable shared input model for a conditional Cartesian product.
  *
- * <p>The dimension snapshots and pairwise relations are immutable inputs to the builder's generators.
+ * <p>The dimension snapshots, pairwise relations and compound rules are immutable inputs to the builder's generators.
  * The compact rows used by prefix-pruned traversal are materialized lazily and then
  * safely published for reuse by every generator created from this model.</p>
  */
@@ -23,26 +23,29 @@ final class ConstraintModel {
     final List<List<?>> dimensions;
     final PersistentRelationMap relations;
     final DimensionIndexes indexes;
+    final List<MultiTriggerRule> multiRules;
     private volatile Rows rows;
     private volatile DenseRows denseRows;
     private volatile boolean denseRowsInitialized;
     private volatile ConstraintPlan plan;
 
     ConstraintModel(List<List<?>> dimensions, PersistentRelationMap relations) {
-        this(dimensions, relations, new DimensionIndexes(dimensions));
+        this(dimensions, relations, new DimensionIndexes(dimensions), List.of());
     }
 
-    private ConstraintModel(List<List<?>> dimensions, PersistentRelationMap relations, DimensionIndexes indexes) {
+    private ConstraintModel(List<List<?>> dimensions, PersistentRelationMap relations,
+                            DimensionIndexes indexes, List<MultiTriggerRule> multiRules) {
         this.dimensions = dimensions;
         this.relations = relations;
         this.indexes = indexes;
+        this.multiRules = multiRules;
     }
 
     ConstraintModel withDimension(List<?> dimension) {
         List<List<?>> updated = new ArrayList<>(dimensions);
         updated.add(dimension);
         List<List<?>> extended = Collections.unmodifiableList(updated);
-        return new ConstraintModel(extended, relations, indexes.extendedTo(extended));
+        return new ConstraintModel(extended, relations, indexes.extendedTo(extended), multiRules);
     }
 
     ConstraintModel withRule(int triggerDim, BitSet triggerValues, int targetDim, BitSet allowedTargets) {
@@ -62,9 +65,33 @@ final class ConstraintModel {
         Relation updated = relation.restrict(triggerValues, allowedTargets, triggerDim == u);
         PersistentRelationMap updatedRelations = relations.with(key, updated);
         if (newLinkedPair) {
-            ConstraintGraph.checkLoopBlocks(dimensions, updatedRelations.keySet());
+            ConstraintGraph.checkLoopBlocks(dimensions, updatedRelations.keySet(), multiRules);
         }
-        return new ConstraintModel(dimensions, updatedRelations, indexes);
+        return new ConstraintModel(dimensions, updatedRelations, indexes, multiRules);
+    }
+
+    /**
+     * Adds a non-binary implication. No pairwise relations are added for it: the dimensions of its scope are
+     * enumerated together as one node of the counting plan and the rule is checked on that node's complete
+     * assignments (see {@link ConstraintGraph#nodeOf}). Existing pairwise relations are left unchanged. Where
+     * the scope's dimensions are already linked by a chain of pairwise rules, the chain becomes a second node
+     * rather than being merged into the scope's node.
+     */
+    ConstraintModel withMultiRule(MultiTriggerRule rule) {
+        List<MultiTriggerRule> rules = new ArrayList<>(multiRules);
+        rules.add(rule);
+        List<MultiTriggerRule> updated = Collections.unmodifiableList(rules);
+        ConstraintGraph.checkLoopBlocks(dimensions, relations.keySet(), updated);
+        return new ConstraintModel(dimensions, relations, indexes, updated);
+    }
+
+    /** Checks a compound implication once every dimension in its scope has been assigned. */
+    boolean acceptsPrefix(int assignedThrough, int[] values) {
+        if (multiRules.isEmpty()) return true;
+        for (MultiTriggerRule rule : multiRules) {
+            if (!rule.acceptsPrefix(assignedThrough, values)) return false;
+        }
+        return true;
     }
 
     ConstraintPlan plan() {
@@ -73,7 +100,7 @@ final class ConstraintModel {
             synchronized (this) {
                 result = plan;
                 if (result == null) {
-                    result = new ConstraintPlan(dimensions, relations);
+                    result = new ConstraintPlan(dimensions, relations, multiRules);
                     plan = result;
                 }
             }

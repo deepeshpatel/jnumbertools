@@ -13,9 +13,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Constraint topology and the two lookahead tiers built on it. The dimensions are grouped into <em>nodes</em>: a dimension that is on no loop of
+ * Constraint topology, bounded compound-rule blocks and the two lookahead tiers built on them. The dimensions are grouped into <em>nodes</em>: a dimension that is on no loop of
  * rules is a node by itself; the dimensions of a loop (a block) form one node whose values are the
- * valid joint assignments of its dimensions. Nodes and the single rules between them form a forest;
+ * valid joint assignments of its dimensions. Nodes and the rules between them form a forest (when a compound rule has
+ * split a loop, several rules join the same two nodes and restrict them together);
  * each tree is rooted at its node with the lowest dimension index.
  * <ul>
  *   <li>{@code counts.free[v][a]}: ways to choose the values of v's subtree when v has value a.</li>
@@ -49,8 +50,10 @@ final class ConstraintPlan {
     private final boolean[] suffixFeasible;  // suffixFeasible[i]: every tree from roots[i] on can be completed
     private final int[] nodeOrder;     // nodes, parents before children
     private volatile ConstraintCounts countsTier;
+    private final List<MultiTriggerRule> multiRules;
 
-    ConstraintPlan(List<List<?>> dims, Map<Long, Relation> relations) {
+    ConstraintPlan(List<List<?>> dims, Map<Long, Relation> relations, List<MultiTriggerRule> multiRules) {
+        this.multiRules = multiRules;
         dimensions = dims.size();
         int n = dimensions;
         dimSize = new int[n];
@@ -75,7 +78,7 @@ final class ConstraintPlan {
         }
 
         // nodes, ordered by their lowest dimension
-        int[] blockOf = ConstraintGraph.blockOf(n, relations.keySet());
+        int[] blockOf = ConstraintGraph.nodeOf(n, relations.keySet(), multiRules);
         int[] nodeOfDim = new int[n];
         List<List<Integer>> memberLists = new ArrayList<>();
         int[] nodeOfBlock = new int[n];
@@ -98,20 +101,23 @@ final class ConstraintPlan {
             if (members[x].length == 1) {
                 size[x] = dims.get(members[x][0]).size();
             } else {
-                values[x] = enumerate(members[x], dims, relations);
+                values[x] = enumerate(members[x], dims, relations, multiRules);
                 size[x] = values[x].length;
             }
         }
 
-        // single rules between different nodes
-        List<List<Object[]>> adjacency = new ArrayList<>(m);
-        for (int x = 0; x < m; x++) adjacency.add(new ArrayList<>());
+        // the rules between two different nodes; several rules may join the same two nodes when a compound
+        // rule has split a loop into two nodes, and then all of them restrict the pair of nodes together
+        List<java.util.Map<Integer, List<Link>>> adjacency = new ArrayList<>(m);
+        for (int x = 0; x < m; x++) adjacency.add(new java.util.LinkedHashMap<>());
         for (Map.Entry<Long, Relation> e : relations.entrySet()) {
             int u = (int) (e.getKey() >>> 32);
             int v = (int) (long) e.getKey();
             if (nodeOfDim[u] == nodeOfDim[v]) continue;
-            adjacency.get(nodeOfDim[u]).add(new Object[]{nodeOfDim[v], u, v, e.getValue(), true});
-            adjacency.get(nodeOfDim[v]).add(new Object[]{nodeOfDim[u], v, u, e.getValue(), false});
+            adjacency.get(nodeOfDim[u]).computeIfAbsent(nodeOfDim[v], k -> new ArrayList<>())
+                    .add(new Link(u, v, e.getValue().uToV()));
+            adjacency.get(nodeOfDim[v]).computeIfAbsent(nodeOfDim[u], k -> new ArrayList<>())
+                    .add(new Link(v, u, e.getValue().vToU()));
         }
 
         fromParent = new BitSet[m][];
@@ -129,12 +135,11 @@ final class ConstraintPlan {
             while (!queue.isEmpty()) {
                 int x = queue.poll();
                 order.add(x);
-                for (Object[] edge : adjacency.get(x)) {
-                    int other = (Integer) edge[0];
+                for (Map.Entry<Integer, List<Link>> edge : adjacency.get(x).entrySet()) {
+                    int other = edge.getKey();
                     if (visited[other]) continue;
                     visited[other] = true;
-                    fromParent[other] = rowsBetween(x, (Integer) edge[1], other, (Integer) edge[2],
-                            (Relation) edge[3], (Boolean) edge[4]);
+                    fromParent[other] = rowsBetween(x, other, edge.getValue());
                     childLists.get(x).add(other);
                     queue.add(other);
                 }
@@ -308,17 +313,27 @@ final class ConstraintPlan {
     }
 
     /** All assignments of the dimensions in {@code dimsOfNode} that satisfy every rule among them. */
-    private static int[][] enumerate(int[] dimsOfNode, List<List<?>> dims, Map<Long, Relation> relations) {
+    private static int[][] enumerate(int[] dimsOfNode, List<List<?>> dims, Map<Long, Relation> relations,
+                                      List<MultiTriggerRule> multiRules) {
         int len = dimsOfNode.length;
         List<int[]> out = new ArrayList<>();
         int[] current = new int[len];
-        fill(0, current, dimsOfNode, dims, relations, out);
+        List<MultiTriggerRule> blockRules;
+        if (multiRules.isEmpty()) {
+            blockRules = List.of();
+        } else {
+            blockRules = multiRules.stream().filter(rule -> rule.isInBlock(dimsOfNode)).toList();
+        }
+        fill(0, current, dimsOfNode, dims, relations, blockRules, out);
         return out.toArray(new int[0][]);
     }
 
     private static void fill(int pos, int[] current, int[] dimsOfNode, List<List<?>> dims,
-                             Map<Long, Relation> relations, List<int[]> out) {
+                             Map<Long, Relation> relations, List<MultiTriggerRule> blockRules, List<int[]> out) {
         if (pos == dimsOfNode.length) {
+            for (MultiTriggerRule rule : blockRules) {
+                if (!rule.isSatisfied(dimsOfNode, current)) return;
+            }
             out.add(current.clone());
             return;
         }
@@ -330,34 +345,78 @@ final class ConstraintPlan {
                 Relation rel = relations.get(ConstraintGraph.key(dimsOfNode[q], dimsOfNode[pos]));
                 if (rel != null && !rel.uToV()[current[q]].get(idx)) ok = false;
             }
-            if (ok) fill(pos + 1, current, dimsOfNode, dims, relations, out);
+            if (ok) fill(pos + 1, current, dimsOfNode, dims, relations, blockRules, out);
         }
     }
 
-    /** Rows[a] = values of {@code child} allowed when {@code parent} has value a, through the one rule between them. */
-    private BitSet[] rowsBetween(int parent, int parentDim, int child, int childDim, Relation rel,
-                                 boolean parentIsLow) {
-        BitSet[] rowsOfDim = parentIsLow ? rel.uToV() : rel.vToU();   // by the parent's dimension value
-        if (values[parent] == null && values[child] == null) {
-            return rowsOfDim;                                      // single dimensions: use the rows as they are
+    /** A rule between a dimension of one node and a dimension of another, as seen from the first node. */
+    private static final class Link {
+        final int parentDim;
+        final int childDim;
+        final BitSet[] rowsByParentValue;   // values of childDim allowed when parentDim has value a
+
+        Link(int parentDim, int childDim, BitSet[] rowsByParentValue) {
+            this.parentDim = parentDim;
+            this.childDim = childDim;
+            this.rowsByParentValue = rowsByParentValue;
         }
-        int parentPos = position(members[parent], parentDim);
-        int childPos = position(members[child], childDim);
-        // Values of the parent node that agree on the linked dimension have the same row: build each distinct
-        // row once and share it (rows are only read). A node of many joint assignments linked through one
-        // dimension then needs one row per value of that dimension, not one per assignment.
-        BitSet[] rowOfParentValue = new BitSet[rowsOfDim.length];
+    }
+
+    /** Hash key for the values that a node value takes on the dimensions that link it to another node. */
+    private static final class ValuesKey {
+        final int[] values;
+        private final int hash;
+
+        ValuesKey(int[] values) {
+            this.values = values;
+            this.hash = Arrays.hashCode(values);
+        }
+
+        @Override public int hashCode() {
+            return hash;
+        }
+
+        @Override public boolean equals(Object other) {
+            return other instanceof ValuesKey k && Arrays.equals(values, k.values);
+        }
+    }
+
+    /**
+     * Rows[a] = values of {@code child} allowed when {@code parent} has value a: the values for which every rule
+     * between the two nodes allows the pair. Parent values that agree on all the dimensions the rules touch share
+     * one row, which is only read.
+     */
+    private BitSet[] rowsBetween(int parent, int child, List<Link> links) {
+        if (links.size() == 1 && values[parent] == null && values[child] == null) {
+            return links.get(0).rowsByParentValue;                 // single dimensions: use the rows as they are
+        }
+        int count = links.size();
+        int[] parentPos = new int[count];
+        int[] childPos = new int[count];
+        for (int i = 0; i < count; i++) {
+            parentPos[i] = position(members[parent], links.get(i).parentDim);
+            childPos[i] = position(members[child], links.get(i).childDim);
+        }
+        java.util.Map<ValuesKey, BitSet> known = new java.util.HashMap<>();
         BitSet[] rows = new BitSet[size[parent]];
         for (int a = 0; a < size[parent]; a++) {
-            int parentValue = values[parent] == null ? a : values[parent][a][parentPos];
-            BitSet row = rowOfParentValue[parentValue];
+            int[] parentValues = new int[count];
+            for (int i = 0; i < count; i++) {
+                parentValues[i] = values[parent] == null ? a : values[parent][a][parentPos[i]];
+            }
+            ValuesKey key = new ValuesKey(parentValues);
+            BitSet row = known.get(key);
             if (row == null) {
                 row = new BitSet(size[child]);
                 for (int b = 0; b < size[child]; b++) {
-                    int childValue = values[child] == null ? b : values[child][b][childPos];
-                    if (rowsOfDim[parentValue].get(childValue)) row.set(b);
+                    boolean allowed = true;
+                    for (int i = 0; i < count && allowed; i++) {
+                        int childValue = values[child] == null ? b : values[child][b][childPos[i]];
+                        allowed = links.get(i).rowsByParentValue[parentValues[i]].get(childValue);
+                    }
+                    if (allowed) row.set(b);
                 }
-                rowOfParentValue[parentValue] = row;
+                known.put(key, row);
             }
             rows[a] = row;
         }
@@ -374,6 +433,11 @@ final class ConstraintPlan {
         for (int d = 1; d < dimensions; d++) {
             if (!agreesWithBelow(d, val[d], val)) return false;
         }
+        if (!multiRules.isEmpty()) {
+            for (MultiTriggerRule rule : multiRules) {
+                if (!rule.isSatisfied(val)) return false;
+            }
+        }
         return true;
     }
 
@@ -386,7 +450,7 @@ final class ConstraintPlan {
         if (dimsBelow.length == 0) {
             for (int idx = from; idx < dimSizeK; idx++) {
                 val[k] = idx;
-                if (last || hasCompletion(k + 1, val)) return idx;
+                if ((last && multiRules.isEmpty()) || hasCompletion(k + 1, val)) return idx;
             }
             return -1;
         }
@@ -400,15 +464,15 @@ final class ConstraintPlan {
                 if (!rows[i][val[dimsBelow[i]]].get(idx)) continue outer;
             }
             val[k] = idx;
-            if (last || hasCompletion(k + 1, val)) return idx;
+            if ((last && multiRules.isEmpty()) || hasCompletion(k + 1, val)) return idx;
         }
         return -1;
     }
 
     /**
-     * For the last dimension only: value idx is valid iff every rule between it and the (already
-     * consistent) earlier dimensions holds. Equivalent to {@code completions(n, val) > 0} but needs no
-     * walk over the whole tree.
+     * Checks the last dimension against its earlier pairwise neighbours. When compound rules are present,
+     * {@link #firstValid(int, int, int[])} also checks the completed joint assignment through the feasibility
+     * plan, because a multi-trigger implication cannot be decided from pairwise rows alone.
      */
     boolean agreesWithBelow(int d, int idx, int[] val) {
         int[] dimsBelow = belowDims[d];

@@ -2,7 +2,7 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.generator.product.compound;
+package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
 
@@ -39,7 +39,7 @@ import java.util.List;
  */
 public final class CompoundConditionalProductBuilder {
 
-    private final CompoundProductEngineBuilder delegate;
+    private final ConditionalProductBuilder delegate;
 
     /**
      * Creates a compound conditional product builder with one dimension.
@@ -47,10 +47,10 @@ public final class CompoundConditionalProductBuilder {
      * @param elements first dimension; copied
      */
     public CompoundConditionalProductBuilder(List<?> elements) {
-        this(new CompoundProductEngineBuilder(elements));
+        this(new ConditionalProductBuilder(elements));
     }
 
-    private CompoundConditionalProductBuilder(CompoundProductEngineBuilder delegate) {
+    private CompoundConditionalProductBuilder(ConditionalProductBuilder delegate) {
         this.delegate = delegate;
     }
 
@@ -76,9 +76,9 @@ public final class CompoundConditionalProductBuilder {
 
     /** First condition of a trigger expression. */
     public final class WhenDimension {
-        private final CompoundProductEngineBuilder.WhenDimension step;
+        private final ConditionalProductBuilder.WhenDimension step;
 
-        private WhenDimension(CompoundProductEngineBuilder.WhenDimension step) {
+        private WhenDimension(ConditionalProductBuilder.WhenDimension step) {
             this.step = step;
         }
 
@@ -94,9 +94,9 @@ public final class CompoundConditionalProductBuilder {
 
     /** A completed condition that can be extended with AND/OR or followed by a consequence. */
     public final class Trigger {
-        private final CompoundProductEngineBuilder.Trigger step;
+        private final ConditionalProductBuilder.Trigger step;
 
-        private Trigger(CompoundProductEngineBuilder.Trigger step) {
+        private Trigger(ConditionalProductBuilder.Trigger step) {
             this.step = step;
         }
 
@@ -115,9 +115,9 @@ public final class CompoundConditionalProductBuilder {
 
     /** Consequence of a compound trigger expression. */
     public final class ThenDimension {
-        private final CompoundProductEngineBuilder.ThenDimension step;
+        private final ConditionalProductBuilder.ThenDimension step;
 
-        private ThenDimension(CompoundProductEngineBuilder.ThenDimension step) {
+        private ThenDimension(ConditionalProductBuilder.ThenDimension step) {
             this.step = step;
         }
 

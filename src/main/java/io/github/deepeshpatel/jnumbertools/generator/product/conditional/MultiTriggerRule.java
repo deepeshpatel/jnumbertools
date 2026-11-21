@@ -2,7 +2,7 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.generator.product.compound;
+package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
 import java.util.ArrayList;
 import java.util.BitSet;
