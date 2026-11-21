@@ -37,6 +37,7 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
     private final int baseDepth;
     private boolean ready;
     private boolean exhausted;
+    private final Traversal traversal;
 
     PrunedLexGenerator(ConstraintModel model) {
         this(model, new int[0], 0, model.dimensions.get(0).size());
@@ -75,6 +76,7 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
         nextCandidate[baseDepth] = candidateFrom;
         candidateLimit[baseDepth] = candidateTo;
         if (candidateFrom == candidateTo) exhausted = true;
+        this.traversal = model.multiRules.isEmpty() ? new PairwiseTraversal() : new CompoundTraversal();
     }
 
     /** Whether completion lookahead is active (for tests). */
@@ -99,37 +101,90 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
     }
 
     private boolean advance() {
-        while (depth >= 0) {
-            int candidate = nextValidCandidate(depth, nextCandidate[depth]);
-            if (candidate >= candidateLimit[depth]) candidate = -1;
-            if (candidate < 0) {
-                if (depth == baseDepth) return false;
-                depth--;
-                nextCandidate[depth] = val[depth] + 1;
-                continue;
-            }
+        return traversal.advance();
+    }
 
-            val[depth] = candidate;
-            nextCandidate[depth] = candidate + 1;
-            if (!model.multiRules.isEmpty() && !model.acceptsPrefix(depth, val)) continue;
-            if (depth == dimensions - 1) {
-                emitted++;
-                return true;
-            }
-            if (lookaheadPlan == null && ++descents > WASTE_FLOOR + WASTE_RATIO * emitted) {
-                lookaheadPlan = model.plan();
-                if (lookaheadPlan.isEmpty()) return false;
-            }
+    /**
+     * Traversal strategies are selected once when the iterator is constructed. The pairwise
+     * candidate loop therefore contains no compound-mode test or compound-rule evaluation.
+     */
+    private abstract class Traversal {
+        abstract boolean advance();
+    }
 
-            // The feasibility tier rejects a prefix with no valid completion before its suffix is explored.
-            if (lookaheadPlan != null && !lookaheadPlan.hasCompletion(depth + 1, val)) {
-                continue;
-            }
+    /** Hot path for ordinary pairwise conditional products. */
+    private final class PairwiseTraversal extends Traversal {
+        @Override
+        boolean advance() {
+            while (depth >= 0) {
+                int candidate = nextValidCandidate(depth, nextCandidate[depth]);
+                if (candidate >= candidateLimit[depth]) candidate = -1;
+                if (candidate < 0) {
+                    if (depth == baseDepth) return false;
+                    depth--;
+                    nextCandidate[depth] = val[depth] + 1;
+                    continue;
+                }
 
-            depth++;
-            nextCandidate[depth] = 0;
+                val[depth] = candidate;
+                nextCandidate[depth] = candidate + 1;
+                if (depth == dimensions - 1) {
+                    emitted++;
+                    return true;
+                }
+                if (lookaheadPlan == null && ++descents > WASTE_FLOOR + WASTE_RATIO * emitted) {
+                    lookaheadPlan = model.plan();
+                    if (lookaheadPlan.isEmpty()) return false;
+                }
+
+                // The feasibility tier rejects a prefix with no valid completion before its suffix is explored.
+                if (lookaheadPlan != null && !lookaheadPlan.hasCompletion(depth + 1, val)) {
+                    continue;
+                }
+
+                depth++;
+                nextCandidate[depth] = 0;
+            }
+            return false;
         }
-        return false;
+    }
+
+    /** Compound traversal checks each compound implication as soon as its scope is assigned. */
+    private final class CompoundTraversal extends Traversal {
+        @Override
+        boolean advance() {
+            while (depth >= 0) {
+                int candidate = nextValidCandidate(depth, nextCandidate[depth]);
+                if (candidate >= candidateLimit[depth]) candidate = -1;
+                if (candidate < 0) {
+                    if (depth == baseDepth) return false;
+                    depth--;
+                    nextCandidate[depth] = val[depth] + 1;
+                    continue;
+                }
+
+                val[depth] = candidate;
+                nextCandidate[depth] = candidate + 1;
+                if (!model.acceptsPrefix(depth, val)) continue;
+                if (depth == dimensions - 1) {
+                    emitted++;
+                    return true;
+                }
+                if (lookaheadPlan == null && ++descents > WASTE_FLOOR + WASTE_RATIO * emitted) {
+                    lookaheadPlan = model.plan();
+                    if (lookaheadPlan.isEmpty()) return false;
+                }
+
+                // The feasibility tier rejects a prefix with no valid completion before its suffix is explored.
+                if (lookaheadPlan != null && !lookaheadPlan.hasCompletion(depth + 1, val)) {
+                    continue;
+                }
+
+                depth++;
+                nextCandidate[depth] = 0;
+            }
+            return false;
+        }
     }
 
     /** Returns the first allowed candidate at or after {@code from}, or -1 if none exists. */
