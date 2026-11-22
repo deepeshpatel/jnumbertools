@@ -102,12 +102,23 @@ final class AnyOrderGenerator extends AbstractGenerator<Object> {
             return lower;
         }
 
-        /** Candidate tuples below the current prefix in the current range, before any pruning (saturating). */
+        /**
+         * Candidate tuples below the current prefix in the current range, before any pruning (saturating).
+         *
+         * <p>An empty range, or an empty dimension below the prefix, means there is no tuple at all. That is
+         * checked before multiplying: the product saturates at {@code Long.MAX_VALUE}, which would otherwise
+         * hide an empty dimension that comes after the dimensions that overflow it.</p>
+         */
         private long workBound() {
+            if (to <= from) return 0;
+            int dimensions = model.dimensions.size();
+            for (int d = prefix.length + 1; d < dimensions; d++) {
+                if (model.dimensions.get(d).isEmpty()) return 0;
+            }
             long bound = to - from;
-            for (int d = prefix.length + 1; d < model.dimensions.size(); d++) {
+            for (int d = prefix.length + 1; d < dimensions; d++) {
                 long size = model.dimensions.get(d).size();
-                if (size != 0 && bound > Long.MAX_VALUE / size) return Long.MAX_VALUE;
+                if (bound > Long.MAX_VALUE / size) return Long.MAX_VALUE;
                 bound *= size;
             }
             return bound;

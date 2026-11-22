@@ -7,11 +7,13 @@ package io.github.deepeshpatel.jnumbertools.benchmarks.compoundcomparison;
 import io.github.deepeshpatel.jnumbertools.base.CartesianProduct;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.CompoundConditionalProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.ConditionalProductBuilder;
+import io.github.deepeshpatel.jnumbertools.benchmarks.compoundcomparison.GenerationChecks.Summary;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 /**
  * Compares complete generation through the compound and pairwise APIs backed by the shared conditional-product engine.
@@ -23,8 +25,17 @@ import java.util.concurrent.TimeUnit;
  *
  * <p>Builder construction and rule registration happen in trial setup, outside the timed
  * methods. Each invocation creates the generator and consumes every tuple through the same
- * hash reduction. The correctness guard compares result summaries without requiring equal
- * encounter order.</p>
+ * hash reduction.</p>
+ *
+ * <p>Every rule here links two dimensions, so the compound builder's model has no multi-trigger rule and
+ * its generator takes the pairwise traversal. This benchmark therefore measures the overhead of the compound
+ * API wrapper against the pairwise API. The compound traversal itself is measured by
+ * {@link CompoundMultiTriggerGenerationBenchmark}.</p>
+ *
+ * <p>Trial setup checks the exact stream code that is timed. The sequential and the parallel stream of every
+ * generator are summarised and compared with an independent brute-force result, so the parallel
+ * spliterators are validated too. Each timed method must also return the expected hash sum. Encounter order
+ * is not compared.</p>
  *
  * <p>The shared rule shape is a chain: whenever dimension i contains 0, dimension i+1 must
  * not contain 0. Both APIs receive exactly these rules. The larger scenarios increase the
@@ -78,16 +89,38 @@ public class CompoundVsPairwiseGenerationBenchmark {
                     .then(target).isNot(0);
         }
 
-        GenerationSummary compound = summarize(compoundBuilder.generate());
-        GenerationSummary pairwiseAnyOrder = summarize(conditionalBuilder.anyOrder());
-        GenerationSummary pairwiseLexOrder = summarize(conditionalBuilder.lexOrder());
-        if (!compound.equals(pairwiseAnyOrder) || !compound.equals(pairwiseLexOrder)) {
-            throw new IllegalStateException(
-                    "Implementations produced different results for " + scenario
-                            + ": compound=" + compound
-                            + ", pairwiseAnyOrder=" + pairwiseAnyOrder
-                            + ", pairwiseLexOrder=" + pairwiseLexOrder);
-        }
+        int[] sizes = new int[dimensionsCount];
+        java.util.Arrays.fill(sizes, domainSize);
+        Predicate<int[]> chain = tuple -> {
+            for (int i = 0; i + 1 < tuple.length; i++) {
+                if (tuple[i] == 0 && tuple[i + 1] == 0) return false;
+            }
+            return true;
+        };
+        Summary expected = GenerationChecks.oracle(sizes, chain);
+        long expectedHashSum = GenerationChecks.hashSum(sizes, chain);
+
+        GenerationChecks.require(scenario, "compound generate()", expected,
+                GenerationChecks.summarize(compoundBuilder.generate().stream()));
+        GenerationChecks.require(scenario, "compound generate() parallel", expected,
+                GenerationChecks.summarize(compoundBuilder.generate().stream().parallel()));
+        GenerationChecks.require(scenario, "pairwise anyOrder()", expected,
+                GenerationChecks.summarize(conditionalBuilder.anyOrder().stream()));
+        GenerationChecks.require(scenario, "pairwise anyOrder() parallel", expected,
+                GenerationChecks.summarize(conditionalBuilder.anyOrder().stream().parallel()));
+        GenerationChecks.require(scenario, "pairwise lexOrder()", expected,
+                GenerationChecks.summarize(conditionalBuilder.lexOrder().stream()));
+        GenerationChecks.require(scenario, "pairwise lexOrder() parallel", expected,
+                GenerationChecks.summarize(conditionalBuilder.lexOrder().stream().parallel()));
+
+        GenerationChecks.require(scenario, "compoundGenerate()", expectedHashSum, compoundGenerate());
+        GenerationChecks.require(scenario, "conditionalAnyOrder()", expectedHashSum, conditionalAnyOrder());
+        GenerationChecks.require(scenario, "conditionalLexOrder()", expectedHashSum, conditionalLexOrder());
+        GenerationChecks.require(scenario, "compoundGenerateParallel()", expectedHashSum, compoundGenerateParallel());
+        GenerationChecks.require(scenario, "conditionalAnyOrderParallel()", expectedHashSum,
+                conditionalAnyOrderParallel());
+        GenerationChecks.require(scenario, "conditionalLexOrderParallel()", expectedHashSum,
+                conditionalLexOrderParallel());
     }
 
     @Benchmark
@@ -130,29 +163,5 @@ public class CompoundVsPairwiseGenerationBenchmark {
         return conditionalBuilder.lexOrder().stream().parallel()
                 .mapToLong(List::hashCode)
                 .sum();
-    }
-
-    private static GenerationSummary summarize(Iterable<List<Object>> tuples) {
-        long count = 0;
-        long sum = 0;
-        long xor = 0;
-
-        for (List<Object> tuple : tuples) {
-            long hash = mix64(tuple.hashCode());
-            count++;
-            sum += hash;
-            xor ^= Long.rotateLeft(hash, (int) (hash & 63));
-        }
-
-        return new GenerationSummary(count, sum, xor);
-    }
-
-    private static long mix64(long value) {
-        value = (value ^ (value >>> 30)) * 0xbf58476d1ce4e5b9L;
-        value = (value ^ (value >>> 27)) * 0x94d049bb133111ebL;
-        return value ^ (value >>> 31);
-    }
-
-    private record GenerationSummary(long count, long sum, long xor) {
     }
 }
