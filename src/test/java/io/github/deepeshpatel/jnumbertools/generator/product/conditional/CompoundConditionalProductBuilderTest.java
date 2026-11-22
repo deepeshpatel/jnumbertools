@@ -26,7 +26,7 @@ class CompoundConditionalProductBuilderTest {
         List<String> browser = List.of("Chrome", "Safari", "Firefox");
         List<String> database = List.of("PostgreSQL", "Oracle");
 
-        var product = cartesianProduct.compoundConditionalProductOf(os, browser, database)
+        var product = cartesianProduct.compoundProductOf(os, browser, database)
                 .when(browser).is("Safari").and(os).is("Windows")
                 .or(browser).is("Chrome").and(os).is("Linux")
                 .then(database).isNot("PostgreSQL");
@@ -42,7 +42,7 @@ class CompoundConditionalProductBuilderTest {
         List<String> b = List.of("b0", "b1");
         List<String> target = List.of("x", "y");
 
-        var product = cartesianProduct.compoundConditionalProductOf(a)
+        var product = cartesianProduct.compoundProductOf(a)
                 .and(b)
                 .and(target)
                 .when(a).is("a1").and(b).is("b1")
@@ -60,7 +60,7 @@ class CompoundConditionalProductBuilderTest {
         List<String> b = List.of("b");
         List<String> target = List.of("x");
 
-        var product = cartesianProduct.compoundConditionalProductOf(a, b, target)
+        var product = cartesianProduct.compoundProductOf(a, b, target)
                 .when(a).is("a").and(b).is("b")
                 .then(target).isNoneOf("x");
 
@@ -74,7 +74,7 @@ class CompoundConditionalProductBuilderTest {
         List<String> os = List.of("Windows", "macOS", "Linux");
         List<String> browser = List.of("Chrome", "Safari", "Firefox");
         List<String> database = List.of("PostgreSQL", "Oracle");
-        var product = cartesianProduct.compoundConditionalProductOf(os, browser, database)
+        var product = cartesianProduct.compoundProductOf(os, browser, database)
                 .when(browser).is("Safari").and(os).is("Windows")
                 .or(browser).is("Chrome").and(os).is("Linux")
                 .then(database).isNot("PostgreSQL");
@@ -106,7 +106,7 @@ class CompoundConditionalProductBuilderTest {
     void orAlternativesOnOneDimensionAreSupported() {
         List<String> os = List.of("Windows", "macOS", "Linux");
         List<String> browser = List.of("Chrome", "Safari", "Firefox");
-        var product = cartesianProduct.compoundConditionalProductOf(os, browser)
+        var product = cartesianProduct.compoundProductOf(os, browser)
                 .when(browser).is("Safari").or(browser).is("Chrome")
                 .then(os).is("Windows");
 
@@ -129,7 +129,7 @@ class CompoundConditionalProductBuilderTest {
         List<String> d = List.of("d0", "d1");
         List<String> target = List.of("x", "y");
 
-        var product = cartesianProduct.compoundConditionalProductOf(a, b, c, d, target)
+        var product = cartesianProduct.compoundProductOf(a, b, c, d, target)
                 .when(a).is("a1").and(b).is("b1").and(c).is("c1").and(d).is("d1")
                 .then(target).is("y");
 
@@ -143,7 +143,7 @@ class CompoundConditionalProductBuilderTest {
         List<String> a = List.of("a");
         List<String> b = List.of("b");
         List<String> target = List.of("x", "y");
-        var product = cartesianProduct.compoundConditionalProductOf(a, b, target)
+        var product = cartesianProduct.compoundProductOf(a, b, target)
                 .when(a).is("a").and(b).is("b")
                 .then(target).isNoneOf("x", "y");
 
@@ -187,7 +187,7 @@ class CompoundConditionalProductBuilderTest {
         var a = values(n); var b = values(n); var c = values(n);
         var d = values(n); var e = values(n); var f = values(n);
 
-        var product = cartesianProduct.compoundConditionalProductOf(a, b, c, d, e, f)
+        var product = cartesianProduct.compoundProductOf(a, b, c, d, e, f)
                 .when(a).is(0).then(b).isNot(0)
                 .when(b).is(1).then(c).isNot(0)
                 .when(c).is(2).then(d).isNot(2)
@@ -215,7 +215,7 @@ class CompoundConditionalProductBuilderTest {
         var a = values(n); var b = values(n); var c = values(n);
         var d = values(n); var e = values(n); var f = values(n);
 
-        var product = cartesianProduct.compoundConditionalProductOf(a, b, c, d, e, f)
+        var product = cartesianProduct.compoundProductOf(a, b, c, d, e, f)
                 .when(a).is(0).then(b).isNot(0)
                 .when(b).is(1).then(c).isNot(0)
                 .when(c).is(2).then(d).isNot(2)
@@ -239,7 +239,7 @@ class CompoundConditionalProductBuilderTest {
         var d = values(n); var e = values(n); var f = values(n);
 
         // both scopes contain f, and c is linked to the joined scope by two pairwise rules
-        var product = cartesianProduct.compoundConditionalProductOf(a, b, c, d, e, f)
+        var product = cartesianProduct.compoundProductOf(a, b, c, d, e, f)
                 .when(a).is(0).then(b).isNot(0)
                 .when(b).is(1).then(c).isNot(0)
                 .when(c).is(2).then(d).isNot(2)
@@ -263,7 +263,7 @@ class CompoundConditionalProductBuilderTest {
         var e = values(n); var x = values(n); var y = values(n);
 
         // the chain a-b-c-d-e joins the scopes {a,d,x} and {b,e,y}, so no single scope can be set apart
-        var product = cartesianProduct.compoundConditionalProductOf(a, b, c, d, e, x, y)
+        var product = cartesianProduct.compoundProductOf(a, b, c, d, e, x, y)
                 .when(a).is(0).then(b).isNot(0)
                 .when(b).is(1).then(c).isNot(0)
                 .when(c).is(2).then(d).isNot(2)
@@ -287,7 +287,7 @@ class CompoundConditionalProductBuilderTest {
 
         // The pairwise rules force b=1 and c=2, and c=2 forces a=0. Then a=0 with c=2 triggers the compound
         // rule, which allows no value of f at all.
-        var product = cartesianProduct.compoundConditionalProductOf(a, b, c, f)
+        var product = cartesianProduct.compoundProductOf(a, b, c, f)
                 .when(a).isNot(1).then(b).is(1)
                 .when(a).is(1).then(b).is(1)
                 .when(b).is(1).then(c).is(2)
@@ -312,7 +312,7 @@ class CompoundConditionalProductBuilderTest {
         var a = values(n); var b = values(n); var c = values(n); var f = values(n);
 
         // The pairwise rules force b=1 and c=2; the compound rule then rules out a=0, leaving a in {1, 2}.
-        var product = cartesianProduct.compoundConditionalProductOf(a, b, c, f)
+        var product = cartesianProduct.compoundProductOf(a, b, c, f)
                 .when(a).isNot(1).then(b).is(1)
                 .when(a).is(1).then(b).is(1)
                 .when(b).is(1).then(c).is(2)
@@ -333,7 +333,7 @@ class CompoundConditionalProductBuilderTest {
         int n = 40;   // 40^4 = 2,560,000 combinations
         var a = values(n); var b = values(n); var c = values(n); var d = values(n);
 
-        var product = cartesianProduct.compoundConditionalProductOf(a, b, c, d)
+        var product = cartesianProduct.compoundProductOf(a, b, c, d)
                 .when(a).is(0).then(b).isNot(0)
                 .when(b).is(0).then(c).isNot(0)
                 .when(c).is(0).then(d).isNot(0);

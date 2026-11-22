@@ -132,7 +132,7 @@ public final class CartesianProduct {
      * <p>
      * Add further dimensions with {@code and(list)}. Rules refer to dimensions by the same list
      * instances passed to this builder. For compound AND/OR trigger expressions, use
-     * {@link #compoundConditionalProductOf(List)} instead.
+     * {@link #compoundProductOf(List)} instead.
      * See {@link ConditionalProductBuilder} for rule semantics and constraint-size limits.
      * </p>
      *
@@ -161,14 +161,7 @@ public final class CartesianProduct {
      */
     public ConditionalProductBuilder conditionalProductOf(
             List<?> first, List<?> second, List<?>... additional) {
-        Util.validateInput(first);
-        Util.validateInput(second);
-
-        ConditionalProductBuilder builder = new ConditionalProductBuilder(first).and(second);
-        for (List<?> dimension : additional) {
-            builder = builder.and(dimension);
-        }
-        return builder;
+        return new ConditionalProductBuilder(first, second, additional);
     }
 
     /**
@@ -183,8 +176,7 @@ public final class CartesianProduct {
      * @return a compound conditional product builder
      * @throws NullPointerException if {@code elements} is null or contains a null element
      */
-    public CompoundConditionalProductBuilder compoundConditionalProductOf(List<?> elements) {
-        Util.validateInput(elements);
+    public CompoundConditionalProductBuilder compoundProductOf(List<?> elements) {
         return new CompoundConditionalProductBuilder(elements);
     }
 
@@ -196,15 +188,9 @@ public final class CartesianProduct {
      * @param additional further dimensions, in product order
      * @return a compound conditional product builder containing all supplied dimensions
      */
-    public CompoundConditionalProductBuilder compoundConditionalProductOf(
+    public CompoundConditionalProductBuilder compoundProductOf(
             List<?> first, List<?> second, List<?>... additional) {
-        Util.validateInput(first);
-        Util.validateInput(second);
-        CompoundConditionalProductBuilder builder = new CompoundConditionalProductBuilder(first).and(second);
-        for (List<?> dimension : additional) {
-            builder = builder.and(dimension);
-        }
-        return builder;
+        return new CompoundConditionalProductBuilder(first, second, additional);
     }
 
     /**

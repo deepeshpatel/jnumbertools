@@ -49,7 +49,7 @@ import java.util.Random;
  * pairwise rule is combined with the other rules using AND. Dimensions are identified by the same
  * list instance passed to {@code conditionalProductOf} or {@code and}. For compound AND/OR trigger
  * expressions, use {@link CompoundConditionalProductBuilder} through
- * {@code compoundConditionalProductOf(...)}.</p>
+ * {@code compoundProductOf(...)}.</p>
  *
  * <h2>What is supported</h2>
  * <p>This builder supports pairwise rules expressed with {@code when(...).then(...)}.
@@ -163,6 +163,32 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     public ConditionalProductBuilder(List<?> elements) {
         this(new ConstraintModel(List.<List<?>>of(snapshot(elements)), PersistentRelationMap.empty()),
                 List.<List<?>>of(elements));
+    }
+
+    /**
+     * Creates a builder with two or more dimensions, equivalent to calling
+     * {@link #ConditionalProductBuilder(List)} with {@code first} and then adding each remaining
+     * dimension through {@link #and(List)}. The dimensions retain the supplied order.
+     *
+     * @param first the first dimension; copied. An empty list is allowed and makes the product empty.
+     * @param second the second dimension; copied
+     * @param additional any further dimensions, in product order; each copied
+     * @throws NullPointerException if any dimension is null or contains a null element
+     */
+    public ConditionalProductBuilder(List<?> first, List<?> second, List<?>... additional) {
+        this(chain(first, second, additional));
+    }
+
+    private static ConditionalProductBuilder chain(List<?> first, List<?> second, List<?>... additional) {
+        ConditionalProductBuilder builder = new ConditionalProductBuilder(first).and(second);
+        for (List<?> dimension : additional) {
+            builder = builder.and(dimension);
+        }
+        return builder;
+    }
+
+    private ConditionalProductBuilder(ConditionalProductBuilder source) {
+        this(source.model, source.originals);
     }
 
     private ConditionalProductBuilder(ConstraintModel model, List<List<?>> originals) {

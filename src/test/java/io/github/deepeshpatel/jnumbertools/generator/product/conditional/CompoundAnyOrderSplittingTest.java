@@ -29,7 +29,7 @@ class CompoundAnyOrderSplittingTest {
         List<List<Integer>> large = new ArrayList<>();
         for (int i = 0; i < 7; i++) large.add(range(1000));
         List<Integer> empty = new ArrayList<>();
-        var product = cartesianProduct.compoundConditionalProductOf(large.get(0), large.get(1),
+        var product = cartesianProduct.compoundProductOf(large.get(0), large.get(1),
                 large.get(2), large.get(3), large.get(4), large.get(5), large.get(6), empty);
 
         Spliterator<List<Object>> spliterator = product.generate().spliterator();
@@ -49,7 +49,7 @@ class CompoundAnyOrderSplittingTest {
         List<List<Integer>> large = new ArrayList<>();
         for (int i = 0; i < 7; i++) large.add(range(1000));
         List<Integer> empty = new ArrayList<>();
-        var product = cartesianProduct.compoundConditionalProductOf(a, b, c)
+        var product = cartesianProduct.compoundProductOf(a, b, c)
                 .and(large.get(0)).and(large.get(1)).and(large.get(2)).and(large.get(3))
                 .and(large.get(4)).and(large.get(5)).and(large.get(6)).and(empty)
                 .when(a).is(0).and(b).is(1).then(c).isNot(0);

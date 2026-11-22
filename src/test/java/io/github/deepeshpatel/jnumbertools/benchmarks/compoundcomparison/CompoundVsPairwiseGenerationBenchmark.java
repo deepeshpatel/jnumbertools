@@ -72,7 +72,7 @@ public class CompoundVsPairwiseGenerationBenchmark {
         }
 
         CartesianProduct products = new CartesianProduct();
-        compoundBuilder = products.compoundConditionalProductOf(
+        compoundBuilder = products.compoundProductOf(
                 dimensions.get(0), dimensions.get(1),
                 dimensions.subList(2, dimensionsCount).toArray(List<?>[]::new));
         conditionalBuilder = products.conditionalProductOf(

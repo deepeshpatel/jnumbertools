@@ -182,7 +182,7 @@ hold together. The condition side offers `is`, `isNot`, `isOneOf`, `isNoneOf` an
 of `isNoneOf(...)` and is retained as a familiar alternative name. Several rules may share the same trigger.
 
 **Dimensions are identified by list instance.** `when(...)` and `then(...)` take the same `List` object that was
-passed to `conditionalProductOf` or to `compoundConditionalProductOf(...)`. Using one list instance for two dimensions is ambiguous and is rejected.
+passed to `conditionalProductOf` or to `compoundProductOf(...)`. Using one list instance for two dimensions is ambiguous and is rejected.
 A rule value that is not in the dimension, or an empty list of values, is rejected, and so is a rule between a
 dimension and itself.
 
@@ -199,7 +199,7 @@ dimension and itself.
 ### 4. Compound Conditional Cartesian Product
 
 For rules whose trigger depends on multiple dimensions, use the separate
-`compoundConditionalProductOf(...)` entry point. Its concrete
+`compoundProductOf(...)` entry point. Its concrete
 `CompoundConditionalProductBuilder` exposes only the operations supported by this
 execution model: lazy generation, exact counting and emptiness checks.
 
@@ -209,7 +209,7 @@ var browser = List.of("Chrome", "Safari", "Firefox");
 var database = List.of("PostgreSQL", "Oracle");
 
 var products = JNumberTools.cartesianProduct()
-        .compoundConditionalProductOf(os, browser, database)
+        .compoundProductOf(os, browser, database)
         .when(browser).is("Safari").and(os).is("Windows")
         .or(browser).is("Chrome").and(os).is("Linux")
         .then(database).isNot("PostgreSQL");

@@ -8,12 +8,15 @@ All notable changes to JNumberTools are recorded here. The format follows
 ### Added
 
 - Added a multi-list `conditionalProductOf(first, second, additional...)` overload alongside the
-  existing single-list entry point and `.and(...)` chaining.
-- Added compound AND/OR trigger expressions through a separate `compoundConditionalProductOf(...)` entry
+  existing single-list entry point and `.and(...)` chaining, and a matching
+  `new ConditionalProductBuilder(first, second, additional...)` constructor.
+- Added compound AND/OR trigger expressions through a separate `compoundProductOf(...)` entry
   point: `.when(dim).is(v).and(dim2).is(v2).or(dim3)...then(dim4).is(v4)`, interpreted as an OR of AND-groups,
   with AND binding more tightly than OR. Its `CompoundConditionalProductBuilder` exposes `generate()`,
-  `count()` and `isEmpty()`. `conditionalProductOf(...)` remains the pairwise-only entry point and additionally
-  exposes `lexOrder()`, `lexOrderMth()`, `byRanks()`, `choice()` and `sample()`.
+  `count()` and `isEmpty()`, and now has a matching
+  `new CompoundConditionalProductBuilder(first, second, additional...)` constructor alongside the
+  single-dimension one. `conditionalProductOf(...)` remains the pairwise-only entry point and
+  additionally exposes `lexOrder()`, `lexOrderMth()`, `byRanks()`, `choice()` and `sample()`.
 
 ### Fixed
 
@@ -34,11 +37,14 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ### Changed
 
-- Unified the compound and pairwise conditional-product engines. `conditionalProductOf(...)` and
-  `compoundConditionalProductOf(...)` now share one implementation; the previously separate, fully
-  duplicated `compound` package is gone. No public API changed as a result, other than the
-  `conditionalProductOf(...)` builder now also accepting `.and(...)/.or(...)` compound trigger
-  expressions directly.
+- Unified the compound and pairwise conditional-product engines internally.
+  `CompoundConditionalProductBuilder` (returned by `compoundProductOf(...)`) now delegates to the same
+  `ConditionalProductBuilder`/model that `conditionalProductOf(...)` uses, instead of a separate,
+  fully duplicated `compound` package, which is gone. The public API is unchanged by this: the two
+  entry points and their two builders remain separate, and `conditionalProductOf(...)`'s own
+  `.and(...)/.or(...)` trigger methods remain package-private (not reachable from
+  `ConditionalProductBuilder` directly).
+- Renamed `compoundConditionalProductOf(...)` to `compoundProductOf(...)` on `CartesianProduct`.
 
 
 ## [4.1.0] - Released 2026-11-20

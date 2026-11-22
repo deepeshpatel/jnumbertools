@@ -19,7 +19,7 @@ import java.util.List;
  *
  * <pre>{@code
  * var products = JNumberTools.cartesianProduct()
- *         .compoundConditionalProductOf(os, browser, database)
+ *         .compoundProductOf(os, browser, database)
  *         .when(browser).is("Safari").and(os).is("Windows")
  *         .or(browser).is("Chrome").and(os).is("Linux")
  *         .then(database).isNot("PostgreSQL")
@@ -32,7 +32,7 @@ import java.util.List;
  * operations are intentionally not exposed by this builder.</p>
  *
  * <p>Dimensions are identified by the same list instances supplied to
- * {@code compoundConditionalProductOf(...)} or {@link #and(List)}. Dimension values are
+ * {@code compoundProductOf(...)} or {@link #and(List)}. Dimension values are
  * copied when the builder is created. Instances are immutable and thread-safe.</p>
  *
  * @author Deepesh Patel
@@ -48,6 +48,20 @@ public final class CompoundConditionalProductBuilder {
      */
     public CompoundConditionalProductBuilder(List<?> elements) {
         this(new ConditionalProductBuilder(elements));
+    }
+
+    /**
+     * Creates a compound conditional product builder with two or more dimensions, equivalent to
+     * calling {@link #CompoundConditionalProductBuilder(List)} with {@code first} and then adding
+     * each remaining dimension through {@link #and(List)}. The dimensions retain the supplied order.
+     *
+     * @param first the first dimension; copied
+     * @param second the second dimension; copied
+     * @param additional any further dimensions, in product order; each copied
+     * @throws NullPointerException if any dimension is null or contains a null element
+     */
+    public CompoundConditionalProductBuilder(List<?> first, List<?> second, List<?>... additional) {
+        this(new ConditionalProductBuilder(first, second, additional));
     }
 
     private CompoundConditionalProductBuilder(ConditionalProductBuilder delegate) {

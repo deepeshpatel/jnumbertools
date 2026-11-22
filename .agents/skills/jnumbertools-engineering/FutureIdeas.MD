@@ -113,12 +113,12 @@ Notes carried over from the retired `ConditionalProductRefactring.md`. They are 
 
 Notes carried over from the retired `ENGINEERING-4.1.1.md`. They are not approved features.
 
-- **Whether `compoundConditionalProductOf(...)` / `CompoundConditionalProductBuilder` should still exist.**
+- **Whether `compoundProductOf(...)` / `CompoundConditionalProductBuilder` should still exist.**
   The compound and pairwise engines were unified under the hood: both now share one `ConditionalProductBuilder`
   and one constraint model. But the public surfaces were not unified. `ConditionalProductBuilder.Trigger.and()`
   and `.or()` are package-private, so `conditionalProductOf(...)` only ever gives a caller single-condition
   pairwise rules (`.when(x).is(v).then(y).is(w)`); the `.and(...)/.or(...)` compound syntax is reachable only
-  through `compoundConditionalProductOf(...)` / `CompoundConditionalProductBuilder`, which is itself limited to
+  through `compoundProductOf(...)` / `CompoundConditionalProductBuilder`, which is itself limited to
   `generate()`, `count()` and `isEmpty()` and does not expose `lexOrder()`, `lexOrderMth()`, `byRanks()`,
   `choice()` or `sample()` even when a rule set happens to collapse to pairwise. So today there are two
   builders, each with a capability the other lacks, and neither is a strict subset of the other. Worth deciding

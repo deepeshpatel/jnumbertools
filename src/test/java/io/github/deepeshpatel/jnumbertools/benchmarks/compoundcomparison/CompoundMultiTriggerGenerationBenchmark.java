@@ -66,7 +66,7 @@ public class CompoundMultiTriggerGenerationBenchmark {
             dimensions.add(List.copyOf(values));
         }
 
-        compoundBuilder = new CartesianProduct().compoundConditionalProductOf(
+        compoundBuilder = new CartesianProduct().compoundProductOf(
                 dimensions.get(0), dimensions.get(1),
                 dimensions.subList(2, dimensionsCount).toArray(List<?>[]::new));
         for (int i = 0; i < dimensionsCount - 1; i++) {
