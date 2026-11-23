@@ -28,8 +28,8 @@ class CompoundConditionalProductBuilderTest {
         List<String> database = List.of("PostgreSQL", "Oracle");
 
         var product = cartesianProduct.compoundProductOf(os, browser, database)
-                .when(browser).is("Safari").and(os).is("Windows")
-                .or(browser).is("Chrome").and(os).is("Linux")
+                .when(condition(browser).is("Safari").and(condition(os).is("Windows"))
+                .or(condition(browser).is("Chrome")).and(condition(os).is("Linux")))
                 .then(database).isNot("PostgreSQL");
 
         assertEquals(BigInteger.valueOf(16), product.count());
@@ -46,9 +46,9 @@ class CompoundConditionalProductBuilderTest {
         var product = cartesianProduct.compoundProductOf(a)
                 .and(b)
                 .and(target)
-                .when(a).is("a1").and(b).is("b1")
+                .when(condition(a).is("a1").and(condition(b).is("b1")))
                 .then(target).is("y")
-                .when(a).is("a0")
+                .when(condition(a).is("a0"))
                 .then(target).is("x");
 
         assertEquals(BigInteger.valueOf(5), product.count());
@@ -62,7 +62,7 @@ class CompoundConditionalProductBuilderTest {
         List<String> target = List.of("x");
 
         var product = cartesianProduct.compoundProductOf(a, b, target)
-                .when(a).is("a").and(b).is("b")
+                .when(condition(a).is("a").and(condition(b).is("b")))
                 .then(target).isNoneOf("x");
 
         assertEquals(BigInteger.ZERO, product.count());
@@ -76,8 +76,8 @@ class CompoundConditionalProductBuilderTest {
         List<String> browser = List.of("Chrome", "Safari", "Firefox");
         List<String> database = List.of("PostgreSQL", "Oracle");
         var product = cartesianProduct.compoundProductOf(os, browser, database)
-                .when(browser).is("Safari").and(os).is("Windows")
-                .or(browser).is("Chrome").and(os).is("Linux")
+                .when(condition(browser).is("Safari").and(condition(os).is("Windows"))
+                .or(condition(browser).is("Chrome")).and(condition(os).is("Linux")))
                 .then(database).isNot("PostgreSQL");
 
         List<List<Object>> expected = List.of(
@@ -108,7 +108,7 @@ class CompoundConditionalProductBuilderTest {
         List<String> os = List.of("Windows", "macOS", "Linux");
         List<String> browser = List.of("Chrome", "Safari", "Firefox");
         var product = cartesianProduct.compoundProductOf(os, browser)
-                .when(browser).is("Safari").or(browser).is("Chrome")
+                .when(condition(browser).is("Safari").or(condition(browser).is("Chrome")))
                 .then(os).is("Windows");
 
         assertEquals(BigInteger.valueOf(5), product.count());
@@ -131,7 +131,7 @@ class CompoundConditionalProductBuilderTest {
         List<String> target = List.of("x", "y");
 
         var product = cartesianProduct.compoundProductOf(a, b, c, d, target)
-                .when(a).is("a1").and(b).is("b1").and(c).is("c1").and(d).is("d1")
+                .when(condition(a).is("a1").and(condition(b).is("b1")).and(condition(c).is("c1")).and(condition(d).is("d1")))
                 .then(target).is("y");
 
         assertEquals(BigInteger.valueOf(31), product.count());
@@ -145,7 +145,7 @@ class CompoundConditionalProductBuilderTest {
         List<String> b = List.of("b");
         List<String> target = List.of("x", "y");
         var product = cartesianProduct.compoundProductOf(a, b, target)
-                .when(a).is("a").and(b).is("b")
+                .when(condition(a).is("a").and(condition(b).is("b")))
                 .then(target).isNoneOf("x", "y");
 
         assertEquals(BigInteger.ZERO, product.count());
@@ -189,11 +189,11 @@ class CompoundConditionalProductBuilderTest {
         var d = values(n); var e = values(n); var f = values(n);
 
         var product = cartesianProduct.compoundProductOf(a, b, c, d, e, f)
-                .when(a).is(0).then(b).isNot(0)
-                .when(b).is(1).then(c).isNot(0)
-                .when(c).is(2).then(d).isNot(2)
-                .when(d).is(3).then(e).isNot(3)
-                .when(a).is(1).and(e).is(1).then(f).isNot(0);
+                .when(condition(a).is(0)).then(b).isNot(0)
+                .when(condition(b).is(1)).then(c).isNot(0)
+                .when(condition(c).is(2)).then(d).isNot(2)
+                .when(condition(d).is(3)).then(e).isNot(3)
+                .when(condition(a).is(1).and(condition(e).is(1))).then(f).isNot(0);
 
         long expected = 0;
         for (int ia = 0; ia < n; ia++)
@@ -217,11 +217,11 @@ class CompoundConditionalProductBuilderTest {
         var d = values(n); var e = values(n); var f = values(n);
 
         var product = cartesianProduct.compoundProductOf(a, b, c, d, e, f)
-                .when(a).is(0).then(b).isNot(0)
-                .when(b).is(1).then(c).isNot(0)
-                .when(c).is(2).then(d).isNot(2)
-                .when(d).is(3).then(e).isNot(3)
-                .when(a).is(1).and(e).is(1).then(f).isNot(0);
+                .when(condition(a).is(0)).then(b).isNot(0)
+                .when(condition(b).is(1)).then(c).isNot(0)
+                .when(condition(c).is(2)).then(d).isNot(2)
+                .when(condition(d).is(3)).then(e).isNot(3)
+                .when(condition(a).is(1).and(condition(e).is(1))).then(f).isNot(0);
 
         Set<List<Object>> expected = bruteForce(new int[]{n, n, n, n, n, n},
                 t -> chainHolds(t) && !(t[0] == 1 && t[4] == 1 && t[5] == 0));
@@ -241,12 +241,12 @@ class CompoundConditionalProductBuilderTest {
 
         // both scopes contain f, and c is linked to the joined scope by two pairwise rules
         var product = cartesianProduct.compoundProductOf(a, b, c, d, e, f)
-                .when(a).is(0).then(b).isNot(0)
-                .when(b).is(1).then(c).isNot(0)
-                .when(c).is(2).then(d).isNot(2)
-                .when(d).is(1).then(e).isNot(1)
-                .when(a).is(1).and(e).is(1).then(f).isNot(0)
-                .when(b).is(0).and(d).is(0).then(f).isNot(1);
+                .when(condition(a).is(0)).then(b).isNot(0)
+                .when(condition(b).is(1)).then(c).isNot(0)
+                .when(condition(c).is(2)).then(d).isNot(2)
+                .when(condition(d).is(1)).then(e).isNot(1)
+                .when(condition(a).is(1).and(condition(e).is(1))).then(f).isNot(0)
+                .when(condition(b).is(0).and(condition(d).is(0))).then(f).isNot(1);
 
         Set<List<Object>> expected = bruteForce(new int[]{n, n, n, n, n, n},
                 t -> !(t[0] == 0 && t[1] == 0) && !(t[1] == 1 && t[2] == 0)
@@ -265,12 +265,12 @@ class CompoundConditionalProductBuilderTest {
 
         // the chain a-b-c-d-e joins the scopes {a,d,x} and {b,e,y}, so no single scope can be set apart
         var product = cartesianProduct.compoundProductOf(a, b, c, d, e, x, y)
-                .when(a).is(0).then(b).isNot(0)
-                .when(b).is(1).then(c).isNot(0)
-                .when(c).is(2).then(d).isNot(2)
-                .when(d).is(1).then(e).isNot(1)
-                .when(a).is(1).and(d).is(1).then(x).isNot(0)
-                .when(b).is(2).and(e).is(2).then(y).isNot(2);
+                .when(condition(a).is(0)).then(b).isNot(0)
+                .when(condition(b).is(1)).then(c).isNot(0)
+                .when(condition(c).is(2)).then(d).isNot(2)
+                .when(condition(d).is(1)).then(e).isNot(1)
+                .when(condition(a).is(1).and(condition(d).is(1))).then(x).isNot(0)
+                .when(condition(b).is(2).and(condition(e).is(2))).then(y).isNot(2);
 
         Set<List<Object>> expected = bruteForce(new int[]{n, n, n, n, n, n, n},
                 t -> !(t[0] == 0 && t[1] == 0) && !(t[1] == 1 && t[2] == 0)
@@ -290,11 +290,11 @@ class CompoundConditionalProductBuilderTest {
         // rule, which allows no value of f at all.
         var product = cartesianProduct.compoundProductOf(a, b, c, f)
                 .when(a).isNot(1).then(b).is(1)
-                .when(a).is(1).then(b).is(1)
-                .when(b).is(1).then(c).is(2)
+                .when(condition(a).is(1)).then(b).is(1)
+                .when(condition(b).is(1)).then(c).is(2)
                 .when(b).isNot(1).then(c).is(2)
-                .when(c).is(2).then(a).is(0)
-                .when(a).is(0).and(c).is(2).then(f).isNoneOf(0, 1, 2);
+                .when(condition(c).is(2)).then(a).is(0)
+                .when(condition(a).is(0).and(condition(c).is(2))).then(f).isNoneOf(0, 1, 2);
 
         Set<List<Object>> expected = bruteForce(new int[]{n, n, n, n},
                 t -> (t[0] == 1 || t[1] == 1) && (t[0] != 1 || t[1] == 1)
@@ -315,10 +315,10 @@ class CompoundConditionalProductBuilderTest {
         // The pairwise rules force b=1 and c=2; the compound rule then rules out a=0, leaving a in {1, 2}.
         var product = cartesianProduct.compoundProductOf(a, b, c, f)
                 .when(a).isNot(1).then(b).is(1)
-                .when(a).is(1).then(b).is(1)
-                .when(b).is(1).then(c).is(2)
+                .when(condition(a).is(1)).then(b).is(1)
+                .when(condition(b).is(1)).then(c).is(2)
                 .when(b).isNot(1).then(c).is(2)
-                .when(a).is(0).and(c).is(2).then(f).isNoneOf(0, 1, 2);
+                .when(condition(a).is(0).and(condition(c).is(2))).then(f).isNoneOf(0, 1, 2);
 
         Set<List<Object>> expected = bruteForce(new int[]{n, n, n, n},
                 t -> (t[0] == 1 || t[1] == 1) && (t[0] != 1 || t[1] == 1)
@@ -335,11 +335,11 @@ class CompoundConditionalProductBuilderTest {
         var a = values(n); var b = values(n); var c = values(n); var d = values(n);
 
         var product = cartesianProduct.compoundProductOf(a, b, c, d)
-                .when(a).is(0).then(b).isNot(0)
-                .when(b).is(0).then(c).isNot(0)
-                .when(c).is(0).then(d).isNot(0);
+                .when(condition(a).is(0)).then(b).isNot(0)
+                .when(condition(b).is(0)).then(c).isNot(0)
+                .when(condition(c).is(0)).then(d).isNot(0);
         assertThrows(IllegalArgumentException.class,
-                () -> product.when(d).is(0).then(a).isNot(0));
+                () -> product.when(condition(d).is(0)).then(a).isNot(0));
     }
 
     // ── Condition: composed trigger expressions with real nesting ──────────────────────────────────
@@ -351,8 +351,8 @@ class CompoundConditionalProductBuilderTest {
         List<String> database = List.of("PostgreSQL", "Oracle");
 
         var flat = cartesianProduct.compoundProductOf(os, browser, database)
-                .when(browser).is("Safari").and(os).is("Windows")
-                .or(browser).is("Chrome").and(os).is("Linux")
+                .when(condition(browser).is("Safari").and(condition(os).is("Windows"))
+                .or(condition(browser).is("Chrome")).and(condition(os).is("Linux")))
                 .then(database).isNot("PostgreSQL");
 
         var tree = cartesianProduct.compoundProductOf(os, browser, database)
