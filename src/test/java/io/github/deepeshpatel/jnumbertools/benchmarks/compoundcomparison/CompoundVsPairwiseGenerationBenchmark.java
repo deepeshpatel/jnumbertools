@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
+import static io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition.condition;
+
 /**
  * Compares complete generation through the compound and pairwise APIs backed by the shared conditional-product engine.
  *
@@ -83,7 +85,7 @@ public class CompoundVsPairwiseGenerationBenchmark {
             List<Integer> trigger = dimensions.get(i);
             List<Integer> target = dimensions.get(i + 1);
 
-            compoundBuilder = compoundBuilder.when(trigger).is(0)
+            compoundBuilder = compoundBuilder.when(condition(trigger).is(0))
                     .then(target).isNot(0);
             conditionalBuilder = conditionalBuilder.when(trigger).is(0)
                     .then(target).isNot(0);
