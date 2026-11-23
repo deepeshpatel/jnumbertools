@@ -33,7 +33,7 @@ import java.util.Objects;
  * atomic predicates. {@link #and(Condition)} and {@link #or(Condition)} rewrite this representation
  * directly (distributing AND over OR, or concatenating OR-groups) rather than building a tree that is
  * converted later, so the result is always already in the same OR-of-AND-groups shape that
- * {@code .when(dim)...then(dim2)...} rules compile to; nesting changes only how many AND-groups the
+ * compound rule representation; nesting changes only how many AND-groups the
  * final condition has, not how it is evaluated or counted. Nesting {@code and(...)} around a condition
  * that already has several OR-groups multiplies the group count (distributing AND over OR), so deep
  * nesting of wide OR expressions can produce a large number of groups; a condition is rejected before
