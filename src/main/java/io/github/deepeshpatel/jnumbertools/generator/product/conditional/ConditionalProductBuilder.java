@@ -251,7 +251,10 @@ public final class ConditionalProductBuilder implements Builder<Object> {
             List<MultiTriggerRule.Condition> resolvedGroup = new ArrayList<>(group.size());
             for (Condition.Leaf leaf : group) {
                 int dim = ruleCompiler.indexOf(leaf.dimension);
-                resolvedGroup.add(new MultiTriggerRule.Condition(dim, ruleCompiler.matching(dim, leaf.values, leaf.negate)));
+                BitSet matching = leaf.predicate != null
+                        ? ruleCompiler.matching(dim, leaf.predicate)
+                        : ruleCompiler.matching(dim, leaf.values, leaf.negate);
+                resolvedGroup.add(new MultiTriggerRule.Condition(dim, matching));
             }
             resolved.add(resolvedGroup);
         }
