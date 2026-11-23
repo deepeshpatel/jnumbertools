@@ -188,8 +188,9 @@ dimension and itself.
 
 **What it cannot do.**
 
-- Rules compare two dimensions at a time. A condition on three or more dimensions at once, a sum or any other
-  aggregate, or an arbitrary predicate is not supported; counting those requires evaluating every tuple.
+- Each pairwise rule relates two dimensions. A trigger involving three or more dimensions, or custom
+  predicates on individual dimensions, belongs in the compound conditional API below. Aggregate conditions
+  over a complete tuple (such as a sum across dimensions) are not supported by this API.
 - Rules that link dimensions in a loop are solved together as one block, so such a block is limited to 1,000,000
   value combinations, and any two dimensions to 50,000,000 value pairs.
 - `lexOrder()` returns valid tuples in lexicographic order. `anyOrder()` returns the same valid tuple set exactly once but makes no encounter-order guarantee. Ranks used by `byRanks(...)` and `lexOrderMth(...)` are always positions in lexicographic order, so ranks change when rules change.
