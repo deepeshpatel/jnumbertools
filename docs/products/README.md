@@ -198,20 +198,24 @@ dimension and itself.
 
 ### 4. Compound Conditional Cartesian Product
 
-For rules whose trigger depends on multiple dimensions, use the separate
-`compoundProductOf(...)` entry point. Its concrete
-`CompoundConditionalProductBuilder` exposes only the operations supported by this
-execution model: lazy generation, exact counting and emptiness checks.
+For rules whose trigger depends on multiple dimensions or requires nested Boolean
+grouping, use the separate `compoundProductOf(...)` entry point with a composed
+`Condition`. Its concrete `CompoundConditionalProductBuilder` exposes lazy
+generation, exact counting and emptiness checks.
 
 ```java
 var os = List.of("Windows", "macOS", "Linux");
 var browser = List.of("Chrome", "Safari", "Firefox");
 var database = List.of("PostgreSQL", "Oracle");
 
+import static io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition.condition;
+
+var trigger = condition(browser).is("Safari").and(condition(os).is("Windows"))
+        .or(condition(browser).is("Chrome").and(condition(os).is("Linux")));
+
 var products = JNumberTools.cartesianProduct()
         .compoundProductOf(os, browser, database)
-        .when(browser).is("Safari").and(os).is("Windows")
-        .or(browser).is("Chrome").and(os).is("Linux")
+        .when(trigger)
         .then(database).isNot("PostgreSQL");
 
 products.count();                     // exact count, without generating tuples
@@ -219,10 +223,11 @@ products.isEmpty();                   // whether any valid tuple exists
 products.generate().stream().forEach(System.out::println);
 ```
 
-AND binds more tightly than OR, so the trigger above means
+The trigger above means
 `(browser = Safari AND os = Windows) OR (browser = Chrome AND os = Linux)`.
-The consequence applies when either conjunction matches. Multiple completed rules are
-combined with AND.
+Conditions can be nested to express either grouping order, for example
+`A AND (B OR C)` or `(A OR B) AND C`. The consequence applies when the
+composed trigger matches. Multiple completed rules are combined with AND.
 
 `generate()` returns a lazy, re-iterable generator. It produces each valid tuple once,
 but makes no encounter-order guarantee. Lexicographic traversal, rank-based operations,
