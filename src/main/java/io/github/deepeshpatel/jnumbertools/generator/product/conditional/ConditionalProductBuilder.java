@@ -54,10 +54,10 @@ import java.util.Random;
  * <h2>What is supported</h2>
  * <p>This builder supports pairwise rules expressed with {@code when(...).then(...)}.
  * It provides lexicographic and any-order traversal, exact counting, rank-based traversal,
- * and random choice and sampling. Compound trigger expressions using {@code .and(...)} or
- * {@code .or(...)} are exposed separately by {@link CompoundConditionalProductBuilder}; that
- * builder intentionally provides generation, counting and emptiness checks without exposing
- * rank-based or lexicographic operations.</p>
+ * and random choice and sampling. Compound trigger expressions are built with {@link Condition}
+ * and attached through {@link CompoundConditionalProductBuilder}; that builder intentionally
+ * provides generation, counting and emptiness checks without exposing rank-based or
+ * lexicographic operations.</p>
  *
  * <h2>Practical performance guidance: dimension order</h2>
  * <p>Dimension declaration order can affect the amount of work required by lexicographic traversal.
