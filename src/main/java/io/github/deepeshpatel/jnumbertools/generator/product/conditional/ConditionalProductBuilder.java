@@ -229,9 +229,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
     /**
      * Starts a rule from a composed {@link Condition}, built with nested {@code and(...)}/{@code or(...)}
-     * calls rather than the flat {@code .when(dim)...and(dim2)...or(dim3)...} chain. Unlike that chain,
-     * a {@code Condition} can express AND-groups nested inside OR, and OR nested inside AND, not just a
-     * single level of OR-of-AND.
+     * calls. A {@code Condition} can express arbitrary nesting, including AND inside OR and OR inside AND.
      *
      * @param condition the trigger condition; dimensions inside it are identified by the same list
      *                   instances passed to {@code conditionalProductOf}/{@code compoundProductOf} or
@@ -260,7 +258,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         return resolved;
     }
 
-    /** First step of a trigger condition; use {@link Trigger#and(List)} or {@link Trigger#or(List)} to add conditions. */
+    /** First step of a pairwise trigger condition. */
     public final class WhenDimension {
         private final int dim;
         private final List<List<MultiTriggerRule.Condition>> groups;
@@ -300,34 +298,14 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     }
 
     /**
-     * A completed trigger expression. {@link #and(List)} appends a condition to the current AND group;
-     * {@link #or(List)} starts another alternative AND group. Thus
-     * {@code .when(A).is(a).and(B).is(b).or(C).is(c)} means
-     * {@code (A=a AND B=b) OR (C=c)}. AND binds within each group.
+     * A completed trigger expression. Pairwise triggers contain one atomic condition; compound
+     * triggers are created from a composed {@link Condition}.
      */
     public final class Trigger {
         private final List<List<MultiTriggerRule.Condition>> groups;
 
         private Trigger(List<List<MultiTriggerRule.Condition>> groups) {
             this.groups = groups;
-        }
-
-        /**
-         * Adds a condition to the current conjunction.
-         * @param dimension a product dimension, identified by its original list instance
-         * @return the next condition in the same AND group
-         */
-        WhenDimension and(List<?> dimension) {
-            return new WhenDimension(ruleCompiler.indexOf(dimension), groups, false);
-        }
-
-        /**
-         * Starts another alternative conjunction. The complete trigger is the OR of all groups.
-         * @param dimension a product dimension, identified by its original list instance
-         * @return the first condition in a new OR group
-         */
-        WhenDimension or(List<?> dimension) {
-            return new WhenDimension(ruleCompiler.indexOf(dimension), groups, true);
         }
 
         /**
@@ -588,8 +566,8 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     private void requirePairwiseRulesForLexOrder() {
         if (!model.multiRules.isEmpty()) {
             throw new UnsupportedOperationException(
-                    "lexOrder() is not supported for compound operations (rules using .and() or .or() inside when()); " +
-                    "use anyOrder() instead. lexOrder() is available only for when().then() pairwise rules.");
+                    "lexOrder() is not supported for compound conditions; use anyOrder() instead. " +
+                    "lexOrder() is available only for pairwise when().then() rules.");
         }
     }
 
