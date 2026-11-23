@@ -462,8 +462,9 @@ class CompoundConditionalProductBuilderTest {
             halfWide = halfWide.or(halfWide);
         }
         assertEquals(Condition.MAX_CLAUSES, halfWide.or(halfWide).groups().size());
+        Condition finalHalfWide = halfWide;
         assertThrows(IllegalArgumentException.class,
-                () -> halfWide.or(condition(browser).is("Safari")));
+                () -> finalHalfWide.or(condition(browser).is("Safari")));
     }
 
 }
