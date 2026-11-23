@@ -72,7 +72,7 @@ public class CompoundMultiTriggerGenerationBenchmark {
                 dimensions.get(0), dimensions.get(1),
                 dimensions.subList(2, dimensionsCount).toArray(List<?>[]::new));
         for (int i = 0; i < dimensionsCount - 1; i++) {
-            compoundBuilder = compoundBuilder.when(dimensions.get(i)).is(0)
+            compoundBuilder = compoundBuilder.when(condition(dimensions.get(i)).is(0))
                     .then(dimensions.get(i + 1)).isNot(0);
         }
 
@@ -80,12 +80,15 @@ public class CompoundMultiTriggerGenerationBenchmark {
         boolean alternative = dimensionsCount >= 4;
         if (alternative) {
             compoundBuilder = compoundBuilder
-                    .when(condition(dimensions.get(0)).is(0).and(condition(dimensions.get(1).is(1))
-                    .or(condition(dimensions.get(1).is(2)).and(condition(dimensions.get(2).is(0)))
+                    .when(condition(dimensions.get(0)).is(0)
+                            .and(condition(dimensions.get(1)).is(1))
+                            .or(condition(dimensions.get(1)).is(2)
+                                    .and(condition(dimensions.get(2)).is(0))))
                     .then(last).isNot(0);
         } else {
             compoundBuilder = compoundBuilder
-                    .when(condition(dimensions.get(0)).is(0).and(condition(dimensions.get(1).is(1)))
+                    .when(condition(dimensions.get(0)).is(0)
+                            .and(condition(dimensions.get(1)).is(1)))
                     .then(last).isNot(0);
         }
 
