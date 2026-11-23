@@ -12,6 +12,7 @@ import java.util.Spliterator;
 import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
+import static io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition.condition;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -52,7 +53,7 @@ class CompoundAnyOrderSplittingTest {
         var product = cartesianProduct.compoundProductOf(a, b, c)
                 .and(large.get(0)).and(large.get(1)).and(large.get(2)).and(large.get(3))
                 .and(large.get(4)).and(large.get(5)).and(large.get(6)).and(empty)
-                .when(a).is(0).and(b).is(1).then(c).isNot(0);
+                .when(condition(a).is(0).and(condition(b).is(1))).then(c).isNot(0);
 
         Spliterator<List<Object>> spliterator = product.generate().spliterator();
         assertEquals(0L, spliterator.estimateSize());
