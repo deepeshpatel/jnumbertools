@@ -113,26 +113,13 @@ Notes carried over from the retired `ConditionalProductRefactring.md`. They are 
 
 Notes carried over from the retired `ENGINEERING-4.1.1.md`. They are not approved features.
 
-- **Whether `compoundProductOf(...)` / `CompoundConditionalProductBuilder` should still exist.**
-  The compound and pairwise engines were unified under the hood: both now share one `ConditionalProductBuilder`
-  and one constraint model. But the public surfaces were not unified. `ConditionalProductBuilder.Trigger.and()`
-  and `.or()` are package-private, so `conditionalProductOf(...)` only ever gives a caller single-condition
-  pairwise rules (`.when(x).is(v).then(y).is(w)`); the `.and(...)/.or(...)` compound syntax is reachable only
-  through `compoundProductOf(...)` / `CompoundConditionalProductBuilder`, which is itself limited to
-  `generate()`, `count()` and `isEmpty()` and does not expose `lexOrder()`, `lexOrderMth()`, `byRanks()`,
-  `choice()` or `sample()` even when a rule set happens to collapse to pairwise. So today there are two
-  builders, each with a capability the other lacks, and neither is a strict subset of the other. Worth deciding
-  deliberately: either (a) make `and()/or()` public on `ConditionalProductBuilder.Trigger` so one builder has
-  the full set (compound syntax plus every traversal/rank/sample operation, throwing
-  `UnsupportedOperationException` only when a rule doesn't collapse to pairwise) and retire the separate
-  compound entry point; or (b) keep two deliberately different builders, but document the actual capability
-  split precisely instead of describing one as a subset of the other.
+- **Compound API decision (resolved for 4.2.0).** Keep the separate `compoundProductOf(...)` builder, but use the composable `Condition` API as its only trigger-expression entry point. Retain the pairwise `conditionalProductOf(...)` API and its lexicographic/rank/sampling operations; retire the older flat compound `.and(dimension)/.or(dimension)` trigger chain.
 - **A diagnostic/introspection method** (`.explain()` or similar) reporting the constraint plan's node
   structure: how many dimensions ended up in each node, and which rules caused dimensions to merge into
   one block. The block-merging bug that `0e47496` fixed is the kind of thing that's invisible from the
   public API until `count()` gets slow or throws; a cheap read-only report of the node/block structure
   would let a caller see it coming instead of discovering it empirically.
 - **Validation gap:** a compound rule's AND-group isn't checked for referencing the same dimension twice
-  with conflicting values (e.g. `.when(x).is(1).and(x).is(2)...`), which is unsatisfiable by construction
+  with conflicting values (e.g. `.when(condition(x).is(1).and(condition(x).is(2)))...`), which is unsatisfiable by construction
   and currently just silently compiles into a group that can never match. Worth a one-line check with a
   clear error message rather than a silent always-false rule.
