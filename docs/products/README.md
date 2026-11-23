@@ -229,6 +229,21 @@ Conditions can be nested to express either grouping order, for example
 `A AND (B OR C)` or `(A OR B) AND C`. The consequence applies when the
 composed trigger matches. Multiple completed rules are combined with AND.
 
+Atomic conditions can also use `matches(Predicate<? super T>)` for custom
+logic on one dimension. The dimension is explicit, so the compiler can evaluate
+the predicate against that dimension's values and compile the matching positions
+before tuple generation:
+
+```java
+var trigger = condition(browser).matches(value -> value.startsWith("Ch"))
+        .and(condition(memory).matches(value -> value >= 16));
+```
+
+The predicate is evaluated when the condition is attached through `.when(trigger)`,
+once for each position in the builder's dimension snapshot, not during tuple
+generation. Predicates should be deterministic and side-effect-free. The generic
+factory infers the predicate's value type from the dimension list.
+
 `generate()` returns a lazy, re-iterable generator. It produces each valid tuple once,
 but makes no encounter-order guarantee. Lexicographic traversal, rank-based operations,
 random choice and sampling are deliberately not exposed by this builder. Use
