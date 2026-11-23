@@ -77,7 +77,7 @@ class CompoundConditionalProductBuilderTest {
         List<String> database = List.of("PostgreSQL", "Oracle");
         var product = cartesianProduct.compoundProductOf(os, browser, database)
                 .when(condition(browser).is("Safari").and(condition(os).is("Windows"))
-                .or(condition(browser).is("Chrome")).and(condition(os).is("Linux")))
+                        .or(condition(browser).is("Chrome").and(condition(os).is("Linux"))))
                 .then(database).isNot("PostgreSQL");
 
         List<List<Object>> expected = List.of(
@@ -362,7 +362,7 @@ class CompoundConditionalProductBuilderTest {
     }
 
     @Test
-    void conditionTreeExpressesAndOfOrWhichTheFlatChainCannot() {
+    void conditionTreeExpressesAndOfOr() {
         // browser = Safari AND (os = Windows OR (os = Linux AND network = 4G))
         List<String> os = List.of("Windows", "macOS", "Linux");
         List<String> browser = List.of("Chrome", "Safari", "Firefox");
