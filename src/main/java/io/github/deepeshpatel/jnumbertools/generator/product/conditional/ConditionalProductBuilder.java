@@ -239,7 +239,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @throws IllegalArgumentException if a dimension referenced inside {@code condition} is not one of
      *                                  this product's dimensions, or a value is not a value of its dimension
      */
-    public Trigger when(Condition condition) {
+    Trigger when(Condition condition) {
         Objects.requireNonNull(condition, "condition must not be null");
         return new Trigger(resolve(condition));
     }
