@@ -15,10 +15,8 @@ import java.util.Objects;
  * A composable trigger condition for {@link CompoundConditionalProductBuilder}, built from atomic
  * per-dimension predicates combined with {@link #and(Condition)} and {@link #or(Condition)}.
  *
- * <p>Unlike the fluent {@code .when(dim).is(v).and(dim2).is(v2).or(dim3)...} chain (which can only
- * express an OR of AND-groups, with every group spanning the whole trigger), a {@code Condition} can
- * be nested arbitrarily, because grouping is expressed by nested method calls rather than by reading
- * left to right:
+ * <p>A {@code Condition} can be nested arbitrarily, because grouping is expressed by nested method
+ * calls rather than by reading a flat chain left to right:
  * <pre>{@code
  * import static io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition.condition;
  *
@@ -32,8 +30,8 @@ import java.util.Objects;
  * <p>Internally, a {@code Condition} is kept as a disjunction of conjunctions (an OR of AND-groups) of
  * atomic predicates. {@link #and(Condition)} and {@link #or(Condition)} rewrite this representation
  * directly (distributing AND over OR, or concatenating OR-groups) rather than building a tree that is
- * converted later, so the result is always already in the same OR-of-AND-groups shape that
- * compound rule representation; nesting changes only how many AND-groups the
+ * converted later, so the result is always already in the OR-of-AND-groups form used by the compound
+ * rule engine; nesting changes only how many AND-groups the
  * final condition has, not how it is evaluated or counted. Nesting {@code and(...)} around a condition
  * that already has several OR-groups multiplies the group count (distributing AND over OR), so deep
  * nesting of wide OR expressions can produce a large number of groups; a condition is rejected before
