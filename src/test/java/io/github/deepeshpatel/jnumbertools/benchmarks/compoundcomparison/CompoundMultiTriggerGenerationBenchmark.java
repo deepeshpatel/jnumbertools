@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
+import static io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition.condition;
+
 /**
  * Measures complete generation through the compound traversal, which a genuine multi-trigger rule selects.
  *
@@ -78,12 +80,12 @@ public class CompoundMultiTriggerGenerationBenchmark {
         boolean alternative = dimensionsCount >= 4;
         if (alternative) {
             compoundBuilder = compoundBuilder
-                    .when(dimensions.get(0)).is(0).and(dimensions.get(1)).is(1)
-                    .or(dimensions.get(1)).is(2).and(dimensions.get(2)).is(0)
+                    .when(condition(dimensions.get(0)).is(0).and(condition(dimensions.get(1).is(1))
+                    .or(condition(dimensions.get(1).is(2)).and(condition(dimensions.get(2).is(0)))
                     .then(last).isNot(0);
         } else {
             compoundBuilder = compoundBuilder
-                    .when(dimensions.get(0)).is(0).and(dimensions.get(1)).is(1)
+                    .when(condition(dimensions.get(0)).is(0).and(condition(dimensions.get(1).is(1)))
                     .then(last).isNot(0);
         }
 
