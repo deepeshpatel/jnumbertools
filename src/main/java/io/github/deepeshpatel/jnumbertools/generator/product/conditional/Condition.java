@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * A composable trigger condition for {@link CompoundConditionalProductBuilder}, built from atomic
@@ -74,9 +75,9 @@ public final class Condition {
      * @return the next step, choosing how the dimension's value must relate to the given values
      * @throws NullPointerException if {@code dimension} is null
      */
-    public static LeafBuilder condition(List<?> dimension) {
+    public static <T> LeafBuilder<T> condition(List<T> dimension) {
         Objects.requireNonNull(dimension, "dimension must not be null");
-        return new LeafBuilder(dimension);
+        return new LeafBuilder<>(dimension);
     }
 
     /**
@@ -145,20 +146,41 @@ public final class Condition {
         final List<?> dimension;
         final Collection<?> values;
         final boolean negate;
+        final Predicate<Object> predicate;
 
-        Leaf(List<?> dimension, Collection<?> values, boolean negate) {
+        Leaf(List<?> dimension, Collection<?> values, boolean negate, Predicate<Object> predicate) {
             this.dimension = dimension;
             this.values = values;
             this.negate = negate;
+            this.predicate = predicate;
         }
     }
 
     /** Next step after {@link Condition#condition(List)}: how the dimension's value must relate to given values. */
-    public static final class LeafBuilder {
-        private final List<?> dimension;
+    public static final class LeafBuilder<T> {
+        private final List<T> dimension;
 
-        private LeafBuilder(List<?> dimension) {
+        private LeafBuilder(List<T> dimension) {
             this.dimension = dimension;
+        }
+
+        /**
+         * Creates a condition from an arbitrary predicate on values in this dimension.
+         *
+         * <p>The predicate is retained until the condition is attached to a product with
+         * {@code .when(condition)}. It is then evaluated once for each position in the builder's
+         * dimension snapshot and compiled into a positional bit set; it is not called during
+         * tuple generation. Predicates should be deterministic and side-effect-free.</p>
+         *
+         * @param predicate predicate to apply to values of this dimension
+         * @return a condition representing the positions accepted by the predicate
+         * @throws NullPointerException if {@code predicate} is null
+         */
+        @SuppressWarnings("unchecked")
+        public Condition matches(Predicate<? super T> predicate) {
+            Objects.requireNonNull(predicate, "predicate must not be null");
+            Predicate<Object> untyped = value -> predicate.test((T) value);
+            return new Condition(List.of(List.of(new Leaf(dimension, List.of(), false, untyped))));
         }
 
         /** The chosen value equals {@code value}. */
@@ -183,7 +205,7 @@ public final class Condition {
             if (values.isEmpty()) {
                 throw new IllegalArgumentException("At least one value is required");
             }
-            List<Leaf> group = List.of(new Leaf(dimension, List.copyOf(values), negate));
+            List<Leaf> group = List.of(new Leaf(dimension, List.copyOf(values), negate, null));
             return new Condition(List.of(group));
         }
 
