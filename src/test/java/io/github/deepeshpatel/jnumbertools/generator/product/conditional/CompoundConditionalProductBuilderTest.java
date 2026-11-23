@@ -443,17 +443,27 @@ class CompoundConditionalProductBuilderTest {
     }
 
     @Test
-    void conditionCapsRunawayAndOverOrNesting() {
+    void conditionChecksClauseLimitBeforeBuildingCombinedGroups() {
         List<String> browser = List.of("Chrome", "Safari");
-        Condition wide = condition(browser).is("Safari").or(condition(browser).is("Chrome")); // 2 groups
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            Condition current = wide;
-            // doubles the group count each time: 2, 4, 8, ... exceeds the 4096 limit well before 13 iterations
-            for (int i = 0; i < 13; i++) {
-                current = current.and(wide);
-            }
-        });
+        // Doubling creates the requested number of clauses in logarithmic time.
+        Condition wide = condition(browser).is("Safari");
+        for (int clauses = 1; clauses < Condition.MAX_CLAUSES; clauses *= 2) {
+            wide = wide.or(wide);
+        }
+
+        // 4096 x 4096 would otherwise attempt to materialize over 16 million groups
+        // before discovering that the configured limit has been exceeded.
+        Condition finalWide = wide;
+        assertThrows(IllegalArgumentException.class, () -> finalWide.and(finalWide));
+
+        Condition halfWide = condition(browser).is("Chrome");
+        for (int clauses = 1; clauses < Condition.MAX_CLAUSES / 2; clauses *= 2) {
+            halfWide = halfWide.or(halfWide);
+        }
+        assertEquals(Condition.MAX_CLAUSES, halfWide.or(halfWide).groups().size());
+        assertThrows(IllegalArgumentException.class,
+                () -> halfWide.or(condition(browser).is("Safari")));
     }
 
 }
