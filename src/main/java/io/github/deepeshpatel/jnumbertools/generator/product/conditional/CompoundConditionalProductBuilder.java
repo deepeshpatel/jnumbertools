@@ -88,6 +88,23 @@ public final class CompoundConditionalProductBuilder {
         return new WhenDimension(delegate.when(dimension));
     }
 
+    /**
+     * Starts a compound rule from a composed {@link Condition}, built with nested {@code and(...)}/
+     * {@code or(...)} calls rather than the flat {@code .when(dim)...and(dim2)...or(dim3)...} chain.
+     * See {@link Condition} for why this allows nesting the flat chain cannot express, such as
+     * {@code A and (B or C)}.
+     *
+     * @param condition the trigger condition; dimensions inside it are identified by the same list
+     *                   instances supplied to {@code compoundProductOf(...)} or {@link #and(List)}
+     * @return the consequence step of the rule
+     * @throws NullPointerException     if {@code condition} is null
+     * @throws IllegalArgumentException if a dimension referenced inside {@code condition} is not one of
+     *                                  this product's dimensions, or a value is not a value of its dimension
+     */
+    public Trigger when(Condition condition) {
+        return new Trigger(delegate.when(condition));
+    }
+
     /** First condition of a trigger expression. */
     public final class WhenDimension {
         private final ConditionalProductBuilder.WhenDimension step;

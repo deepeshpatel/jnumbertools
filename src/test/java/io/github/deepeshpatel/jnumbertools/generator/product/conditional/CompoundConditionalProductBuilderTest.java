@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
+import static io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition.condition;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CompoundConditionalProductBuilderTest {
@@ -339,6 +340,120 @@ class CompoundConditionalProductBuilderTest {
                 .when(c).is(0).then(d).isNot(0);
         assertThrows(IllegalArgumentException.class,
                 () -> product.when(d).is(0).then(a).isNot(0));
+    }
+
+    // ── Condition: composed trigger expressions with real nesting ──────────────────────────────────
+
+    @Test
+    void conditionTreeReproducesTheSameRuleAsTheFlatOrOfAndChain() {
+        List<String> os = List.of("Windows", "macOS", "Linux");
+        List<String> browser = List.of("Chrome", "Safari", "Firefox");
+        List<String> database = List.of("PostgreSQL", "Oracle");
+
+        var flat = cartesianProduct.compoundProductOf(os, browser, database)
+                .when(browser).is("Safari").and(os).is("Windows")
+                .or(browser).is("Chrome").and(os).is("Linux")
+                .then(database).isNot("PostgreSQL");
+
+        var tree = cartesianProduct.compoundProductOf(os, browser, database)
+                .when(
+                        condition(browser).is("Safari").and(condition(os).is("Windows"))
+                                .or(condition(browser).is("Chrome").and(condition(os).is("Linux")))
+                )
+                .then(database).isNot("PostgreSQL");
+
+        assertEquals(flat.count(), tree.count());
+        assertEquals(BigInteger.valueOf(16), tree.count());
+        assertEquals(new HashSet<>(flat.generate().stream().toList()), new HashSet<>(tree.generate().stream().toList()));
+    }
+
+    @Test
+    void conditionTreeExpressesAndOfOrWhichTheFlatChainCannot() {
+        // browser = Safari AND (os = Windows OR (os = Linux AND network = 4G))
+        List<String> os = List.of("Windows", "macOS", "Linux");
+        List<String> browser = List.of("Chrome", "Safari", "Firefox");
+        List<String> database = List.of("PostgreSQL", "Oracle");
+        List<String> network = List.of("WiFi", "4G");
+
+        var product = cartesianProduct.compoundProductOf(os, browser, database)
+                .and(network)
+                .when(
+                        condition(browser).is("Safari")
+                                .and(
+                                        condition(os).is("Windows")
+                                                .or(condition(os).is("Linux").and(condition(network).is("4G")))
+                                )
+                )
+                .then(database).isNot("PostgreSQL");
+
+        long expected = 0;
+        for (String o : os) for (String b : browser) for (String d : database) for (String n : network) {
+            boolean triggerMatches = b.equals("Safari") && (o.equals("Windows") || (o.equals("Linux") && n.equals("4G")));
+            boolean ok = !triggerMatches || !d.equals("PostgreSQL");
+            if (ok) expected++;
+        }
+        assertEquals(BigInteger.valueOf(expected), product.count());
+        assertEquals(expected, product.generate().stream().count());
+    }
+
+    @Test
+    void conditionAndDistributesOverOr() {
+        // (browser = Safari OR browser = Chrome) AND (os = Windows OR os = Linux)
+        List<String> os = List.of("Windows", "macOS", "Linux");
+        List<String> browser = List.of("Chrome", "Safari", "Firefox");
+        List<String> database = List.of("PostgreSQL", "Oracle");
+
+        Condition left = condition(browser).is("Safari").or(condition(browser).is("Chrome"));
+        Condition right = condition(os).is("Windows").or(condition(os).is("Linux"));
+
+        var product = cartesianProduct.compoundProductOf(os, browser, database)
+                .when(left.and(right))
+                .then(database).isNot("PostgreSQL");
+
+        long expected = 0;
+        for (String o : os) for (String b : browser) for (String d : database) {
+            boolean triggerMatches = (b.equals("Safari") || b.equals("Chrome")) && (o.equals("Windows") || o.equals("Linux"));
+            boolean ok = !triggerMatches || !d.equals("PostgreSQL");
+            if (ok) expected++;
+        }
+        assertEquals(BigInteger.valueOf(expected), product.count());
+    }
+
+    @Test
+    void conditionRejectsADimensionNotPartOfTheProduct() {
+        List<String> os = List.of("Windows", "macOS");
+        List<String> browser = List.of("Chrome", "Safari");
+        List<String> database = List.of("PostgreSQL", "Oracle");
+        List<String> unrelated = List.of("x", "y");
+
+        var product = cartesianProduct.compoundProductOf(os, browser, database);
+        assertThrows(IllegalArgumentException.class,
+                () -> product.when(condition(unrelated).is("x")).then(database).isNot("PostgreSQL"));
+    }
+
+    @Test
+    void conditionRejectsAnUnknownValue() {
+        List<String> os = List.of("Windows", "macOS");
+        List<String> browser = List.of("Chrome", "Safari");
+        List<String> database = List.of("PostgreSQL", "Oracle");
+
+        var product = cartesianProduct.compoundProductOf(os, browser, database);
+        assertThrows(IllegalArgumentException.class,
+                () -> product.when(condition(os).is("DoesNotExist")).then(database).isNot("PostgreSQL"));
+    }
+
+    @Test
+    void conditionCapsRunawayAndOverOrNesting() {
+        List<String> browser = List.of("Chrome", "Safari");
+        Condition wide = condition(browser).is("Safari").or(condition(browser).is("Chrome")); // 2 groups
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            Condition current = wide;
+            // doubles the group count each time: 2, 4, 8, ... exceeds the 4096 limit well before 13 iterations
+            for (int i = 0; i < 13; i++) {
+                current = current.and(wide);
+            }
+        });
     }
 
 }

@@ -227,6 +227,39 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         return new WhenDimension(ruleCompiler.indexOf(dimension), List.of(), false);
     }
 
+    /**
+     * Starts a rule from a composed {@link Condition}, built with nested {@code and(...)}/{@code or(...)}
+     * calls rather than the flat {@code .when(dim)...and(dim2)...or(dim3)...} chain. Unlike that chain,
+     * a {@code Condition} can express AND-groups nested inside OR, and OR nested inside AND, not just a
+     * single level of OR-of-AND.
+     *
+     * @param condition the trigger condition; dimensions inside it are identified by the same list
+     *                   instances passed to {@code conditionalProductOf}/{@code compoundProductOf} or
+     *                   {@code and}
+     * @return the next step of the rule
+     * @throws NullPointerException     if {@code condition} is null
+     * @throws IllegalArgumentException if a dimension referenced inside {@code condition} is not one of
+     *                                  this product's dimensions, or a value is not a value of its dimension
+     */
+    public Trigger when(Condition condition) {
+        Objects.requireNonNull(condition, "condition must not be null");
+        return new Trigger(resolve(condition));
+    }
+
+    private List<List<MultiTriggerRule.Condition>> resolve(Condition condition) {
+        List<List<Condition.Leaf>> groups = condition.groups();
+        List<List<MultiTriggerRule.Condition>> resolved = new ArrayList<>(groups.size());
+        for (List<Condition.Leaf> group : groups) {
+            List<MultiTriggerRule.Condition> resolvedGroup = new ArrayList<>(group.size());
+            for (Condition.Leaf leaf : group) {
+                int dim = ruleCompiler.indexOf(leaf.dimension);
+                resolvedGroup.add(new MultiTriggerRule.Condition(dim, ruleCompiler.matching(dim, leaf.values, leaf.negate)));
+            }
+            resolved.add(resolvedGroup);
+        }
+        return resolved;
+    }
+
     /** First step of a trigger condition; use {@link Trigger#and(List)} or {@link Trigger#or(List)} to add conditions. */
     public final class WhenDimension {
         private final int dim;

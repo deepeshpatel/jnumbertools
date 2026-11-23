@@ -17,6 +17,15 @@ All notable changes to JNumberTools are recorded here. The format follows
   `new CompoundConditionalProductBuilder(first, second, additional...)` constructor alongside the
   single-dimension one. `conditionalProductOf(...)` remains the pairwise-only entry point and
   additionally exposes `lexOrder()`, `lexOrderMth()`, `byRanks()`, `choice()` and `sample()`.
+- Added `Condition`, a composable trigger condition built with `condition(dim).is(v)` and combined
+  with `.and(Condition)`/`.or(Condition)`, plus a matching `.when(Condition)` overload on
+  `CompoundConditionalProductBuilder` (and on `ConditionalProductBuilder`, for internal resolution).
+  Unlike the flat `.when(dim)...and(dim2)...or(dim3)...` chain, which can only express a single level
+  of OR-of-AND-groups, a `Condition` can be nested arbitrarily (AND inside OR, OR inside AND), because
+  grouping is expressed by nested method calls rather than by reading a chain left to right. `and(...)`
+  distributes over `or(...)` into the same OR-of-AND-groups form the flat chain already compiles to, so
+  evaluation and counting are unaffected by how a condition was built; combining conditions into more
+  than 4096 AND-groups is rejected rather than silently accepted.
 
 ### Fixed
 
