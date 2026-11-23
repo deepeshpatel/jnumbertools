@@ -167,10 +167,10 @@ public final class CartesianProduct {
     /**
      * Creates a builder for a Cartesian product constrained by compound trigger expressions.
      *
-     * <p>Use {@code .and(dimension)} to add a condition to the current conjunction and
-     * {@code .or(dimension)} to start an alternative conjunction. AND binds more tightly
-     * than OR. The resulting builder exposes generation, exact counting and emptiness
-     * checks; it does not expose lexicographic or rank-based operations.</p>
+     * <p>Build a composed {@link io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition}
+     * with nested {@code and(Condition)} and {@code or(Condition)} calls, then attach it with
+     * {@code when(condition)}. The resulting builder exposes generation, exact counting and
+     * emptiness checks; it does not expose lexicographic or rank-based operations.</p>
      *
      * @param elements the first dimension; copied
      * @return a compound conditional product builder
