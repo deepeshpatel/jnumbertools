@@ -94,7 +94,9 @@ public final class Condition {
      */
     public Condition and(Condition other) {
         Objects.requireNonNull(other, "other must not be null");
-        List<List<Leaf>> combined = new ArrayList<>(this.groups.size() * other.groups.size());
+        long clauseCount = (long) this.groups.size() * other.groups.size();
+        checkClauseCount(clauseCount);
+        List<List<Leaf>> combined = new ArrayList<>((int) clauseCount);
         for (List<Leaf> left : this.groups) {
             for (List<Leaf> right : other.groups) {
                 List<Leaf> merged = new ArrayList<>(left.size() + right.size());
@@ -103,7 +105,7 @@ public final class Condition {
                 combined.add(Collections.unmodifiableList(merged));
             }
         }
-        return new Condition(checkedGroups(combined));
+        return new Condition(Collections.unmodifiableList(combined));
     }
 
     /**
@@ -118,20 +120,21 @@ public final class Condition {
      */
     public Condition or(Condition other) {
         Objects.requireNonNull(other, "other must not be null");
-        List<List<Leaf>> combined = new ArrayList<>(this.groups.size() + other.groups.size());
+        long clauseCount = (long) this.groups.size() + other.groups.size();
+        checkClauseCount(clauseCount);
+        List<List<Leaf>> combined = new ArrayList<>((int) clauseCount);
         combined.addAll(this.groups);
         combined.addAll(other.groups);
-        return new Condition(checkedGroups(combined));
+        return new Condition(Collections.unmodifiableList(combined));
     }
 
-    private static List<List<Leaf>> checkedGroups(List<List<Leaf>> combined) {
-        if (combined.size() > MAX_CLAUSES) {
-            throw new IllegalArgumentException("Combining these conditions produces " + combined.size()
+    private static void checkClauseCount(long clauseCount) {
+        if (clauseCount > MAX_CLAUSES) {
+            throw new IllegalArgumentException("Combining these conditions produces " + clauseCount
                     + " AND-groups; the limit is " + MAX_CLAUSES
                     + ". This usually means a condition with wide OR expressions is nested inside "
                     + "several and(...) calls; restructure it into fewer, narrower conditions.");
         }
-        return Collections.unmodifiableList(combined);
     }
 
     /** OR-of-AND-groups form, for resolution by the builder that owns the dimensions this refers to. */
