@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Resolves rule dimensions by caller-list identity and compiles value predicates into dimension-index bit sets.
@@ -51,6 +52,22 @@ final class RuleCompiler {
      * {@code values}. If {@code negate} is true, returns the complement:
      * indexes of values that do not match any of the supplied values.
      */
+    /**
+     * Returns the positions in dimension {@code dim} accepted by {@code predicate}.
+     * The predicate is evaluated once per position during rule compilation, never during generation.
+     */
+    BitSet matching(int dim, Predicate<Object> predicate) {
+        Objects.requireNonNull(predicate, "predicate must not be null");
+        List<?> values = dimensions.get(dim);
+        BitSet result = new BitSet(values.size());
+        for (int position = 0; position < values.size(); position++) {
+            if (predicate.test(values.get(position))) {
+                result.set(position);
+            }
+        }
+        return result;
+    }
+
     BitSet matching(int dim, Collection<?> values, boolean negate) {
         Objects.requireNonNull(values, "values must not be null");
         if (values.isEmpty()) {
