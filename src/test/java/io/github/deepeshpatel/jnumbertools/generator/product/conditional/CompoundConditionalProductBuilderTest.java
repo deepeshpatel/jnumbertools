@@ -461,10 +461,11 @@ class CompoundConditionalProductBuilderTest {
         for (int clauses = 1; clauses < Condition.MAX_CLAUSES / 2; clauses *= 2) {
             halfWide = halfWide.or(halfWide);
         }
-        assertEquals(Condition.MAX_CLAUSES, halfWide.or(halfWide).groups().size());
-        Condition finalHalfWide = halfWide;
+        Condition atLimit = halfWide.or(halfWide);
+        assertEquals(Condition.MAX_CLAUSES, atLimit.groups().size());
+
         assertThrows(IllegalArgumentException.class,
-                () -> finalHalfWide.or(condition(browser).is("Safari")));
+                () -> atLimit.or(condition(browser).is("Safari")));
     }
 
 }
