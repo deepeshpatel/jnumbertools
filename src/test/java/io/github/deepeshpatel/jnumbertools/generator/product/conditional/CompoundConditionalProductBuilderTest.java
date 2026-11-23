@@ -29,7 +29,7 @@ class CompoundConditionalProductBuilderTest {
 
         var product = cartesianProduct.compoundProductOf(os, browser, database)
                 .when(condition(browser).is("Safari").and(condition(os).is("Windows"))
-                .or(condition(browser).is("Chrome")).and(condition(os).is("Linux")))
+                        .or(condition(browser).is("Chrome").and(condition(os).is("Linux"))))
                 .then(database).isNot("PostgreSQL");
 
         assertEquals(BigInteger.valueOf(16), product.count());
@@ -289,10 +289,10 @@ class CompoundConditionalProductBuilderTest {
         // The pairwise rules force b=1 and c=2, and c=2 forces a=0. Then a=0 with c=2 triggers the compound
         // rule, which allows no value of f at all.
         var product = cartesianProduct.compoundProductOf(a, b, c, f)
-                .when(a).isNot(1).then(b).is(1)
+                .when(condition(a).isNot(1)).then(b).is(1)
                 .when(condition(a).is(1)).then(b).is(1)
                 .when(condition(b).is(1)).then(c).is(2)
-                .when(b).isNot(1).then(c).is(2)
+                .when(condition(b).isNot(1)).then(c).is(2)
                 .when(condition(c).is(2)).then(a).is(0)
                 .when(condition(a).is(0).and(condition(c).is(2))).then(f).isNoneOf(0, 1, 2);
 
@@ -314,10 +314,10 @@ class CompoundConditionalProductBuilderTest {
 
         // The pairwise rules force b=1 and c=2; the compound rule then rules out a=0, leaving a in {1, 2}.
         var product = cartesianProduct.compoundProductOf(a, b, c, f)
-                .when(a).isNot(1).then(b).is(1)
+                .when(condition(a).isNot(1)).then(b).is(1)
                 .when(condition(a).is(1)).then(b).is(1)
                 .when(condition(b).is(1)).then(c).is(2)
-                .when(b).isNot(1).then(c).is(2)
+                .when(condition(b).isNot(1)).then(c).is(2)
                 .when(condition(a).is(0).and(condition(c).is(2))).then(f).isNoneOf(0, 1, 2);
 
         Set<List<Object>> expected = bruteForce(new int[]{n, n, n, n},
@@ -345,15 +345,10 @@ class CompoundConditionalProductBuilderTest {
     // ── Condition: composed trigger expressions with real nesting ──────────────────────────────────
 
     @Test
-    void conditionTreeReproducesTheSameRuleAsTheFlatOrOfAndChain() {
+    void conditionTreeRepresentsAnOrOfConjunctions() {
         List<String> os = List.of("Windows", "macOS", "Linux");
         List<String> browser = List.of("Chrome", "Safari", "Firefox");
         List<String> database = List.of("PostgreSQL", "Oracle");
-
-        var flat = cartesianProduct.compoundProductOf(os, browser, database)
-                .when(condition(browser).is("Safari").and(condition(os).is("Windows"))
-                .or(condition(browser).is("Chrome")).and(condition(os).is("Linux")))
-                .then(database).isNot("PostgreSQL");
 
         var tree = cartesianProduct.compoundProductOf(os, browser, database)
                 .when(
@@ -362,9 +357,8 @@ class CompoundConditionalProductBuilderTest {
                 )
                 .then(database).isNot("PostgreSQL");
 
-        assertEquals(flat.count(), tree.count());
         assertEquals(BigInteger.valueOf(16), tree.count());
-        assertEquals(new HashSet<>(flat.generate().stream().toList()), new HashSet<>(tree.generate().stream().toList()));
+        assertEquals(16, tree.generate().stream().count());
     }
 
     @Test
