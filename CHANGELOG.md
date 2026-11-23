@@ -10,22 +10,18 @@ All notable changes to JNumberTools are recorded here. The format follows
 - Added a multi-list `conditionalProductOf(first, second, additional...)` overload alongside the
   existing single-list entry point and `.and(...)` chaining, and a matching
   `new ConditionalProductBuilder(first, second, additional...)` constructor.
-- Added compound AND/OR trigger expressions through a separate `compoundProductOf(...)` entry
-  point: `.when(dim).is(v).and(dim2).is(v2).or(dim3)...then(dim4).is(v4)`, interpreted as an OR of AND-groups,
-  with AND binding more tightly than OR. Its `CompoundConditionalProductBuilder` exposes `generate()`,
-  `count()` and `isEmpty()`, and now has a matching
-  `new CompoundConditionalProductBuilder(first, second, additional...)` constructor alongside the
-  single-dimension one. `conditionalProductOf(...)` remains the pairwise-only entry point and
-  additionally exposes `lexOrder()`, `lexOrderMth()`, `byRanks()`, `choice()` and `sample()`.
+- Added compound trigger expressions through a separate `compoundProductOf(...)` entry point.
+  Triggers are composed with `condition(dim).is(value)` and nested `.and(Condition)` /
+  `.or(Condition)` calls, then attached with `.when(condition)`. The
+  `CompoundConditionalProductBuilder` exposes `generate()`, `count()` and `isEmpty()`.
+  `conditionalProductOf(...)` remains the pairwise-only entry point and additionally exposes
+  `lexOrder()`, `lexOrderMth()`, `byRanks()`, `choice()` and `sample()`.
 - Added `Condition`, a composable trigger condition built with `condition(dim).is(v)` and combined
   with `.and(Condition)`/`.or(Condition)`, plus a matching `.when(Condition)` overload on
   `CompoundConditionalProductBuilder` (and on `ConditionalProductBuilder`, for internal resolution).
-  Unlike the flat `.when(dim)...and(dim2)...or(dim3)...` chain, which can only express a single level
-  of OR-of-AND-groups, a `Condition` can be nested arbitrarily (AND inside OR, OR inside AND), because
-  grouping is expressed by nested method calls rather than by reading a chain left to right. `and(...)`
-  distributes over `or(...)` into the same OR-of-AND-groups form the flat chain already compiles to, so
-  evaluation and counting are unaffected by how a condition was built; combining conditions into more
-  than 4096 AND-groups is rejected rather than silently accepted.
+  Conditions can be nested arbitrarily (AND inside OR, OR inside AND), with grouping expressed by
+  nested method calls. Internally, they are normalized to OR-of-AND-groups; combining conditions into
+  more than 4096 AND-groups is rejected before allocating the combined groups.
 
 ### Fixed
 
@@ -47,12 +43,10 @@ All notable changes to JNumberTools are recorded here. The format follows
 ### Changed
 
 - Unified the compound and pairwise conditional-product engines internally.
-  `CompoundConditionalProductBuilder` (returned by `compoundProductOf(...)`) now delegates to the same
-  `ConditionalProductBuilder`/model that `conditionalProductOf(...)` uses, instead of a separate,
-  fully duplicated `compound` package, which is gone. The public API is unchanged by this: the two
-  entry points and their two builders remain separate, and `conditionalProductOf(...)`'s own
-  `.and(...)/.or(...)` trigger methods remain package-private (not reachable from
-  `ConditionalProductBuilder` directly).
+  `CompoundConditionalProductBuilder` delegates to the shared conditional-product model while
+  retaining its separate public API and supported-operation set. Compound rules now enter only
+  through `.when(Condition)`; the former flat `.and(dimension)/.or(dimension)` trigger chain
+  has been retired.
 - Renamed `compoundConditionalProductOf(...)` to `compoundProductOf(...)` on `CartesianProduct`.
 
 
