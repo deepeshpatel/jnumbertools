@@ -7,23 +7,22 @@ package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
 
 import java.math.BigInteger;
-import java.util.Collection;
 import java.util.List;
 
 /**
- * Builder for Cartesian products constrained by compound trigger expressions.
+ * Builder for Cartesian products constrained by composed {@link Condition} expressions.
  *
- * <p>Use {@code when(...)} to start a trigger, {@code and(...)} to add a condition to the
- * current conjunction, and {@code or(...)} to start an alternative conjunction. AND binds
- * more tightly than OR. For example:</p>
+ * <p>Build trigger expressions from atomic conditions using nested {@code and(...)} and
+ * {@code or(...)} calls, then attach the expression with {@code when(condition)}:</p>
  *
  * <pre>{@code
+ * var trigger = condition(browser).is("Safari")
+ *         .and(condition(os).is("Windows").or(condition(os).is("Linux")));
+ *
  * var products = JNumberTools.cartesianProduct()
  *         .compoundProductOf(os, browser, database)
- *         .when(browser).is("Safari").and(os).is("Windows")
- *         .or(browser).is("Chrome").and(os).is("Linux")
- *         .then(database).isNot("PostgreSQL")
- *         .generate();
+ *         .when(trigger)
+ *         .then(database).isNot("PostgreSQL");
  * }</pre>
  *
  * <p>Every completed rule must hold. Compound rules support exact {@link #count()} and
@@ -79,25 +78,12 @@ public final class CompoundConditionalProductBuilder {
     }
 
     /**
-     * Starts a compound rule.
-     *
-     * @param dimension a dimension supplied to this builder
-     * @return the first trigger condition
-     */
-    public WhenDimension when(List<?> dimension) {
-        return new WhenDimension(delegate.when(dimension));
-    }
-
-    /**
-     * Starts a compound rule from a composed {@link Condition}, built with nested {@code and(...)}/
-     * {@code or(...)} calls rather than the flat {@code .when(dim)...and(dim2)...or(dim3)...} chain.
-     * See {@link Condition} for why this allows nesting the flat chain cannot express, such as
-     * {@code A and (B or C)}.
+     * Starts a compound rule from a composed {@link Condition}.
      *
      * @param condition the trigger condition; dimensions inside it are identified by the same list
-     *                   instances supplied to {@code compoundProductOf(...)} or {@link #and(List)}
+     *                  instances supplied to {@code compoundProductOf(...)} or {@link #and(List)}
      * @return the consequence step of the rule
-     * @throws NullPointerException     if {@code condition} is null
+     * @throws NullPointerException if {@code condition} is null
      * @throws IllegalArgumentException if a dimension referenced inside {@code condition} is not one of
      *                                  this product's dimensions, or a value is not a value of its dimension
      */
@@ -105,38 +91,12 @@ public final class CompoundConditionalProductBuilder {
         return new Trigger(delegate.when(condition));
     }
 
-    /** First condition of a trigger expression. */
-    public final class WhenDimension {
-        private final ConditionalProductBuilder.WhenDimension step;
-
-        private WhenDimension(ConditionalProductBuilder.WhenDimension step) {
-            this.step = step;
-        }
-
-        public Trigger is(Object value) { return new Trigger(step.is(value)); }
-        public Trigger isNot(Object value) { return new Trigger(step.isNot(value)); }
-        public Trigger isOneOf(Object... values) { return new Trigger(step.isOneOf(values)); }
-        public Trigger isOneOf(Collection<?> values) { return new Trigger(step.isOneOf(values)); }
-        public Trigger isNoneOf(Object... values) { return new Trigger(step.isNoneOf(values)); }
-        public Trigger isNoneOf(Collection<?> values) { return new Trigger(step.isNoneOf(values)); }
-        public Trigger isNotIn(Object... values) { return new Trigger(step.isNotIn(values)); }
-        public Trigger isNotIn(Collection<?> values) { return new Trigger(step.isNotIn(values)); }
-    }
-
-    /** A completed condition that can be extended with AND/OR or followed by a consequence. */
+    /** Consequence of a compound trigger expression. */
     public final class Trigger {
         private final ConditionalProductBuilder.Trigger step;
 
         private Trigger(ConditionalProductBuilder.Trigger step) {
             this.step = step;
-        }
-
-        public WhenDimension and(List<?> dimension) {
-            return new WhenDimension(step.and(dimension));
-        }
-
-        public WhenDimension or(List<?> dimension) {
-            return new WhenDimension(step.or(dimension));
         }
 
         public ThenDimension then(List<?> dimension) {
@@ -161,19 +121,19 @@ public final class CompoundConditionalProductBuilder {
         public CompoundConditionalProductBuilder isOneOf(Object... values) {
             return new CompoundConditionalProductBuilder(step.isOneOf(values));
         }
-        public CompoundConditionalProductBuilder isOneOf(Collection<?> values) {
+        public CompoundConditionalProductBuilder isOneOf(java.util.Collection<?> values) {
             return new CompoundConditionalProductBuilder(step.isOneOf(values));
         }
         public CompoundConditionalProductBuilder isNoneOf(Object... values) {
             return new CompoundConditionalProductBuilder(step.isNoneOf(values));
         }
-        public CompoundConditionalProductBuilder isNoneOf(Collection<?> values) {
+        public CompoundConditionalProductBuilder isNoneOf(java.util.Collection<?> values) {
             return new CompoundConditionalProductBuilder(step.isNoneOf(values));
         }
         public CompoundConditionalProductBuilder isNotIn(Object... values) {
             return new CompoundConditionalProductBuilder(step.isNotIn(values));
         }
-        public CompoundConditionalProductBuilder isNotIn(Collection<?> values) {
+        public CompoundConditionalProductBuilder isNotIn(java.util.Collection<?> values) {
             return new CompoundConditionalProductBuilder(step.isNotIn(values));
         }
     }
