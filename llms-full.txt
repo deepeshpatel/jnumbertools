@@ -1,0 +1,658 @@
+# JNumberTools — Full API Examples
+
+JNumberTools is a Java library for combinatorics and number theory. It provides generators for permutations, derangements, combinations, subsets and five Cartesian product styles (simple, constrained, compiled, compound and lambda-engine), together with ranking, unranking, number-system representations and mathematical functions.
+
+## Common conventions
+
+- Ranks are zero-based: rank `0` identifies the first result.
+- `lexOrder()` generates results in lexicographical order.
+- `lexOrderMth(m, start)` generates every `m`-th result, beginning at rank `start`.
+- `byRanks(...)` generates results at the specified ranks. The sequence of requested ranks determines the output sequence.
+- `choice(n, random)` selects `n` results with replacement; duplicates are possible.
+- `sample(n, random)` selects `n` distinct results without replacement.
+- Counts and ranks use `BigInteger` where required.
+- Generator results are lazy; call `.stream()` to consume them.
+
+Common imports used in examples:
+
+```java
+import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.Calculator;
+
+import java.math.BigInteger;
+import java.util.*;
+import java.util.stream.*;
+```
+
+---
+
+# 1. Permutations
+
+## 1.1 Unique permutations
+
+| Description | API | Output |
+|---|---|---|
+| Generate all permutations of integers `0, 1, 2`. | `JNumberTools.permutations().unique(3).lexOrder();` | `[0,1,2], [0,2,1], [1,0,2], [1,2,0], [2,0,1], [2,1,0]` |
+| Generate all permutations of `A, B, C`. | `JNumberTools.permutations().unique("A", "B", "C").lexOrder();` | `[A,B,C], [A,C,B], [B,A,C], [B,C,A], [C,A,B], [C,B,A]` |
+| Generate permutations at ranks 1, 3 and 5. | `JNumberTools.permutations().unique("A", "B", "C").byRanks(1, 3, 5);` | `[A,C,B], [B,C,A], [C,B,A]` |
+| Generate every second permutation, starting at rank 0. | `JNumberTools.permutations().unique("A", "B", "C").lexOrderMth(2, 0);` | `[A,B,C], [B,A,C], [C,A,B]` |
+| Generate permutations where each result differs from the previous by a single swap. | `JNumberTools.permutations().unique("A", "B", "C").singleSwap();` | All six permutations in minimum-change order. |
+| Select 3 random permutations; duplicates are possible. | `JNumberTools.permutations().unique("A", "B", "C").choice(3, new Random());` | Three randomly selected permutations. |
+| Select 3 distinct random permutations. | `JNumberTools.permutations().unique("A", "B", "C").sample(3, new Random());` | Three distinct randomly selected permutations. |
+
+## 1.2 Multiset permutations
+
+A multiset permutation uses a specified frequency for each element.
+
+```java
+var elements = new LinkedHashMap<String, Integer>();
+elements.put("A", 2);
+elements.put("B", 1);
+elements.put("C", 1);
+```
+
+| Description | API | Output |
+|---|---|---|
+| Generate all permutations of two A's, one B and one C. | `JNumberTools.permutations().multiset(elements).lexOrder();` | `[A,A,B,C], [A,A,C,B], [A,B,A,C], ...` |
+| Generate permutations at ranks 0, 2 and 5. | `JNumberTools.permutations().multiset(elements).byRanks(0, 2, 5);` | Results at those three zero-based ranks. |
+| Generate every second multiset permutation, starting at rank 0. | `JNumberTools.permutations().multiset(elements).lexOrderMth(2, 0);` | Ranks `0, 2, 4, ...` |
+| Select 3 random multiset permutations; duplicates are possible. | `JNumberTools.permutations().multiset(elements).choice(3, new Random());` | Three random multiset permutations. |
+| Select 3 distinct random multiset permutations. | `JNumberTools.permutations().multiset(elements).sample(3, new Random());` | Three distinct multiset permutations. |
+| Generate results at large ranks supplied as decimal strings. | `JNumberTools.permutations().multiset(elements).byRanks("10", "1000000000000000000000");` | Results at the two specified ranks. |
+
+## 1.3 k-permutations
+
+A k-permutation selects and orders `k` distinct elements from `n` elements. The number of results is `nPk`.
+
+| Description | API | Output |
+|---|---|---|
+| Generate all 2-permutations of integers `0` through `4`. | `JNumberTools.permutations().nPk(5, 2).lexOrder();` | `[0,1], [0,2], [0,3], [0,4], [1,0], ...` |
+| Generate all 2-permutations of A, B, C and D. | `JNumberTools.permutations().nPk(2, "A", "B", "C", "D").lexOrder();` | `[A,B], [A,C], [A,D], [B,A], ...` |
+| Generate every third k-permutation, starting at rank 0. | `JNumberTools.permutations().nPk(5, 2).lexOrderMth(3, 0);` | Results at ranks `0, 3, 6, 9, ...` |
+| Generate every third k-permutation, starting at rank 1. | `JNumberTools.permutations().nPk(5, 2).lexOrderMth(3, 1);` | Results at ranks `1, 4, 7, 10, ...` |
+| Generate k-permutations in combination order. | `JNumberTools.permutations().nPk(3, 2).combinationOrder();` | `[0,1], [1,0], [0,2], [2,0], [1,2], [2,1]` |
+| Generate every second k-permutation in combination order. | `JNumberTools.permutations().nPk(3, 2).combinationOrderMth(2, 0);` | Results at combination-order ranks `0, 2, 4`. |
+| Generate k-permutations at ranks 1, 3 and 5. | `JNumberTools.permutations().nPk(5, 2).byRanks(1, 3, 5);` | Results at those three ranks. |
+| Select 3 random k-permutations; duplicates are possible. | `JNumberTools.permutations().nPk(5, 2).choice(3, new Random());` | Three random k-permutations. |
+| Select 3 distinct random k-permutations. | `JNumberTools.permutations().nPk(5, 2).sample(3, new Random());` | Three distinct k-permutations. |
+
+## 1.4 Repetitive permutations
+
+A repetitive permutation allows an element to appear more than once. The first argument is the output length; the second argument is the number of available element types.
+
+| Description | API | Output |
+|---|---|---|
+| Generate all sequences of length 2 using integers `0, 1, 2`. | `JNumberTools.permutations().repetitive(2, 3).lexOrder();` | `[0,0], [0,1], [0,2], [1,0], [1,1], ...` |
+| Generate all sequences of length 2 using A, B and C. | `JNumberTools.permutations().repetitive(2, "A", "B", "C").lexOrder();` | `[A,A], [A,B], [A,C], [B,A], ...` |
+| Generate every second repetitive permutation, starting at rank 0. | `JNumberTools.permutations().repetitive(2, 3).lexOrderMth(2, 0);` | Results at ranks `0, 2, 4, 6, ...` |
+| Generate repetitive permutations at ranks 1, 3 and 5. | `JNumberTools.permutations().repetitive(2, 3).byRanks(1, 3, 5);` | Results at those three ranks. |
+| Select 3 random repetitive permutations; duplicates are possible. | `JNumberTools.permutations().repetitive(2, 3).choice(3, new Random());` | Three random sequences. |
+| Select 3 distinct random repetitive permutations. | `JNumberTools.permutations().repetitive(2, 3).sample(3, new Random());` | Three distinct sequences. |
+
+---
+
+# 2. Combinations
+
+## 2.1 Unique combinations
+
+A unique combination selects `r` distinct elements from `n` elements. The order of selection does not matter.
+
+| Description | API | Output |
+|---|---|---|
+| Generate all combinations of 2 elements from integers `0` through `3`. | `JNumberTools.combinations().unique(4, 2).lexOrder();` | `[0,1], [0,2], [0,3], [1,2], [1,3], [2,3]` |
+| Generate all combinations of 2 elements from A, B, C and D. | `JNumberTools.combinations().unique(2, "A", "B", "C", "D").lexOrder();` | `[A,B], [A,C], [A,D], [B,C], [B,D], [C,D]` |
+| Generate every second combination, starting at rank 0. | `JNumberTools.combinations().unique(4, 2).lexOrderMth(2, 0);` | `[0,1], [0,3], [1,3]` |
+| Generate combinations at ranks 0, 2 and 5. | `JNumberTools.combinations().unique(4, 2).byRanks(0, 2, 5);` | `[0,1], [0,3], [2,3]` |
+| Select 3 random combinations; duplicates are possible. | `JNumberTools.combinations().unique(5, 2).choice(3, new Random());` | Three random combinations. |
+| Select 3 distinct random combinations. | `JNumberTools.combinations().unique(5, 2).sample(3, new Random());` | Three distinct combinations. |
+
+## 2.2 Multiset combinations
+
+A multiset combination selects elements from a multiset with limited frequencies.
+
+```java
+var elements = new LinkedHashMap<String, Integer>();
+elements.put("Apple", 2);
+elements.put("Banana", 1);
+```
+
+| Description | API | Output |
+|---|---|---|
+| Generate all combinations of 2 elements from the multiset. | `JNumberTools.combinations().multiset(elements, 2).lexOrder();` | `{Apple=2}, {Apple=1, Banana=1}` |
+| Generate every second multiset combination, starting at rank 0. | `JNumberTools.combinations().multiset(elements, 2).lexOrderMth(2, 0);` | Results at ranks `0, 2, 4, ...` |
+| Generate multiset combinations at ranks 0 and 1. | `JNumberTools.combinations().multiset(elements, 2).byRanks(0, 1);` | Results at those ranks. |
+| Select 2 random multiset combinations; duplicates are possible. | `JNumberTools.combinations().multiset(elements, 2).choice(2, new Random());` | Two random multiset combinations. |
+| Select 2 distinct random multiset combinations. | `JNumberTools.combinations().multiset(elements, 2).sample(2, new Random());` | Two distinct multiset combinations. |
+
+## 2.3 Repetitive combinations
+
+A repetitive combination allows an element to be selected more than once.
+
+| Description | API | Output |
+|---|---|---|
+| Generate all combinations of size 2 from 3 types with repetition. | `JNumberTools.combinations().repetitive(3, 2).lexOrder();` | `[0,0], [0,1], [0,2], [1,1], [1,2], [2,2]` |
+| Generate every second repetitive combination, starting at rank 0. | `JNumberTools.combinations().repetitive(3, 2).lexOrderMth(2, 0);` | Results at ranks `0, 2, 4, ...` |
+| Generate repetitive combinations at ranks 0, 2 and 5. | `JNumberTools.combinations().repetitive(3, 2).byRanks(0, 2, 5);` | Results at those ranks. |
+| Select 3 random repetitive combinations; duplicates are possible. | `JNumberTools.combinations().repetitive(3, 2).choice(3, new Random());` | Three random combinations. |
+| Select 3 distinct random repetitive combinations. | `JNumberTools.combinations().repetitive(3, 2).sample(3, new Random());` | Three distinct combinations. |
+
+---
+
+# 3. Sets and Subsets
+
+A subset generator includes the empty set `[]` (the empty set, ∅) when using `.all()`. The `.all()` method is equivalent to `.inRange(0, max)`, so it includes subsets of size zero. To exclude the empty set, use `.inRange(1, max)` instead.
+
+## 3.1 All subsets
+
+| Description | API | Output |
+|---|---|---|
+| Generate all subsets of A, B and C. | `JNumberTools.subsets().of("A", "B", "C").all().lexOrder();` | `[], [A], [B], [C], [A,B], [A,C], [B,C], [A,B,C]` |
+| Generate all subsets of integers `0` through `2`. | `JNumberTools.subsets().of(3).all().lexOrder();` | `[], [0], [1], [2], [0,1], [0,2], [1,2], [0,1,2]` |
+| Generate every second subset, starting at rank 0. | `JNumberTools.subsets().of(3).all().lexOrderMth(2, 0);` | Results at ranks `0, 2, 4, 6`. |
+| Generate subsets at ranks 0, 2 and 7. | `JNumberTools.subsets().of(3).all().byRanks(0, 2, 7);` | `[], [1], [0,1,2]` |
+| Select 3 random subsets; duplicates are possible. | `JNumberTools.subsets().of(3).all().choice(3, new Random());` | Three random subsets. |
+| Select 3 distinct random subsets. | `JNumberTools.subsets().of(3).all().sample(3, new Random());` | Three distinct subsets. |
+
+## 3.2 Subsets within a size range
+
+| Description | API | Output |
+|---|---|---|
+| Generate subsets of A, B and C having sizes 1 through 2. | `JNumberTools.subsets().of("A", "B", "C").inRange(1, 2).lexOrder();` | `[A], [B], [C], [A,B], [A,C], [B,C]` |
+| Generate subsets of integers `0` through `3` having sizes 2 through 3. | `JNumberTools.subsets().of(4).inRange(2, 3).lexOrder();` | `[0,1], [0,2], [0,3], [1,2], [1,3], [2,3], [0,1,2], ...` |
+| Generate every second subset in the size range, starting at rank 0. | `JNumberTools.subsets().of(4).inRange(2, 3).lexOrderMth(2, 0);` | Results at ranks `0, 2, 4, ...` |
+| Generate subsets in the size range at ranks 0, 2 and 5. | `JNumberTools.subsets().of(4).inRange(2, 3).byRanks(0, 2, 5);` | Results at those ranks. |
+
+---
+
+# 4. Cartesian Products
+
+JNumberTools provides five product styles. Choose the builder by the structure of each dimension and the complexity of the rules:
+
+| Product style | Entry point | Use it when | Traversal and operations |
+|---|---|---|---|
+| Simple Product | `simpleProductOf(...)` | Each dimension contributes one value and there are no constraints. | Lexicographical and every-mth traversal; rank-based and random operations. |
+| Constrained Product | `constrainedProductOfDistinct(...)` and related methods | A dimension represents a combination, a multi-select, or a subset range. | Lexicographical and every-mth traversal; rank-based and random operations. |
+| Compiled Product | `conditionalProductOf(...)` | Rules connect pairs of dimensions using `when(...).then(...)`. | Lexicographical/rank traversal, counting, choice and sample. |
+| Compound Product | `compoundProductOf(...)` | A trigger depends on multiple dimensions or needs nested Boolean grouping. | Lazy `generate()`, exact `count()`, `isEmpty()`; no rank or sampling API. |
+| Lambda Engine | `withLambda(...)` | Rules are too complex or application-specific for the declarative rule builders and are clearer as Java predicates. | Joint predicates are compiled into constraints; lazy `generate()`, exact `count()`, `isEmpty()`; no rank or sampling API. |
+
+## 4.1 Simple Cartesian product
+
+A simple Cartesian product combines one element from each input dimension.
+
+```java
+var colors = List.of("Red", "Green");
+var sizes = List.of("S", "M");
+```
+
+| Description | API | Output |
+|---|---|---|
+| Generate the Cartesian product of colors and sizes. | `JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes).lexOrder();` | `[Red,S], [Red,M], [Green,S], [Green,M]` |
+| Generate every second product, starting at rank 0. | `JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes).lexOrderMth(2, 0);` | `[Red,S], [Green,S]` |
+| Generate products at ranks 0, 2 and 3. | `JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes).byRanks(0, 2, 3);` | `[Red,S], [Green,S], [Green,M]` |
+| Select 3 random products; duplicates are possible. | `JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes).choice(3, new Random());` | Three random products. |
+| Select 3 distinct random products. | `JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes).sample(3, new Random());` | Three distinct products. |
+
+## 4.2 Constrained Cartesian product
+
+A constrained Cartesian product lets each dimension select a fixed number of distinct elements, a fixed number with repetition, or subsets within a size range. The resulting dimensions are combined into a Cartesian product.
+
+```java
+// All combinations of:
+// - any 1 pizza base
+// - any 2 distinct cheeses
+// - any 2 sauces (repetition allowed)
+// - any toppings in range 1 to 5
+var pizzaBase = List.of("Small", "Medium", "Large");
+var cheese = List.of("Ricotta", "Mozzarella", "Cheddar");
+var sauce = List.of("Tomato Ketchup", "White Sauce", "Green Chutney");
+var toppings = List.of("Tomato", "Capsicum", "Onion", "Corn", "Mushroom");
+
+JNumberTools.cartesianProduct()
+   .constrainedProductOfDistinct(1, pizzaBase)
+   .andDistinct(2, cheese)
+   .andMultiSelect(2, sauce)
+   .andInRange(1, 5, toppings)
+   .lexOrder()
+   .stream().forEach(System.out::println);
+```
+
+The supported dimension methods are:
+
+| Start dimension | Additional dimension | Meaning |
+|---|---|---|
+| `constrainedProductOfDistinct(quantity, elements)` | `andDistinct(quantity, elements)` | Select a fixed number of distinct elements. |
+| `constrainedProductOfMultiSelect(quantity, elements)` | `andMultiSelect(quantity, elements)` | Select a fixed number of elements with repetition allowed. |
+| `constrainedProductOfInRange(from, to, elements)` | `andInRange(from, to, elements)` | Select subsets whose sizes are within the specified range. |
+
+Use `constrainedProductOfDistinct` instead of the deprecated `constrainedProductOf`.
+
+The constrained builder supports lexicographical traversal and every-mth traversal directly. For example:
+
+```java
+var smallAlphabets = IntStream.rangeClosed('a', 'z').mapToObj(c -> (char) c).toList();
+var capitalAlphabets = IntStream.rangeClosed('A', 'Z').mapToObj(c -> (char) c).toList();
+var symbols = List.of('~', '!', '@', '#', '
+   .andDistinct(12, capitalAlphabets)
+   .andMultiSelect(3, symbols)
+   .andInRange(10, 20, numbers)
+   .lexOrderMth(1_000_000_000_000_000_000L, 0)
+   .stream().forEach(System.out::println);
+```
+
+## 4.3 Compiled Product: pairwise conditional rules
+
+The Compiled Product uses `conditionalProductOf(...)` to express rules between pairs of dimensions. The builder compiles the rules into constraints, so invalid branches can be pruned before complete tuples are materialized. It supports lexicographical and rank-based traversal, exact counting, choice and sampling.
+
+```java
+var os = List.of("Windows", "macOS", "Linux");
+var browser = List.of("Chrome", "Safari", "Firefox");
+var network = List.of("WiFi", "4G");
+
+var configs = JNumberTools.cartesianProduct()
+    .conditionalProductOf(os)
+    .and(browser)
+    .and(network)
+    .when(browser).is("Safari").then(os).isOneOf("macOS")
+    .when(network).is("4G").then(os).isNot("Linux")
+    .when(network).is("4G").then(browser).isNot("Chrome");
+```
+
+| Description | API | Output |
+|---|---|---|
+| Count valid configurations. | `configs.count();` | `10` |
+| Check whether any valid configuration exists. | `configs.isEmpty();` | `false` |
+| Generate valid configurations in lexicographical order. | `configs.lexOrder();` | Valid tuples only, in lexicographical order. |
+| Generate every third valid tuple, starting at rank 1. | `configs.lexOrderMth(3, 1);` | Valid tuples at lexicographical ranks `1, 4, 7, ...` |
+| Generate valid tuples at ranks 0 and 2. | `configs.byRanks(0, 2);` | Valid tuples at those ranks. |
+| Select 2 random valid tuples. | `configs.choice(2, new Random(42));` | Two valid tuples; duplicates are possible. |
+| Select 2 distinct random valid tuples. | `configs.sample(2, new Random(42));` | Two distinct valid tuples. |
+| Generate valid tuples without an encounter-order guarantee. | `configs.anyOrder();` | Every valid tuple exactly once, in unspecified order. |
+
+A rule such as `.when(browser).is("Safari").then(os).isOneOf("macOS")` means that whenever the chosen browser is Safari, the chosen OS must be macOS. It does not constrain tuples where the browser is not Safari. Every completed rule must hold.
+
+The pairwise API supports `is`, `isNot`, `isOneOf`, `isNoneOf` and `isNotIn` on both the trigger and consequence sides. `isNotIn` is an alias of `isNoneOf`. Dimensions are identified by the same list instances supplied to `conditionalProductOf(...)` and `and(...)`.
+
+Use the Compiled Product for pairwise rules. Use the Compound Product for nested Boolean triggers, and the Lambda Engine for arbitrary joint predicates.
+
+## 4.4 Compound Product: nested Boolean rules
+
+The Compound Product uses `compoundProductOf(...)` and a composed `Condition` when a trigger depends on multiple dimensions or needs nested Boolean grouping.
+
+```java
+import static io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition.condition;
+
+var os = List.of("Windows", "macOS", "Linux");
+var browser = List.of("Chrome", "Safari", "Firefox");
+var database = List.of("PostgreSQL", "Oracle");
+
+var trigger = condition(browser).is("Safari")
+        .and(condition(os).is("Windows"))
+        .or(condition(browser).is("Chrome")
+        .and(condition(os).is("Linux")));
+
+var products = JNumberTools.cartesianProduct()
+        .compoundProductOf(os, browser, database)
+        .when(trigger)
+        .then(database).isNot("PostgreSQL");
+```
+
+The trigger means:
+`(browser = Safari AND os = Windows) OR (browser = Chrome AND os = Linux)`.
+Conditions can be nested to express groupings such as `A AND (B OR C)` and
+`(A OR B) AND C`. Multiple completed rules are combined with AND.
+
+| Description | API | Output |
+|---|---|---|
+| Count valid tuples. | `products.count();` | Exact number of valid tuples. |
+| Check whether the result is empty. | `products.isEmpty();` | `true` or `false`. |
+| Generate all valid tuples lazily. | `products.generate();` | Each valid tuple exactly once; encounter order is unspecified. |
+| Match a custom predicate on one dimension. | `condition(browser).matches(value -> value.startsWith("Ch"));` | Matches browser values beginning with `Ch`. |
+
+Atomic `Condition.matches(Predicate)` applies to one explicitly named dimension. The
+predicate is evaluated for that dimension's values while the condition is attached and
+the matching positions are compiled before tuple generation. It is not a joint predicate
+over multiple dimensions.
+
+The Compound Product exposes lazy, re-iterable `generate()`, exact `count()` and
+`isEmpty()`. It does not expose lexicographical traversal, rank-based operations,
+random choice or sampling.
+
+## 4.5 Lambda Engine: predicate-to-constraint compiler
+
+Use the Lambda Engine when rules are too complex to express clearly with the pairwise
+Compiled Product or the declarative nested conditions of the Compound Product. It gives
+the flexibility of lambda-style rules while keeping the code readable and retaining the
+constraint engine's pruned execution path.
+
+This is **not** a predicate filter applied to every completed tuple. Each lambda rule is
+compiled when it is added: the builder enumerates combinations of values in the declared
+scope, evaluates the predicate, and converts the result into the same internal constraint
+representation used by the Compound Product. Generation, counting and emptiness checks
+then use those compiled constraints; the predicate is not invoked again.
+
+#### Typed predicate over two dimensions
+
+```java
+var cores = List.of(1, 2, 4, 8);
+var memoryGb = List.of(2, 4, 8, 16);
+
+var products = JNumberTools.cartesianProduct()
+        .withLambda(cores, memoryGb)
+        .when(cores, memoryGb).matches((c, m) -> c * m <= 256);
+
+products.count();                    // exact count
+products.isEmpty();                  // whether any valid tuple exists
+products.generate().stream().forEach(System.out::println);
+```
+
+#### Predicate over three or more dimensions
+
+For an arbitrary number of dimensions, the predicate receives an `Object[]` whose
+positions follow the order of dimensions passed to `when(...)`:
+
+```java
+var cores = List.of(1, 2, 4, 8);
+var memoryGb = List.of(2, 4, 8, 16);
+var budget = List.of(8, 16, 32);
+
+var products = JNumberTools.cartesianProduct()
+        .withLambda(cores, memoryGb, budget)
+        .when(cores, memoryGb, budget).matches(values -> {
+            int c = (Integer) values[0];
+            int m = (Integer) values[1];
+            int b = (Integer) values[2];
+            return c * m <= b;
+        })
+        .andWhen(memoryGb, budget).matches((m, b) -> m * 2 <= b);
+
+products.count();
+products.generate().stream().forEach(System.out::println);
+```
+
+Add further dimensions with `and(list)` and further rules with
+`andWhen(...).matches(...)`. Every completed lambda rule must hold; rules are combined
+with AND.
+
+**Compilation and constraints:**
+
+- A rule over two dimensions is compiled into pairwise constraints when possible.
+- A rule over more dimensions is compiled into a bounded joint constraint.
+- Compiling one rule is limited to 1,000,000 predicate probes (antecedent combinations
+  multiplied by target values). Narrow the rule scope or dimension sizes if this limit
+  would be exceeded.
+- Predicates must be deterministic and side-effect-free. In the `Object[]` form, use
+  values in scope order; do not mutate or retain the array supplied during compilation.
+- `generate()` is lazy and re-iterable and produces each valid tuple once, without an
+  encounter-order guarantee. The builder also exposes exact `count()` and `isEmpty()`.
+  It does not expose lexicographical traversal, rank-based access, choice or sampling.
+
+Prefer the Compiled Product for straightforward pairwise rules and the Compound Product
+when nested Boolean conditions communicate the rule more clearly. Use the Lambda Engine
+when the rule is genuinely joint logic (arithmetic, relational or application-specific
+computation) and the lambda is the clearest representation.
+
+<!-- TODO: Insert the actual Lambda Engine benchmark code and measured results here. -->
+
+## 4.6 Products of ranks, random choice and random sample
+
+Simple, constrained and compiled products support rank-based and random operations.
+`byRanks` returns products at the requested ranks, `choice` draws with replacement
+(duplicates possible), and `sample` draws distinct products without replacement.
+
+```java
+var colors = List.of("Red", "Green", "Blue");
+var sizes = List.of("S", "M");
+var product = JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes);
+
+// The products at ranks 5 and 0: [Blue, M], [Red, S]
+product.byRanks(List.of(BigInteger.valueOf(5), BigInteger.ZERO))
+       .stream().forEach(System.out::println);
+
+// 3 random products, duplicates possible
+product.choice(3, new Random(1)).stream().forEach(System.out::println);
+
+// 3 distinct random products
+product.sample(3, new Random(1)).stream().forEach(System.out::println);
+
+// The same operations on a constrained product
+var cheese = List.of("Ricotta", "Mozzarella", "Cheddar");
+var constrained = JNumberTools.cartesianProduct()
+        .constrainedProductOfDistinct(1, sizes)
+        .andDistinct(2, cheese);
+constrained.byRanks(List.of(BigInteger.TWO)).stream().forEach(System.out::println);
+
+// The same rank/choice/sample family is available on a compiled pairwise product.
+var os = List.of("Windows", "macOS", "Linux");
+var browser = List.of("Chrome", "Safari", "Firefox");
+var compiled = JNumberTools.cartesianProduct()
+        .conditionalProductOf(os, browser)
+        .when(browser).is("Safari").then(os).is("macOS");
+compiled.byRanks(0, 2).stream().forEach(System.out::println);
+```
+
+The Compound Product and Lambda Engine intentionally do not expose these rank-based or
+random operations; use `generate()` for their lazy, re-iterable output.
+
+---
+
+# 5. Derangements
+
+A derangement is a permutation in which no element remains in its original position.
+
+## 5.1 Derangement generation
+
+| Description | API | Output |
+|---|---|---|
+| Generate all derangements of integers `0, 1, 2, 3`. | `JNumberTools.derangements().of(4).lexOrder();` | `[1,0,3,2], [1,2,3,0], [1,3,0,2], ...` |
+| Generate all derangements of A, B, C and D. | `JNumberTools.derangements().of("A", "B", "C", "D").lexOrder();` | Derangements with no element in its original position. |
+| Generate every third derangement, starting at rank 0. | `JNumberTools.derangements().of(5).lexOrderMth(3, 0);` | Derangements at ranks `0, 3, 6, ...` |
+| Generate derangements at ranks 0, 2 and 10. | `JNumberTools.derangements().of(5).byRanks(0, 2, 10);` | Derangements at those ranks. |
+| Select 3 random derangements; duplicates are possible. | `JNumberTools.derangements().of(5).choice(3, new Random());` | Three random derangements. |
+| Select 3 distinct random derangements. | `JNumberTools.derangements().of(5).sample(3, new Random());` | Three distinct derangements. |
+
+---
+
+# 6. Number Systems
+
+JNumberTools documents four combinatorial number-system representations: Factoradic, Permutadic, Combinadic and Derangadic.
+
+## 6.1 Factoradic (Factorial Number System)
+
+| Description | API | Output |
+|---|---|---|
+| Convert decimal 859 to Factoradic. | `JNumberTools.numberSystem().factoradic(BigInteger.valueOf(859));` | A Factoradic representation whose decimal value is `859`. |
+
+Example:
+
+```java
+BigInteger number = BigInteger.valueOf(859);
+Factoradic factoradic = JNumberTools.numberSystem().factoradic(number);
+
+System.out.println(factoradic);
+System.out.println(factoradic.decimalValue); // 859
+```
+
+## 6.2 Permutadic (Permutational Number System)
+
+Permutadic is a generalization of Factoradic for k-permutations.
+
+| Description | API | Output |
+|---|---|---|
+| Convert decimal 100 to a Permutadic representation of degree 3. | `JNumberTools.numberSystem().permutadic(BigInteger.valueOf(100), 3);` | A Permutadic representation whose decimal value is `100`. |
+
+Example:
+
+```java
+BigInteger number = BigInteger.valueOf(100);
+Permutadic permutadic = JNumberTools.numberSystem().permutadic(number, 3);
+
+System.out.println(permutadic);
+System.out.println(permutadic.decimalValue); // 100
+```
+
+## 6.3 Combinadic (Combinatorial Number System)
+
+Combinadic represents combination ranks using binomial coefficients.
+
+| Description | API | Output |
+|---|---|---|
+| Convert decimal 35 to a Combinadic representation of degree 3. | `JNumberTools.numberSystem().combinadic(BigInteger.valueOf(35), 3);` | A Combinadic representation whose decimal value is `35`. |
+
+Example:
+
+```java
+BigInteger number = BigInteger.valueOf(35);
+Combinadic combinadic = JNumberTools.numberSystem().combinadic(number, 3);
+
+System.out.println(combinadic);
+System.out.println(combinadic.decimalValue); // 35
+```
+
+## 6.4 Derangadic (Derangement Number System)
+
+Derangadic provides a bijection between ranks `0` through `!n - 1` and derangements of order `n`.
+
+| Description | API | Output |
+|---|---|---|
+| Decode rank 5 into a derangement of order 5. | `JNumberTools.numberSystem().derangadic(BigInteger.valueOf(5), 5);` | Derangement `[1, 3, 0, 4, 2]`. |
+| Read the rank of the decoded derangement. | `derangadic.rank();` | `5` |
+| Read the number of derangements of order 5. | `derangadic.count();` | `44` |
+| Read the encoded digits. | `derangadic.encoded();` | `[0, 1, 0, 2, 0]` |
+| Advance the representation by two ranks. | `derangadic.add(BigInteger.TWO).derangement();` | `[1, 3, 4, 2, 0]` |
+
+Example:
+
+```java
+Derangadic derangadic =
+        JNumberTools.numberSystem().derangadic(BigInteger.valueOf(5), 5);
+
+System.out.println(Arrays.toString(derangadic.derangement())); // [1, 3, 0, 4, 2]
+System.out.println(derangadic.rank());                         // 5
+System.out.println(derangadic.count());                        // 44
+System.out.println(Arrays.toString(derangadic.encoded()));     // [0, 1, 0, 2, 0]
+
+int[] later = derangadic.add(BigInteger.TWO).derangement();     // [1, 3, 4, 2, 0]
+```
+
+`next()` advances an instance to the following rank in place. It uses an incremental algorithm rather than recomputing from rank zero.
+
+---
+
+# 7. Calculator
+
+The `Calculator` class provides combinatorial and arithmetic functions. It uses memoization for several calculations and supports `BigInteger` results.
+
+## 7.1 Factorial and subfactorial
+
+| Description | API | Output |
+|---|---|---|
+| Calculate 5 factorial. | `new Calculator().factorial(5);` | `120` |
+| Calculate the subfactorial of 4, the number of derangements of 4 elements. | `new Calculator().subFactorial(4);` | `9` |
+| Find the smallest n for which n factorial exceeds 1000. | `new Calculator().factorialUpperBound(BigInteger.valueOf(1000));` | `7` |
+
+## 7.2 Combinations and permutations
+
+| Description | API | Output |
+|---|---|---|
+| Calculate 5 choose 2. | `new Calculator().nCr(5, 2);` | `10` |
+| Calculate 4 choose 3 with repetition. | `new Calculator().nCrRepetitive(4, 3);` | `20` |
+| Find the smallest n for which n choose 3 exceeds 100. | `new Calculator().nCrUpperBound(3, BigInteger.valueOf(100));` | `10` |
+| Calculate 5 permute 3. | `new Calculator().nPr(5, 3);` | `60` |
+
+## 7.3 Multiset calculations
+
+| Description | API | Output |
+|---|---|---|
+| Calculate the multinomial coefficient for frequencies 2, 1 and 3. | `new Calculator().multinomial(2, 1, 3);` | `60` |
+| Calculate all multiset combination counts for frequencies 2 and 1. | `Calculator.multisetCombinationsCountAll(2, 1);` | `[1, 2]` |
+| Calculate the number of ways to select 2 items from a multiset with frequencies 2, 2 and 1. | `Calculator.multisetCombinationsCount(2, 2, 1);` | `2` |
+| Count selections of 5 items using frequency entries from index 2 onward. | `Calculator.multisetCombinationsCountStartingFromIndex(5, 2, new int[]{10, 12, 5, 8});` | A `BigInteger` count. |
+
+## 7.4 Subset calculations
+
+| Description | API | Output |
+|---|---|---|
+| Count subsets of sizes 1 through 2 from 4 elements. | `new Calculator().totalSubsetsInRange(1, 2, 4);` | `10` |
+
+## 7.5 Arithmetic operations
+
+| Description | API | Output |
+|---|---|---|
+| Calculate 2 raised to the power 10. | `new Calculator().power(2, 10);` | `1024` |
+| Calculate the GCD of 48, 18 and 27. | `new Calculator().gcd(BigInteger.valueOf(48), BigInteger.valueOf(18), BigInteger.valueOf(27));` | `3` |
+| Calculate the LCM of 4, 6 and 8. | `new Calculator().lcm(BigInteger.valueOf(4), BigInteger.valueOf(6), BigInteger.valueOf(8));` | `24` |
+
+## 7.6 Special combinatorial functions
+
+| Description | API | Output |
+|---|---|---|
+| Calculate the number of permutations of 4 elements with exactly 1 fixed point. | `new Calculator().rencontresNumber(4, 1);` | `8` |
+
+---
+
+# 8. Ranking and Unranking
+
+Ranking returns the zero-based lexicographical rank of a valid combinatorial object. Unranking performs the inverse operation by returning the object at a specified rank.
+
+Ranks are represented using `BigInteger`.
+
+## 8.1 Ranking permutations
+
+| Description | API | Output |
+|---|---|---|
+| Find the rank of permutation `[3,2,1,0]` among permutations of 4 elements. | `JNumberTools.rankOf().permutation().unique(3, 2, 1, 0);` | `23` |
+| Find the rank of k-permutation `[4,6,2,0]` from 8 elements. | `JNumberTools.rankOf().permutation().k(8, 4, 6, 2, 0);` | A zero-based `BigInteger` rank. |
+| Find the rank of `[1,0,0,1]` among sequences of length 4 over 2 types. | `JNumberTools.rankOf().permutation().repetitive(2, 1, 0, 0, 1);` | `9` |
+| Find the rank of multiset permutation `[0,1,0]` with frequencies `[2,1]`. | `JNumberTools.rankOf().permutation().multiset(new int[]{2, 1}, new int[]{0, 1, 0});` | A zero-based `BigInteger` rank. |
+| Find the rank of derangement `[1,0,3,2]`. | `JNumberTools.rankOf().permutation().derangement(1, 0, 3, 2);` | A zero-based `BigInteger` rank. |
+
+## 8.2 Ranking combinations
+
+| Description | API | Output |
+|---|---|---|
+| Find the rank of combination `[1,2,3,4]` among 4-combinations of 8 elements. | `JNumberTools.rankOf().combination().unique(8, 1, 2, 3, 4);` | A zero-based `BigInteger` rank. |
+| Find the rank of repetitive combination `[0,1,1]` from 3 types. | `JNumberTools.rankOf().combination().repetitive(3, 0, 1, 1);` | A zero-based `BigInteger` rank. |
+| Find the rank of a multiset combination selecting one item each of types 0 and 1. | `JNumberTools.rankOf().combination().multiset(new int[]{2, 2, 1}, new int[]{1, 1, 0});` | A zero-based `BigInteger` rank. |
+
+## 8.3 Unranking permutations
+
+| Description | API | Output |
+|---|---|---|
+| Decode rank 5 into a permutation of 3 elements. | `JNumberTools.unrankOf().permutation().unique(BigInteger.valueOf(5), 3);` | `[2,1,0]` |
+| Determine the smallest permutation size capable of containing rank 5. | `JNumberTools.unrankOf().permutation().uniqueMinimumSize(BigInteger.valueOf(5));` | An integer permutation. |
+| Decode rank 5 into a k-permutation from 8 elements, selecting 3. | `JNumberTools.unrankOf().permutation().k(BigInteger.valueOf(5), 8, 3);` | An integer array of length 3. |
+| Decode rank 5 into a repetitive permutation with 2 types and length 4. | `JNumberTools.unrankOf().permutation().repetitive(BigInteger.valueOf(5), 2, 4);` | An integer array of length 4. |
+| Decode rank 2 into a multiset permutation with frequencies 2 and 1. | `JNumberTools.unrankOf().permutation().multiset(BigInteger.valueOf(2), 2, 1);` | An integer array containing two occurrences of type 0 and one of type 1. |
+| Decode rank 2 into a derangement of order 4. | `JNumberTools.unrankOf().permutation().derangement(BigInteger.valueOf(2), 4);` | A derangement of length 4. |
+
+## 8.4 Unranking combinations
+
+| Description | API | Output |
+|---|---|---|
+| Decode rank 9 into a 3-combination from 5 elements. | `JNumberTools.unrankOf().combination().unique(BigInteger.valueOf(9), 5, 3);` | An integer array of length 3. |
+| Decode rank 4 into a repetitive combination of size 3 from 3 types. | `JNumberTools.unrankOf().combination().repetitive(BigInteger.valueOf(4), 3, 3);` | An integer array of length 3. |
+| Decode rank 0 into a multiset combination with frequencies `[2,2,1]`, selecting 2 items. | `JNumberTools.unrankOf().combination().multiset(BigInteger.ZERO, new int[]{2, 2, 1}, 2);` | A count vector aligned with the frequency vector. |
+
+## 8.5 Ranking and unranking together
+
+For a valid combinatorial object, ranking and unranking are inverse operations.
+
+| Description | API | Output |
+|---|---|---|
+| Rank a permutation and decode the same rank. | `int[] p = {2, 0, 1}; BigInteger rank = JNumberTools.rankOf().permutation().unique(p); int[] decoded = JNumberTools.unrankOf().permutation().unique(rank, p.length);` | `decoded` is `[2,0,1]`, the original permutation. |
+
+---
+
+# Important API semantics and limitations
+
+1. **Zero-based ranks:** Rank 0 is the first result. For example, ranks 1, 3 and 5 refer to the second, fourth and sixth results when counted from one.
+2. **Lexicographical order:** Rank-based operations on generators use the lexicographical ordering defined by the relevant generator. Combination-order k-permutations use their own combination-first ordering.
+3. **Random choice versus random sample:** `choice` samples with replacement. `sample` samples without replacement and therefore cannot return more distinct results than the total number of available results.
+4. **Large ranks:** Use the `String` overload of `byRanks` when a rank does not fit in a `long`. For example, `.byRanks("1000000000000000000000")`.
+5. **Lazy generation:** Generator methods return lazy, re-iterable generators. They do not necessarily materialize all results in memory.
+6. **Product builder differences:** Simple, constrained and compiled products support lexicographical/rank-based operations and random choice or sampling. Compound Product and Lambda Engine expose lazy `generate()`, exact `count()` and `isEmpty()`; they do not expose rank-based traversal, choice or sampling. Compound `Condition.matches(...)` predicates apply to one dimension, while Lambda Engine predicates may jointly inspect the values in a declared multi-dimension scope. Both are compiled before tuple generation.
+7. **Empty results:** A generator may have zero results. A generator containing one empty tuple is not empty.
+8. **Validation:** Input constraints and exception behavior are specified in the repository's `ValidationRules.md`.
+
+Use the relevant builder family and documented methods. Do not assume that similarly named builders expose identical operations.

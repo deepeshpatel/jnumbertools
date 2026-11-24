@@ -22,11 +22,13 @@ JNumberTools provides the following generators for Cartesian products. All m<sup
     1. [Constrained Cartesian product in lex order](#21-constrained-cartesian-product-in-lex-order)
     2. [Every m<sup>th</sup> constrained Cartesian product in lex order](#22-m-th-constrained-cartesian-product)
 
-3. [Conditional Cartesian Product](#3-conditional-cartesian-product)
+3. [Compiled Product: pairwise conditional rules](#3-compiled-product-pairwise-conditional-rules)
 
-4. [Compound Conditional Cartesian Product](#4-compound-conditional-cartesian-product)
+4. [Compound Product: nested Boolean rules](#4-compound-product-nested-boolean-rules)
 
-5. [Products of ranks, random choice and random sample](#5-products-of-ranks-random-choice-and-random-sample)
+5. [Lambda Engine: predicate-to-constraint compiler](#5-lambda-engine-predicate-to-constraint-compiler)
+
+6. [Products of ranks, random choice and random sample](#6-products-of-ranks-random-choice-and-random-sample)
 
 ---
 
@@ -131,9 +133,9 @@ JNumberTools.cartesianProduct()
    .stream().forEach(System.out::println);
 ```
 
-### 3. Conditional Cartesian Product
+### 3. Compiled Product: Pairwise Conditional Rules
 
-A simple Cartesian product restricted by rules between two dimensions, for example "if the network is 4G, the
+A compiled Cartesian product restricted by pairwise rules between two dimensions, for example "if the network is 4G, the
 OS cannot be Linux". It counts, orders, ranks and samples only the valid tuples, **without generating and
 filtering the full product**, so it stays fast when the full product is huge and most of it is invalid.
 
@@ -197,12 +199,12 @@ dimension and itself.
 - When almost every tuple is valid, a plain filter over a simple product is about as fast. The advantage grows as
   the rules remove more of the space.
 
-### 4. Compound Conditional Cartesian Product
+### 4. Compound Product: Nested Boolean Rules
 
 For rules whose trigger depends on multiple dimensions or requires nested Boolean
 grouping, use the separate `compoundProductOf(...)` entry point with a composed
 `Condition`. Its concrete `CompoundConditionalProductBuilder` exposes lazy
-generation, exact counting and emptiness checks.
+generation, exact counting and emptiness checks. Use this declarative form when the rule can be expressed clearly as nested `AND`/`OR` conditions.
 
 ```java
 var os = List.of("Windows", "macOS", "Linux");
@@ -231,9 +233,10 @@ Conditions can be nested to express either grouping order, for example
 composed trigger matches. Multiple completed rules are combined with AND.
 
 Atomic conditions can also use `matches(Predicate<? super T>)` for custom
-logic on one dimension. The dimension is explicit, so the compiler can evaluate
-the predicate against that dimension's values and compile the matching positions
-before tuple generation:
+logic on one dimension. This predicate receives one value from that dimension;
+it is not a joint predicate over multiple dimensions. The dimension is explicit,
+so the compiler evaluates the predicate against that dimension's values and
+compiles the matching positions before tuple generation:
 
 ```java
 var trigger = condition(browser).matches(value -> value.startsWith("Ch"))
@@ -259,9 +262,88 @@ into the scope. Each node is subject to the same combination limit, and the pair
 the 50,000,000 value-pair limit (`MAX_PAIR_CELLS`). When a chain passes through the scopes
 of several compound rules, the dimensions on that cycle are enumerated together.
 
-### 5. Products of ranks, random choice and random sample
+### 5. Lambda Engine: Predicate-to-Constraint Compiler
 
-Simple, constrained and conditional products support the same `byRanks`, `choice` and `sample` operations as the other generators. `byRanks` returns the products at the given ranks, `choice` draws random products with replacement (duplicates possible), and `sample` draws random distinct products.
+Use the Lambda Engine when the rules are too complex to express clearly with the pairwise
+Compiled Product or the declarative nested conditions of the Compound Product. It provides
+the flexibility of writing rules in a lambda style while retaining readable code and the
+existing constraint engine's pruning and optimized execution path.
+
+The key design point is that this is **not a predicate filter applied to every generated tuple**.
+Each lambda rule is compiled when the rule is added. The builder enumerates the combinations
+of values in the rule's declared scope, evaluates the predicate, and converts the result into
+the same internal constraint representation used by the Compound Product. Subsequent
+generation, counting and emptiness checks use those compiled constraints; they do not invoke
+the predicate again.
+
+#### Typed rule over two dimensions
+
+For exactly two dimensions, the predicate is a typed `BiPredicate`:
+
+```java
+var cores = List.of(1, 2, 4, 8);
+var memoryGb = List.of(2, 4, 8, 16);
+
+var products = JNumberTools.cartesianProduct()
+        .withLambda(cores, memoryGb)
+        .when(cores, memoryGb).matches((c, m) -> c * m <= 256);
+
+products.count();                    // exact count
+products.isEmpty();                  // whether any valid tuple exists
+products.generate().stream().forEach(System.out::println);
+```
+
+#### Joint predicate over three or more dimensions
+
+For an arbitrary number of dimensions, the predicate receives an `Object[]` in the same
+order as the dimensions passed to `when(...)`:
+
+```java
+var cores = List.of(1, 2, 4, 8);
+var memoryGb = List.of(2, 4, 8, 16);
+var budget = List.of(8, 16, 32);
+
+var products = JNumberTools.cartesianProduct()
+        .withLambda(cores, memoryGb, budget)
+        .when(cores, memoryGb, budget).matches(values -> {
+            int c = (Integer) values[0];
+            int m = (Integer) values[1];
+            int b = (Integer) values[2];
+            return c * m <= b;
+        })
+        .andWhen(memoryGb, budget).matches((m, b) -> m * 2 <= b);
+
+products.count();
+products.generate().stream().forEach(System.out::println);
+```
+
+Additional dimensions can be appended with `and(list)`. Add further rules with
+`andWhen(...).matches(...)`. Every completed lambda rule must hold; rules are combined
+with AND.
+
+**Compilation and limits.**
+
+- A two-dimension rule is compiled into pairwise constraints when possible.
+- A rule whose scope has more than two dimensions is compiled into a bounded joint constraint.
+- Compiling a rule is limited to 1,000,000 predicate probes (the product of the antecedent
+  combinations and target values). Narrow the scope or dimension sizes if this limit is exceeded.
+- Predicates must be deterministic and side-effect-free. For the `Object[]` form, read the
+  supplied values in scope order; do not mutate or retain the compilation array.
+- `generate()` is lazy and re-iterable and produces each valid tuple once, without an
+  encounter-order guarantee. The builder also exposes exact `count()` and `isEmpty()`.
+  Lexicographical traversal, rank-based access, choice and sampling are not exposed.
+
+**When to choose it.** Prefer the pairwise Compiled Product for straightforward two-dimension
+rules. Prefer the Compound Product when a rule is naturally expressed as nested Boolean
+conditions over dimensions. Use the Lambda Engine when the rule is genuinely joint logic
+(arithmetic, relational or application-specific computation) and the lambda makes that logic
+clearer than a condition tree.
+
+<!-- TODO: Insert the actual Lambda Engine benchmark code and measured results here. -->
+
+### 6. Products of ranks, random choice and random sample
+
+Simple, constrained and compiled products support `byRanks`, `choice` and `sample`. The Compound Product and Lambda Engine intentionally expose a smaller terminal API. `byRanks` returns the products at the given ranks, `choice` draws random products with replacement (duplicates possible), and `sample` draws random distinct products.
 
 ```java
 var colors = List.of("Red", "Green", "Blue");
