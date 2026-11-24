@@ -39,6 +39,23 @@ public class Util {
         return Collections.singletonList(Collections.<K,V>emptyMap()).iterator();
     }
 
+    /**
+     * Converts decimal rank strings to {@link BigInteger} values.
+     *
+     * @param ranks decimal rank strings
+     * @return the corresponding ranks as BigInteger values
+     * @throws NullPointerException if the list or one of its entries is null
+     * @throws NumberFormatException if an entry is not a valid integer
+     */
+    public static List<BigInteger> toBigIntegers(List<String> ranks) {
+        Objects.requireNonNull(ranks, "ranks");
+        List<BigInteger> converted = new ArrayList<>(ranks.size());
+        for (String rank : ranks) {
+            converted.add(new BigInteger(Objects.requireNonNull(rank, "rank")));
+        }
+        return converted;
+    }
+
     public static void validateInput(List<?> elements) {
         if(elements == null) {
             String error = "elements should not be null for combinatorics generators to work." +
