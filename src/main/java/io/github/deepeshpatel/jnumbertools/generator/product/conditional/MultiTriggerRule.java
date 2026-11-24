@@ -26,6 +26,12 @@ final class MultiTriggerRule {
     final BitSet allowedTargets;
     final int[] scope;
 
+    // Flattened view of `groups`, filled once in the constructor. Iterating arrays by index avoids the
+    // per-call Iterator allocation of the enhanced-for loops; isSatisfied is on the hot path for compound
+    // traversal (once per candidate prefix per tuple) and for ConstraintPlan.fill (once per candidate).
+    private final int[][] condDims;          // condDims[g][i] = dimension of group g, condition i
+    private final BitSet[][] condValues;     // condValues[g][i] = allowed values of that condition
+
     MultiTriggerRule(List<List<Condition>> groups, int targetDimension, BitSet allowedTargets) {
         this.groups = copyGroups(groups);
         this.targetDimension = targetDimension;
@@ -44,14 +50,34 @@ final class MultiTriggerRule {
         scope = new int[count];
         int at = 0;
         for (int d = 0; d < seen.length; d++) if (seen[d]) scope[at++] = d;
+
+        // Build the flattened view once. Every Condition is immutable (its values are cloned in the
+        // constructor), so the arrays only reference them; no further copying is needed.
+        int groupCount = this.groups.size();
+        condDims = new int[groupCount][];
+        condValues = new BitSet[groupCount][];
+        for (int g = 0; g < groupCount; g++) {
+            List<Condition> group = this.groups.get(g);
+            int condCount = group.size();
+            int[] dims = new int[condCount];
+            BitSet[] values = new BitSet[condCount];
+            for (int i = 0; i < condCount; i++) {
+                Condition c = group.get(i);
+                dims[i] = c.dimension;
+                values[i] = c.values;
+            }
+            condDims[g] = dims;
+            condValues[g] = values;
+        }
     }
 
     static List<List<Condition>> copyGroups(List<List<Condition>> groups) {
         List<List<Condition>> copy = new ArrayList<>(groups.size());
         for (List<Condition> group : groups) {
-            List<Condition> conditions = new ArrayList<>(group.size());
-            for (Condition condition : group) conditions.add(new Condition(condition.dimension, condition.values));
-            copy.add(Collections.unmodifiableList(conditions));
+            // Condition is immutable — its BitSet is cloned in its own constructor and never exposed
+            // mutably. Only the list containers need to be copied here; sharing Condition references
+            // avoids re-cloning every BitSet on every call to this method.
+            copy.add(Collections.unmodifiableList(new ArrayList<>(group)));
         }
         return Collections.unmodifiableList(copy);
     }
@@ -66,10 +92,12 @@ final class MultiTriggerRule {
     }
 
     boolean isSatisfied(int[] assignment) {
-        for (List<Condition> group : groups) {
+        for (int g = 0; g < condDims.length; g++) {
+            int[] dims = condDims[g];
+            BitSet[] values = condValues[g];
             boolean matches = true;
-            for (Condition condition : group) {
-                if (!condition.values.get(assignment[condition.dimension])) {
+            for (int i = 0; i < dims.length; i++) {
+                if (!values[i].get(assignment[dims[i]])) {
                     matches = false;
                     break;
                 }
@@ -80,11 +108,13 @@ final class MultiTriggerRule {
     }
 
     boolean isSatisfied(int[] dimensions, int[] localValues) {
-        for (List<Condition> group : groups) {
+        for (int g = 0; g < condDims.length; g++) {
+            int[] dims = condDims[g];
+            BitSet[] values = condValues[g];
             boolean matches = true;
-            for (Condition condition : group) {
-                int position = positionOf(dimensions, condition.dimension);
-                if (position < 0 || !condition.values.get(localValues[position])) {
+            for (int i = 0; i < dims.length; i++) {
+                int position = positionOf(dimensions, dims[i]);
+                if (position < 0 || !values[i].get(localValues[position])) {
                     matches = false;
                     break;
                 }

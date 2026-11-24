@@ -129,23 +129,20 @@ public class CartesianProductByRanks<T> implements StreamableIterable<T> {
             dimensions = (Iterator<List<T>>[]) new Iterator[builders.size()];
             for (int i = 0; i < slots.length; i++) {
                 slots[i] = new RankSlot();
-                try {
-                    dimensions[i] = builders.get(i).byRanks(slots[i]).iterator();
-                } catch (UnsupportedOperationException noByRanks) {
-                    dimensions[i] = null;   // a builder without rank support: fetch() uses lexOrderMth instead
-                }
+                // Builder.byRanks(...) is required by the Builder interface, so no fallback path is
+                // needed: a builder without rank support would not compile. If a future Builder ever
+                // does need to reject rank access, letting UnsupportedOperationException propagate is
+                // the correct behaviour — silently falling back to lexOrderMth(ONE, position) would
+                // be O(rank) per element.
+                dimensions[i] = builders.get(i).byRanks(slots[i]).iterator();
             }
         }
 
         private List<T> fetch(int dimension, BigInteger position) {
-            Iterator<List<T>> generator = dimensions[dimension];
-            if (generator != null && generator.hasNext()) {
-                slots[dimension].value = position;
-                return generator.next();
-            }
-            // No by-rank generator, or one that stopped after a fixed number of elements regardless of the ranks
-            // fed to it: build a one-off generator for this position.
-            return builders.get(dimension).lexOrderMth(BigInteger.ONE, position).iterator().next();
+            // RankSlot.hasNext() always returns true, so the iterator is guaranteed to yield one element
+            // per slot value; no hasNext() check is needed.
+            slots[dimension].value = position;
+            return dimensions[dimension].next();
         }
 
         private List<T> getMth(BigInteger rank) {

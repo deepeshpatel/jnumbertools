@@ -171,7 +171,9 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     /**
      * Creates a builder with two or more dimensions, equivalent to calling
      * {@link #ConditionalProductBuilder(List)} with {@code first} and then adding each remaining
-     * dimension through {@link #and(List)}. The dimensions retain the supplied order.
+     * dimension through {@link #and(List)}, but in a single pass: the dimension list, the identity
+     * indexes and the rule compiler are built once, so the cost is O(dimensions) rather than the
+     * O(dimensions²) of repeated {@code .and(...)} calls.
      *
      * @param first the first dimension; copied. An empty list is allowed and makes the product empty.
      * @param second the second dimension; copied
@@ -179,15 +181,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @throws NullPointerException if any dimension is null or contains a null element
      */
     public ConditionalProductBuilder(List<?> first, List<?> second, List<?>... additional) {
-        this(chain(first, second, additional));
-    }
-
-    private static ConditionalProductBuilder chain(List<?> first, List<?> second, List<?>... additional) {
-        ConditionalProductBuilder builder = new ConditionalProductBuilder(first).and(second);
-        for (List<?> dimension : additional) {
-            builder = builder.and(dimension);
-        }
-        return builder;
+        this(snapshotAll(first, second, additional), callerListsOf(first, second, additional));
     }
 
     private ConditionalProductBuilder(ConditionalProductBuilder source) {
@@ -198,6 +192,41 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         this.model = model;
         this.originals = originals;
         this.ruleCompiler = new RuleCompiler(model.dimensions, originals, model.indexes);
+    }
+
+    /**
+     * Builds a builder directly from already-snapshotted dimensions and the caller's parallel list of
+     * original instances. Used by the multi-argument constructor, which does not go through repeated
+     * {@link #and(List)} calls: those would copy the growing dimension list, indexes and rule compiler
+     * once per dimension, making the whole construction O(d²). With this constructor it is O(d).
+     *
+     * @param copies    private snapshots, one per dimension (element i is the snapshot of originals.get(i))
+     * @param originals the caller's list instances, kept only for identity comparison in the rule API
+     */
+    private ConditionalProductBuilder(List<List<?>> copies, List<List<?>> originals) {
+        this.model = new ConstraintModel(copies, PersistentRelationMap.empty());
+        this.originals = Collections.unmodifiableList(originals);
+        this.ruleCompiler = new RuleCompiler(model.dimensions, this.originals, model.indexes);
+    }
+
+    /** Snapshots every dimension of the multi-argument constructor exactly once. */
+    private static List<List<?>> snapshotAll(List<?> first, List<?> second, List<?>... additional) {
+        int count = 2 + additional.length;
+        List<List<?>> copies = new ArrayList<>(count);
+        copies.add(snapshot(first));
+        copies.add(snapshot(second));
+        for (List<?> dimension : additional) copies.add(snapshot(dimension));
+        return copies;
+    }
+
+    /** Keeps the caller's list instances (for identity-based rule resolution), in the same order as the copies. */
+    private static List<List<?>> callerListsOf(List<?> first, List<?> second, List<?>... additional) {
+        int count = 2 + additional.length;
+        List<List<?>> lists = new ArrayList<>(count);
+        lists.add(first);
+        lists.add(second);
+        for (List<?> dimension : additional) lists.add(dimension);
+        return lists;
     }
 
     /**
@@ -577,7 +606,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         if (!model.multiRules.isEmpty()) {
             throw new UnsupportedOperationException(
                     "lexOrder() is not supported for compound conditions; use anyOrder() instead. " +
-                    "lexOrder() is available only for pairwise when().then() rules.");
+                            "lexOrder() is available only for pairwise when().then() rules.");
         }
     }
 
@@ -617,20 +646,31 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * {@link #count()}/{@link #isEmpty()}/{@link #anyOrder()} treats that block as a single node with
      * precomputed, table-driven transitions — no interpreter re-evaluates the predicate while generating.</p>
      *
+     * <p>A scope of a single dimension is rejected: {@code ConstraintPlan} does not run a rule through its
+     * node enumeration for a single-dimension node, so such a rule would be enforced by traversal but
+     * ignored by counting and unranking, giving inconsistent results between {@code lexOrder()},
+     * {@code count()} and {@code byRanks(...)}. Use {@link Condition#condition(List)} with
+     * {@code .matches(Predicate)} through the compound-product API, or pre-filter the dimension list, when
+     * a single-dimension filter is needed.</p>
+     *
      * @param scopeDims positions of the dimensions the predicate jointly depends on, in declaration order;
-     *                  must contain at least one position and no duplicates
+     *                  must contain at least two positions (one antecedent plus the target) and no duplicates
      * @param predicate evaluated with one argument per {@code scopeDims} position, in the same order;
      *                  must be deterministic and side-effect-free
      * @return a new builder with the compiled rule(s) added
-     * @throws IllegalArgumentException if the scope is empty, contains a duplicate dimension, or the
-     *                                  antecedent-combinations-times-target-values count that would need
-     *                                  to be probed exceeds {@link ConstraintGraph#MAX_LOOP_COMBINATIONS}
+     * @throws IllegalArgumentException if the scope has fewer than two dimensions or contains a duplicate
+     *                                  dimension, or the antecedent-combinations-times-target-values count
+     *                                  that would need to be probed exceeds
+     *                                  {@link ConstraintGraph#MAX_LOOP_COMBINATIONS}
      */
     ConditionalProductBuilder withLambdaRule(int[] scopeDims, Predicate<Object[]> predicate) {
         Objects.requireNonNull(predicate, "predicate must not be null");
         Objects.requireNonNull(scopeDims, "scopeDims must not be null");
-        if (scopeDims.length == 0) {
-            throw new IllegalArgumentException("A lambda rule must depend on at least one dimension");
+        if (scopeDims.length < 2) {
+            throw new IllegalArgumentException("A lambda rule must depend on at least two dimensions "
+                    + "(one antecedent and one target); for a filter on a single dimension use "
+                    + "Condition.condition(dim).matches(...) with compoundProductOf(...), or pre-filter "
+                    + "the dimension list before building the product");
         }
         for (int i = 0; i < scopeDims.length; i++) {
             for (int j = i + 1; j < scopeDims.length; j++) {
@@ -674,6 +714,15 @@ public final class ConditionalProductBuilder implements Builder<Object> {
             throw new IllegalArgumentException("Compiling this lambda rule would need to probe the predicate "
                     + "more than " + ConstraintGraph.MAX_LOOP_COMBINATIONS + " times (antecedent combinations "
                     + "times target values); narrow the scope or its dimensions' sizes.");
+        }
+
+        // Nothing to compile when either side is empty. An empty antecedent dimension means there is no
+        // antecedent combination to pick a value from (the enumeration loop below would call get(0) on an
+        // empty list); an empty target dimension means no tuple can satisfy any rule that names it. In
+        // either case the product itself has count 0, and returning without adding a rule is both correct
+        // and avoids both the exception and the pointless probe loop.
+        if (antecedentCombos == 0 || targetSize == 0) {
+            return this;
         }
 
         Map<BitSet, List<int[]>> combosByAllowedTargets = new LinkedHashMap<>();
@@ -749,12 +798,4 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         Util.validateInput(elements);
         return Util.copyOfNoNulls(elements);
     }
-
-    // ── Rule tables ──────────────────────────────────────────────────────────
-
-    /** Allowed value pairs between dimension u and dimension v (u &lt; v). Immutable once built. */
-    // ── Counting plan ────────────────────────────────────────────────────────
-
-
-
 }

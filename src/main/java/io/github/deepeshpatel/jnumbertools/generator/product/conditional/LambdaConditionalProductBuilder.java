@@ -91,15 +91,28 @@ public final class LambdaConditionalProductBuilder {
      * Starts a rule whose predicate will receive one argument per dimension here, in this order — the
      * uncapped form, for any number of dimensions.
      *
+     * <p>A rule must name at least two dimensions: one antecedent (the {@code when} side) and one target
+     * (the last dimension in {@code scope}). For a filter on a single dimension, use
+     * {@code compoundProductOf(...).when(Condition.condition(dim).matches(pred)).then(...)}, or pre-filter
+     * the dimension list before building the product. Single-dimension scopes are rejected because
+     * {@code ConstraintPlan} does not run rules through its node enumeration for a single-dimension node,
+     * so such a rule would be enforced during traversal but ignored by {@code count()} and rank-based
+     * operations.</p>
+     *
      * @param scope the dimensions the predicate jointly depends on, in argument order; each the same
      *              list instance supplied to {@code withLambda(...)} or {@link #and(List)}
      * @return the next step, which takes the predicate itself
      * @throws NullPointerException if {@code scope} or any element is null
-     * @throws IllegalArgumentException if {@code scope} is empty, a dimension is not one of this
-     *                                  product's, or the same dimension appears twice
+     * @throws IllegalArgumentException if {@code scope} has fewer than two dimensions, a dimension is not
+     *                                  one of this product's, or the same dimension appears twice
      */
     public Scope when(List<?>... scope) {
         Objects.requireNonNull(scope, "scope must not be null");
+        if (scope.length < 2) {
+            throw new IllegalArgumentException("A lambda rule must name at least two dimensions "
+                    + "(one antecedent and one target); for a single-dimension filter use the compound "
+                    + "product API");
+        }
         int[] indexes = resolve(scope);
         return new Scope(indexes);
     }

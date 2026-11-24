@@ -126,6 +126,10 @@ final class ConstraintCounts {
             prefixValid = prefix[i + 1] >= 0;
         }
         long[] message = new long[parentSize];
+        // Equal rows are not always the same object: Relation.buildRows deduplicates rows by signature only
+        // when its rule count is at most MAX_SHARED_RULES (62). Above that, two rows can be structurally equal
+        // but distinct instances, and content-based deduplication here is the only thing that keeps the number
+        // of sum computations proportional to the number of distinct allowed-value sets, not to parentSize.
         Map<BitSet, Long> sums = new HashMap<>();
         for (int a = 0; a < parentSize; a++) {
             BitSet allowed = rows[a];
@@ -188,6 +192,8 @@ final class ConstraintCounts {
         prefix[0] = BigInteger.ZERO;
         for (int i = 0; i < childFree.length; i++) prefix[i + 1] = prefix[i].add(childFree[i]);
         BigInteger[] message = new BigInteger[parentSize];
+        // See messagesLong: rows above MAX_SHARED_RULES are not guaranteed to share identity, so content-based
+        // deduplication must be used.
         Map<BitSet, BigInteger> sums = new HashMap<>();
         for (int a = 0; a < parentSize; a++) {
             BitSet allowed = rows[a];

@@ -7,6 +7,7 @@ package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -186,5 +187,80 @@ class LambdaConditionalProductBuilderTest {
             if (!(x.equals("a0") && z.equals("c2"))) expected++;
         }
         assertEquals(BigInteger.valueOf(expected), product.count());
+    }
+
+    // ── Scope and empty-dimension regressions ────────────────────────────────────────────────
+    //
+    // A lambda rule must name at least two dimensions: one antecedent (the `when` side) and one
+    // target (the last dimension in scope). Single-dimension scopes are rejected because
+    // ConstraintPlan does not run rules through its node enumeration for a single-dimension
+    // node, so such a rule would be enforced during traversal but ignored by count() and
+    // rank-based operations.
+    //
+    // An empty antecedent or target dimension makes the whole product empty (the empty dimension
+    // is one of the product's dimensions, so it contributes 0 possible values). Rule compilation
+    // must therefore skip the probe loop rather than call get(0) on the empty list — which used
+    // to throw IndexOutOfBoundsException before the antecedentCombos == 0 / targetSize == 0
+    // early-return was added to ConditionalProductBuilder.withLambdaRule.
+
+    @Test
+    void singleDimensionScopeIsRejected() {
+        List<Integer> dimension = List.of(1, 2, 3);
+
+        // Varargs form: when(List<?>...) with a single argument. The typed when(List<A>, List<B>)
+        // is only selectable with two arguments, so a one-dimensional call goes through varargs.
+        var builder = cartesianProduct.withLambda(dimension);
+        assertThrows(IllegalArgumentException.class, () -> builder.when(dimension));
+        assertThrows(IllegalArgumentException.class, () -> builder.andWhen(dimension));
+    }
+
+    @Test
+    void emptyAntecedentDimensionProducesEmptyProductWithoutThrowing() {
+        List<Integer> antecedent = new ArrayList<>();   // empty antecedent
+        List<Integer> target = List.of(1, 2, 3);
+
+        var product = cartesianProduct.withLambda(antecedent, target)
+                .when(antecedent, target).matches((a, t) -> true);
+
+        // No exception: the rule compilation must not attempt get(0) on the empty antecedent.
+        // The product itself is empty because the empty dimension has no values to choose from.
+        assertEquals(BigInteger.ZERO, product.count());
+        assertTrue(product.isEmpty());
+        assertTrue(product.generate().stream().toList().isEmpty());
+    }
+
+    @Test
+    void emptyTargetDimensionProducesEmptyProductWithoutThrowing() {
+        List<Integer> antecedent = List.of(1, 2, 3);
+        List<Integer> target = new ArrayList<>();
+        AtomicInteger predicateCalls = new AtomicInteger();
+
+        var product = cartesianProduct.withLambda(antecedent, target)
+                .when(antecedent, target)
+                .matches((a, t) -> {
+                    predicateCalls.incrementAndGet();
+                    return true;
+                });
+
+        assertEquals(0, predicateCalls.get());
+        assertEquals(BigInteger.ZERO, product.count());
+        assertTrue(product.isEmpty());
+        assertTrue(product.generate().stream().toList().isEmpty());
+    }
+
+    @Test
+    void multipleAntecedentsWithOneEmptyProducesEmptyProductWithoutThrowing() {
+        List<Integer> first = List.of(1, 2);
+        List<Integer> emptyMiddle = new ArrayList<>();  // empty antecedent, not the last dimension
+        List<Integer> target = List.of(3, 4);
+
+        var product = cartesianProduct.withLambda(first, emptyMiddle, target)
+                .when(first, emptyMiddle, target).matches(values -> true);
+
+        // antecedentCombos must short-circuit to 0 as soon as one antecedent size is 0, so the
+        // probe loop never runs. The product is empty because emptyMiddle has no values.
+        assertEquals(BigInteger.ZERO, product.count());
+        assertTrue(product.isEmpty());
+        assertTrue(product.generate().stream().toList().isEmpty());
     }
 }
