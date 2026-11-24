@@ -10,18 +10,31 @@ All notable changes to JNumberTools are recorded here. The format follows
 - Added a multi-list `conditionalProductOf(first, second, additional...)` overload alongside the
   existing single-list entry point and `.and(...)` chaining, and a matching
   `new ConditionalProductBuilder(first, second, additional...)` constructor.
-- Added compound trigger expressions through a separate `compoundProductOf(...)` entry point.
+- Added compound trigger expressions through a separate `compoundProductOf(...)` entry point,
+  including the multi-list overload `compoundProductOf(first, second, additional...)`.
   Triggers are composed with `condition(dim).is(value)` and nested `.and(Condition)` /
   `.or(Condition)` calls, then attached with `.when(condition)`. The
   `CompoundConditionalProductBuilder` exposes `generate()`, `count()` and `isEmpty()`.
   `conditionalProductOf(...)` remains the pairwise-only entry point and additionally exposes
   `lexOrder()`, `lexOrderMth()`, `byRanks()`, `choice()` and `sample()`.
-- Added `Condition`, a composable trigger condition built with `condition(dim).is(v)` and combined
-  with `.and(Condition)`/`.or(Condition)`, plus a matching `.when(Condition)` overload on
-  `CompoundConditionalProductBuilder` (and on `ConditionalProductBuilder`, for internal resolution).
-  Conditions can be nested arbitrarily (AND inside OR, OR inside AND), with grouping expressed by
-  nested method calls. Internally, they are normalized to OR-of-AND-groups; combining conditions into
-  more than 4096 AND-groups is rejected before allocating the combined groups.
+- Added `Condition`, a composable trigger condition built with `condition(dim).is(v)` and
+  `condition(dim).matches(predicate)`, and combined with `.and(Condition)`/`.or(Condition)`,
+  plus a matching `.when(Condition)` overload on `CompoundConditionalProductBuilder` (and on
+  `ConditionalProductBuilder`, for internal resolution). Conditions can be nested arbitrarily
+  (AND inside OR, OR inside AND), with grouping expressed by nested method calls. Internally,
+  they are normalized to OR-of-AND-groups; combining conditions into more than 4096 AND-groups
+  is rejected before allocating the combined groups.
+- Added `withLambda(...)` as a separate Cartesian-product entry point, with overloads for
+  one dimension (`withLambda(List<?> elements)`) and for two or more dimensions
+  (`withLambda(List<?> first, List<?> second, List<?>... additional)`). The
+  `LambdaConditionalProductBuilder` supports `when(...)` and `andWhen(...)` scopes, using
+  `Predicate<Object[]>` for arbitrary scope sizes or a typed
+  `BiPredicate<? super A, ? super B>` for two dimensions. Each predicate is compiled once into
+  the conditional-product constraint representation; predicates are not re-evaluated during
+  generation, counting or emptiness checks. Compilation is limited to 1,000,000 predicate probes
+  (antecedent combinations × target values); exceeding this limit throws
+  `IllegalArgumentException`. A two-dimension rule with a single trigger dimension is routed
+  through the pairwise relation table when applicable.
 
 ### Fixed
 
