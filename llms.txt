@@ -24,7 +24,7 @@ Map the user's requirement to the exact `JNumberTools` entry point before writin
 | All subsets (`2^n` power set) or subsets within size bounds | `JNumberTools.subsets()` | Generates unordered subsets of an input collection or range |
 | Derangements (`!n`, permutations with no fixed points) | `JNumberTools.derangements()` | Generates permutations where `element[i] != original[i]` |
 | Standard Cartesian products across multiple dimensions | `JNumberTools.cartesianProduct()` | Ordered `d`-tuples (`List<T>`) formed across `d` input lists/collections |
-| Simple Cartesian product | `JNumberTools.cartesianProduct().simpleProductOf(...)` | One value from each input dimension; lexicographical and every-mth traversal |
+| Simple Cartesian product | `JNumberTools.cartesianProduct().simpleProductOf(list1).and(list2).and(list3)` | One value from each input dimension; lexicographical and every-mth traversal |
 | Constrained Cartesian product | `JNumberTools.cartesianProduct().constrainedProductOfDistinct(...)` and related builders | Each dimension is a fixed-size combination, multi-select, or subset range; lexicographical and every-mth traversal |
 | Compiled Product (pairwise rules) | `JNumberTools.cartesianProduct().conditionalProductOf(...)` | Pairwise `when(...).then(...)` rules; lexicographical/rank traversal, count, choice and sample |
 | Compound Product (nested Boolean rules) | `JNumberTools.cartesianProduct().compoundProductOf(...)` | Multi-dimension triggers with nested `AND`/`OR` `Condition` expressions; lazy `generate()`, count and emptiness |
@@ -39,7 +39,7 @@ Map the user's requirement to the exact `JNumberTools` entry point before writin
 - **Ordered arrangements of one collection** -> Use `permutations()`.
 - **Unordered selection of `k` elements from one collection** -> Use `combinations()`.
 - **All subsets of one collection** -> Use `subsets()`.
-- **One value from each of several domains, without rules** -> Use `simpleProductOf(...)`.
+- **One value from each of several domains, without rules** -> Use `simpleProductOf(list1).and(list2)...`. `simpleProductOf` accepts exactly one `List<?>`; add every subsequent dimension with `and(List<?>)`. It has no multi-list overload.
 - **Each dimension is itself a combination, multi-select, or subset range** -> Use the constrained product builders.
 - **Straightforward rules between two dimensions** -> Use `conditionalProductOf(...)` (Compiled Product).
 - **Rules with multi-dimension triggers or nested Boolean grouping** -> Use `compoundProductOf(...)` (Compound Product).
@@ -47,7 +47,7 @@ Map the user's requirement to the exact `JNumberTools` entry point before writin
 
 ## The Five Cartesian Product Styles
 
-- **Simple Product (`simpleProductOf`)**: The ordinary Cartesian product; generates all `|D1| x |D2| x ... x |Dd|` tuples, with lexicographical and every-mth traversal.
+- **Simple Product (`simpleProductOf`)**: The ordinary Cartesian product; generates all `|D1| x |D2| x ... x |Dd|` tuples, with lexicographical and every-mth traversal. Its factory signature is `simpleProductOf(List<?> elements)`; append dimensions with `SimpleProductBuilder.and(List<?> elements)`. Unlike `conditionalProductOf`, `compoundProductOf` and `withLambda`, it does not have an overload accepting multiple dimension lists.
 - **Constrained Product (`constrainedProductOfDistinct`, `constrainedProductOfMultiSelect`, `constrainedProductOfInRange`)**: Each dimension is a combination, multi-select, or subset-range selection; the dimensions are then combined.
 - **Compiled Product (`conditionalProductOf`)**: Expresses pairwise rules with `.when(dimA).is(value).then(dimB).isOneOf(...)` and related matchers. The builder compiles these rules into constraints and supports lexicographical/rank-based operations, counting and sampling.
 - **Compound Product (`compoundProductOf`)**: Expresses multi-dimension triggers and nested Boolean groupings using `Condition`; exposes lazy `generate()`, exact `count()` and `isEmpty()`.

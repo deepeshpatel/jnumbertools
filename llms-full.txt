@@ -195,6 +195,26 @@ var sizes = List.of("S", "M");
 | Select 3 random products; duplicates are possible. | `JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes).choice(3, new Random());` | Three random products. |
 | Select 3 distinct random products. | `JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes).sample(3, new Random());` | Three distinct products. |
 
+### Simple Product dimension arguments
+
+The Simple Product factory accepts exactly one list:
+
+```java
+SimpleProductBuilder simpleProductOf(List<?> elements)
+```
+
+Add each further dimension by chaining `SimpleProductBuilder.and(List<?> elements)`. For three dimensions, use:
+
+```java
+JNumberTools.cartesianProduct()
+        .simpleProductOf(list1)
+        .and(list2)
+        .and(list3)
+        .lexOrder();
+```
+
+There is no `simpleProductOf(list1, list2, list3)` overload. Do not infer one from the other Cartesian-product builders: `conditionalProductOf(first, second, additional...)`, `compoundProductOf(first, second, additional...)` and `withLambda(first, second, additional...)` do provide multi-list overloads.
+
 ## 4.2 Constrained Cartesian product
 
 A constrained Cartesian product lets each dimension select a fixed number of distinct elements, a fixed number with repetition, or subsets within a size range. The resulting dimensions are combined into a Cartesian product.
