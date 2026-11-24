@@ -76,11 +76,13 @@ public final class BuilderTestHelper {
         assertNotNull(builder.byRanks(ranks));
 
         // Empty ranks allowed
-        assertNotNull(builder.byRanks(Collections.emptyList()));
+        List<BigInteger> empty = List.of();
+        assertNotNull(builder.byRanks(empty));
 
         // Null ranks
+        List<BigInteger> nullList = null;
         assertThrows(IllegalArgumentException.class, () ->
-                builder.byRanks(null));
+                builder.byRanks(nullList));
 
         // Note: Invalid rank values (negative, out of bounds) are NOT tested here
         // They are deferred to iteration and tested in generator-specific test classes
@@ -246,8 +248,8 @@ public final class BuilderTestHelper {
         assertThrows(IllegalArgumentException.class, () -> builder.lexOrderMth(0, 0));
         assertThrows(IllegalArgumentException.class, () -> builder.lexOrderMth(-1, 0));
         assertThrows(IllegalArgumentException.class, () -> builder.lexOrderMth(1, -1));
-
-        assertFalse(builder.byRanks(List.of()).iterator().hasNext());
+        List<BigInteger> empty = List.of();
+        assertFalse(builder.byRanks(empty).iterator().hasNext());
         assertThrows(IllegalArgumentException.class, () -> builder.byRanks(List.of(BigInteger.ZERO)).stream().toList());
 
         assertThrows(IllegalArgumentException.class, () -> builder.sample(1, new Random(1)));

@@ -17,9 +17,12 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.function.Predicate;
 
 /**
  * Builder for a Cartesian product whose dimensions are linked by <em>rules</em>, written as plain
@@ -65,7 +68,7 @@ import java.util.Random;
  * and {@link #and(List)}. It also defines the tuple positions and lexicographic encounter order, so
  * changing it changes the order (and positional meaning) of the generated tuples.</p>
  *
- * <p>During prefix-pruned traversal, a pairwise rule can be checked when the later of its two dimensions
+ * <p>During prefix-pruned traversal, a pairwise rule can be checked when the latter of its two dimensions
  * is assigned. A multi-trigger rule can be checked as soon as every dimension in its trigger and target
  * scope has been assigned. A restrictive rule can therefore prune the remaining search below that point.
  * As a practical starting point:</p>
@@ -161,8 +164,8 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @throws NullPointerException if {@code elements} is null or contains a null element
      */
     public ConditionalProductBuilder(List<?> elements) {
-        this(new ConstraintModel(List.<List<?>>of(snapshot(elements)), PersistentRelationMap.empty()),
-                List.<List<?>>of(elements));
+        this(new ConstraintModel(List.of(snapshot(elements)), PersistentRelationMap.empty()),
+                List.of(elements));
     }
 
     /**
@@ -242,6 +245,11 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     Trigger when(Condition condition) {
         Objects.requireNonNull(condition, "condition must not be null");
         return new Trigger(resolve(condition));
+    }
+
+    /** Resolves {@code dimension} to its position, by the same list-instance identity rule as every other rule API. */
+    int indexOfDimension(List<?> dimension) {
+        return ruleCompiler.indexOf(dimension);
     }
 
     private List<List<MultiTriggerRule.Condition>> resolve(Condition condition) {
@@ -579,6 +587,154 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     private ConditionalProductBuilder withRule(int triggerDim, BitSet triggerValues, int targetDim, BitSet allowedTargets) {
         return new ConditionalProductBuilder(
                 model.withRule(triggerDim, triggerValues, targetDim, allowedTargets), originals);
+    }
+
+    /**
+     * Compiles an arbitrary joint predicate over {@code scopeDims} into one or more multi-trigger rules:
+     * the same representation a compound {@link Condition} rule resolves into. The predicate is evaluated
+     * once per combination of the scope's dimensions, here, during compilation; it is never called again
+     * during generation, counting, or emptiness checks.
+     *
+     * <h2>How this is compiled</h2>
+     * <p>The last dimension in {@code scopeDims} is treated as the rule's target; the remaining dimensions
+     * are its antecedent. Every combination of the antecedent dimensions' values is enumerated (bounded by
+     * {@link ConstraintGraph#MAX_LOOP_COMBINATIONS}, the same bound a compound rule's scope is checked
+     * against) and, for each one, the predicate is evaluated once per value of the target dimension to
+     * determine that combination's allowed target values. Antecedent combinations that produce the same
+     * allowed-target set are grouped into a single rule with one OR-group per combination, mirroring how
+     * {@code .when(conditionA).then(dim).isX(); .when(conditionB).then(dim).isY();} compiles into separate
+     * rules only when their consequences actually differ. An antecedent combination under which every
+     * target value is accepted contributes no rule at all, since it imposes no constraint.</p>
+     *
+     * <p>When the scope is exactly two dimensions (one antecedent, one target), each compiled group is
+     * routed to the lightweight binary {@code Relation} table instead of a multi-trigger rule — the same
+     * automatic pairwise detection {@code CompoundConditionalProductBuilder}'s {@code .then(dim).isX()}
+     * already performs for a single-dimension {@link Condition}. This keeps several independent two-dimension
+     * lambda rules that happen to share one dimension (e.g. four rules all triggered by the same {@code os})
+     * from being merged into one oversized block purely because of how they were declared.</p>
+     *
+     * <p>This gives the compiled rule the exact same downstream treatment as a compound rule: the
+     * constraint graph folds its scope into one bounded, enumerated block, and the tree DP that backs
+     * {@link #count()}/{@link #isEmpty()}/{@link #anyOrder()} treats that block as a single node with
+     * precomputed, table-driven transitions — no interpreter re-evaluates the predicate while generating.</p>
+     *
+     * @param scopeDims positions of the dimensions the predicate jointly depends on, in declaration order;
+     *                  must contain at least one position and no duplicates
+     * @param predicate evaluated with one argument per {@code scopeDims} position, in the same order;
+     *                  must be deterministic and side-effect-free
+     * @return a new builder with the compiled rule(s) added
+     * @throws IllegalArgumentException if the scope is empty, contains a duplicate dimension, or the
+     *                                  antecedent-combinations-times-target-values count that would need
+     *                                  to be probed exceeds {@link ConstraintGraph#MAX_LOOP_COMBINATIONS}
+     */
+    ConditionalProductBuilder withLambdaRule(int[] scopeDims, Predicate<Object[]> predicate) {
+        Objects.requireNonNull(predicate, "predicate must not be null");
+        Objects.requireNonNull(scopeDims, "scopeDims must not be null");
+        if (scopeDims.length == 0) {
+            throw new IllegalArgumentException("A lambda rule must depend on at least one dimension");
+        }
+        for (int i = 0; i < scopeDims.length; i++) {
+            for (int j = i + 1; j < scopeDims.length; j++) {
+                if (scopeDims[i] == scopeDims[j]) {
+                    throw new IllegalArgumentException("A lambda rule scope cannot contain the same dimension twice");
+                }
+            }
+        }
+
+        int targetDim = scopeDims[scopeDims.length - 1];
+        int[] antecedentDims = Arrays.copyOf(scopeDims, scopeDims.length - 1);
+        int[] antecedentSizes = new int[antecedentDims.length];
+        for (int i = 0; i < antecedentDims.length; i++) {
+            antecedentSizes[i] = model.dimensions.get(antecedentDims[i]).size();
+        }
+        int targetSize = model.dimensions.get(targetDim).size();
+
+        long antecedentCombos = 1L;
+        for (int size : antecedentSizes) {
+            if (size == 0) {
+                antecedentCombos = 0;
+                break;
+            }
+            if (antecedentCombos > ConstraintGraph.MAX_LOOP_COMBINATIONS / size) {
+                antecedentCombos = ConstraintGraph.MAX_LOOP_COMBINATIONS + 1;
+                break;
+            }
+            antecedentCombos *= size;
+        }
+        long totalProbes;
+        if (antecedentCombos > ConstraintGraph.MAX_LOOP_COMBINATIONS) {
+            totalProbes = ConstraintGraph.MAX_LOOP_COMBINATIONS + 1;
+        } else if (targetSize == 0 || antecedentCombos == 0) {
+            totalProbes = 0;
+        } else if (antecedentCombos > ConstraintGraph.MAX_LOOP_COMBINATIONS / targetSize) {
+            totalProbes = ConstraintGraph.MAX_LOOP_COMBINATIONS + 1;
+        } else {
+            totalProbes = antecedentCombos * targetSize;
+        }
+        if (totalProbes > ConstraintGraph.MAX_LOOP_COMBINATIONS) {
+            throw new IllegalArgumentException("Compiling this lambda rule would need to probe the predicate "
+                    + "more than " + ConstraintGraph.MAX_LOOP_COMBINATIONS + " times (antecedent combinations "
+                    + "times target values); narrow the scope or its dimensions' sizes.");
+        }
+
+        Map<BitSet, List<int[]>> combosByAllowedTargets = new LinkedHashMap<>();
+        Object[] tuple = new Object[scopeDims.length];
+        int[] counters = new int[antecedentDims.length];
+        List<?> targetValues = model.dimensions.get(targetDim);
+        while (true) {
+            for (int i = 0; i < antecedentDims.length; i++) {
+                tuple[i] = model.dimensions.get(antecedentDims[i]).get(counters[i]);
+            }
+            BitSet allowed = new BitSet(targetSize);
+            for (int t = 0; t < targetSize; t++) {
+                tuple[scopeDims.length - 1] = targetValues.get(t);
+                if (predicate.test(tuple)) {
+                    allowed.set(t);
+                }
+            }
+            if (allowed.cardinality() < targetSize) {
+                combosByAllowedTargets.computeIfAbsent(allowed, key -> new ArrayList<>()).add(counters.clone());
+            }
+            int i = antecedentDims.length - 1;
+            while (i >= 0) {
+                counters[i]++;
+                if (counters[i] < antecedentSizes[i]) break;
+                counters[i] = 0;
+                i--;
+            }
+            if (i < 0) break;
+        }
+
+        ConditionalProductBuilder result = this;
+        if (antecedentDims.length == 1) {
+            // Exactly one antecedent dimension and one target: the same shape compound's .then(dim).isX()
+            // detects as pairwise and routes to the lightweight binary relation table, never a block, so a
+            // lambda rule gets the identical treatment instead of being forced into block territory just
+            // because it was written as a lambda.
+            int antecedentDim = antecedentDims[0];
+            for (Map.Entry<BitSet, List<int[]>> entry : combosByAllowedTargets.entrySet()) {
+                BitSet triggerValues = new BitSet(antecedentSizes[0]);
+                for (int[] combo : entry.getValue()) triggerValues.set(combo[0]);
+                result = new ConditionalProductBuilder(
+                        result.model.withRule(antecedentDim, triggerValues, targetDim, entry.getKey()), result.originals);
+            }
+        } else {
+            for (Map.Entry<BitSet, List<int[]>> entry : combosByAllowedTargets.entrySet()) {
+                List<List<MultiTriggerRule.Condition>> groups = new ArrayList<>(entry.getValue().size());
+                for (int[] combo : entry.getValue()) {
+                    List<MultiTriggerRule.Condition> group = new ArrayList<>(antecedentDims.length);
+                    for (int i = 0; i < antecedentDims.length; i++) {
+                        BitSet single = new BitSet(antecedentSizes[i]);
+                        single.set(combo[i]);
+                        group.add(new MultiTriggerRule.Condition(antecedentDims[i], single));
+                    }
+                    groups.add(group);
+                }
+                MultiTriggerRule rule = new MultiTriggerRule(groups, targetDim, entry.getKey());
+                result = new ConditionalProductBuilder(result.model.withMultiRule(rule), result.originals);
+            }
+        }
+        return result;
     }
 
     private static Object nonNull(Object value) {

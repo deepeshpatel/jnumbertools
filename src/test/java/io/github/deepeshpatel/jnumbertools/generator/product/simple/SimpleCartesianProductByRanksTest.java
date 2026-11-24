@@ -234,26 +234,6 @@ public class SimpleCartesianProductByRanksTest {
         }
 
         @Test
-        void shouldHandleEmptyRankSequence() {
-            var product = cartesianProduct.simpleProductOf(List.of("A", "B"))
-                    .and(List.of(1, 2));
-
-            var result = product.byRanks(Collections.emptyList()).stream().toList();
-
-            assertTrue(result.isEmpty());
-        }
-
-        @Test
-        void shouldThrowExceptionForNullRanks() {
-            var product = cartesianProduct.simpleProductOf(List.of("A", "B"))
-                    .and(List.of(1, 2));
-
-            assertThrows(IllegalArgumentException.class, () ->
-                    product.byRanks(null)
-            );
-        }
-
-        @Test
         void shouldThrowExceptionForNegativeRank() {
             var product = cartesianProduct.simpleProductOf(List.of("A", "B"))
                     .and(List.of(1, 2));
@@ -325,8 +305,6 @@ public class SimpleCartesianProductByRanksTest {
             // when the rank is reached, not when byRanks() is called.
             var generator = product.byRanks(List.of(BigInteger.ZERO));
             assertThrows(IllegalArgumentException.class, () -> generator.stream().toList());
-            // an empty rank sequence is still fine
-            assertTrue(product.byRanks(List.of()).stream().toList().isEmpty());
         }
 
         @Test

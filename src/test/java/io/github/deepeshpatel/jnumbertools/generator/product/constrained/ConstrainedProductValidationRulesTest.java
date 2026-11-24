@@ -438,8 +438,8 @@ class ConstrainedProductValidationRulesTest {
     @Test
     void byRanksIsLazyAndOnlyChecksNullUpFront() {
         var builder = cartesianProduct.constrainedProductOfDistinct(2, ABC).andMultiSelect(2, ONE_TO_FOUR);   // 30
-
-        assertThrows(IllegalArgumentException.class, () -> builder.byRanks(null));
+        List<BigInteger> nullList = null;
+        assertThrows(IllegalArgumentException.class, () -> builder.byRanks(nullList));
 
         var tooBig = builder.byRanks(List.of(bi(30)));
         var negative = builder.byRanks(List.of(BigInteger.ZERO, bi(-1)));

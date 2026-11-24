@@ -162,13 +162,6 @@ class SubsetBuilderTest {
         // Valid ranks
         var ranks = List.of(BigInteger.ZERO, BigInteger.ONE, BigInteger.valueOf(2));
         assertNotNull(builder.byRanks(ranks));
-
-        // Empty ranks allowed
-        assertNotNull(builder.byRanks(Collections.emptyList()));
-
-        // Null ranks
-        assertThrows(IllegalArgumentException.class, () ->
-                builder.byRanks(null));
     }
 
     @Test

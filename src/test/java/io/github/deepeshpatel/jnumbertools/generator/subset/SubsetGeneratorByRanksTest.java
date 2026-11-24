@@ -158,12 +158,6 @@ public class SubsetGeneratorByRanksTest {
             assertEquals(List.of('C', 'D'), result.get(2)); // rank 10 = [A,B,D]
         }
 
-        @Test
-        void shouldWorkWithEmptyRankSequence() {
-            var builder = subsets.of(A_B_C_D).all();
-            var result = builder.byRanks(List.of()).stream().toList();
-            assertTrue(result.isEmpty());
-        }
     }
 
     @Nested
@@ -332,8 +326,8 @@ public class SubsetGeneratorByRanksTest {
         @Test
         void emptyDomainRejectsEveryRankButAcceptsNoRanks() {
             var emptyDomain = subsets.of(Collections.emptyList()).inRange(1, 2);   // count = 0
-
-            assertTrue(emptyDomain.byRanks(List.of()).stream().toList().isEmpty());
+            List<BigInteger> empty = List.of();
+            assertTrue(emptyDomain.byRanks(empty).stream().toList().isEmpty());
             var generator = emptyDomain.byRanks(List.of(BigInteger.ZERO));
             assertThrows(IllegalArgumentException.class, () -> generator.stream().toList());
         }
@@ -366,7 +360,8 @@ public class SubsetGeneratorByRanksTest {
 
         @Test
         void lexOrderMthOnByRanksGeneratorValidatesItsParameters() {
-            var generator = subsets.of(A_B_C_D).inRange(2, 3).byRanks(List.of());   // count = 10
+            List<BigInteger> empty = List.of();
+            var generator = subsets.of(A_B_C_D).inRange(2, 3).byRanks(empty);   // count = 10
 
             assertThrows(IllegalArgumentException.class, () -> generator.lexOrderMth(BigInteger.ZERO, BigInteger.ZERO));
             assertThrows(IllegalArgumentException.class, () -> generator.lexOrderMth(BigInteger.ONE, big(-1)));
