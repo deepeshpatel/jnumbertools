@@ -1,15 +1,15 @@
 # JNumberTools
 
-> Zero-dependency Java 17+ library for deterministic combinatorics, arbitrary-precision (`BigInteger`) ranking/unranking, lexicographical sampling, and rule-constrained Cartesian products.
+> Zero-dependency Java 21+ library for deterministic combinatorics, arbitrary-precision (`BigInteger`) ranking/unranking, lexicographical sampling, and rule-constrained Cartesian products.
 
-JNumberTools provides lazy `Iterator` and `Stream` generators, `BigInteger` rank/unrank converters, and mathematical calculators under `io.github.deepeshpatel.jnumbertools`.
+JNumberTools provides lazy `Iterator` and `Stream` generators, `BigInteger` rank/unrank converters, and mathematical calculators under `io.github.deepeshpatel.jnumbertools`. Import `io.github.deepeshpatel.jnumbertools.base.Calculator` and create it with `new Calculator()`.
 
 **Strict LLM Grounding Rule:** Use only classes, entry points, and builder methods explicitly documented in this file or the linked repository docs. Do not invent builder methods or assume that distinct generator families (such as permutations, combinations, and conditional Cartesian products) expose identical terminal methods.
 
 ## Coordinates & Runtime Requirements
 
 - **Maven Central:** `io.github.deepeshpatel:jnumbertools:4.2.0`
-- **Java Version:** Java 17+
+- **Java Version:** Java 21+
 - **Dependencies:** Zero runtime dependencies
 - **License:** Apache-2.0
 
@@ -19,7 +19,7 @@ Map the user's requirement to the exact `JNumberTools` entry point before writin
 
 | Problem / Requirement | Entry Point | Notes |
 | :--- | :--- | :--- |
-| All permutations (`n!`), `k`-permutations (`nPk`), repetitive, multiset, or circular permutations | `JNumberTools.permutations()` | Ordered arrangements; supports `lexOrder()`, `byRanks()`, `sample()`, `count()` |
+| All permutations (`n!`), `k`-permutations (`nPk`), repetitive or multiset permutations | `JNumberTools.permutations()` | Ordered arrangements; supports `lexOrder()`, `byRanks()`, `sample()`, `count()` |
 | Unordered selections without repetition (`nCr`), with repetition, or from multisets | `JNumberTools.combinations()` | Unordered subsets of size `k`; do not use Cartesian products for unordered combinations |
 | All subsets (`2^n` power set) or subsets within size bounds | `JNumberTools.subsets()` | Generates unordered subsets of an input collection or range |
 | Derangements (`!n`, permutations with no fixed points) | `JNumberTools.derangements()` | Generates permutations where `element[i] != original[i]` |
@@ -31,8 +31,8 @@ Map the user's requirement to the exact `JNumberTools` entry point before writin
 | Lambda Engine (joint predicates) | `JNumberTools.cartesianProduct().withLambda(...)` | Compiles joint Java predicates into constraints; lazy `generate()`, count and emptiness |
 | Find the zero-based lexicographical `BigInteger` rank of a combinatorial object | `JNumberTools.rankOf()` | Direct mathematical ranking without iterating from rank `0` |
 | Reconstruct a combinatorial object directly from its zero-based `BigInteger` rank | `JNumberTools.unrankOf()` | Direct mathematical unranking without generating preceding elements |
-| Combinatorial counts (`nPr`, `nCr`, factorials, derangements, Stirling/Catalan numbers) | `JNumberTools.calculator()` | Thread-safe `BigInteger` mathematical computations |
-| Factoradic and combinadic number system conversions | `JNumberTools.numberSystem()` | Mixed-radix representations for permutations and combinations |
+| Combinatorial counts (`nPr`, `nCr`, factorials, derangements and related combinatorial functions) | `new Calculator()` | Thread-safe `BigInteger` mathematical computations |
+| Factoradic, Permutadic, Combinadic and Derangadic number-system conversions | `JNumberTools.numberSystem()` | Representations for permutations, k-permutations, combinations and derangements |
 
 ## Choosing the Right Generator
 
@@ -61,8 +61,8 @@ The Lambda Engine provides lambda-style flexibility while retaining readable rul
 
 - **Zero-based `BigInteger` indexing:** Ranks are zero-based (`0` to `count().subtract(BigInteger.ONE)`). `count()` returns `BigInteger` to support spaces larger than `Long.MAX_VALUE`.
 - **Lazy evaluation & reusability:** Generators produce elements lazily via `stream()` or `iterator()` without materializing the full combinatorial space in memory.
-- **Partitioning via `byRanks(...)`:** `byRanks(...)` accepts explicit `BigInteger` indices or a lazy `Stream<BigInteger>`, allowing distributed workers (e.g., Apache Spark or Flink) to process disjoint rank slices independently.
-- **`anyOrder()` vs. `lexOrder()`:** `lexOrder()` guarantees standard lexicographical ordering; `anyOrder()` prioritizes fastest traversal/pruning order and does **not** mean random order.
+- **Partitioning via `byRanks(...)`:** `byRanks(...)` accepts an `Iterable<BigInteger>` of ranks (for example, a `List<BigInteger>`), with convenience overloads for `long...` and decimal `String` ranks. A Java `Stream<BigInteger>` is not accepted directly. This allows distributed workers (e.g., Apache Spark or Flink) to process disjoint rank slices independently.
+- **Ordering:** `lexOrder()` guarantees standard lexicographical ordering. The `anyOrder()` traversal option is specific to the Compiled Product (`conditionalProductOf(...)`); it prioritizes traversal/pruning order and does **not** mean random order.
 - **Sampling semantics:** `sample(...)` draws random elements using rank-based selection rather than materializing and shuffling the entire space.
 - **Predicate compilation:** `Condition.matches(...)` applies a predicate to values of one named dimension. `withLambda(...).when(dimensions...).matches(...)` applies a joint predicate to combinations in the declared scope. Both are evaluated during rule compilation, not repeatedly for each generated tuple.
 - **Lambda compilation limit:** A lambda rule is rejected if compiling it would require more than 1,000,000 predicate probes. Keep rule scopes and dimension sizes bounded.
