@@ -25,12 +25,12 @@ import java.util.stream.StreamSupport;
  * This class provides a foundation for permutation generators that operate on a multiset defined
  * by a map of elements to their frequencies (e.g., {A=2, B=1}). The total number of unique permutations
  * is given by tthe multinomial coefficient n! / ∏ (fᵢ!), where n = ∑fᵢ is the sum of frequencies and fᵢ are
- * the frequencies of distinct elements. It ensures elements are comparable for consistent
+ * the frequencies of distinct elements. It preserves the insertion order of the multiset keys for consistent
  * lexicographical ordering and manages the multiset structure. Subclasses must implement the
  * {@code iterator()} method to generate permutations as lists, where position matters.
  * </p>
  *
- * @param <T> the type of elements, must implement {@code Comparable} for sorting
+ * @param <T> the type of elements
  * @author Deepesh Patel
  */
 public abstract class AbstractMultisetPermutation<T> implements StreamableIterable<T> {

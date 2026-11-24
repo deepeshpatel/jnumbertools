@@ -80,12 +80,21 @@ public final class SimpleProductBuilder implements Builder<Object> {
      * defensive copies. The second parameter only distinguishes it from the public constructor (same erasure).
      */
     private SimpleProductBuilder(List<List<?>> allLists, Void unused) {
+        this(allLists, initialDimSizes(allLists), unused);
+    }
+
+    private SimpleProductBuilder(List<List<?>> allLists, BigInteger[] dimSizes, Void unused) {
         this.allLists = allLists;
         this.cachedCount = computeCount(allLists);
-        this.dimSizes = new BigInteger[allLists.size()];
-        for (int i = 0; i < dimSizes.length; i++) {
-            dimSizes[i] = BigInteger.valueOf(allLists.get(i).size());
+        this.dimSizes = dimSizes;
+    }
+
+    private static BigInteger[] initialDimSizes(List<List<?>> lists) {
+        BigInteger[] sizes = new BigInteger[lists.size()];
+        for (int i = 0; i < sizes.length; i++) {
+            sizes[i] = BigInteger.valueOf(lists.get(i).size());
         }
+        return sizes;
     }
 
     // ── Dimension chaining ───────────────────────────────────────────────────
@@ -103,7 +112,12 @@ public final class SimpleProductBuilder implements Builder<Object> {
         List<List<?>> newLists = new ArrayList<>(allLists.size() + 1); // O(dimensions)
         newLists.addAll(allLists);
         newLists.add(copy);
-        return new SimpleProductBuilder(Collections.unmodifiableList(newLists), null);
+
+        // Reuse the already-computed dimension sizes; only the appended dimension needs a new BigInteger.
+        BigInteger[] newDimSizes = Arrays.copyOf(dimSizes, dimSizes.length + 1);
+        newDimSizes[dimSizes.length] = BigInteger.valueOf(copy.size());
+
+        return new SimpleProductBuilder(Collections.unmodifiableList(newLists), newDimSizes, null);
     }
 
     // ── Builder interface ────────────────────────────────────────────────────
