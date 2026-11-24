@@ -2,10 +2,10 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.baseline;
+package io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.baseline;
 
-import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.scenario.Rule;
-import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.scenario.Scenario.ScenarioData;
+import io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.scenario.Rule;
+import io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.scenario.Scenario.ScenarioData;
 
 import java.util.ArrayList;
 import java.util.Arrays;

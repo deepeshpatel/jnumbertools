@@ -2,12 +2,12 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.support;
+package io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.support;
 
-import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.baseline.ImperativeBacktrackingBaseline;
-import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.scenario.Rule;
-import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.scenario.Scenario;
-import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.scenario.Scenario.ScenarioData;
+import io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.baseline.ImperativeBacktrackingBaseline;
+import io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.scenario.Rule;
+import io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.scenario.Scenario;
+import io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.scenario.Scenario.ScenarioData;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.ConditionalProductBuilder;
 
 import java.math.BigInteger;

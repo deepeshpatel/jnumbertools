@@ -2,9 +2,9 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct;
+package io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct;
 
-import io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.support.SpecialOperationsCase;
+import io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.support.SpecialOperationsCase;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.concurrent.TimeUnit;

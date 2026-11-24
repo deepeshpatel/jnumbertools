@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.becchmark.quick;
+package io.github.deepeshpatel.jnumbertools.benchmarks.main;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition;
@@ -13,11 +13,12 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * End-to-end comparison of conditional Cartesian product implementations:
+ * Quick screening comparison of conditional Cartesian product implementations:
  *
- * 1. Compound conditional product built from Condition.is(...)
- * 2. Pruned Java Stream implementation
- * 3. Interpreted (pruned-DFS) lambda-scoped conditional product
+ * 1. Pairwise when-then conditional product
+ * 2. Compound conditional product built from Condition.is(...)
+ * 3. Lambda-scoped conditional product
+ * 4. Incrementally pruned Java Stream baseline
  *
  * <h2>What is, and is not, inside the measured time</h2>
  * <p>Each {@link BenchmarkMethod} is split into a {@code build} step and a {@code run} step.

@@ -1,12 +1,14 @@
 # Benchmarks
 
+
+
 JMH benchmarks for JNumberTools maintainers. These classes live under `src/test/java`; they are
 development tools and are not included in the published library.
 
 ## Benchmark design rules
 
-1. Compare each library API implementation with an equivalent Java Stream implementation whenever
-   the operation can reasonably be expressed with streams.
+1. Benchmark only workloads for which there is a meaningful, equivalent competing
+   implementation. Do not create a benchmark merely to time a JNumberTools API in isolation.
 2. Compare equivalent workloads and consume equivalent results. Validate result counts and a checksum
    before interpreting performance numbers.
 3. Include setup and construction in an end-to-end benchmark when those costs are part of normal use.
@@ -15,11 +17,13 @@ development tools and are not included in the published library.
    noisy runs as exploratory, not publication-quality evidence.
 5. Keep benchmark classes small. Put reusable scenario generation, baselines, and setup logic in
    named subpackages. Do not put Java source files directly in the `benchmarks/` directory.
+6. Benchmark code in subpackage `benchmarks.jmh` is intended to be executed with JMH.
+7. Benchmark code in subpackage `benchmarks.main` is intended for quick benchmark screening
+   directly from Java, without requiring JMH.
 
-A Java Stream baseline is a standing comparison requirement for future benchmark families. The baseline
-should be independent of the library implementation; for conditional products, it incrementally checks
-constraints while recursively traversing dimensions rather than materializing the full Cartesian product
-and filtering only at the end.
+A Java Stream baseline is appropriate when it expresses the same workload independently. It is not
+a mandatory baseline for every API. For APIs without a meaningful in-project competitor, defer
+performance comparisons until a suitable external library or alternative implementation is selected.
 
 ## Package layout
 
@@ -30,23 +34,86 @@ benchmarks/
 │   ├── BenchmarkCommandGenerator.java
 │   ├── BenchmarkCommandExecutor.java
 │   └── BenchmarkEnvironment.java
-└── conditionalproduct/
-    ├── anyorder/
-    ├── baseline/
-    ├── scenario/
-    └── support/
+├── main/
+│   ├── ConditionalProductBenchmark.java
+│   └── SimpleProductBenchmark.java
+└── jmh/
+    ├── apicomparison/
+    │   ├── ConditionalProductApiBenchmark.java
+    │   └── SimpleProductApiBenchmark.java
+    ├── compoundcomparison/
+    └── conditionalproduct/
+        ├── anyorder/
+        ├── baseline/
+        ├── scenario/
+        └── support/
 ```
 
-The topology benchmarks share one parameterized JMH class. The command generator is kept
-separate from the benchmark itself: it collects selections, validates them, expands valid
-topology/dimension/domain-size combinations, and prints a command. The
-`BenchmarkCommandExecutor` can either generate a command interactively or accept a pasted command,
-then execute it and stream JMH output to the console. `BenchmarkEnvironment` records commit,
-branch/working-tree state, JDK/JVM, OS, CPU and memory metadata.
+The benchmark suite has two distinct layers. `main/` contains direct-from-main quick screens
+for the public API comparisons. `jmh/apicomparison/` contains the corresponding JMH comparisons.
+The existing `jmh/conditionalproduct/` suite is for internal traversal/topology strategy analysis;
+it is not a substitute for the public API comparison.
 
-## Conditional-product benchmarks
+The command generator is kept separate from the benchmark itself: it collects selections,
+validates them, expands valid topology/dimension/domain-size combinations, and prints a command.
+The `BenchmarkCommandExecutor` can either generate a command interactively or accept a pasted
+command, then execute it and stream JMH output to the console. `BenchmarkEnvironment` records
+commit, branch/working-tree state, JDK/JVM, OS, CPU and memory metadata.
 
-The unified `conditionalproduct/io.github.deepeshpatel.jnumbertools.becchmark.quick.ConditionalProductBenchmark` compares these implementations:
+## Public API comparison benchmarks
+
+These are the only two API-level comparisons currently in scope. Each has a quick-screening
+program under `main/` and a JMH counterpart under `jmh/apicomparison/`.
+
+| Workload | Independent Java baseline | JNumberTools implementations |
+|---|---|---|
+| Conditional Cartesian product | Incrementally pruned nested Streams | Pairwise when-then, Compound, Lambda |
+| Simple Cartesian product | Nested `Stream.flatMap()` | Simple product |
+
+The conditional-product quick screen is
+`main/ConditionalProductBenchmark`; its JMH counterpart is
+`jmh/apicomparison/ConditionalProductApiBenchmark`. Both use the same five-dimension
+configuration problem and verify equivalent tuple sets/counts. Builder construction and rule
+registration are outside the timed region; generation and complete result materialization are
+measured.
+
+The simple-product quick screen is `main/SimpleProductBenchmark`; its JMH counterpart is
+`jmh/apicomparison/SimpleProductApiBenchmark`. Both compare a four-dimensional product against
+nested `Stream.flatMap()` and verify equivalent tuple counts/checksums. Input and builder setup
+are outside the timed region; both implementations traverse and consume every tuple without
+materializing an additional result collection.
+
+### Running the public API comparisons
+
+Run the quick screens directly from the project root:
+
+```bash
+mvn test-compile dependency:build-classpath -Dmdep.includeScope=test -Dmdep.outputFile=target/test-classpath.txt
+
+java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
+  io.github.deepeshpatel.jnumbertools.benchmarks.main.ConditionalProductBenchmark
+
+java -cp "target/test-classes:target/classes:$(cat target/test-classpath.txt)" \
+  io.github.deepeshpatel.jnumbertools.benchmarks.main.SimpleProductBenchmark
+```
+
+Run the JMH counterparts independently:
+
+```bash
+mvn exec:java -Dexec.classpathScope=test -Dexec.mainClass=org.openjdk.jmh.Main \
+  -Dexec.args="ConditionalProductApiBenchmark.* -wi 5 -i 8 -f 2 -tu ms -bm avgt -prof gc"
+
+mvn exec:java -Dexec.classpathScope=test -Dexec.mainClass=org.openjdk.jmh.Main \
+  -Dexec.args="SimpleProductApiBenchmark.* -wi 5 -i 8 -f 2 -tu ms -bm avgt -prof gc"
+```
+
+The quick screens are for fast local comparison only. Use JMH results, including error estimates
+and allocation data, for performance conclusions.
+
+## Internal conditional-product strategy benchmarks
+
+These answer implementation questions such as which traversal strategy performs best for a
+given topology and domain shape. They are not additional public API-vs-Streams comparisons.
 
 - `PRUNED_BITSET`
 - `PRUNED_DFS`
@@ -139,7 +206,7 @@ allocation per operation, and a warning when score error exceeds 10% of the scor
 
 Full traversal is only part of the library: `count`, `isEmpty`, `lexOrderMth`, `byRanks`, `choice`
 and `sample` use the exact counting tier, which is where the largest gains over enumeration are
-expected. Two classes measure them (preset `special-ops`, which runs both and writes two JSON files):
+expected. Three classes measure them (preset `special`, which runs all three and writes three JSON files):
 
 - `ConditionalProductSpecialOperationsBenchmark`: five bounded workloads (`CHAIN-5x25`,
   `MANY_VALID-5x25`, `DEAD_END-5x25`, `DEEP_DEAD_END-5x25`, `SMALL_DOMAIN-10x4`) with `LIBRARY`
@@ -206,11 +273,10 @@ The selector first offers three presets:
 - **full-matrix**: every topology, shape and implementation in one benchmark generation, with
   5 warmup iterations, 8 measurement iterations and 2 forks. This is the confirmation run the
   decision log requires; it takes a long time.
-- **special-ops**: the two special-operations benchmarks above.
+- **special**: the three special-operations benchmarks described above.
 - **custom**: the interactive selections above.
 
-Every generated command also records the run. Files go to `benchmark-results/` (git-ignored; only
-the final summary table is committed to this README):
+Every generated command records the run under `benchmark-results/`, which is git-ignored and intended for exploratory/local output. After completing a reproducible confirmation run, copy the selected JSON result files, the matching environment record, and (optionally) console logs into the tracked repository-root `benchmarks/results/<date>/` directory. Commit only deliberate, final result sets there; do not commit every exploratory run. See [`benchmarks/results/README.md`](../../../../../../../../benchmarks/results/README.md) for the archive convention:
 
 - `<run>.env.txt`: commit, branch, whether the tree had uncommitted changes, JDK and JVM, JVM
   arguments, OS, CPU model, logical CPUs, physical memory and maximum heap

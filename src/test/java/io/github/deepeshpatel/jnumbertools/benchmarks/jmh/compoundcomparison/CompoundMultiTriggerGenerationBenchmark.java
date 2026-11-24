@@ -2,10 +2,10 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.benchmarks.compoundcomparison;
+package io.github.deepeshpatel.jnumbertools.benchmarks.jmh.compoundcomparison;
 
 import io.github.deepeshpatel.jnumbertools.base.CartesianProduct;
-import io.github.deepeshpatel.jnumbertools.benchmarks.compoundcomparison.GenerationChecks.Summary;
+import io.github.deepeshpatel.jnumbertools.benchmarks.jmh.compoundcomparison.GenerationChecks.Summary;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.CompoundConditionalProductBuilder;
 import org.openjdk.jmh.annotations.*;
 
