@@ -431,7 +431,6 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     @Override
     public StreamableIterable<Object> lexOrder() {
-        requirePairwiseRulesForLexOrder();
         return lexOrder(LexOrderStrategy.PRUNED_BITSET);
     }
 
