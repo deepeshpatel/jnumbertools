@@ -76,6 +76,32 @@ public final class SimpleProductBuilder implements Builder<Object> {
     }
 
     /**
+     * Creates a builder containing two or more dimensions.
+     * Every dimension is copied once, preserving the supplied order.
+     *
+     * @param first first dimension
+     * @param second second dimension
+     * @param additional any further dimensions
+     * @throws NullPointerException if the additional array or any dimension is null,
+     *         or if any dimension contains a null element
+     */
+    public SimpleProductBuilder(List<?> first, List<?> second, List<?>... additional) {
+        this(snapshotDimensions(first, second, additional), null);
+    }
+
+    private static List<List<?>> snapshotDimensions(
+            List<?> first, List<?> second, List<?>[] additional) {
+        Objects.requireNonNull(additional, "additional dimensions must not be null");
+        List<List<?>> dimensions = new ArrayList<>(2 + additional.length);
+        dimensions.add(snapshot(first));
+        dimensions.add(snapshot(second));
+        for (List<?> dimension : additional) {
+            dimensions.add(snapshot(dimension));
+        }
+        return Collections.unmodifiableList(dimensions);
+    }
+
+    /**
      * Private constructor shared by the public one and {@link #and(List)}; the caller has already made the
      * defensive copies. The second parameter only distinguishes it from the public constructor (same erasure).
      */

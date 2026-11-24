@@ -128,6 +128,26 @@ public final class CartesianProduct {
     }
 
     /**
+     * Creates a builder for a simple Cartesian product over two or more dimensions.
+     * <p>
+     * This convenience overload is equivalent to calling {@link #simpleProductOf(List)}
+     * with {@code first}, then adding {@code second} and every {@code additional} dimension
+     * in order. Every dimension is snapshotted when this method is called.
+     * </p>
+     *
+     * @param first the first dimension
+     * @param second the second dimension
+     * @param additional any further dimensions, in product order
+     * @return a simple product builder containing all supplied dimensions
+     * @throws NullPointerException if any dimension or the additional array is null,
+     *         or if any dimension contains a null element
+     */
+    public SimpleProductBuilder simpleProductOf(
+            List<?> first, List<?> second, List<?>... additional) {
+        return new SimpleProductBuilder(first, second, additional);
+    }
+
+    /**
      * Creates a builder for a Cartesian product whose dimensions are linked by pairwise rules,
      * such as {@code when(browser).is("Safari").then(os).isOneOf("macOS")}.
      * <p>
