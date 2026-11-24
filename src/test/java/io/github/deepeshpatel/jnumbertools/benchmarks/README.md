@@ -31,7 +31,6 @@ benchmarks/
 │   ├── BenchmarkCommandExecutor.java
 │   └── BenchmarkEnvironment.java
 └── conditionalproduct/
-    ├── ConditionalProductBenchmark.java
     ├── anyorder/
     ├── baseline/
     ├── scenario/
@@ -47,7 +46,7 @@ branch/working-tree state, JDK/JVM, OS, CPU and memory metadata.
 
 ## Conditional-product benchmarks
 
-The unified `conditionalproduct/ConditionalProductBenchmark` compares these implementations:
+The unified `conditionalproduct/io.github.deepeshpatel.jnumbertools.becchmark.quick.ConditionalProductBenchmark` compares these implementations:
 
 - `PRUNED_BITSET`
 - `PRUNED_DFS`
