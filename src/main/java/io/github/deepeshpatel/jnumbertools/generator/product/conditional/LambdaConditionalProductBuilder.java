@@ -92,9 +92,10 @@ public final class LambdaConditionalProductBuilder {
      * uncapped form, for any number of dimensions.
      *
      * <p>A rule must name at least two dimensions: one antecedent (the {@code when} side) and one target
-     * (the last dimension in {@code scope}). For a filter on a single dimension, use
-     * {@code compoundProductOf(...).when(Condition.condition(dim).matches(pred)).then(...)}, or pre-filter
-     * the dimension list before building the product. Single-dimension scopes are rejected because
+     * (the last dimension in {@code scope}). A single-dimension {@link Condition} can be used as
+     * the trigger for a compound-product rule on a separate target dimension; that constrains the target,
+     * not the trigger dimension itself. To filter values from one dimension, pre-filter its input list.
+     * Single-dimension scopes are rejected because
      * {@code ConstraintPlan} does not run rules through its node enumeration for a single-dimension node,
      * so such a rule would be enforced during traversal but ignored by {@code count()} and rank-based
      * operations.</p>
@@ -110,8 +111,8 @@ public final class LambdaConditionalProductBuilder {
         Objects.requireNonNull(scope, "scope must not be null");
         if (scope.length < 2) {
             throw new IllegalArgumentException("A lambda rule must name at least two dimensions "
-                    + "(one antecedent and one target); for a single-dimension filter use the compound "
-                    + "product API");
+                    + "(one antecedent and one target); to filter a single dimension, pre-filter its "
+                    + "input list before building the product");
         }
         int[] indexes = resolve(scope);
         return new Scope(indexes);

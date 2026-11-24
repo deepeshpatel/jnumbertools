@@ -263,4 +263,43 @@ class LambdaConditionalProductBuilderTest {
         assertTrue(product.isEmpty());
         assertTrue(product.generate().stream().toList().isEmpty());
     }
+
+    @Test
+    void emptyTargetSkipsProbeLimitCheckEvenWhenAntecedentProductExceedsLimit() {
+        List<Integer> first = wideDimension(1001);
+        List<Integer> second = wideDimension(1001);
+        List<Integer> emptyTarget = new ArrayList<>();
+        AtomicInteger predicateCalls = new AtomicInteger();
+
+        var product = cartesianProduct.withLambda(first, second, emptyTarget)
+                .when(first, second, emptyTarget).matches(values -> {
+                    predicateCalls.incrementAndGet();
+                    return true;
+                });
+
+        assertEquals(0, predicateCalls.get());
+        assertEquals(BigInteger.ZERO, product.count());
+        assertTrue(product.isEmpty());
+        assertTrue(product.generate().stream().toList().isEmpty());
+    }
+
+    @Test
+    void lateEmptyAntecedentSkipsProbeLimitCheckAfterOversizedPrefix() {
+        List<Integer> first = wideDimension(1001);
+        List<Integer> second = wideDimension(1001);
+        List<Integer> emptyAntecedent = new ArrayList<>();
+        List<Integer> target = List.of(1, 2);
+        AtomicInteger predicateCalls = new AtomicInteger();
+
+        var product = cartesianProduct.withLambda(first, second, emptyAntecedent, target)
+                .when(first, second, emptyAntecedent, target).matches(values -> {
+                    predicateCalls.incrementAndGet();
+                    return true;
+                });
+
+        assertEquals(0, predicateCalls.get());
+        assertEquals(BigInteger.ZERO, product.count());
+        assertTrue(product.isEmpty());
+        assertTrue(product.generate().stream().toList().isEmpty());
+    }
 }

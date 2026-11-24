@@ -650,8 +650,9 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * node enumeration for a single-dimension node, so such a rule would be enforced by traversal but
      * ignored by counting and unranking, giving inconsistent results between {@code lexOrder()},
      * {@code count()} and {@code byRanks(...)}. Use {@link Condition#condition(List)} with
-     * {@code .matches(Predicate)} through the compound-product API, or pre-filter the dimension list, when
-     * a single-dimension filter is needed.</p>
+     * {@code .matches(Predicate)} as a trigger for a rule on a separate target dimension through the
+     * compound-product API. That does not filter the trigger dimension itself; to filter values from a
+     * dimension, pre-filter its input list before building the product.</p>
      *
      * @param scopeDims positions of the dimensions the predicate jointly depends on, in declaration order;
      *                  must contain at least two positions (one antecedent plus the target) and no duplicates
@@ -668,9 +669,8 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         Objects.requireNonNull(scopeDims, "scopeDims must not be null");
         if (scopeDims.length < 2) {
             throw new IllegalArgumentException("A lambda rule must depend on at least two dimensions "
-                    + "(one antecedent and one target); for a filter on a single dimension use "
-                    + "Condition.condition(dim).matches(...) with compoundProductOf(...), or pre-filter "
-                    + "the dimension list before building the product");
+                    + "(one antecedent and one target); to filter values from a single dimension, "
+                    + "pre-filter its input list before building the product");
         }
         for (int i = 0; i < scopeDims.length; i++) {
             for (int j = i + 1; j < scopeDims.length; j++) {
@@ -688,12 +688,20 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         }
         int targetSize = model.dimensions.get(targetDim).size();
 
-        long antecedentCombos = 1L;
+        // An empty target or antecedent makes the entire Cartesian product empty, so no
+        // predicate probes are required. Check every antecedent before bounded multiplication:
+        // an empty dimension may occur after a prefix whose product already exceeds the probe limit.
+        if (targetSize == 0) {
+            return this;
+        }
         for (int size : antecedentSizes) {
             if (size == 0) {
-                antecedentCombos = 0;
-                break;
+                return this;
             }
+        }
+
+        long antecedentCombos = 1L;
+        for (int size : antecedentSizes) {
             if (antecedentCombos > ConstraintGraph.MAX_LOOP_COMBINATIONS / size) {
                 antecedentCombos = ConstraintGraph.MAX_LOOP_COMBINATIONS + 1;
                 break;
@@ -701,11 +709,8 @@ public final class ConditionalProductBuilder implements Builder<Object> {
             antecedentCombos *= size;
         }
         long totalProbes;
-        if (antecedentCombos > ConstraintGraph.MAX_LOOP_COMBINATIONS) {
-            totalProbes = ConstraintGraph.MAX_LOOP_COMBINATIONS + 1;
-        } else if (targetSize == 0 || antecedentCombos == 0) {
-            totalProbes = 0;
-        } else if (antecedentCombos > ConstraintGraph.MAX_LOOP_COMBINATIONS / targetSize) {
+        if (antecedentCombos > ConstraintGraph.MAX_LOOP_COMBINATIONS
+                || antecedentCombos > ConstraintGraph.MAX_LOOP_COMBINATIONS / targetSize) {
             totalProbes = ConstraintGraph.MAX_LOOP_COMBINATIONS + 1;
         } else {
             totalProbes = antecedentCombos * targetSize;

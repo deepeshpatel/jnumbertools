@@ -20,17 +20,17 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * Abstract base class for generating multiset permutations with sorting capability.
+ * Abstract base class for generating multiset permutations in insertion-order lexicographical order.
  * <p>
  * This class provides a foundation for permutation generators that operate on a multiset defined
  * by a map of elements to their frequencies (e.g., {A=2, B=1}). The total number of unique permutations
- * is given by tthe multinomial coefficient n! / ∏ (fᵢ!), where n = ∑fᵢ is the sum of frequencies and fᵢ are
- * the frequencies of distinct elements. It ensures elements are comparable for consistent
- * lexicographical ordering and manages the multiset structure. Subclasses must implement the
- * {@code iterator()} method to generate permutations as lists, where position matters.
+ * is given by the multinomial coefficient n! / ∏ (fᵢ!), where n = ∑fᵢ is the sum of frequencies and fᵢ are
+ * the frequencies of distinct elements. The order of keys in the insertion-ordered map defines the
+ * lexicographical order; elements do not need to implement {@code Comparable}. Subclasses must implement
+ * the {@code iterator()} method to generate permutations as lists, where position matters.
  * </p>
  *
- * @param <T> the type of elements, must implement {@code Comparable} for sorting
+ * @param <T> the type of elements in the multiset
  * @author Deepesh Patel
  */
 public abstract class AbstractMultisetPermutation<T> implements StreamableIterable<T> {
@@ -41,7 +41,7 @@ public abstract class AbstractMultisetPermutation<T> implements StreamableIterab
     protected final Calculator calculator;
 
     /**
-     * Constructs an {@code AbstractMultisetPermutation} instance with a sorted multiset.
+     * Constructs an {@code AbstractMultisetPermutation} instance with an insertion-ordered multiset.
      * <p>
      * <strong>For internal/library use only.</strong>
      * Application code must use the {@link Permutations} builder instead.
