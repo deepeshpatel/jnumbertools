@@ -5,6 +5,9 @@
 package io.github.deepeshpatel.jnumbertools.generator.base;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -61,6 +64,40 @@ public interface MultisetBuilder<T> {
      * @return a generator producing combinations at the given ranks
      */
     Iterable<Map<T, Integer>> byRanks(Iterable<BigInteger> ranks);
+
+    /**
+     * Convenience overload accepting decimal rank strings.
+     *
+     * @param ranks decimal rank strings
+     * @return a generator producing combinations at the specified ranks
+     */
+    default Iterable<Map<T, Integer>> byRanks(List<String> ranks) {
+        return byRanks(Util.toBigIntegers(ranks));
+    }
+
+    /**
+     * Convenience overload accepting multiple decimal rank strings.
+     *
+     * @param ranks decimal rank strings
+     * @return a generator producing combinations at the specified ranks
+     */
+    default Iterable<Map<T, Integer>> byRanks(String... ranks) {
+        return byRanks(Util.toBigIntegers(Arrays.asList(ranks)));
+    }
+
+    /**
+     * Convenience overload accepting multiple long rank values.
+     *
+     * @param ranks rank values
+     * @return a generator producing combinations at the specified ranks
+     */
+    default Iterable<Map<T, Integer>> byRanks(long... ranks) {
+        List<BigInteger> converted = new ArrayList<>(ranks.length);
+        for (long rank : ranks) {
+            converted.add(BigInteger.valueOf(rank));
+        }
+        return byRanks(converted);
+    }
 
     /**
      * Generates a random sample of multiset combinations with replacement.
