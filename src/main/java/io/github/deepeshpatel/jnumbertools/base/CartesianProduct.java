@@ -31,22 +31,18 @@ import java.util.List;
  * CartesianProduct cp = new CartesianProduct();
  *
  * // Product of [A, B] × [1, 2] × [X, Y]
- * cp.simpleProductOf("A", "B")
- *   .and(1, 2)
- *   .and("X", "Y")
+ * cp.simpleProductOf(List.of("A", "B"), List.of(1, 2), List.of("X", "Y"))
  *   .lexOrder()
  *   .forEach(System.out::println);
  * // Output: [A,1,X], [A,1,Y], [A,2,X], [A,2,Y], [B,1,X], [B,1,Y], [B,2,X], [B,2,Y]
  *
  * // Every 2nd product starting from rank 1
- * cp.simpleProductOf(0, 1, 2)
- *   .and(0, 1, 2)
+ * cp.simpleProductOf(List.of(0, 1, 2), List.of(0, 1, 2))
  *   .lexOrderMth(2, 1)
  *   .forEach(System.out::println);
  *
  * // Random sample of 3 products without replacement
- * cp.simpleProductOf("A", "B", "C")
- *   .and("X", "Y")
+ * cp.simpleProductOf(List.of("A", "B", "C"), List.of("X", "Y"))
  *   .sample(3)
  *   .forEach(System.out::println);
  * </pre>

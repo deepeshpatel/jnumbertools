@@ -86,9 +86,7 @@ import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
  * <pre>
  * // Simple product of multiple sets
  * JNumberTools.cartesianProduct()
- *     .simpleProductOf("A", "B")
- *     .and("X", "Y")
- *     .and(1, 2)
+ *     .simpleProductOf(List.of("A", "B"), List.of("X", "Y"), List.of(1, 2))
  *     .lexOrder()
  *     .forEach(System.out::println);
  * </pre>

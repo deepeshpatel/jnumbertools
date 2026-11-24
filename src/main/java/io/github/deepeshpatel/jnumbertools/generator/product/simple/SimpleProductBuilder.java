@@ -72,7 +72,7 @@ public final class SimpleProductBuilder implements Builder<Object> {
      * @throws NullPointerException if {@code elements} is null or contains a null element
      */
     public SimpleProductBuilder(List<?> elements) {
-        this(List.<List<?>>of(snapshot(elements)), null);
+        this(List.<List<?>>of(snapshot(elements)), (Void) null);
     }
 
     /**
@@ -86,7 +86,7 @@ public final class SimpleProductBuilder implements Builder<Object> {
      *         or if any dimension contains a null element
      */
     public SimpleProductBuilder(List<?> first, List<?> second, List<?>... additional) {
-        this(snapshotDimensions(first, second, additional), null);
+        this(snapshotDimensions(first, second, additional), (Void) null);
     }
 
     private static List<List<?>> snapshotDimensions(
