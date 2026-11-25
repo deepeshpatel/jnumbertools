@@ -54,20 +54,13 @@ import java.util.stream.Stream;
 public class ConditionalProductSpeedBenchmarkJMH {
 
     @Param({
-            "100", "200", "300", "400", "500",
+            "50", "100", "200", "300", "400", "500",
             "1000", "2000", "3000", "4000", "5000"
     })
     public int size;
 
-    private static final int[] SIZES = {
-            100, 200, 300, 400, 500,
-            1000, 2000, 3000, 4000, 5000
-    };
-
-    private static final int[] EXPECTED_MATCHES = {
-            616, 1216, 1816, 2416, 3016,
-            6016, 12016, 18016, 24016, 30016
-    };
+    private static final int[] SIZES = {            50, 100,  200,  300,  400,  500, 1000, 2000,   3000, 4000,  5000};
+    private static final int[] EXPECTED_MATCHES = {316, 616, 1216, 1816, 2416, 3016, 6016, 12016, 18016, 24016, 30016};
 
     private static final String LINUX = "Linux";
     private static final String WINDOWS = "Windows";
@@ -513,11 +506,38 @@ public class ConditionalProductSpeedBenchmarkJMH {
 
 /*
 
-same command used for all size
+sample command -
 mvn test-compile exec:exec \
   -Dexec.executable="java" \
   -Dexec.classpathScope="test" \
   -Dexec.args="-cp %classpath org.openjdk.jmh.Main ConditionalProductSpeedBenchmarkJMH -p size=1000 -wi 5 -w 1s -i 10 -r 1s -f 3 -tu ms -bm avgt -prof gc"
+
+# JMH version: 1.37
+# VM version: JDK 27.0.1.0.3, OpenJDK 64-Bit Server VM, 27.0.1.0.3
+# VM invoker: /opt/homebrew/Cellar/openjdk/27.0.1.0.3/libexec/openjdk.jdk/Contents/Home/bin/java
+# VM options: <none>
+
+Benchmark                                                                (size)  Mode  Cnt       Score    Error   Units
+ConditionalProductSpeedBenchmarkJMH.compound                                 50  avgt   30       0.010 ±  0.001   ms/op
+ConditionalProductSpeedBenchmarkJMH.compound:gc.alloc.rate                   50  avgt   30    1462.204 ± 68.958  MB/sec
+ConditionalProductSpeedBenchmarkJMH.compound:gc.alloc.rate.norm              50  avgt   30   15472.065 ±  0.003    B/op
+ConditionalProductSpeedBenchmarkJMH.compound:gc.count                        50  avgt   30     484.000           counts
+ConditionalProductSpeedBenchmarkJMH.compound:gc.time                         50  avgt   30     117.000               ms
+ConditionalProductSpeedBenchmarkJMH.engineLambda                             50  avgt   30       0.010 ±  0.001   ms/op
+ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.alloc.rate               50  avgt   30    1510.936 ± 41.046  MB/sec
+ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.alloc.rate.norm          50  avgt   30   15472.062 ±  0.002    B/op
+ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.count                    50  avgt   30     597.000           counts
+ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.time                     50  avgt   30     109.000               ms
+ConditionalProductSpeedBenchmarkJMH.pairwiseWhenThen                         50  avgt   30       0.010 ±  0.001   ms/op
+ConditionalProductSpeedBenchmarkJMH.pairwiseWhenThen:gc.alloc.rate           50  avgt   30    1482.769 ± 46.137  MB/sec
+ConditionalProductSpeedBenchmarkJMH.pairwiseWhenThen:gc.alloc.rate.norm      50  avgt   30   15472.064 ±  0.002    B/op
+ConditionalProductSpeedBenchmarkJMH.pairwiseWhenThen:gc.count                50  avgt   30     603.000           counts
+ConditionalProductSpeedBenchmarkJMH.pairwiseWhenThen:gc.time                 50  avgt   30     107.000               ms
+ConditionalProductSpeedBenchmarkJMH.prunedJavaStream                         50  avgt   30       0.057 ±  0.001   ms/op
+ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.alloc.rate           50  avgt   30    1774.250 ± 14.355  MB/sec
+ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.alloc.rate.norm      50  avgt   30  105784.363 ±  0.003    B/op
+ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.count                50  avgt   30     626.000           counts
+ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.time                 50  avgt   30     118.000               ms
 
 Benchmark                                                                (size)  Mode  Cnt       Score    Error   Units
 ConditionalProductSpeedBenchmarkJMH.compound                                100  avgt   30       0.019 ±  0.001   ms/op
@@ -540,6 +560,28 @@ ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.alloc.rate          100 
 ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.alloc.rate.norm     100  avgt   30  205049.312 ±  0.024    B/op
 ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.count               100  avgt   30     743.000           counts
 ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.time                100  avgt   30     117.000               ms
+
+Benchmark                                                                (size)  Mode  Cnt       Score     Error   Units
+ConditionalProductSpeedBenchmarkJMH.compound                                200  avgt   30       0.037 ±   0.001   ms/op
+ConditionalProductSpeedBenchmarkJMH.compound:gc.alloc.rate                  200  avgt   30    1520.651 ±  46.591  MB/sec
+ConditionalProductSpeedBenchmarkJMH.compound:gc.alloc.rate.norm             200  avgt   30   58656.235 ±   7.691    B/op
+ConditionalProductSpeedBenchmarkJMH.compound:gc.count                       200  avgt   30     787.000            counts
+ConditionalProductSpeedBenchmarkJMH.compound:gc.time                        200  avgt   30     143.000                ms
+ConditionalProductSpeedBenchmarkJMH.engineLambda                            200  avgt   30       0.044 ±   0.005   ms/op
+ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.alloc.rate              200  avgt   30    1287.682 ± 123.719  MB/sec
+ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.alloc.rate.norm         200  avgt   30   58656.283 ±   7.706    B/op
+ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.count                   200  avgt   30     908.000            counts
+ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.time                    200  avgt   30     148.000                ms
+ConditionalProductSpeedBenchmarkJMH.pairwiseWhenThen                        200  avgt   30       0.037 ±   0.001   ms/op
+ConditionalProductSpeedBenchmarkJMH.pairwiseWhenThen:gc.alloc.rate          200  avgt   30    1499.825 ±  52.298  MB/sec
+ConditionalProductSpeedBenchmarkJMH.pairwiseWhenThen:gc.alloc.rate.norm     200  avgt   30   58664.239 ±   7.688    B/op
+ConditionalProductSpeedBenchmarkJMH.pairwiseWhenThen:gc.count               200  avgt   30     883.000            counts
+ConditionalProductSpeedBenchmarkJMH.pairwiseWhenThen:gc.time                200  avgt   30     140.000                ms
+ConditionalProductSpeedBenchmarkJMH.prunedJavaStream                        200  avgt   30       0.750 ±   0.016   ms/op
+ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.alloc.rate          200  avgt   30     513.718 ±  10.780  MB/sec
+ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.alloc.rate.norm     200  avgt   30  403564.778 ±   0.105    B/op
+ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.count               200  avgt   30     577.000            counts
+ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.time                200  avgt   30     101.000                ms
 
 Benchmark                                                                (size)  Mode  Cnt        Score    Error   Units
 ConditionalProductSpeedBenchmarkJMH.compound                               1000  avgt   30        0.185 ±  0.005   ms/op
