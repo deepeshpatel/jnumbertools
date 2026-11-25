@@ -351,10 +351,10 @@ var products = JNumberTools.cartesianProduct()
 ```
 
 Two through ten selected dimensions have typed predicate interfaces. For an arbitrary
-scope arity, use the array form:
+scope arity, pass an explicit `List<?>[]` to select the array form:
 
 ```java
-.when(dimA, dimB, dimC).matches(values ->
+.when(new List<?>[]{dimA, dimB, dimC}).matches(values ->
         (Integer) values[0] + (Integer) values[1] <= (Integer) values[2])
 ```
 

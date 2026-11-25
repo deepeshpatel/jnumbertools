@@ -110,7 +110,7 @@ class LambdaConditionalProductBuilderTest {
         List<Integer> d=java.util.stream.IntStream.range(0,10).boxed().toList();
 
         var product=cartesianProduct.withLambda(a,b,c,d)
-                .when(a,b,c).matches((values)->(Integer)values[0]+(Integer)values[1]<=(Integer)values[2]);
+                .when(a,b,c).matches((x,y,z)->x+y<=z);
 
         long scopedCount=0;
         for(int x:a) for(int y:b) for(int z:c) if(x+y<=z) scopedCount++;
@@ -125,7 +125,7 @@ class LambdaConditionalProductBuilderTest {
         List<Integer> unrelated=java.util.stream.IntStream.range(0,100).boxed().toList();
 
         var product=cartesianProduct.withLambda(a,b,unrelated,unrelated,unrelated)
-                .when(a,b).matches(values->(Integer)values[0]<(Integer)values[1]);
+                .when(new List<?>[]{a,b}).matches(values->(Integer)values[0]<(Integer)values[1]);
 
         assertEquals(BigInteger.valueOf(4_950L).multiply(BigInteger.valueOf(1_000_000L)),product.count());
     }
