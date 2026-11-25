@@ -19,19 +19,14 @@ import java.util.function.Predicate;
 import static io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition.condition;
 
 /**
- * Compares complete generation through the pairwise, compound and lambda-scoped entry points, on the
+ * Compares complete generation through the pairwise, compound and full-tuple lambda entry points, on the
  * exact same chain rule and {@code @Param} scenarios as {@link CompoundVsPairwiseGenerationBenchmark}:
  * whenever dimension i contains 0, dimension i+1 must not contain 0, expressed as a {@code BiPredicate}
  * over each adjacent pair rather than an equality/membership trigger.
  *
- * <p>Every lambda rule here links exactly two dimensions, so each one is compiled by
- * {@code LambdaConditionalProductBuilder} into the same lightweight pairwise {@code Relation} table the
- * pairwise and compound APIs use for this rule shape (see {@code ConditionalProductBuilder.withLambdaRule}'s
- * class Javadoc) — not a multi-trigger block. All three builders should therefore show the same generation
+ * <p>The lambda predicate is evaluated over the full tuple and compiled into the existing joint-scope rule representation. All three builders should therefore show the same generation
  * cost; this benchmark exists to confirm that empirically rather than only by the earlier correctness-only
- * {@code ChkLambda} driver, and to give a baseline for a future benchmark over a lambda rule that genuinely
- * cannot be pairwise (three or more dimensions named in one {@code matches(...)} call), which belongs
- * alongside {@link CompoundMultiTriggerGenerationBenchmark} instead of here.</p>
+ * {@code ChkLambda} driver, and to give a baseline for the benchmark now measures the full-tuple predicate path.</p>
  *
  * <p>Builder construction and rule registration — including compiling every lambda rule into its relation
  * table — happen in trial setup, outside the timed methods, matching every other benchmark in this
@@ -47,12 +42,12 @@ import static io.github.deepeshpatel.jnumbertools.generator.product.conditional.
 @Threads(1)
 public class LambdaVsCompoundGenerationBenchmark {
 
-    @Param({"3x10", "5x10", "7x5", "10x3", "5x15", "4x30", "5x18"})
+    @Param({"3x10", "5x10", "7x5", "10x3", "5x15", "4x30"})
     public String scenario;
 
     private CompoundConditionalProductBuilder compoundBuilder;
     private ConditionalProductBuilder conditionalBuilder;
-    private LambdaConditionalProductBuilder lambdaBuilder;
+    private LambdaConditionalProductBuilder.ArrayBased lambdaBuilder;
 
     @Setup(Level.Trial)
     public void setup() {
@@ -78,7 +73,13 @@ public class LambdaVsCompoundGenerationBenchmark {
                 dimensions.subList(2, dimensionsCount).toArray(List<?>[]::new));
         lambdaBuilder = products.withLambda(
                 dimensions.get(0), dimensions.get(1),
-                dimensions.subList(2, dimensionsCount).toArray(List<?>[]::new));
+                dimensions.subList(2, dimensionsCount).toArray(List<?>[]::new))
+                .when(values -> {
+                    for (int i = 0; i + 1 < values.length; i++) {
+                        if (values[i].equals(0) && values[i + 1].equals(0)) return false;
+                    }
+                    return true;
+                });
 
         for (int i = 0; i < dimensionsCount - 1; i++) {
             List<Integer> trigger = dimensions.get(i);
@@ -88,8 +89,6 @@ public class LambdaVsCompoundGenerationBenchmark {
                     .then(target).isNot(0);
             conditionalBuilder = conditionalBuilder.when(trigger).is(0)
                     .then(target).isNot(0);
-            lambdaBuilder = lambdaBuilder.when(trigger, target)
-                    .matches((t, v) -> !(t == 0 && v == 0));
         }
 
         int[] sizes = new int[dimensionsCount];

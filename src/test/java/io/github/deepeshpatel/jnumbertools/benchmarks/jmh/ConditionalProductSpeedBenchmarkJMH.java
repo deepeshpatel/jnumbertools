@@ -223,32 +223,14 @@ public class ConditionalProductSpeedBenchmarkJMH {
                         dimensions.region
                 )
 
-                .when(dimensions.os, dimensions.browser).matches((os, browser) -> {
-                    if (LINUX.equals(os)) {
-                        return LINUX_BROWSERS.contains(browser);
-                    }
-                    if (WINDOWS.equals(os)) {
-                        return WINDOWS_BROWSERS.contains(browser);
-                    }
-                    return true;
-                })
-
-                .andWhen(dimensions.os, dimensions.network).matches((os, network) ->
-                        !LINUX.equals(os) || LINUX_NETWORKS.contains(network))
-
-                .andWhen(dimensions.os, dimensions.database).matches((os, database) -> {
-                    if (LINUX.equals(os)) {
-                        return LINUX_DATABASES.contains(database);
-                    }
-                    if (WINDOWS.equals(os)) {
-                        return WINDOWS_DATABASES.contains(database);
-                    }
-                    return true;
-                })
-
-                .andWhen(dimensions.os, dimensions.region).matches((os, region) -> {
-                    if (LINUX.equals(os)) {
-                        return LINUX_REGIONS.contains(region);
+                 .when((os, browser, network, database, region) ->
+        (LINUX.equals(os) ? LINUX_BROWSERS.contains(browser)
+                : WINDOWS.equals(os) ? WINDOWS_BROWSERS.contains(browser) : true)
+        && (!LINUX.equals(os) || LINUX_NETWORKS.contains(network))
+        && (LINUX.equals(os) ? LINUX_DATABASES.contains(database)
+                : WINDOWS.equals(os) ? WINDOWS_DATABASES.contains(database) : true)
+        && (LINUX.equals(os) ? LINUX_REGIONS.contains(region)
+                : WINDOWS.equals(os) ? WINDOWS_REGIONS.contains(region) : true));
                     }
                     if (WINDOWS.equals(os)) {
                         return WINDOWS_REGIONS.contains(region);

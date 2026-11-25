@@ -127,20 +127,14 @@ public class ConditionalProductApiBenchmark {
             case "LAMBDA" -> {
                 var builder = JNumberTools.cartesianProduct()
                         .withLambda(d.os, d.browser, d.network, d.database, d.region)
-                        .when(d.os, d.browser).matches((os, browser) -> {
-                            if (LINUX.equals(os)) return LINUX_BROWSERS.contains(browser);
-                            if (WINDOWS.equals(os)) return WINDOWS_BROWSERS.contains(browser);
-                            return true;
-                        })
-                        .andWhen(d.os, d.network).matches((os, network) ->
-                                !LINUX.equals(os) || LINUX_NETWORKS.contains(network))
-                        .andWhen(d.os, d.database).matches((os, database) -> {
-                            if (LINUX.equals(os)) return LINUX_DATABASES.contains(database);
-                            if (WINDOWS.equals(os)) return WINDOWS_DATABASES.contains(database);
-                            return true;
-                        })
-                        .andWhen(d.os, d.region).matches((os, region) -> {
-                            if (LINUX.equals(os)) return LINUX_REGIONS.contains(region);
+                         .when((os, browser, network, database, region) ->
+        (LINUX.equals(os) ? LINUX_BROWSERS.contains(browser)
+                : WINDOWS.equals(os) ? WINDOWS_BROWSERS.contains(browser) : true)
+        && (!LINUX.equals(os) || LINUX_NETWORKS.contains(network))
+        && (LINUX.equals(os) ? LINUX_DATABASES.contains(database)
+                : WINDOWS.equals(os) ? WINDOWS_DATABASES.contains(database) : true)
+        && (LINUX.equals(os) ? LINUX_REGIONS.contains(region)
+                : WINDOWS.equals(os) ? WINDOWS_REGIONS.contains(region) : true));
                             if (WINDOWS.equals(os)) return WINDOWS_REGIONS.contains(region);
                             return true;
                         });
