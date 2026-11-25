@@ -315,38 +315,23 @@ The Compound Product exposes lazy, re-iterable `generate()`, exact `count()` and
 `isEmpty()`. It does not expose lexicographical traversal, rank-based operations,
 random choice or sampling.
 
-## 4.5 Lambda Engine: predicate-to-constraint compiler
+## 4.5 Lambda Engine: strongly typed joint predicates
 
-Use the Lambda Engine when rules are too complex to express clearly with the pairwise
-Compiled Product or the declarative nested conditions of the Compound Product. It gives
-the flexibility of lambda-style rules while keeping the code readable and retaining the
-constraint engine's pruned execution path.
+Use the Lambda Engine for arbitrary Java logic over Cartesian-product dimensions. The
+predicate receives the values from **all dimensions registered with** `withLambda(...)`,
+in declaration order. It is not a filter applied after every complete tuple has been
+generated: predicates are evaluated while the rule is compiled, and the compiled
+constraint is used by generation, counting and emptiness checks.
 
-This is **not** a predicate filter applied to every completed tuple. Each lambda rule is
-compiled when it is added: the builder enumerates combinations of values in the declared
-scope, evaluates the predicate, and converts the result into the same internal constraint
-representation used by the Compound Product. Generation, counting and emptiness checks
-then use those compiled constraints; the predicate is not invoked again.
+### Predicate arities
 
-#### Typed predicate over two dimensions
+- One dimension: Java `Predicate<T>`; it filters that dimension's values.
+- Two dimensions: Java `BiPredicate<A, B>`.
+- Three through ten dimensions: `LambdaConditionalProductBuilder.Predicate3` through
+  `Predicate10`, with strongly typed lambda parameters.
+- More than ten dimensions: `Predicate<Object[]>`; array positions follow dimension order.
 
-```java
-var cores = List.of(1, 2, 4, 8);
-var memoryGb = List.of(2, 4, 8, 16);
-
-var products = JNumberTools.cartesianProduct()
-        .withLambda(cores, memoryGb)
-        .when(cores, memoryGb).matches((c, m) -> c * m <= 256);
-
-products.count();                    // exact count
-products.isEmpty();                  // whether any valid tuple exists
-products.generate().stream().forEach(System.out::println);
-```
-
-#### Predicate over three or more dimensions
-
-For an arbitrary number of dimensions, the predicate receives an `Object[]` whose
-positions follow the order of dimensions passed to `when(...)`:
+### Strongly typed example and Boolean logic
 
 ```java
 var cores = List.of(1, 2, 4, 8);
@@ -355,71 +340,62 @@ var budget = List.of(8, 16, 32);
 
 var products = JNumberTools.cartesianProduct()
         .withLambda(cores, memoryGb, budget)
-        .when(cores, memoryGb, budget).matches(values -> {
-            int c = (Integer) values[0];
-            int m = (Integer) values[1];
-            int b = (Integer) values[2];
-            return c * m <= b;
-        })
-        .andWhen(memoryGb, budget).matches((m, b) -> m * 2 <= b);
+        .when((core, memory, maxBudget) ->
+                (core * memory <= maxBudget && memory <= 8)
+                || (core >= 8 && maxBudget >= 16));
 
 products.count();
 products.generate().stream().forEach(System.out::println);
 ```
 
-Add further dimensions with `and(list)` and further rules with
-`andWhen(...).matches(...)`. Every completed lambda rule must hold; rules are combined
-with AND.
+Use Java's `&&`, `||`, `!` and parentheses for arbitrary Boolean expressions, including
+`(A && B) || (C && D)`. No separate `orWhen` or `andWhen` methods are needed.
 
-**Compilation and constraints:**
+### Multiple conditions
 
-- A rule over two dimensions is compiled into pairwise constraints when possible.
-- A rule over more dimensions is compiled into a bounded joint constraint.
-- Compiling one rule is limited to 1,000,000 predicate probes (antecedent combinations
-  multiplied by target values). Narrow the rule scope or dimension sizes if this limit
-  would be exceeded.
-- Predicates must be deterministic and side-effect-free. In the `Object[]` form, use
-  values in scope order; do not mutate or retain the array supplied during compilation.
-- `generate()` is lazy and re-iterable and produces each valid tuple once, without an
-  encounter-order guarantee. The builder also exposes exact `count()` and `isEmpty()`.
+Every `.when(predicate)` call adds another condition, and repeated calls are combined
+with AND:
+
+```java
+var products = JNumberTools.cartesianProduct()
+        .withLambda(cores, memoryGb, budget)
+        .when((core, memory, maxBudget) -> core * memory <= maxBudget)
+        .when((core, memory, maxBudget) -> memory <= 8 || maxBudget >= 32);
+```
+
+This is logically equivalent to combining both predicates with `&&` inside one
+`.when(...)` call. Their compilation costs may differ; benchmark the two forms if that
+difference matters.
+
+### More than ten dimensions
+
+The array form remains available for arbitrary arity:
+
+```java
+var products = JNumberTools.cartesianProduct()
+        .withLambda(d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11)
+        .when(values -> values[0].equals(values[10]));
+```
+
+### Compilation and constraints
+
+- For two or more dimensions, each predicate is compiled over the complete Cartesian
+  product of the registered dimensions.
+- The existing compilation limit is 1,000,000 predicate probes per `.when(...)` call.
+  If the product of the dimension sizes exceeds this limit, rule compilation is rejected.
+- Predicates must be deterministic and side-effect-free. The array supplied to the
+  greater-than-ten form is a temporary compilation array; do not retain or mutate it.
+- Predicates are evaluated during compilation, not during subsequent generation or counting.
+- The builder exposes lazy, re-iterable `generate()`, exact `count()` and `isEmpty()`.
   It does not expose lexicographical traversal, rank-based access, choice or sampling.
 
-Prefer the Compiled Product for straightforward pairwise rules and the Compound Product
-when nested Boolean conditions communicate the rule more clearly. Use the Lambda Engine
-when the rule is genuinely joint logic (arithmetic, relational or application-specific
-computation) and the lambda is the clearest representation.
+Prefer `conditionalProductOf(...)` for straightforward pairwise rules and
+`compoundProductOf(...)` when nested declarative conditions are clearer. The Lambda
+Engine is for custom joint logic that is most naturally expressed as Java predicates.
 
-**Design note — Collection-as-Handle:** `when(...)`/`andWhen(...)` bind a predicate's
-parameters to dimensions using the caller's own `List` instances as handles, resolved by
-reference identity rather than content equality, string key, or position. Constraint
-solvers (and most embedded DSLs) normally require wrapping each input in a purpose-built
-`Variable<T>`/`Dimension<T>` object before it can be referenced in a rule; here the
-`List<T>` the caller already has *is* the handle, so no wrapper type is introduced.
-Passing exactly two lists to `when(...)` additionally yields a type-safe
-`BiPredicate<A, B>` with no casts; three or more falls back to an `Object[]` in the
-declared scope order, avoiding a `TriPredicate`/`QuadPredicate`/... interface explosion.
-See `RuleCompiler` (an `IdentityHashMap<List<?>, int[]>`) for the resolution mechanism.
-
-**Measured performance (JMH, `ConditionalProductSpeedBenchmarkJMH`, average time in ms,
-5 warmup + 10 measurement iterations x 3 forks):**
-
-| Dimension size | Compiled Product | Compound Product | Lambda Engine | Pruned Java `Stream` |
-|---:|---:|---:|---:|---:|
-| 50   | 0.010 | 0.010 | 0.010 | 0.057   |
-| 100  | 0.019 | 0.019 | 0.019 | 0.206   |
-| 200  | 0.037 | 0.037 | 0.044 | 0.750   |
-| 1000 | 0.180 | 0.185 | 0.229 | 18.626  |
-| 5000 | 0.835 | 0.847 | 0.848 | 489.458 |
-
-The Lambda Engine tracks the Compiled and Compound Products within measurement noise at
-every size tested, consistent with it compiling into the same constraint representation
-those builders use. All three diverge sharply from the pruned `Stream` baseline as size
-grows (about 6x faster at size 50, widening to roughly 580x faster at size 5000), because
-invalid branches are pruned via precompiled constraints rather than re-evaluated through
-nested filters for every candidate tuple.
-
-Reproduce with `ConditionalProductSpeedBenchmarkJMH` in
-`src/test/java/io/github/deepeshpatel/jnumbertools/benchmarks/jmh/`.
+**Benchmark note:** performance measurements published for the previous scoped-predicate
+API are not representative of this all-dimensions API. Re-run the benchmarks against this
+API before publishing comparative performance claims.
 
 ## 4.6 Products of ranks, random choice and random sample
 
@@ -773,38 +749,23 @@ The Compound Product exposes lazy, re-iterable `generate()`, exact `count()` and
 `isEmpty()`. It does not expose lexicographical traversal, rank-based operations,
 random choice or sampling.
 
-## 4.5 Lambda Engine: predicate-to-constraint compiler
+## 4.5 Lambda Engine: strongly typed joint predicates
 
-Use the Lambda Engine when rules are too complex to express clearly with the pairwise
-Compiled Product or the declarative nested conditions of the Compound Product. It gives
-the flexibility of lambda-style rules while keeping the code readable and retaining the
-constraint engine's pruned execution path.
+Use the Lambda Engine for arbitrary Java logic over Cartesian-product dimensions. The
+predicate receives the values from **all dimensions registered with** `withLambda(...)`,
+in declaration order. It is not a filter applied after every complete tuple has been
+generated: predicates are evaluated while the rule is compiled, and the compiled
+constraint is used by generation, counting and emptiness checks.
 
-This is **not** a predicate filter applied to every completed tuple. Each lambda rule is
-compiled when it is added: the builder enumerates combinations of values in the declared
-scope, evaluates the predicate, and converts the result into the same internal constraint
-representation used by the Compound Product. Generation, counting and emptiness checks
-then use those compiled constraints; the predicate is not invoked again.
+### Predicate arities
 
-#### Typed predicate over two dimensions
+- One dimension: Java `Predicate<T>`; it filters that dimension's values.
+- Two dimensions: Java `BiPredicate<A, B>`.
+- Three through ten dimensions: `LambdaConditionalProductBuilder.Predicate3` through
+  `Predicate10`, with strongly typed lambda parameters.
+- More than ten dimensions: `Predicate<Object[]>`; array positions follow dimension order.
 
-```java
-var cores = List.of(1, 2, 4, 8);
-var memoryGb = List.of(2, 4, 8, 16);
-
-var products = JNumberTools.cartesianProduct()
-        .withLambda(cores, memoryGb)
-        .when(cores, memoryGb).matches((c, m) -> c * m <= 256);
-
-products.count();                    // exact count
-products.isEmpty();                  // whether any valid tuple exists
-products.generate().stream().forEach(System.out::println);
-```
-
-#### Predicate over three or more dimensions
-
-For an arbitrary number of dimensions, the predicate receives an `Object[]` whose
-positions follow the order of dimensions passed to `when(...)`:
+### Strongly typed example and Boolean logic
 
 ```java
 var cores = List.of(1, 2, 4, 8);
@@ -813,71 +774,62 @@ var budget = List.of(8, 16, 32);
 
 var products = JNumberTools.cartesianProduct()
         .withLambda(cores, memoryGb, budget)
-        .when(cores, memoryGb, budget).matches(values -> {
-            int c = (Integer) values[0];
-            int m = (Integer) values[1];
-            int b = (Integer) values[2];
-            return c * m <= b;
-        })
-        .andWhen(memoryGb, budget).matches((m, b) -> m * 2 <= b);
+        .when((core, memory, maxBudget) ->
+                (core * memory <= maxBudget && memory <= 8)
+                || (core >= 8 && maxBudget >= 16));
 
 products.count();
 products.generate().stream().forEach(System.out::println);
 ```
 
-Add further dimensions with `and(list)` and further rules with
-`andWhen(...).matches(...)`. Every completed lambda rule must hold; rules are combined
-with AND.
+Use Java's `&&`, `||`, `!` and parentheses for arbitrary Boolean expressions, including
+`(A && B) || (C && D)`. No separate `orWhen` or `andWhen` methods are needed.
 
-**Compilation and constraints:**
+### Multiple conditions
 
-- A rule over two dimensions is compiled into pairwise constraints when possible.
-- A rule over more dimensions is compiled into a bounded joint constraint.
-- Compiling one rule is limited to 1,000,000 predicate probes (antecedent combinations
-  multiplied by target values). Narrow the rule scope or dimension sizes if this limit
-  would be exceeded.
-- Predicates must be deterministic and side-effect-free. In the `Object[]` form, use
-  values in scope order; do not mutate or retain the array supplied during compilation.
-- `generate()` is lazy and re-iterable and produces each valid tuple once, without an
-  encounter-order guarantee. The builder also exposes exact `count()` and `isEmpty()`.
+Every `.when(predicate)` call adds another condition, and repeated calls are combined
+with AND:
+
+```java
+var products = JNumberTools.cartesianProduct()
+        .withLambda(cores, memoryGb, budget)
+        .when((core, memory, maxBudget) -> core * memory <= maxBudget)
+        .when((core, memory, maxBudget) -> memory <= 8 || maxBudget >= 32);
+```
+
+This is logically equivalent to combining both predicates with `&&` inside one
+`.when(...)` call. Their compilation costs may differ; benchmark the two forms if that
+difference matters.
+
+### More than ten dimensions
+
+The array form remains available for arbitrary arity:
+
+```java
+var products = JNumberTools.cartesianProduct()
+        .withLambda(d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11)
+        .when(values -> values[0].equals(values[10]));
+```
+
+### Compilation and constraints
+
+- For two or more dimensions, each predicate is compiled over the complete Cartesian
+  product of the registered dimensions.
+- The existing compilation limit is 1,000,000 predicate probes per `.when(...)` call.
+  If the product of the dimension sizes exceeds this limit, rule compilation is rejected.
+- Predicates must be deterministic and side-effect-free. The array supplied to the
+  greater-than-ten form is a temporary compilation array; do not retain or mutate it.
+- Predicates are evaluated during compilation, not during subsequent generation or counting.
+- The builder exposes lazy, re-iterable `generate()`, exact `count()` and `isEmpty()`.
   It does not expose lexicographical traversal, rank-based access, choice or sampling.
 
-Prefer the Compiled Product for straightforward pairwise rules and the Compound Product
-when nested Boolean conditions communicate the rule more clearly. Use the Lambda Engine
-when the rule is genuinely joint logic (arithmetic, relational or application-specific
-computation) and the lambda is the clearest representation.
+Prefer `conditionalProductOf(...)` for straightforward pairwise rules and
+`compoundProductOf(...)` when nested declarative conditions are clearer. The Lambda
+Engine is for custom joint logic that is most naturally expressed as Java predicates.
 
-**Design note — Collection-as-Handle:** `when(...)`/`andWhen(...)` bind a predicate's
-parameters to dimensions using the caller's own `List` instances as handles, resolved by
-reference identity rather than content equality, string key, or position. Constraint
-solvers (and most embedded DSLs) normally require wrapping each input in a purpose-built
-`Variable<T>`/`Dimension<T>` object before it can be referenced in a rule; here the
-`List<T>` the caller already has *is* the handle, so no wrapper type is introduced.
-Passing exactly two lists to `when(...)` additionally yields a type-safe
-`BiPredicate<A, B>` with no casts; three or more falls back to an `Object[]` in the
-declared scope order, avoiding a `TriPredicate`/`QuadPredicate`/... interface explosion.
-See `RuleCompiler` (an `IdentityHashMap<List<?>, int[]>`) for the resolution mechanism.
-
-**Measured performance (JMH, `ConditionalProductSpeedBenchmarkJMH`, average time in ms,
-5 warmup + 10 measurement iterations x 3 forks):**
-
-| Dimension size | Compiled Product | Compound Product | Lambda Engine | Pruned Java `Stream` |
-|---:|---:|---:|---:|---:|
-| 50   | 0.010 | 0.010 | 0.010 | 0.057   |
-| 100  | 0.019 | 0.019 | 0.019 | 0.206   |
-| 200  | 0.037 | 0.037 | 0.044 | 0.750   |
-| 1000 | 0.180 | 0.185 | 0.229 | 18.626  |
-| 5000 | 0.835 | 0.847 | 0.848 | 489.458 |
-
-The Lambda Engine tracks the Compiled and Compound Products within measurement noise at
-every size tested, consistent with it compiling into the same constraint representation
-those builders use. All three diverge sharply from the pruned `Stream` baseline as size
-grows (about 6x faster at size 50, widening to roughly 580x faster at size 5000), because
-invalid branches are pruned via precompiled constraints rather than re-evaluated through
-nested filters for every candidate tuple.
-
-Reproduce with `ConditionalProductSpeedBenchmarkJMH` in
-`src/test/java/io/github/deepeshpatel/jnumbertools/benchmarks/jmh/`.
+**Benchmark note:** performance measurements published for the previous scoped-predicate
+API are not representative of this all-dimensions API. Re-run the benchmarks against this
+API before publishing comparative performance claims.
 
 ## 4.6 Products of ranks, random choice and random sample
 
