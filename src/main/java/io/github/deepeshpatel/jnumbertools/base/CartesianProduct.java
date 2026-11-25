@@ -211,40 +211,75 @@ public final class CartesianProduct {
     }
 
     /**
-     * Creates a builder for a Cartesian product constrained by raw joint predicates over several
-     * dimensions at once — for arithmetic or relational logic spanning two or more dimensions that a
-     * {@link io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition}'s equality and
-     * membership leaves cannot express.
-     *
-     * <p>Each rule, added with {@code when(dims...).matches(predicate)}, is compiled once, when it is
-     * added, into the same multi-trigger rule representation a compound {@code Condition} compiles into:
-     * every combination of the named dimensions' values is enumerated and the predicate evaluated against
-     * it, bounded the same way a compound rule's scope is bounded. Generation, {@link
-     * LambdaConditionalProductBuilder#count()} and {@link LambdaConditionalProductBuilder#isEmpty()} then
-     * read the precomputed result; the predicate itself is never called again. See {@link
-     * LambdaConditionalProductBuilder} for the full semantics and the trade-off (a lambda is opaque to
-     * static inspection, unlike a {@code Condition}) against using one.</p>
-     *
-     * @param elements the first dimension; copied
-     * @return a lambda-constrained product builder
-     * @throws NullPointerException if {@code elements} is null or contains a null element
+     * Creates a strongly typed lambda-constrained builder for one dimension.
+     * The predicate filters values in that dimension.
      */
-    public LambdaConditionalProductBuilder withLambda(List<?> elements) {
-        return new LambdaConditionalProductBuilder(elements);
+    public <A> LambdaConditionalProductBuilder.Typed1<A> withLambda(List<A> elements) {
+        return new LambdaConditionalProductBuilder.Typed1<>(new ConditionalProductBuilder(elements));
+    }
+
+    /** Creates a strongly typed lambda-constrained builder for 2 dimensions. */
+    public <A, B> LambdaConditionalProductBuilder.Typed2<A, B> withLambda(
+            List<A> first, List<B> second) {
+        return new LambdaConditionalProductBuilder.Typed2<>(new ConditionalProductBuilder(first, second));
+    }
+
+    /** Creates a strongly typed lambda-constrained builder for 3 dimensions. */
+    public <A, B, C> LambdaConditionalProductBuilder.Typed3<A, B, C> withLambda(
+            List<A> first, List<B> second, List<C> dimension3) {
+        return new LambdaConditionalProductBuilder.Typed3<>(new ConditionalProductBuilder(first, second, dimension3));
+    }
+
+    /** Creates a strongly typed lambda-constrained builder for 4 dimensions. */
+    public <A, B, C, D> LambdaConditionalProductBuilder.Typed4<A, B, C, D> withLambda(
+            List<A> first, List<B> second, List<C> dimension3, List<D> dimension4) {
+        return new LambdaConditionalProductBuilder.Typed4<>(new ConditionalProductBuilder(first, second, dimension3, dimension4));
+    }
+
+    /** Creates a strongly typed lambda-constrained builder for 5 dimensions. */
+    public <A, B, C, D, E> LambdaConditionalProductBuilder.Typed5<A, B, C, D, E> withLambda(
+            List<A> first, List<B> second, List<C> dimension3, List<D> dimension4, List<E> dimension5) {
+        return new LambdaConditionalProductBuilder.Typed5<>(new ConditionalProductBuilder(first, second, dimension3, dimension4, dimension5));
+    }
+
+    /** Creates a strongly typed lambda-constrained builder for 6 dimensions. */
+    public <A, B, C, D, E, F> LambdaConditionalProductBuilder.Typed6<A, B, C, D, E, F> withLambda(
+            List<A> first, List<B> second, List<C> dimension3, List<D> dimension4, List<E> dimension5, List<F> dimension6) {
+        return new LambdaConditionalProductBuilder.Typed6<>(new ConditionalProductBuilder(first, second, dimension3, dimension4, dimension5, dimension6));
+    }
+
+    /** Creates a strongly typed lambda-constrained builder for 7 dimensions. */
+    public <A, B, C, D, E, F, G> LambdaConditionalProductBuilder.Typed7<A, B, C, D, E, F, G> withLambda(
+            List<A> first, List<B> second, List<C> dimension3, List<D> dimension4, List<E> dimension5, List<F> dimension6, List<G> dimension7) {
+        return new LambdaConditionalProductBuilder.Typed7<>(new ConditionalProductBuilder(first, second, dimension3, dimension4, dimension5, dimension6, dimension7));
+    }
+
+    /** Creates a strongly typed lambda-constrained builder for 8 dimensions. */
+    public <A, B, C, D, E, F, G, H> LambdaConditionalProductBuilder.Typed8<A, B, C, D, E, F, G, H> withLambda(
+            List<A> first, List<B> second, List<C> dimension3, List<D> dimension4, List<E> dimension5, List<F> dimension6, List<G> dimension7, List<H> dimension8) {
+        return new LambdaConditionalProductBuilder.Typed8<>(new ConditionalProductBuilder(first, second, dimension3, dimension4, dimension5, dimension6, dimension7, dimension8));
+    }
+
+    /** Creates a strongly typed lambda-constrained builder for 9 dimensions. */
+    public <A, B, C, D, E, F, G, H, I> LambdaConditionalProductBuilder.Typed9<A, B, C, D, E, F, G, H, I> withLambda(
+            List<A> first, List<B> second, List<C> dimension3, List<D> dimension4, List<E> dimension5, List<F> dimension6, List<G> dimension7, List<H> dimension8, List<I> dimension9) {
+        return new LambdaConditionalProductBuilder.Typed9<>(new ConditionalProductBuilder(first, second, dimension3, dimension4, dimension5, dimension6, dimension7, dimension8, dimension9));
+    }
+
+    /** Creates a strongly typed lambda-constrained builder for 10 dimensions. */
+    public <A, B, C, D, E, F, G, H, I, J> LambdaConditionalProductBuilder.Typed10<A, B, C, D, E, F, G, H, I, J> withLambda(
+            List<A> first, List<B> second, List<C> dimension3, List<D> dimension4, List<E> dimension5, List<F> dimension6, List<G> dimension7, List<H> dimension8, List<I> dimension9, List<J> dimension10) {
+        return new LambdaConditionalProductBuilder.Typed10<>(new ConditionalProductBuilder(first, second, dimension3, dimension4, dimension5, dimension6, dimension7, dimension8, dimension9, dimension10));
     }
 
     /**
-     * Creates a lambda-constrained product builder with two or more dimensions.
-     *
-     * @param first the first dimension; copied
-     * @param second the second dimension; copied
-     * @param additional further dimensions, in product order; each copied
-     * @return a lambda-constrained product builder containing all supplied dimensions
-     * @throws NullPointerException if any dimension is null or contains a null element
+     * Creates an array-based lambda-constrained builder for more than ten dimensions.
+     * The predicate receives all values in declaration order through an Object array.
      */
-    public LambdaConditionalProductBuilder withLambda(
+    public LambdaConditionalProductBuilder.ArrayBased withLambda(
             List<?> first, List<?> second, List<?>... additional) {
-        return new LambdaConditionalProductBuilder(first, second, additional);
+        return new LambdaConditionalProductBuilder.ArrayBased(
+                new ConditionalProductBuilder(first, second, additional));
     }
 
     /**

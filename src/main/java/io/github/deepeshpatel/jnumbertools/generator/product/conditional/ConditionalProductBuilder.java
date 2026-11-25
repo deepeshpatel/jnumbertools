@@ -664,6 +664,27 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      *                                  that would need to be probed exceeds
      *                                  {@link ConstraintGraph#MAX_LOOP_COMBINATIONS}
      */
+    /**
+     * Filters a sole dimension while preserving the caller's original list as its identity handle.
+     */
+    ConditionalProductBuilder withUnaryLambdaRule(Predicate<Object> predicate) {
+        Objects.requireNonNull(predicate, "predicate must not be null");
+        if (model.dimensions.size() != 1) {
+            throw new IllegalStateException("A unary lambda predicate requires exactly one dimension");
+        }
+        List<Object> filtered = new ArrayList<>();
+        for (Object value : model.dimensions.get(0)) {
+            if (predicate.test(value)) filtered.add(value);
+        }
+        List<List<?>> copies = new ArrayList<>(model.dimensions);
+        copies.set(0, snapshot(filtered));
+        return new ConditionalProductBuilder(copies, originals);
+    }
+
+    int dimensionCount() {
+        return model.dimensions.size();
+    }
+
     ConditionalProductBuilder withLambdaRule(int[] scopeDims, Predicate<Object[]> predicate) {
         Objects.requireNonNull(predicate, "predicate must not be null");
         Objects.requireNonNull(scopeDims, "scopeDims must not be null");

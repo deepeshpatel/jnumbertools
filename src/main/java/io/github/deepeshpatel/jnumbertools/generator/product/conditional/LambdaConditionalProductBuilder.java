@@ -13,219 +13,184 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 /**
- * Builder for Cartesian products constrained by a raw joint predicate over several dimensions, for logic
- * that a {@link Condition}'s equality/membership leaves cannot express — arithmetic or relational logic
- * spanning two or more dimensions at once.
+ * Namespace for the strongly typed lambda predicates and builders used by
+ * {@link io.github.deepeshpatel.jnumbertools.base.CartesianProduct#withLambda(List)}.
  *
- * <pre>{@code
- * var products = JNumberTools.cartesianProduct()
- *         .withLambda(cores, memoryGb, budget)
- *         .when(cores, memoryGb).matches((c, m) -> c * m <= 256)
- *         .andWhen(memoryGb, budget).matches((m, b) -> m * 4 <= b);
- * }</pre>
+ * <p>One dimension uses {@link Predicate}; two use {@link BiPredicate}; three through ten use
+ * {@link Predicate3} through {@link Predicate10}. More than ten dimensions use
+ * {@link ArrayBased}, whose predicate receives an {@code Object[]}.</p>
  *
- * <h2>How this differs from {@link CompoundConditionalProductBuilder}</h2>
- * <p>Each {@code when(...).matches(...)} call is compiled once, when it is added: every combination of
- * the named dimensions' values is enumerated and the predicate is evaluated against it, bounded the same
- * way a compound rule's scope is bounded (see {@code ConditionalProductBuilder}'s class Javadoc). The
- * result is compiled into the same multi-trigger rule representation {@link Condition} resolves into, so
- * generation, {@link #count()} and {@link #isEmpty()} never call the predicate again — they read the
- * precomputed table, exactly as they would for a compound rule. The predicate itself may express anything
- * a {@code Condition} cannot (arbitrary Java code over the joint values), at the cost of being opaque to
- * static inspection: unlike a {@code Condition}, a lambda cannot be decomposed or displayed by a future
- * diagnostic/explain tool.</p>
- *
- * <p>Every completed rule must hold; rules are combined with AND, like {@code compoundProductOf(...)}'s.
- * Compound rules support exact {@link #count()} and {@link #isEmpty()} queries and lazy generation through
- * {@link #generate()}; generation does not promise lexicographic encounter order, and rank-based traversal
- * and sampling are intentionally not exposed, matching {@link CompoundConditionalProductBuilder}.</p>
- *
- * <p>Dimensions are identified by the same list instances supplied to {@code withLambda(...)} or
- * {@link #and(List)}. Dimension values are copied when the builder is created. Instances are immutable
- * and thread-safe.</p>
- *
- * @author Deepesh Patel
+ * <p>Each {@code when(...)} call adds one condition over all registered dimensions. Repeated calls
+ * are combined with AND. Use Java's {@code &&}, {@code ||}, and {@code !} inside a predicate for
+ * arbitrary Boolean expressions. Predicates are evaluated during rule compilation, subject to the
+ * existing one-million-probe limit, not during later counting or generation.</p>
  */
 public final class LambdaConditionalProductBuilder {
+    private LambdaConditionalProductBuilder() { }
 
-    private final ConditionalProductBuilder delegate;
+    @FunctionalInterface public interface Predicate3<A,B,C> { boolean test(A a, B b, C c); }
+    @FunctionalInterface public interface Predicate4<A,B,C,D> { boolean test(A a, B b, C c, D d); }
+    @FunctionalInterface public interface Predicate5<A,B,C,D,E> { boolean test(A a, B b, C c, D d, E e); }
+    @FunctionalInterface public interface Predicate6<A,B,C,D,E,F> { boolean test(A a, B b, C c, D d, E e, F f); }
+    @FunctionalInterface public interface Predicate7<A,B,C,D,E,F,G> { boolean test(A a, B b, C c, D d, E e, F f, G g); }
+    @FunctionalInterface public interface Predicate8<A,B,C,D,E,F,G,H> { boolean test(A a, B b, C c, D d, E e, F f, G g, H h); }
+    @FunctionalInterface public interface Predicate9<A,B,C,D,E,F,G,H,I> { boolean test(A a, B b, C c, D d, E e, F f, G g, H h, I i); }
+    @FunctionalInterface public interface Predicate10<A,B,C,D,E,F,G,H,I,J> { boolean test(A a, B b, C c, D d, E e, F f, G g, H h, I i, J j); }
 
-    /**
-     * Creates a lambda-constrained product builder with one dimension.
-     *
-     * @param elements first dimension; copied
-     */
-    public LambdaConditionalProductBuilder(List<?> elements) {
-        this(new ConditionalProductBuilder(elements));
-    }
-
-    /**
-     * Creates a lambda-constrained product builder with two or more dimensions, equivalent to calling
-     * {@link #LambdaConditionalProductBuilder(List)} with {@code first} and then adding each remaining
-     * dimension through {@link #and(List)}. The dimensions retain the supplied order.
-     *
-     * @param first the first dimension; copied
-     * @param second the second dimension; copied
-     * @param additional any further dimensions, in product order; each copied
-     * @throws NullPointerException if any dimension is null or contains a null element
-     */
-    public LambdaConditionalProductBuilder(List<?> first, List<?> second, List<?>... additional) {
-        this(new ConditionalProductBuilder(first, second, additional));
-    }
-
-    private LambdaConditionalProductBuilder(ConditionalProductBuilder delegate) {
-        this.delegate = delegate;
-    }
-
-    /**
-     * Returns a new builder with another dimension appended.
-     *
-     * @param elements the next dimension; copied
-     * @return a new immutable builder
-     */
-    public LambdaConditionalProductBuilder and(List<?> elements) {
-        return new LambdaConditionalProductBuilder(delegate.and(elements));
-    }
-
-    /**
-     * Starts a rule whose predicate will receive one argument per dimension here, in this order — the
-     * uncapped form, for any number of dimensions.
-     *
-     * <p>A rule must name at least two dimensions: one antecedent (the {@code when} side) and one target
-     * (the last dimension in {@code scope}). A single-dimension {@link Condition} can be used as
-     * the trigger for a compound-product rule on a separate target dimension; that constrains the target,
-     * not the trigger dimension itself. To filter values from one dimension, pre-filter its input list.
-     * Single-dimension scopes are rejected because
-     * {@code ConstraintPlan} does not run rules through its node enumeration for a single-dimension node,
-     * so such a rule would be enforced during traversal but ignored by {@code count()} and rank-based
-     * operations.</p>
-     *
-     * @param scope the dimensions the predicate jointly depends on, in argument order; each the same
-     *              list instance supplied to {@code withLambda(...)} or {@link #and(List)}
-     * @return the next step, which takes the predicate itself
-     * @throws NullPointerException if {@code scope} or any element is null
-     * @throws IllegalArgumentException if {@code scope} has fewer than two dimensions, a dimension is not
-     *                                  one of this product's, or the same dimension appears twice
-     */
-    public Scope when(List<?>... scope) {
-        Objects.requireNonNull(scope, "scope must not be null");
-        if (scope.length < 2) {
-            throw new IllegalArgumentException("A lambda rule must name at least two dimensions "
-                    + "(one antecedent and one target); to filter a single dimension, pre-filter its "
-                    + "input list before building the product");
+    private abstract static class Base {
+        final ConditionalProductBuilder delegate;
+        Base(ConditionalProductBuilder delegate) {
+            this.delegate = Objects.requireNonNull(delegate, "delegate must not be null");
         }
-        int[] indexes = resolve(scope);
-        return new Scope(indexes);
-    }
-
-    /**
-     * Alias of {@link #when(List[])}, for fluent declaration of another rule after the first.
-     */
-    public Scope andWhen(List<?>... scope) {
-        return when(scope);
-    }
-
-    /**
-     * Starts a rule over exactly two dimensions, with a typed {@link BiPredicate} rather than the
-     * uncapped {@code Object[]} form.
-     *
-     * @param first the first dimension the predicate depends on
-     * @param second the second dimension the predicate depends on
-     * @return the next step, typed to {@code first} and {@code second}'s element types
-     * @throws NullPointerException if either dimension is null
-     * @throws IllegalArgumentException if either dimension is not one of this product's, or the two
-     *                                  dimensions are the same
-     */
-    public <A, B> Scope2<A, B> when(List<A> first, List<B> second) {
-        Objects.requireNonNull(first, "first must not be null");
-        Objects.requireNonNull(second, "second must not be null");
-        int[] indexes = resolve(new List<?>[] {first, second});
-        return new Scope2<>(indexes);
-    }
-
-    /** Alias of {@link #when(List, List)}, for fluent declaration of another rule after the first. */
-    public <A, B> Scope2<A, B> andWhen(List<A> first, List<B> second) {
-        return when(first, second);
-    }
-
-    private int[] resolve(List<?>[] scope) {
-        if (scope.length == 0) {
-            throw new IllegalArgumentException("A lambda rule must depend on at least one dimension");
+        final int[] allDimensions() {
+            int[] indexes = new int[delegate.dimensionCount()];
+            for (int i=0;i<indexes.length;i++) indexes[i]=i;
+            return indexes;
         }
-        int[] indexes = new int[scope.length];
-        for (int i = 0; i < scope.length; i++) {
-            Objects.requireNonNull(scope[i], "a scope dimension must not be null");
-            indexes[i] = delegate.indexOfDimension(scope[i]);
-        }
-        return indexes;
+        public StreamableIterable<Object> generate() { return delegate.anyOrder(); }
+        public BigInteger count() { return delegate.count(); }
+        public boolean isEmpty() { return delegate.isEmpty(); }
     }
 
-    /** The uncapped next step after {@link #when(List[])}: supply the predicate itself. */
-    public final class Scope {
-        private final int[] indexes;
-
-        private Scope(int[] indexes) {
-            this.indexes = indexes;
-        }
-
-        /**
-         * Adds this rule. The predicate receives one argument per scope dimension, in the order
-         * {@link #when(List[])} was given them, and is evaluated once per combination of the scope's
-         * values during compilation of this call, never during generation.
-         *
-         * @param predicate the joint predicate; must be deterministic and side-effect-free
-         * @return a new builder with this rule added
-         * @throws NullPointerException if {@code predicate} is null
-         * @throws IllegalArgumentException if compiling this rule would need to evaluate the predicate
-         *                                  more times than the configured limit allows
-         */
-        public LambdaConditionalProductBuilder matches(Predicate<Object[]> predicate) {
-            Objects.requireNonNull(predicate, "predicate must not be null");
-            return new LambdaConditionalProductBuilder(delegate.withLambdaRule(indexes, predicate));
-        }
-    }
-
-    /** The typed next step after {@link #when(List, List)}: supply a {@link BiPredicate}. */
-    public final class Scope2<A, B> {
-        private final int[] indexes;
-
-        private Scope2(int[] indexes) {
-            this.indexes = indexes;
-        }
-
-        /**
-         * Adds this rule, typed to the two dimensions named in {@link #when(List, List)}.
-         *
-         * @param predicate the joint predicate; must be deterministic and side-effect-free
-         * @return a new builder with this rule added
-         * @throws NullPointerException if {@code predicate} is null
-         * @throws IllegalArgumentException if compiling this rule would need to evaluate the predicate
-         *                                  more times than the configured limit allows
-         */
+    /** Strongly typed builder for one dimension; {@code when} filters that dimension. */
+    public static final class Typed1<A> extends Base {
+        public Typed1(ConditionalProductBuilder delegate) { super(delegate); }
         @SuppressWarnings("unchecked")
-        public LambdaConditionalProductBuilder matches(BiPredicate<? super A, ? super B> predicate) {
+        public Typed1<A> when(Predicate<? super A> predicate) {
             Objects.requireNonNull(predicate, "predicate must not be null");
-            Predicate<Object[]> untyped = args -> predicate.test((A) args[0], (B) args[1]);
-            return new LambdaConditionalProductBuilder(delegate.withLambdaRule(indexes, untyped));
+            return new Typed1<>(delegate.withUnaryLambdaRule(value -> predicate.test((A)value)));
+        }
+        public <B> Typed2<A,B> and(List<B> dimension) {
+            return new Typed2<>(delegate.and(dimension));
         }
     }
 
-    /**
-     * Lazily generates every valid tuple exactly once. Encounter order is unspecified.
-     *
-     * @return a re-iterable generator of valid tuples
-     */
-    public StreamableIterable<Object> generate() {
-        return delegate.anyOrder();
+    /** Strongly typed builder for 2 dimensions. */
+    public static final class Typed2<A,B> extends Base {
+        public Typed2(ConditionalProductBuilder delegate) { super(delegate); }
+        @SuppressWarnings("unchecked")
+        public Typed2<A,B> when(BiPredicate<? super A,? super B> predicate) {
+            Objects.requireNonNull(predicate, "predicate must not be null");
+            return new Typed2<>(delegate.withLambdaRule(allDimensions(), v -> predicate.test((A)v[0],(B)v[1])));
+        }
+        public <C> Typed3<A,B,C> and(List<C> dimension) {
+            return new Typed3<>(delegate.and(dimension));
+        }
     }
 
-    /** Returns the exact number of valid tuples without generating them. */
-    public BigInteger count() {
-        return delegate.count();
+    /** Strongly typed builder for 3 dimensions. */
+    public static final class Typed3<A,B,C> extends Base {
+        public Typed3(ConditionalProductBuilder delegate) { super(delegate); }
+        @SuppressWarnings("unchecked")
+        public Typed3<A,B,C> when(Predicate3<? super A,? super B,? super C> predicate) {
+            Objects.requireNonNull(predicate, "predicate must not be null");
+            return new Typed3<>(delegate.withLambdaRule(allDimensions(), v -> predicate.test((A)v[0],(B)v[1],(C)v[2])));
+        }
+        public <D> Typed4<A,B,C,D> and(List<D> dimension) {
+            return new Typed4<>(delegate.and(dimension));
+        }
     }
 
-    /** Returns whether this product contains no valid tuples. */
-    public boolean isEmpty() {
-        return delegate.isEmpty();
+    /** Strongly typed builder for 4 dimensions. */
+    public static final class Typed4<A,B,C,D> extends Base {
+        public Typed4(ConditionalProductBuilder delegate) { super(delegate); }
+        @SuppressWarnings("unchecked")
+        public Typed4<A,B,C,D> when(Predicate4<? super A,? super B,? super C,? super D> predicate) {
+            Objects.requireNonNull(predicate, "predicate must not be null");
+            return new Typed4<>(delegate.withLambdaRule(allDimensions(), v -> predicate.test((A)v[0],(B)v[1],(C)v[2],(D)v[3])));
+        }
+        public <E> Typed5<A,B,C,D,E> and(List<E> dimension) {
+            return new Typed5<>(delegate.and(dimension));
+        }
+    }
+
+    /** Strongly typed builder for 5 dimensions. */
+    public static final class Typed5<A,B,C,D,E> extends Base {
+        public Typed5(ConditionalProductBuilder delegate) { super(delegate); }
+        @SuppressWarnings("unchecked")
+        public Typed5<A,B,C,D,E> when(Predicate5<? super A,? super B,? super C,? super D,? super E> predicate) {
+            Objects.requireNonNull(predicate, "predicate must not be null");
+            return new Typed5<>(delegate.withLambdaRule(allDimensions(), v -> predicate.test((A)v[0],(B)v[1],(C)v[2],(D)v[3],(E)v[4])));
+        }
+        public <F> Typed6<A,B,C,D,E,F> and(List<F> dimension) {
+            return new Typed6<>(delegate.and(dimension));
+        }
+    }
+
+    /** Strongly typed builder for 6 dimensions. */
+    public static final class Typed6<A,B,C,D,E,F> extends Base {
+        public Typed6(ConditionalProductBuilder delegate) { super(delegate); }
+        @SuppressWarnings("unchecked")
+        public Typed6<A,B,C,D,E,F> when(Predicate6<? super A,? super B,? super C,? super D,? super E,? super F> predicate) {
+            Objects.requireNonNull(predicate, "predicate must not be null");
+            return new Typed6<>(delegate.withLambdaRule(allDimensions(), v -> predicate.test((A)v[0],(B)v[1],(C)v[2],(D)v[3],(E)v[4],(F)v[5])));
+        }
+        public <G> Typed7<A,B,C,D,E,F,G> and(List<G> dimension) {
+            return new Typed7<>(delegate.and(dimension));
+        }
+    }
+
+    /** Strongly typed builder for 7 dimensions. */
+    public static final class Typed7<A,B,C,D,E,F,G> extends Base {
+        public Typed7(ConditionalProductBuilder delegate) { super(delegate); }
+        @SuppressWarnings("unchecked")
+        public Typed7<A,B,C,D,E,F,G> when(Predicate7<? super A,? super B,? super C,? super D,? super E,? super F,? super G> predicate) {
+            Objects.requireNonNull(predicate, "predicate must not be null");
+            return new Typed7<>(delegate.withLambdaRule(allDimensions(), v -> predicate.test((A)v[0],(B)v[1],(C)v[2],(D)v[3],(E)v[4],(F)v[5],(G)v[6])));
+        }
+        public <H> Typed8<A,B,C,D,E,F,G,H> and(List<H> dimension) {
+            return new Typed8<>(delegate.and(dimension));
+        }
+    }
+
+    /** Strongly typed builder for 8 dimensions. */
+    public static final class Typed8<A,B,C,D,E,F,G,H> extends Base {
+        public Typed8(ConditionalProductBuilder delegate) { super(delegate); }
+        @SuppressWarnings("unchecked")
+        public Typed8<A,B,C,D,E,F,G,H> when(Predicate8<? super A,? super B,? super C,? super D,? super E,? super F,? super G,? super H> predicate) {
+            Objects.requireNonNull(predicate, "predicate must not be null");
+            return new Typed8<>(delegate.withLambdaRule(allDimensions(), v -> predicate.test((A)v[0],(B)v[1],(C)v[2],(D)v[3],(E)v[4],(F)v[5],(G)v[6],(H)v[7])));
+        }
+        public <I> Typed9<A,B,C,D,E,F,G,H,I> and(List<I> dimension) {
+            return new Typed9<>(delegate.and(dimension));
+        }
+    }
+
+    /** Strongly typed builder for 9 dimensions. */
+    public static final class Typed9<A,B,C,D,E,F,G,H,I> extends Base {
+        public Typed9(ConditionalProductBuilder delegate) { super(delegate); }
+        @SuppressWarnings("unchecked")
+        public Typed9<A,B,C,D,E,F,G,H,I> when(Predicate9<? super A,? super B,? super C,? super D,? super E,? super F,? super G,? super H,? super I> predicate) {
+            Objects.requireNonNull(predicate, "predicate must not be null");
+            return new Typed9<>(delegate.withLambdaRule(allDimensions(), v -> predicate.test((A)v[0],(B)v[1],(C)v[2],(D)v[3],(E)v[4],(F)v[5],(G)v[6],(H)v[7],(I)v[8])));
+        }
+        public <J> Typed10<A,B,C,D,E,F,G,H,I,J> and(List<J> dimension) {
+            return new Typed10<>(delegate.and(dimension));
+        }
+    }
+
+    /** Strongly typed builder for 10 dimensions. */
+    public static final class Typed10<A,B,C,D,E,F,G,H,I,J> extends Base {
+        public Typed10(ConditionalProductBuilder delegate) { super(delegate); }
+        @SuppressWarnings("unchecked")
+        public Typed10<A,B,C,D,E,F,G,H,I,J> when(Predicate10<? super A,? super B,? super C,? super D,? super E,? super F,? super G,? super H,? super I,? super J> predicate) {
+            Objects.requireNonNull(predicate, "predicate must not be null");
+            return new Typed10<>(delegate.withLambdaRule(allDimensions(), v -> predicate.test((A)v[0],(B)v[1],(C)v[2],(D)v[3],(E)v[4],(F)v[5],(G)v[6],(H)v[7],(I)v[8],(J)v[9])));
+        }
+        public ArrayBased and(List<?> dimension) {
+            return new ArrayBased(delegate.and(dimension));
+        }
+    }
+
+    /** Array-based fallback for products with more than ten dimensions. */
+    public static final class ArrayBased extends Base {
+        public ArrayBased(ConditionalProductBuilder delegate) { super(delegate); }
+        public ArrayBased and(List<?> dimension) {
+            return new ArrayBased(delegate.and(dimension));
+        }
+        public ArrayBased when(Predicate<Object[]> predicate) {
+            Objects.requireNonNull(predicate, "predicate must not be null");
+            return new ArrayBased(delegate.withLambdaRule(allDimensions(), predicate));
+        }
     }
 }
