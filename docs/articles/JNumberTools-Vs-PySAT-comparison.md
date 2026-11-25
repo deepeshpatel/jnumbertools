@@ -21,7 +21,7 @@ PySAT is primarily designed as a SAT-solving interface. It provides solving, mod
 | Capability | JNumberTools | PySAT | Advantage |
 |---|---|---|---|
 | General SAT solving | Not designed as a general SAT solver | Integrates several established SAT solvers | **PySAT** |
-| Arbitrary CNF formulas | Current conditional API naturally represents binary clauses / implications | Supports general CNF, including clauses with more than two literals | **PySAT** |
+| Arbitrary CNF formulas | Pairwise rules represent binary clauses / implications; Compound Product can express multi-literal clauses through compound triggers, but JNumberTools is not a general CNF/SAT interface | Supports general CNF, including clauses with more than two literals | **PySAT** |
 | SAT-specific optimizations | Uses its own constraint/product algorithms | Benefits from mature solver techniques such as conflict learning and preprocessing | **PySAT** |
 | Unsatisfiable core extraction | Not a native feature of the current API | Supported | **PySAT** |
 | Incremental solving with assumptions | Not an equivalent SAT-oracle interface | Supported | **PySAT** |

@@ -339,7 +339,6 @@ conditions over dimensions. Use the Lambda Engine when the rule is genuinely joi
 (arithmetic, relational or application-specific computation) and the lambda makes that logic
 clearer than a condition tree.
 
-<!-- TODO: Insert the actual Lambda Engine benchmark code and measured results here. -->
 
 ### 6. Products of ranks, random choice and random sample
 
