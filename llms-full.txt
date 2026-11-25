@@ -315,87 +315,69 @@ The Compound Product exposes lazy, re-iterable `generate()`, exact `count()` and
 `isEmpty()`. It does not expose lexicographical traversal, rank-based operations,
 random choice or sampling.
 
-## 4.5 Lambda Engine: strongly typed joint predicates
+## 4.5 Lambda Engine: typed and scoped joint predicates
 
-Use the Lambda Engine for arbitrary Java logic over Cartesian-product dimensions. The
-predicate receives the values from **all dimensions registered with** `withLambda(...)`,
-in declaration order. It is not a filter applied after every complete tuple has been
-generated: predicates are evaluated while the rule is compiled, and the compiled
-constraint is used by generation, counting and emptiness checks.
+Use the Lambda Engine for arbitrary Java logic over Cartesian-product dimensions.
 
-### Predicate arities
+### Full-tuple predicates
 
-- One dimension: Java `Predicate<T>`; it filters that dimension's values.
-- Two dimensions: Java `BiPredicate<A, B>`.
-- Three through ten dimensions: `LambdaConditionalProductBuilder.Predicate3` through
-  `Predicate10`, with strongly typed lambda parameters.
-- More than ten dimensions: `Predicate<Object[]>`; array positions follow dimension order.
-
-### Strongly typed example and Boolean logic
+The `.when(predicate)` overload receives every dimension registered with
+`withLambda(...)`, in declaration order. One dimension uses Java `Predicate<T>`;
+two use `BiPredicate<A, B>`; three through ten use `Predicate3` through
+`Predicate10`; more than ten use `Predicate<Object[]>`.
 
 ```java
-var cores = List.of(1, 2, 4, 8);
-var memoryGb = List.of(2, 4, 8, 16);
-var budget = List.of(8, 16, 32);
-
 var products = JNumberTools.cartesianProduct()
         .withLambda(cores, memoryGb, budget)
         .when((core, memory, maxBudget) ->
                 (core * memory <= maxBudget && memory <= 8)
                 || (core >= 8 && maxBudget >= 16));
-
-products.count();
-products.generate().stream().forEach(System.out::println);
 ```
 
-Use Java's `&&`, `||`, `!` and parentheses for arbitrary Boolean expressions, including
-`(A && B) || (C && D)`. No separate `orWhen` or `andWhen` methods are needed.
+### Scoped predicates
 
-### Multiple conditions
-
-Every `.when(predicate)` call adds another condition, and repeated calls are combined
-with AND:
+Use `.when(dim1, dim2, ...).matches(predicate)` when a condition depends on
+only some of the registered dimensions. The arguments are the exact list instances
+passed to `withLambda(...)` or `.and(...)`. The predicate receives only the selected
+values, in the order supplied.
 
 ```java
 var products = JNumberTools.cartesianProduct()
-        .withLambda(cores, memoryGb, budget)
-        .when((core, memory, maxBudget) -> core * memory <= maxBudget)
-        .when((core, memory, maxBudget) -> memory <= 8 || maxBudget >= 32);
+        .withLambda(os, browser, database, region, cache)
+        .when(os, browser).matches((operatingSystem, webBrowser) ->
+                !webBrowser.equals("Safari") || operatingSystem.equals("macOS"))
+        .when(database, region).matches((db, deploymentRegion) ->
+                !db.equals("Oracle") || deploymentRegion.equals("EU"));
 ```
 
-This is logically equivalent to combining both predicates with `&&` inside one
-`.when(...)` call. Their compilation costs may differ; benchmark the two forms if that
-difference matters.
-
-### More than ten dimensions
-
-The array form remains available for arbitrary arity:
+Two through ten selected dimensions have typed predicate interfaces. For an arbitrary
+scope arity, use the array form:
 
 ```java
-var products = JNumberTools.cartesianProduct()
-        .withLambda(d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11)
-        .when(values -> values[0].equals(values[10]));
+.when(dimA, dimB, dimC).matches(values ->
+        (Integer) values[0] + (Integer) values[1] <= (Integer) values[2])
 ```
 
 ### Compilation and constraints
 
-- For two or more dimensions, each predicate is compiled over the complete Cartesian
-  product of the registered dimensions.
-- The existing compilation limit is 1,000,000 predicate probes per `.when(...)` call.
-  If the product of the dimension sizes exceeds this limit, rule compilation is rejected.
-- Predicates must be deterministic and side-effect-free. The array supplied to the
-  greater-than-ten form is a temporary compilation array; do not retain or mutate it.
-- Predicates are evaluated during compilation, not during subsequent generation or counting.
+- Each rule is compiled when added. Full-tuple predicates probe the complete registered
+  tuple scope; scoped predicates probe only the selected dimensions.
+- For a scoped rule, the probe count is the product of the selected antecedent dimension
+  sizes and the selected target dimension size. The final selected dimension is the target.
+  The one-million-probe limit applies independently to each rule.
+- A scope containing two million-element dimensions still requires one trillion probes
+  and is rejected. Scoping avoids multiplying work by unrelated dimensions; it does not
+  make a huge selected scope inexpensive.
+- Rules are combined with AND. Use Java Boolean operators and parentheses for OR and
+  nested expressions within a predicate.
+- Predicates must be deterministic and side-effect-free. They are evaluated during
+  compilation, not during subsequent generation or counting.
 - The builder exposes lazy, re-iterable `generate()`, exact `count()` and `isEmpty()`.
   It does not expose lexicographical traversal, rank-based access, choice or sampling.
 
 Prefer `conditionalProductOf(...)` for straightforward pairwise rules and
 `compoundProductOf(...)` when nested declarative conditions are clearer. The Lambda
 Engine is for custom joint logic that is most naturally expressed as Java predicates.
-
-**Benchmark note:** performance measurements published for the previous scoped-predicate
-API are not representative of this all-dimensions API. Re-run the benchmarks against this
-API before publishing comparative performance claims.
 
 ## 4.6 Products of ranks, random choice and random sample
 

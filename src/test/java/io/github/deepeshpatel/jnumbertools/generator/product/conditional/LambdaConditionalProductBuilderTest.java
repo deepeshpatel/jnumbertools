@@ -86,4 +86,48 @@ class LambdaConditionalProductBuilderTest {
         assertEquals(BigInteger.ZERO,none.count());
         assertTrue(none.isEmpty());
     }
+
+    @Test
+    void scopedTwoDimensionPredicateIgnoresUnrelatedDimensionsAndRemainsTyped() {
+        List<Integer> a=java.util.stream.IntStream.range(0,10).boxed().toList();
+        List<Integer> b=java.util.stream.IntStream.range(0,10).boxed().toList();
+        List<Integer> c=java.util.stream.IntStream.range(0,10).boxed().toList();
+        List<Integer> d=java.util.stream.IntStream.range(0,10).boxed().toList();
+        List<Integer> e=java.util.stream.IntStream.range(0,10).boxed().toList();
+
+        var product=cartesianProduct.withLambda(a,b,c,d,e)
+                .when(a,b).matches((x,y)->x<=y);
+
+        assertEquals(BigInteger.valueOf(55_000),product.count());
+        assertEquals(55_000,product.generate().stream().count());
+    }
+
+    @Test
+    void scopedThreeDimensionPredicateReceivesOnlySelectedValues() {
+        List<Integer> a=java.util.stream.IntStream.range(0,10).boxed().toList();
+        List<Integer> b=java.util.stream.IntStream.range(0,10).boxed().toList();
+        List<Integer> c=java.util.stream.IntStream.range(0,10).boxed().toList();
+        List<Integer> d=java.util.stream.IntStream.range(0,10).boxed().toList();
+
+        var product=cartesianProduct.withLambda(a,b,c,d)
+                .when(a,b,c).matches((values)->(Integer)values[0]+(Integer)values[1]<=(Integer)values[2]);
+
+        long scopedCount=0;
+        for(int x:a) for(int y:b) for(int z:c) if(x+y<=z) scopedCount++;
+        assertEquals(BigInteger.valueOf(scopedCount*10),product.count());
+        assertEquals(scopedCount*10,product.generate().stream().count());
+    }
+
+    @Test
+    void scopedArrayPredicateUsesOnlyNamedDimensionsForProbeLimit() {
+        List<Integer> a=java.util.stream.IntStream.range(0,100).boxed().toList();
+        List<Integer> b=java.util.stream.IntStream.range(0,100).boxed().toList();
+        List<Integer> unrelated=java.util.stream.IntStream.range(0,100).boxed().toList();
+
+        var product=cartesianProduct.withLambda(a,b,unrelated,unrelated,unrelated)
+                .when(a,b).matches(values->(Integer)values[0]<(Integer)values[1]);
+
+        assertEquals(BigInteger.valueOf(4_950L).multiply(BigInteger.valueOf(1_000_000L)),product.count());
+    }
+
 }
