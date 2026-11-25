@@ -8,8 +8,10 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -18,6 +20,10 @@ import java.util.Set;
  * <p>Non-bridge edges identify dimensions connected through a cycle. Such dimensions are grouped into
  * loop blocks and checked against the maximum permitted product of their domain sizes. Bridge edges
  * remain between blocks, leaving a forest for the exact counting plan.</p>
+ *
+ * <p>Adjacency is stored as a compact sparse-row structure ({@code int[] offset} plus {@code int[] neighbors})
+ * rather than {@code List<List<Integer>>}, which removes both the per-vertex list object and its
+ * {@code Integer} boxing on the bridge-search hot path.</p>
  */
 final class ConstraintGraph {
     static final long MAX_LOOP_COMBINATIONS = 1_000_000L;
@@ -58,13 +64,13 @@ final class ConstraintGraph {
         // Two nodes joined by several rules (which happens when a compound rule splits a loop into two nodes)
         // are related through one combined table with a cell for every pair of node values. Bound its size by
         // the product of the nodes' domain sizes, as a pairwise rule's table is bounded by MAX_PAIR_CELLS.
-        java.util.Map<Long, Integer> linksBetweenNodes = new java.util.HashMap<>();
+        Map<Long, Integer> linksBetweenNodes = new HashMap<>();
         for (long edge : keys) {
             int a = block[(int) (edge >>> 32)];
             int b = block[(int) edge];
             if (a != b) linksBetweenNodes.merge(key(Math.min(a, b), Math.max(a, b)), 1, Integer::sum);
         }
-        for (java.util.Map.Entry<Long, Integer> pair : linksBetweenNodes.entrySet()) {
+        for (Map.Entry<Long, Integer> pair : linksBetweenNodes.entrySet()) {
             if (pair.getValue() < 2) continue;
             long pa = product[(int) (pair.getKey() >>> 32)];
             long pb = product[(int) (long) pair.getKey()];
@@ -82,27 +88,32 @@ final class ConstraintGraph {
      * index of its block.
      */
     static int[] blockOf(int n, Collection<Long> keys) {
-        List<List<Integer>> adjacency = new ArrayList<>(n);
-        for (int i = 0; i < n; i++) {
-            adjacency.add(new ArrayList<>());
+        int[] degree = new int[n];
+        for (long edge : keys) {
+            degree[(int) (edge >>> 32)]++;
+            degree[(int) edge]++;
         }
+        int[] offset = new int[n + 1];
+        for (int i = 0; i < n; i++) offset[i + 1] = offset[i] + degree[i];
+        int[] neighbors = new int[offset[n]];
+        int[] fill = Arrays.copyOf(offset, n);
         for (long edge : keys) {
             int u = (int) (edge >>> 32);
             int v = (int) edge;
-            adjacency.get(u).add(v);
-            adjacency.get(v).add(u);
+            neighbors[fill[u]++] = v;
+            neighbors[fill[v]++] = u;
         }
 
         int[] discovery = new int[n];
         int[] low = new int[n];
         int[] parent = new int[n];
-        int[] nextEdge = new int[n];
+        int[] nextEdge = Arrays.copyOf(offset, n);   // absolute index into `neighbors`, starts at offset[vertex]
         int[] time = {0};
         Arrays.fill(parent, -1);
         Set<Long> bridges = new HashSet<>();
         for (int vertex = 0; vertex < n; vertex++) {
             if (discovery[vertex] == 0) {
-                findBridges(vertex, adjacency, discovery, low, parent, nextEdge, time, bridges);
+                findBridges(vertex, offset, neighbors, discovery, low, parent, nextEdge, time, bridges);
             }
         }
 
@@ -157,14 +168,14 @@ final class ConstraintGraph {
         while (true) {
             int[] indexOfNode = new int[n];
             Arrays.fill(indexOfNode, -1);
-            List<Integer> reps = new ArrayList<>();
+            int[] reps = new int[n];   // node representatives; q of them, in encounter order
+            int q = 0;
             for (int d = 0; d < n; d++) {
                 if (indexOfNode[node[d]] < 0) {
-                    indexOfNode[node[d]] = reps.size();
-                    reps.add(node[d]);
+                    indexOfNode[node[d]] = q;
+                    reps[q++] = node[d];
                 }
             }
-            int q = reps.size();
             boolean[] special = new boolean[q];
             for (MultiTriggerRule rule : multiRules) special[indexOfNode[node[rule.scope[0]]]] = true;
 
@@ -202,7 +213,7 @@ final class ConstraintGraph {
             for (int i = 0; i < q; i++) {
                 int root = find(merge, i);
                 if (root != i) changed = true;
-                newNode[i] = reps.get(root);   // the root is the lowest index, which is the lowest dimension
+                newNode[i] = reps[root];   // the root is the lowest index, which is the lowest dimension
             }
             if (!changed) return node;
             for (int d = 0; d < n; d++) node[d] = newNode[indexOfNode[node[d]]];
@@ -213,7 +224,7 @@ final class ConstraintGraph {
      * Tarjan's depth-first bridge search. The constraint graph has at most one edge per dimension pair,
      * because {@code relations} stores one combined relation for each pair.
      */
-    private static void findBridges(int root, List<List<Integer>> adjacency,
+    private static void findBridges(int root, int[] offset, int[] neighbors,
                                     int[] discovery, int[] low, int[] parent, int[] nextEdge,
                                     int[] time, Set<Long> bridges) {
         ArrayDeque<Integer> stack = new ArrayDeque<>();
@@ -223,9 +234,8 @@ final class ConstraintGraph {
         // Iterative DFS avoids making graph depth a Java call-stack limit.
         while (!stack.isEmpty()) {
             int vertex = stack.peek();
-            List<Integer> neighbors = adjacency.get(vertex);
-            if (nextEdge[vertex] < neighbors.size()) {
-                int next = neighbors.get(nextEdge[vertex]++);
+            if (nextEdge[vertex] < offset[vertex + 1]) {
+                int next = neighbors[nextEdge[vertex]++];
                 if (next == parent[vertex]) {
                     continue;
                 }

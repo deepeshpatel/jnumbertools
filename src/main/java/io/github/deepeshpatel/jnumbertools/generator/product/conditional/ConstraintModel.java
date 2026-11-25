@@ -116,7 +116,6 @@ final class ConstraintModel {
         return Tuple.wrap(values);
     }
 
-
     /**
      * Returns dense boolean relation rows when their total cell count is within the configured memory cap.
      * A null result means the dense representation is too large and callers should use the BitSet rows.
@@ -133,12 +132,19 @@ final class ConstraintModel {
                     if (cells > DenseRows.MAX_CELLS) break;
                 }
                 if (cells <= DenseRows.MAX_CELLS) {
-                    List<List<Integer>> dimensionLists = new ArrayList<>(dimensions.size());
-                    List<List<boolean[][]>> rowLists = new ArrayList<>(dimensions.size());
-                    for (int d = 0; d < dimensions.size(); d++) {
-                        dimensionLists.add(new ArrayList<>());
-                        rowLists.add(new ArrayList<>());
+                    int dimensionCount = dimensions.size();
+                    // Count relations per "higher" dimension, then fill arrays directly (no per-dimension Lists).
+                    int[] count = new int[dimensionCount];
+                    for (Long key : relations.keySet()) {
+                        count[(int) (long) key]++;
                     }
+                    int[][] belowDims = new int[dimensionCount][];
+                    boolean[][][][] belowRows = new boolean[dimensionCount][][][];
+                    for (int d = 0; d < dimensionCount; d++) {
+                        belowDims[d] = new int[count[d]];
+                        belowRows[d] = new boolean[count[d]][][];
+                    }
+                    int[] fill = new int[dimensionCount];
                     for (Map.Entry<Long, Relation> entry : relations.entrySet()) {
                         int lower = (int) (entry.getKey() >>> 32);
                         int higher = (int) (long) entry.getKey();
@@ -160,14 +166,9 @@ final class ConstraintModel {
                             }
                             dense[i] = row;
                         }
-                        dimensionLists.get(higher).add(lower);
-                        rowLists.get(higher).add(dense);
-                    }
-                    int[][] belowDims = new int[dimensions.size()][];
-                    boolean[][][][] belowRows = new boolean[dimensions.size()][][][];
-                    for (int d = 0; d < dimensions.size(); d++) {
-                        belowDims[d] = dimensionLists.get(d).stream().mapToInt(Integer::intValue).toArray();
-                        belowRows[d] = rowLists.get(d).toArray(new boolean[0][][]);
+                        belowDims[higher][fill[higher]] = lower;
+                        belowRows[higher][fill[higher]] = dense;
+                        fill[higher]++;
                     }
                     denseRows = new DenseRows(belowDims, belowRows);
                 }
@@ -201,24 +202,26 @@ final class ConstraintModel {
         }
 
         private static Rows build(int dimensionCount, Map<Long, Relation> relations) {
-            List<List<Integer>> dimensionLists = new ArrayList<>(dimensionCount);
-            List<List<BitSet[]>> rowLists = new ArrayList<>(dimensionCount);
-            for (int d = 0; d < dimensionCount; d++) {
-                dimensionLists.add(new ArrayList<>());
-                rowLists.add(new ArrayList<>());
-            }
-            for (Map.Entry<Long, Relation> entry : relations.entrySet()) {
-                int lower = (int) (entry.getKey() >>> 32);
-                int higher = (int) (long) entry.getKey();
-                Relation relation = entry.getValue();
-                dimensionLists.get(higher).add(lower);
-                rowLists.get(higher).add(relation.uToV());
+            // Two-pass: count relations per "higher" dimension, then fill primitive arrays directly.
+            // Iteration order of relations.keySet() and relations.entrySet() is identical (ascending key
+            // order), so each dimension's entries are appended in the same order as before.
+            int[] count = new int[dimensionCount];
+            for (Long key : relations.keySet()) {
+                count[(int) (long) key]++;
             }
             int[][] belowDims = new int[dimensionCount][];
             BitSet[][][] belowRows = new BitSet[dimensionCount][][];
             for (int d = 0; d < dimensionCount; d++) {
-                belowDims[d] = dimensionLists.get(d).stream().mapToInt(Integer::intValue).toArray();
-                belowRows[d] = rowLists.get(d).toArray(new BitSet[0][]);
+                belowDims[d] = new int[count[d]];
+                belowRows[d] = new BitSet[count[d]][];
+            }
+            int[] fill = new int[dimensionCount];
+            for (Map.Entry<Long, Relation> entry : relations.entrySet()) {
+                int lower = (int) (entry.getKey() >>> 32);
+                int higher = (int) (long) entry.getKey();
+                belowDims[higher][fill[higher]] = lower;
+                belowRows[higher][fill[higher]] = entry.getValue().uToV();
+                fill[higher]++;
             }
             return new Rows(belowDims, belowRows);
         }
@@ -234,6 +237,4 @@ final class ConstraintModel {
             this.belowRows = belowRows;
         }
     }
-
-
 }

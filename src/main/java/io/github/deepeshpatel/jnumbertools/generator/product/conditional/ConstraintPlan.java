@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,46 +59,56 @@ final class ConstraintPlan {
         int n = dimensions;
         dimSize = new int[n];
         for (int d = 0; d < n; d++) dimSize[d] = dims.get(d).size();
-        List<List<Integer>> belowList = new ArrayList<>(n);
-        List<List<BitSet[]>> belowRowList = new ArrayList<>(n);
-        for (int d = 0; d < n; d++) {
-            belowList.add(new ArrayList<>());
-            belowRowList.add(new ArrayList<>());
-        }
-        for (Map.Entry<Long, Relation> e : relations.entrySet()) {
-            int u = (int) (e.getKey() >>> 32);
-            int v = (int) (long) e.getKey();
-            belowList.get(v).add(u);
-            belowRowList.get(v).add(e.getValue().uToV());
+
+        // belowDims / belowRows: count then fill. relations.entrySet() iterates in ascending key order,
+        // so per-dimension entries are appended in the same order they would have been with a List<List<…>>.
+        int[] belowCount = new int[n];
+        for (Long key : relations.keySet()) {
+            belowCount[(int) (long) key]++;
         }
         belowDims = new int[n][];
         belowRows = new BitSet[n][][];
         for (int d = 0; d < n; d++) {
-            belowDims[d] = belowList.get(d).stream().mapToInt(Integer::intValue).toArray();
-            belowRows[d] = belowRowList.get(d).toArray(new BitSet[0][]);
+            belowDims[d] = new int[belowCount[d]];
+            belowRows[d] = new BitSet[belowCount[d]][];
+        }
+        int[] belowFill = new int[n];
+        for (Map.Entry<Long, Relation> e : relations.entrySet()) {
+            int u = (int) (e.getKey() >>> 32);
+            int v = (int) (long) e.getKey();
+            belowDims[v][belowFill[v]] = u;
+            belowRows[v][belowFill[v]] = e.getValue().uToV();
+            belowFill[v]++;
         }
 
-        // nodes, ordered by their lowest dimension
+        // Nodes, ordered by their lowest dimension. Two passes over d: first assign node indices to every
+        // block, then count members per node, then fill. Members in each node stay in ascending dimension
+        // order, which is what the previous List<List<Integer>> build guaranteed.
         int[] blockOf = ConstraintGraph.nodeOf(n, relations.keySet(), multiRules);
         int[] nodeOfDim = new int[n];
-        List<List<Integer>> memberLists = new ArrayList<>();
         int[] nodeOfBlock = new int[n];
         Arrays.fill(nodeOfBlock, -1);
+        int m = 0;
         for (int d = 0; d < n; d++) {
             int b = blockOf[d];
             if (nodeOfBlock[b] < 0) {
-                nodeOfBlock[b] = memberLists.size();
-                memberLists.add(new ArrayList<>());
+                nodeOfBlock[b] = m++;
             }
             nodeOfDim[d] = nodeOfBlock[b];
-            memberLists.get(nodeOfBlock[b]).add(d);
         }
-        int m = memberLists.size();
+        int[] memberCount = new int[m];
+        for (int d = 0; d < n; d++) memberCount[nodeOfDim[d]]++;
         members = new int[m][];
+        for (int x = 0; x < m; x++) members[x] = new int[memberCount[x]];
+        Arrays.fill(memberCount, 0);
+        for (int d = 0; d < n; d++) {
+            int x = nodeOfDim[d];
+            members[x][memberCount[x]++] = d;
+        }
+
         size = new int[m];
         values = new int[m][][];
         for (int x = 0; x < m; x++) {
-            members[x] = memberLists.get(x).stream().mapToInt(Integer::intValue).toArray();
             if (members[x].length == 1) {
                 size[x] = dims.get(members[x][0]).size();
             } else {
@@ -106,10 +117,10 @@ final class ConstraintPlan {
             }
         }
 
-        // the rules between two different nodes; several rules may join the same two nodes when a compound
-        // rule has split a loop into two nodes, and then all of them restrict the pair of nodes together
-        List<java.util.Map<Integer, List<Link>>> adjacency = new ArrayList<>(m);
-        for (int x = 0; x < m; x++) adjacency.add(new java.util.LinkedHashMap<>());
+        // Rules between two different nodes. Several rules may join the same two nodes when a compound
+        // rule has split a loop into two nodes; all of them then restrict the pair together.
+        List<Map<Integer, List<Link>>> adjacency = new ArrayList<>(m);
+        for (int x = 0; x < m; x++) adjacency.add(new LinkedHashMap<>());
         for (Map.Entry<Long, Relation> e : relations.entrySet()) {
             int u = (int) (e.getKey() >>> 32);
             int v = (int) (long) e.getKey();
@@ -121,38 +132,44 @@ final class ConstraintPlan {
         }
 
         fromParent = new BitSet[m][];
-        List<List<Integer>> childLists = new ArrayList<>(m);
-        for (int x = 0; x < m; x++) childLists.add(new ArrayList<>());
+        children = new int[m][];
+        int[] childCount = new int[m];
+        // Upper bound: distinct neighbours of each node. Trim afterwards.
+        for (int x = 0; x < m; x++) children[x] = new int[adjacency.get(x).size()];
         boolean[] visited = new boolean[m];
-        List<Integer> rootList = new ArrayList<>();
-        List<Integer> order = new ArrayList<>(m);
+        int[] rootList = new int[m];
+        int rootCount = 0;
+        int[] order = new int[m];
+        int orderCount = 0;
         for (int r = 0; r < m; r++) {
             if (visited[r]) continue;
-            rootList.add(r);
+            rootList[rootCount++] = r;
             visited[r] = true;
             ArrayDeque<Integer> queue = new ArrayDeque<>();
             queue.add(r);
             while (!queue.isEmpty()) {
                 int x = queue.poll();
-                order.add(x);
+                order[orderCount++] = x;
                 for (Map.Entry<Integer, List<Link>> edge : adjacency.get(x).entrySet()) {
                     int other = edge.getKey();
                     if (visited[other]) continue;
                     visited[other] = true;
                     fromParent[other] = rowsBetween(x, other, edge.getValue());
-                    childLists.get(x).add(other);
+                    children[x][childCount[x]++] = other;
                     queue.add(other);
                 }
             }
         }
-        children = new int[m][];
+        // Trim over-allocated children. Only nodes with fewer children than neighbours reallocate.
         for (int x = 0; x < m; x++) {
-            children[x] = childLists.get(x).stream().mapToInt(Integer::intValue).toArray();
+            if (childCount[x] < children[x].length) {
+                children[x] = Arrays.copyOf(children[x], childCount[x]);
+            }
         }
 
         minSub = new int[m];
-        for (int idx = order.size() - 1; idx >= 0; idx--) {
-            int v = order.get(idx);
+        for (int idx = m - 1; idx >= 0; idx--) {
+            int v = order[idx];
             minSub[v] = members[v][0];
             for (int c : children[v]) minSub[v] = Math.min(minSub[v], minSub[c]);
         }
@@ -164,14 +181,15 @@ final class ConstraintPlan {
             minChildSub[x] = low;
         }
 
-        roots = rootList.stream().mapToInt(Integer::intValue).toArray();
+        roots = Arrays.copyOf(rootList, rootCount);
         firstRoot = new int[n + 1];
         int ri = 0;
         for (int k = 0; k <= n; k++) {
             while (ri < roots.length && members[roots[ri]][0] < k) ri++;
             firstRoot[k] = ri;
         }
-        nodeOrder = order.stream().mapToInt(Integer::intValue).toArray();
+        // BFS visits every node exactly once, so orderCount == m and order is fully populated.
+        nodeOrder = order;
 
         canComplete = new BitSet[m];
         for (int idx = nodeOrder.length - 1; idx >= 0; idx--) {
@@ -314,7 +332,7 @@ final class ConstraintPlan {
 
     /** All assignments of the dimensions in {@code dimsOfNode} that satisfy every rule among them. */
     private static int[][] enumerate(int[] dimsOfNode, List<List<?>> dims, Map<Long, Relation> relations,
-                                      List<MultiTriggerRule> multiRules) {
+                                     List<MultiTriggerRule> multiRules) {
         int len = dimsOfNode.length;
         List<int[]> out = new ArrayList<>();
         int[] current = new int[len];
@@ -490,6 +508,4 @@ final class ConstraintPlan {
     int dimensionSize(int dim) {
         return dimSize[dim];
     }
-
-
 }
