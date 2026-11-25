@@ -1,3 +1,4 @@
+
 package io.github.deepeshpatel.jnumbertools.benchmarks.main;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
@@ -7,10 +8,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Quick screening comparison of conditional Cartesian product implementations:
@@ -20,48 +20,76 @@ import java.util.stream.Collectors;
  * 3. Lambda-scoped conditional product
  * 4. Incrementally pruned Java Stream baseline
  *
- * <h2>What is, and is not, inside the measured time</h2>
- * <p>Each {@link BenchmarkMethod} is split into a {@code build} step and a {@code run} step.
- * {@code build} runs exactly once per size, outside every timed round: it constructs the builder and
- * registers every rule, which for the lambda-scoped method means compiling its {@code matches(...)}
- * predicates there too. Only {@code run} — generation and materialization into the result {@code Set} —
- * is ever timed, in both the warmup and the measurement rounds. This keeps one-time compilation cost
- * out of the per-call numbers for every method alike, not only the lambda-scoped one, so the columns
- * compare the same thing: the cost of producing the tuples from an already-built product.</p>
+ * <p>Each benchmark method builds its product once per size. Only generation
+ * and traversal of the generated tuples are timed.</p>
  *
- * <p>The column order in the printed table follows the order of the
- * {@code BenchmarkMethod[]} array built by {@link #createMethods()}, so
- * implementations can be reordered or added there without touching the
- * header, separator, or data-row formatting.</p>
+ * <p>No implementation materializes its results into a Set or another
+ * collection. Every generated tuple is consumed by the checksum calculation.
+ * This avoids Set insertion, duplicate detection, and collection allocation
+ * while ensuring that the complete result is traversed.</p>
+ *
+ * <p>The checksum is order-independent, so implementations may generate
+ * equivalent tuples in different orders.</p>
  */
-public class ConditionalProductBenchmark {
+public class ConditionalProductSpeedBenchmarkMain {
 
     private static final int WARMUP_ROUNDS = 5;
     private static final int MEASUREMENT_ROUNDS = 9;
 
-    private static final int[] SIZES = {100, 200, 300, 400, 500, 1000, 2000, 3000, 4000, 5000};
+    private static final int[] SIZES = {
+            100, 200, 300, 400, 500, 1000, 2000, 3000, 4000, 5000
+    };
 
     private static final int[] EXPECTED_MATCHES = {
-            616, 1216, 1816, 2416, 3016, 6016, 12016, 18016, 24016, 30016
+            616, 1216, 1816, 2416, 3016,
+            6016, 12016, 18016, 24016, 30016
     };
 
     private static final String LINUX = "Linux";
     private static final String WINDOWS = "Windows";
 
-    private static final List<String> LINUX_BROWSERS = List.of("Firefox", "Safari");
-    private static final List<String> LINUX_NETWORKS = List.of("4G", "WiFi");
-    private static final List<String> LINUX_DATABASES = List.of("PostgreSQL", "MySQL");
-    private static final List<String> LINUX_REGIONS = List.of("ap-south", "eu-west");
+    private static final List<String> LINUX_BROWSERS =
+            List.of("Firefox", "Safari");
 
-    private static final List<String> WINDOWS_BROWSERS = List.of("Firefox", "Safari", "Chrome");
-    private static final List<String> WINDOWS_DATABASES = List.of("PostgreSQL");
-    private static final List<String> WINDOWS_REGIONS = List.of("us-east", "eu-west");
+    private static final List<String> LINUX_NETWORKS =
+            List.of("4G", "WiFi");
 
-    private static final String[] BROWSER_BASE = {"Firefox", "Safari", "Chrome", "Internet Explorer"};
-    private static final String[] NETWORK_BASE = {"2G", "3G", "4G", "WiFi"};
-    private static final String[] DATABASE_BASE = {"PostgreSQL", "MySQL", "Oracle"};
+    private static final List<String> LINUX_DATABASES =
+            List.of("PostgreSQL", "MySQL");
 
-    private static final String[] REGION_BASE = {"ap-south", "eu-west", "us-east"};
+    private static final List<String> LINUX_REGIONS =
+            List.of("ap-south", "eu-west");
+
+    private static final List<String> WINDOWS_BROWSERS =
+            List.of("Firefox", "Safari", "Chrome");
+
+    private static final List<String> WINDOWS_DATABASES =
+            List.of("PostgreSQL");
+
+    private static final List<String> WINDOWS_REGIONS =
+            List.of("us-east", "eu-west");
+
+    private static final String[] BROWSER_BASE = {
+            "Firefox", "Safari", "Chrome", "Internet Explorer"
+    };
+
+    private static final String[] NETWORK_BASE = {
+            "2G", "3G", "4G", "WiFi"
+    };
+
+    private static final String[] DATABASE_BASE = {
+            "PostgreSQL", "MySQL", "Oracle"
+    };
+
+    private static final String[] REGION_BASE = {
+            "ap-south", "eu-west", "us-east"
+    };
+
+    /*
+     * Keeps the checksum observable without including the volatile write
+     * in the measured generation time.
+     */
+    private static volatile long blackhole;
 
     public static void main(String[] args) {
 
@@ -80,23 +108,26 @@ public class ConditionalProductBenchmark {
     }
 
     // -------------------------------------------------------------------------
-    // Method registry — single source of truth for column order
+    // Method registry
     // -------------------------------------------------------------------------
 
-    /**
-     * Builds the ordered list of benchmarked implementations. Reorder this
-     * array to reorder the table; add an entry to add a column.
-     *
-     * <p>Each entry's {@code build} function does all one-time work (builder construction, rule
-     * registration, predicate compilation) and returns a {@link Supplier} that only generates and
-     * materializes the result; {@code build} itself is never timed.</p>
-     */
     private static BenchmarkMethod[] createMethods() {
-        return new BenchmarkMethod[] {
-                new BenchmarkMethod("Pairwise when-then", ConditionalProductBenchmark::whenThen),
-                new BenchmarkMethod("Compound", ConditionalProductBenchmark::buildCompound),
-                new BenchmarkMethod("engineLambda", ConditionalProductBenchmark::buildEngineLambda),
-                new BenchmarkMethod("Pruned Stream", ConditionalProductBenchmark::buildPrunedStream),
+        return new BenchmarkMethod[]{
+                new BenchmarkMethod(
+                        "Pairwise when-then",
+                        ConditionalProductSpeedBenchmarkMain::whenThen),
+
+                new BenchmarkMethod(
+                        "Compound",
+                        ConditionalProductSpeedBenchmarkMain::buildCompound),
+
+                new BenchmarkMethod(
+                        "engineLambda",
+                        ConditionalProductSpeedBenchmarkMain::buildEngineLambda),
+
+                new BenchmarkMethod(
+                        "Pruned Stream",
+                        ConditionalProductSpeedBenchmarkMain::buildPrunedStream)
         };
     }
 
@@ -105,67 +136,97 @@ public class ConditionalProductBenchmark {
     // -------------------------------------------------------------------------
 
     private static void runBenchmark(
-            BenchmarkMethod[] methods, int size, int expectedMatches) {
+            BenchmarkMethod[] methods,
+            int size,
+            int expectedMatches) {
+
         Dimensions dimensions = createDimensions(size);
 
         /*
-         * Build once per method, outside every timed section. For a method whose rules are lambda
-         * predicates, this is where compilation happens — it never runs again below.
+         * Build each implementation once, outside the timed sections.
          */
-        Supplier<Set<List<Object>>>[] runnables = new Supplier[methods.length];
-        for (int i = 0; i < methods.length; i++) {
-            runnables[i] = methods[i].build.apply(dimensions);
+        List<Supplier<Result>> runnables = new ArrayList<>(methods.length);
+
+        for (BenchmarkMethod method : methods) {
+            runnables.add(method.build.apply(dimensions));
         }
 
         /*
-         * Correctness verification is deliberately outside the timed section.
+         * Correctness verification is outside the timed sections.
+         *
+         * The first implementation establishes the expected result.
+         * Every other implementation must produce the same count and
+         * checksum aggregates.
          */
-        Set<List<Object>> expected = null;
+        Result expected = runnables.getFirst().get();
+        consume(expected);
 
-        for (int i = 0; i < methods.length; i++) {
-            Set<List<Object>> result = runnables[i].get();
+        if (expected.count() != expectedMatches) {
+            throw new AssertionError(
+                    "Unexpected match count for size " + size
+                            + ": expected " + expectedMatches
+                            + ", got " + expected.count());
+        }
 
-            if (expected == null) {
-                expected = result;
-            } else if (!expected.equals(result)) {
-                throw new AssertionError("Incorrect result from " + methods[i].name + " for size " + size);
+        for (int i = 1; i < methods.length; i++) {
+            Result actual = runnables.get(i).get();
+            consume(actual);
+
+            if (!expected.equals(actual)) {
+                throw new AssertionError(
+                        "Incorrect result from " + methods[i].name
+                                + " for size " + size
+                                + ". Expected " + expected
+                                + ", got " + actual);
             }
         }
 
-        if (expected.size() != expectedMatches) {
-            throw new AssertionError("Unexpected match count for size " + size + ": expected " + expectedMatches + ", got " + expected.size());
-        }
-
         /*
-         * Warmup. Rotate execution order to reduce systematic ordering bias.
+         * Warmup.
+         * Rotate execution order to reduce systematic ordering bias.
          */
         for (int round = 0; round < WARMUP_ROUNDS; round++) {
-            executeRound(runnables, round);
+            executeRound(runnables, round, expected);
         }
 
         /*
          * Measurement.
          */
-        long[][] measurements = new long[methods.length][MEASUREMENT_ROUNDS];
+        long[][] measurements =
+                new long[methods.length][MEASUREMENT_ROUNDS];
 
         for (int round = 0; round < MEASUREMENT_ROUNDS; round++) {
 
             int offset = round % methods.length;
 
             for (int j = 0; j < methods.length; j++) {
+
                 int methodIndex = (j + offset) % methods.length;
+
                 long start = System.nanoTime();
-                Set<List<Object>> result = runnables[methodIndex].get();
+
+                Result result = runnables.get(methodIndex).get();
+
                 long elapsed = System.nanoTime() - start;
+
                 measurements[methodIndex][round] = elapsed;
 
-                if (result.size() != expectedMatches) {
-                    throw new AssertionError(methods[methodIndex].name + " produced an unexpected result count");
+                /*
+                 * Consume and validate outside the measured interval.
+                 */
+                consume(result);
+
+                if (!expected.equals(result)) {
+                    throw new AssertionError(
+                            methods[methodIndex].name
+                                    + " produced an unexpected result"
+                                    + " for size " + size);
                 }
             }
         }
 
         double[] medianMillis = new double[methods.length];
+
         for (int i = 0; i < methods.length; i++) {
             medianMillis[i] =
                     median(measurements[i]) / 1_000_000.0;
@@ -174,21 +235,119 @@ public class ConditionalProductBenchmark {
         printDataRow(methods, size, expectedMatches, medianMillis);
     }
 
-    private static void executeRound(Supplier<Set<List<Object>>>[] runnables, int round ) {
-        int offset = round % runnables.length;
-        for (int j = 0; j < runnables.length; j++) {
-            int index = (j + offset) % runnables.length;
-            runnables[index].get();
+    private static void executeRound(
+            List<Supplier<Result>> runnables,
+            int round,
+            Result expected) {
+
+        int offset = round % runnables.size();
+
+        for (int j = 0; j < runnables.size(); j++) {
+
+            int index = (j + offset) % runnables.size();
+
+            Result result = runnables.get(index).get();
+
+            consume(result);
+
+            if (!expected.equals(result)) {
+                throw new AssertionError(
+                        "Unexpected result during warmup");
+            }
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Checksum
+    // -------------------------------------------------------------------------
+
+    /**
+     * Traverses every tuple and calculates an order-independent checksum.
+     *
+     * <p>We maintain:</p>
+     * <ul>
+     *     <li>Number of tuples</li>
+     *     <li>Sum of tuple hash codes</li>
+     *     <li>Sum of squared tuple hash codes</li>
+     *     <li>XOR of mixed tuple hash codes</li>
+     * </ul>
+     *
+     * <p>This avoids storing the generated tuples while providing a
+     * lightweight consistency check across implementations.</p>
+     */
+    private static Result checksum(Stream<List<Object>> tuples) {
+
+        long count = 0;
+        long hashSum = 0;
+        long hashSquareSum = 0;
+        long hashXor = 0;
+
+        var iterator = tuples.iterator();
+
+        while (iterator.hasNext()) {
+
+            List<Object> tuple = iterator.next();
+
+            int tupleHash = tuple.hashCode();
+
+            count++;
+            hashSum += tupleHash;
+            hashSquareSum += (long) tupleHash * tupleHash;
+            hashXor ^= mix(tupleHash);
+        }
+
+        return new Result(
+                count,
+                hashSum,
+                hashSquareSum,
+                hashXor);
+    }
+
+    /**
+     * Mixes a tuple hash code to make the XOR aggregate more discriminating.
+     */
+    private static long mix(int hash) {
+
+        long value = hash;
+
+        value ^= value >>> 33;
+        value *= 0xff51afd7ed558ccdL;
+
+        value ^= value >>> 33;
+        value *= 0xc4ceb9fe1a85ec53L;
+
+        value ^= value >>> 33;
+
+        return value;
+    }
+
+    /**
+     * Makes the checksum observable outside the timed section.
+     */
+    private static void consume(Result result) {
+
+        blackhole ^= result.count()
+                + result.hashSum()
+                + Long.rotateLeft(result.hashSquareSum(), 17)
+                + result.hashXor();
+    }
+
+    private record Result(
+            long count,
+            long hashSum,
+            long hashSquareSum,
+            long hashXor) {
     }
 
     // -------------------------------------------------------------------------
     // 1. Pairwise when-then conditional product
     // -------------------------------------------------------------------------
-    private static Supplier<Set<List<Object>>> whenThen(Dimensions d) {
+
+    private static Supplier<Result> whenThen(Dimensions d) {
 
         var builder = JNumberTools.cartesianProduct()
-                .conditionalProductOf(d.os, d.browser, d.network, d.database, d.region)
+                .conditionalProductOf(
+                        d.os, d.browser, d.network, d.database, d.region)
 
                 // Linux rules
                 .when(d.os).is(LINUX)
@@ -213,21 +372,18 @@ public class ConditionalProductBenchmark {
                 .when(d.os).is(WINDOWS)
                 .then(d.region).isOneOf(WINDOWS_REGIONS);
 
-        return () -> builder.anyOrder()
-                .stream()
-                .map(tuple -> List.copyOf(tuple))
-                .collect(Collectors.toSet());
+        return () -> checksum(builder.anyOrder().stream());
     }
 
-
     // -------------------------------------------------------------------------
-    // 2. Compound conditional product (triggers built from Condition.is)
+    // 2. Compound conditional product
     // -------------------------------------------------------------------------
 
-    private static Supplier<Set<List<Object>>> buildCompound(Dimensions d) {
+    private static Supplier<Result> buildCompound(Dimensions d) {
 
         var builder = JNumberTools.cartesianProduct()
-                .compoundProductOf(d.os, d.browser, d.network, d.database, d.region)
+                .compoundProductOf(
+                        d.os, d.browser, d.network, d.database, d.region)
 
                 // Linux rules
                 .when(Condition.condition(d.os).is(LINUX))
@@ -252,23 +408,28 @@ public class ConditionalProductBenchmark {
                 .when(Condition.condition(d.os).is(WINDOWS))
                 .then(d.region).isOneOf(WINDOWS_REGIONS);
 
-        return () -> builder.generate()
-                .stream()
-                .map(tuple -> List.copyOf(tuple))
-                .collect(Collectors.toSet());
+        return () -> checksum(builder.generate().stream());
     }
 
     // -------------------------------------------------------------------------
-    // 3. Lambda Engine - Engine integrated withLambda (compiles into the same Relation tables as Compound)
+    // 3. Lambda Engine
     // -------------------------------------------------------------------------
-    private static Supplier<Set<List<Object>>> buildEngineLambda(Dimensions d) {
+
+    private static Supplier<Result> buildEngineLambda(Dimensions d) {
 
         var builder = JNumberTools.cartesianProduct()
-                .withLambda(d.os, d.browser, d.network, d.database, d.region)
+                .withLambda(
+                        d.os, d.browser, d.network, d.database, d.region)
 
                 .when(d.os, d.browser).matches((os, browser) -> {
-                    if (LINUX.equals(os)) return LINUX_BROWSERS.contains(browser);
-                    if (WINDOWS.equals(os)) return WINDOWS_BROWSERS.contains(browser);
+                    if (LINUX.equals(os)) {
+                        return LINUX_BROWSERS.contains(browser);
+                    }
+
+                    if (WINDOWS.equals(os)) {
+                        return WINDOWS_BROWSERS.contains(browser);
+                    }
+
                     return true;
                 })
 
@@ -276,33 +437,42 @@ public class ConditionalProductBenchmark {
                         !LINUX.equals(os) || LINUX_NETWORKS.contains(network))
 
                 .andWhen(d.os, d.database).matches((os, database) -> {
-                    if (LINUX.equals(os)) return LINUX_DATABASES.contains(database);
-                    if (WINDOWS.equals(os)) return WINDOWS_DATABASES.contains(database);
+                    if (LINUX.equals(os)) {
+                        return LINUX_DATABASES.contains(database);
+                    }
+
+                    if (WINDOWS.equals(os)) {
+                        return WINDOWS_DATABASES.contains(database);
+                    }
+
                     return true;
                 })
 
                 .andWhen(d.os, d.region).matches((os, region) -> {
-                    if (LINUX.equals(os)) return LINUX_REGIONS.contains(region);
-                    if (WINDOWS.equals(os)) return WINDOWS_REGIONS.contains(region);
+                    if (LINUX.equals(os)) {
+                        return LINUX_REGIONS.contains(region);
+                    }
+
+                    if (WINDOWS.equals(os)) {
+                        return WINDOWS_REGIONS.contains(region);
+                    }
+
                     return true;
                 });
 
-        return () -> builder.generate()
-                .stream()
-                .map(tuple -> List.copyOf(tuple))
-                .collect(Collectors.toSet());
+        return () -> checksum(builder.generate().stream());
     }
 
     // -------------------------------------------------------------------------
     // 4. Pruned Java Stream baseline
     // -------------------------------------------------------------------------
 
-    private static Supplier<Set<List<Object>>> buildPrunedStream(Dimensions d) {
-        // No builder to construct; the closure itself is the whole implementation.
-        return () -> prunedStream(d);
+    private static Supplier<Result> buildPrunedStream(Dimensions d) {
+
+        return () -> checksum(prunedStream(d));
     }
 
-    private static Set<List<Object>> prunedStream(Dimensions d) {
+    private static Stream<List<Object>> prunedStream(Dimensions d) {
 
         return d.os.stream()
 
@@ -312,6 +482,7 @@ public class ConditionalProductBenchmark {
                             if (os.equals(LINUX)) {
                                 return LINUX_BROWSERS.contains(browser);
                             }
+
                             return WINDOWS_BROWSERS.contains(browser);
                         })
 
@@ -321,6 +492,7 @@ public class ConditionalProductBenchmark {
                                     if (os.equals(LINUX)) {
                                         return LINUX_NETWORKS.contains(network);
                                     }
+
                                     return true;
                                 })
 
@@ -330,6 +502,7 @@ public class ConditionalProductBenchmark {
                                             if (os.equals(LINUX)) {
                                                 return LINUX_DATABASES.contains(database);
                                             }
+
                                             return WINDOWS_DATABASES.contains(database);
                                         })
 
@@ -339,6 +512,7 @@ public class ConditionalProductBenchmark {
                                                     if (os.equals(LINUX)) {
                                                         return LINUX_REGIONS.contains(region);
                                                     }
+
                                                     return WINDOWS_REGIONS.contains(region);
                                                 })
 
@@ -352,29 +526,39 @@ public class ConditionalProductBenchmark {
                                         )
                                 )
                         )
-                )
-                .collect(Collectors.toSet());
+                );
     }
-
-
-
-
 
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
 
     private static Dimensions createDimensions(int size) {
+
         List<String> os = List.of(LINUX, WINDOWS);
-        List<String> browser = createDimension(BROWSER_BASE, size, "OtherBrowser-");
-        List<String> network = createDimension(NETWORK_BASE, size, "OtherNetwork-");
-        List<String> database = createDimension(DATABASE_BASE, size, "OtherDatabase-");
-        List<String> region = createDimension(REGION_BASE, size, "OtherRegion-");
+
+        List<String> browser =
+                createDimension(BROWSER_BASE, size, "OtherBrowser-");
+
+        List<String> network =
+                createDimension(NETWORK_BASE, size, "OtherNetwork-");
+
+        List<String> database =
+                createDimension(DATABASE_BASE, size, "OtherDatabase-");
+
+        List<String> region =
+                createDimension(REGION_BASE, size, "OtherRegion-");
+
         return new Dimensions(os, browser, network, database, region);
     }
 
-    private static List<String> createDimension(String[] base, int size, String prefix) {
+    private static List<String> createDimension(
+            String[] base,
+            int size,
+            String prefix) {
+
         List<String> values = new ArrayList<>(size);
+
         values.addAll(Arrays.asList(base));
 
         for (int i = values.size(); i < size; i++) {
@@ -387,6 +571,7 @@ public class ConditionalProductBenchmark {
     private static long median(long[] values) {
 
         long[] sorted = values.clone();
+
         Arrays.sort(sorted);
 
         return sorted[sorted.length / 2];
@@ -400,7 +585,13 @@ public class ConditionalProductBenchmark {
         private final List<String> database;
         private final List<String> region;
 
-        private Dimensions(List<String> os, List<String> browser, List<String> network, List<String> database, List<String> region) {
+        private Dimensions(
+                List<String> os,
+                List<String> browser,
+                List<String> network,
+                List<String> database,
+                List<String> region) {
+
             this.os = os;
             this.browser = browser;
             this.network = network;
@@ -412,47 +603,78 @@ public class ConditionalProductBenchmark {
     private static final class BenchmarkMethod {
 
         private final String name;
-        private final Function<Dimensions, Supplier<Set<List<Object>>>> build;
+        private final Function<Dimensions, Supplier<Result>> build;
 
-        private BenchmarkMethod(String name, Function<Dimensions, Supplier<Set<List<Object>>>> build) {
+        private BenchmarkMethod(
+                String name,
+                Function<Dimensions, Supplier<Result>> build) {
+
             this.name = name;
             this.build = build;
         }
     }
+
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
     private static void printHeader(BenchmarkMethod[] methods) {
+
         StringBuilder fmt = new StringBuilder("%-8s %-12s");
-        for (int i = 0; i < methods.length; i++) fmt.append(" %-17s");
+
+        for (int i = 0; i < methods.length; i++) {
+            fmt.append(" %-17s");
+        }
+
         fmt.append("%n");
 
         Object[] args = new Object[2 + methods.length];
+
         args[0] = "Size";
         args[1] = "Matches";
+
         for (int i = 0; i < methods.length; i++) {
             args[2 + i] = methods[i].name + " ms";
         }
+
         System.out.printf(fmt.toString(), args);
     }
 
     private static void printSeparator(int methodCount) {
+
         int width = 8 + 1 + 12 + methodCount * (1 + 17);
+
         System.out.println("-".repeat(width));
     }
 
-    private static void printDataRow(BenchmarkMethod[] methods, int size, int expectedMatches, double[] medianMillis) {
+    private static void printDataRow(
+            BenchmarkMethod[] methods,
+            int size,
+            int expectedMatches,
+            double[] medianMillis) {
+
         StringBuilder fmt = new StringBuilder("%-8d %-12d");
-        for (int i = 0; i < methods.length; i++) fmt.append(" %-17.3f");
+
+        for (int i = 0; i < methods.length; i++) {
+            fmt.append(" %-17.3f");
+        }
+
         fmt.append("%n");
 
         Object[] args = new Object[2 + methods.length];
+
         args[0] = size;
         args[1] = expectedMatches;
+
         for (int i = 0; i < methods.length; i++) {
             args[2 + i] = medianMillis[i];
         }
+
         System.out.printf(fmt.toString(), args);
     }
 
     private static void printBenchmarkConditions() {
+
         System.out.println();
         System.out.println("Conditional Product Benchmark");
         System.out.println("==============================================================");
@@ -462,6 +684,7 @@ public class ConditionalProductBenchmark {
     }
 
     private static void printProblemStatement() {
+
         System.out.println("""
             Problem Statement
             ==============================================================
@@ -490,21 +713,20 @@ public class ConditionalProductBenchmark {
             ==============================================================
             """);
     }
-
 }
 
+
 /*
-Benchmark result
 Size     Matches      Pairwise when-then ms Compound ms       engineLambda ms   Pruned Stream ms
 ---------------------------------------------------------------------------------------------
-100      616          0.110             0.105             0.117             0.643
-200      1216         0.104             0.105             0.111             1.088
-300      1816         0.128             0.132             0.135             1.847
-400      2416         0.199             0.205             0.192             3.187
-500      3016         0.275             0.276             0.262             5.027
-1000     6016         0.404             0.388             0.411             17.284
-2000     12016        0.812             0.847             0.829             69.063
-3000     18016        1.355             1.350             1.322             153.291
-4000     24016        1.764             1.732             1.744             270.358
-5000     30016        2.409             2.336             2.347             419.092
+100      616          0.163             0.163             0.161             0.594
+200      1216         0.061             0.051             0.068             0.799
+300      1816         0.058             0.056             0.057             1.626
+400      2416         0.079             0.078             0.079             2.708
+500      3016         0.105             0.094             0.094             4.343
+1000     6016         0.214             0.208             0.203             15.071
+2000     12016        0.359             0.360             0.376             57.271
+3000     18016        0.571             0.531             0.524             126.792
+4000     24016        0.710             0.715             0.723             221.740
+5000     30016        0.878             0.865             0.865             349.215
  */
