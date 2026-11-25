@@ -19,19 +19,14 @@ import java.util.function.Predicate;
 import static io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition.condition;
 
 /**
- * Compares complete generation through the pairwise, compound and full-tuple lambda entry points, on the
- * exact same chain rule and {@code @Param} scenarios as {@link CompoundVsPairwiseGenerationBenchmark}:
- * whenever dimension i contains 0, dimension i+1 must not contain 0, expressed as a {@code BiPredicate}
- * over each adjacent pair rather than an equality/membership trigger.
+ * Compares complete generation through the pairwise, compound and full-tuple lambda entry points.
+ * Each implementation applies the same chain constraint: if dimension i contains 0, dimension i+1
+ * must not contain 0. The lambda implementation expresses the complete chain in one predicate over
+ * the registered tuple.
  *
- * <p>The lambda predicate is evaluated over the full tuple and compiled into the existing joint-scope rule representation. All three builders should therefore show the same generation
- * cost; this benchmark exists to confirm that empirically rather than only by the earlier correctness-only
- * {@code ChkLambda} driver, and to give a baseline for the benchmark now measures the full-tuple predicate path.</p>
- *
- * <p>Builder construction and rule registration — including compiling every lambda rule into its relation
- * table — happen in trial setup, outside the timed methods, matching every other benchmark in this
- * package. Trial setup validates every generator's sequential and parallel stream against an independent
- * brute-force result before any timed method runs.</p>
+ * <p>Builder construction and predicate compilation happen in trial setup, outside timed methods.
+ * Trial setup validates sequential and parallel generation against an independent brute-force result.
+ * Scenarios are kept within the lambda compiler's one-million-probe limit.</p>
  */
 @State(Scope.Thread)
 @BenchmarkMode(Mode.AverageTime)
