@@ -128,16 +128,13 @@ public class ConditionalProductApiBenchmark {
                 var builder = JNumberTools.cartesianProduct()
                         .withLambda(d.os, d.browser, d.network, d.database, d.region)
                          .when((os, browser, network, database, region) ->
-        (LINUX.equals(os) ? LINUX_BROWSERS.contains(browser)
-                : WINDOWS.equals(os) ? WINDOWS_BROWSERS.contains(browser) : true)
-        && (!LINUX.equals(os) || LINUX_NETWORKS.contains(network))
-        && (LINUX.equals(os) ? LINUX_DATABASES.contains(database)
-                : WINDOWS.equals(os) ? WINDOWS_DATABASES.contains(database) : true)
-        && (LINUX.equals(os) ? LINUX_REGIONS.contains(region)
-                : WINDOWS.equals(os) ? WINDOWS_REGIONS.contains(region) : true));
-                            if (WINDOWS.equals(os)) return WINDOWS_REGIONS.contains(region);
-                            return true;
-                        });
+                        (LINUX.equals(os) ? LINUX_BROWSERS.contains(browser)
+                                : WINDOWS.equals(os) ? WINDOWS_BROWSERS.contains(browser) : true)
+                        && (!LINUX.equals(os) || LINUX_NETWORKS.contains(network))
+                        && (LINUX.equals(os) ? LINUX_DATABASES.contains(database)
+                                : WINDOWS.equals(os) ? WINDOWS_DATABASES.contains(database) : true)
+                        && (LINUX.equals(os) ? LINUX_REGIONS.contains(region)
+                                : WINDOWS.equals(os) ? WINDOWS_REGIONS.contains(region) : true));
                 yield () -> builder.generate().stream()
                         .map(tuple -> List.copyOf(tuple))
                         .collect(Collectors.toSet());
