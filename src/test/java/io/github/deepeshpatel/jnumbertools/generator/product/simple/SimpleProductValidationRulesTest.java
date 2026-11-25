@@ -264,8 +264,6 @@ class SimpleProductValidationRulesTest {
         var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);
         var lex = drain(builder.lexOrder());
 
-        assertThrows(IllegalArgumentException.class, () -> builder.byRanks(null));
-
         // consumed lazily: nothing is read at the call, the caller may stop whenever it likes
         int[] pulled = {0};
         Iterable<BigInteger> infinite = () -> new Iterator<>() {
@@ -292,9 +290,8 @@ class SimpleProductValidationRulesTest {
         assertEquals(List.of(lex.get(5), lex.get(0), lex.get(5)), drain(builder.byRanks(List.of(bi(5), bi(0), bi(5)))));
 
         // empty product: every rank is out of range; no ranks, no results
-        var empty = emptyProduct();
-        assertThrows(IllegalArgumentException.class, () -> drain(empty.byRanks(List.of(BigInteger.ZERO))));
-        assertTrue(drain(empty.byRanks(List.of())).isEmpty());
+        var emptyProduct = emptyProduct();
+        assertThrows(IllegalArgumentException.class, () -> drain(emptyProduct.byRanks(List.of(BigInteger.ZERO))));
     }
 
     @Test

@@ -1,11 +1,9 @@
+
 /*
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Utility class for mixed radix number system conversions.
@@ -51,15 +49,14 @@ public final class MixedRadix {
      * @see MixedRadix#toDecimal(int[], int[])
      */
     public static int[] toMixedRadix(int num, int[] bases) {
-        List<Integer> digits = new ArrayList<>();
+        int[] digits = new int[bases.length];
 
         for (int i = bases.length - 1; i >= 0; i--) {
-            int digit = num % bases[i];
+            digits[i] = num % bases[i];
             num /= bases[i];
-            digits.add(0, digit);
         }
 
-        return digits.stream().mapToInt(Integer::intValue).toArray();
+        return digits;
     }
 
     /**

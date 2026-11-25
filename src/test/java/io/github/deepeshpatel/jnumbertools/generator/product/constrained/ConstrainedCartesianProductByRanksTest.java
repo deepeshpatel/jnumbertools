@@ -331,11 +331,9 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldThrowForNullRanks() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
-                    .andDistinct(2, cheese);
-
-            assertThrows(IllegalArgumentException.class, () ->
-                    product.byRanks(null));
+            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase).andDistinct(2, cheese);
+            List<BigInteger> nullList = null;
+            assertThrows(IllegalArgumentException.class, () -> product.byRanks(nullList));
         }
 
         @Test
@@ -363,8 +361,8 @@ public class ConstrainedCartesianProductByRanksTest {
         void shouldHandleEmptyRankSequence() {
             var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
-
-            var result = product.byRanks(Collections.emptyList()).stream().toList();
+            List<BigInteger> empty = List.of();
+            var result = product.byRanks(empty).stream().toList();
             assertTrue(result.isEmpty());
         }
 

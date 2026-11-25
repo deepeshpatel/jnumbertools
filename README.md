@@ -6,7 +6,7 @@
 **Key Features:**
 
 1. Applications in machine learning, cryptography, testing, and optimization.
-2. Iterator- and stream-based APIs for permutations, combinations, and Cartesian products, including constrained generation and rule-restricted ("conditional") products that count, rank and sample without filtering the full product.
+2. Iterator- and stream-based APIs for permutations, combinations, and five Cartesian product styles: simple, constrained, compiled pairwise-rule, compound Boolean-rule, and lambda-predicate products.
 3. Lexicographical sampling and ranking for efficient exploration of large combinatorial spaces.
 4. Java APIs that can be adapted by application code for workflows using Spark, Flink, Hadoop, and other data-processing frameworks; JNumberTools does not provide framework-specific connectors.
 
@@ -19,17 +19,17 @@ Add the following section to your configuration(pom/gradle etc) file.
 <dependency>
     <groupId>io.github.deepeshpatel</groupId>
     <artifactId>jnumbertools</artifactId>
-    <version>4.1.0</version>
+    <version>4.2.0</version>
 </dependency>
 ```
 
 **Gradle**
 ```gradle
-implementation 'io.github.deepeshpatel:jnumbertools:4.1.0'
+implementation 'io.github.deepeshpatel:jnumbertools:4.2.0'
 ```
 **SBT**
 ```sbt
-libraryDependencies += "io.github.deepeshpatel" % "jnumbertools" % "4.1.0"
+libraryDependencies += "io.github.deepeshpatel" % "jnumbertools" % "4.2.0"
 ```
 
 ## Performance
@@ -39,19 +39,19 @@ libraryDependencies += "io.github.deepeshpatel" % "jnumbertools" % "4.1.0"
 - **Data-processing workflows**: Java iterators and streams can be adapted for use in applications built with Apache Spark, Flink, and Hadoop; framework-specific integration is handled by the application.
 - **Optimized Algorithms**: Efficient lexicographical generation and ranking
 
-## Operations available on every generator
+## Operations by product family
 
-All generators (permutations, derangements, combinations, subsets and Cartesian products) are obtained from a builder, and every builder offers the same operations:
+The available operations depend on the product builder. Do not assume that every product style exposes the same traversal or sampling methods.
 
-| Operation | Result |
-|---|---|
-| `lexOrder()` | all results in lexicographical order |
-| `lexOrderMth(m, start)` | every m<sup>th</sup> result from rank `start`, generated directly without the preceding ones |
-| `byRanks(ranks)` | the results at the given ranks, consumed lazily |
-| `choice(n, random)` | `n` random results, with replacement (duplicates possible) |
-| `sample(n, random)` | `n` distinct random results, without replacement |
-| `count()` | the number of results as a `BigInteger` (`0` is valid) |
-| `isEmpty()` | `true` exactly when `count()` is `0`; a builder whose only result is the empty list is not empty |
+| Product family | Entry point | Main operations |
+|---|---|---|
+| Simple Product | `simpleProductOf(...)` | `lexOrder()`, `lexOrderMth(m, start)`, rank-based access, choice and sample |
+| Constrained Product | `constrainedProductOfDistinct(...)` and related builders | `lexOrder()`, `lexOrderMth(m, start)`, rank-based access, choice and sample |
+| Compiled Product (pairwise rules) | `conditionalProductOf(...)` | `lexOrder()`, `lexOrderMth(m, start)`, `byRanks(...)`, `choice(...)`, `sample(...)`, `count()`, `isEmpty()` |
+| Compound Product (nested Boolean rules) | `compoundProductOf(...)` | `generate()`, `count()`, `isEmpty()` |
+| Lambda Engine (joint predicates compiled to constraints) | `withLambda(...)` | `generate()`, `count()`, `isEmpty()` |
+
+`generate()` on the Compound Product and Lambda Engine returns a lazy, re-iterable generator; neither builder promises lexicographical encounter order or exposes rank-based traversal and sampling.
 
 ```java
 var combinations = JNumberTools.combinations().unique(5, 3);
@@ -71,7 +71,7 @@ The argument checks and the exceptions each operation raises are specified in [V
 2. [Derangements: fixed-point-free permutations](docs/derangements/README.md)
 3. [Combinations: 15 different types of combinations](docs/combinations/README.md)
 4. [Set/subset generations: 7 different types available](docs/sets/README.md)
-5. [Cartesian Product: simple, constrained and conditional products](docs/products/README.md)
+5. [Cartesian Products: simple, constrained, compiled, compound and lambda-engine products](docs/products/README.md)
 6. [Ranking of permutations & combinations: 8 different types of rankings](docs/ranking/README.md)
 7. [Number system algorithms: 4 different types for combinatorics](docs/numbersystem/README.md)
 8. [Math Functions](docs/calculator/README.md)

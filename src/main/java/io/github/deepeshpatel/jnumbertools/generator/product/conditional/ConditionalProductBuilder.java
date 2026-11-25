@@ -17,9 +17,12 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.function.Predicate;
 
 /**
  * Builder for a Cartesian product whose dimensions are linked by <em>rules</em>, written as plain
@@ -35,7 +38,7 @@ import java.util.Random;
  *         .and(network)
  *         .when(browser).is("Safari").then(os).isOneOf("macOS")
  *         .when(os).is("Linux").then(browser).isNoneOf("Chrome")
- *         .when(network).is("4G").then(os).isNoneOf("Linux");
+ *         .when(network).is("4G").then(os).isNoneOf("Linux")
  *
  * configs.count();                       // exact, without listing the tuples
  * configs.lexOrder().stream().forEach(System.out::println); // all valid tuples, in lexicographic order
@@ -45,32 +48,19 @@ import java.util.Random;
  *
  * <h2>Meaning of a rule</h2>
  * <p>{@code when(A).is(x).then(B).isOneOf(y, z)} means: whenever the value chosen from {@code A}
- * is {@code x}, the value chosen from {@code B} must be {@code y} or {@code z}. The rule does not say
- * anything about tuples where {@code A} is not {@code x}. All rules must hold together ("and").
- * {@code when(...)} and {@code then(...)} take the same {@link List} instance that was passed to
- * {@code conditionalProductOf} or {@code and} (matched by identity).</p>
+ * is {@code x}, the value chosen from {@code B} must be {@code y} or {@code z}. Every completed
+ * pairwise rule is combined with the other rules using AND. Dimensions are identified by the same
+ * list instance passed to {@code conditionalProductOf} or {@code and}. For compound AND/OR trigger
+ * expressions, use {@link CompoundConditionalProductBuilder} through
+ * {@code compoundProductOf(...)}.</p>
  *
- * <h2>What is supported, and what is not</h2>
- * <p>Rules are evaluated on pairs of values, never on whole tuples. Dimensions linked by rules in a tree
- * shape are handled with a small table per dimension. Dimensions that rules link in a <em>loop</em> (for
- * example rules between A and B, B and C, and C and A) are solved together as one block, so the work for
- * such a block grows with the product of the sizes of its dimensions. A loop block is rejected if that
- * product exceeds 1,000,000 ({@code MAX_LOOP_COMBINATIONS}). Each pair of dimensions connected by a rule
- * also requires a relation table; a rule is rejected if that table would exceed 50,000,000 value pairs
- * ({@code MAX_PAIR_CELLS}).
- * For all accepted rule sets, {@link #count()}, {@link #lexOrder()},
- * {@link #lexOrderMth(BigInteger, BigInteger)}, {@link #byRanks(Iterable)}, {@link #choice(int, Random)}
- * and {@link #sample(int, Random)} operate on valid tuples without materializing the complete Cartesian
- * product. {@link #choice(int, Random)} may use rejection sampling, which draws candidates from the full
- * product and discards those that violate a rule.
- * Ordinary {@link #lexOrder()} traversal defaults to {@link LexOrderStrategy#PRUNED_BITSET}; callers can select
- * {@link LexOrderStrategy#PRUNED_DFS} or {@link LexOrderStrategy#DP} explicitly, or use
- * {@link LexOrderStrategy#ADAPTIVE} with a non-negative estimate.
- * ADAPTIVE is an implementation policy, not a promise about which algorithm is selected for a given workload.
- * Its internal selection and selection criteria may change between versions. In this version it resolves to
- * {@link LexOrderStrategy#PRUNED_BITSET}; the estimate is validated but does not affect that choice.
- * Exact counting and rank-based operations use the DP plan, regardless of the lexicographic traversal strategy. Ranks are positions among the valid tuples in lexicographic order (dimension order,
- * then the order of each list). They change when rules change.</p>
+ * <h2>What is supported</h2>
+ * <p>This builder supports pairwise rules expressed with {@code when(...).then(...)}.
+ * It provides lexicographic and any-order traversal, exact counting, rank-based traversal,
+ * and random choice and sampling. Compound trigger expressions are built with {@link Condition}
+ * and attached through {@link CompoundConditionalProductBuilder}; that builder intentionally
+ * provides generation, counting and emptiness checks without exposing rank-based or
+ * lexicographic operations.</p>
  *
  * <h2>Practical performance guidance: dimension order</h2>
  * <p>Dimension declaration order can affect the amount of work required by lexicographic traversal.
@@ -78,9 +68,9 @@ import java.util.Random;
  * and {@link #and(List)}. It also defines the tuple positions and lexicographic encounter order, so
  * changing it changes the order (and positional meaning) of the generated tuples.</p>
  *
- * <p>During prefix-pruned traversal, a rule between two dimensions can be checked when the later of
- * those dimensions is assigned: the candidate value is tested against dimensions already present in
- * the prefix. A restrictive relation can therefore prune the remaining search below that point.
+ * <p>During prefix-pruned traversal, a pairwise rule can be checked when the latter of its two dimensions
+ * is assigned. A multi-trigger rule can be checked as soon as every dimension in its trigger and target
+ * scope has been assigned. A restrictive rule can therefore prune the remaining search below that point.
  * As a practical starting point:</p>
  * <ul>
  *   <li>Do not automatically put the most restrictive dimension first. First consider which other
@@ -111,9 +101,9 @@ import java.util.Random;
  * builder.</p>
  *
  * <h2>Algorithm &amp; Complexity</h2>
- * <p>Internally, this builder models rule-constrained Cartesian products as a binary
- * <strong>Constraint Satisfaction Problem (CSP)</strong> and compiles the rules into an exact counting
- * and generation plan:</p>
+ * <p>Internally, this builder models rule-constrained Cartesian products as a constraint satisfaction
+ * problem (CSP). Pairwise rules use the binary constraint graph; multi-trigger rules form bounded
+ * joint-assignment blocks. Both are compiled into an exact counting and generation plan:</p>
  * <ul>
  *   <li><strong>Cycle Contraction &amp; Forest Decomposition</strong>
  *       <em>(related to Freuder 1982; Dechter &amp; Pearl 1987)</em>:
@@ -122,7 +112,9 @@ import java.util.Random;
  *       assignments of each block are enumerated once, subject to the
  *       {@code MAX_LOOP_COMBINATIONS} limit (1,000,000) on the product of the original dimension sizes in that
  *       block. The remaining bridge edges form a forest (of treewidth at most 1), enabling dynamic
- *       programming across the resulting trees.</li>
+ *       programming across the resulting trees. The dimensions of a multi-trigger rule's scope are
+ *       always one block. A chain of pairwise rules that links two of them is a second block, joined to
+ *       the first by the rules between them, rather than part of the scope's block.</li>
  *
  *   <li><strong>Bottom-Up Tree DP / Sum-Product Counting</strong>
  *       <em>(related to Pearl 1988; Dechter 1999)</em>:
@@ -166,21 +158,75 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     private final List<List<?>> originals;       // the caller's list objects, matched by identity only
     private final RuleCompiler ruleCompiler;
 
-
     /**
      * Creates a builder with a single dimension.
      * @param elements first dimension; copied. An empty list is allowed and makes the product empty.
      * @throws NullPointerException if {@code elements} is null or contains a null element
      */
     public ConditionalProductBuilder(List<?> elements) {
-        this(new ConstraintModel(List.<List<?>>of(snapshot(elements)), PersistentRelationMap.empty()),
-                List.<List<?>>of(elements));
+        this(new ConstraintModel(List.of(snapshot(elements)), PersistentRelationMap.empty()),
+                List.of(elements));
+    }
+
+    /**
+     * Creates a builder with two or more dimensions, equivalent to calling
+     * {@link #ConditionalProductBuilder(List)} with {@code first} and then adding each remaining
+     * dimension through {@link #and(List)}, but in a single pass: the dimension list, the identity
+     * indexes and the rule compiler are built once, so the cost is O(dimensions) rather than the
+     * O(dimensions²) of repeated {@code .and(...)} calls.
+     *
+     * @param first the first dimension; copied. An empty list is allowed and makes the product empty.
+     * @param second the second dimension; copied
+     * @param additional any further dimensions, in product order; each copied
+     * @throws NullPointerException if any dimension is null or contains a null element
+     */
+    public ConditionalProductBuilder(List<?> first, List<?> second, List<?>... additional) {
+        this(snapshotAll(first, second, additional), callerListsOf(first, second, additional));
+    }
+
+    private ConditionalProductBuilder(ConditionalProductBuilder source) {
+        this(source.model, source.originals);
     }
 
     private ConditionalProductBuilder(ConstraintModel model, List<List<?>> originals) {
         this.model = model;
         this.originals = originals;
         this.ruleCompiler = new RuleCompiler(model.dimensions, originals, model.indexes);
+    }
+
+    /**
+     * Builds a builder directly from already-snapshotted dimensions and the caller's parallel list of
+     * original instances. Used by the multi-argument constructor, which does not go through repeated
+     * {@link #and(List)} calls: those would copy the growing dimension list, indexes and rule compiler
+     * once per dimension, making the whole construction O(d²). With this constructor it is O(d).
+     *
+     * @param copies    private snapshots, one per dimension (element i is the snapshot of originals.get(i))
+     * @param originals the caller's list instances, kept only for identity comparison in the rule API
+     */
+    private ConditionalProductBuilder(List<List<?>> copies, List<List<?>> originals) {
+        this.model = new ConstraintModel(copies, PersistentRelationMap.empty());
+        this.originals = Collections.unmodifiableList(originals);
+        this.ruleCompiler = new RuleCompiler(model.dimensions, this.originals, model.indexes);
+    }
+
+    /** Snapshots every dimension of the multi-argument constructor exactly once. */
+    private static List<List<?>> snapshotAll(List<?> first, List<?> second, List<?>... additional) {
+        int count = 2 + additional.length;
+        List<List<?>> copies = new ArrayList<>(count);
+        copies.add(snapshot(first));
+        copies.add(snapshot(second));
+        for (List<?> dimension : additional) copies.add(snapshot(dimension));
+        return copies;
+    }
+
+    /** Keeps the caller's list instances (for identity-based rule resolution), in the same order as the copies. */
+    private static List<List<?>> callerListsOf(List<?> first, List<?> second, List<?>... additional) {
+        int count = 2 + additional.length;
+        List<List<?>> lists = new ArrayList<>(count);
+        lists.add(first);
+        lists.add(second);
+        for (List<?> dimension : additional) lists.add(dimension);
+        return lists;
     }
 
     /**
@@ -210,111 +256,167 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      *                                  list instance was used for more than one dimension
      */
     public WhenDimension when(List<?> dimension) {
-        return new WhenDimension(ruleCompiler.indexOf(dimension));
+        return new WhenDimension(ruleCompiler.indexOf(dimension), List.of(), false);
     }
 
-    /** First step of a rule: what the chosen value of the "when" dimension must be. */
+    /**
+     * Starts a rule from a composed {@link Condition}, built with nested {@code and(...)}/{@code or(...)}
+     * calls. A {@code Condition} can express arbitrary nesting, including AND inside OR and OR inside AND.
+     *
+     * @param condition the trigger condition; dimensions inside it are identified by the same list
+     *                   instances passed to {@code conditionalProductOf}/{@code compoundProductOf} or
+     *                   {@code and}
+     * @return the next step of the rule
+     * @throws NullPointerException     if {@code condition} is null
+     * @throws IllegalArgumentException if a dimension referenced inside {@code condition} is not one of
+     *                                  this product's dimensions, or a value is not a value of its dimension
+     */
+    Trigger when(Condition condition) {
+        Objects.requireNonNull(condition, "condition must not be null");
+        return new Trigger(resolve(condition));
+    }
+
+    /** Resolves {@code dimension} to its position, by the same list-instance identity rule as every other rule API. */
+    int indexOfDimension(List<?> dimension) {
+        return ruleCompiler.indexOf(dimension);
+    }
+
+    private List<List<MultiTriggerRule.Condition>> resolve(Condition condition) {
+        List<List<Condition.Leaf>> groups = condition.groups();
+        List<List<MultiTriggerRule.Condition>> resolved = new ArrayList<>(groups.size());
+        for (List<Condition.Leaf> group : groups) {
+            List<MultiTriggerRule.Condition> resolvedGroup = new ArrayList<>(group.size());
+            for (Condition.Leaf leaf : group) {
+                int dim = ruleCompiler.indexOf(leaf.dimension);
+                BitSet matching = leaf.predicate != null
+                        ? ruleCompiler.matching(dim, leaf.predicate)
+                        : ruleCompiler.matching(dim, leaf.values, leaf.negate);
+                resolvedGroup.add(new MultiTriggerRule.Condition(dim, matching));
+            }
+            resolved.add(resolvedGroup);
+        }
+        return resolved;
+    }
+
+    /** First step of a pairwise trigger condition. */
     public final class WhenDimension {
         private final int dim;
+        private final List<List<MultiTriggerRule.Condition>> groups;
+        private final boolean startsAlternative;
 
-        private WhenDimension(int dim) { this.dim = dim; }
+        private WhenDimension(int dim, List<List<MultiTriggerRule.Condition>> groups, boolean startsAlternative) {
+            this.dim = dim;
+            this.groups = groups;
+            this.startsAlternative = startsAlternative;
+        }
 
         /** The chosen value equals {@code value}. */
         public Trigger is(Object value) { return trigger(List.of(nonNull(value)), false); }
-
         /** The chosen value is anything except {@code value}. */
         public Trigger isNot(Object value) { return trigger(List.of(nonNull(value)), true); }
-
         /** The chosen value is one of {@code values} (at least one is required). */
         public Trigger isOneOf(Object... values) { return trigger(asList(values), false); }
-
         /** The chosen value is one of {@code values} (at least one is required). */
         public Trigger isOneOf(Collection<?> values) { return trigger(values, false); }
-
         /** The chosen value is none of {@code values} (at least one is required). */
         public Trigger isNoneOf(Object... values) { return trigger(asList(values), true); }
-
         /** The chosen value is none of {@code values} (at least one is required). */
         public Trigger isNoneOf(Collection<?> values) { return trigger(values, true); }
-
         /** Alias of {@link #isNoneOf(Object...)}. */
         public Trigger isNotIn(Object... values) { return isNoneOf(values); }
-
         /** Alias of {@link #isNoneOf(Collection)}. */
         public Trigger isNotIn(Collection<?> values) { return isNoneOf(values); }
 
         private Trigger trigger(Collection<?> values, boolean negate) {
-            return new Trigger(dim, ruleCompiler.matching(dim, values, negate));
+            List<List<MultiTriggerRule.Condition>> updated = new ArrayList<>();
+            for (List<MultiTriggerRule.Condition> group : groups) updated.add(new ArrayList<>(group));
+            if (updated.isEmpty() || startsAlternative) updated.add(new ArrayList<>());
+            updated.get(updated.size() - 1).add(
+                    new MultiTriggerRule.Condition(dim, ruleCompiler.matching(dim, values, negate)));
+            return new Trigger(MultiTriggerRule.copyGroups(updated));
         }
     }
 
-    /** Second step of a rule: the condition is known, now name the dimension that is restricted. */
+    /**
+     * A completed trigger expression. Pairwise triggers contain one atomic condition; compound
+     * triggers are created from a composed {@link Condition}.
+     */
     public final class Trigger {
-        private final int dim;
-        private final BitSet values;
+        private final List<List<MultiTriggerRule.Condition>> groups;
 
-        private Trigger(int dim, BitSet values) {
-            this.dim = dim;
-            this.values = values;
+        private Trigger(List<List<MultiTriggerRule.Condition>> groups) {
+            this.groups = groups;
         }
 
         /**
-         * Names the restricted dimension.
-         *
-         * @param dimension the same list instance that was passed to {@code conditionalProductOf} or
-         *                  {@code and}; must be a different dimension from the one in {@code when}
+         * Names the dimension restricted by this trigger expression.
+         * @param dimension target dimension; must not occur in any trigger condition
          * @return the final step of the rule
-         * @throws NullPointerException     if {@code dimension} is null
-         * @throws IllegalArgumentException if the list is not a dimension of this product, is ambiguous, or
-         *                                  is the dimension used in {@code when}
+         * @throws NullPointerException if {@code dimension} is null
+         * @throws IllegalArgumentException if the dimension is not part of this product or is used by the trigger
          */
         public ThenDimension then(List<?> dimension) {
             int target = ruleCompiler.indexOf(dimension);
-            if (target == dim) {
-                throw new IllegalArgumentException("A rule needs two different dimensions");
+            for (List<MultiTriggerRule.Condition> group : groups) {
+                for (MultiTriggerRule.Condition condition : group) {
+                    if (condition.dimension == target) {
+                        throw new IllegalArgumentException("The target dimension must differ from every trigger dimension");
+                    }
+                }
             }
-            return new ThenDimension(dim, values, target);
+            return new ThenDimension(groups, target);
         }
     }
 
     /** Final step of a rule: what the restricted dimension may be. Returns the new builder. */
     public final class ThenDimension {
-        private final int triggerDim;
-        private final BitSet triggerValues;
+        private final List<List<MultiTriggerRule.Condition>> groups;
         private final int targetDim;
 
-        private ThenDimension(int triggerDim, BitSet triggerValues, int targetDim) {
-            this.triggerDim = triggerDim;
-            this.triggerValues = triggerValues;
+        private ThenDimension(List<List<MultiTriggerRule.Condition>> groups, int targetDim) {
+            this.groups = groups;
             this.targetDim = targetDim;
         }
 
         /** The value must equal {@code value}. */
         public ConditionalProductBuilder is(Object value) { return apply(List.of(nonNull(value)), false); }
-
         /** The value must be anything except {@code value}. */
         public ConditionalProductBuilder isNot(Object value) { return apply(List.of(nonNull(value)), true); }
-
         /** The value must be one of {@code values} (at least one is required). */
         public ConditionalProductBuilder isOneOf(Object... values) { return apply(asList(values), false); }
-
         /** The value must be one of {@code values} (at least one is required). */
         public ConditionalProductBuilder isOneOf(Collection<?> values) { return apply(values, false); }
-
         /** The value must be none of {@code values} (at least one is required). */
         public ConditionalProductBuilder isNoneOf(Object... values) { return apply(asList(values), true); }
-
         /** The value must be none of {@code values} (at least one is required). */
         public ConditionalProductBuilder isNoneOf(Collection<?> values) { return apply(values, true); }
-
         /** Alias of {@link #isNoneOf(Object...)}. */
         public ConditionalProductBuilder isNotIn(Object... values) { return isNoneOf(values); }
-
         /** Alias of {@link #isNoneOf(Collection)}. */
         public ConditionalProductBuilder isNotIn(Collection<?> values) { return isNoneOf(values); }
 
         private ConditionalProductBuilder apply(Collection<?> values, boolean negate) {
-            return withRule(triggerDim, triggerValues, targetDim, ruleCompiler.matching(targetDim, values, negate));
+            BitSet allowed = ruleCompiler.matching(targetDim, values, negate);
+            int singleTriggerDimension = -1;
+            BitSet combinedTriggers = new BitSet();
+            boolean pairwise = true;
+            for (List<MultiTriggerRule.Condition> group : groups) {
+                BitSet groupValues = null;
+                for (MultiTriggerRule.Condition condition : group) {
+                    if (singleTriggerDimension < 0) singleTriggerDimension = condition.dimension;
+                    if (singleTriggerDimension != condition.dimension) {
+                        pairwise = false;
+                        break;
+                    }
+                    if (groupValues == null) groupValues = (BitSet) condition.values.clone();
+                    else groupValues.and(condition.values);
+                }
+                if (!pairwise) break;
+                if (groupValues != null) combinedTriggers.or(groupValues);
+            }
+            if (pairwise) return withRule(singleTriggerDimension, combinedTriggers, targetDim, allowed);
+            return new ConditionalProductBuilder(
+                    model.withMultiRule(new MultiTriggerRule(groups, targetDim, allowed)), originals);
         }
     }
 
@@ -354,6 +456,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * The lookahead threshold is an implementation choice and may change between versions.</p>
      *
      * @return a re-iterable generator of valid tuples in lexicographic order
+     * @throws UnsupportedOperationException if the product contains a compound trigger rule
      */
     @Override
     public StreamableIterable<Object> lexOrder() {
@@ -384,9 +487,8 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * In this version it resolves to {@code PRUNED_BITSET}; the estimate is validated but does not affect
      * strategy selection.</p>
      *
-     * <p>This setting affects only this lexicographic traversal. Exact-count and rank-based operations,
-     * including {@link #count()}, {@link #lexOrderMth(BigInteger, BigInteger)}, {@link #byRanks(Iterable)},
-     * {@link #choice(int, Random)} and {@link #sample(int, Random)}, continue to use the DP plan.</p>
+     * <p>This setting affects only this lexicographic traversal. Exact-count and rank-based operations
+     * use the DP plan.</p>
      *
      * @param strategy traversal strategy; must not be {@code null} or {@link LexOrderStrategy#ADAPTIVE}
      * @return a re-iterable generator of valid tuples in lexicographic order
@@ -394,6 +496,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @throws IllegalArgumentException if {@code strategy} is {@code ADAPTIVE}
      */
     public StreamableIterable<Object> lexOrder(LexOrderStrategy strategy) {
+        requirePairwiseRulesForLexOrder();
         Objects.requireNonNull(strategy, "strategy");
         if (strategy == LexOrderStrategy.ADAPTIVE) {
             throw new IllegalArgumentException("ADAPTIVE requires an estimated traversal limit; use lexOrder(strategy, estimatedLimit)");
@@ -420,6 +523,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @throws IllegalArgumentException if the strategy is not {@code ADAPTIVE} or the estimate is negative
      */
     public StreamableIterable<Object> lexOrder(LexOrderStrategy strategy, long estimatedLimit) {
+        requirePairwiseRulesForLexOrder();
         Objects.requireNonNull(strategy, "strategy");
         if (strategy != LexOrderStrategy.ADAPTIVE) {
             throw new IllegalArgumentException("An estimated traversal limit is supported only with ADAPTIVE");
@@ -439,7 +543,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     public StreamableIterable<Object> lexOrderMth(BigInteger m, BigInteger start) {
         BigInteger count = count();
         Util.validateLexOrderMthParams(m, start, count);
-        return ConditionalProductGenerators.rankBased(model, new EveryMthIterable(start, m, count));
+        return byRanks(new EveryMthIterable(start, m, count));
     }
 
     /**
@@ -473,11 +577,14 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     @Override
     public StreamableIterable<Object> sample(int sampleSize, Random random) {
-        return ConditionalProductGenerators.rankBased(model, new BigIntegerSample(count(), sampleSize, random));
+        return byRanks(new BigIntegerSample(count(), sampleSize, random));
     }
 
     /**
-     * Number of valid tuples, computed from the rules without enumerating the product.
+     * Number of valid tuples.
+     *
+     * <p>The count is computed from the rules without enumerating the Cartesian product.</p>
+     *
      * @return the exact count
      */
     @Override
@@ -495,11 +602,192 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         return "ConditionalProductBuilder{dimensions=" + model.dimensions + ", linkedPairs=" + model.relations.size() + '}';
     }
 
+    private void requirePairwiseRulesForLexOrder() {
+        if (!model.multiRules.isEmpty()) {
+            throw new UnsupportedOperationException(
+                    "lexOrder() is not supported for compound conditions; use anyOrder() instead. " +
+                            "lexOrder() is available only for pairwise when().then() rules.");
+        }
+    }
+
     // ── Rule application ─────────────────────────────────────────────────────
 
     private ConditionalProductBuilder withRule(int triggerDim, BitSet triggerValues, int targetDim, BitSet allowedTargets) {
         return new ConditionalProductBuilder(
                 model.withRule(triggerDim, triggerValues, targetDim, allowedTargets), originals);
+    }
+
+    /**
+     * Compiles an arbitrary joint predicate over {@code scopeDims} into one or more multi-trigger rules:
+     * the same representation a compound {@link Condition} rule resolves into. The predicate is evaluated
+     * once per combination of the scope's dimensions, here, during compilation; it is never called again
+     * during generation, counting, or emptiness checks.
+     *
+     * <h2>How this is compiled</h2>
+     * <p>The last dimension in {@code scopeDims} is treated as the rule's target; the remaining dimensions
+     * are its antecedent. Every combination of the antecedent dimensions' values is enumerated (bounded by
+     * {@link ConstraintGraph#MAX_LOOP_COMBINATIONS}, the same bound a compound rule's scope is checked
+     * against) and, for each one, the predicate is evaluated once per value of the target dimension to
+     * determine that combination's allowed target values. Antecedent combinations that produce the same
+     * allowed-target set are grouped into a single rule with one OR-group per combination, mirroring how
+     * {@code .when(conditionA).then(dim).isX(); .when(conditionB).then(dim).isY();} compiles into separate
+     * rules only when their consequences actually differ. An antecedent combination under which every
+     * target value is accepted contributes no rule at all, since it imposes no constraint.</p>
+     *
+     * <p>When the scope is exactly two dimensions (one antecedent, one target), each compiled group is
+     * routed to the lightweight binary {@code Relation} table instead of a multi-trigger rule — the same
+     * automatic pairwise detection {@code CompoundConditionalProductBuilder}'s {@code .then(dim).isX()}
+     * already performs for a single-dimension {@link Condition}. This keeps several independent two-dimension
+     * lambda rules that happen to share one dimension (e.g. four rules all triggered by the same {@code os})
+     * from being merged into one oversized block purely because of how they were declared.</p>
+     *
+     * <p>This gives the compiled rule the exact same downstream treatment as a compound rule: the
+     * constraint graph folds its scope into one bounded, enumerated block, and the tree DP that backs
+     * {@link #count()}/{@link #isEmpty()}/{@link #anyOrder()} treats that block as a single node with
+     * precomputed, table-driven transitions — no interpreter re-evaluates the predicate while generating.</p>
+     *
+     * <p>A scope of a single dimension is rejected: {@code ConstraintPlan} does not run a rule through its
+     * node enumeration for a single-dimension node, so such a rule would be enforced by traversal but
+     * ignored by counting and unranking, giving inconsistent results between {@code lexOrder()},
+     * {@code count()} and {@code byRanks(...)}. Use {@link Condition#condition(List)} with
+     * {@code .matches(Predicate)} as a trigger for a rule on a separate target dimension through the
+     * compound-product API. That does not filter the trigger dimension itself; to filter values from a
+     * dimension, pre-filter its input list before building the product.</p>
+     *
+     * @param scopeDims positions of the dimensions the predicate jointly depends on, in declaration order;
+     *                  must contain at least two positions (one antecedent plus the target) and no duplicates
+     * @param predicate evaluated with one argument per {@code scopeDims} position, in the same order;
+     *                  must be deterministic and side-effect-free
+     * @return a new builder with the compiled rule(s) added
+     * @throws IllegalArgumentException if the scope has fewer than two dimensions or contains a duplicate
+     *                                  dimension, or the antecedent-combinations-times-target-values count
+     *                                  that would need to be probed exceeds
+     *                                  {@link ConstraintGraph#MAX_LOOP_COMBINATIONS}
+     */
+    ConditionalProductBuilder withLambdaRule(int[] scopeDims, Predicate<Object[]> predicate) {
+        Objects.requireNonNull(predicate, "predicate must not be null");
+        Objects.requireNonNull(scopeDims, "scopeDims must not be null");
+        if (scopeDims.length < 2) {
+            throw new IllegalArgumentException("A lambda rule must depend on at least two dimensions "
+                    + "(one antecedent and one target); to filter values from a single dimension, "
+                    + "pre-filter its input list before building the product");
+        }
+        for (int i = 0; i < scopeDims.length; i++) {
+            for (int j = i + 1; j < scopeDims.length; j++) {
+                if (scopeDims[i] == scopeDims[j]) {
+                    throw new IllegalArgumentException("A lambda rule scope cannot contain the same dimension twice");
+                }
+            }
+        }
+
+        int targetDim = scopeDims[scopeDims.length - 1];
+        int[] antecedentDims = Arrays.copyOf(scopeDims, scopeDims.length - 1);
+        int[] antecedentSizes = new int[antecedentDims.length];
+        for (int i = 0; i < antecedentDims.length; i++) {
+            antecedentSizes[i] = model.dimensions.get(antecedentDims[i]).size();
+        }
+        int targetSize = model.dimensions.get(targetDim).size();
+
+        // An empty target or antecedent makes the entire Cartesian product empty, so no
+        // predicate probes are required. Check every antecedent before bounded multiplication:
+        // an empty dimension may occur after a prefix whose product already exceeds the probe limit.
+        if (targetSize == 0) {
+            return this;
+        }
+        for (int size : antecedentSizes) {
+            if (size == 0) {
+                return this;
+            }
+        }
+
+        long antecedentCombos = 1L;
+        for (int size : antecedentSizes) {
+            if (antecedentCombos > ConstraintGraph.MAX_LOOP_COMBINATIONS / size) {
+                antecedentCombos = ConstraintGraph.MAX_LOOP_COMBINATIONS + 1;
+                break;
+            }
+            antecedentCombos *= size;
+        }
+        long totalProbes;
+        if (antecedentCombos > ConstraintGraph.MAX_LOOP_COMBINATIONS
+                || antecedentCombos > ConstraintGraph.MAX_LOOP_COMBINATIONS / targetSize) {
+            totalProbes = ConstraintGraph.MAX_LOOP_COMBINATIONS + 1;
+        } else {
+            totalProbes = antecedentCombos * targetSize;
+        }
+        if (totalProbes > ConstraintGraph.MAX_LOOP_COMBINATIONS) {
+            throw new IllegalArgumentException("Compiling this lambda rule would need to probe the predicate "
+                    + "more than " + ConstraintGraph.MAX_LOOP_COMBINATIONS + " times (antecedent combinations "
+                    + "times target values); narrow the scope or its dimensions' sizes.");
+        }
+
+        // Nothing to compile when either side is empty. An empty antecedent dimension means there is no
+        // antecedent combination to pick a value from (the enumeration loop below would call get(0) on an
+        // empty list); an empty target dimension means no tuple can satisfy any rule that names it. In
+        // either case the product itself has count 0, and returning without adding a rule is both correct
+        // and avoids both the exception and the pointless probe loop.
+        if (antecedentCombos == 0 || targetSize == 0) {
+            return this;
+        }
+
+        Map<BitSet, List<int[]>> combosByAllowedTargets = new LinkedHashMap<>();
+        Object[] tuple = new Object[scopeDims.length];
+        int[] counters = new int[antecedentDims.length];
+        List<?> targetValues = model.dimensions.get(targetDim);
+        while (true) {
+            for (int i = 0; i < antecedentDims.length; i++) {
+                tuple[i] = model.dimensions.get(antecedentDims[i]).get(counters[i]);
+            }
+            BitSet allowed = new BitSet(targetSize);
+            for (int t = 0; t < targetSize; t++) {
+                tuple[scopeDims.length - 1] = targetValues.get(t);
+                if (predicate.test(tuple)) {
+                    allowed.set(t);
+                }
+            }
+            if (allowed.cardinality() < targetSize) {
+                combosByAllowedTargets.computeIfAbsent(allowed, key -> new ArrayList<>()).add(counters.clone());
+            }
+            int i = antecedentDims.length - 1;
+            while (i >= 0) {
+                counters[i]++;
+                if (counters[i] < antecedentSizes[i]) break;
+                counters[i] = 0;
+                i--;
+            }
+            if (i < 0) break;
+        }
+
+        ConditionalProductBuilder result = this;
+        if (antecedentDims.length == 1) {
+            // Exactly one antecedent dimension and one target: the same shape compound's .then(dim).isX()
+            // detects as pairwise and routes to the lightweight binary relation table, never a block, so a
+            // lambda rule gets the identical treatment instead of being forced into block territory just
+            // because it was written as a lambda.
+            int antecedentDim = antecedentDims[0];
+            for (Map.Entry<BitSet, List<int[]>> entry : combosByAllowedTargets.entrySet()) {
+                BitSet triggerValues = new BitSet(antecedentSizes[0]);
+                for (int[] combo : entry.getValue()) triggerValues.set(combo[0]);
+                result = new ConditionalProductBuilder(
+                        result.model.withRule(antecedentDim, triggerValues, targetDim, entry.getKey()), result.originals);
+            }
+        } else {
+            for (Map.Entry<BitSet, List<int[]>> entry : combosByAllowedTargets.entrySet()) {
+                List<List<MultiTriggerRule.Condition>> groups = new ArrayList<>(entry.getValue().size());
+                for (int[] combo : entry.getValue()) {
+                    List<MultiTriggerRule.Condition> group = new ArrayList<>(antecedentDims.length);
+                    for (int i = 0; i < antecedentDims.length; i++) {
+                        BitSet single = new BitSet(antecedentSizes[i]);
+                        single.set(combo[i]);
+                        group.add(new MultiTriggerRule.Condition(antecedentDims[i], single));
+                    }
+                    groups.add(group);
+                }
+                MultiTriggerRule rule = new MultiTriggerRule(groups, targetDim, entry.getKey());
+                result = new ConditionalProductBuilder(result.model.withMultiRule(rule), result.originals);
+            }
+        }
+        return result;
     }
 
     private static Object nonNull(Object value) {
@@ -515,12 +803,4 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         Util.validateInput(elements);
         return Util.copyOfNoNulls(elements);
     }
-
-    // ── Rule tables ──────────────────────────────────────────────────────────
-
-    /** Allowed value pairs between dimension u and dimension v (u &lt; v). Immutable once built. */
-    // ── Counting plan ────────────────────────────────────────────────────────
-
-
-
 }

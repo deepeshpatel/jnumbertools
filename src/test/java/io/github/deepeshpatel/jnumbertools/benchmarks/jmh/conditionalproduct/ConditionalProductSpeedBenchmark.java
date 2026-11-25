@@ -1,5 +1,5 @@
 
-package io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct;
+package io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.openjdk.jmh.annotations.*;

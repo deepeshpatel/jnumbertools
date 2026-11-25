@@ -6,6 +6,8 @@ package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.ConditionalProductBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.product.conditional.CompoundConditionalProductBuilder;
+import io.github.deepeshpatel.jnumbertools.generator.product.conditional.LambdaConditionalProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder;
 
@@ -19,7 +21,7 @@ import java.util.List;
  * <ul>
  *   <li><b>Simple Product</b>: Aⁿ where A is a single set repeated n times</li>
  *   <li><b>Constrained Product</b>: A₁ × A₂ × ... × Aₖ where each Aᵢ can be a set, combination, or subset with constraints</li>
- *   <li><b>Conditional Product</b>: a simple product restricted by rules between two dimensions</li>
+ *   <li><b>Conditional Product</b>: a simple product restricted by pairwise rules or compound AND/OR trigger rules</li>
  * </ul>
  *
  * <h2>Usage Examples</h2>
@@ -29,22 +31,18 @@ import java.util.List;
  * CartesianProduct cp = new CartesianProduct();
  *
  * // Product of [A, B] × [1, 2] × [X, Y]
- * cp.simpleProductOf("A", "B")
- *   .and(1, 2)
- *   .and("X", "Y")
+ * cp.simpleProductOf(List.of("A", "B"), List.of(1, 2), List.of("X", "Y"))
  *   .lexOrder()
  *   .forEach(System.out::println);
  * // Output: [A,1,X], [A,1,Y], [A,2,X], [A,2,Y], [B,1,X], [B,1,Y], [B,2,X], [B,2,Y]
  *
  * // Every 2nd product starting from rank 1
- * cp.simpleProductOf(0, 1, 2)
- *   .and(0, 1, 2)
+ * cp.simpleProductOf(List.of(0, 1, 2), List.of(0, 1, 2))
  *   .lexOrderMth(2, 1)
  *   .forEach(System.out::println);
  *
  * // Random sample of 3 products without replacement
- * cp.simpleProductOf("A", "B", "C")
- *   .and("X", "Y")
+ * cp.simpleProductOf(List.of("A", "B", "C"), List.of("X", "Y"))
  *   .sample(3)
  *   .forEach(System.out::println);
  * </pre>
@@ -126,22 +124,127 @@ public final class CartesianProduct {
     }
 
     /**
-     * Creates a builder for a Cartesian product whose dimensions are linked by rules such as
-     * {@code when(browser).is("Safari").then(os).isOneOf("macOS")}.
+     * Creates a builder for a simple Cartesian product over two or more dimensions.
      * <p>
-     * Add further dimensions with {@code and(list)} and rules with {@code when(list)...then(list)...}.
-     * Counting, ranking and sampling work on the valid tuples only, without enumerating the full product.
-     * Rules refer to a dimension by the same list instance that was passed in. See
-     * {@link ConditionalProductBuilder} for the rule vocabulary and its limits.
+     * This convenience overload is equivalent to calling {@link #simpleProductOf(List)}
+     * with {@code first}, then adding {@code second} and every {@code additional} dimension
+     * in order. Every dimension is snapshotted when this method is called.
+     * </p>
+     *
+     * @param first the first dimension
+     * @param second the second dimension
+     * @param additional any further dimensions, in product order
+     * @return a simple product builder containing all supplied dimensions
+     * @throws NullPointerException if any dimension or the additional array is null,
+     *         or if any dimension contains a null element
+     */
+    public SimpleProductBuilder simpleProductOf(
+            List<?> first, List<?> second, List<?>... additional) {
+        return new SimpleProductBuilder(first, second, additional);
+    }
+
+    /**
+     * Creates a builder for a Cartesian product whose dimensions are linked by pairwise rules,
+     * such as {@code when(browser).is("Safari").then(os).isOneOf("macOS")}.
+     * <p>
+     * Add further dimensions with {@code and(list)}. Rules refer to dimensions by the same list
+     * instances passed to this builder. For compound AND/OR trigger expressions, use
+     * {@link #compoundProductOf(List)} instead.
+     * See {@link ConditionalProductBuilder} for rule semantics and constraint-size limits.
      * </p>
      *
      * @param elements the first dimension; copied. An empty list is allowed and makes the product empty.
-     * @return a ConditionalProductBuilder for adding dimensions and rules
+     * @return a ConditionalProductBuilder for adding dimensions and pairwise rules
      * @throws NullPointerException if {@code elements} is null or contains a null element
      */
     public ConditionalProductBuilder conditionalProductOf(List<?> elements) {
         Util.validateInput(elements);
         return new ConditionalProductBuilder(elements);
+    }
+
+    /**
+     * Creates a builder for a conditional Cartesian product with two or more dimensions.
+     * <p>
+     * This is a convenience overload equivalent to calling {@link #conditionalProductOf(List)}
+     * with the first dimension and then adding each remaining dimension through
+     * {@link ConditionalProductBuilder#and(List)}. The dimensions retain the supplied order.
+     * </p>
+     *
+     * @param first the first dimension
+     * @param second the second dimension
+     * @param additional any further dimensions, in product order
+     * @return a conditional product builder containing all supplied dimensions
+     * @throws NullPointerException if any dimension is null or contains a null element
+     */
+    public ConditionalProductBuilder conditionalProductOf(
+            List<?> first, List<?> second, List<?>... additional) {
+        return new ConditionalProductBuilder(first, second, additional);
+    }
+
+    /**
+     * Creates a builder for a Cartesian product constrained by compound trigger expressions.
+     *
+     * <p>Build a composed {@link io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition}
+     * with nested {@code and(Condition)} and {@code or(Condition)} calls, then attach it with
+     * {@code when(condition)}. The resulting builder exposes generation, exact counting and
+     * emptiness checks; it does not expose lexicographic or rank-based operations.</p>
+     *
+     * @param elements the first dimension; copied
+     * @return a compound conditional product builder
+     * @throws NullPointerException if {@code elements} is null or contains a null element
+     */
+    public CompoundConditionalProductBuilder compoundProductOf(List<?> elements) {
+        return new CompoundConditionalProductBuilder(elements);
+    }
+
+    /**
+     * Creates a compound conditional product builder with two or more dimensions.
+     *
+     * @param first the first dimension
+     * @param second the second dimension
+     * @param additional further dimensions, in product order
+     * @return a compound conditional product builder containing all supplied dimensions
+     */
+    public CompoundConditionalProductBuilder compoundProductOf(
+            List<?> first, List<?> second, List<?>... additional) {
+        return new CompoundConditionalProductBuilder(first, second, additional);
+    }
+
+    /**
+     * Creates a builder for a Cartesian product constrained by raw joint predicates over several
+     * dimensions at once — for arithmetic or relational logic spanning two or more dimensions that a
+     * {@link io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition}'s equality and
+     * membership leaves cannot express.
+     *
+     * <p>Each rule, added with {@code when(dims...).matches(predicate)}, is compiled once, when it is
+     * added, into the same multi-trigger rule representation a compound {@code Condition} compiles into:
+     * every combination of the named dimensions' values is enumerated and the predicate evaluated against
+     * it, bounded the same way a compound rule's scope is bounded. Generation, {@link
+     * LambdaConditionalProductBuilder#count()} and {@link LambdaConditionalProductBuilder#isEmpty()} then
+     * read the precomputed result; the predicate itself is never called again. See {@link
+     * LambdaConditionalProductBuilder} for the full semantics and the trade-off (a lambda is opaque to
+     * static inspection, unlike a {@code Condition}) against using one.</p>
+     *
+     * @param elements the first dimension; copied
+     * @return a lambda-constrained product builder
+     * @throws NullPointerException if {@code elements} is null or contains a null element
+     */
+    public LambdaConditionalProductBuilder withLambda(List<?> elements) {
+        return new LambdaConditionalProductBuilder(elements);
+    }
+
+    /**
+     * Creates a lambda-constrained product builder with two or more dimensions.
+     *
+     * @param first the first dimension; copied
+     * @param second the second dimension; copied
+     * @param additional further dimensions, in product order; each copied
+     * @return a lambda-constrained product builder containing all supplied dimensions
+     * @throws NullPointerException if any dimension is null or contains a null element
+     */
+    public LambdaConditionalProductBuilder withLambda(
+            List<?> first, List<?> second, List<?>... additional) {
+        return new LambdaConditionalProductBuilder(first, second, additional);
     }
 
     /**

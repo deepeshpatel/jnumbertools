@@ -131,10 +131,12 @@ class ConstrainedProductBuilderTest {
         assertNotNull(builder.byRanks(ranks));
 
         // Test null ranks throws
-        assertThrows(IllegalArgumentException.class, () -> builder.byRanks(null));
+        List<BigInteger> nullList = null;
+        assertThrows(IllegalArgumentException.class, () -> builder.byRanks(nullList));
 
         // Test empty ranks is allowed
-        assertNotNull(builder.byRanks(Collections.emptyList()));
+        List<BigInteger> empty = List.of();
+        assertNotNull(builder.byRanks(empty));
     }
 
     @Test

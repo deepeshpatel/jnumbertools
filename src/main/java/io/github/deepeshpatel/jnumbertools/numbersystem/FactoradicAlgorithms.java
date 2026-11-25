@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
@@ -7,8 +8,7 @@ package io.github.deepeshpatel.jnumbertools.numbersystem;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * Provides various algorithms for working with the Factoradic numeral system.
@@ -35,10 +35,6 @@ public final class FactoradicAlgorithms {
 
     /**
      * Converts a Factoradic representation to its decimal equivalent.
-     * <p>
-     * This method computes the decimal value by summing each digit multiplied by the factorial of its position.
-     * <em>Note:</em> A new {@link Calculator} instance is created internally; consider refactoring to remove the static dependency.
-     * </p>
      *
      * @param factoradic an array representing the Factoradic digits.
      * @return the decimal value corresponding to the given Factoradic representation.
@@ -76,15 +72,23 @@ public final class FactoradicAlgorithms {
         if (k.equals(BigInteger.ZERO)) {
             return new int[]{0};
         }
-        List<Integer> factoradic = new ArrayList<>();
-        long d = 1;
+
+        // The maximum number of factoradic digits for a positive BigInteger
+        // is bounded by its bit length plus one.
+        int[] digits = new int[k.bitLength() + 1];
+        int size = 0;
+        long divisor = 1;
+
         while (!k.equals(BigInteger.ZERO)) {
-            BigInteger[] divideAndRemainder = k.divideAndRemainder(BigInteger.valueOf(d));
-            factoradic.add(divideAndRemainder[1].intValue());
+            BigInteger[] divideAndRemainder =
+                    k.divideAndRemainder(BigInteger.valueOf(divisor));
+
+            digits[size++] = divideAndRemainder[1].intValue();
             k = divideAndRemainder[0];
-            d++;
+            divisor++;
         }
-        return factoradic.stream().mapToInt(Integer::intValue).toArray();
+
+        return Arrays.copyOf(digits, size);
     }
 
     /**
@@ -138,21 +142,21 @@ public final class FactoradicAlgorithms {
      * the digits that dividing by d, d+1, ... one at a time would give.
      */
     private static void fillDigitsMagnitude(BigInteger k, int[] factoradic) {
-        byte[] bytes = k.toByteArray();                       // big-endian, two's complement; k > 0
+        byte[] bytes = k.toByteArray();
         int words = (bytes.length + 3) >>> 2;
-        int[] mag = new int[words];                           // mag[0] is the most significant word
+        int[] mag = new int[words];
         for (int b = 0; b < bytes.length; b++) {
-            int fromEnd = bytes.length - 1 - b;               // byte position counted from the least significant end
+            int fromEnd = bytes.length - 1 - b;
             mag[words - 1 - (fromEnd >>> 2)] |= (bytes[b] & 0xFF) << ((fromEnd & 3) << 3);
         }
-        int first = 0;                                        // index of the first non-zero word
+        int first = 0;
         while (first < words && mag[first] == 0) first++;
 
         int size = factoradic.length;
-        int digitsDone = 0;                                   // digits for divisors 1 .. digitsDone are written
+        int digitsDone = 0;
         while (digitsDone < size && first < words) {
             long product = digitsDone + 1L;
-            int last = digitsDone + 1;                        // the group covers divisors digitsDone+1 .. last
+            int last = digitsDone + 1;
             while (last < size && product * (last + 1L) < (1L << 31)) {
                 product *= ++last;
             }
@@ -163,14 +167,13 @@ public final class FactoradicAlgorithms {
                 remainder = current % product;
             }
             for (int d = digitsDone + 1; d <= last; d++) {
-                factoradic[size - d] = (int) (remainder % d);   // divisor d belongs to digit size - d
+                factoradic[size - d] = (int) (remainder % d);
                 remainder /= d;
             }
             digitsDone = last;
             while (first < words && mag[first] == 0) first++;
         }
         if (first < words) {
-            // value needs more digits than allowed, i.e. value >= size!
             throw new IllegalArgumentException(
                     "value is too large to be represented with " + size + " factoradic digits");
         }
@@ -178,9 +181,6 @@ public final class FactoradicAlgorithms {
 
     /**
      * Converts a Factoradic representation to its corresponding permutation.
-     * <p>
-     * This method maps the Factoradic digits to positions to produce the permutation.
-     * </p>
      *
      * @param factoradic the Factoradic representation to be converted.
      * @return an array representing the permutation corresponding to the given Factoradic representation.
@@ -203,19 +203,10 @@ public final class FactoradicAlgorithms {
 
     /**
      * Converts a rank to its corresponding permutation of specified size.
-     * <p>
-     * Uses factoradic representation to directly compute the permutation at the given
-     * lexicographical rank without generating all preceding permutations.
-     * </p>
-     * <p>
-     * Example: For size=3, rank 0 returns [0,1,2], rank 1 returns [0,2,1],
-     * rank 5 returns [2,1,0] (the last permutation).
-     * </p>
      *
      * @param rank the 0-based lexicographical rank of the desired permutation
      * @param size the size of the permutation (number of elements)
-     * @return an array of indices representing the permutation at the specified rank
-     * @throws IllegalArgumentException if rank is negative or ≥ size!
+     * @return an array of indices representing the permutation at the given rank
      */
     public static int[] unRank(BigInteger rank, int size) {
         return factoradicToMthPermutation(intToFactoradicKnownSize(rank, size));

@@ -2,7 +2,7 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.benchmarks.conditionalproduct.anyorder;
+package io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.anyorder;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.ConditionalProductBuilder;

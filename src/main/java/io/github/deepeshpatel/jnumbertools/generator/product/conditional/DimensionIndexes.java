@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,20 +44,52 @@ final class DimensionIndexes {
         if (map == null) {
             List<?> list = dimensions.get(dim);
             map = new HashMap<>(Math.max(16, list.size() * 2));
+            // Values that occur once keep a one-element array. The positions of a value that repeats are collected
+            // in a growable buffer (amortized constant time per occurrence) and stored as one exact-length array
+            // at the end, so a dimension made of many equal values is not copied once per occurrence.
+            Map<Object, Positions> repeated = null;
             for (int i = 0; i < list.size(); i++) {
                 Object element = list.get(i);
                 int[] known = map.get(element);
                 if (known == null) {
                     map.put(element, new int[]{i});
                 } else {
-                    int[] grown = java.util.Arrays.copyOf(known, known.length + 1);
-                    grown[known.length] = i;
-                    map.put(element, grown);
+                    if (repeated == null) repeated = new HashMap<>();
+                    Positions positions = repeated.get(element);
+                    if (positions == null) {
+                        positions = new Positions(known[0]);
+                        repeated.put(element, positions);
+                    }
+                    positions.add(i);
+                }
+            }
+            if (repeated != null) {
+                for (Map.Entry<Object, Positions> entry : repeated.entrySet()) {
+                    map.put(entry.getKey(), entry.getValue().toArray());
                 }
             }
             maps.compareAndSet(dim, null, map);
             map = maps.get(dim);
         }
         return map;
+    }
+
+    /** Positions of one repeated value, appended in increasing order. */
+    private static final class Positions {
+        private int[] buffer = new int[4];
+        private int size;
+
+        Positions(int first) {
+            buffer[size++] = first;
+        }
+
+        void add(int position) {
+            if (size == buffer.length) buffer = Arrays.copyOf(buffer, size * 2);
+            buffer[size++] = position;
+        }
+
+        int[] toArray() {
+            return Arrays.copyOf(buffer, size);
+        }
     }
 }

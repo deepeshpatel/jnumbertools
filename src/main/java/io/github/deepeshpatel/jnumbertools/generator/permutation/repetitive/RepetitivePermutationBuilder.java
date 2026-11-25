@@ -230,7 +230,7 @@ public final class RepetitivePermutationBuilder<T> implements Builder<T> {
      */
     @Override
     public BigInteger count() {
-        // In context of combinatorics 0⁰ = 1, 0⁰ = 1  and 0ʳ = 0
+        // In context of combinatorics 0⁰ = 1  and 0ʳ = 0
         if(width==0) return BigInteger.ONE;
         if(elements.isEmpty()) return BigInteger.ZERO;
         return calculator.power(elements.size(), width);

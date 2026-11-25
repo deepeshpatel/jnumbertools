@@ -85,4 +85,22 @@ class AnyOrderSplittingTest {
         var empty = cartesianProduct.conditionalProductOf(a).and(List.<Integer>of()).and(c);
         assertEquals(0L, empty.anyOrder().spliterator().estimateSize());
     }
+
+    @Test
+    void anEmptyDimensionAfterOverflowingDimensionsMeansNoWorkAndNoSplit() {
+        // Seven dimensions of 1,000 values multiply past Long.MAX_VALUE. The empty dimension after them still
+        // makes the product empty, so the spliterator must report no work and must not split.
+        List<List<Integer>> large = new ArrayList<>();
+        for (int i = 0; i < 7; i++) large.add(range(1000));
+        List<Integer> empty = new ArrayList<>();
+        var product = cartesianProduct.conditionalProductOf(large.get(0), large.get(1),
+                large.get(2), large.get(3), large.get(4), large.get(5), large.get(6), empty);
+
+        Spliterator<List<Object>> spliterator = product.anyOrder().spliterator();
+        assertEquals(0L, spliterator.estimateSize());
+        assertTrue(spliterator.trySplit() == null, "an empty product has nothing to split");
+        List<List<Object>> actual = new ArrayList<>();
+        spliterator.forEachRemaining(actual::add);
+        assertTrue(actual.isEmpty());
+    }
 }

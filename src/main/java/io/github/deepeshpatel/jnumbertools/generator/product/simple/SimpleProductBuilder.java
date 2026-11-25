@@ -72,7 +72,33 @@ public final class SimpleProductBuilder implements Builder<Object> {
      * @throws NullPointerException if {@code elements} is null or contains a null element
      */
     public SimpleProductBuilder(List<?> elements) {
-        this(List.<List<?>>of(snapshot(elements)), null);
+        this(List.<List<?>>of(snapshot(elements)), (Void) null);
+    }
+
+    /**
+     * Creates a builder containing two or more dimensions.
+     * Every dimension is copied once, preserving the supplied order.
+     *
+     * @param first first dimension
+     * @param second second dimension
+     * @param additional any further dimensions
+     * @throws NullPointerException if the additional array or any dimension is null,
+     *         or if any dimension contains a null element
+     */
+    public SimpleProductBuilder(List<?> first, List<?> second, List<?>... additional) {
+        this(snapshotDimensions(first, second, additional), (Void) null);
+    }
+
+    private static List<List<?>> snapshotDimensions(
+            List<?> first, List<?> second, List<?>[] additional) {
+        Objects.requireNonNull(additional, "additional dimensions must not be null");
+        List<List<?>> dimensions = new ArrayList<>(2 + additional.length);
+        dimensions.add(snapshot(first));
+        dimensions.add(snapshot(second));
+        for (List<?> dimension : additional) {
+            dimensions.add(snapshot(dimension));
+        }
+        return Collections.unmodifiableList(dimensions);
     }
 
     /**
@@ -80,12 +106,21 @@ public final class SimpleProductBuilder implements Builder<Object> {
      * defensive copies. The second parameter only distinguishes it from the public constructor (same erasure).
      */
     private SimpleProductBuilder(List<List<?>> allLists, Void unused) {
+        this(allLists, initialDimSizes(allLists), unused);
+    }
+
+    private SimpleProductBuilder(List<List<?>> allLists, BigInteger[] dimSizes, Void unused) {
         this.allLists = allLists;
         this.cachedCount = computeCount(allLists);
-        this.dimSizes = new BigInteger[allLists.size()];
-        for (int i = 0; i < dimSizes.length; i++) {
-            dimSizes[i] = BigInteger.valueOf(allLists.get(i).size());
+        this.dimSizes = dimSizes;
+    }
+
+    private static BigInteger[] initialDimSizes(List<List<?>> lists) {
+        BigInteger[] sizes = new BigInteger[lists.size()];
+        for (int i = 0; i < sizes.length; i++) {
+            sizes[i] = BigInteger.valueOf(lists.get(i).size());
         }
+        return sizes;
     }
 
     // ── Dimension chaining ───────────────────────────────────────────────────
@@ -103,7 +138,12 @@ public final class SimpleProductBuilder implements Builder<Object> {
         List<List<?>> newLists = new ArrayList<>(allLists.size() + 1); // O(dimensions)
         newLists.addAll(allLists);
         newLists.add(copy);
-        return new SimpleProductBuilder(Collections.unmodifiableList(newLists), null);
+
+        // Reuse the already-computed dimension sizes; only the appended dimension needs a new BigInteger.
+        BigInteger[] newDimSizes = Arrays.copyOf(dimSizes, dimSizes.length + 1);
+        newDimSizes[dimSizes.length] = BigInteger.valueOf(copy.size());
+
+        return new SimpleProductBuilder(Collections.unmodifiableList(newLists), newDimSizes, null);
     }
 
     // ── Builder interface ────────────────────────────────────────────────────

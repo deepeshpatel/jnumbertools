@@ -5,6 +5,66 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ## [Unreleased]
 
+## [4.2.0] - Released 2026-11-25
+
+### Added
+
+- Added a multi-list `conditionalProductOf(first, second, additional...)` overload alongside the
+  existing single-list entry point and `.and(...)` chaining, and a matching
+  `new ConditionalProductBuilder(first, second, additional...)` constructor.
+- Added compound trigger expressions through a separate `compoundProductOf(...)` entry point,
+  including the multi-list overload `compoundProductOf(first, second, additional...)`.
+  Triggers are composed with `condition(dim).is(value)` and nested `.and(Condition)` /
+  `.or(Condition)` calls, then attached with `.when(condition)`. The
+  `CompoundConditionalProductBuilder` exposes `generate()`, `count()` and `isEmpty()`.
+  `conditionalProductOf(...)` remains the pairwise-only entry point and additionally exposes
+  `lexOrder()`, `lexOrderMth()`, `byRanks()`, `choice()` and `sample()`.
+- Added `Condition`, a composable trigger condition built with `condition(dim).is(v)` and
+  `condition(dim).matches(predicate)`, and combined with `.and(Condition)`/`.or(Condition)`,
+  plus a matching `.when(Condition)` overload on `CompoundConditionalProductBuilder` (and on
+  `ConditionalProductBuilder`, for internal resolution). Conditions can be nested arbitrarily
+  (AND inside OR, OR inside AND), with grouping expressed by nested method calls. Internally,
+  they are normalized to OR-of-AND-groups; combining conditions into more than 4096 AND-groups
+  is rejected before allocating the combined groups.
+- Added `withLambda(...)` as a separate Cartesian-product entry point, with overloads for
+  one dimension (`withLambda(List<?> elements)`) and for two or more dimensions
+  (`withLambda(List<?> first, List<?> second, List<?>... additional)`). The
+  `LambdaConditionalProductBuilder` supports `when(...)` and `andWhen(...)` scopes, using
+  `Predicate<Object[]>` for arbitrary scope sizes or a typed
+  `BiPredicate<? super A, ? super B>` for two dimensions. Each predicate is compiled once into
+  the conditional-product constraint representation; predicates are not re-evaluated during
+  generation, counting or emptiness checks. Compilation is limited to 1,000,000 predicate probes
+  (antecedent combinations × target values); exceeding this limit throws
+  `IllegalArgumentException`. A two-dimension rule with a single trigger dimension is routed
+  through the pairwise relation table when applicable.
+
+### Fixed
+
+- Fixed compound rules whose scope overlaps a chain of pairwise rules. The chain was merged with the
+  scope into one enumerated block, which made counting far slower than the same chain without the
+  compound rule and rejected models that contain no loop. The chain between the scope's dimensions
+  is now a separate node joined to the scope by the rules between them, so each node is enumerated and
+  bounded on its own.
+- Fixed a gap where a node-to-node relation table built between two multi-dimension nodes (a compound
+  scope, or an ordinary pairwise loop of three or more dimensions) joined by a single rule was not
+  size-checked at all; only tables built from two or more rules between the same pair of nodes were.
+  The real cost of such a table depends on how many distinct combinations of values the linking rules'
+  own dimensions actually take, which can be far smaller than either node's full size once rows that
+  project to the same values are shared, so the check is applied as the table is actually being built,
+  bounding the work by `MAX_PAIR_CELLS` directly rather than by an estimate from the nodes' sizes. An
+  earlier version of this fix checked the nodes' full sizes instead and rejected some legitimate, cheap
+  rule sets as a result; it was replaced with this one before release.
+
+### Changed
+
+- Unified the compound and pairwise conditional-product engines internally.
+  `CompoundConditionalProductBuilder` delegates to the shared conditional-product model while
+  retaining its separate public API and supported-operation set. Compound rules now enter only
+  through `.when(Condition)`; the former flat `.and(dimension)/.or(dimension)` trigger chain
+  has been retired.
+- Renamed `compoundConditionalProductOf(...)` to `compoundProductOf(...)` on `CartesianProduct`.
+
+
 ## [4.1.0] - Released 2026-11-20
 
 ### Added

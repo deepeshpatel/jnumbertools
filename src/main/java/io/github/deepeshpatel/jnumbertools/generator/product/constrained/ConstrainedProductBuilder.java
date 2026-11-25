@@ -62,7 +62,8 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
     private final List<Builder<?>> builders;
     private final Calculator calculator;
     private final boolean isEmptyProduct;
-    private final BigInteger cachedCount; // pre-computed; count() is called frequently
+    private final BigInteger cachedCount;   // pre-computed; count() is called frequently
+    private final int[] sortedOrder;        // dimension indices ascending by count; fixed at construction
 
     /**
      * Constructs a ConstrainedProductBuilder with an initial multi-select combination.
@@ -83,6 +84,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         this.builders.add(firstBuilder);
         this.isEmptyProduct = firstBuilder.isEmpty();
         this.cachedCount = computeCount(this.builders, this.isEmptyProduct);
+        this.sortedOrder = computeSortedOrder(this.builders);
     }
 
     /**
@@ -95,16 +97,21 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         this.builders.add(firstBuilder);
         this.isEmptyProduct = firstBuilder.isEmpty();
         this.cachedCount = computeCount(this.builders, this.isEmptyProduct);
+        this.sortedOrder = computeSortedOrder(this.builders);
     }
 
     /**
-     * Private constructor for creating new instances with existing data.
+     * Private constructor for creating new instances with existing data. Both the count and the sorted
+     * dimension order are supplied by the caller so that {@link #append(Builder)} does not redo the work
+     * already done by the previous builder; only the new dimension's contribution is computed there.
      */
-    private ConstrainedProductBuilder(List<Builder<?>> builders, Calculator calculator, boolean isEmptyProduct) {
+    private ConstrainedProductBuilder(List<Builder<?>> builders, Calculator calculator,
+                                      boolean isEmptyProduct, BigInteger cachedCount, int[] sortedOrder) {
         this.builders = builders;
         this.calculator = calculator;
         this.isEmptyProduct = isEmptyProduct;
-        this.cachedCount = computeCount(builders, isEmptyProduct);
+        this.cachedCount = cachedCount;
+        this.sortedOrder = sortedOrder;
     }
 
     // ── count helper ────────────────────────────────────────────────────────
@@ -115,6 +122,42 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         return builders.stream()
                 .map(Builder::count)
                 .reduce(BigInteger.ONE, BigInteger::multiply);
+    }
+
+    /**
+     * Dimension indices ordered by dimension size (smallest first), used by
+     * {@link ConstrainedProductGenerator#iterator()} to decide which dimensions to keep in memory.
+     * Computed once per builder; the underlying dimension counts never change after construction.
+     */
+    private static int[] computeSortedOrder(List<Builder<?>> builders) {
+        int n = builders.size();
+        if (n == 0) return new int[0];
+        Integer[] boxed = new Integer[n];
+        for (int i = 0; i < n; i++) boxed[i] = i;
+        Arrays.sort(boxed, Comparator.comparing(i -> builders.get(i).count()));
+        int[] order = new int[n];
+        for (int i = 0; i < n; i++) order[i] = boxed[i];
+        return order;
+    }
+
+    /**
+     * Inserts {@code newIndex} into {@code order} at the first position where the existing dimension's
+     * count exceeds {@code newCount}. Stable: dimensions of equal count stay in insertion order.
+     */
+    private static int[] insertSorted(int[] order, int newIndex, BigInteger newCount,
+                                      List<Builder<?>> existingBuilders) {
+        int insertAt = order.length;
+        for (int i = 0; i < order.length; i++) {
+            if (existingBuilders.get(order[i]).count().compareTo(newCount) > 0) {
+                insertAt = i;
+                break;
+            }
+        }
+        int[] result = new int[order.length + 1];
+        System.arraycopy(order, 0, result, 0, insertAt);
+        result[insertAt] = newIndex;
+        System.arraycopy(order, insertAt, result, insertAt + 1, order.length - insertAt);
+        return result;
     }
 
     // ── Dimension chaining ───────────────────────────────────────────────────
@@ -170,14 +213,23 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
 
     /**
      * Adds an already validated dimension. An already-empty product stays empty, so nothing is added to it.
+     * The new count and sorted order are computed incrementally from the previous builder's values, so
+     * chaining n dimensions is O(n) multiplications total rather than O(n²).
      */
     private ConstrainedProductBuilder append(Builder<?> newDimension) {
         if (isEmptyProduct) {
-            return new ConstrainedProductBuilder(builders, calculator, true);
+            // An empty product stays empty; the existing arrays are still valid.
+            return new ConstrainedProductBuilder(builders, calculator, true, BigInteger.ZERO, sortedOrder);
         }
         List<Builder<?>> newBuilders = new ArrayList<>(this.builders);
         newBuilders.add(newDimension);
-        return new ConstrainedProductBuilder(newBuilders, calculator, newDimension.isEmpty());
+        int newIndex = this.builders.size();          // position of the new dimension in newBuilders
+        BigInteger newDimCount = newDimension.count();
+        BigInteger newCount = newDimension.isEmpty()
+                ? BigInteger.ZERO
+                : cachedCount.multiply(newDimCount);
+        int[] newOrder = insertSorted(sortedOrder, newIndex, newDimCount, this.builders);
+        return new ConstrainedProductBuilder(newBuilders, calculator, newDimension.isEmpty(), newCount, newOrder);
     }
 
     // ── Builder interface ────────────────────────────────────────────────────
@@ -276,14 +328,14 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
             // C(34,17), which can never fit) is generated lazily and never materialized.
             // The first dimension is never restarted - it is traversed once - so keeping it in memory would only
             // cost time up front, and it is always lazy.
+            //
+            // sortedOrder was computed once at builder construction (and updated incrementally on each and*()),
+            // so this method performs no per-call sort or count() comparisons.
             int n = builders.size();
-            Integer[] smallestFirst = new Integer[n];
-            for (int i = 0; i < n; i++) smallestFirst[i] = i;
-            Arrays.sort(smallestFirst, Comparator.comparing(i -> builders.get(i).count()));
 
             Iterable<List<Object>>[] dimensions = new Iterable[n];
             long remaining = MATERIALIZE_BUDGET;
-            for (int i : smallestFirst) {
+            for (int i : sortedOrder) {
                 Builder<?> dimension = builders.get(i);
                 BigInteger count = dimension.count();
                 if (i > 0 && count.compareTo(BigInteger.valueOf(remaining)) <= 0) {

@@ -23,6 +23,47 @@ class CartesianProductTest {
         cartesianProduct.simpleProductOf(Collections.emptyList());
     }
 
+    @Test
+    @DisplayName("simpleProductOf overload accepts two or more dimensions")
+    void simpleProductOfMultipleDimensions() {
+        var first = List.of("A", "B");
+        var second = List.of(1, 2);
+        var third = List.of("X", "Y");
+
+        var product = cartesianProduct.simpleProductOf(first, second, third);
+
+        assertEquals(8, product.count().intValueExact());
+        assertEquals(List.of(
+                List.of("A", 1, "X"),
+                List.of("A", 1, "Y"),
+                List.of("A", 2, "X"),
+                List.of("A", 2, "Y"),
+                List.of("B", 1, "X"),
+                List.of("B", 1, "Y"),
+                List.of("B", 2, "X"),
+                List.of("B", 2, "Y")
+        ), product.lexOrder().stream().toList());
+    }
+
+    @Test
+    @DisplayName("simpleProductOf overload validates and snapshots every dimension")
+    void simpleProductOfMultipleDimensionsValidationAndSnapshot() {
+        var first = new java.util.ArrayList<>(List.of("A", "B"));
+        var second = new java.util.ArrayList<>(List.of(1, 2));
+
+        var product = cartesianProduct.simpleProductOf(first, second);
+        first.clear();
+        second.add(3);
+
+        assertEquals(4, product.count().intValueExact());
+        assertThrows(NullPointerException.class,
+                () -> cartesianProduct.simpleProductOf(List.of("A"), null));
+        assertThrows(NullPointerException.class,
+                () -> cartesianProduct.simpleProductOf(List.of("A"), List.of(1), (List<?>[]) null));
+        assertThrows(NullPointerException.class,
+                () -> cartesianProduct.simpleProductOf(List.of("A"), List.of(1), java.util.Arrays.asList("X", null)));
+    }
+
     @Nested
     @DisplayName("constrainedProductOfDistinct")
     class ConstrainedProductOfDistinctTests {

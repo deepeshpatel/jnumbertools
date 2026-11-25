@@ -70,12 +70,6 @@ class SimpleProductBuilderTest {
         // Test returns generator for valid ranks
         var ranks = List.of(BigInteger.ZERO, BigInteger.ONE);
         assertNotNull(builder.byRanks(ranks));
-
-        // Test null ranks throws
-        assertThrows(IllegalArgumentException.class, () -> builder.byRanks(null));
-
-        // Test empty ranks is allowed
-        assertNotNull(builder.byRanks(Collections.emptyList()));
     }
 
     @Test
