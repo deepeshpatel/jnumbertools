@@ -460,7 +460,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     @Override
     public StreamableIterable<Object> lexOrder() {
-        return lexOrder(LexOrderStrategy.PRUNED_BITSET);
+        return lexOrder(model.multiRules.isEmpty() ? LexOrderStrategy.PRUNED_BITSET : LexOrderStrategy.DP);
     }
 
     /**
@@ -496,8 +496,12 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @throws IllegalArgumentException if {@code strategy} is {@code ADAPTIVE}
      */
     public StreamableIterable<Object> lexOrder(LexOrderStrategy strategy) {
-        requirePairwiseRulesForLexOrder();
         Objects.requireNonNull(strategy, "strategy");
+        if (!model.multiRules.isEmpty() && strategy != LexOrderStrategy.DP) {
+            throw new UnsupportedOperationException(
+                    "Compound conditions require lexOrder(LexOrderStrategy.DP); " +
+                            "the pruned lexicographic strategies support pairwise rules only.");
+        }
         if (strategy == LexOrderStrategy.ADAPTIVE) {
             throw new IllegalArgumentException("ADAPTIVE requires an estimated traversal limit; use lexOrder(strategy, estimatedLimit)");
         }
@@ -531,7 +535,8 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         if (estimatedLimit < 0) {
             throw new IllegalArgumentException("estimatedLimit must be non-negative");
         }
-        return ConditionalProductGenerators.lexOrder(model, LexOrderStrategy.PRUNED_BITSET);
+        return ConditionalProductGenerators.lexOrder(
+                model, model.multiRules.isEmpty() ? LexOrderStrategy.PRUNED_BITSET : LexOrderStrategy.DP);
     }
 
     /**
@@ -602,13 +607,6 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         return "ConditionalProductBuilder{dimensions=" + model.dimensions + ", linkedPairs=" + model.relations.size() + '}';
     }
 
-    private void requirePairwiseRulesForLexOrder() {
-        if (!model.multiRules.isEmpty()) {
-            throw new UnsupportedOperationException(
-                    "lexOrder() is not supported for compound conditions; use anyOrder() instead. " +
-                            "lexOrder() is available only for pairwise when().then() rules.");
-        }
-    }
 
     // ── Rule application ─────────────────────────────────────────────────────
 
