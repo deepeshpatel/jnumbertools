@@ -5,6 +5,12 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Added natural-order comparison methods to conditional-product rule conditions and consequences:
+  `isGreaterThan`, `isGreaterThanOrEqual`, `isLessThan` and `isLessThanOrEqual`.
+  Comparisons use `Comparable.compareTo` and are compiled into positional bit sets.
+
 ### Changed
 
 - The strongly typed lambda predicates now stop at five dimensions: `Predicate3` through `Predicate5`
