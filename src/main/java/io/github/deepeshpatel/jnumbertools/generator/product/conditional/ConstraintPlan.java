@@ -456,10 +456,13 @@ final class ConstraintPlan {
         throw new IllegalStateException("dimension not in node");
     }
 
-    /** Whether a complete tuple satisfies every pairwise rule (used by pairwise rejection sampling). */
+    /** Whether a complete tuple satisfies every pairwise and multi-trigger rule. */
     boolean isValid(int[] val) {
         for (int d = 1; d < dimensions; d++) {
             if (!agreesWithBelow(d, val[d], val)) return false;
+        }
+        for (MultiTriggerRule rule : multiRules) {
+            if (!rule.isSatisfied(val)) return false;
         }
         return true;
     }
