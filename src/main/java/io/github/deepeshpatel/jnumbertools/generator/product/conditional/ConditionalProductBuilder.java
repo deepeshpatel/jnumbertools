@@ -456,7 +456,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * The lookahead threshold is an implementation choice and may change between versions.</p>
      *
      * @return a re-iterable generator of valid tuples in lexicographic order
-     * @throws UnsupportedOperationException if an explicitly requested strategy supports pairwise rules only
+     * @throws UnsupportedOperationException if the requested strategy supports pairwise rules only and the product has compound rules
      */
     @Override
     public StreamableIterable<Object> lexOrder() {
