@@ -22,6 +22,43 @@ import static org.junit.jupiter.api.Assertions.*;
 class CompoundConditionalProductBuilderTest {
 
     @Test
+    void conditionSupportsNaturalOrderComparisons() {
+        List<Integer> a = List.of(1, 2, 3, 4, 5);
+        List<Integer> b = List.of(10, 20, 30, 40, 50);
+        List<Integer> target = List.of(100, 200, 300);
+
+        var product = cartesianProduct.compoundProductOf(a, b, target)
+                .when(condition(a).isGreaterThan(2)
+                        .and(condition(b).isGreaterThanOrEqual(30))
+                        .or(condition(a).isLessThan(2)
+                                .and(condition(b).isLessThanOrEqual(20))))
+                .then(target).isGreaterThanOrEqual(200);
+
+        var expected = cartesianProduct.simpleProductOf(a).and(b).and(target).lexOrder().stream()
+                .filter(tuple -> {
+                    int av = (Integer) tuple.get(0);
+                    int bv = (Integer) tuple.get(1);
+                    boolean trigger = (av > 2 && bv >= 30) || (av < 2 && bv <= 20);
+                    return !trigger || (Integer) tuple.get(2) >= 200;
+                }).toList();
+        assertEquals(expected, product.lexOrder().stream().toList());
+    }
+
+    @Test
+    void relationalComparisonsRejectNullAndIncompatibleValues() {
+        List<Integer> numbers = List.of(1, 2, 3);
+        List<String> words = List.of("a", "b");
+
+        assertThrows(NullPointerException.class, () -> condition(numbers).isGreaterThan(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> cartesianProduct.compoundProductOf(numbers, words)
+                        .when(condition(numbers).isGreaterThan(1)).then(words).is("a"));
+        assertThrows(IllegalArgumentException.class,
+                () -> cartesianProduct.compoundProductOf(numbers, words)
+                        .when(condition(words).isLessThan("b")).then(numbers).is(1));
+    }
+
+    @Test
     void compoundEntryPointGeneratesAndCountsMatchingTuples() {
         List<String> os = List.of("Windows", "macOS", "Linux");
         List<String> browser = List.of("Chrome", "Safari", "Firefox");
