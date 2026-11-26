@@ -100,6 +100,32 @@ class ConditionalProductBuilderTest {
     }
 
     @Test
+    void relationalComparisonsWorkOnTriggersAndConsequences() {
+        List<Integer> trigger = List.of(1, 2, 3, 4, 5);
+        List<Integer> target = List.of(10, 20, 30, 40);
+
+        var greater = cartesianProduct.conditionalProductOf(trigger).and(target)
+                .when(trigger).isGreaterThan(3).then(target).isGreaterThanOrEqual(30);
+        assertEquals(List.of(
+                List.of(1, 10), List.of(1, 20), List.of(1, 30), List.of(1, 40),
+                List.of(2, 10), List.of(2, 20), List.of(2, 30), List.of(2, 40),
+                List.of(3, 10), List.of(3, 20), List.of(3, 30), List.of(3, 40),
+                List.of(4, 30), List.of(4, 40),
+                List.of(5, 30), List.of(5, 40)),
+                greater.lexOrder().stream().toList());
+
+        var less = cartesianProduct.conditionalProductOf(trigger).and(target)
+                .when(trigger).isLessThanOrEqual(2).then(target).isLessThan(30);
+        assertEquals(List.of(
+                List.of(1, 10), List.of(1, 20),
+                List.of(2, 10), List.of(2, 20),
+                List.of(3, 10), List.of(3, 20), List.of(3, 30), List.of(3, 40),
+                List.of(4, 10), List.of(4, 20), List.of(4, 30), List.of(4, 40),
+                List.of(5, 10), List.of(5, 20), List.of(5, 30), List.of(5, 40)),
+                less.lexOrder().stream().toList());
+    }
+
+    @Test
     void ruleVocabularyIsEquivalent() {
         var a = cartesianProduct.conditionalProductOf(os).and(browser)
                 .when(browser).is("Safari").then(os).isOneOf("macOS");
