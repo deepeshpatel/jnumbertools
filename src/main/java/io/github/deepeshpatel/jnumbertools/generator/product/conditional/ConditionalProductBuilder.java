@@ -443,7 +443,8 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
     // Builder interface Methods
     /**
-     * Returns the valid tuples in lexicographic order using the {@link LexOrderStrategy#PRUNED_BITSET} strategy.
+     * Returns valid tuples in lexicographic order. Pairwise-only products use {@link LexOrderStrategy#PRUNED_BITSET};
+     * products containing compound or lambda rules use {@link LexOrderStrategy#DP}.
      *
      * <p>This is the default and recommended strategy for ordinary lexicographic traversal. It checks constraints against the selected prefix and,
      * lazily enables feasibility lookahead when traversal work indicates that pairwise prefix pruning has
@@ -456,7 +457,6 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * The lookahead threshold is an implementation choice and may change between versions.</p>
      *
      * @return a re-iterable generator of valid tuples in lexicographic order
-     * @throws UnsupportedOperationException if the requested strategy supports pairwise rules only and the product has compound rules
      */
     @Override
     public StreamableIterable<Object> lexOrder() {
@@ -528,10 +528,6 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      */
     public StreamableIterable<Object> lexOrder(LexOrderStrategy strategy, long estimatedLimit) {
         Objects.requireNonNull(strategy, "strategy");
-        if (!model.multiRules.isEmpty()) {
-            throw new UnsupportedOperationException(
-                    "Compound conditions require the DP lexicographic strategy.");
-        }
         if (strategy != LexOrderStrategy.ADAPTIVE) {
             throw new IllegalArgumentException("An estimated traversal limit is supported only with ADAPTIVE");
         }
