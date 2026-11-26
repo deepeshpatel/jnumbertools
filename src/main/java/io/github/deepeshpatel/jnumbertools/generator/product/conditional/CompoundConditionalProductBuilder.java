@@ -8,6 +8,7 @@ import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Builder for Cartesian products constrained by composed {@link Condition} expressions.
@@ -27,8 +28,8 @@ import java.util.List;
  *
  * <p>Every completed rule must hold. Compound rules support exact {@link #count()} and
  * {@link #isEmpty()} queries and lazy generation through {@link #generate()}. Generation
- * does not promise lexicographic encounter order. Rank-based traversal and sampling
- * operations are intentionally not exposed by this builder.</p>
+ * does not promise lexicographic encounter order during {@link #generate()}. Lexicographic traversal,
+ * rank-based access, choice and sampling are also available. Compound rules use the DP lexicographic strategy.</p>
  *
  * <p>Dimensions are identified by the same list instances supplied to
  * {@code compoundProductOf(...)} or {@link #and(List)}. Dimension values are
@@ -150,6 +151,41 @@ public final class CompoundConditionalProductBuilder {
     /** Returns the exact number of valid tuples without generating them. */
     public BigInteger count() {
         return delegate.count();
+    }
+
+    /** Returns valid tuples in lexicographic order. Compound rules use the DP strategy. */
+    public StreamableIterable<Object> lexOrder() {
+        return delegate.lexOrder();
+    }
+
+    /** Returns valid tuples in lexicographic order using the requested strategy. */
+    public StreamableIterable<Object> lexOrder(LexOrderStrategy strategy) {
+        return delegate.lexOrder(strategy);
+    }
+
+    /** Returns valid tuples in lexicographic order using the adaptive strategy policy. */
+    public StreamableIterable<Object> lexOrder(LexOrderStrategy strategy, long estimatedLimit) {
+        return delegate.lexOrder(strategy, estimatedLimit);
+    }
+
+    /** Returns every m-th valid tuple in lexicographic rank order. */
+    public StreamableIterable<Object> lexOrderMth(BigInteger m, BigInteger start) {
+        return delegate.lexOrderMth(m, start);
+    }
+
+    /** Resolves the supplied valid-tuple ranks lazily. */
+    public StreamableIterable<Object> byRanks(Iterable<BigInteger> ranks) {
+        return delegate.byRanks(ranks);
+    }
+
+    /** Uniform random choice with replacement. */
+    public StreamableIterable<Object> choice(int sampleSize, Random random) {
+        return delegate.choice(sampleSize, random);
+    }
+
+    /** Uniform random sampling without replacement. */
+    public StreamableIterable<Object> sample(int sampleSize, Random random) {
+        return delegate.sample(sampleSize, random);
     }
 
     /** Returns whether this product contains no valid tuples. */
