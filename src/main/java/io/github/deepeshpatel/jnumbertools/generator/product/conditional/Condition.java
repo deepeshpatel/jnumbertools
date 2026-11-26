@@ -187,19 +187,19 @@ public final class Condition {
         public Condition is(Object value) { return leaf(List.of(nonNull(value)), false); }
         /** The chosen value is greater than {@code value}, using its natural ordering. */
         public Condition isGreaterThan(T value) {
-            return matches(candidate -> ComparisonPredicates.greaterThan(value).test(candidate));
+            return matches(ComparisonPredicates.greaterThan(value));
         }
         /** The chosen value is greater than or equal to {@code value}, using its natural ordering. */
         public Condition isGreaterThanOrEqual(T value) {
-            return matches(candidate -> ComparisonPredicates.greaterThanOrEqual(value).test(candidate));
+            return matches(ComparisonPredicates.greaterThanOrEqual(value));
         }
         /** The chosen value is less than {@code value}, using its natural ordering. */
         public Condition isLessThan(T value) {
-            return matches(candidate -> ComparisonPredicates.lessThan(value).test(candidate));
+            return matches(ComparisonPredicates.lessThan(value));
         }
         /** The chosen value is less than or equal to {@code value}, using its natural ordering. */
         public Condition isLessThanOrEqual(T value) {
-            return matches(candidate -> ComparisonPredicates.lessThanOrEqual(value).test(candidate));
+            return matches(ComparisonPredicates.lessThanOrEqual(value));
         }
         /** The chosen value is anything except {@code value}. */
         public Condition isNot(Object value) { return leaf(List.of(nonNull(value)), true); }
