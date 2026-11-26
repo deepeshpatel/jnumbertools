@@ -9,6 +9,7 @@ import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -124,6 +125,39 @@ public final class LambdaConditionalProductBuilder {
 
         /** Returns the exact number of valid tuples. */
         public BigInteger count() { return delegate.count(); }
+
+        /** Returns valid tuples in lexicographic order. Compound rules use the DP strategy. */
+        public StreamableIterable<Object> lexOrder() { return delegate.lexOrder(); }
+
+        /** Returns valid tuples in lexicographic order using the requested strategy. */
+        public StreamableIterable<Object> lexOrder(LexOrderStrategy strategy) {
+            return delegate.lexOrder(strategy);
+        }
+
+        /** Returns valid tuples in lexicographic order using the adaptive strategy policy. */
+        public StreamableIterable<Object> lexOrder(LexOrderStrategy strategy, long estimatedLimit) {
+            return delegate.lexOrder(strategy, estimatedLimit);
+        }
+
+        /** Returns every m-th valid tuple in lexicographic rank order. */
+        public StreamableIterable<Object> lexOrderMth(BigInteger m, BigInteger start) {
+            return delegate.lexOrderMth(m, start);
+        }
+
+        /** Resolves the supplied valid-tuple ranks lazily. */
+        public StreamableIterable<Object> byRanks(Iterable<BigInteger> ranks) {
+            return delegate.byRanks(ranks);
+        }
+
+        /** Uniform random choice with replacement. */
+        public StreamableIterable<Object> choice(int sampleSize, Random random) {
+            return delegate.choice(sampleSize, random);
+        }
+
+        /** Uniform random sampling without replacement. */
+        public StreamableIterable<Object> sample(int sampleSize, Random random) {
+            return delegate.sample(sampleSize, random);
+        }
 
         /** Returns whether no tuple is valid. */
         public boolean isEmpty() { return delegate.isEmpty(); }
