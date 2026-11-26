@@ -456,7 +456,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * The lookahead threshold is an implementation choice and may change between versions.</p>
      *
      * @return a re-iterable generator of valid tuples in lexicographic order
-     * @throws UnsupportedOperationException if the product contains a compound trigger rule
+     * @throws UnsupportedOperationException if an explicitly requested strategy supports pairwise rules only
      */
     @Override
     public StreamableIterable<Object> lexOrder() {
@@ -527,8 +527,11 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @throws IllegalArgumentException if the strategy is not {@code ADAPTIVE} or the estimate is negative
      */
     public StreamableIterable<Object> lexOrder(LexOrderStrategy strategy, long estimatedLimit) {
-        requirePairwiseRulesForLexOrder();
         Objects.requireNonNull(strategy, "strategy");
+        if (!model.multiRules.isEmpty()) {
+            throw new UnsupportedOperationException(
+                    "Compound conditions require the DP lexicographic strategy.");
+        }
         if (strategy != LexOrderStrategy.ADAPTIVE) {
             throw new IllegalArgumentException("An estimated traversal limit is supported only with ADAPTIVE");
         }
