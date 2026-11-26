@@ -281,6 +281,7 @@ class LambdaConditionalProductBuilderTest {
         assertEquals(List.of(expected.get(0), expected.get(3), expected.get(5)),
                 product.byRanks(List.of(BigInteger.ZERO, BigInteger.valueOf(3), BigInteger.valueOf(5))).stream().toList());
         assertEquals(expected, product.lexOrder(LexOrderStrategy.DP).stream().toList());
+        assertEquals(expected, product.lexOrder(LexOrderStrategy.ADAPTIVE, 100).stream().toList());
         assertEquals(2, product.lexOrderMth(BigInteger.valueOf(3), BigInteger.ZERO).stream().count());
         assertEquals(4, product.choice(4, new java.util.Random(42)).stream().count());
         List<List<Object>> sample = product.sample(4, new java.util.Random(42)).stream().toList();
