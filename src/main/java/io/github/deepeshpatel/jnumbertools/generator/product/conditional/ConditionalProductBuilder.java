@@ -618,6 +618,27 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     }
 
     /**
+     * Filters a sole dimension while preserving the caller's original list as its identity handle.
+     */
+    ConditionalProductBuilder withUnaryLambdaRule(Predicate<Object> predicate) {
+        Objects.requireNonNull(predicate, "predicate must not be null");
+        if (model.dimensions.size() != 1) {
+            throw new IllegalStateException("A unary lambda predicate requires exactly one dimension");
+        }
+        List<Object> filtered = new ArrayList<>();
+        for (Object value : model.dimensions.get(0)) {
+            if (predicate.test(value)) filtered.add(value);
+        }
+        List<List<?>> copies = new ArrayList<>(model.dimensions);
+        copies.set(0, snapshot(filtered));
+        return new ConditionalProductBuilder(copies, originals);
+    }
+
+    int dimensionCount() {
+        return model.dimensions.size();
+    }
+
+    /**
      * Compiles an arbitrary joint predicate over {@code scopeDims} into one or more multi-trigger rules:
      * the same representation a compound {@link Condition} rule resolves into. The predicate is evaluated
      * once per combination of the scope's dimensions, here, during compilation; it is never called again
@@ -664,27 +685,6 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      *                                  that would need to be probed exceeds
      *                                  {@link ConstraintGraph#MAX_LOOP_COMBINATIONS}
      */
-    /**
-     * Filters a sole dimension while preserving the caller's original list as its identity handle.
-     */
-    ConditionalProductBuilder withUnaryLambdaRule(Predicate<Object> predicate) {
-        Objects.requireNonNull(predicate, "predicate must not be null");
-        if (model.dimensions.size() != 1) {
-            throw new IllegalStateException("A unary lambda predicate requires exactly one dimension");
-        }
-        List<Object> filtered = new ArrayList<>();
-        for (Object value : model.dimensions.get(0)) {
-            if (predicate.test(value)) filtered.add(value);
-        }
-        List<List<?>> copies = new ArrayList<>(model.dimensions);
-        copies.set(0, snapshot(filtered));
-        return new ConditionalProductBuilder(copies, originals);
-    }
-
-    int dimensionCount() {
-        return model.dimensions.size();
-    }
-
     ConditionalProductBuilder withLambdaRule(int[] scopeDims, Predicate<Object[]> predicate) {
         Objects.requireNonNull(predicate, "predicate must not be null");
         Objects.requireNonNull(scopeDims, "scopeDims must not be null");
@@ -737,9 +737,13 @@ public final class ConditionalProductBuilder implements Builder<Object> {
             totalProbes = antecedentCombos * targetSize;
         }
         if (totalProbes > ConstraintGraph.MAX_LOOP_COMBINATIONS) {
+            BigInteger probes = BigInteger.ONE;
+            for (int dim : scopeDims) probes = probes.multiply(BigInteger.valueOf(model.dimensions.get(dim).size()));
             throw new IllegalArgumentException("Compiling this lambda rule would need to probe the predicate "
-                    + "more than " + ConstraintGraph.MAX_LOOP_COMBINATIONS + " times (antecedent combinations "
-                    + "times target values); narrow the scope or its dimensions' sizes.");
+                    + probes + " times (antecedent combinations times target values), but the limit is "
+                    + ConstraintGraph.MAX_LOOP_COMBINATIONS + ". A predicate over all dimensions is compiled "
+                    + "over the whole product; use when(dim1, dim2, ...).matches(predicate) to cover only the "
+                    + "dimensions it depends on, or reduce the sizes of the dimensions it covers.");
         }
 
         // Nothing to compile when either side is empty. An empty antecedent dimension means there is no

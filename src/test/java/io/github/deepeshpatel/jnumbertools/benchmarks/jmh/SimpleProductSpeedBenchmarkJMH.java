@@ -237,25 +237,27 @@ sample command
 mvn test-compile exec:exec \
   -Dexec.executable="java" \
   -Dexec.classpathScope="test" \
-  -Dexec.args="-cp %classpath org.openjdk.jmh.Main SimpleProductSpeedBenchmarkJMH -p size=5,10,15,20,30,40 -wi 1 -w 1s -i 2 -r 1s -f 1 -tu ms -bm avgt"
+  -Dexec.args="-cp %classpath org.openjdk.jmh.Main SimpleProductSpeedBenchmarkJMH -p size=5,10,15 -wi 5 -w 1s -i 10 -r 1s -f 3 -tu ms -bm avgt"
 
 # JMH version: 1.37
 # VM version: JDK 27.0.1.0.3, OpenJDK 64-Bit Server VM, 27.0.1.0.3
 # VM invoker: /opt/homebrew/Cellar/openjdk/27.0.1.0.3/libexec/openjdk.jdk/Contents/Home/bin/java
 # VM options: <none>
 
+Benchmark                                                 (size)  Mode  Cnt  Score    Error  Units
+SimpleProductSpeedBenchmarkJMH.jnumberToolsSimpleProduct       5  avgt   30  0.005 ±  0.001  ms/op
+SimpleProductSpeedBenchmarkJMH.jnumberToolsSimpleProduct      10  avgt   30  0.066 ±  0.003  ms/op
+SimpleProductSpeedBenchmarkJMH.jnumberToolsSimpleProduct      15  avgt   30  0.342 ±  0.007  ms/op
+SimpleProductSpeedBenchmarkJMH.nestedJavaStream                5  avgt   30  0.012 ±  0.001  ms/op
+SimpleProductSpeedBenchmarkJMH.nestedJavaStream               10  avgt   30  0.144 ±  0.004  ms/op
+SimpleProductSpeedBenchmarkJMH.nestedJavaStream               15  avgt   30  0.758 ±  0.006  ms/op
+
 Benchmark                                                 (size)  Mode  Cnt   Score   Error  Units
-SimpleProductSpeedBenchmarkJMH.jnumberToolsSimpleProduct       5  avgt    2   0.005          ms/op
-SimpleProductSpeedBenchmarkJMH.jnumberToolsSimpleProduct      10  avgt    2   0.063          ms/op
-SimpleProductSpeedBenchmarkJMH.jnumberToolsSimpleProduct      15  avgt    2   0.376          ms/op
-SimpleProductSpeedBenchmarkJMH.jnumberToolsSimpleProduct      20  avgt    2   1.087          ms/op
-SimpleProductSpeedBenchmarkJMH.jnumberToolsSimpleProduct      30  avgt    2   5.276          ms/op
-SimpleProductSpeedBenchmarkJMH.jnumberToolsSimpleProduct      40  avgt    2  16.826          ms/op
-SimpleProductSpeedBenchmarkJMH.nestedJavaStream                5  avgt    2   0.012          ms/op
-SimpleProductSpeedBenchmarkJMH.nestedJavaStream               10  avgt    2   0.149          ms/op
-SimpleProductSpeedBenchmarkJMH.nestedJavaStream               15  avgt    2   0.755          ms/op
-SimpleProductSpeedBenchmarkJMH.nestedJavaStream               20  avgt    2   2.388          ms/op
-SimpleProductSpeedBenchmarkJMH.nestedJavaStream               30  avgt    2  12.234          ms/op
-SimpleProductSpeedBenchmarkJMH.nestedJavaStream               40  avgt    2  36.916          ms/op
+SimpleProductSpeedBenchmarkJMH.jnumberToolsSimpleProduct      20  avgt   30   1.086 ± 0.026  ms/op
+SimpleProductSpeedBenchmarkJMH.jnumberToolsSimpleProduct      30  avgt   30   5.856 ± 0.846  ms/op
+SimpleProductSpeedBenchmarkJMH.jnumberToolsSimpleProduct      40  avgt   30  17.229 ± 0.412  ms/op
+SimpleProductSpeedBenchmarkJMH.nestedJavaStream               20  avgt   30   2.322 ± 0.025  ms/op
+SimpleProductSpeedBenchmarkJMH.nestedJavaStream               30  avgt   30  12.276 ± 0.341  ms/op
+SimpleProductSpeedBenchmarkJMH.nestedJavaStream               40  avgt   30  37.117 ± 0.256  ms/op
 
  */

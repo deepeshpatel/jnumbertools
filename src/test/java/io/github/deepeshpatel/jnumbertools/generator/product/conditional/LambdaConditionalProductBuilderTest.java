@@ -52,12 +52,21 @@ class LambdaConditionalProductBuilderTest {
     }
 
     @Test
-    void tenDimensionsUseStronglyTypedPredicate() {
+    void fiveDimensionsUseStronglyTypedPredicate() {
         List<Integer> d=List.of(0,1);
-        var product=cartesianProduct.withLambda(d,d,d,d,d,d,d,d,d,d)
-                .when((a,b,c,d4,e,f,g,h,i,j)->a+b+c+d4+e+f+g+h+i+j>=1);
-        assertEquals(BigInteger.valueOf(1023),product.count());
-        assertEquals(1023,product.generate().stream().count());
+        var product=cartesianProduct.withLambda(d,d,d,d,d)
+                .when((a,b,c,d4,e)->a+b+c+d4+e>=1);
+        assertEquals(BigInteger.valueOf(31),product.count());
+        assertEquals(31,product.generate().stream().count());
+    }
+
+    @Test
+    void sixDimensionsUseArrayPredicate() {
+        List<Integer> d=List.of(0,1);
+        var product=cartesianProduct.withLambda(d,d,d,d,d,d)
+                .when(values->values[0].equals(values[5]));
+        assertEquals(BigInteger.valueOf(32),product.count());
+        assertEquals(32,product.generate().stream().count());
     }
 
     @Test
@@ -128,6 +137,130 @@ class LambdaConditionalProductBuilderTest {
                 .when(new List<?>[]{a,b}).matches(values->(Integer)values[0]<(Integer)values[1]);
 
         assertEquals(BigInteger.valueOf(4_950L).multiply(BigInteger.valueOf(1_000_000L)),product.count());
+    }
+
+    // ── scoped rules keep the builder's type, so typed and scoped rules can be mixed in any order ──
+
+    private static List<Integer> range(int size) {
+        return java.util.stream.IntStream.range(0,size).boxed().toList();
+    }
+
+    @Test
+    void aScopedRuleReturnsTheSameTypedBuilderAndTypedRulesCanFollow() {
+        List<Integer> a=range(4), b=range(4), c=range(4), d=range(4), e=range(4);
+
+        LambdaConditionalProductBuilder.Typed5<Integer,Integer,Integer,Integer,Integer> product =
+                cartesianProduct.withLambda(a,b,c,d,e)
+                        .when(a,b).matches((x,y)->x<=y)                         // scoped, still a Typed5
+                        .when((v,w,x,y,z)->v+z>=2)                             // typed full-tuple rule after it
+                        .when(c,d,e).matches((x,y,z)->x!=y||y!=z);            // scoped again
+
+        long expected=0;
+        for(int v:a) for(int w:b) for(int x:c) for(int y:d) for(int z:e)
+            if(v<=w && v+z>=2 && (x!=y||y!=z)) expected++;
+        assertEquals(BigInteger.valueOf(expected),product.count());
+        assertEquals(expected,product.generate().stream().count());
+        assertEquals(expected,product.generate().stream().parallel().count());
+    }
+
+    @Test
+    void aScopedRuleOnAThreeDimensionBuilderCanStillAppendADimension() {
+        List<Integer> a=range(3), b=range(3), c=range(3), d=range(3);
+
+        var product=cartesianProduct.withLambda(a,b,c)
+                .when(a,b).matches((x,y)->x!=y)
+                .and(d)                                                         // typed and(...) is still available
+                .when((x,y,z,w)->x+w<=z+2);
+
+        long expected=0;
+        for(int x:a) for(int y:b) for(int z:c) for(int w:d)
+            if(x!=y && x+w<=z+2) expected++;
+        assertEquals(BigInteger.valueOf(expected),product.count());
+    }
+
+    @Test
+    void scopedRulesMixedWithTypedRulesInAnyOrderGiveTheSameProduct() {
+        List<Integer> a=range(5), b=range(5), c=range(5);
+
+        var scopedFirst=cartesianProduct.withLambda(a,b,c)
+                .when(a,c).matches((x,z)->x<z).when((x,y,z)->x+y!=z);
+        var typedFirst=cartesianProduct.withLambda(a,b,c)
+                .when((x,y,z)->x+y!=z).when(a,c).matches((x,z)->x<z);
+
+        assertEquals(scopedFirst.count(),typedFirst.count());
+        assertEquals(new java.util.HashSet<>(scopedFirst.generate().stream().toList()),
+                new java.util.HashSet<>(typedFirst.generate().stream().toList()));
+    }
+
+    @Test
+    void arrayScopeOnATypedBuilderReturnsTheTypedBuilder() {
+        List<Integer> a=range(3), b=range(3), c=range(3), d=range(3), e=range(3), f=range(3);
+
+        var product=cartesianProduct.withLambda(a,b,c,d,e,f)                   // six dimensions: array-based
+                .when(a,b,c,d,e,f).matches(values->(Integer)values[0]+(Integer)values[5]==2);
+
+        long expected=0;
+        for(int x:a) for(int y:f) if(x+y==2) expected++;
+        assertEquals(BigInteger.valueOf(expected*81),product.count());
+    }
+
+    // ── a typed builder must be given exactly as many dimensions as its arity ──────────────────────
+
+    @Test
+    void typedBuildersRejectAProductWithADifferentNumberOfDimensions() {
+        List<Integer> a=range(2), b=range(2);
+        var twoDimensions=new ConditionalProductBuilder(a,b);
+
+        var tooMany=assertThrows(IllegalArgumentException.class,
+                ()->new LambdaConditionalProductBuilder.Typed3<Integer,Integer,Integer>(twoDimensions));
+        assertTrue(tooMany.getMessage().contains("exactly 3 dimensions"));
+        assertTrue(tooMany.getMessage().contains("has 2"));
+
+        assertThrows(IllegalArgumentException.class,
+                ()->new LambdaConditionalProductBuilder.Typed1<Integer>(twoDimensions));
+        assertThrows(NullPointerException.class,
+                ()->new LambdaConditionalProductBuilder.Typed2<Integer,Integer>(null));
+        // the matching arity is accepted
+        assertEquals(BigInteger.valueOf(4),
+                new LambdaConditionalProductBuilder.Typed2<Integer,Integer>(twoDimensions).count());
+    }
+
+    // ── the probe limit ───────────────────────────────────────────────────────────────────────────
+
+    @Test
+    void aFullTupleRuleOverTooManyCombinationsPointsToTheScopedForm() {
+        List<Integer> a=range(101), b=range(101), c=range(101);     // 101^3 = 1,030,301 probes > 1,000,000
+
+        var typed=cartesianProduct.withLambda(a,b,c);
+        var e=assertThrows(IllegalArgumentException.class,()->typed.when((x,y,z)->true));
+
+        assertTrue(e.getMessage().contains("1030301"),e.getMessage());
+        assertTrue(e.getMessage().contains("1000000"),e.getMessage());
+        assertTrue(e.getMessage().contains("matches(predicate)"),e.getMessage());
+    }
+
+    @Test
+    void aScopedRuleOverTheSameDimensionsFitsWhenItNamesFewerOfThem() {
+        List<Integer> a=range(101), b=range(101), c=range(101);
+
+        var product=cartesianProduct.withLambda(a,b,c).when(a,b).matches((x,y)->x<=y);
+        assertEquals(BigInteger.valueOf(5151L*101),product.count());      // 5151 pairs with x <= y, times 101 values of c
+    }
+
+    // ── parallel streams ──────────────────────────────────────────────────────────────────────────
+
+    @Test
+    void parallelAndSequentialStreamsAgreeForLambdaRules() {
+        List<Integer> a=range(6), b=range(6), c=range(6), d=range(6);
+        var product=cartesianProduct.withLambda(a,b,c,d)
+                .when(a,b).matches((x,y)->x!=y)
+                .when((x,y,z,w)->(x+y+z+w)%3!=0);
+
+        long expected=0;
+        for(int x:a) for(int y:b) for(int z:c) for(int w:d) if(x!=y&&(x+y+z+w)%3!=0) expected++;
+        assertEquals(expected,product.generate().stream().count());
+        assertEquals(expected,product.generate().stream().parallel().count());
+        assertEquals(BigInteger.valueOf(expected),product.count());
     }
 
 }

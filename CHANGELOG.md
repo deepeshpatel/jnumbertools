@@ -5,6 +5,23 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The strongly typed lambda predicates now stop at five dimensions: `Predicate3` through `Predicate5`
+  and the typed builders `Typed1` through `Typed5`. Products with more than five dimensions use
+  the `Predicate<Object[]>` form. `withLambda(...)` has typed overloads for one to five
+  dimensions and an array-based overload for more.
+- A scoped lambda rule, `.when(dim1, dim2, ...).matches(predicate)`, now returns the builder type
+  it was started from instead of an array-based builder, so typed full-tuple rules, scoped rules
+  and `and(list)` can be combined in any order without losing parameter types.
+- The error for a lambda rule that would exceed the 1,000,000-probe limit now reports the
+  number of probes required and points to the scoped form.
+
+### Fixed
+
+- A typed lambda builder constructed over a product with a different number of dimensions than its
+  arity now throws `IllegalArgumentException` instead of silently ignoring dimensions.
+
 ## [4.2.0] - Released 2026-11-25
 
 ### Added

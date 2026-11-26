@@ -323,8 +323,8 @@ Use the Lambda Engine for arbitrary Java logic over Cartesian-product dimensions
 
 The `.when(predicate)` overload receives every dimension registered with
 `withLambda(...)`, in declaration order. One dimension uses Java `Predicate<T>`;
-two use `BiPredicate<A, B>`; three through ten use `Predicate3` through
-`Predicate10`; more than ten use `Predicate<Object[]>`.
+two use `BiPredicate<A, B>`; three through five use `Predicate3` through
+`Predicate5`; more than five use `Predicate<Object[]>`.
 
 ```java
 var products = JNumberTools.cartesianProduct()
@@ -350,7 +350,7 @@ var products = JNumberTools.cartesianProduct()
                 !db.equals("Oracle") || deploymentRegion.equals("EU"));
 ```
 
-Two through ten selected dimensions have typed predicate interfaces. For an arbitrary
+Two through five selected dimensions have typed predicate interfaces. For an arbitrary
 scope arity, pass an explicit `List<?>[]` to select the array form:
 
 ```java
@@ -743,9 +743,9 @@ constraint is used by generation, counting and emptiness checks.
 
 - One dimension: Java `Predicate<T>`; it filters that dimension's values.
 - Two dimensions: Java `BiPredicate<A, B>`.
-- Three through ten dimensions: `LambdaConditionalProductBuilder.Predicate3` through
-  `Predicate10`, with strongly typed lambda parameters.
-- More than ten dimensions: `Predicate<Object[]>`; array positions follow dimension order.
+- Three through five dimensions: `LambdaConditionalProductBuilder.Predicate3` through
+  `Predicate5`, with strongly typed lambda parameters.
+- More than five dimensions: `Predicate<Object[]>`; array positions follow dimension order.
 
 ### Strongly typed example and Boolean logic
 
@@ -783,14 +783,14 @@ This is logically equivalent to combining both predicates with `&&` inside one
 `.when(...)` call. Their compilation costs may differ; benchmark the two forms if that
 difference matters.
 
-### More than ten dimensions
+### More than five dimensions
 
-The array form remains available for arbitrary arity:
+Products with more than five dimensions use the array form:
 
 ```java
 var products = JNumberTools.cartesianProduct()
-        .withLambda(d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11)
-        .when(values -> values[0].equals(values[10]));
+        .withLambda(d1, d2, d3, d4, d5, d6)
+        .when(values -> values[0].equals(values[5]));
 ```
 
 ### Compilation and constraints
