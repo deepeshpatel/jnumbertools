@@ -179,8 +179,12 @@ The lexicographic strategy affects `lexOrder()` only. It does not change the sem
 
 **Reading a rule.** `when(A).is(x).then(B).isOneOf(y, z)` means: whenever the value chosen from `A` is `x`,
 the value chosen from `B` must be `y` or `z`. It says nothing about tuples where `A` is not `x`. All rules must
-hold together. The condition side offers `is`, `isNot`, `isOneOf`, `isNoneOf` and `isNotIn`, and so does the
-`then` side; the multi-value methods accept either varargs or a collection. `isNotIn(...)` is an alias
+hold together. The condition side and the `then` side support equality and membership methods (`is`, `isNot`,
+`isOneOf`, `isNoneOf` and `isNotIn`), plus natural-order comparisons:
+`isGreaterThan`, `isGreaterThanOrEqual`, `isLessThan` and `isLessThanOrEqual`.
+The comparison methods accept values implementing `Comparable`; values are compared using
+`compareTo`. Dimension values must be mutually comparable with the supplied bound.
+The multi-value methods accept either varargs or a collection. `isNotIn(...)` is an alias
 of `isNoneOf(...)` and is retained as a familiar alternative name. Several rules may share the same trigger.
 
 **Dimensions are identified by list instance.** `when(...)` and `then(...)` take the same `List` object that was
