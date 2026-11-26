@@ -462,4 +462,32 @@ class CompoundConditionalProductBuilderTest {
                 () -> atLimit.or(condition(browser).is("Safari")));
     }
 
+    @Test
+    void compoundBuilderExposesLexicographicRanksChoiceAndSampling() {
+        List<Integer> a = List.of(0, 1);
+        List<Integer> b = List.of(0, 1);
+        List<Integer> target = List.of(0, 1);
+
+        var product = cartesianProduct.compoundProductOf(a, b, target)
+                .when(condition(a).is(0).and(condition(b).is(0)))
+                .then(target).is(0);
+
+        List<List<Object>> expected = List.of(
+                List.of(0, 0, 0),
+                List.of(0, 1, 0), List.of(0, 1, 1),
+                List.of(1, 0, 0), List.of(1, 0, 1),
+                List.of(1, 1, 0), List.of(1, 1, 1));
+
+        assertEquals(expected, product.lexOrder().stream().toList());
+        assertEquals(List.of(expected.get(0), expected.get(3), expected.get(6)),
+                product.byRanks(List.of(BigInteger.ZERO, BigInteger.valueOf(3), BigInteger.valueOf(6))).stream().toList());
+        assertEquals(product.lexOrder().stream().toList(),
+                product.lexOrder(LexOrderStrategy.DP).stream().toList());
+        assertEquals(7, product.lexOrderMth(BigInteger.valueOf(3), BigInteger.ZERO).stream().count());
+        assertEquals(4, product.choice(4, new java.util.Random(42)).stream().count());
+        List<List<Object>> sample = product.sample(4, new java.util.Random(42)).stream().toList();
+        assertEquals(4, sample.size());
+        assertEquals(4, new HashSet<>(sample).size());
+    }
+
 }
