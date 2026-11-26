@@ -312,6 +312,14 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
         /** The chosen value equals {@code value}. */
         public Trigger is(Object value) { return trigger(List.of(nonNull(value)), false); }
+        /** The chosen value is greater than {@code value}, using its natural ordering. */
+        public Trigger isGreaterThan(Object value) { return trigger(ComparisonPredicates.greaterThan(value)); }
+        /** The chosen value is greater than or equal to {@code value}, using its natural ordering. */
+        public Trigger isGreaterThanOrEqual(Object value) { return trigger(ComparisonPredicates.greaterThanOrEqual(value)); }
+        /** The chosen value is less than {@code value}, using its natural ordering. */
+        public Trigger isLessThan(Object value) { return trigger(ComparisonPredicates.lessThan(value)); }
+        /** The chosen value is less than or equal to {@code value}, using its natural ordering. */
+        public Trigger isLessThanOrEqual(Object value) { return trigger(ComparisonPredicates.lessThanOrEqual(value)); }
         /** The chosen value is anything except {@code value}. */
         public Trigger isNot(Object value) { return trigger(List.of(nonNull(value)), true); }
         /** The chosen value is one of {@code values} (at least one is required). */
@@ -333,6 +341,14 @@ public final class ConditionalProductBuilder implements Builder<Object> {
             if (updated.isEmpty() || startsAlternative) updated.add(new ArrayList<>());
             updated.get(updated.size() - 1).add(
                     new MultiTriggerRule.Condition(dim, ruleCompiler.matching(dim, values, negate)));
+            return new Trigger(MultiTriggerRule.copyGroups(updated));
+        }
+        private Trigger trigger(Predicate<Object> predicate) {
+            List<List<MultiTriggerRule.Condition>> updated = new ArrayList<>();
+            for (List<MultiTriggerRule.Condition> group : groups) updated.add(new ArrayList<>(group));
+            if (updated.isEmpty() || startsAlternative) updated.add(new ArrayList<>());
+            updated.get(updated.size() - 1).add(
+                    new MultiTriggerRule.Condition(dim, ruleCompiler.matching(dim, predicate)));
             return new Trigger(MultiTriggerRule.copyGroups(updated));
         }
     }
@@ -380,6 +396,14 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
         /** The value must equal {@code value}. */
         public ConditionalProductBuilder is(Object value) { return apply(List.of(nonNull(value)), false); }
+        /** The value must be greater than {@code value}, using its natural ordering. */
+        public ConditionalProductBuilder isGreaterThan(Object value) { return apply(ComparisonPredicates.greaterThan(value)); }
+        /** The value must be greater than or equal to {@code value}, using its natural ordering. */
+        public ConditionalProductBuilder isGreaterThanOrEqual(Object value) { return apply(ComparisonPredicates.greaterThanOrEqual(value)); }
+        /** The value must be less than {@code value}, using its natural ordering. */
+        public ConditionalProductBuilder isLessThan(Object value) { return apply(ComparisonPredicates.lessThan(value)); }
+        /** The value must be less than or equal to {@code value}, using its natural ordering. */
+        public ConditionalProductBuilder isLessThanOrEqual(Object value) { return apply(ComparisonPredicates.lessThanOrEqual(value)); }
         /** The value must be anything except {@code value}. */
         public ConditionalProductBuilder isNot(Object value) { return apply(List.of(nonNull(value)), true); }
         /** The value must be one of {@code values} (at least one is required). */
@@ -396,7 +420,14 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         public ConditionalProductBuilder isNotIn(Collection<?> values) { return isNoneOf(values); }
 
         private ConditionalProductBuilder apply(Collection<?> values, boolean negate) {
-            BitSet allowed = ruleCompiler.matching(targetDim, values, negate);
+            return applyMatching(ruleCompiler.matching(targetDim, values, negate));
+        }
+
+        private ConditionalProductBuilder apply(Predicate<Object> predicate) {
+            return applyMatching(ruleCompiler.matching(targetDim, predicate));
+        }
+
+        private ConditionalProductBuilder applyMatching(BitSet allowed) {
             int singleTriggerDimension = -1;
             BitSet combinedTriggers = new BitSet();
             boolean pairwise = true;
