@@ -45,14 +45,17 @@ class CompoundConditionalProductBuilderTest {
     }
 
     @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
     void relationalComparisonsRejectNullAndIncompatibleValues() {
         List<Integer> numbers = List.of(1, 2, 3);
         List<String> words = List.of("a", "b");
 
         assertThrows(NullPointerException.class, () -> condition(numbers).isGreaterThan(null));
+        // Deliberately bypass the generic type check to verify the runtime guard for raw/misused APIs.
+        Condition incompatible = ((Condition.LeafBuilder) condition(words)).isLessThan(1);
         assertThrows(IllegalArgumentException.class,
                 () -> cartesianProduct.compoundProductOf(numbers, words)
-                        .when(condition(words).isLessThan(1)).then(numbers).is(1));
+                        .when(incompatible).then(numbers).is(1));
     }
 
     @Test
