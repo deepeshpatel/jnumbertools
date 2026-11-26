@@ -446,11 +446,10 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * Returns valid tuples in lexicographic order. Pairwise-only products use {@link LexOrderStrategy#PRUNED_BITSET};
      * products containing compound or lambda rules use {@link LexOrderStrategy#DP}.
      *
-     * <p>This is the default and recommended strategy for ordinary lexicographic traversal. It checks constraints against the selected prefix and,
-     * lazily enables feasibility lookahead when traversal work indicates that pairwise prefix pruning has
-     * explored substantial dead-end work (more than 1,024 plus four times the tuples emitted so far; the trigger does
-     * not depend on the constraint graph's shape). Lookahead never changes the tuples returned or their order.
-     * It does not build exact completion counts.</p>
+     * <p>For pairwise-only rules, the default strategy checks constraints against the selected prefix and
+     * lazily enables feasibility lookahead after substantial dead-end work. It does not build exact completion
+     * counts. When compound or lambda rules are present, the builder selects DP because the pruned strategies
+     * operate on pairwise rules only.</p>
      *
      * <p>Use {@link #lexOrder(LexOrderStrategy)} to select {@link LexOrderStrategy#DP} explicitly, or
      * {@link #lexOrder(LexOrderStrategy, long)} to use the {@link LexOrderStrategy#ADAPTIVE} policy.
