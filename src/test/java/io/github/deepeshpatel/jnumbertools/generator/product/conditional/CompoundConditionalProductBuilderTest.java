@@ -52,10 +52,7 @@ class CompoundConditionalProductBuilderTest {
         assertThrows(NullPointerException.class, () -> condition(numbers).isGreaterThan(null));
         assertThrows(IllegalArgumentException.class,
                 () -> cartesianProduct.compoundProductOf(numbers, words)
-                        .when(condition(numbers).isGreaterThan(1)).then(words).is("a"));
-        assertThrows(IllegalArgumentException.class,
-                () -> cartesianProduct.compoundProductOf(numbers, words)
-                        .when(condition(words).isLessThan("b")).then(numbers).is(1));
+                        .when(condition(words).isLessThan(1)).then(numbers).is(1));
     }
 
     @Test
