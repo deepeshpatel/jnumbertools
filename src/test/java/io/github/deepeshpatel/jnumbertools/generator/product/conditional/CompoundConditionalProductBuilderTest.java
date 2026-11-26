@@ -483,7 +483,7 @@ class CompoundConditionalProductBuilderTest {
                 product.byRanks(List.of(BigInteger.ZERO, BigInteger.valueOf(3), BigInteger.valueOf(6))).stream().toList());
         assertEquals(product.lexOrder().stream().toList(),
                 product.lexOrder(LexOrderStrategy.DP).stream().toList());
-        assertEquals(7, product.lexOrderMth(BigInteger.valueOf(3), BigInteger.ZERO).stream().count());
+        assertEquals(3, product.lexOrderMth(BigInteger.valueOf(3), BigInteger.ZERO).stream().count());
         assertEquals(4, product.choice(4, new java.util.Random(42)).stream().count());
         List<List<Object>> sample = product.sample(4, new java.util.Random(42)).stream().toList();
         assertEquals(4, sample.size());
