@@ -119,6 +119,18 @@ public final class CompoundConditionalProductBuilder {
         public CompoundConditionalProductBuilder isNot(Object value) {
             return new CompoundConditionalProductBuilder(step.isNot(value));
         }
+        public CompoundConditionalProductBuilder isGreaterThan(Object value) {
+            return new CompoundConditionalProductBuilder(step.isGreaterThan(value));
+        }
+        public CompoundConditionalProductBuilder isGreaterThanOrEqual(Object value) {
+            return new CompoundConditionalProductBuilder(step.isGreaterThanOrEqual(value));
+        }
+        public CompoundConditionalProductBuilder isLessThan(Object value) {
+            return new CompoundConditionalProductBuilder(step.isLessThan(value));
+        }
+        public CompoundConditionalProductBuilder isLessThanOrEqual(Object value) {
+            return new CompoundConditionalProductBuilder(step.isLessThanOrEqual(value));
+        }
         public CompoundConditionalProductBuilder isOneOf(Object... values) {
             return new CompoundConditionalProductBuilder(step.isOneOf(values));
         }
