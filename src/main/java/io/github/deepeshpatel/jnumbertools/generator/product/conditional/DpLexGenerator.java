@@ -88,7 +88,12 @@ final class DpLexGenerator implements Iterator<List<Object>> {
                 values[dimension] = candidate;
                 dimension++;
                 if (dimension == plan.dimensions) {
-                    return true;
+                    if (plan.isValid(values)) {
+                        return true;
+                    }
+                    dimension = plan.dimensions - 1;
+                    from = values[dimension] + 1;
+                    continue;
                 }
                 from = 0;
             }
