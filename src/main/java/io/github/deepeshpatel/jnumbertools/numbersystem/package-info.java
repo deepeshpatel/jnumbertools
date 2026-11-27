@@ -10,8 +10,7 @@
  * subpackages. These systems encode positions or structures in combinatorial spaces and allow
  * direct rank-based conversion without enumerating all preceding structures.</p>
  *
- * @see io.github.deepeshpatel.jnumbertools.base.NumberSystem
- * @see io.github.deepeshpatel.jnumbertools.base.RankOf
- * @see io.github.deepeshpatel.jnumbertools.base.UnrankOf
+ * @see io.github.deepeshpatel.jnumbertools.entrypoint.Rank
+ * @see io.github.deepeshpatel.jnumbertools.entrypoint.Unrank
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem;
