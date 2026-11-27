@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -15,7 +17,6 @@ import java.util.Random;
 import java.util.Spliterator;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -40,7 +41,7 @@ class ConstraintPlanTierTest {
     private record Rule(int trigger, List<Integer> triggerValues, int target, List<Integer> allowed) {}
 
     private static ConditionalProductBuilder build(List<List<Integer>> dims, List<Rule> rules) {
-        var builder = cartesianProduct.conditionalProductOf(dims.get(0));
+        var builder = Product.conditional(dims.toArray(List[]::new));
         for (int d = 1; d < dims.size(); d++) builder = builder.and(dims.get(d));
         for (Rule r : rules) {
             builder = builder.when(dims.get(r.trigger())).isOneOf(r.triggerValues())
