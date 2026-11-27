@@ -11,6 +11,8 @@
  * {@link java.util.stream.Stream}. This package also contains internal iteration and validation
  * utilities shared by generator implementations.</p>
  *
- * @see io.github.deepeshpatel.jnumbertools.base.JNumberTools
+ * @see io.github.deepeshpatel.jnumbertools.entrypoint.Permutation
+ * @see io.github.deepeshpatel.jnumbertools.entrypoint.Combination
+ * @see io.github.deepeshpatel.jnumbertools.entrypoint.Product
  */
 package io.github.deepeshpatel.jnumbertools.generator.base;
