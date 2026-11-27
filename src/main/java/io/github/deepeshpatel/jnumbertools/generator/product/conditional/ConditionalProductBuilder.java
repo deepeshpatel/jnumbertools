@@ -432,11 +432,11 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     // Builder interface Methods
     /**
      * Returns valid tuples in lexicographic order. Pairwise-only products use {@link LexOrderStrategy#PRUNED_BITSET};
-     * products containing compound or lambda rules use {@link LexOrderStrategy#DP}.
+     * products containing multi-trigger Lambda rules use {@link LexOrderStrategy#DP}.
      *
      * <p>For pairwise-only rules, the default strategy checks constraints against the selected prefix and
      * lazily enables feasibility lookahead after substantial dead-end work. It does not build exact completion
-     * counts. When compound or lambda rules are present, the builder selects DP because the pruned strategies
+     * counts. When multi-trigger Lambda rules are present, the builder selects DP because the pruned strategies
      * operate on pairwise rules only.</p>
      *
      * <p>Use {@link #lexOrder(LexOrderStrategy)} to select {@link LexOrderStrategy#DP} explicitly, or
@@ -645,7 +645,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * lambda rules that happen to share one dimension (e.g. four rules all triggered by the same {@code os})
      * from being merged into one oversized block purely because of how they were declared.</p>
      *
-     * <p>This gives the compiled rule the exact same downstream treatment as a compound rule: the
+     * <p>This gives the compiled rule the same downstream treatment as a multi-trigger Lambda rule: the
      * constraint graph folds its scope into one bounded, enumerated block, and the tree DP that backs
      * {@link #count()}/{@link #isEmpty()}/{@link #anyOrder()} treats that block as a single node with
      * precomputed, table-driven transitions — no interpreter re-evaluates the predicate while generating.</p>
