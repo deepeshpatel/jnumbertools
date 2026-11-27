@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem.derangadic;
 
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
+
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Test;
@@ -472,7 +474,7 @@ class DerangadicAlgorithmsTest {
     private static List<int[]> generateDerangementsByBruteForce(int n) {
         List<int[]> derangements = new ArrayList<>();
 
-        JNumberTools.permutations()
+        Permutation
                 .unique(n)
                 .lexOrder()
                 .stream()
