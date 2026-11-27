@@ -27,7 +27,7 @@ final class MultiTriggerRule {
     final int[] scope;
 
     // Flattened view of `groups`, filled once in the constructor. Iterating arrays by index avoids the
-    // per-call Iterator allocation of the enhanced-for loops; isSatisfied is on the hot path for compound
+    // per-call Iterator allocation of the enhanced-for loops; isSatisfied is on the hot path for multi-trigger
     // traversal (once per candidate prefix per tuple) and for ConstraintPlan.fill (once per candidate).
     private final int[][] condDims;          // condDims[g][i] = dimension of group g, condition i
     private final BitSet[][] condValues;     // condValues[g][i] = allowed values of that condition
