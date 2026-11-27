@@ -260,7 +260,7 @@ class ConditionalProductBuilderTest {
 
     @Test
     void nullAndUnknownInput() {
-        assertThrows(NullPointerException.class, () -> Product.conditional(null));
+        assertThrows(NullPointerException.class, () -> Product.conditional((List<?>) null));
         assertThrows(NullPointerException.class,
                 () -> Product.conditional(java.util.Arrays.asList("a", null)));
         var builder = Product.conditional(os).and(browser);
