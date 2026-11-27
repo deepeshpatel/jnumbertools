@@ -169,7 +169,7 @@ public final class LambdaConditionalProductBuilder {
          * @param delegate a product with exactly one dimension
          * @throws IllegalArgumentException if {@code delegate} does not have exactly one dimension
          */
-        public Typed1(ConditionalProductBuilder delegate) { super(requireDimensions(delegate, 1, "Typed1")); }
+        Typed1(ConditionalProductBuilder delegate) { super(requireDimensions(delegate, 1, "Typed1")); }
         @Override Typed1<A> with(ConditionalProductBuilder next) { return new Typed1<>(next); }
 
         /** Keeps only the values of the dimension that satisfy {@code predicate}. */
@@ -191,7 +191,7 @@ public final class LambdaConditionalProductBuilder {
          * @param delegate a product with exactly two dimensions
          * @throws IllegalArgumentException if {@code delegate} does not have exactly two dimensions
          */
-        public Typed2(ConditionalProductBuilder delegate) { super(requireDimensions(delegate, 2, "Typed2")); }
+        Typed2(ConditionalProductBuilder delegate) { super(requireDimensions(delegate, 2, "Typed2")); }
         @Override Typed2<A,B> with(ConditionalProductBuilder next) { return new Typed2<>(next); }
 
         /** Adds a rule over both dimensions. */
@@ -214,7 +214,7 @@ public final class LambdaConditionalProductBuilder {
          * @param delegate a product with exactly three dimensions
          * @throws IllegalArgumentException if {@code delegate} does not have exactly three dimensions
          */
-        public Typed3(ConditionalProductBuilder delegate) { super(requireDimensions(delegate, 3, "Typed3")); }
+        Typed3(ConditionalProductBuilder delegate) { super(requireDimensions(delegate, 3, "Typed3")); }
         @Override Typed3<A,B,C> with(ConditionalProductBuilder next) { return new Typed3<>(next); }
 
         /** Adds a rule over all three dimensions. */
@@ -237,7 +237,7 @@ public final class LambdaConditionalProductBuilder {
          * @param delegate a product with exactly four dimensions
          * @throws IllegalArgumentException if {@code delegate} does not have exactly four dimensions
          */
-        public Typed4(ConditionalProductBuilder delegate) { super(requireDimensions(delegate, 4, "Typed4")); }
+        Typed4(ConditionalProductBuilder delegate) { super(requireDimensions(delegate, 4, "Typed4")); }
         @Override Typed4<A,B,C,D> with(ConditionalProductBuilder next) { return new Typed4<>(next); }
 
         /** Adds a rule over all four dimensions. */
@@ -260,7 +260,7 @@ public final class LambdaConditionalProductBuilder {
          * @param delegate a product with exactly five dimensions
          * @throws IllegalArgumentException if {@code delegate} does not have exactly five dimensions
          */
-        public Typed5(ConditionalProductBuilder delegate) { super(requireDimensions(delegate, 5, "Typed5")); }
+        Typed5(ConditionalProductBuilder delegate) { super(requireDimensions(delegate, 5, "Typed5")); }
         @Override Typed5<A,B,C,D,E> with(ConditionalProductBuilder next) { return new Typed5<>(next); }
 
         /** Adds a rule over all five dimensions. */
@@ -392,7 +392,7 @@ public final class LambdaConditionalProductBuilder {
      */
     public static final class ArrayBased extends Base<ArrayBased> {
         /** @param delegate the product to build rules on */
-        public ArrayBased(ConditionalProductBuilder delegate) { super(delegate); }
+        ArrayBased(ConditionalProductBuilder delegate) { super(delegate); }
         @Override ArrayBased with(ConditionalProductBuilder next) { return new ArrayBased(next); }
 
         /** Appends a dimension. */
