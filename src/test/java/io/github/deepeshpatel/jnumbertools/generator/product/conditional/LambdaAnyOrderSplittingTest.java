@@ -33,7 +33,7 @@ class LambdaAnyOrderSplittingTest {
         var product = Product.conditional(large.get(0), large.get(1), large.get(2), large.get(3),
                 large.get(4), large.get(5), large.get(6), empty).withLambda();
 
-        Spliterator<List<Object>> spliterator = product.generate().spliterator();
+        Spliterator<List<Object>> spliterator = product.anyOrder().spliterator();
         assertEquals(0L, spliterator.estimateSize());
         assertTrue(spliterator.trySplit() == null, "an empty product has nothing to split");
         List<List<Object>> actual = new ArrayList<>();
@@ -54,7 +54,7 @@ class LambdaAnyOrderSplittingTest {
                         large.get(4), large.get(5), large.get(6), empty).withLambda()
                 .when(a, b, c).matches((av, bv, cv) -> av == 0 && bv == 1);
 
-        Spliterator<List<Object>> spliterator = product.generate().spliterator();
+        Spliterator<List<Object>> spliterator = product.anyOrder().spliterator();
         assertEquals(0L, spliterator.estimateSize());
         assertTrue(spliterator.trySplit() == null);
         assertTrue(product.isEmpty());
