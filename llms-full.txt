@@ -1,6 +1,6 @@
 # JNumberTools — Full API Examples
 
-JNumberTools is a Java 21+ library for combinatorics and number theory. It provides generators for permutations, derangements, combinations, subsets and four Cartesian product styles (simple, constrained, compiled and lambda-engine), together with ranking, unranking, number-system representations and mathematical functions.
+JNumberTools is a Java 21+ library for combinatorics and number theory. It provides generators for permutations, derangements, combinations, subsets and three Cartesian product builder families: Simple Product, Constrained Product and Pre-Compiled Conditional Product (with Pairwise Rules and a Lambda Engine), together with ranking, unranking, number-system representations and mathematical functions.
 
 ## Common conventions
 
@@ -175,9 +175,9 @@ A subset generator includes the empty set `[]` (the empty set, ∅) when using `
 
 # 4. Cartesian Products
 
-Use the `Product` static entry point in `io.github.deepeshpatel.jnumbertools.entrypoint`. It exposes simple, constrained and pairwise-conditional product builders. Lambda predicates are configured on the conditional builder.
+Use the `Product` static entry point in `io.github.deepeshpatel.jnumbertools.entrypoint`. It exposes three builder families: Simple Product, Constrained Product and Pre-Compiled Conditional Product. The conditional builder provides Pairwise Rules and a Lambda Engine.
 
-## 4.1 Simple Cartesian product
+## 4.1 Simple Product
 
 Pass one list for each dimension, in tuple order:
 
@@ -193,7 +193,7 @@ product.choice(3, new Random()).forEach(System.out::println);
 product.sample(3, new Random()).forEach(System.out::println);
 ```
 
-## 4.2 Constrained Cartesian product
+## 4.2 Constrained Product
 
 Start with a constrained dimension, then add further dimensions using the matching builder methods:
 
@@ -210,7 +210,7 @@ Product.constrained()
 
 The first dimension can use `ofDistinct(quantity, elements)`, `ofMultiSelect(quantity, elements)` or `ofInRange(from, to, elements)`. Later dimensions use `andDistinct`, `andMultiSelect` or `andInRange`. A shared `Calculator` can be supplied with `Product.constrained(calculator)`.
 
-## 4.3 Compiled pairwise conditional product
+## 4.3 Pre-Compiled Conditional Product — Pairwise Rules
 
 ```java
 var os = List.of("Windows", "macOS", "Linux");
@@ -228,7 +228,7 @@ configs.byRanks(0, 2).forEach(System.out::println);
 
 Pairwise rules are compiled into constraints so invalid branches can be pruned before complete tuples are generated. The builder supports counting, lexicographical/rank traversal and random selection.
 
-## 4.4 Lambda predicates
+## 4.4 Pre-Compiled Conditional Product — Lambda Engine
 
 The conditional builder also supports `withLambda(...)`. Typed whole-product predicate overloads are available for one through five dimensions; the no-argument form supports array-based predicates for arbitrary dimension counts.
 
@@ -458,7 +458,7 @@ For a valid combinatorial object, ranking and unranking are inverse operations.
 3. **Random choice versus random sample:** `choice` samples with replacement. `sample` samples without replacement and therefore cannot return more distinct results than the total number of available results.
 4. **Large ranks:** Use the `String` overload of `byRanks` when a rank does not fit in a `long`. For example, `.byRanks("1000000000000000000000")`.
 5. **Lazy generation:** Generator methods return lazy, re-iterable generators. They do not necessarily materialize all results in memory.
-6. **Product builder differences:** Simple, constrained and compiled products support lexicographical/rank-based operations and random choice or sampling. The Lambda builder also exposes `lexOrder()`, `anyOrder()`, `lexOrderMth(...)`, `byRanks(...)`, `choice(...)`, `sample(...)`, `count()` and `isEmpty()`. Typed whole-product predicates support one through five dimensions; the array-based form supports arbitrary dimensions. Scoped predicates inspect only their selected dimensions, while unscoped predicates inspect all dimensions registered at that point. Predicates are compiled before tuple generation.
+6. **Product builder differences:** Simple Product, Constrained Product and Pre-Compiled Conditional Product are the three product builder families. The conditional family provides Pairwise Rules and a Lambda Engine. Simple and constrained products provide `lexOrder()` and `lexOrderMth(...)`; conditional products also provide rank-based access and exact counting. The Lambda Engine additionally provides `anyOrder()`, which does not guarantee lexicographical order. Typed whole-product predicates support one through five dimensions; the array-based form supports arbitrary dimensions. Scoped predicates inspect only their selected dimensions, while unscoped predicates inspect all dimensions registered at that point. Predicates are compiled before tuple generation.
 7. **Empty results:** A generator may have zero results. A generator containing one empty tuple is not empty.
 8. **Validation:** Input constraints and exception behavior are specified in the repository's `ValidationRules.md`.
 
@@ -467,6 +467,6 @@ Use the relevant builder family and documented methods. Do not assume that simil
 
 ## Product API details
 
-The `Product` entry point accepts product dimensions directly. Use `Product.simple(list1, list2, ...)` for an unconstrained product, `Product.constrained()` for combination/subset dimensions, and `Product.conditional(list1, list2, ...)` for pairwise rules or lambda predicates.
+The `Product` entry point exposes three builder families: `Product.simple(list1, list2, ...)` for an unconstrained Cartesian product; `Product.constrained()` for combination, multi-selection and subset-range dimensions; and `Product.conditional(list1, list2, ...)` for a Pre-Compiled Conditional Product. The conditional builder supports Pairwise Rules and a Lambda Engine configured through `withLambda(...)` or `withLambda()`.
 
-The Lambda API has typed whole-product predicate overloads for one through five dimensions. For more dimensions, use the array-based `withLambda()` form. Scoped rules use `.when(dimensions...).matches(predicate)`; predicates must be deterministic and side-effect-free and are evaluated during compilation.
+The Lambda Engine has typed whole-product predicate overloads for one through five dimensions. For more dimensions, use the array-based `withLambda()` form. Scoped rules use `.when(dimensions...).matches(predicate)`. Predicates are compiled into constraints, subject to the documented probe limit.

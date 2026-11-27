@@ -1,12 +1,26 @@
 [Home](../../README.md)
+</br>[Permutation Generators](../permutations/README.md)
+</br>[Derangement Generators](../derangements/README.md)
+</br>[Combination Generators](../combinations/README.md)
+</br>[Set/Subset Generators](../sets/README.md)
+</br>[Cartesian Product Generators](../products/README.md)
+</br>[Math Functions](../calculator/README.md)
+</br>[Ranking Algorithms](../ranking/README.md)
+</br>[Number System Algorithms](../numbersystem/README.md)
 
 # Cartesian Product Generators
 
-Use the static `Product` entry point in `io.github.deepeshpatel.jnumbertools.entrypoint`. It exposes simple, constrained and pairwise-conditional products. Lambda predicates are available from the conditional builder.
+The `Product` static entry point in `io.github.deepeshpatel.jnumbertools.entrypoint` provides three product builder families:
 
-## 1. Simple Cartesian product
+1. **Simple Product** — generates the full Cartesian product.
+2. **Constrained Product** — uses combinations, multi-selections or subset ranges as product dimensions.
+3. **Pre-Compiled Conditional Product** — applies compiled conditions between dimensions, using either pairwise rules or the Lambda Engine.
 
-Pass each dimension as a `List`. The lists are supplied in tuple order.
+## 1. Simple Product
+
+Pass one list for each dimension. The lists are supplied in tuple order.
+
+### 1.1 Product in lexicographical order
 
 ```java
 var sizes = List.of("Small", "Medium", "Large");
@@ -18,19 +32,31 @@ Product.simple(sizes, crusts, cheeses)
     .forEach(System.out::println);
 ```
 
-The simple-product builder also supports `lexOrderMth(m, start)`, `byRanks(...)`, `choice(...)`, `sample(...)`, `count()` and `isEmpty()`.
+### 1.2 Every M-th product in lexicographical order
 
-## 2. Constrained Cartesian product
+`lexOrderMth(m, start)` generates every `m`-th product, beginning at the zero-based rank `start`.
 
-Use `Product.constrained()` to start a constrained product. The first dimension is selected with one of these methods:
+```java
+Product.simple(sizes, crusts, cheeses)
+    .lexOrderMth(5, 0)
+    .forEach(System.out::println);
+```
 
-| Method | Meaning |
+The simple-product builder also supports `byRanks(...)`, `choice(...)`, `sample(...)`, `count()` and `isEmpty()`.
+
+## 2. Constrained Product
+
+Use `Product.constrained()` to start a constrained product. Each dimension is defined by a combination or subset operation.
+
+| First-dimension method | Meaning |
 |---|---|
 | `ofDistinct(quantity, elements)` | Fixed-size combinations without repetition |
 | `ofMultiSelect(quantity, elements)` | Fixed-size combinations with repetition |
 | `ofInRange(from, to, elements)` | Subsets whose sizes are in the inclusive range |
 
-Add later dimensions with the corresponding `andDistinct`, `andMultiSelect` or `andInRange` builder methods.
+Add subsequent dimensions with the corresponding `andDistinct`, `andMultiSelect` or `andInRange` methods.
+
+### 2.1 Product in lexicographical order
 
 ```java
 var colors = List.of("Red", "Green", "Blue");
@@ -43,17 +69,25 @@ Product.constrained()
     .forEach(System.out::println);
 ```
 
-A shared `Calculator` can be supplied when creating the constrained factory. This allows combinatorial caches to be reused across factories.
+### 2.2 Every M-th product in lexicographical order
 
 ```java
-Calculator calculator = new Calculator();
-var constrained = Product.constrained(calculator)
-    .ofDistinct(2, colors);
+Product.constrained()
+    .ofDistinct(2, colors)
+    .andMultiSelect(2, sizes)
+    .lexOrderMth(5, 0)
+    .forEach(System.out::println);
 ```
 
-## 3. Compiled pairwise conditional product
+A shared `Calculator` can be supplied through `Product.constrained(calculator)` when combinatorial caches should be reused across constrained-product factories.
 
-Use `Product.conditional(dimensions...)` to create a product with pairwise rules. Each dimension is a list.
+## 3. Pre-Compiled Conditional Product
+
+Use `Product.conditional(dimensions...)` to create a product whose valid tuples are determined by conditions. Conditions are compiled before traversal, allowing invalid branches to be pruned without first generating complete tuples.
+
+### 3.1 Pairwise rules
+
+Pairwise rules express relationships between two dimensions using the values that satisfy the business requirement.
 
 ```java
 var operatingSystems = List.of("Linux", "Windows", "macOS");
@@ -67,11 +101,11 @@ Product.conditional(operatingSystems, browsers, networks)
     .forEach(System.out::println);
 ```
 
-The compiled pairwise builder supports lexicographical traversal, every-mth traversal, rank-based access, counting and sampling. Its rules are compiled into constraints rather than filtering completed tuples.
+The pairwise builder supports lexicographical traversal, every-M-th traversal, rank-based access, counting and random selection.
 
-## 4. Lambda predicates
+### 3.2 Lambda Engine
 
-The conditional builder also exposes `withLambda(...)` for joint predicates. Typed overloads are available for one through five dimensions; the no-argument form provides an array-based predicate for arbitrary dimension counts.
+Use `withLambda(...)` when a condition involves multiple dimensions and is more naturally expressed as a predicate. Typed whole-product predicate overloads are available for one through five dimensions; the no-argument `withLambda()` form provides an array-based predicate for arbitrary dimension counts.
 
 ```java
 Product.conditional(operatingSystems, browsers, networks)
@@ -82,13 +116,40 @@ Product.conditional(operatingSystems, browsers, networks)
     .forEach(System.out::println);
 ```
 
-Use scoped predicates with `.when(dimensions...).matches(predicate)` when the rule only depends on a subset of dimensions. Lambda predicates are compiled into constraints, subject to the documented probe limit; they are not intended as an unbounded general-purpose constraint solver.
+Scoped predicates can also be declared with `.when(dimensions...).matches(predicate)` when the predicate depends only on selected dimensions. Lambda predicates are compiled into constraints, subject to the documented probe limit; this is not an unbounded general-purpose constraint solver.
 
-## 5. Choosing a product style
+The Lambda Engine supports lexicographical traversal, every-M-th traversal, rank-based access, counting and random selection. Its `anyOrder()` operation does not guarantee lexicographical order.
 
-- Use **simple** when every tuple is valid.
-- Use **constrained** when dimensions are combinations, multi-selects or subset ranges.
-- Use **conditional** for pairwise relationships between dimensions.
-- Use **lambda predicates** for joint rules involving multiple dimensions.
+## 4. Conditional Product vs. Pruned Stream Filtering
 
-The available terminal operations depend on the returned builder type. Consult the Javadoc for the exact builder contract rather than assuming all product styles expose identical methods.
+A conditional product expresses the validity rules directly and lets the builder perform pruning. A manually pruned stream must encode the filtering and pruning logic itself.
+
+| Aspect | Pre-Compiled Conditional Product | Pruned Stream Filtering |
+|---|---|---|
+| **Readability** | Conditions express the business requirement directly. | Pruning logic is more complex to write and maintain. |
+| **Filtering logic** | `matches()` expresses the condition that should be satisfied. | `filter()` requires the negated condition, making the filtering logic less readable. |
+| **Execution** | In the current benchmarks, around **2× faster** when more than 50% of tuples are valid; **many times faster** when fewer than 5% are valid. | Performance degrades as more invalid tuples must be visited and filtered. |
+| **Pruning** | Pruning is handled automatically by the builder. | The developer must implement pruning manually and may miss pruning opportunities. |
+| **Total count** | `count()` returns the exact count without enumerating the tuples. | Requires enumerating the stream. |
+| **Access by rank** | `byRanks(...)` retrieves requested ranks without generating all preceding tuples. | Requires enumeration to reach the requested position. |
+
+The performance figures reflect the workloads measured in the current JNumberTools benchmarks; actual results depend on dimension sizes, validity distribution and predicate cost.
+
+## 5. Choosing a Product Builder
+
+- Use **Simple Product** when every tuple in the Cartesian product is valid.
+- Use **Constrained Product** when dimensions are combinations, multi-selections or subsets within a size range.
+- Use **Pre-Compiled Conditional Product — Pairwise Rules** when validity depends on pairwise relationships between dimensions.
+- Use **Pre-Compiled Conditional Product — Lambda Engine** when validity is more naturally expressed as a predicate involving multiple dimensions.
+
+The available terminal operations depend on the returned builder type. Consult the Javadoc for the exact builder contract rather than assuming all product builders expose identical methods.
+
+[Home](../../README.md)
+</br>[Permutation Generators](../permutations/README.md)
+</br>[Derangement Generators](../derangements/README.md)
+</br>[Combination Generators](../combinations/README.md)
+</br>[Set/Subset Generators](../sets/README.md)
+</br>[Cartesian Product Generators](../products/README.md)
+</br>[Math Functions](../calculator/README.md)
+</br>[Ranking Algorithms](../ranking/README.md)
+</br>[Number System Algorithms](../numbersystem/README.md)
