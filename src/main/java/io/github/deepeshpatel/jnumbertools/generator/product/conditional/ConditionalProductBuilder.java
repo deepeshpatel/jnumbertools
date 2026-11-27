@@ -435,12 +435,9 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     }
 
     /**
-     * Switches to the Lambda rule-definition style while retaining the dimensions and any
-     * pairwise rules already configured on this builder.
-     *
-     * <p>The no-argument overload provides array-based predicates for products of any dimension
-     * count. These overloads provide strongly typed whole-product predicates for one through
-     * five dimensions.</p>
+     * Switches to the array-based Lambda rule-definition style while retaining the dimensions and
+     * pairwise rules already configured on this builder. The predicate receives all current values
+     * as an {@code Object[]} and supports any number of dimensions.
      *
      * @return an array-based Lambda builder over the current conditional product
      */
@@ -449,74 +446,105 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     }
 
     /**
-     * Adds a typed predicate over the single dimension, retaining all previously configured rules.
+     * Switches to a typed Lambda builder for one dimension.
      *
-     * @param predicate predicate applied to each value
+     * @param dimension the existing dimension, used to preserve its element type
      * @param <A> element type
-     * @return a typed one-dimensional Lambda builder
+     * @return a typed one-dimensional Lambda builder over this product
      */
-    public <A> LambdaConditionalProductBuilder.Typed1<A> withLambda(
-            java.util.function.Predicate<? super A> predicate) {
-        return new LambdaConditionalProductBuilder.Typed1<A>(this).when(predicate);
+    public <A> LambdaConditionalProductBuilder.Typed1<A> withLambda(List<A> dimension) {
+        requireLambdaDimensions(dimension);
+        return new LambdaConditionalProductBuilder.Typed1<>(this);
     }
 
     /**
-     * Adds a typed predicate over both dimensions, retaining all previously configured rules.
+     * Switches to a typed Lambda builder for two dimensions.
      *
-     * @param predicate predicate applied to each pair
+     * @param first the existing first dimension
+     * @param second the existing second dimension
      * @param <A> first element type
      * @param <B> second element type
-     * @return a typed two-dimensional Lambda builder
+     * @return a typed two-dimensional Lambda builder over this product
      */
     public <A, B> LambdaConditionalProductBuilder.Typed2<A, B> withLambda(
-            java.util.function.BiPredicate<? super A, ? super B> predicate) {
-        return new LambdaConditionalProductBuilder.Typed2<A, B>(this).when(predicate);
+            List<A> first, List<B> second) {
+        requireLambdaDimensions(first, second);
+        return new LambdaConditionalProductBuilder.Typed2<>(this);
     }
 
     /**
-     * Adds a typed predicate over all three dimensions, retaining all previously configured rules.
+     * Switches to a typed Lambda builder for three dimensions.
      *
-     * @param predicate predicate applied to each triple
+     * @param first the existing first dimension
+     * @param second the existing second dimension
+     * @param third the existing third dimension
      * @param <A> first element type
      * @param <B> second element type
      * @param <C> third element type
-     * @return a typed three-dimensional Lambda builder
+     * @return a typed three-dimensional Lambda builder over this product
      */
     public <A, B, C> LambdaConditionalProductBuilder.Typed3<A, B, C> withLambda(
-            LambdaConditionalProductBuilder.Predicate3<? super A, ? super B, ? super C> predicate) {
-        return new LambdaConditionalProductBuilder.Typed3<A, B, C>(this).when(predicate);
+            List<A> first, List<B> second, List<C> third) {
+        requireLambdaDimensions(first, second, third);
+        return new LambdaConditionalProductBuilder.Typed3<>(this);
     }
 
     /**
-     * Adds a typed predicate over all four dimensions, retaining all previously configured rules.
+     * Switches to a typed Lambda builder for four dimensions.
      *
-     * @param predicate predicate applied to each four-tuple
+     * @param first the existing first dimension
+     * @param second the existing second dimension
+     * @param third the existing third dimension
+     * @param fourth the existing fourth dimension
      * @param <A> first element type
      * @param <B> second element type
      * @param <C> third element type
      * @param <D> fourth element type
-     * @return a typed four-dimensional Lambda builder
+     * @return a typed four-dimensional Lambda builder over this product
      */
     public <A, B, C, D> LambdaConditionalProductBuilder.Typed4<A, B, C, D> withLambda(
-            LambdaConditionalProductBuilder.Predicate4<? super A, ? super B, ? super C, ? super D> predicate) {
-        return new LambdaConditionalProductBuilder.Typed4<A, B, C, D>(this).when(predicate);
+            List<A> first, List<B> second, List<C> third, List<D> fourth) {
+        requireLambdaDimensions(first, second, third, fourth);
+        return new LambdaConditionalProductBuilder.Typed4<>(this);
     }
 
     /**
-     * Adds a typed predicate over all five dimensions, retaining all previously configured rules.
+     * Switches to a typed Lambda builder for five dimensions.
      *
-     * @param predicate predicate applied to each five-tuple
+     * @param first the existing first dimension
+     * @param second the existing second dimension
+     * @param third the existing third dimension
+     * @param fourth the existing fourth dimension
+     * @param fifth the existing fifth dimension
      * @param <A> first element type
      * @param <B> second element type
      * @param <C> third element type
      * @param <D> fourth element type
      * @param <E> fifth element type
-     * @return a typed five-dimensional Lambda builder
+     * @return a typed five-dimensional Lambda builder over this product
      */
     public <A, B, C, D, E> LambdaConditionalProductBuilder.Typed5<A, B, C, D, E> withLambda(
-            LambdaConditionalProductBuilder.Predicate5<? super A, ? super B, ? super C, ? super D,
-                    ? super E> predicate) {
-        return new LambdaConditionalProductBuilder.Typed5<A, B, C, D, E>(this).when(predicate);
+            List<A> first, List<B> second, List<C> third, List<D> fourth, List<E> fifth) {
+        requireLambdaDimensions(first, second, third, fourth, fifth);
+        return new LambdaConditionalProductBuilder.Typed5<>(this);
+    }
+
+    /**
+     * Ensures that the dimensions supplied for typed Lambda inference are exactly the dimensions
+     * already registered on this builder, in declaration order.
+     */
+    private void requireLambdaDimensions(List<?>... dimensions) {
+        Objects.requireNonNull(dimensions, "dimensions must not be null");
+        if (dimensions.length != dimensionCount()) {
+            throw new IllegalArgumentException("Typed Lambda entry point requires exactly "
+                    + dimensions.length + " dimensions, but this product has " + dimensionCount());
+        }
+        for (int i = 0; i < dimensions.length; i++) {
+            if (indexOfDimension(Objects.requireNonNull(dimensions[i], "dimension must not be null")) != i) {
+                throw new IllegalArgumentException("Typed Lambda dimensions must match the product's "
+                        + "registered dimensions in declaration order");
+            }
+        }
     }
 
     // Builder interface Methods
