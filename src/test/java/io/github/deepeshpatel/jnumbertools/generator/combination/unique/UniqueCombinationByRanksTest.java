@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 
+import io.github.deepeshpatel.jnumbertools.base.Combination;
+
 import io.github.deepeshpatel.jnumbertools.TestBase;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Nested;
@@ -25,7 +27,7 @@ class UniqueCombinationByRanksTest {
             int n = 5;
             int r = 3;
             int sampleSize = 4;
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .unique(n, r)
                     .choice(sampleSize, TestBase.random)
                     .stream()
@@ -38,7 +40,7 @@ class UniqueCombinationByRanksTest {
             int n = 3;
             int r = 2;
             int sampleSize = 4; // Larger than nCr=3 to increase duplicate chance
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .unique(n, r)
                     .choice(sampleSize, TestBase.random)
                     .stream()
@@ -54,7 +56,7 @@ class UniqueCombinationByRanksTest {
             List<String> elements = of("A", "B", "C", "D");
             int r = 2;
             int sampleSize = 3;
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .unique(r, elements)
                     .choice(sampleSize, TestBase.random)
                     .stream()
@@ -73,7 +75,7 @@ class UniqueCombinationByRanksTest {
             int n = 3;
             int r = 2;
             int sampleSize = 5; // nCr = 3C2 = 3, sampleSize > nCr
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .unique(n, r)
                     .choice(sampleSize, TestBase.random)
                     .stream()
@@ -83,7 +85,7 @@ class UniqueCombinationByRanksTest {
 
         @Test
         void shouldHandleEmptyInputWithZeroSize() {
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .unique(0, Collections.emptyList())
                     .choice(1, TestBase.random)
                     .stream()
@@ -94,7 +96,7 @@ class UniqueCombinationByRanksTest {
 
         @Test
         void shouldThrowExceptionForEmptyInputWithNonZeroSize() {
-            assertThrows(IllegalArgumentException.class, () -> JNumberTools.combinations()
+            assertThrows(IllegalArgumentException.class, () -> Combination
                     .unique(1, Collections.emptyList())
                     .choice(1, TestBase.random)
                     .stream()
@@ -106,7 +108,7 @@ class UniqueCombinationByRanksTest {
             List<Integer> largeInput = Stream.iterate(0, i -> i + 1).limit(20).collect(Collectors.toList());
             int r = 3;
             int sampleSize = 10;
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .unique(r, largeInput)
                     .choice(sampleSize, TestBase.random)
                     .stream()
@@ -121,7 +123,7 @@ class UniqueCombinationByRanksTest {
 
         @Test
         void shouldGenerateConsistentPropertiesAcrossIterators() {
-            var iterable = JNumberTools.combinations()
+            var iterable = Combination
                     .unique(2, "A", "B", "C")
                     .choice(3, TestBase.random);
             var list1 = iterable.stream().toList();
