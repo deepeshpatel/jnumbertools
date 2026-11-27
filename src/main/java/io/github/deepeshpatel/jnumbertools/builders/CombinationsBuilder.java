@@ -93,14 +93,14 @@ public final class CombinationsBuilder {
     private final Calculator calculator;
 
     /**
-     * Constructs a new Combinations instance with a default Calculator.
+     * Constructs a new {@code CombinationsBuilder} with a default Calculator.
      */
     public CombinationsBuilder() {
         this(new Calculator());
     }
 
     /**
-     * Constructs a new Combinations instance with the specified Calculator.
+     * Constructs a new {@code CombinationsBuilder} with the specified Calculator.
      *
      * @param calculator the Calculator for combinatorial computations
      */
