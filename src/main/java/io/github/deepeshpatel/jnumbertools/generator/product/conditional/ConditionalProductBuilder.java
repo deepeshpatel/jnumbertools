@@ -32,10 +32,7 @@ import java.util.function.Predicate;
  * var browser = List.of("Chrome", "Safari", "Firefox");
  * var network = List.of("WiFi", "4G");
  *
- * var configs = JNumberTools.cartesianProduct()
- *         .conditionalProductOf(os)
- *         .and(browser)
- *         .and(network)
+ * var configs = Product.conditional(os, browser, network)
  *         .when(browser).is("Safari").then(os).isOneOf("macOS")
  *         .when(os).is("Linux").then(browser).isNoneOf("Chrome")
  *         .when(network).is("4G").then(os).isNoneOf("Linux")
@@ -50,7 +47,7 @@ import java.util.function.Predicate;
  * <p>{@code when(A).is(x).then(B).isOneOf(y, z)} means: whenever the value chosen from {@code A}
  * is {@code x}, the value chosen from {@code B} must be {@code y} or {@code z}. Every completed
  * pairwise rule is combined with the other rules using AND. Dimensions are identified by the same
- * list instance passed to {@code conditionalProductOf} or {@code and}. More complex joint predicates
+ * list instance passed to {@link Product#conditional(List, List, List[])} or {@code and}. More complex joint predicates
  * can be expressed through the Lambda Conditional Product API.</p>
  *
  * <h2>What is supported</h2>
@@ -442,6 +439,10 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * @return an array-based Lambda builder over the current conditional product
      */
     public LambdaConditionalProductBuilder.ArrayBased withLambda() {
+        if (dimensionCount() < 2) {
+            throw new IllegalStateException("The array-based Lambda API requires at least two dimensions; "
+                    + "use withLambda(dimension) for a one-dimensional product");
+        }
         return new LambdaConditionalProductBuilder.ArrayBased(this);
     }
 
@@ -605,7 +606,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         Objects.requireNonNull(strategy, "strategy");
         if (!model.multiRules.isEmpty() && strategy != LexOrderStrategy.DP) {
             throw new UnsupportedOperationException(
-                    "Compound conditions require lexOrder(LexOrderStrategy.DP); " +
+                    "Multi-trigger Lambda rules require lexOrder(LexOrderStrategy.DP); " +
                             "the pruned lexicographic strategies support pairwise rules only.");
         }
         if (strategy == LexOrderStrategy.ADAPTIVE) {
