@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -18,7 +20,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -72,7 +73,7 @@ class ConstrainedProductValidationRulesTest {
     }
 
     private ConstrainedProductBuilder emptyProduct() {
-        var p = cartesianProduct.constrainedProductOfDistinct(1, Collections.emptyList());
+        var p = Product.constrained().ofDistinct(1, Collections.emptyList());
         assertEquals(BigInteger.ZERO, p.count());
         assertTrue(p.isEmpty());
         return p;
@@ -80,12 +81,12 @@ class ConstrainedProductValidationRulesTest {
 
     @Test
     void nullInputIsRejectedEverywhere() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(2, ABC);
+        var builder = Product.constrained().ofDistinct(2, ABC);
         List<String> nothing = null;
 
-        assertThrows(NullPointerException.class, () -> cartesianProduct.constrainedProductOfDistinct(2, nothing));
-        assertThrows(NullPointerException.class, () -> cartesianProduct.constrainedProductOfMultiSelect(2, nothing));
-        assertThrows(NullPointerException.class, () -> cartesianProduct.constrainedProductOfInRange(0, 1, nothing));
+        assertThrows(NullPointerException.class, () -> Product.constrained().ofDistinct(2, nothing));
+        assertThrows(NullPointerException.class, () -> Product.constrained().ofMultiSelect(2, nothing));
+        assertThrows(NullPointerException.class, () -> Product.constrained().ofInRange(0, 1, nothing));
         assertThrows(NullPointerException.class, () -> new ConstrainedProductBuilder(2, nothing, false, calculator));
         assertThrows(NullPointerException.class, () -> new ConstrainedProductBuilder(0, 1, nothing, calculator));
 
@@ -103,13 +104,13 @@ class ConstrainedProductValidationRulesTest {
     @Test
     void nullElementsAreRejectedWhenBuilderIsCreated() {
         List<String> withNull = Arrays.asList("A", null, "C");
-        var builder = cartesianProduct.constrainedProductOfDistinct(1, ABC);
+        var builder = Product.constrained().ofDistinct(1, ABC);
         var empty = emptyProduct();
 
         List<Executable> checks = List.of(
-                () -> assertThrows(NullPointerException.class, () -> cartesianProduct.constrainedProductOfDistinct(2, withNull), "ofDistinct"),
-                () -> assertThrows(NullPointerException.class, () -> cartesianProduct.constrainedProductOfMultiSelect(2, withNull), "ofMultiSelect"),
-                () -> assertThrows(NullPointerException.class, () -> cartesianProduct.constrainedProductOfInRange(0, 2, withNull), "ofInRange"),
+                () -> assertThrows(NullPointerException.class, () -> Product.constrained().ofDistinct(2, withNull), "ofDistinct"),
+                () -> assertThrows(NullPointerException.class, () -> Product.constrained().ofMultiSelect(2, withNull), "ofMultiSelect"),
+                () -> assertThrows(NullPointerException.class, () -> Product.constrained().ofInRange(0, 2, withNull), "ofInRange"),
                 () -> assertThrows(NullPointerException.class, () -> new ConstrainedProductBuilder(2, withNull, false, calculator), "ctor distinct"),
                 () -> assertThrows(NullPointerException.class, () -> new ConstrainedProductBuilder(2, withNull, true, calculator), "ctor multi"),
                 () -> assertThrows(NullPointerException.class, () -> new ConstrainedProductBuilder(0, 2, withNull, calculator), "ctor range"),
@@ -129,7 +130,7 @@ class ConstrainedProductValidationRulesTest {
         List<Integer> second = new ArrayList<>(ONE_TO_FOUR);
         List<String> third = new ArrayList<>(List.of("x", "y"));
 
-        var builder = cartesianProduct.constrainedProductOfDistinct(2, first)
+        var builder = Product.constrained().ofDistinct(2, first)
                 .andMultiSelect(2, second)
                 .andInRange(1, 2, third);
 
@@ -164,19 +165,19 @@ class ConstrainedProductValidationRulesTest {
     @SuppressWarnings("removal")
     @Test
     void negativeQuantityIsAlwaysAnInvalidArgumentError() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(1, ABC);
+        var builder = Product.constrained().ofDistinct(1, ABC);
         var empty = emptyProduct();
         List<String> noElements = Collections.emptyList();
 
         List<Executable> checks = List.of(
                 // non-empty input (should already pass)
-                () -> assertThrows(IllegalArgumentException.class, () -> cartesianProduct.constrainedProductOfDistinct(-1, ABC), "ofDistinct"),
-                () -> assertThrows(IllegalArgumentException.class, () -> cartesianProduct.constrainedProductOfMultiSelect(-1, ABC), "ofMultiSelect"),
+                () -> assertThrows(IllegalArgumentException.class, () -> Product.constrained().ofDistinct(-1, ABC), "ofDistinct"),
+                () -> assertThrows(IllegalArgumentException.class, () -> Product.constrained().ofMultiSelect(-1, ABC), "ofMultiSelect"),
                 () -> assertThrows(IllegalArgumentException.class, () -> builder.andDistinct(-1, ABC), "andDistinct"),
                 () -> assertThrows(IllegalArgumentException.class, () -> builder.andMultiSelect(-1, ABC), "andMultiSelect"),
                 // empty element list
-                () -> assertThrows(IllegalArgumentException.class, () -> cartesianProduct.constrainedProductOfDistinct(-1, noElements), "ofDistinct, empty list"),
-                () -> assertThrows(IllegalArgumentException.class, () -> cartesianProduct.constrainedProductOfMultiSelect(-1, noElements), "ofMultiSelect, empty list"),
+                () -> assertThrows(IllegalArgumentException.class, () -> Product.constrained().ofDistinct(-1, noElements), "ofDistinct, empty list"),
+                () -> assertThrows(IllegalArgumentException.class, () -> Product.constrained().ofMultiSelect(-1, noElements), "ofMultiSelect, empty list"),
                 () -> assertThrows(IllegalArgumentException.class, () -> builder.andDistinct(-1, noElements), "andDistinct, empty list"),
                 () -> assertThrows(IllegalArgumentException.class, () -> builder.andMultiSelect(-1, noElements), "andMultiSelect, empty list"),
                 // public constructors
@@ -184,8 +185,8 @@ class ConstrainedProductValidationRulesTest {
                 () -> assertThrows(IllegalArgumentException.class, () -> new ConstrainedProductBuilder(-1, noElements, false, calculator), "ctor distinct, empty list"),
                 () -> assertThrows(IllegalArgumentException.class, () -> new ConstrainedProductBuilder(-1, noElements, true, calculator), "ctor multi, empty list"),
                 // deprecated factory is still public API
-                () -> assertThrows(IllegalArgumentException.class, () -> cartesianProduct.constrainedProductOf(-1, ABC), "constrainedProductOf"),
-                () -> assertThrows(IllegalArgumentException.class, () -> cartesianProduct.constrainedProductOf(-1, noElements), "constrainedProductOf, empty list"),
+                () -> assertThrows(IllegalArgumentException.class, () -> Product.constrained().ofDistinct(-1, ABC), "constrainedProductOf"),
+                () -> assertThrows(IllegalArgumentException.class, () -> Product.constrained().ofDistinct(-1, noElements), "constrainedProductOf, empty list"),
                 // already-empty product must not skip validation
                 () -> assertThrows(IllegalArgumentException.class, () -> empty.andDistinct(-1, ABC), "empty.andDistinct"),
                 () -> assertThrows(IllegalArgumentException.class, () -> empty.andMultiSelect(-1, ABC), "empty.andMultiSelect")
@@ -199,14 +200,14 @@ class ConstrainedProductValidationRulesTest {
      */
     @Test
     void invalidRangeIsAlwaysAnInvalidArgumentError() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(1, ABC);
+        var builder = Product.constrained().ofDistinct(1, ABC);
         var empty = emptyProduct();
 
         List<Executable> checks = List.of(
-                () -> assertThrows(IllegalArgumentException.class, () -> cartesianProduct.constrainedProductOfInRange(-1, 2, ABC), "from < 0"),
-                () -> assertThrows(IllegalArgumentException.class, () -> cartesianProduct.constrainedProductOfInRange(3, 1, ABC), "to < from"),
-                () -> assertThrows(IllegalArgumentException.class, () -> cartesianProduct.constrainedProductOfInRange(4, 4, ABC), "from > n"),
-                () -> assertThrows(IllegalArgumentException.class, () -> cartesianProduct.constrainedProductOfInRange(0, 4, ABC), "to > n"),
+                () -> assertThrows(IllegalArgumentException.class, () -> Product.constrained().ofInRange(-1, 2, ABC), "from < 0"),
+                () -> assertThrows(IllegalArgumentException.class, () -> Product.constrained().ofInRange(3, 1, ABC), "to < from"),
+                () -> assertThrows(IllegalArgumentException.class, () -> Product.constrained().ofInRange(4, 4, ABC), "from > n"),
+                () -> assertThrows(IllegalArgumentException.class, () -> Product.constrained().ofInRange(0, 4, ABC), "to > n"),
                 () -> assertThrows(IllegalArgumentException.class, () -> new ConstrainedProductBuilder(3, 1, ABC, calculator), "ctor to < from"),
                 () -> assertThrows(IllegalArgumentException.class, () -> builder.andInRange(-1, 2, ABC), "and from < 0"),
                 () -> assertThrows(IllegalArgumentException.class, () -> builder.andInRange(3, 1, ABC), "and to < from"),
@@ -223,12 +224,12 @@ class ConstrainedProductValidationRulesTest {
     /** Rule: n = 0 accepts any range with 0 <= from <= to (table SUBSETS). */
     @Test
     void emptySetAcceptsAnyRangeEvenHugeOnes() {
-        var withEmptySubset = cartesianProduct.constrainedProductOfInRange(0, Integer.MAX_VALUE, Collections.emptyList());
+        var withEmptySubset = Product.constrained().ofInRange(0, Integer.MAX_VALUE, Collections.emptyList());
         assertEquals(BigInteger.ONE, withEmptySubset.count());
         assertFalse(withEmptySubset.isEmpty());
         assertEquals(List.of(List.of()), withEmptySubset.lexOrder().stream().toList());
 
-        var noSubsets = cartesianProduct.constrainedProductOfInRange(1, Integer.MAX_VALUE, Collections.emptyList());
+        var noSubsets = Product.constrained().ofInRange(1, Integer.MAX_VALUE, Collections.emptyList());
         assertEquals(BigInteger.ZERO, noSubsets.count());
         assertTrue(noSubsets.isEmpty());
     }
@@ -249,9 +250,9 @@ class ConstrainedProductValidationRulesTest {
                 final int fn = n, fq = q;
                 var list = range(n);
                 checks.add(() -> assertDimension("distinct n=" + fn + " q=" + fq,
-                        cartesianProduct.constrainedProductOfDistinct(fq, list), distinctCount(fn, fq)));
+                        Product.constrained().ofDistinct(fq, list), distinctCount(fn, fq)));
                 checks.add(() -> assertDimension("multiSelect n=" + fn + " q=" + fq,
-                        cartesianProduct.constrainedProductOfMultiSelect(fq, list), multiSelectCount(fn, fq)));
+                        Product.constrained().ofMultiSelect(fq, list), multiSelectCount(fn, fq)));
             }
             for (int from = 0; from <= 3; from++) {
                 for (int to = from; to <= 3; to++) {
@@ -259,7 +260,7 @@ class ConstrainedProductValidationRulesTest {
                     final int fn = n, ff = from, ft = to;
                     var list = range(n);
                     checks.add(() -> assertDimension("range n=" + fn + " [" + ff + "," + ft + "]",
-                            cartesianProduct.constrainedProductOfInRange(ff, ft, list), rangeCount(fn, ff, ft)));
+                            Product.constrained().ofInRange(ff, ft, list), rangeCount(fn, ff, ft)));
                 }
             }
         }
@@ -276,7 +277,7 @@ class ConstrainedProductValidationRulesTest {
                 // dimension 1: distinct q1 of 3, dimension 2: multi-select q2 of 2, dimension 3: subsets of {0,1}
                 BigInteger expected = distinctCount(3, q1).multiply(multiSelectCount(2, q2)).multiply(rangeCount(2, 0, 2));
                 checks.add(() -> assertDimension("chain q1=" + f1 + " q2=" + f2,
-                        cartesianProduct.constrainedProductOfDistinct(f1, ABC)
+                        Product.constrained().ofDistinct(f1, ABC)
                                 .andMultiSelect(f2, List.of(1, 2))
                                 .andInRange(0, 2, List.of("x", "y")),
                         expected));
@@ -298,7 +299,7 @@ class ConstrainedProductValidationRulesTest {
      */
     @Test
     void zeroMultiplicityDimensionContributesOneEmptyTuple() {
-        var base = cartesianProduct.constrainedProductOfDistinct(2, ABC);          // 3 tuples
+        var base = Product.constrained().ofDistinct(2, ABC);          // 3 tuples
         var baseTuples = base.lexOrder().stream().toList();
         assertEquals(3, baseTuples.size());
 
@@ -312,7 +313,7 @@ class ConstrainedProductValidationRulesTest {
         assertAll(checks);
 
         // as the FIRST dimension: a single [[]]
-        var onlyEmptyTuple = cartesianProduct.constrainedProductOfDistinct(0, ABC);
+        var onlyEmptyTuple = Product.constrained().ofDistinct(0, ABC);
         assertEquals(BigInteger.ONE, onlyEmptyTuple.count());
         assertFalse(onlyEmptyTuple.isEmpty());
         assertEquals(List.of(List.of()), onlyEmptyTuple.lexOrder().stream().toList());
@@ -328,7 +329,7 @@ class ConstrainedProductValidationRulesTest {
     /** Rule: any dimension with count = 0 makes the product empty ([]). */
     @Test
     void anyEmptyDimensionMakesTheProductEmpty() {
-        var p = cartesianProduct.constrainedProductOfDistinct(2, ABC)
+        var p = Product.constrained().ofDistinct(2, ABC)
                 .andDistinct(2, Collections.emptyList())
                 .andMultiSelect(2, ABC);                    // later dimension must not revive it
         assertEquals(BigInteger.ZERO, p.count());
@@ -345,7 +346,7 @@ class ConstrainedProductValidationRulesTest {
      */
     @Test
     void choiceAndSampleSizeRules() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(2, ABC).andMultiSelect(2, ONE_TO_FOUR);   // 30
+        var builder = Product.constrained().ofDistinct(2, ABC).andMultiSelect(2, ONE_TO_FOUR);   // 30
 
         assertThrows(IllegalArgumentException.class, () -> builder.choice(0, TestBase.random));
         assertThrows(IllegalArgumentException.class, () -> builder.choice(-1, TestBase.random));
@@ -377,7 +378,7 @@ class ConstrainedProductValidationRulesTest {
      */
     @Test
     void nullRandomSourceThrowsNullInputError() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(2, ABC);
+        var builder = Product.constrained().ofDistinct(2, ABC);
 
         assertThrows(NullPointerException.class, () -> builder.choice(1, null));
         assertThrows(NullPointerException.class, () -> builder.sample(1, null));
@@ -391,11 +392,11 @@ class ConstrainedProductValidationRulesTest {
     @Test
     void domainWhoseOnlyElementIsTheEmptyList() {
         List<Executable> checks = List.of(
-                () -> assertOnlyEmptyTuple("distinct(0, empty list)", cartesianProduct.constrainedProductOfDistinct(0, Collections.emptyList())),
-                () -> assertOnlyEmptyTuple("distinct(0, A,B,C)", cartesianProduct.constrainedProductOfDistinct(0, ABC)),
-                () -> assertOnlyEmptyTuple("multiSelect(0, A,B,C)", cartesianProduct.constrainedProductOfMultiSelect(0, ABC)),
-                () -> assertOnlyEmptyTuple("inRange(0,0, A,B,C)", cartesianProduct.constrainedProductOfInRange(0, 0, ABC)),
-                () -> assertOnlyEmptyTuple("inRange(0,5, empty list)", cartesianProduct.constrainedProductOfInRange(0, 5, Collections.emptyList())));
+                () -> assertOnlyEmptyTuple("distinct(0, empty list)", Product.constrained().ofDistinct(0, Collections.emptyList())),
+                () -> assertOnlyEmptyTuple("distinct(0, A,B,C)", Product.constrained().ofDistinct(0, ABC)),
+                () -> assertOnlyEmptyTuple("multiSelect(0, A,B,C)", Product.constrained().ofMultiSelect(0, ABC)),
+                () -> assertOnlyEmptyTuple("inRange(0,0, A,B,C)", Product.constrained().ofInRange(0, 0, ABC)),
+                () -> assertOnlyEmptyTuple("inRange(0,5, empty list)", Product.constrained().ofInRange(0, 5, Collections.emptyList())));
         assertAll(checks);
     }
 
@@ -418,7 +419,7 @@ class ConstrainedProductValidationRulesTest {
     /** Rule: lexOrderMth - count = 0 accepts any start >= 0; m <= 0 and start < 0 stay invalid. */
     @Test
     void lexOrderMthRules() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(2, ABC).andMultiSelect(2, ONE_TO_FOUR);   // 30
+        var builder = Product.constrained().ofDistinct(2, ABC).andMultiSelect(2, ONE_TO_FOUR);   // 30
         assertThrows(IllegalArgumentException.class, () -> builder.lexOrderMth(0, 0));
         assertThrows(IllegalArgumentException.class, () -> builder.lexOrderMth(-1, 0));
         assertThrows(IllegalArgumentException.class, () -> builder.lexOrderMth(1, -1));
@@ -437,7 +438,7 @@ class ConstrainedProductValidationRulesTest {
      */
     @Test
     void byRanksIsLazyAndOnlyChecksNullUpFront() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(2, ABC).andMultiSelect(2, ONE_TO_FOUR);   // 30
+        var builder = Product.constrained().ofDistinct(2, ABC).andMultiSelect(2, ONE_TO_FOUR);   // 30
         List<BigInteger> nullList = null;
         assertThrows(IllegalArgumentException.class, () -> builder.byRanks(nullList));
 
@@ -462,7 +463,7 @@ class ConstrainedProductValidationRulesTest {
      */
     @Test
     void resultsAreImmutable() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(2, ABC).andMultiSelect(2, ONE_TO_FOUR);   // 30
+        var builder = Product.constrained().ofDistinct(2, ABC).andMultiSelect(2, ONE_TO_FOUR);   // 30
 
         Map<String, List<List<Object>>> produced = new LinkedHashMap<>();
         produced.put("lexOrder", builder.lexOrder().stream().toList());
@@ -470,8 +471,8 @@ class ConstrainedProductValidationRulesTest {
         produced.put("byRanks", builder.byRanks(List.of(BigInteger.ZERO, bi(29))).stream().toList());
         produced.put("choice", builder.choice(3, new Random(1)).stream().toList());
         produced.put("sample", builder.sample(3, new Random(1)).stream().toList());
-        produced.put("single dimension lexOrder", cartesianProduct.constrainedProductOfDistinct(2, ABC).lexOrder().stream().toList());
-        produced.put("subset dimension lexOrder", cartesianProduct.constrainedProductOfInRange(1, 2, ABC).lexOrder().stream().toList());
+        produced.put("single dimension lexOrder", Product.constrained().ofDistinct(2, ABC).lexOrder().stream().toList());
+        produced.put("subset dimension lexOrder", Product.constrained().ofInRange(1, 2, ABC).lexOrder().stream().toList());
 
         List<Executable> checks = new ArrayList<>();
         produced.forEach((source, tuples) -> {
@@ -488,7 +489,7 @@ class ConstrainedProductValidationRulesTest {
 
     @Test
     void generatorsAreReIterable() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(2, ABC).andMultiSelect(2, ONE_TO_FOUR);
+        var builder = Product.constrained().ofDistinct(2, ABC).andMultiSelect(2, ONE_TO_FOUR);
 
         var lex = builder.lexOrder();
         assertEquals(lex.stream().toList(), lex.stream().toList(), "lexOrder");
