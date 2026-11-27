@@ -4,6 +4,11 @@ import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.builders.CombinationRankOfBuilder;
 import io.github.deepeshpatel.jnumbertools.builders.PermutationRankOfBuilder;
 
+/** Static entry point for zero-based lexicographical ranking of permutations, derangements and combinations.
+ * <p>Use {@link #permutation()} or {@link #combination()} to obtain the corresponding rank builder.
+ * An optional shared {@link io.github.deepeshpatel.jnumbertools.datastructure.Calculator} can be
+ * supplied to reuse combinatorial caches.</p>
+ */
 public class Rank {
     /** Returns ranking operations for permutations and derangements. */
     public static PermutationRankOfBuilder permutation() {
