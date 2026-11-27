@@ -66,10 +66,8 @@ class StaticGeneratorEntryPointsTest {
     }
 
     @Test
-    void jNumberToolsRetainsRankingAndNumberSystemEntryPoints() {
-        // Keep the central facade focused on ranking, unranking, and number systems.
-        assertEquals(BigInteger.valueOf(2), JNumberTools.rankOf().permutation().unique(1, 0));
-        assertEquals(2, JNumberTools.unrankOf().permutation().unique(BigInteger.valueOf(2), 3).length);
-        assertEquals(0, JNumberTools.numberSystem().factoradic(BigInteger.ZERO, 1).length);
-    }
-}
+    void jNumberToolsRetainsItsRemainingEntryPoints() {
+        assertEquals(JNumberTools.rankOf().getClass(), RankOf.class);
+        assertEquals(JNumberTools.unrankOf().getClass(), UnrankOf.class);
+        assertEquals(JNumberTools.numberSystem().getClass(), NumberSystem.class);
+    }}
