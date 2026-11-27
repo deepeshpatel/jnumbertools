@@ -36,17 +36,17 @@ import static java.util.Arrays.asList;
  * import io.github.deepeshpatel.jnumbertools.entrypoint.Permutation;
  *
  * // All permutations of [A, B, C] in lexicographical order
- * perm.unique("A", "B", "C")
+ * Permutation.unique("A", "B", "C")
  *     .lexOrder()
  *     .forEach(System.out::println);
  *
  * // Every 2nd permutation starting from rank 1
- * perm.unique(4)  // permutations of [0,1,2,3]
+ * Permutation.unique(4)  // permutations of [0,1,2,3]
  *     .lexOrderMth(2, 1)
  *     .forEach(System.out::println);
  *
  * // Random sample of 3 unique permutations without replacement
- * perm.unique("A", "B", "C", "D")
+ * Permutation.unique("A", "B", "C", "D")
  *     .sample(3)
  *     .forEach(System.out::println);
  * </pre>
@@ -54,12 +54,12 @@ import static java.util.Arrays.asList;
  * <h3>k-Permutations</h3>
  * <pre>
  * // All 2-permutations of [A, B, C, D] in lexicographical order
- * perm.nPk(2, "A", "B", "C", "D")
+ * Permutation.nPk(2, "A", "B", "C", "D")
  *     .lexOrder()
  *     .forEach(System.out::println);
  *
  * // In combination order (grouped by underlying combination)
- * perm.nPk(2, "A", "B", "C")
+ * Permutation.nPk(2, "A", "B", "C")
  *     .combinationOrder()
  *     .forEach(System.out::println);
  * </pre>
@@ -67,7 +67,7 @@ import static java.util.Arrays.asList;
  * <h3>Repetitive Permutations</h3>
  * <pre>
  * // All 3-length permutations of [A, B] with repetition
- * perm.repetitive(3, "A", "B")
+ * Permutation.repetitive(3, "A", "B")
  *     .lexOrder()
  *     .forEach(System.out::println);
  * // Output: [A,A,A], [A,A,B], [A,B,A], [A,B,B], [B,A,A], [B,A,B], [B,B,A], [B,B,B]
@@ -80,7 +80,7 @@ import static java.util.Arrays.asList;
  * multiset.put("A", 2);
  * multiset.put("B", 1);
  *
- * perm.multiset(multiset)
+ * Permutation.multiset(multiset)
  *     .lexOrder()
  *     .forEach(System.out::println);
  * // Output: [A,A,B], [A,B,A], [B,A,A]
