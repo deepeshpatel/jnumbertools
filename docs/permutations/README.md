@@ -49,6 +49,8 @@ JNumberTools provides the following 23 permutation generation APIs. All m<sup>th
 
 ### 1. Unique Permutation Generators
 
+**Static entry point:** `io.github.deepeshpatel.jnumbertools.base.Permutation` (import `Permutation`).
+
 #### 1.1 Unique permutation in lex order
 Used to generate all n! unique permutations of n elements in lexicographical order.
 
