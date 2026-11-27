@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.base.Derangement;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -110,11 +112,11 @@ class DerangementsTest {
     class IntegrationTests {
 
         @Test
-        @DisplayName("JNumberTools.derangements() is wired and functional")
+        @DisplayName("Derangement is wired and functional")
         void shouldBeWiredIntoJNumberToolsFacade() {
-            assertNotNull(JNumberTools.derangements());
+            assertNotNull(Derangement);
             assertEquals(BigInteger.valueOf(9),
-                    JNumberTools.derangements().of(4).count());
+                    Derangement.of(4).count());
         }
     }
 }
