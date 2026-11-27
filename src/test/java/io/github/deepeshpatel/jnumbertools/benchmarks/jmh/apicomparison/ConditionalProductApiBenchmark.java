@@ -119,7 +119,7 @@ public class ConditionalProductApiBenchmark {
                                 : WINDOWS.equals(os) ? WINDOWS_DATABASES.contains(database) : true)
                         && (LINUX.equals(os) ? LINUX_REGIONS.contains(region)
                                 : WINDOWS.equals(os) ? WINDOWS_REGIONS.contains(region) : true));
-                yield () -> builder.generate().stream()
+                yield () -> builder.anyOrder().stream()
                         .map(tuple -> List.copyOf(tuple))
                         .collect(Collectors.toSet());
             }
