@@ -90,8 +90,8 @@ import java.math.BigInteger;
  *
  * <h2>Intended use</h2>
  * <p>
- * <strong>Implementation class: intended to be used through {@link io.github.deepeshpatel.jnumbertools.base.RankOf} and
- * {@link io.github.deepeshpatel.jnumbertools.base.UnrankOf} (and the builders).</strong> Argument validation and its error signalling belong to those;
+ * <strong>Implementation class: intended to be used through {@link io.github.deepeshpatel.jnumbertools.entrypoint.Rank} and
+ * {@link io.github.deepeshpatel.jnumbertools.entrypoint.Unrank} (and the builders).</strong> Argument validation and its error signalling belong to those;
  * this class assumes valid input. Intrinsic conversion checks remain here: ranks outside
  * {@code [0, D_n)} cannot be encoded, and digit values outside the legal candidate range
  * cannot be decoded.
