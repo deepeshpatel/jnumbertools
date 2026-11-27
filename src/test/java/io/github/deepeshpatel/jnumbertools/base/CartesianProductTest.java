@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
+import static io.github.deepeshpatel.jnumbertools.TestBase.errMsgNullInput;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Product Factory Validation")
@@ -19,7 +21,7 @@ class CartesianProductTest {
         assertTrue(exp.getMessage().startsWith(errMsgNullInput));
 
         // Empty list is allowed and will be treated as empty-set(∅)
-        cartesianProduct.simpleProductOf(Collections.emptyList());
+        Product.simple(Collections.emptyList());
     }
 
     @Test
@@ -29,7 +31,7 @@ class CartesianProductTest {
         var second = List.of(1, 2);
         var third = List.of("X", "Y");
 
-        var product = cartesianProduct.simpleProductOf(first, second, third);
+        var product = Product.simple(first, second, third);
 
         assertEquals(8, product.count().intValueExact());
         assertEquals(List.of(
@@ -50,17 +52,17 @@ class CartesianProductTest {
         var first = new java.util.ArrayList<>(List.of("A", "B"));
         var second = new java.util.ArrayList<>(List.of(1, 2));
 
-        var product = cartesianProduct.simpleProductOf(first, second);
+        var product = Product.simple(first, second);
         first.clear();
         second.add(3);
 
         assertEquals(4, product.count().intValueExact());
         assertThrows(NullPointerException.class,
-                () -> cartesianProduct.simpleProductOf(List.of("A"), null));
+                () -> Product.simple(List.of("A"), null));
         assertThrows(NullPointerException.class,
-                () -> cartesianProduct.simpleProductOf(List.of("A"), List.of(1), (List<?>[]) null));
+                () -> Product.simple(List.of("A"), List.of(1), (List<?>[]) null));
         assertThrows(NullPointerException.class,
-                () -> cartesianProduct.simpleProductOf(List.of("A"), List.of(1), java.util.Arrays.asList("X", null)));
+                () -> Product.simple(List.of("A"), List.of(1), java.util.Arrays.asList("X", null)));
     }
 
     @Nested
@@ -78,15 +80,15 @@ class CartesianProductTest {
         @Test
         @DisplayName("empty input allowed")
         void emptyInput() {
-            cartesianProduct.constrainedProductOfDistinct(10, Collections.emptyList());
-            cartesianProduct.constrainedProductOfDistinct(5, Collections.emptyList());
+            Product.constrained().ofDistinct(10, Collections.emptyList());
+            Product.constrained().ofDistinct(5, Collections.emptyList());
         }
 
         @Test
         @DisplayName("negative quantity throws IAE with message")
         void negativeQuantity() {
             var exp2 = assertThrows(IllegalArgumentException.class, ()->
-                    cartesianProduct.constrainedProductOfDistinct(-1, Collections.emptyList()));
+                    Product.constrained().ofDistinct(-1, Collections.emptyList()));
             assertEquals("quantity must be ≥ 0", exp2.getMessage());
         }
     }
@@ -106,15 +108,15 @@ class CartesianProductTest {
         @Test
         @DisplayName("empty input allowed")
         void emptyInput() {
-            cartesianProduct.constrainedProductOfMultiSelect(3, Collections.emptyList());
-            cartesianProduct.constrainedProductOfMultiSelect(0, Collections.emptyList());
+            Product.constrained().ofMultiSelect(3, Collections.emptyList());
+            Product.constrained().ofMultiSelect(0, Collections.emptyList());
         }
 
         @Test
         @DisplayName("negative quantity throws IAE with message")
         void negativeQuantity() {
             var exp2 = assertThrows(IllegalArgumentException.class, ()->
-                    cartesianProduct.constrainedProductOfMultiSelect(-1, Collections.emptyList()));
+                    Product.constrained().ofMultiSelect(-1, Collections.emptyList()));
             assertEquals("quantity must be ≥ 0", exp2.getMessage());
         }
     }
@@ -135,7 +137,7 @@ class CartesianProductTest {
         @DisplayName("invalid from index throws IAE")
         void invalidFromIndex() {
             var exp2 = assertThrows(IllegalArgumentException.class, ()->
-                    cartesianProduct.constrainedProductOfInRange(-1, 5, A_B));
+                    Product.constrained().ofInRange(-1, 5, A_B));
             assertEquals("Invalid range: from=-1, to=5 - must satisfy 0 ≤ from ≤ to", exp2.getMessage());
         }
 
@@ -143,14 +145,14 @@ class CartesianProductTest {
         @DisplayName("to index exceeding input size throws IAE")
         void toIndexExceedsSize() {
             var exp = assertThrows(IllegalArgumentException.class, () ->
-                    cartesianProduct.constrainedProductOfInRange(1, 10, A_B_C));
+                    Product.constrained().ofInRange(1, 10, A_B_C));
             assertEquals("Invalid range: to cannot exceed 3", exp.getMessage());
         }
 
         @Test
         @DisplayName("empty input allowed for valid range")
         void emptyInput() {
-            cartesianProduct.constrainedProductOfInRange(0, 0, Collections.emptyList());
+            Product.constrained().ofInRange(0, 0, Collections.emptyList());
         }
     }
 }
