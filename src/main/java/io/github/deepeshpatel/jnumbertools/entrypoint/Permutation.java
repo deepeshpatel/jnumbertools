@@ -20,6 +20,21 @@ import java.util.List;
  * and multiset permutations. The returned builders provide the traversal,
  * ranking, and sampling operations available for each permutation type.</p>
  *
+ * <p>The static factories use an internally managed {@link io.github.deepeshpatel.jnumbertools.datastructure.Calculator}
+ * for convenience. Advanced users who want to share calculation caches across generators can
+ * instantiate the corresponding concrete builder directly and pass the same calculator to each
+ * builder. For example:</p>
+ *
+ * <pre>{@code
+ * Calculator calculator = new Calculator();
+ * var first = new UniquePermutationBuilder<>(calculator, List.of("A", "B", "C"));
+ * var second = new UniquePermutationBuilder<>(calculator, List.of("D", "E", "F"));
+ * }</pre>
+ *
+ * <p>Import {@code Calculator} from {@code io.github.deepeshpatel.jnumbertools.datastructure}
+ * and {@code UniquePermutationBuilder} from
+ * {@code io.github.deepeshpatel.jnumbertools.generator.permutation.unique}.</p>
+ *
  * <pre>{@code
  * Permutation.unique("A", "B", "C").lexOrder();
  * Permutation.nPk(2, "A", "B", "C").lexOrder();
