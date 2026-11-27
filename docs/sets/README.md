@@ -12,6 +12,8 @@
 
 JNumberTools provides the following 7 generators for sets and subsets. All m<sup>th</sup> generators are BigInteger compatible, enabling rapid generation of subsets at very large indices, such as 10<sup>100</sup>.
 
+**Static entry point:** `Subset`. Add `import io.github.deepeshpatel.jnumbertools.base.Subset;` to use the examples in a Java source file.
+
 **Currently Available Algorithms**
 
 1. [All subsets in lex order](#1-all-subsets-in-lex-order)
