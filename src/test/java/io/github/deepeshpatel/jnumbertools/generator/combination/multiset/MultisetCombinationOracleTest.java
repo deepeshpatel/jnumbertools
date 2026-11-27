@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
+import io.github.deepeshpatel.jnumbertools.base.Combination;
+
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Test;
 
@@ -65,7 +67,7 @@ class MultisetCombinationOracleTest {
     }
 
     private static void check(int[] freq, int r, int limit) {
-        var builder = JNumberTools.combinations().multiset(multiset(freq), r);
+        var builder = Combination.multiset(multiset(freq), r);
         List<int[]> expected = new ArrayList<>();
         enumerate(freq, 0, r, new int[freq.length], expected, limit);
         String label = "types=" + freq.length + " r=" + r;
@@ -117,7 +119,7 @@ class MultisetCombinationOracleTest {
 
     @Test
     void hugeSpaceByRanksAgreesWithLexOrderMth() {
-        var big = JNumberTools.combinations().multiset(multiset(repeat(3, 40)), 60);
+        var big = Combination.multiset(multiset(repeat(3, 40)), 60);
         BigInteger total = big.count();
         Random random = new Random(5);
         for (int i = 0; i < 100; i++) {
