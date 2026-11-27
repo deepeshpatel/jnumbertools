@@ -21,14 +21,14 @@ import java.util.List;
  * For example:</p>
  *
  * <pre>{@code
+ * import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
+ * import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetSelector;
+ * import java.util.List;
+ *
  * Calculator calculator = new Calculator();
  * var first = new SubsetSelector<>(List.of("A", "B", "C"), calculator);
  * var second = new SubsetSelector<>(List.of("D", "E", "F"), calculator);
  * }</pre>
- *
- * <p>Import {@code Calculator} from {@code io.github.deepeshpatel.jnumbertools.datastructure}
- * and {@code SubsetSelector} from
- * {@code io.github.deepeshpatel.jnumbertools.generator.subset}.</p>
  *
  * <pre>{@code
  * Subset.of("A", "B", "C").all().lexOrder();
