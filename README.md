@@ -39,37 +39,38 @@ libraryDependencies += "io.github.deepeshpatel" % "jnumbertools" % "4.2.0"
 - **Data-processing workflows**: Java iterators and streams can be adapted for use in applications built with Apache Spark, Flink, and Hadoop; framework-specific integration is handled by the application.
 - **Optimized Algorithms**: Efficient lexicographical generation and ranking
 
-## Operations by product family
+## Public API entry points
 
-The available operations depend on the product builder. Do not assume that every product style exposes the same traversal or sampling methods.
+The library uses dedicated static entry points for generator creation:
 
-| Product family | Entry point | Main operations |
-|---|---|---|
-| Simple Product | `simpleProductOf(...)` | `lexOrder()`, `lexOrderMth(m, start)`, rank-based access, choice and sample |
-| Constrained Product | `constrainedProductOfDistinct(...)` and related builders | `lexOrder()`, `lexOrderMth(m, start)`, rank-based access, choice and sample |
-| Compiled Product (pairwise rules) | `conditionalProductOf(...)` | `lexOrder()`, `lexOrderMth(m, start)`, `byRanks(...)`, `choice(...)`, `sample(...)`, `count()`, `isEmpty()` |
-| Lambda Engine (joint predicates compiled to constraints) | `withLambda(...)` | `generate()`, `count()`, `isEmpty()` |
+| Entry point | Purpose |
+|---|---|
+| `Permutation` | Unique, k-, repetitive and multiset permutations |
+| `Combination` | Unique, repetitive and multiset combinations |
+| `Subset` | All subsets or subsets within a size range |
+| `Derangement` | Fixed-point-free permutations |
+| `Product` | Simple, constrained and conditional Cartesian products |
+| `Rank` / `Unrank` | Ranking and unranking permutations, derangements and combinations |
 
-`generate()` on the Lambda Engine returns a lazy, re-iterable generator; it does not promise lexicographical encounter order or expose rank-based traversal and sampling.
+The public entry points are in `io.github.deepeshpatel.jnumbertools.entrypoint`. Builders are in `io.github.deepeshpatel.jnumbertools.builders`, and the reusable mathematical `Calculator` is in `io.github.deepeshpatel.jnumbertools.datastructure`.
 
 ```java
-import io.github.deepeshpatel.jnumbertools.entrypoint.Combination;
+import io.github.deepeshpatel.jnumbertools.entrypoint.*;
+import java.util.List;
+import java.math.BigInteger;
 
-var combinations = Combination.unique(5, 3);
-combinations.
+var permutations = Permutation.unique("A", "B", "C").lexOrder();
+var combinations = Combination.unique(3, "A", "B", "C", "D").lexOrder();
+var subsets = Subset.of("A", "B", "C").inRange(1, 2).lexOrder();
+var products = Product.simple(List.of("Linux", "Windows"), List.of("Firefox", "Chrome"));
 
-count();   // 10
-combinations.
-
-isEmpty(); // false
-Combination.
-
-unique(2,3).
-
-isEmpty(); // true: cannot choose 3 of 2
+BigInteger rank = Rank.permutation().unique(2, 0, 1);
+int[] permutation = Unrank.permutation().unique(rank, 3);
 ```
 
-The argument checks and the exceptions each operation raises are specified in [ValidationRules.md](ValidationRules.md).
+The four Cartesian product styles are simple, constrained, compiled pairwise-conditional, and lambda-predicate products. The available operations depend on the builder type; consult the [Products guide](docs/products/README.md).
+
+The argument checks and exceptions for public operations are specified in [ValidationRules.md](ValidationRules.md).
 
 ![License](https://img.shields.io/github/license/deepeshpatel/jnumbertools)
 ![Stars](https://img.shields.io/github/stars/deepeshpatel/jnumbertools?style=social)
