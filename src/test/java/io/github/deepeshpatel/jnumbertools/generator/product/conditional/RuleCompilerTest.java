@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -11,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,14 +24,14 @@ class RuleCompilerTest {
     void aValueThatAppearsTwiceInADimensionConstrainsBothPositions() {
         List<Integer> a = new ArrayList<>(List.of(1, 2, 2, 3));
         List<Integer> b = new ArrayList<>(List.of(10, 20));
-        var builder = cartesianProduct.conditionalProductOf(a).and(b).when(a).is(2).then(b).isOneOf(10);
+        var builder = Product.conditional(a).and(b).when(a).is(2).then(b).isOneOf(10);
 
         List<List<Object>> expected = new ArrayList<>();
         for (int x : a) for (int y : b) if (x != 2 || y == 10) expected.add(List.of(x, y));
         assertEquals(expected, builder.lexOrder().stream().toList());
         assertEquals(BigInteger.valueOf(expected.size()), builder.count());
 
-        var negated = cartesianProduct.conditionalProductOf(a).and(b).when(a).is(2).then(b).isNot(10);
+        var negated = Product.conditional(a).and(b).when(a).is(2).then(b).isNot(10);
         List<List<Object>> expectedNegated = new ArrayList<>();
         for (int x : a) for (int y : b) if (x != 2 || y != 10) expectedNegated.add(List.of(x, y));
         assertEquals(expectedNegated, negated.lexOrder().stream().toList());
@@ -40,7 +41,7 @@ class RuleCompilerTest {
     void unknownAndRepeatedValuesAreReported() {
         List<Integer> a = new ArrayList<>(List.of(1, 2, 3));
         List<Integer> b = new ArrayList<>(List.of(10, 20));
-        var builder = cartesianProduct.conditionalProductOf(a).and(b);
+        var builder = Product.conditional(a).and(b);
 
         var error = assertThrows(IllegalArgumentException.class, () -> builder.when(a).is(99));
         assertTrue(error.getMessage().contains("Not a value of that dimension: [99]"), error.getMessage());
@@ -58,7 +59,7 @@ class RuleCompilerTest {
         List<Integer> a = new ArrayList<>(List.of(0, 1, 2, 3));
         List<Integer> b = new ArrayList<>(List.of(0, 1, 2, 3));
         List<Integer> c = new ArrayList<>(List.of(0, 1, 2, 3));
-        var builder = cartesianProduct.conditionalProductOf(a).and(b)
+        var builder = Product.conditional(a).and(b)
                 .when(a).isOneOf(List.of(0, 1)).then(b).isOneOf(List.of(1, 2))
                 .and(c)
                 .when(b).is(2).then(c).isNotIn(List.of(0, 3))
@@ -77,7 +78,7 @@ class RuleCompilerTest {
     void builderDerivedConcurrentlyFromOneBaseAllSeeTheSameIndex() {
         List<Integer> a = new ArrayList<>(IntStream.range(0, 40).boxed().toList());
         List<Integer> b = new ArrayList<>(IntStream.range(0, 40).boxed().toList());
-        var base = cartesianProduct.conditionalProductOf(a).and(b);
+        var base = Product.conditional(a).and(b);
 
         List<BigInteger> counts = IntStream.range(0, 64).parallel()
                 .mapToObj(i -> base.when(a).is(i % 40).then(b).isOneOf(List.of(i % 7, (i + 1) % 40)).count())
