@@ -12,15 +12,15 @@ import java.util.List;
 /**
  * First step of building subsets: the elements are known, the size range is not.
  * <p>
- * Obtained from {@code JNumberTools.subsets().of(...)}. Choose the sizes with {@link #all()} or
+ * Obtained from {@code Subset.of(...)}. Choose the sizes with {@link #all()} or
  * {@link #inRange(int, int)}; either returns a {@link SubsetBuilder}, which offers {@code count()},
  * {@code lexOrder()} and the other operations. Because only a {@code SubsetBuilder} has those
  * operations, forgetting to choose a size range does not compile.
  * </p>
  *
  * <pre>{@code
- * JNumberTools.subsets().of("A", "B", "C").all().lexOrder();       // every subset
- * JNumberTools.subsets().of("A", "B", "C").inRange(1, 2).count();  // subsets of size 1 or 2
+ * Subset.of("A", "B", "C").all().lexOrder();       // every subset
+ * Subset.of("A", "B", "C").inRange(1, 2).count();  // subsets of size 1 or 2
  * }</pre>
  *
  * <p>This class is immutable and thread-safe.</p>
