@@ -1,7 +1,8 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import io.github.deepeshpatel.jnumbertools.base.CartesianProduct;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -15,13 +16,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ConstrainedProductBuilderTest {
 
-    private final CartesianProduct cartesianProduct = new CartesianProduct(calculator);
+    private final Product.Constrained product = Product.constrained(calculator);
     private final List<String> setA = of("A", "B", "C");
     private final List<Integer> setB = of(1, 2, 3, 4);
 
     @Test
     void andDistinct() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(2, setA);
+        var builder = product.ofDistinct(2, setA);
 
         // Test adding distinct dimension
         var builderWithB = builder.andDistinct(2, setB);
@@ -43,7 +44,7 @@ class ConstrainedProductBuilderTest {
 
     @Test
     void andMultiSelect() {
-        var builder = cartesianProduct.constrainedProductOfMultiSelect(2, setA);
+        var builder = product.ofMultiSelect(2, setA);
 
         // Test adding multi-select dimension
         var builderWithB = builder.andMultiSelect(2, setB);
@@ -65,7 +66,7 @@ class ConstrainedProductBuilderTest {
 
     @Test
     void andInRange() {
-        var builder = cartesianProduct.constrainedProductOfInRange(1, 2, setA);
+        var builder = product.ofInRange(1, 2, setA);
 
         // Test adding in-range dimension
         var builderWithB = builder.andInRange(1, 3, setB);
