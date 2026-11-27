@@ -40,7 +40,7 @@ import java.util.*;
  * @see Derangadic
  * @see DerangementBuilder
  */
-public final class Derangement<T> extends AbstractGenerator<T> {
+public final class DerangementGenerator<T> extends AbstractGenerator<T> {
 
     private final Calculator calculator;
 
@@ -49,7 +49,7 @@ public final class Derangement<T> extends AbstractGenerator<T> {
      * <p><strong>Internal use only.</strong> Library users should obtain
      * instances through {@link DerangementBuilder#lexOrder()}.</p>
      */
-    Derangement(List<T> elements, Calculator calculator) {
+    DerangementGenerator(List<T> elements, Calculator calculator) {
         super(elements);
         this.calculator = calculator;
     }

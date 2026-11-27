@@ -1,6 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
+import io.github.deepeshpatel.jnumbertools.base.Subset;
 import io.github.deepeshpatel.jnumbertools.base.Subsets;
 import org.junit.jupiter.api.Test;
 
@@ -50,7 +51,7 @@ class SubsetBuilderTest {
 
     @Test
     void all() {
-        var builder = subsets.of(elements);
+        var builder = Subset.of(elements);
 
         // Should return new instance
         var allBuilder = builder.all();
@@ -66,7 +67,7 @@ class SubsetBuilderTest {
 
     @Test
     void inRange() {
-        var builder = subsets.of(elements);
+        var builder = Subset.of(elements);
 
         // Valid ranges - should not throw
         assertDoesNotThrow(() -> builder.inRange(0, 0));
@@ -100,7 +101,7 @@ class SubsetBuilderTest {
                 builder.inRange(4, 4));
 
         // Empty list special cases - all mathematically valid
-        var emptyBuilder = subsets.of(Collections.emptyList());
+        var emptyBuilder = Subset.of(Collections.emptyList());
 
         // [0,0] - valid, returns empty-set(∅)
         assertDoesNotThrow(() -> emptyBuilder.inRange(0, 0));
@@ -117,7 +118,7 @@ class SubsetBuilderTest {
 
     @Test
     void lexOrder() {
-        var builder = subsets.of(elements);
+        var builder = Subset.of(elements);
 
         // The selector has no lexOrder(): a size range must be chosen first (checked by the compiler).
         // Should return generator when range is specified
@@ -132,7 +133,7 @@ class SubsetBuilderTest {
 
     @Test
     void lexOrderMth() {
-        var builder = subsets.of(elements).inRange(1, 2);
+        var builder = Subset.of(elements).inRange(1, 2);
         BigInteger total = builder.count(); // 6
 
         // Valid parameters
@@ -157,7 +158,7 @@ class SubsetBuilderTest {
 
     @Test
     void byRanks() {
-        var builder = subsets.of(elements).inRange(1, 2);
+        var builder = Subset.of(elements).inRange(1, 2);
 
         // Valid ranks
         var ranks = List.of(BigInteger.ZERO, BigInteger.ONE, BigInteger.valueOf(2));
@@ -166,7 +167,7 @@ class SubsetBuilderTest {
 
     @Test
     void choice() {
-        var builder = subsets.of(elements).inRange(1, 2);
+        var builder = Subset.of(elements).inRange(1, 2);
 
         // Valid sample size
         assertNotNull(builder.choice(3, TestBase.random));
@@ -181,7 +182,7 @@ class SubsetBuilderTest {
 
     @Test
     void sample() {
-        var builder = subsets.of(elements).inRange(1, 2);
+        var builder = Subset.of(elements).inRange(1, 2);
         BigInteger total = builder.count(); // 6
 
         // Valid sample size
@@ -198,7 +199,7 @@ class SubsetBuilderTest {
 
     @Test
     void count() {
-        var builder = subsets.of(elements);
+        var builder = Subset.of(elements);
 
         // Before range specified - should return 0? (check your implementation)
         // assertEquals(BigInteger.ZERO, builder.count());
@@ -212,11 +213,11 @@ class SubsetBuilderTest {
         assertEquals(BigInteger.valueOf(6), rangeBuilder.count());
 
         // Empty list with [0,0]
-        var emptyZeroBuilder = subsets.of(Collections.emptyList()).inRange(0, 0);
+        var emptyZeroBuilder = Subset.of(Collections.emptyList()).inRange(0, 0);
         assertEquals(BigInteger.ONE, emptyZeroBuilder.count());
 
         // Empty list with [0,2]
-        var emptyRangeBuilder = subsets.of(Collections.emptyList()).inRange(0, 2);
+        var emptyRangeBuilder = Subset.of(Collections.emptyList()).inRange(0, 2);
         assertEquals(BigInteger.ONE, emptyRangeBuilder.count());
 
         // Empty list with invalid range - throws, so count not tested
@@ -226,7 +227,7 @@ class SubsetBuilderTest {
     void isEmpty_forEmptyListWithRangeZeroZero_shouldReturnFalse() {
         // Empty list with range [0,0] should produce one element: [[]]
         // Therefore isEmpty() should return false
-        var builder = subsets.of(Collections.emptyList()).inRange(0, 0);
+        var builder = Subset.of(Collections.emptyList()).inRange(0, 0);
 
         assertEquals(BigInteger.ONE, builder.count(), "Count should be 1");
         assertFalse(builder.isEmpty(), "Builder should not be empty as it produces [[]]");
@@ -240,15 +241,15 @@ class SubsetBuilderTest {
     @Test
     void isEmpty() {
         // Non-empty builder with valid range
-        var builder = subsets.of(elements).inRange(1, 2);
+        var builder = Subset.of(elements).inRange(1, 2);
         assertFalse(builder.isEmpty());
 
         // Builder that will produce one element ([[]])
-        var emptyZeroBuilder = subsets.of(Collections.emptyList()).inRange(0, 0);
+        var emptyZeroBuilder = Subset.of(Collections.emptyList()).inRange(0, 0);
         assertFalse(emptyZeroBuilder.isEmpty()); // Actually produces 1 element
 
         // Builder that produces zero elements
-        var zeroBuilder = subsets.of(Collections.emptyList()).inRange(1, 2);
+        var zeroBuilder = Subset.of(Collections.emptyList()).inRange(1, 2);
         assertTrue(zeroBuilder.isEmpty());
     }
 
@@ -262,7 +263,7 @@ class SubsetBuilderTest {
             for (int from = 0; from <= 5; from++) {
                 for (int to = from; to <= 5; to++) {
                     if (n > 0 && to > n) continue; // rejected by inRange(), see inRange()
-                    var b = subsets.of(list).inRange(from, to);
+                    var b = Subset.of(list).inRange(from, to);
                     assertEquals(b.count().signum() == 0, b.isEmpty(),
                             "n=" + n + ", range [" + from + "," + to + "]");
                 }
@@ -270,16 +271,16 @@ class SubsetBuilderTest {
         }
 
         // a builder whose only result is the empty subset ([[]]) is not empty
-        assertFalse(subsets.of(elements).inRange(0, 0).isEmpty());
-        assertFalse(subsets.of(Collections.emptyList()).all().isEmpty());
+        assertFalse(Subset.of(elements).inRange(0, 0).isEmpty());
+        assertFalse(Subset.of(Collections.emptyList()).all().isEmpty());
         // ... but no subsets at all is
-        assertTrue(subsets.of(Collections.emptyList()).inRange(1, 3).isEmpty());
+        assertTrue(Subset.of(Collections.emptyList()).inRange(1, 3).isEmpty());
     }
 
     @Test
     void nullInputThrowsNullInputError() {
         assertThrows(NullPointerException.class, () -> new SubsetSelector<String>(null, calculator));
-        assertThrows(NullPointerException.class, () -> subsets.of((List<String>) null));
+        assertThrows(NullPointerException.class, () -> Subset.of((List<String>) null));
     }
 
     @Test
@@ -287,14 +288,14 @@ class SubsetBuilderTest {
         List<String> withNull = new ArrayList<>(Arrays.asList("A", null, "C"));
 
         // thrown at creation, not later during iteration
-        assertThrows(NullPointerException.class, () -> subsets.of(withNull));
+        assertThrows(NullPointerException.class, () -> Subset.of(withNull));
         assertThrows(NullPointerException.class, () -> new SubsetSelector<>(withNull, calculator));
     }
 
     @Test
     void builderTakesSnapshotOfElements() {
         List<String> live = new ArrayList<>(List.of("A", "B", "C"));
-        var builder = subsets.of(live).inRange(1, 2);
+        var builder = Subset.of(live).inRange(1, 2);
 
         BigInteger countBefore = builder.count();
         var lexBefore = builder.lexOrder().stream().toList();
@@ -318,7 +319,7 @@ class SubsetBuilderTest {
 
     @Test
     void resultsAreImmutable() {
-        var builder = subsets.of(List.of('A', 'B', 'C')).all();
+        var builder = Subset.of(List.of('A', 'B', 'C')).all();
         List<List<Character>> all = new ArrayList<>();
 
         builder.lexOrder().forEach(all::add);                       // includes [] and the whole set
@@ -336,8 +337,8 @@ class SubsetBuilderTest {
 
     @Test
     void choiceAndSampleRules() {
-        var builder = subsets.of(elements).inRange(1, 2);                 // count = 6
-        var emptyDomain = subsets.of(Collections.emptyList()).inRange(1, 2); // count = 0
+        var builder = Subset.of(elements).inRange(1, 2);                 // count = 6
+        var emptyDomain = Subset.of(Collections.emptyList()).inRange(1, 2); // count = 0
 
         // sampleSize <= 0
         assertThrows(IllegalArgumentException.class, () -> builder.choice(0, TestBase.random));
@@ -362,14 +363,14 @@ class SubsetBuilderTest {
         assertThrows(NullPointerException.class, () -> builder.sample(1, null));
 
         // count = 1 and the only element is the empty list: choice yields s empty results
-        var onlyEmptySubset = subsets.of(Collections.emptyList()).all();
+        var onlyEmptySubset = Subset.of(Collections.emptyList()).all();
         assertEquals(List.of(List.of(), List.of(), List.of()),
                 onlyEmptySubset.choice(3, new Random(1)).stream().toList());
     }
 
     @Test
     void samplingAndRanksWorkBeyondLongRange() {
-        var big = subsets.of(100).all();                         // 2^100 subsets, far beyond a long
+        var big = Subset.of(100).all();                         // 2^100 subsets, far beyond a long
         BigInteger count = BigInteger.TWO.pow(100);
         assertEquals(count, big.count());
 
@@ -398,7 +399,7 @@ class SubsetBuilderTest {
 
     @Test
     void lexOrderMthRules() {
-        var emptyDomain = subsets.of(Collections.emptyList()).inRange(1, 2); // count = 0
+        var emptyDomain = Subset.of(Collections.emptyList()).inRange(1, 2); // count = 0
 
         // count = 0 and start >= 0: accepted, yields nothing
         assertTrue(emptyDomain.lexOrderMth(1, 0).stream().toList().isEmpty());
@@ -408,7 +409,7 @@ class SubsetBuilderTest {
         assertThrows(IllegalArgumentException.class, () -> emptyDomain.lexOrderMth(1, -1));
 
         // count = 1: only start = 0 is valid
-        var onlyEmptySubset = subsets.of(Collections.emptyList()).all();
+        var onlyEmptySubset = Subset.of(Collections.emptyList()).all();
         assertEquals(List.of(List.of()), onlyEmptySubset.lexOrderMth(1, 0).stream().toList());
         assertThrows(IllegalArgumentException.class, () -> onlyEmptySubset.lexOrderMth(1, 1));
     }
@@ -416,13 +417,13 @@ class SubsetBuilderTest {
     @Test
     void emptySetAcceptsAnyRangeEvenHugeOnes() {
         // The table lists [0, m] and [1, m] for n = 0 for any m, so a huge `to` must be cheap
-        var withEmptySubset = subsets.of(Collections.emptyList()).inRange(0, Integer.MAX_VALUE);
+        var withEmptySubset = Subset.of(Collections.emptyList()).inRange(0, Integer.MAX_VALUE);
         assertEquals(BigInteger.ONE, withEmptySubset.count());
         assertEquals(List.of(List.of()), withEmptySubset.lexOrder().stream().toList());
         assertEquals(List.of(List.of()), withEmptySubset.lexOrderMth(1, 0).stream().toList());
         assertEquals(List.of(List.of()), withEmptySubset.byRanks(List.of(BigInteger.ZERO)).stream().toList());
 
-        var noSubsets = subsets.of(Collections.emptyList()).inRange(1, Integer.MAX_VALUE);
+        var noSubsets = Subset.of(Collections.emptyList()).inRange(1, Integer.MAX_VALUE);
         assertEquals(BigInteger.ZERO, noSubsets.count());
         assertTrue(noSubsets.isEmpty());
         assertTrue(noSubsets.lexOrder().stream().toList().isEmpty());
@@ -434,7 +435,7 @@ class SubsetBuilderTest {
     @Test
     void selectorOffersAllAndInRangeAndNothingElse() {
         // A selector cannot count or generate: only all() and inRange(...) lead to a builder.
-        var selector = subsets.of(elements);
+        var selector = Subset.of(elements);
         assertTrue(selector instanceof SubsetSelector);
         assertFalse((Object) selector instanceof io.github.deepeshpatel.jnumbertools.generator.base.Builder);
         assertEquals(java.math.BigInteger.valueOf(1L << elements.size()), selector.all().count());
@@ -443,7 +444,7 @@ class SubsetBuilderTest {
 
     @Test
     void selectorCanBeReusedForDifferentRanges() {
-        var selector = subsets.of(elements);
+        var selector = Subset.of(elements);
         var all = selector.all();
         var some = selector.inRange(1, 1);
         assertEquals(java.math.BigInteger.valueOf(elements.size()), some.count());

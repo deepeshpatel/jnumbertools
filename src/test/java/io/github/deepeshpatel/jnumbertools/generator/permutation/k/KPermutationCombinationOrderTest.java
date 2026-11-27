@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,7 @@ class KPermutationCombinationOrderTest {
             for (int n = 1; n <= 4; n++) {
                 var input = Collections.nCopies(n, "A");
                 for (int k = 1; k <= n; k++) {
-                    long size = permutation.nPk(k, input).combinationOrder().stream().count();
+                    long size = Permutation.nPk(k, input).combinationOrder().stream().count();
                     assertEquals(calculator.nPr(n, k).longValue(), size,
                             "nPr(" + n + "," + k + ") mismatch");
                 }
@@ -63,7 +64,7 @@ class KPermutationCombinationOrderTest {
         @Test
         @DisplayName("n=0, k=0: returns single empty permutation")
         void nZeroKZero() {
-            var b = permutation.nPk(0, Collections.emptyList());
+            var b = Permutation.nPk(0, Collections.emptyList());
             assertEquals(BigInteger.ONE, b.count());
             var result = b.combinationOrder().stream().toList();
             assertEquals(1, result.size());
@@ -73,7 +74,7 @@ class KPermutationCombinationOrderTest {
         @Test
         @DisplayName("n=0, k>0: returns empty stream")
         void nZeroKPositive() {
-            var b = permutation.nPk(2, Collections.emptyList());
+            var b = Permutation.nPk(2, Collections.emptyList());
             assertEquals(BigInteger.ZERO, b.count());
             assertTrue(b.combinationOrder().stream().toList().isEmpty());
         }
@@ -81,7 +82,7 @@ class KPermutationCombinationOrderTest {
         @Test
         @DisplayName("n>0, k=0: returns single empty permutation")
         void nPositiveKZero() {
-            var b = permutation.nPk(0, of("A", "B", "C"));
+            var b = Permutation.nPk(0, of("A", "B", "C"));
             assertEquals(BigInteger.ONE, b.count());
             var result = b.combinationOrder().stream().toList();
             assertEquals(1, result.size());
@@ -91,7 +92,7 @@ class KPermutationCombinationOrderTest {
         @Test
         @DisplayName("n>0, k>n: returns empty stream")
         void kGreaterThanN() {
-            var b = permutation.nPk(4, of('A', 'B', 'C'));
+            var b = Permutation.nPk(4, of('A', 'B', 'C'));
             assertEquals(BigInteger.ZERO, b.count());
             assertTrue(b.combinationOrder().stream().toList().isEmpty());
         }
@@ -100,7 +101,7 @@ class KPermutationCombinationOrderTest {
         @DisplayName("Negative k throws IllegalArgumentException")
         void negativeKThrows() {
             assertThrows(IllegalArgumentException.class, () ->
-                    permutation.nPk(-3, new ArrayList<>()).combinationOrder());
+                    Permutation.nPk(-3, new ArrayList<>()).combinationOrder());
         }
     }
 
@@ -122,7 +123,7 @@ class KPermutationCombinationOrderTest {
                     of(2, 3),
                     of(3, 2)
             );
-            var actual = permutation.nPk(2, 1, 2, 3).combinationOrder().stream().toList();
+            var actual = Permutation.nPk(2, 1, 2, 3).combinationOrder().stream().toList();
             assertIterableEquals(expected, actual);
         }
 
@@ -137,7 +138,7 @@ class KPermutationCombinationOrderTest {
                     of('B', 'C'),
                     of('C', 'B')
             );
-            var output = permutation.nPk(2, 'A', 'B', 'C').combinationOrder().stream().toList();
+            var output = Permutation.nPk(2, 'A', 'B', 'C').combinationOrder().stream().toList();
             assertIterableEquals(expected, output);
         }
 
@@ -146,7 +147,7 @@ class KPermutationCombinationOrderTest {
         void sameCombinationsAreContiguous() {
             int k = 3;
             var input = of("A","B","C","D","E");
-            var output = permutation.nPk(k, input).combinationOrder().stream().toList();
+            var output = Permutation.nPk(k, input).combinationOrder().stream().toList();
 
             var seenCombinations = new HashSet<TreeSet<String>>();
             TreeSet<String> previousCombination = null;
@@ -168,7 +169,7 @@ class KPermutationCombinationOrderTest {
         void combinationsAppearInLexOrder() {
             int k = 3;
             var input = of("A","B","C","D","E");
-            var output = permutation.nPk(k, input).combinationOrder().stream().toList();
+            var output = Permutation.nPk(k, input).combinationOrder().stream().toList();
 
             var combosInOrder = new ArrayList<List<String>>();
             List<String> lastCombo = null;
@@ -203,7 +204,7 @@ class KPermutationCombinationOrderTest {
         @Test
         @DisplayName("Multiple stream() calls produce equal results")
         void multipleStreamCallsAreEqual() {
-            var iterable = permutation.nPk(2, "A", "B", "C").combinationOrder();
+            var iterable = Permutation.nPk(2, "A", "B", "C").combinationOrder();
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertIterableEquals(list1, list2);
@@ -212,14 +213,14 @@ class KPermutationCombinationOrderTest {
         @Test
         @DisplayName("Outer collection is immutable")
         void outerCollectionIsImmutable() {
-            var results = permutation.nPk(2, "A", "B", "C").combinationOrder().stream().toList();
+            var results = Permutation.nPk(2, "A", "B", "C").combinationOrder().stream().toList();
             assertThrows(UnsupportedOperationException.class, () -> results.add(List.of("X")));
         }
 
         @Test
         @DisplayName("Inner lists are immutable")
         void innerListsAreImmutable() {
-            var results = permutation.nPk(2, "A", "B", "C").combinationOrder().stream().toList();
+            var results = Permutation.nPk(2, "A", "B", "C").combinationOrder().stream().toList();
             assertThrows(UnsupportedOperationException.class, () -> results.get(0).add("X"));
         }
     }
@@ -234,7 +235,7 @@ class KPermutationCombinationOrderTest {
         for (int n = 0; n <= 8; n++) {
             var input = Collections.nCopies(n, "X");
             for (int k = 0; k <= n; k++) {
-                long count = permutation.nPk(k, input).combinationOrder().stream().count();
+                long count = Permutation.nPk(k, input).combinationOrder().stream().count();
                 assertEquals(calculator.nPr(n, k).longValue(), count,
                         "n=" + n + " k=" + k);
             }
@@ -248,7 +249,7 @@ class KPermutationCombinationOrderTest {
         @Test
         @DisplayName("next() called 12 times without hasNext() returns all of 4P2")
         void nextWorksWithoutHasNext() {
-            var it = permutation.nPk(2, "A", "B", "C", "D").combinationOrder().iterator();
+            var it = Permutation.nPk(2, "A", "B", "C", "D").combinationOrder().iterator();
             Set<List<String>> seen = new HashSet<>();
             for (int i = 0; i < 12; i++) {
                 seen.add(it.next());                       // never calls hasNext()
@@ -261,7 +262,7 @@ class KPermutationCombinationOrderTest {
         @Test
         @DisplayName("hasNext() has no side effects")
         void hasNextHasNoSideEffects() {
-            var it = permutation.nPk(2, "A", "B", "C", "D").combinationOrder().iterator();
+            var it = Permutation.nPk(2, "A", "B", "C", "D").combinationOrder().iterator();
             for (int i = 0; i < 20; i++) {
                 assertTrue(it.hasNext());
             }
@@ -276,7 +277,7 @@ class KPermutationCombinationOrderTest {
         @Test
         @DisplayName("next()-only traversal gives the same sequence as for-each")
         void nextOnlyTraversalMatchesForEach() {
-            var iterable = permutation.nPk(3, "A", "B", "C", "D", "E").combinationOrder();
+            var iterable = Permutation.nPk(3, "A", "B", "C", "D", "E").combinationOrder();
             List<List<String>> expected = iterable.stream().toList();
             var it = iterable.iterator();
             List<List<String>> viaNext = new ArrayList<>();

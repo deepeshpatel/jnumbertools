@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.rank;
 
+import io.github.deepeshpatel.jnumbertools.base.Combination;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -8,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.combination;
 import static io.github.deepeshpatel.jnumbertools.TestBase.rankOf;
 import static io.github.deepeshpatel.jnumbertools.TestBase.unrankOf;
 import static org.junit.jupiter.api.Assertions.*;
@@ -179,7 +179,7 @@ class RankUnrankValidationRulesTest {
         for (int n = 0; n <= 7; n++) {
             for (int r = 0; r <= n; r++) {
                 int position = 0;
-                for (List<Integer> combo : combination.unique(n, r).lexOrder()) {
+                for (List<Integer> combo : Combination.unique(n, r).lexOrder()) {
                     int[] indices = combo.stream().mapToInt(Integer::intValue).toArray();
                     assertEquals(bi(position), rankOf.combination().unique(n, indices), "n=" + n + " r=" + r + " " + combo);
                     position++;
@@ -195,7 +195,7 @@ class RankUnrankValidationRulesTest {
         for (int n = 0; n <= 7; n++) {
             for (int r = 0; r <= n; r++) {
                 List<int[]> expected = new ArrayList<>();
-                for (List<Integer> combo : combination.unique(n, r).lexOrder()) {
+                for (List<Integer> combo : Combination.unique(n, r).lexOrder()) {
                     expected.add(combo.stream().mapToInt(Integer::intValue).toArray());
                 }
                 assertEquals(calculator.nCr(n, r).intValueExact(), expected.size());

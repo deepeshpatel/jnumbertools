@@ -123,7 +123,7 @@ public class RepetitiveCombinationByRanks<T> extends AbstractGenerator<T> {
          * formula. It iteratively selects indices by comparing the remaining rank against the
          * number of combinations for each possible element.
          *
-         * @param m the rank of the combination (m ≥ 0); may exceed the range of a {@code long}
+         * @param remainingM the rank of the combination (m ≥ 0); may exceed the range of a {@code long}
          * @return an array of indices representing the combination
          */
         private int[] mthCombinationLong(long remainingM) {

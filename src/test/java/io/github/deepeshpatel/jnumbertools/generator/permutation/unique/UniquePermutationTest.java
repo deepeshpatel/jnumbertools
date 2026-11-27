@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -38,7 +39,7 @@ class UniquePermutationTest {
         @DisplayName("n elements produce n! permutations")
         void countIsFactorial(int n) {
             var input = Collections.nCopies(n, "A");
-            long size = permutation.unique(input).lexOrder().stream().count();
+            long size = Permutation.unique(input).lexOrder().stream().count();
             assertEquals(calculator.nPr(n, n).longValue(), size,
                     "n=" + n + " should produce " + calculator.nPr(n, n) + " permutations");
         }
@@ -46,7 +47,7 @@ class UniquePermutationTest {
         @Test
         @DisplayName("n=0 produces exactly 1 permutation: the empty list")
         void zeroElementsProducesOneEmptyPermutation() {
-            var builder = permutation.unique(0);
+            var builder = Permutation.unique(0);
             assertEquals(BigInteger.ONE, builder.count());
             var results = builder.lexOrder().stream().toList();
             assertEquals(1, results.size());
@@ -57,7 +58,7 @@ class UniquePermutationTest {
         @DisplayName("count() matches stream count")
         void builderCountMatchesStreamCount() {
             for (int n = 0; n <= 5; n++) {
-                var builder = permutation.unique(n);
+                var builder = Permutation.unique(n);
                 long streamCount = builder.lexOrder().stream().count();
                 assertEquals(builder.count().longValue(), streamCount,
                         "n=" + n + ": builder.count() must match stream count");
@@ -125,7 +126,7 @@ class UniquePermutationTest {
         @DisplayName("Each permutation contains all original elements exactly once")
         void eachPermutationContainsAllElements() {
             List<Integer> input = of(1, 2, 3, 4);
-            var perms = permutation.unique(input).lexOrder().stream().toList();
+            var perms = Permutation.unique(input).lexOrder().stream().toList();
             for (var perm : perms) {
                 assertEquals(input.size(), perm.size());
                 assertEquals(new HashSet<>(input), new HashSet<>(perm),
@@ -136,7 +137,7 @@ class UniquePermutationTest {
         @Test
         @DisplayName("All generated permutations are distinct")
         void allPermutationsAreDistinct() {
-            var perms = permutation.unique("A", "B", "C", "D").lexOrder().stream().toList();
+            var perms = Permutation.unique("A", "B", "C", "D").lexOrder().stream().toList();
             assertEquals(new HashSet<>(perms).size(), perms.size(),
                     "all permutations must be distinct");
         }
@@ -144,7 +145,7 @@ class UniquePermutationTest {
         @Test
         @DisplayName("Permutations are in non-decreasing lexicographic order")
         void permutationsInLexOrder() {
-            var perms = permutation.unique(1, 2, 3, 4).lexOrder().stream().toList();
+            var perms = Permutation.unique(1, 2, 3, 4).lexOrder().stream().toList();
             for (int i = 1; i < perms.size(); i++) {
                 assertTrue(isLexLessOrEqual(perms.get(i - 1), perms.get(i)),
                         "permutation at rank " + (i-1) + " must be lex ≤ rank " + i);
@@ -163,7 +164,7 @@ class UniquePermutationTest {
         @Test
         @DisplayName("Multiple stream() calls on the same iterable produce equal results")
         void multipleStreamCallsAreEqual() {
-            UniquePermutation<String> iterable = permutation.unique("A", "B", "C").lexOrder();
+            UniquePermutation<String> iterable = Permutation.unique("A", "B", "C").lexOrder();
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertIterableEquals(list1, list2);
@@ -173,7 +174,7 @@ class UniquePermutationTest {
         @Test
         @DisplayName("Outer collection returned by stream().toList() is immutable")
         void outerCollectionIsImmutable() {
-            var results = permutation.unique("A", "B").lexOrder().stream().toList();
+            var results = Permutation.unique("A", "B").lexOrder().stream().toList();
             assertThrows(UnsupportedOperationException.class, () -> results.add(of("X")));
             assertThrows(UnsupportedOperationException.class, () -> results.remove(0));
         }
@@ -181,7 +182,7 @@ class UniquePermutationTest {
         @Test
         @DisplayName("Inner lists returned are immutable")
         void innerListsAreImmutable() {
-            var results = permutation.unique("A", "B").lexOrder().stream().toList();
+            var results = Permutation.unique("A", "B").lexOrder().stream().toList();
             var first = results.get(0);
             assertThrows(UnsupportedOperationException.class, () -> first.add("X"));
             assertThrows(UnsupportedOperationException.class, () -> first.set(0, "X"));
@@ -205,7 +206,7 @@ class UniquePermutationTest {
     @DisplayName("[STRESS] All n! permutations counted correctly for n = 0..10")
     void stressTesting() {
         for (int n = 0; n <= 10; n++) {
-            long count = permutation.unique(n).lexOrder().stream().count();
+            long count = Permutation.unique(n).lexOrder().stream().count();
             assertEquals(calculator.factorial(n).longValue(), count,
                     "n=" + n + " count mismatch");
         }
@@ -216,11 +217,11 @@ class UniquePermutationTest {
     // =========================================================
 
     private List<List<Object>> permutationsOf(Object... elements) {
-        return permutation.unique(elements).lexOrder().stream().toList();
+        return Permutation.unique(elements).lexOrder().stream().toList();
     }
 
     @SuppressWarnings("unchecked")
     private List<?> permutationsOf(List<?> elements) {
-        return permutation.unique(elements).lexOrder().stream().toList();
+        return Permutation.unique(elements).lexOrder().stream().toList();
     }
 }

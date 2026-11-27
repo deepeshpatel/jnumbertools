@@ -3,7 +3,6 @@ package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 import io.github.deepeshpatel.jnumbertools.base.Permutation;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +28,7 @@ class KPermutationByRanksTest {
             for (int n = 0; n <= 4; n++) {
                 var input = Collections.nCopies(n, "A");
                 for (int k = 0; k <= n; k++) {
-                    long size = permutation.nPk(k, input)
+                    long size = Permutation.nPk(k, input)
                             .lexOrder()
                             .stream().count();
                     assertEquals(calculator.nPr(n, k).longValue(), size);
@@ -40,31 +39,31 @@ class KPermutationByRanksTest {
         @Test
         void assertCountAndContentForSpecialCase() {
             // Case 1: n=0, k=0 -> ⁰P₀ = 1 -> should return [[]]
-            var zeroZeroGenerator = permutation.nPk(0, 0).lexOrderMth(1, 0);
+            var zeroZeroGenerator = Permutation.nPk(0, 0).lexOrderMth(1, 0);
             var zeroZeroResult = zeroZeroGenerator.stream().toList();
             assertEquals(1, zeroZeroResult.size());
             assertTrue(zeroZeroResult.get(0).isEmpty());
 
             // Case 2: n=0, k>0 -> ⁰Pₖ = 0 -> should return [] (empty iterator)
-            var zeroPositiveGenerator = permutation.nPk(0, 2).lexOrderMth(1, 0);
+            var zeroPositiveGenerator = Permutation.nPk(0, 2).lexOrderMth(1, 0);
             assertTrue(zeroPositiveGenerator.stream().toList().isEmpty());
 
             // Case 3: n>0, k=0 -> ⁿP₀ = 1 -> should return [[]]
-            var positiveZeroGenerator = permutation.nPk(3, 0).lexOrderMth(1, 0);
+            var positiveZeroGenerator = Permutation.nPk(3, 0).lexOrderMth(1, 0);
             var positiveZeroResult = positiveZeroGenerator.stream().toList();
             assertEquals(1, positiveZeroResult.size());
             assertTrue(positiveZeroResult.get(0).isEmpty());
 
             // Case 4: n>0, k>n -> ⁿPₖ = 0 -> should return [] (empty iterator)
-            var greaterKGenerator = permutation.nPk(2, 3).lexOrderMth(1, 0);
+            var greaterKGenerator = Permutation.nPk(2, 3).lexOrderMth(1, 0);
             assertTrue(greaterKGenerator.stream().toList().isEmpty());
 
             // Case 5: With m>1, should still respect count=0
-            var greaterKWithMthGenerator = permutation.nPk(2, 3).lexOrderMth(3, 0);
+            var greaterKWithMthGenerator = Permutation.nPk(2, 3).lexOrderMth(3, 0);
             assertTrue(greaterKWithMthGenerator.stream().toList().isEmpty());
 
             // Case 6: Empty list with k>0 -> ⁰Pₖ = 0
-            var emptyListGenerator = permutation.nPk(2, Collections.emptyList()).lexOrderMth(1, 0);
+            var emptyListGenerator = Permutation.nPk(2, Collections.emptyList()).lexOrderMth(1, 0);
             assertTrue(emptyListGenerator.stream().toList().isEmpty());
         }
 
@@ -74,8 +73,8 @@ class KPermutationByRanksTest {
             int k = 3;
             int start = 2;
             for (int m = 1; m <= 10; m += 2) {
-                var all = permutation.nPk(k, input);
-                var mth = permutation.nPk(k, input).lexOrderMth(m, start);
+                var all = Permutation.nPk(k, input);
+                var mth = Permutation.nPk(k, input).lexOrderMth(m, start);
                 assertEveryMthValue(all.lexOrder().stream(), mth.stream(), start, m);
             }
         }
@@ -84,7 +83,7 @@ class KPermutationByRanksTest {
         void shouldGenerateCorrectMthPermutationForKEquals1() {
             var input = List.of(0, 1, 2, 3, 4);
             int k = 1;
-            var result = permutation.nPk(k, input).lexOrderMth(2, 1).stream().toList();
+            var result = Permutation.nPk(k, input).lexOrderMth(2, 1).stream().toList();
             assertEquals(2, result.size(), "Should generate correct number of permutations");
             for (List<Integer> perm : result) {
                 assertEquals(1, perm.size(), "Each permutation should have size 1");
@@ -95,7 +94,7 @@ class KPermutationByRanksTest {
         void shouldGenerateCorrectMthPermutationForKEqualsN() {
             var input = List.of(0, 1, 2, 3);
             int k = 4;
-            var result = permutation.nPk(k, input).lexOrderMth(3, 0).stream().toList();
+            var result = Permutation.nPk(k, input).lexOrderMth(3, 0).stream().toList();
             assertEquals(8, result.size(), "Should generate correct number of permutations"); // 4! / 3 = 8
             for (List<Integer> perm : result) {
                 assertEquals(4, perm.size(), "Each permutation should have size 4");
@@ -107,7 +106,7 @@ class KPermutationByRanksTest {
         void shouldReturnSameResultForDifferentIteratorObjects() {
             var input = List.of(0, 1, 2, 3);
             int k = 2;
-            var iterable = permutation.nPk(k, input).lexOrderMth(2, 0);
+            var iterable = Permutation.nPk(k, input).lexOrderMth(2, 0);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertIterableEquals(list1, list2);
@@ -117,7 +116,7 @@ class KPermutationByRanksTest {
         void shouldGenerateValidPermutationSizes() {
             var input = List.of(0, 1, 2, 3, 4);
             int k = 3;
-            var result = permutation.nPk(k, input).lexOrderMth(3, 0).stream().toList();
+            var result = Permutation.nPk(k, input).lexOrderMth(3, 0).stream().toList();
             for (List<Integer> perm : result) {
                 assertEquals(k, perm.size(), "Each permutation should have size k");
                 assertEquals(new HashSet<>(perm).size(), k, "Permutation should contain unique elements");
@@ -138,7 +137,7 @@ class KPermutationByRanksTest {
                     of(35, 30, 18, 16, 38, 1, 2, 32, 23, 22, 33, 3, 29, 17, 26, 6, 12, 14, 11, 28)
             );
 
-            var permutations = permutation.nPk(40, 20)
+            var permutations = Permutation.nPk(40, 20)
                     .lexOrderMth(increment, increment)
                     .stream().toList();
             assertIterableEquals(expected, permutations);
@@ -151,7 +150,7 @@ class KPermutationByRanksTest {
                     of('c', 'a', 'd'),
                     of('d', 'e', 'a')
             );
-            var output = permutation.nPk(3, 'a', 'b', 'c', 'd', 'e')
+            var output = Permutation.nPk(3, 'a', 'b', 'c', 'd', 'e')
                     .lexOrderMth(20, 5)
                     .stream().toList();
             assertIterableEquals(expected, output);
@@ -166,7 +165,7 @@ class KPermutationByRanksTest {
             var input = List.of(0, 1, 2, 3, 4);
             int k = 3;
             int sampleSize = 4;
-            var permutations = permutation.nPk(k, input)
+            var permutations = Permutation.nPk(k, input)
                     .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
@@ -178,7 +177,7 @@ class KPermutationByRanksTest {
             var input = List.of(0, 1, 2, 3);
             int k = 2;
             int sampleSize = 6;
-            var permutations = permutation.nPk(k, input)
+            var permutations = Permutation.nPk(k, input)
                     .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
@@ -191,7 +190,7 @@ class KPermutationByRanksTest {
             var input = List.of(0, 1, 2, 3, 4);
             int k = 3;
             int sampleSize = 3;
-            var permutations = permutation.nPk(k, input)
+            var permutations = Permutation.nPk(k, input)
                     .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
@@ -211,7 +210,7 @@ class KPermutationByRanksTest {
         void shouldHandleKEqualsZero() {
             var input = List.of(0, 1, 2);
             int k = 0;
-            var permutations = permutation.nPk(k, input)
+            var permutations = Permutation.nPk(k, input)
                     .sample(1, TestBase.random)
                     .stream()
                     .toList();
@@ -225,7 +224,7 @@ class KPermutationByRanksTest {
         void shouldGenerateConsistentResultsAcrossIterators() {
             var input = List.of(0, 1, 2, 3);
             int k = 2;
-            var iterable = permutation.nPk(k, input).sample(3, TestBase.random);
+            var iterable = Permutation.nPk(k, input).sample(3, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
 
@@ -244,7 +243,7 @@ class KPermutationByRanksTest {
             var input = List.of(0, 1, 2, 3);
             int k = 2;
             int choiceSize = 5;
-            var permutations = permutation.nPk(k, input)
+            var permutations = Permutation.nPk(k, input)
                     .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
@@ -256,7 +255,7 @@ class KPermutationByRanksTest {
             var input = List.of(0, 1, 2);
             int k = 2;
             int choiceSize = 8; // > 3P2 = 6 to ensure duplicates
-            var permutations = permutation.nPk(k, input)
+            var permutations = Permutation.nPk(k, input)
                     .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
@@ -269,7 +268,7 @@ class KPermutationByRanksTest {
             var input = List.of(0, 1, 2, 3, 4);
             int k = 3;
             int choiceSize = 4;
-            var permutations = permutation.nPk(k, input)
+            var permutations = Permutation.nPk(k, input)
                     .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
@@ -290,7 +289,7 @@ class KPermutationByRanksTest {
             var input = List.of(0, 1, 2);
             int k = 2;
             int choiceSize = 10; // > 3P2 = 6
-            var permutations = permutation.nPk(k, input)
+            var permutations = Permutation.nPk(k, input)
                     .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
@@ -301,7 +300,7 @@ class KPermutationByRanksTest {
         void shouldHandleKEqualsZero() {
             var input = List.of(0, 1, 2);
             int k = 0;
-            var permutations = permutation.nPk(k, input)
+            var permutations = Permutation.nPk(k, input)
                     .choice(3, TestBase.random)
                     .stream()
                     .toList();
@@ -315,7 +314,7 @@ class KPermutationByRanksTest {
         void shouldGenerateConsistentResultsAcrossIterators() {
             var input = List.of(0, 1, 2, 3);
             int k = 2;
-            var iterable = permutation.nPk(k, input).choice(4, TestBase.random);
+            var iterable = Permutation.nPk(k, input).choice(4, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
 
@@ -373,7 +372,7 @@ class KPermutationByRanksTest {
         @Test
         @DisplayName("Zero selection: one empty permutation per rank supplied; only rank 0 is valid")
         void zeroSelectionHonoursTheRankSource() {
-            var zero = permutation.nPk(0, List.of("A", "B"));
+            var zero = Permutation.nPk(0, List.of("A", "B"));
             assertEquals(List.of(List.of(), List.of()), zero.byRanks(of(BigInteger.ZERO, BigInteger.ZERO)).stream().toList());
             assertThrows(IllegalArgumentException.class, () -> zero.byRanks(of(BigInteger.ONE)).stream().toList());
         }
@@ -381,7 +380,7 @@ class KPermutationByRanksTest {
         @Test
         @DisplayName("Selection larger than the set: every rank is out of range")
         void selectionLargerThanSetRejectsEveryRank() {
-            var none = permutation.nPk(5, List.of("A", "B"));
+            var none = Permutation.nPk(5, List.of("A", "B"));
             assertThrows(IllegalArgumentException.class, () -> none.byRanks(of(BigInteger.ZERO)).stream().toList());
         }
 
@@ -390,7 +389,7 @@ class KPermutationByRanksTest {
         void ranksBeyondLongRange() {
             int n = 30, k = 15;
             List<Integer> elements = IntStream.range(0, n).boxed().toList();
-            var builder = permutation.nPk(k, elements);
+            var builder = Permutation.nPk(k, elements);
             BigInteger count = builder.count();
             assertTrue(count.compareTo(BigInteger.ONE.shiftLeft(63)) > 0);
 

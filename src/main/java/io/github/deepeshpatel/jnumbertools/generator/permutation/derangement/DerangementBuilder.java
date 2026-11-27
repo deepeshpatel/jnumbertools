@@ -73,7 +73,7 @@ import java.util.Random;
  *
  * @param <T> the element type
  * @author Deepesh Patel &amp; Aditya Patel
- * @see Derangement
+ * @see DerangementGenerator
  * @see DerangementByRanks
  * @see io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic
  */
@@ -97,11 +97,11 @@ public final class DerangementBuilder<T> implements Builder<T> {
     /**
      * Generates all derangements in lexicographical order.
      *
-     * @return a {@link Derangement} generator
+     * @return a {@link DerangementGenerator} generator
      */
     @Override
-    public Derangement<T> lexOrder() {
-        return new Derangement<>(elements, calculator);
+    public DerangementGenerator<T> lexOrder() {
+        return new DerangementGenerator<>(elements, calculator);
     }
 
     /**

@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
+import io.github.deepeshpatel.jnumbertools.base.Subset;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -41,7 +42,7 @@ class SubsetGeneratorTest {
         @DisplayName("Full power-set count equals 2^n")
         void fullPowerSetCount(int n) {
             List<String> input = Collections.nCopies(n, "A");
-            long count = subsets.of(input).all().lexOrder().stream().count();
+            long count = Subset.of(input).all().lexOrder().stream().count();
             assertEquals(1L << n, count, "2^" + n + " subsets expected");
         }
 
@@ -51,13 +52,13 @@ class SubsetGeneratorTest {
             for (int n = 0; n <= 4; n++) {
                 List<String> input = Collections.nCopies(n, "A");
                 // all()
-                var allBuilder = subsets.of(input).all();
+                var allBuilder = Subset.of(input).all();
                 assertEquals(allBuilder.count().longValue(),
                         allBuilder.lexOrder().stream().count(),
                         "all() count mismatch for n=" + n);
                 // inRange(0, n)
                 for (int to = 0; to <= n; to++) {
-                    var rangeBuilder = subsets.of(input).inRange(0, to);
+                    var rangeBuilder = Subset.of(input).inRange(0, to);
                     assertEquals(rangeBuilder.count().longValue(),
                             rangeBuilder.lexOrder().stream().count(),
                             "inRange(0," + to + ") count mismatch for n=" + n);
@@ -72,7 +73,7 @@ class SubsetGeneratorTest {
                 List<String> input = Collections.nCopies(n, "A");
                 for (int from = 0; from <= n; from++) {
                     for (int to = from; to <= n; to++) {
-                        long count = subsets.of(input).inRange(from, to)
+                        long count = Subset.of(input).inRange(from, to)
                                 .lexOrder().stream().count();
                         long expected = 0;
                         for (int i = from; i <= to; i++) {
@@ -88,7 +89,7 @@ class SubsetGeneratorTest {
         @Test
         @DisplayName("n=0, all() → 1 subset: [[]]")
         void emptySetHasOneSubset() {
-            var builder = subsets.of(Collections.emptyList()).all();
+            var builder = Subset.of(Collections.emptyList()).all();
             assertEquals(BigInteger.ONE, builder.count());
             var result = builder.lexOrder().stream().toList();
             assertEquals(1, result.size());
@@ -98,7 +99,7 @@ class SubsetGeneratorTest {
         @Test
         @DisplayName("n=0, inRange(1,2) → 0 subsets")
         void emptySetInRange1to2() {
-            var builder = subsets.of(Collections.emptyList()).inRange(1, 2);
+            var builder = Subset.of(Collections.emptyList()).inRange(1, 2);
             assertEquals(BigInteger.ZERO, builder.count());
             assertTrue(builder.lexOrder().stream().toList().isEmpty());
         }
@@ -106,7 +107,7 @@ class SubsetGeneratorTest {
         @Test
         @DisplayName("inRange(0,0) → always 1 subset: [[]]")
         void range0to0ProducesEmptySubset() {
-            var result = subsets.of(A_B_C).inRange(0, 0).lexOrder().stream().toList();
+            var result = Subset.of(A_B_C).inRange(0, 0).lexOrder().stream().toList();
             assertIterableEquals(listOfEmptyList, result);
         }
     }
@@ -123,7 +124,7 @@ class SubsetGeneratorTest {
         @DisplayName("Full power-set of [A,B,C] in lex order")
         void fullPowerSetOf3() {
             String expected = "[[], [A], [B], [C], [A, B], [A, C], [B, C], [A, B, C]]";
-            String output = subsets.of(A_B_C).all().lexOrder().stream().toList().toString();
+            String output = Subset.of(A_B_C).all().lexOrder().stream().toList().toString();
             assertEquals(expected, output);
         }
 
@@ -131,7 +132,7 @@ class SubsetGeneratorTest {
         @DisplayName("Input order preserved: [C,B,A] enumerates in input-position order")
         void inputOrderPreserved() {
             String expected = "[[C], [B], [A], [C, B], [C, A], [B, A], [C, B, A]]";
-            String output = subsets.of("C", "B", "A").inRange(1, 3)
+            String output = Subset.of("C", "B", "A").inRange(1, 3)
                     .lexOrder().stream().toList().toString();
             assertEquals(expected, output);
         }
@@ -140,7 +141,7 @@ class SubsetGeneratorTest {
         @DisplayName("inRange(2,3) of [A,B,C] returns size-2 and size-3 subsets")
         void range2to3OfABC() {
             String expected = "[[A, B], [A, C], [B, C], [A, B, C]]";
-            String output = subsets.of(A_B_C).inRange(2, 3)
+            String output = Subset.of(A_B_C).inRange(2, 3)
                     .lexOrder().stream().toList().toString();
             assertEquals(expected, output);
         }
@@ -148,7 +149,7 @@ class SubsetGeneratorTest {
         @Test
         @DisplayName("of(n) generates numeric subsets [0..n-1]")
         void numericSubsets() {
-            String output = subsets.of(3).all().lexOrder().stream().toList().toString();
+            String output = Subset.of(3).all().lexOrder().stream().toList().toString();
             assertEquals("[[], [0], [1], [2], [0, 1], [0, 2], [1, 2], [0, 1, 2]]", output);
         }
 
@@ -156,7 +157,7 @@ class SubsetGeneratorTest {
         @DisplayName("Each subset contains only elements from input with no duplicates")
         void eachSubsetHasUniqueElementsFromInput() {
             var input = A_B_C_D;
-            var subsetList = subsets.of(input).all().lexOrder().stream().toList();
+            var subsetList = Subset.of(input).all().lexOrder().stream().toList();
             for (var sub : subsetList) {
                 assertEquals(new HashSet<>(sub).size(), sub.size(),
                         "subset must have no duplicate elements: " + sub);
@@ -168,7 +169,7 @@ class SubsetGeneratorTest {
         @Test
         @DisplayName("All subsets are distinct")
         void allSubsetsAreDistinct() {
-            var subsetList = subsets.of(A_B_C_D).all().lexOrder().stream().toList();
+            var subsetList = Subset.of(A_B_C_D).all().lexOrder().stream().toList();
             assertEquals(new HashSet<>(subsetList).size(), subsetList.size(),
                     "all subsets must be distinct");
         }
@@ -177,7 +178,7 @@ class SubsetGeneratorTest {
         @DisplayName("Subset sizes within range stay within [from, to]")
         void subsetSizesWithinRange() {
             int from = 1, to = 3;
-            var subsetList = subsets.of(A_B_C_D).inRange(from, to).lexOrder().stream().toList();
+            var subsetList = Subset.of(A_B_C_D).inRange(from, to).lexOrder().stream().toList();
             for (var sub : subsetList) {
                 assertTrue(sub.size() >= from && sub.size() <= to,
                         "subset size " + sub.size() + " out of range [" + from + "," + to + "]");
@@ -196,7 +197,7 @@ class SubsetGeneratorTest {
         @Test
         @DisplayName("Multiple stream() calls on same iterable produce equal results")
         void multipleStreamCallsAreEqual() {
-            var iterable = subsets.of(A_B_C).all().lexOrder();
+            var iterable = Subset.of(A_B_C).all().lexOrder();
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertIterableEquals(list1, list2);
@@ -206,7 +207,7 @@ class SubsetGeneratorTest {
         @Test
         @DisplayName("Every iterator() call starts a fresh, independent traversal")
         void iteratorsAreIndependent() {
-            var generator = subsets.of(A_B_C).all().lexOrder();
+            var generator = Subset.of(A_B_C).all().lexOrder();
             var first = generator.iterator();
             first.next();
             first.next();
@@ -221,9 +222,9 @@ class SubsetGeneratorTest {
         @Test
         @DisplayName("next() works without hasNext(), also across size blocks, and fails past the end")
         void nextWorksWithoutHasNext() {
-            var expected = subsets.of(A_B_C).all().lexOrder().stream().toList();   // 8 subsets, sizes 0..3
+            var expected = Subset.of(A_B_C).all().lexOrder().stream().toList();   // 8 subsets, sizes 0..3
 
-            var iterator = subsets.of(A_B_C).all().lexOrder().iterator();
+            var iterator = Subset.of(A_B_C).all().lexOrder().iterator();
             List<List<Character>> actual = new ArrayList<>();
             for (int i = 0; i < expected.size(); i++) {
                 actual.add(iterator.next());   // never calls hasNext(), crosses the block boundaries
@@ -238,7 +239,7 @@ class SubsetGeneratorTest {
         @DisplayName("Results are immutable")
         void subsetsAreImmutable() {
             // includes [], the whole set (r == n) and proper subsets
-            subsets.of(A_B_C).all().lexOrder().forEach(subset ->
+            Subset.of(A_B_C).all().lexOrder().forEach(subset ->
                     assertThrows(UnsupportedOperationException.class, () -> subset.add('Z'), "subset=" + subset));
         }
     }
@@ -250,10 +251,10 @@ class SubsetGeneratorTest {
     @Test
     @DisplayName("Empty set with a huge range: [0, huge] -> [[]], [1, huge] -> []")
     void emptySetWithHugeRange() {
-        var withEmptySubset = subsets.of(Collections.emptyList()).inRange(0, Integer.MAX_VALUE).lexOrder();
+        var withEmptySubset = Subset.of(Collections.emptyList()).inRange(0, Integer.MAX_VALUE).lexOrder();
         assertEquals(List.of(List.of()), withEmptySubset.stream().toList());
 
-        var withoutSubsets = subsets.of(Collections.emptyList()).inRange(1, Integer.MAX_VALUE).lexOrder();
+        var withoutSubsets = Subset.of(Collections.emptyList()).inRange(1, Integer.MAX_VALUE).lexOrder();
         assertTrue(withoutSubsets.stream().toList().isEmpty());
     }
 
@@ -267,7 +268,7 @@ class SubsetGeneratorTest {
     void stressTesting() {
         for (int n = 0; n <= 20; n++) {
             List<Integer> input = java.util.stream.IntStream.range(0, n).boxed().toList();
-            long count = subsets.of(input).all().lexOrder().stream().count();
+            long count = Subset.of(input).all().lexOrder().stream().count();
             assertEquals(1L << n, count, "n=" + n + " count mismatch");
         }
     }

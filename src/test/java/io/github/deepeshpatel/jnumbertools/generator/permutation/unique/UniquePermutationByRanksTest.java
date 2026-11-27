@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -34,7 +35,7 @@ class UniquePermutationByRanksTest {
             for (int n = 0; n < 6; n++) {
                 var input = Collections.nCopies(n, "A");
                 for (int increment = 1; increment <= 4; increment++) {
-                    long size = permutation
+                    long size = Permutation
                             .unique(input)
                             .lexOrderMth(increment, 0)
                             .stream().count();
@@ -47,13 +48,13 @@ class UniquePermutationByRanksTest {
         @Test
         void assertCountAndContentForSpecialCase() {
             // Case 1: n=0 -> 0! = 1 -> should return [[]]
-            var zeroGenerator = permutation.unique(0).lexOrderMth(1, 0);
+            var zeroGenerator = Permutation.unique(0).lexOrderMth(1, 0);
             var zeroResult = zeroGenerator.stream().toList();
             assertEquals(1, zeroResult.size());
             assertTrue(zeroResult.get(0).isEmpty());
 
             // Case 2: n=0 with m>1 -> still should return [[]]
-            var zeroWithMthGenerator = permutation.unique(0).lexOrderMth(3, 0);
+            var zeroWithMthGenerator = Permutation.unique(0).lexOrderMth(3, 0);
             var zeroWithMthResult = zeroWithMthGenerator.stream().toList();
             assertEquals(1, zeroWithMthResult.size());
             assertTrue(zeroWithMthResult.get(0).isEmpty());
@@ -64,7 +65,7 @@ class UniquePermutationByRanksTest {
 
         @Test
         void shouldReturnSameResultForDifferentIteratorObjects() {
-            var iterable = permutation.unique("A", "B", "C").lexOrderMth(3, 0);
+            var iterable = Permutation.unique("A", "B", "C").lexOrderMth(3, 0);
             var lists1 = iterable.stream().toList();
             var lists2 = iterable.stream().toList();
             assertIterableEquals(lists1, lists2);
@@ -101,7 +102,7 @@ class UniquePermutationByRanksTest {
                     of(10, 5, 2, 11, 7, 12, 4, 3, 8, 1, 6, 0, 9),
                     of(12, 6, 3, 5, 4, 8, 1, 7, 0, 2, 9, 10, 11)
             );
-            var actual = permutation.unique(input)
+            var actual = Permutation.unique(input)
                     .lexOrderMth(1_000_000_000, 0)
                     .stream().toList();
             assertIterableEquals(expected, actual);
@@ -112,8 +113,8 @@ class UniquePermutationByRanksTest {
             int size = 6;
             int start = 3;
             for(int m=1; m<=32; m+=2) {
-                var all = permutation.unique(size).lexOrder();
-                var mth = permutation.unique(size).lexOrderMth(m, start);
+                var all = Permutation.unique(size).lexOrder();
+                var mth = Permutation.unique(size).lexOrderMth(m, start);
                 assertEveryMthValue(all.stream(), mth.stream(), start, m);
             }
         }
@@ -130,17 +131,17 @@ class UniquePermutationByRanksTest {
             int n = 10;
             for (int x = 1000; x < 5000; x += 500) {
                 BigInteger nthOfFactorialX = calculator.factorial(x).divide(BigInteger.valueOf(n));
-                long count = permutation.unique(x).lexOrderMth(nthOfFactorialX, BigInteger.ZERO).stream().count();
+                long count = Permutation.unique(x).lexOrderMth(nthOfFactorialX, BigInteger.ZERO).stream().count();
                 assertEquals(n, count);
             }
         }
 
         private List<?> uniquePermutation(int increment, int start, Object... elements) {
-            return permutation.unique(elements).lexOrderMth(increment, start).stream().toList();
+            return Permutation.unique(elements).lexOrderMth(increment, start).stream().toList();
         }
 
         private List<?> uniquePermutation(int increment, int start, List<?> elements) {
-            return permutation.unique(elements).lexOrderMth(increment, start).stream().toList();
+            return Permutation.unique(elements).lexOrderMth(increment, start).stream().toList();
         }
     }
 
@@ -150,7 +151,7 @@ class UniquePermutationByRanksTest {
         @Test
         void shouldGenerateExactSampleSize() {
             int sampleSize = 4;
-            var permutations = permutation.unique("A", "B", "C")
+            var permutations = Permutation.unique("A", "B", "C")
                     .choice(sampleSize, random)
                     .stream()
                     .toList();
@@ -160,7 +161,7 @@ class UniquePermutationByRanksTest {
         @Test
         void shouldAllowDuplicatePermutations() {
             int sampleSize = 4; // > 3! = 6 for small input to ensure duplicates
-            var permutations = permutation.unique("A", "B")
+            var permutations = Permutation.unique("A", "B")
                     .choice(sampleSize, TestBase.random)
                     .stream()
                     .toList();
@@ -173,7 +174,7 @@ class UniquePermutationByRanksTest {
         void shouldGenerateValidPermutations() {
             List<String> elements = of("A", "B", "C");
             int sampleSize = 3;
-            var permutations = permutation.unique(elements)
+            var permutations = Permutation.unique(elements)
                     .choice(sampleSize, TestBase.random)
                     .stream()
                     .toList();
@@ -189,7 +190,7 @@ class UniquePermutationByRanksTest {
         void shouldHandleSampleSizeLargerThanTotalPermutations() {
             List<String> elements = of("A", "B");
             int sampleSize = 5; // > 2! = 2
-            var permutations = permutation.unique(elements)
+            var permutations = Permutation.unique(elements)
                     .choice(sampleSize, TestBase.random)
                     .stream()
                     .toList();
@@ -198,7 +199,7 @@ class UniquePermutationByRanksTest {
 
         @Test
         void shouldHandleEmptyInput() {
-            var permutations = permutation.unique(Collections.emptyList())
+            var permutations = Permutation.unique(Collections.emptyList())
                     .choice(1, TestBase.random)
                     .stream()
                     .toList();
@@ -208,7 +209,7 @@ class UniquePermutationByRanksTest {
 
         @Test
         void shouldGenerateConsistentResultsAcrossIterators() {
-            var iterable = permutation.unique("A", "B", "C").choice(3, TestBase.random);
+            var iterable = Permutation.unique("A", "B", "C").choice(3, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertEquals(3, list1.size(), "First iterator should produce sampleSize permutations");
@@ -226,7 +227,7 @@ class UniquePermutationByRanksTest {
         @Test
         void shouldGenerateExactSampleSize() {
             int sampleSize = 3;
-            var permutations = permutation.unique("A", "B", "C")
+            var permutations = Permutation.unique("A", "B", "C")
                     .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
@@ -236,7 +237,7 @@ class UniquePermutationByRanksTest {
         @Test
         void shouldGenerateUniquePermutations() {
             int sampleSize = 4;
-            var permutations = permutation.unique("A", "B", "C", "D")
+            var permutations = Permutation.unique("A", "B", "C", "D")
                     .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
@@ -248,7 +249,7 @@ class UniquePermutationByRanksTest {
         void shouldGenerateValidPermutations() {
             List<String> elements = of("A", "B", "C", "D");
             int sampleSize = 3;
-            var permutations = permutation.unique(elements)
+            var permutations = Permutation.unique(elements)
                     .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
@@ -262,7 +263,7 @@ class UniquePermutationByRanksTest {
 
         @Test
         void shouldHandleEmptyInput() {
-            var permutations = permutation.unique(Collections.emptyList())
+            var permutations = Permutation.unique(Collections.emptyList())
                     .sample(1, TestBase.random)
                     .stream()
                     .toList();
@@ -272,7 +273,7 @@ class UniquePermutationByRanksTest {
 
         @Test
         void shouldGenerateConsistentResultsAcrossIterators() {
-            var iterable = permutation.unique("A", "B", "C").sample(2, TestBase.random);
+            var iterable = Permutation.unique("A", "B", "C").sample(2, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertEquals(2, list1.size(), "First iterator should produce sampleSize permutations");
@@ -291,7 +292,7 @@ class UniquePermutationByRanksTest {
 
         @Test
         void byRanks_withNegativeRank_shouldThrowException() {
-            var result = permutation.unique("A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(-1)));
+            var result = Permutation.unique("A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(-1)));
 
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
@@ -300,7 +301,7 @@ class UniquePermutationByRanksTest {
 
         @Test
         void byRanks_withOutOfBoundRank_shouldThrowException() {
-            var result = permutation.unique("A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(1000000000)));
+            var result = Permutation.unique("A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(1000000000)));
 
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
@@ -309,7 +310,7 @@ class UniquePermutationByRanksTest {
 
         @Test
         void byRanks_withValidRanks_shouldWork() {
-            var result = permutation.unique("A", "B", "C").byRanks(of(
+            var result = Permutation.unique("A", "B", "C").byRanks(of(
                     java.math.BigInteger.ZERO,
                     java.math.BigInteger.ONE,
                     java.math.BigInteger.valueOf(2)
@@ -329,7 +330,7 @@ class UniquePermutationByRanksTest {
         @Test
         @DisplayName("Empty set: one empty permutation per rank supplied; only rank 0 is valid")
         void emptySetHonoursTheRankSource() {
-            var empty = permutation.unique(List.of());
+            var empty = Permutation.unique(List.of());
             assertEquals(List.of(List.of(), List.of(), List.of()),
                     empty.byRanks(of(BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO)).stream().toList());
             assertThrows(IllegalArgumentException.class, () -> empty.byRanks(of(BigInteger.ONE)).stream().toList());
@@ -340,7 +341,7 @@ class UniquePermutationByRanksTest {
         @DisplayName("Ranks beyond the 64-bit range (25! > Long.MAX_VALUE)")
         void ranksBeyondLongRange() {
             int n = 25;
-            var builder = permutation.unique(n);
+            var builder = Permutation.unique(n);
             BigInteger last = calculator.factorial(n).subtract(BigInteger.ONE);
             List<Integer> identity = IntStream.range(0, n).boxed().toList();
             List<Integer> reversed = IntStream.range(0, n).map(i -> n - 1 - i).boxed().toList();

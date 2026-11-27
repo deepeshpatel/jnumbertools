@@ -4,7 +4,6 @@
  */
 package io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.support;
 
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import io.github.deepeshpatel.jnumbertools.base.Product;
 import io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.baseline.ImperativeBacktrackingBaseline;
 import io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.baseline.NestedStreamBaseline;

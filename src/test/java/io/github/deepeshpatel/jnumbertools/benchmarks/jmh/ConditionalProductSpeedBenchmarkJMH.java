@@ -1,7 +1,6 @@
 
 package io.github.deepeshpatel.jnumbertools.benchmarks.jmh;
 
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import io.github.deepeshpatel.jnumbertools.base.Product;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;

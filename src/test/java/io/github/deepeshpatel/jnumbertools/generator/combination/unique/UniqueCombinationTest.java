@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 
+import io.github.deepeshpatel.jnumbertools.base.Combination;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,7 +41,7 @@ class UniqueCombinationTest {
             for (int n = 0; n <= 4; n++) {
                 List<String> input = Collections.nCopies(n, "A");
                 for (int r = 0; r <= n; r++) {
-                    long count = combination.unique(r, input).lexOrder().stream().count();
+                    long count = Combination.unique(r, input).lexOrder().stream().count();
                     assertEquals(calculator.nCr(n, r).longValue(), count,
                             "C(" + n + "," + r + ") mismatch");
                 }
@@ -50,7 +51,7 @@ class UniqueCombinationTest {
         @Test
         @DisplayName("n=0, r=0: C(0,0)=1, returns [[]]")
         void zeroChooseZero() {
-            var builder = combination.unique(0, Collections.emptyList());
+            var builder = Combination.unique(0, Collections.emptyList());
             assertEquals(BigInteger.ONE, builder.count());
             var result = builder.lexOrder().stream().toList();
             assertEquals(1, result.size());
@@ -60,7 +61,7 @@ class UniqueCombinationTest {
         @Test
         @DisplayName("n=0, r>0: C(0,r)=0, returns []")
         void zeroChoosePositive() {
-            var builder = combination.unique(1, Collections.emptyList());
+            var builder = Combination.unique(1, Collections.emptyList());
             assertEquals(BigInteger.ZERO, builder.count());
             assertTrue(builder.lexOrder().stream().toList().isEmpty());
         }
@@ -68,7 +69,7 @@ class UniqueCombinationTest {
         @Test
         @DisplayName("n>0, r=0: C(n,0)=1, returns [[]]")
         void positiveChooseZero() {
-            var builder = combination.unique(0, "A", "B", "C");
+            var builder = Combination.unique(0, "A", "B", "C");
             assertEquals(BigInteger.ONE, builder.count());
             var result = builder.lexOrder().stream().toList();
             assertEquals(1, result.size());
@@ -78,7 +79,7 @@ class UniqueCombinationTest {
         @Test
         @DisplayName("r>n: C(n,r)=0, returns []")
         void rGreaterThanN() {
-            var builder = combination.unique(2, "A");  // C(1,2)=0
+            var builder = Combination.unique(2, "A");  // C(1,2)=0
             assertEquals(BigInteger.ZERO, builder.count());
             assertTrue(builder.lexOrder().stream().toList().isEmpty());
         }
@@ -86,7 +87,7 @@ class UniqueCombinationTest {
         @Test
         @DisplayName("r=n: C(n,n)=1, returns [all elements]")
         void rEqualsN() {
-            var builder = combination.unique(3, "A", "B", "C");
+            var builder = Combination.unique(3, "A", "B", "C");
             assertEquals(BigInteger.ONE, builder.count());
             var result = builder.lexOrder().stream().toList();
             assertEquals(1, result.size());
@@ -101,7 +102,7 @@ class UniqueCombinationTest {
                 int n = pair[0], r = pair[1];
                 List<Integer> input = Stream.iterate(0, i -> i+1).limit(n)
                         .collect(Collectors.toList());
-                var builder = combination.unique(r, input);
+                var builder = Combination.unique(r, input);
                 long streamCount = builder.lexOrder().stream().count();
                 assertEquals(builder.count().longValue(), streamCount,
                         "C(" + n + "," + r + "): count() vs stream mismatch");
@@ -144,7 +145,7 @@ class UniqueCombinationTest {
         void eachCombinationHasRElements() {
             int r = 3;
             var input = of("A", "B", "C", "D", "E");
-            var combos = combination.unique(r, input).lexOrder().stream().toList();
+            var combos = Combination.unique(r, input).lexOrder().stream().toList();
             for (var combo : combos) {
                 assertEquals(r, combo.size(), "each combination must have r=" + r + " elements");
             }
@@ -154,7 +155,7 @@ class UniqueCombinationTest {
         @DisplayName("Each combination contains only elements from input, no repeats within")
         void eachCombinationHasUniqueElements() {
             var input = of("A", "B", "C", "D");
-            var combos = combination.unique(2, input).lexOrder().stream().toList();
+            var combos = Combination.unique(2, input).lexOrder().stream().toList();
             for (var combo : combos) {
                 assertEquals(new HashSet<>(combo).size(), combo.size(),
                         "combination must have no repeated elements: " + combo);
@@ -166,7 +167,7 @@ class UniqueCombinationTest {
         @Test
         @DisplayName("All combinations are distinct")
         void allCombinationsAreDistinct() {
-            var combos = combination.unique(3, "A", "B", "C", "D", "E")
+            var combos = Combination.unique(3, "A", "B", "C", "D", "E")
                     .lexOrder().stream().toList();
             assertEquals(new HashSet<>(combos).size(), combos.size(),
                     "all combinations must be distinct");
@@ -176,7 +177,7 @@ class UniqueCombinationTest {
         @DisplayName("Combinations are in non-decreasing lexicographic order")
         void combinationsInLexOrder() {
             List<Integer> input = of(1, 2, 3, 4, 5);
-            var combos = combination.unique(3, input).lexOrder().stream().toList();
+            var combos = Combination.unique(3, input).lexOrder().stream().toList();
             for (int i = 1; i < combos.size(); i++) {
                 List<Integer> prev = (List<Integer>) combos.get(i - 1);
                 List<Integer> curr = (List<Integer>) combos.get(i);
@@ -200,7 +201,7 @@ class UniqueCombinationTest {
         void largeInputCountIsCorrect(int r) {
             List<Integer> input = Stream.iterate(1, i -> i + 1).limit(20)
                     .collect(Collectors.toList());
-            long count = combination.unique(r, input).lexOrder().stream().count();
+            long count = Combination.unique(r, input).lexOrder().stream().count();
             assertEquals(calculator.nCr(20, r).longValue(), count,
                     "C(20," + r + ") count mismatch");
         }
@@ -217,7 +218,7 @@ class UniqueCombinationTest {
         @Test
         @DisplayName("Multiple stream() calls on same iterable produce equal results")
         void multipleStreamCallsAreEqual() {
-            var iterable = combination.unique(2, "A", "B", "C").lexOrder();
+            var iterable = Combination.unique(2, "A", "B", "C").lexOrder();
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertIterableEquals(list1, list2);
@@ -235,7 +236,7 @@ class UniqueCombinationTest {
     void stressTesting() {
         List<Integer> input = Stream.iterate(0, i -> i + 1).limit(30)
                 .collect(Collectors.toList());
-        long count = combination.unique(15, input).lexOrder().stream().count();
+        long count = Combination.unique(15, input).lexOrder().stream().count();
         assertEquals(calculator.nCr(30, 15).longValue(), count);
     }
 
@@ -244,7 +245,7 @@ class UniqueCombinationTest {
     // =========================================================
 
     private List<?> output(int r, List<?> elements) {
-        return combination.unique(r, elements).lexOrder().stream().toList();
+        return Combination.unique(r, elements).lexOrder().stream().toList();
     }
 
     private boolean isLexLessOrEqual(List<Integer> a, List<Integer> b) {

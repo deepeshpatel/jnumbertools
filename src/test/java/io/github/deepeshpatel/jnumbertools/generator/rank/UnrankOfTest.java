@@ -1,6 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.rank;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,9 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.combination;
+import io.github.deepeshpatel.jnumbertools.base.Combination;
 import static io.github.deepeshpatel.jnumbertools.TestBase.rankOf;
-import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
 import static io.github.deepeshpatel.jnumbertools.TestBase.unrankOf;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -293,7 +293,7 @@ public class UnrankOfTest {
                     BigInteger total = calculator.power(n, width);
                     for (BigInteger rank = BigInteger.ZERO; rank.compareTo(total) < 0;
                          rank = rank.add(BigInteger.ONE)) {
-                        List<Integer> expected = permutation.repetitive(width, n)
+                        List<Integer> expected = Permutation.repetitive(width, n)
                                 .byRanks(List.of(rank)).iterator().next();
                         assertArrayEquals(expected.stream().mapToInt(Integer::intValue).toArray(),
                                 unrankOf.permutation().repetitive(rank, n, width));
@@ -314,7 +314,7 @@ public class UnrankOfTest {
                     BigInteger total = calculator.nCrRepetitive(n, r);
                     for (BigInteger rank = BigInteger.ZERO; rank.compareTo(total) < 0;
                          rank = rank.add(BigInteger.ONE)) {
-                        List<Integer> expected = combination.repetitive(n, r)
+                        List<Integer> expected = Combination.repetitive(n, r)
                                 .byRanks(List.of(rank)).iterator().next();
                         assertArrayEquals(expected.stream().mapToInt(Integer::intValue).toArray(),
                                 unrankOf.combination().repetitive(rank, n, r));
@@ -336,12 +336,12 @@ public class UnrankOfTest {
             int[][] frequencyCases = {{}, {1}, {2}, {2, 1}, {1, 2, 1}, {2, 2, 1}, {0, 2, 1}};
             for (int[] frequencies : frequencyCases) {
                 LinkedHashMap<Integer, Integer> options = asFrequencyMap(frequencies);
-                List<List<Integer>> all = permutation.multiset(options).lexOrder().stream().toList();
+                List<List<Integer>> all = Permutation.multiset(options).lexOrder().stream().toList();
                 for (int i = 0; i < all.size(); i++) {
                     BigInteger rank = BigInteger.valueOf(i);
                     int[] expected = all.get(i).stream().mapToInt(Integer::intValue).toArray();
                     assertArrayEquals(expected, unrankOf.permutation().multiset(rank, frequencies));
-                    List<Integer> byRank = permutation.multiset(options).byRanks(List.of(rank)).iterator().next();
+                    List<Integer> byRank = Permutation.multiset(options).byRanks(List.of(rank)).iterator().next();
                     assertArrayEquals(expected, byRank.stream().mapToInt(Integer::intValue).toArray());
                 }
             }
@@ -357,13 +357,13 @@ public class UnrankOfTest {
                 LinkedHashMap<Integer, Integer> options = asFrequencyMap(frequencies);
                 int totalItems = java.util.Arrays.stream(frequencies).sum();
                 for (int r = 0; r <= totalItems + 1; r++) {
-                    List<Map<Integer, Integer>> all = combination.multiset(options, r).lexOrder().stream().toList();
+                    List<Map<Integer, Integer>> all = Combination.multiset(options, r).lexOrder().stream().toList();
                     for (int i = 0; i < all.size(); i++) {
                         int[] expected = new int[frequencies.length];
                         all.get(i).forEach((type, count) -> expected[type] = count);
                         BigInteger rank = BigInteger.valueOf(i);
                         assertArrayEquals(expected, unrankOf.combination().multiset(rank, frequencies, r));
-                        Map<Integer, Integer> byRank = combination.multiset(options, r)
+                        Map<Integer, Integer> byRank = Combination.multiset(options, r)
                                 .byRanks(List.of(rank)).iterator().next();
                         int[] actual = new int[frequencies.length];
                         byRank.forEach((type, count) -> actual[type] = count);

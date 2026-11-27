@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,7 @@ class KPermutationCombinationOrderMthTest {
             for (int n = 0; n <= 4; n++) {
                 var input = Collections.nCopies(n, 'A');
                 for (int k = 0; k <= n; k++) {
-                    long size = permutation.nPk(k, input)
+                    long size = Permutation.nPk(k, input)
                             .combinationOrderMth(increment, 0)
                             .stream().count();
                     long expected = (long) Math.ceil(calculator.nPr(n, k).longValue() / (double) increment);
@@ -65,7 +66,7 @@ class KPermutationCombinationOrderMthTest {
         @Test
         @DisplayName("n=0, k=0: ⁰P₀ = 1, returns [[]]")
         void nZeroKZero() {
-            var result = permutation.nPk(0, 0).combinationOrderMth(1, 0).stream().toList();
+            var result = Permutation.nPk(0, 0).combinationOrderMth(1, 0).stream().toList();
             assertEquals(1, result.size());
             assertTrue(result.get(0).isEmpty());
         }
@@ -73,13 +74,13 @@ class KPermutationCombinationOrderMthTest {
         @Test
         @DisplayName("n=0, k>0: ⁰Pₖ = 0, empty stream")
         void nZeroKPositive() {
-            assertTrue(permutation.nPk(0, 2).combinationOrderMth(1, 0).stream().toList().isEmpty());
+            assertTrue(Permutation.nPk(0, 2).combinationOrderMth(1, 0).stream().toList().isEmpty());
         }
 
         @Test
         @DisplayName("n>0, k=0: ⁿP₀ = 1, returns [[]]")
         void nPositiveKZero() {
-            var result = permutation.nPk(3, 0).combinationOrderMth(1, 0).stream().toList();
+            var result = Permutation.nPk(3, 0).combinationOrderMth(1, 0).stream().toList();
             assertEquals(1, result.size());
             assertTrue(result.get(0).isEmpty());
         }
@@ -87,21 +88,21 @@ class KPermutationCombinationOrderMthTest {
         @Test
         @DisplayName("n>0, k>n: ⁿPₖ = 0, empty stream regardless of m")
         void kGreaterThanN() {
-            assertTrue(permutation.nPk(2, 3).combinationOrderMth(1, 0).stream().toList().isEmpty());
-            assertTrue(permutation.nPk(2, 3).combinationOrderMth(3, 0).stream().toList().isEmpty());
+            assertTrue(Permutation.nPk(2, 3).combinationOrderMth(1, 0).stream().toList().isEmpty());
+            assertTrue(Permutation.nPk(2, 3).combinationOrderMth(3, 0).stream().toList().isEmpty());
         }
 
         @Test
         @DisplayName("Empty list with k>0: empty stream")
         void emptyInputKPositive() {
-            assertTrue(permutation.nPk(2, Collections.emptyList())
+            assertTrue(Permutation.nPk(2, Collections.emptyList())
                     .combinationOrderMth(1, 0).stream().toList().isEmpty());
         }
 
         @Test
         @DisplayName("Empty list with k=0: single empty permutation")
         void emptyInputKZero() {
-            var output = permutation.nPk(0, Collections.emptyList())
+            var output = Permutation.nPk(0, Collections.emptyList())
                     .combinationOrderMth(1, 0).stream().toList();
             assertIterableEquals(listOfEmptyList, output);
         }
@@ -110,21 +111,21 @@ class KPermutationCombinationOrderMthTest {
         @DisplayName("Negative k throws IllegalArgumentException")
         void negativeKThrows() {
             assertThrows(IllegalArgumentException.class, () ->
-                    permutation.nPk(1, -1).combinationOrderMth(3, 0));   // (n, k) = (1, -1)
+                    Permutation.nPk(1, -1).combinationOrderMth(3, 0));   // (n, k) = (1, -1)
         }
 
         @Test
         @DisplayName("Negative n throws IllegalArgumentException")
         void negativeNThrows() {
             assertThrows(IllegalArgumentException.class, () ->
-                    permutation.nPk(-1, 1).combinationOrderMth(3, 0));   // (n, k) = (-1, 1)
+                    Permutation.nPk(-1, 1).combinationOrderMth(3, 0));   // (n, k) = (-1, 1)
         }
 
         @Test
         @DisplayName("Non-positive m throws (m must be > 0)")
         void nonPositiveMThrows() {
             assertThrows(IllegalArgumentException.class, () ->
-                    permutation.nPk(2, A_B_C).combinationOrderMth(0, 0));
+                    Permutation.nPk(2, A_B_C).combinationOrderMth(0, 0));
         }
     }
 
@@ -154,8 +155,8 @@ class KPermutationCombinationOrderMthTest {
         })
         @DisplayName("mth output equals every-m-th of combinationOrder")
         void mthMatchesEveryMthOfCombinationOrder(int k, int m, int start) {
-            var all = permutation.nPk(k, A_B_C_D).combinationOrder().stream();
-            var mth = permutation.nPk(k, A_B_C_D).combinationOrderMth(m, start).stream();
+            var all = Permutation.nPk(k, A_B_C_D).combinationOrder().stream();
+            var mth = Permutation.nPk(k, A_B_C_D).combinationOrderMth(m, start).stream();
             assertEveryMthValue(all, mth, start, m);
         }
 
@@ -168,7 +169,7 @@ class KPermutationCombinationOrderMthTest {
                     of('a', 'e', 'c'),
                     of('c', 'e', 'b')
             );
-            var output = permutation.nPk(3, 'a', 'b', 'c', 'd', 'e')
+            var output = Permutation.nPk(3, 'a', 'b', 'c', 'd', 'e')
                     .combinationOrderMth(20, 5).stream().toList();
             assertIterableEquals(expected, output);
         }
@@ -176,7 +177,7 @@ class KPermutationCombinationOrderMthTest {
         @Test
         @DisplayName("k=n, m=1: full nPk count in combinationOrder")
         void kEqualsNFullStream() {
-            var output = permutation.nPk(3, A_B_C).combinationOrderMth(1, 0).stream().toList();
+            var output = Permutation.nPk(3, A_B_C).combinationOrderMth(1, 0).stream().toList();
             assertEquals(calculator.nPr(3, 3).longValue(), output.size());
             // also verify the exact sequence
             assertEquals(
@@ -188,7 +189,7 @@ class KPermutationCombinationOrderMthTest {
         @DisplayName("Large input: m=1 produces full nPr(10,5) = 30240 permutations")
         void largeInputM1() {
             var input = of('A','B','C','D','E','F','G','H','I','J');
-            long count = permutation.nPk(5, input).combinationOrderMth(1, 0).stream().count();
+            long count = Permutation.nPk(5, input).combinationOrderMth(1, 0).stream().count();
             assertEquals(30240L, count);
             assertEquals(calculator.nPr(10, 5).longValue(), count);
         }
@@ -204,7 +205,7 @@ class KPermutationCombinationOrderMthTest {
         @Test
         @DisplayName("Multiple stream() calls produce equal results")
         void multipleStreamCallsAreEqual() {
-            var iterable = permutation.nPk(2, A_B_C).combinationOrderMth(2, 0);
+            var iterable = Permutation.nPk(2, A_B_C).combinationOrderMth(2, 0);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertIterableEquals(list1, list2);
@@ -213,7 +214,7 @@ class KPermutationCombinationOrderMthTest {
         @Test
         @DisplayName("Inner lists are immutable")
         void innerListsAreImmutable() {
-            var results = permutation.nPk(2, A_B_C).combinationOrderMth(1, 0).stream().toList();
+            var results = Permutation.nPk(2, A_B_C).combinationOrderMth(1, 0).stream().toList();
             assertThrows(UnsupportedOperationException.class, () -> results.get(0).add('Z'));
         }
     }
@@ -229,8 +230,8 @@ class KPermutationCombinationOrderMthTest {
         int n = 6;
         var input = of('A','B','C','D','E','F');
         for (int k = 0; k <= n; k++) {
-            var all = permutation.nPk(k, input).combinationOrder().stream();
-            var mth = permutation.nPk(k, input).combinationOrderMth(m, 0).stream();
+            var all = Permutation.nPk(k, input).combinationOrder().stream();
+            var mth = Permutation.nPk(k, input).combinationOrderMth(m, 0).stream();
             assertEveryMthValue(all, mth, 0, m);
         }
     }
@@ -242,7 +243,7 @@ class KPermutationCombinationOrderMthTest {
         @Test
         @DisplayName("22C21 combinations x 21! permutations: m = 21! selects the first permutation of each combination")
         void firstPermutationOfEachCombinationWhenKFactorialExceedsLong() {
-            var builder = permutation.nPk(21, IntStream.range(0, 22).boxed().toList());
+            var builder = Permutation.nPk(21, IntStream.range(0, 22).boxed().toList());
             BigInteger permutationsPerCombination = calculator.factorial(21);          // 5.1e19 > Long.MAX_VALUE
             var results = builder.combinationOrderMth(permutationsPerCombination, BigInteger.ZERO).stream().toList();
 
@@ -258,7 +259,7 @@ class KPermutationCombinationOrderMthTest {
         @Test
         @DisplayName("k = n = 21 (one combination): agrees with lexOrderMth at ranks beyond 2^62")
         void agreesWithLexOrderMthAtDeepRanks() {
-            var builder = permutation.nPk(21, IntStream.range(0, 21).boxed().toList());
+            var builder = Permutation.nPk(21, IntStream.range(0, 21).boxed().toList());
             for (String rank : List.of("5000000000000000000", "10000000000000000000", "40000000000000000000")) {
                 BigInteger start = new BigInteger(rank);
                 assertEquals(builder.lexOrderMth(BigInteger.ONE, start).iterator().next(),
@@ -269,7 +270,7 @@ class KPermutationCombinationOrderMthTest {
         @Test
         @DisplayName("k = n = 66 (66! has 64 trailing zero bits)")
         void kFactorialWithZeroLowBits() {
-            var builder = permutation.nPk(66, IntStream.range(0, 66).boxed().toList());
+            var builder = Permutation.nPk(66, IntStream.range(0, 66).boxed().toList());
             assertEquals(IntStream.range(0, 66).boxed().toList(), builder.combinationOrderMth(1, 0).iterator().next());
             assertEquals(builder.lexOrderMth(1, 1).iterator().next(), builder.combinationOrderMth(1, 1).iterator().next());
         }

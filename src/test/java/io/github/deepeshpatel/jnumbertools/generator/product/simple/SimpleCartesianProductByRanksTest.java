@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
 import io.github.deepeshpatel.jnumbertools.base.Product;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
@@ -45,7 +46,7 @@ public class SimpleCartesianProductByRanksTest {
                         .and(decimalDigits)
                         .and(decimalDigits)
                         .lexOrderMth(m, 0).stream().toList();
-                var expected = permutation.repetitive(3, decimalDigits)
+                var expected = Permutation.repetitive(3, decimalDigits)
                         .lexOrderMth(m, 0).stream().toList();
                 assertEquals(expected, result);
             }
@@ -57,7 +58,7 @@ public class SimpleCartesianProductByRanksTest {
                     .and(A_B_C)
                     .and(A_B_C)
                     .lexOrderMth(1, 0).stream().toList();
-            var expected = permutation.repetitive(3, A_B_C)
+            var expected = Permutation.repetitive(3, A_B_C)
                     .lexOrder().stream().toList();
             assertIterableEquals(expected, result);
         }

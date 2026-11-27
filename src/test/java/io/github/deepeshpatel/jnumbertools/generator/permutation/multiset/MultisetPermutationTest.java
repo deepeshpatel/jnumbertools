@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,7 +41,7 @@ class MultisetPermutationTest {
             var input = IntStream.range(0, n).boxed().toList();
             int[] frequency = getRandomMultisetFreqArray(random, input.size());
             LinkedHashMap<Object, Integer> options = createMap(input, frequency);
-            long count = permutation.multiset(options).lexOrder().stream().count();
+            long count = Permutation.multiset(options).lexOrder().stream().count();
             assertEquals(calculator.multinomial(frequency).longValue(), count);
         }
 
@@ -48,7 +49,7 @@ class MultisetPermutationTest {
         @DisplayName("Empty map → 1 permutation: the empty list")
         void emptyMapProducesOneEmptyPermutation() {
             var emptyMap = new LinkedHashMap<String, Integer>();
-            var builder = permutation.multiset(emptyMap);
+            var builder = Permutation.multiset(emptyMap);
             assertEquals(calculator.factorial(0), builder.count());
             var result = builder.lexOrder().stream().toList();
             assertEquals(1, result.size());
@@ -60,7 +61,7 @@ class MultisetPermutationTest {
         void singleElementMultipleFrequency() {
             LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
             options.put("A", 3);
-            var result = permutation.multiset(options).lexOrder().stream().toList();
+            var result = Permutation.multiset(options).lexOrder().stream().toList();
             assertEquals(1, result.size());
             assertEquals(List.of("A", "A", "A"), result.get(0));
         }
@@ -70,7 +71,7 @@ class MultisetPermutationTest {
         void allUniqueFrequenciesGivesFactorial() {
             LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
             options.put("A", 1); options.put("B", 1); options.put("C", 1);
-            long count = permutation.multiset(options).lexOrder().stream().count();
+            long count = Permutation.multiset(options).lexOrder().stream().count();
             assertEquals(6L, count);
         }
 
@@ -79,7 +80,7 @@ class MultisetPermutationTest {
         void builderCountMatchesStreamCount() {
             LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
             options.put("Red", 2); options.put("Green", 1); options.put("Blue", 1);
-            var builder = permutation.multiset(options);
+            var builder = Permutation.multiset(options);
             long streamCount = builder.lexOrder().stream().count();
             assertEquals(builder.count().longValue(), streamCount);
         }
@@ -107,7 +108,7 @@ class MultisetPermutationTest {
             );
             LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
             options.put("A", 2); options.put("B", 1); options.put("C", 1);
-            var output = permutation.multiset(options).lexOrder().stream().toList();
+            var output = Permutation.multiset(options).lexOrder().stream().toList();
             assertIterableEquals(expected, output);
         }
 
@@ -125,7 +126,7 @@ class MultisetPermutationTest {
             );
             LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
             options.put("Red", 2); options.put("Green", 1); options.put("Blue", 1);
-            var output = permutation.multiset(options).lexOrder().stream().toList();
+            var output = Permutation.multiset(options).lexOrder().stream().toList();
             assertIterableEquals(expected, output);
         }
 
@@ -134,7 +135,7 @@ class MultisetPermutationTest {
         void eachPermContainsCorrectMultiset() {
             LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
             options.put("A", 2); options.put("B", 2);
-            var perms = permutation.multiset(options).lexOrder().stream().toList();
+            var perms = Permutation.multiset(options).lexOrder().stream().toList();
             Map<String, Long> expectedFreq = Map.of("A", 2L, "B", 2L);
             for (var perm : perms) {
                 Map<Object, Long> freq = new LinkedHashMap<>();
@@ -149,7 +150,7 @@ class MultisetPermutationTest {
         void allPermutationsAreDistinct() {
             LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
             options.put("A", 2); options.put("B", 1); options.put("C", 1);
-            var perms = permutation.multiset(options).lexOrder().stream().toList();
+            var perms = Permutation.multiset(options).lexOrder().stream().toList();
             assertEquals(new HashSet<>(perms).size(), perms.size(),
                     "all multiset permutations must be distinct");
         }
@@ -159,7 +160,7 @@ class MultisetPermutationTest {
         void permutationsInLexOrder() {
             LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
             options.put("A", 2); options.put("B", 2);
-            var perms = permutation.multiset(options).lexOrder().stream().toList();
+            var perms = Permutation.multiset(options).lexOrder().stream().toList();
             for (int i = 1; i < perms.size(); i++) {
                 assertTrue(isLexLessOrEqual(perms.get(i - 1), perms.get(i)),
                         "rank " + (i-1) + " must be lex ≤ rank " + i);
@@ -179,7 +180,7 @@ class MultisetPermutationTest {
         @DisplayName("Null multiset map throws NullPointerException")
         void nullMapThrows() {
             assertThrows(NullPointerException.class,
-                    () -> permutation.multiset(null).lexOrder());
+                    () -> Permutation.multiset(null).lexOrder());
         }
 
         @Test
@@ -188,7 +189,7 @@ class MultisetPermutationTest {
             LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
             options.put("A", 2); options.put("B", -1);
             assertThrows(IllegalArgumentException.class,
-                    () -> permutation.multiset(options).lexOrder());
+                    () -> Permutation.multiset(options).lexOrder());
         }
     }
 
@@ -206,7 +207,7 @@ class MultisetPermutationTest {
             var elements = of("A", "B", "C");
             int[] frequencies = {3, 2, 2};
             LinkedHashMap<Object, Integer> options = createMap(elements, frequencies);
-            var iterable = permutation.multiset(options).lexOrder();
+            var iterable = Permutation.multiset(options).lexOrder();
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertIterableEquals(list1, list2);
@@ -225,7 +226,7 @@ class MultisetPermutationTest {
             var input = IntStream.range(0, n).boxed().toList();
             int[] freq = getRandomMultisetFreqArray(random, n);
             LinkedHashMap<Object, Integer> options = createMap(input, freq);
-            long count = permutation.multiset(options).lexOrder().stream().count();
+            long count = Permutation.multiset(options).lexOrder().stream().count();
             assertEquals(calculator.multinomial(freq).longValue(), count,
                     "n=" + n + " multinomial mismatch");
         }

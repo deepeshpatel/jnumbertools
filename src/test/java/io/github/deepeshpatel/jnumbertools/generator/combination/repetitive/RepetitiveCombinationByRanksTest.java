@@ -3,7 +3,6 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 import io.github.deepeshpatel.jnumbertools.base.Combination;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +30,7 @@ class RepetitiveCombinationByRanksTest {
 
             for (int n = 1; n <= 4; n++) {
                 for (int r = 1; r <= 3; r++) {
-                    long count = combination.repetitive(n, r)
+                    long count = Combination.repetitive(n, r)
                             .lexOrderMth(increment, start)
                             .stream()
                             .count();
@@ -46,27 +45,27 @@ class RepetitiveCombinationByRanksTest {
         @Test
         void assertCountAndContentForSpecialCase() {
             // Case 1: n=0, r=0 -> 1 -> should return [[]]
-            var zeroZeroGenerator = combination.repetitive(0, 0).lexOrderMth(1, 0);
+            var zeroZeroGenerator = Combination.repetitive(0, 0).lexOrderMth(1, 0);
             var zeroZeroResult = zeroZeroGenerator.stream().toList();
             assertEquals(1, zeroZeroResult.size());
             assertTrue(zeroZeroResult.get(0).isEmpty());
 
             // Case 2: n=0, r>0 -> 0 -> should return [] (empty iterator)
-            var zeroPositiveGenerator = combination.repetitive(0, 2).lexOrderMth(1, 0);
+            var zeroPositiveGenerator = Combination.repetitive(0, 2).lexOrderMth(1, 0);
             assertTrue(zeroPositiveGenerator.stream().toList().isEmpty());
 
             // Case 3: n>0, r=0 -> 1 -> should return [[]]
-            var positiveZeroGenerator = combination.repetitive(3, 0).lexOrderMth(1, 0);
+            var positiveZeroGenerator = Combination.repetitive(3, 0).lexOrderMth(1, 0);
             var positiveZeroResult = positiveZeroGenerator.stream().toList();
             assertEquals(1, positiveZeroResult.size());
             assertTrue(positiveZeroResult.get(0).isEmpty());
 
             // Case 4: With m>1, should still respect count=0
-            var zeroPositiveWithMthGenerator = combination.repetitive(0, 2).lexOrderMth(3, 0);
+            var zeroPositiveWithMthGenerator = Combination.repetitive(0, 2).lexOrderMth(3, 0);
             assertTrue(zeroPositiveWithMthGenerator.stream().toList().isEmpty());
 
             // Case 5: Empty list with r>0 -> 0
-            var emptyListGenerator = combination.repetitive(2, Collections.emptyList()).lexOrderMth(1, 0);
+            var emptyListGenerator = Combination.repetitive(2, Collections.emptyList()).lexOrderMth(1, 0);
             assertTrue(emptyListGenerator.stream().toList().isEmpty());
         }
 
@@ -74,8 +73,8 @@ class RepetitiveCombinationByRanksTest {
         void should_generate_correct_combinations_for_r_greater_than_n() {
             int n = 3;
             int r = 5;
-            var expected = combination.repetitive(n, r).lexOrder().stream().toList();
-            var output = combination.repetitive(n, r).lexOrderMth(1, 0).stream().toList();
+            var expected = Combination.repetitive(n, r).lexOrder().stream().toList();
+            var output = Combination.repetitive(n, r).lexOrderMth(1, 0).stream().toList();
             assertIterableEquals(expected, output);
         }
 
@@ -83,8 +82,8 @@ class RepetitiveCombinationByRanksTest {
         void should_generate_correct_combination_for_r_equals_1() {
             int n = 4;
             int r = 1;
-            var expected = combination.repetitive(n, r).lexOrder().stream().toList();
-            var output = combination.repetitive(n, r).lexOrderMth(1, 0).stream().toList();
+            var expected = Combination.repetitive(n, r).lexOrder().stream().toList();
+            var output = Combination.repetitive(n, r).lexOrderMth(1, 0).stream().toList();
             assertIterableEquals(expected, output);
         }
 
@@ -92,8 +91,8 @@ class RepetitiveCombinationByRanksTest {
         void should_generate_correct_combination_for_n_equals_1() {
             int n = 1;
             int r = 5;
-            var expected = combination.repetitive(n, r).lexOrder().stream().toList();
-            var output = combination.repetitive(n, r).lexOrderMth(1, 0).stream().toList();
+            var expected = Combination.repetitive(n, r).lexOrder().stream().toList();
+            var output = Combination.repetitive(n, r).lexOrderMth(1, 0).stream().toList();
             assertIterableEquals(expected, output);
         }
 
@@ -106,7 +105,7 @@ class RepetitiveCombinationByRanksTest {
                     of(1, 2, 2)
             );
 
-            var output = combination.repetitive(n, r).lexOrderMth(5, 3).stream().toList();
+            var output = Combination.repetitive(n, r).lexOrderMth(5, 3).stream().toList();
             assertIterableEquals(expected, output);
         }
 
@@ -116,8 +115,8 @@ class RepetitiveCombinationByRanksTest {
             int n = 8;
             int r = 4;
             for(int m=1; m<=15; m++) {
-                var all = combination.repetitive(n, r).lexOrder();
-                var mth = combination.repetitive(n, r).lexOrderMth(m, start);
+                var all = Combination.repetitive(n, r).lexOrder();
+                var mth = Combination.repetitive(n, r).lexOrderMth(m, start);
                 assertEveryMthValue(all.stream(), mth.stream(), start, m);
             }
         }
@@ -374,7 +373,7 @@ class RepetitiveCombinationByRanksTest {
 
         @Test
         void byRanks_withNegativeRank_shouldThrowException() {
-            var result = combination.repetitive(2, "A", "B", "C").byRanks(of(BigInteger.valueOf(-1)));
+            var result = Combination.repetitive(2, "A", "B", "C").byRanks(of(BigInteger.valueOf(-1)));
 
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
@@ -383,7 +382,7 @@ class RepetitiveCombinationByRanksTest {
 
         @Test
         void byRanks_withOutOfBoundRank_shouldThrowException() {
-            var result = combination.repetitive(2, "A", "B", "C").byRanks(of(BigInteger.valueOf(1000000000)));
+            var result = Combination.repetitive(2, "A", "B", "C").byRanks(of(BigInteger.valueOf(1000000000)));
 
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
@@ -392,7 +391,7 @@ class RepetitiveCombinationByRanksTest {
 
         @Test
         void byRanks_withValidRanks_shouldWork() {
-            var result = combination.repetitive(2, "A", "B", "C").byRanks(of(
+            var result = Combination.repetitive(2, "A", "B", "C").byRanks(of(
                     BigInteger.ZERO,
                     BigInteger.ONE,
                     BigInteger.valueOf(2)
@@ -441,14 +440,14 @@ class RepetitiveCombinationByRanksTest {
 
         @Test
         void domainIsLargerThanLong() {
-            assertTrue(combination.repetitive(N, R).count().bitLength() > 64);
+            assertTrue(Combination.repetitive(N, R).count().bitLength() > 64);
         }
 
         @Test
         void byRanks_firstAndLastRankOfLargeDomain() {
-            BigInteger last = combination.repetitive(N, R).count().subtract(BigInteger.ONE);
+            BigInteger last = Combination.repetitive(N, R).count().subtract(BigInteger.ONE);
 
-            var result = combination.repetitive(N, R).byRanks(of(BigInteger.ZERO, last)).stream().toList();
+            var result = Combination.repetitive(N, R).byRanks(of(BigInteger.ZERO, last)).stream().toList();
 
             assertEquals(Collections.nCopies(R, 0), result.get(0));
             assertEquals(Collections.nCopies(R, N - 1), result.get(1));
@@ -456,7 +455,7 @@ class RepetitiveCombinationByRanksTest {
 
         @Test
         void byRanks_ranksAroundAndBeyondLongRange_roundTrip() {
-            BigInteger count = combination.repetitive(N, R).count();
+            BigInteger count = Combination.repetitive(N, R).count();
             List<BigInteger> ranks = new ArrayList<>(List.of(
                     two63.subtract(BigInteger.ONE),
                     two63,
@@ -470,7 +469,7 @@ class RepetitiveCombinationByRanksTest {
                 ranks.add(new BigInteger(count.bitLength() + 4, random).mod(count));
             }
 
-            var result = combination.repetitive(N, R).byRanks(ranks).stream().toList();
+            var result = Combination.repetitive(N, R).byRanks(ranks).stream().toList();
 
             assertEquals(ranks.size(), result.size());
             for (int i = 0; i < ranks.size(); i++) {
@@ -481,15 +480,15 @@ class RepetitiveCombinationByRanksTest {
 
         @Test
         void byRanks_rankEqualToCount_isStillRejected() {
-            BigInteger count = combination.repetitive(N, R).count();
-            var result = combination.repetitive(N, R).byRanks(of(count));
+            BigInteger count = Combination.repetitive(N, R).count();
+            var result = Combination.repetitive(N, R).byRanks(of(count));
 
             assertThrows(IllegalArgumentException.class, () -> result.stream().toList());
         }
 
         @Test
         void sample_fromLargeDomain_returnsDistinctValidCombinations() {
-            var result = combination.repetitive(N, R).sample(25, new Random(7)).stream().toList();
+            var result = Combination.repetitive(N, R).sample(25, new Random(7)).stream().toList();
 
             assertEquals(25, result.size());
             result.forEach(this::assertValidCombination);
@@ -498,7 +497,7 @@ class RepetitiveCombinationByRanksTest {
 
         @Test
         void choice_fromLargeDomain_returnsValidCombinations() {
-            var result = combination.repetitive(N, R).choice(25, new Random(7)).stream().toList();
+            var result = Combination.repetitive(N, R).choice(25, new Random(7)).stream().toList();
 
             assertEquals(25, result.size());
             result.forEach(this::assertValidCombination);

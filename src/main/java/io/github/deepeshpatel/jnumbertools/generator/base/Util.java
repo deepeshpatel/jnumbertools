@@ -4,8 +4,6 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.base;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
-
 import java.math.BigInteger;
 import java.util.*;
 

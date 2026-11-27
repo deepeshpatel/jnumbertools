@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,7 +41,7 @@ class RepetitivePermutationTest {
             for (int n = 1; n <= 3; n++) {
                 var input = Collections.nCopies(n, "A");
                 for (int r = 1; r <= n + 1; r++) {
-                    long size = permutation.repetitive(r, input).lexOrder().stream().count();
+                    long size = Permutation.repetitive(r, input).lexOrder().stream().count();
                     assertEquals((long) Math.pow(n, r), size,
                             "n=" + n + " r=" + r + " should produce " + (long)Math.pow(n,r));
                 }
@@ -50,7 +51,7 @@ class RepetitivePermutationTest {
         @Test
         @DisplayName("n=0, r=0 → 0^0 = 1, returns [[]]")
         void zeroChooseZero() {
-            var builder = permutation.repetitive(0, Collections.emptyList());
+            var builder = Permutation.repetitive(0, Collections.emptyList());
             assertEquals(BigInteger.ONE, builder.count());
             var result = builder.lexOrder().stream().toList();
             assertEquals(1, result.size());
@@ -60,7 +61,7 @@ class RepetitivePermutationTest {
         @Test
         @DisplayName("n=0, r>0 → 0^r = 0, returns []")
         void zeroElementsPositiveWidth() {
-            var builder = permutation.repetitive(2, Collections.emptyList());
+            var builder = Permutation.repetitive(2, Collections.emptyList());
             assertEquals(BigInteger.ZERO, builder.count());
             assertTrue(builder.lexOrder().stream().toList().isEmpty());
         }
@@ -68,7 +69,7 @@ class RepetitivePermutationTest {
         @Test
         @DisplayName("n>0, r=0 → n^0 = 1, returns [[]]")
         void positiveElementsZeroWidth() {
-            var builder = permutation.repetitive(0, "A", "B");
+            var builder = Permutation.repetitive(0, "A", "B");
             assertEquals(BigInteger.ONE, builder.count());
             var result = builder.lexOrder().stream().toList();
             assertEquals(1, result.size());
@@ -82,7 +83,7 @@ class RepetitivePermutationTest {
             for (int[] p : pairs) {
                 int n = p[0], r = p[1];
                 var input = Collections.nCopies(n, "X");
-                var builder = permutation.repetitive(r, input);
+                var builder = Permutation.repetitive(r, input);
                 long streamCount = builder.lexOrder().stream().count();
                 assertEquals(builder.count().longValue(), streamCount,
                         "n=" + n + " r=" + r + ": count() vs stream mismatch");
@@ -107,7 +108,7 @@ class RepetitivePermutationTest {
                     of(1, 0, 0), of(1, 0, 1),
                     of(1, 1, 0), of(1, 1, 1)
             );
-            var output = permutation.repetitive(3, 0, 1).lexOrder().stream().toList();
+            var output = Permutation.repetitive(3, 0, 1).lexOrder().stream().toList();
             assertIterableEquals(expected, output);
         }
 
@@ -119,7 +120,7 @@ class RepetitivePermutationTest {
                     of('B', 'A'), of('B', 'B'), of('B', 'C'),
                     of('C', 'A'), of('C', 'B'), of('C', 'C')
             );
-            var output = permutation.repetitive(2, A_B_C).lexOrder().stream().toList();
+            var output = Permutation.repetitive(2, A_B_C).lexOrder().stream().toList();
             assertIterableEquals(expected, output);
         }
 
@@ -127,7 +128,7 @@ class RepetitivePermutationTest {
         @DisplayName("Each tuple has exactly r elements")
         void eachTupleHasRElements() {
             int r = 3;
-            var output = permutation.repetitive(r, "A", "B").lexOrder().stream().toList();
+            var output = Permutation.repetitive(r, "A", "B").lexOrder().stream().toList();
             for (var tuple : output) {
                 assertEquals(r, tuple.size(), "each tuple must have r=" + r + " elements");
             }
@@ -137,7 +138,7 @@ class RepetitivePermutationTest {
         @DisplayName("Each tuple element comes from the input set")
         void eachElementFromInputSet() {
             var input = of("X", "Y");
-            var output = permutation.repetitive(3, input).lexOrder().stream().toList();
+            var output = Permutation.repetitive(3, input).lexOrder().stream().toList();
             var inputSet = new HashSet<>(input);
             for (var tuple : output) {
                 for (var elem : tuple) {
@@ -150,7 +151,7 @@ class RepetitivePermutationTest {
         @Test
         @DisplayName("All tuples are distinct")
         void allTuplesAreDistinct() {
-            var output = permutation.repetitive(3, "A", "B").lexOrder().stream().toList();
+            var output = Permutation.repetitive(3, "A", "B").lexOrder().stream().toList();
             assertEquals(new HashSet<>(output).size(), output.size(),
                     "all tuples must be distinct");
         }
@@ -158,7 +159,7 @@ class RepetitivePermutationTest {
         @Test
         @DisplayName("Tuples are in non-decreasing lexicographic order")
         void tuplesInLexOrder() {
-            var output = permutation.repetitive(3, 0, 1, 2).lexOrder().stream().toList();
+            var output = Permutation.repetitive(3, 0, 1, 2).lexOrder().stream().toList();
             for (int i = 1; i < output.size(); i++) {
                 assertTrue(isLexLessOrEqual(output.get(i - 1), output.get(i)),
                         "rank " + (i-1) + " must be lex ≤ rank " + i);
@@ -168,7 +169,7 @@ class RepetitivePermutationTest {
         @Test
         @DisplayName("Width-1: each element appears exactly once in lex order")
         void width1ProducesEachElementOnce() {
-            var output = permutation.repetitive(1, "A", "B", "C").lexOrder().stream().toList();
+            var output = Permutation.repetitive(1, "A", "B", "C").lexOrder().stream().toList();
             assertEquals(List.of(of("A"), of("B"), of("C")), output);
         }
     }
@@ -185,8 +186,8 @@ class RepetitivePermutationTest {
         @DisplayName("mth output matches every-m-th element of full lex stream")
         void mthMatchesEveryMth() {
             for (int m = 1; m <= 5; m++) {
-                var all = permutation.repetitive(3, "A", "B", "C").lexOrder();
-                var mth = permutation.repetitive(3, "A", "B", "C").lexOrderMth(m, 0);
+                var all = Permutation.repetitive(3, "A", "B", "C").lexOrder();
+                var mth = Permutation.repetitive(3, "A", "B", "C").lexOrderMth(m, 0);
                 assertEveryMthValue(all.stream(), mth.stream(), 0, m);
             }
         }
@@ -195,8 +196,8 @@ class RepetitivePermutationTest {
         @ValueSource(ints = {0, 1, 2, 5})
         @DisplayName("mth with start offset matches full stream from that offset")
         void mthWithStartOffset(int start) {
-            var all = permutation.repetitive(3, 0, 1).lexOrder();
-            var mth = permutation.repetitive(3, 0, 1).lexOrderMth(3, start);
+            var all = Permutation.repetitive(3, 0, 1).lexOrder();
+            var mth = Permutation.repetitive(3, 0, 1).lexOrderMth(3, start);
             assertEveryMthValue(all.stream(), mth.stream(), start, 3);
         }
     }
@@ -212,7 +213,7 @@ class RepetitivePermutationTest {
         @Test
         @DisplayName("Iterating past the last element throws NoSuchElementException")
         void throwsAfterLastElement() {
-            var iterator = permutation.repetitive(1, "A").lexOrder().iterator();
+            var iterator = Permutation.repetitive(1, "A").lexOrder().iterator();
             iterator.next();
             assertThrows(NoSuchElementException.class, iterator::next);
         }
@@ -221,7 +222,7 @@ class RepetitivePermutationTest {
         @DisplayName("Multiple stream() calls produce equal results")
         void multipleStreamCallsAreEqual() {
             RepetitivePermutation<String> iterable =
-                    permutation.repetitive(2, "A", "B", "C").lexOrder();
+                    Permutation.repetitive(2, "A", "B", "C").lexOrder();
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertEquals(list1, list2);
@@ -231,13 +232,13 @@ class RepetitivePermutationTest {
         @DisplayName("Negative width throws IllegalArgumentException")
         void negativeWidthThrows() {
             assertThrows(IllegalArgumentException.class,
-                    () -> permutation.repetitive(-1, "A", "B").lexOrder());
+                    () -> Permutation.repetitive(-1, "A", "B").lexOrder());
         }
 
         @Test
         @DisplayName("Large width (2^20) produces correct count")
         void largeWidthCount() {
-            long count = permutation.repetitive(20, 0, 1).lexOrder().stream().count();
+            long count = Permutation.repetitive(20, 0, 1).lexOrder().stream().count();
             assertEquals(1_048_576L, count); // 2^20
         }
     }
@@ -252,7 +253,7 @@ class RepetitivePermutationTest {
     void stressTesting() {
         for (int n = 20; n <= 24; n++) {
             for (int r = 0; r <= 5; r++) {
-                long count = permutation.repetitive(r, n).lexOrder().stream().count();
+                long count = Permutation.repetitive(r, n).lexOrder().stream().count();
                 assertEquals(calculator.power(n, r).longValue(), count);
             }
         }

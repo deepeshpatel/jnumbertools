@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for k-permutations in lexicographic order:
- * <pre>{@code permutation.nPk(k, input).lexOrder()}</pre>
+ * <pre>{@code Permutation.nPk(k, input).lexOrder()}</pre>
  * Generates all ordered arrangements of k elements chosen from n, count = nPr(n, k).
  */
 @DisplayName("K-Permutations (lex order)")
@@ -38,7 +39,7 @@ class KPermutationLexOrderTest {
             for (int n = 1; n <= 4; n++) {
                 var input = Collections.nCopies(n, "A");
                 for (int k = 1; k <= n; k++) {
-                    long size = permutation.nPk(k, input).lexOrder().stream().count();
+                    long size = Permutation.nPk(k, input).lexOrder().stream().count();
                     assertEquals(calculator.nPr(n, k).longValue(), size,
                             "nPr(" + n + "," + k + ") mismatch");
                 }
@@ -52,7 +53,7 @@ class KPermutationLexOrderTest {
             for (int[] p : pairs) {
                 int n = p[0], k = p[1];
                 var input = Collections.nCopies(n, "X");
-                var builder = permutation.nPk(k, input);
+                var builder = Permutation.nPk(k, input);
                 long streamCount = builder.lexOrder().stream().count();
                 assertEquals(builder.count().longValue(), streamCount,
                         "n=" + n + " k=" + k);
@@ -70,7 +71,7 @@ class KPermutationLexOrderTest {
         @Test
         @DisplayName("n=0, k>0: ⁰Pₖ = 0, empty stream")
         void nZeroKPositive() {
-            var b = permutation.nPk(0, 1);
+            var b = Permutation.nPk(0, 1);
             assertEquals(BigInteger.ZERO, b.count());
             assertTrue(b.lexOrder().stream().toList().isEmpty());
         }
@@ -78,7 +79,7 @@ class KPermutationLexOrderTest {
         @Test
         @DisplayName("n>0, k>n: ⁿPₖ = 0, empty stream")
         void kGreaterThanN() {
-            var b = permutation.nPk(1, 2);
+            var b = Permutation.nPk(1, 2);
             assertEquals(BigInteger.ZERO, b.count());
             assertTrue(b.lexOrder().stream().toList().isEmpty());
         }
@@ -86,7 +87,7 @@ class KPermutationLexOrderTest {
         @Test
         @DisplayName("n=0, k=0: ⁰P₀ = 1, single empty permutation")
         void nZeroKZero() {
-            var b = permutation.nPk(0, 0);
+            var b = Permutation.nPk(0, 0);
             assertEquals(BigInteger.ONE, b.count());
             var result = b.lexOrder().stream().toList();
             assertEquals(1, result.size());
@@ -96,7 +97,7 @@ class KPermutationLexOrderTest {
         @Test
         @DisplayName("n>0, k=0: ⁿP₀ = 1, single empty permutation")
         void nPositiveKZero() {
-            var b = permutation.nPk(2, 0);
+            var b = Permutation.nPk(2, 0);
             assertEquals(BigInteger.ONE, b.count());
             var result = b.lexOrder().stream().toList();
             assertEquals(1, result.size());
@@ -106,7 +107,7 @@ class KPermutationLexOrderTest {
         @Test
         @DisplayName("Empty input list with k=0: single empty permutation")
         void emptyInputWithKZero() {
-            var result = permutation.nPk(0, Collections.emptyList()).lexOrder().stream().toList();
+            var result = Permutation.nPk(0, Collections.emptyList()).lexOrder().stream().toList();
             assertIterableEquals(listOfEmptyList, result);
         }
 
@@ -114,7 +115,7 @@ class KPermutationLexOrderTest {
         @DisplayName("Negative k throws IllegalArgumentException")
         void negativeKThrows() {
             assertThrows(IllegalArgumentException.class, () ->
-                    permutation.nPk(-1, of("A", "B")).lexOrder());
+                    Permutation.nPk(-1, of("A", "B")).lexOrder());
         }
     }
 
@@ -136,15 +137,15 @@ class KPermutationLexOrderTest {
                     of('C', 'A'),
                     of('C', 'B')
             );
-            var output = permutation.nPk(2, 'A', 'B', 'C').lexOrder().stream().toList();
+            var output = Permutation.nPk(2, 'A', 'B', 'C').lexOrder().stream().toList();
             assertIterableEquals(expected, output);
         }
 
         @Test
         @DisplayName("k=n: nPk equals full unique permutation")
         void kEqualsNMatchesUnique() {
-            var unique = permutation.unique('A', 'B', 'C').lexOrder().stream().toList();
-            var kPerm  = permutation.nPk(3, 'A', 'B', 'C').lexOrder().stream().toList();
+            var unique = Permutation.unique('A', 'B', 'C').lexOrder().stream().toList();
+            var kPerm  = Permutation.nPk(3, 'A', 'B', 'C').lexOrder().stream().toList();
             assertIterableEquals(unique, kPerm);
         }
 
@@ -153,7 +154,7 @@ class KPermutationLexOrderTest {
         void allOutputsLexOrderedAndSizeK() {
             int k = 3;
             var input = of("A","B","C","D","E","F");
-            var output = permutation.nPk(k, input).lexOrder().stream().toList();
+            var output = Permutation.nPk(k, input).lexOrder().stream().toList();
             for (var p : output) {
                 assertEquals(k, p.size(), "each permutation must be of size k");
             }
@@ -168,9 +169,9 @@ class KPermutationLexOrderTest {
         void lexOrderEqualsSortedCombinationOrder() {
             int k = 4;
             var input = of("A","B","C","D","E","F","G","H");
-            var lex = permutation.nPk(k, input).lexOrder().stream()
+            var lex = Permutation.nPk(k, input).lexOrder().stream()
                     .map(Object::toString).toList();
-            var comboSorted = permutation.nPk(k, input).combinationOrder().stream()
+            var comboSorted = Permutation.nPk(k, input).combinationOrder().stream()
                     .map(Object::toString).sorted().toList();
             assertEquals(comboSorted, lex);
         }
@@ -186,7 +187,7 @@ class KPermutationLexOrderTest {
         @Test
         @DisplayName("Multiple stream() calls produce equal results")
         void multipleStreamCallsAreEqual() {
-            var iterable = permutation.nPk(2, "A", "B", "C").lexOrder();
+            var iterable = Permutation.nPk(2, "A", "B", "C").lexOrder();
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertIterableEquals(list1, list2);
@@ -196,7 +197,7 @@ class KPermutationLexOrderTest {
         @Test
         @DisplayName("Outer collection is immutable")
         void outerCollectionIsImmutable() {
-            var results = permutation.nPk(2, "A", "B", "C").lexOrder().stream().toList();
+            var results = Permutation.nPk(2, "A", "B", "C").lexOrder().stream().toList();
             assertThrows(UnsupportedOperationException.class, () -> results.add(List.of("X", "Y")));
             assertThrows(UnsupportedOperationException.class, () -> results.remove(0));
         }
@@ -204,7 +205,7 @@ class KPermutationLexOrderTest {
         @Test
         @DisplayName("Inner lists are immutable")
         void innerListsAreImmutable() {
-            var results = permutation.nPk(2, "A", "B", "C").lexOrder().stream().toList();
+            var results = Permutation.nPk(2, "A", "B", "C").lexOrder().stream().toList();
             var first = results.get(0);
             assertThrows(UnsupportedOperationException.class, () -> first.add("X"));
             assertThrows(UnsupportedOperationException.class, () -> first.set(0, "X"));
@@ -221,7 +222,7 @@ class KPermutationLexOrderTest {
         for (int n = 0; n <= 8; n++) {
             var input = Collections.nCopies(n, "X");
             for (int k = 0; k <= n; k++) {
-                long count = permutation.nPk(k, input).lexOrder().stream().count();
+                long count = Permutation.nPk(k, input).lexOrder().stream().count();
                 assertEquals(calculator.nPr(n, k).longValue(), count,
                         "n=" + n + " k=" + k);
             }

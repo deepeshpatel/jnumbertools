@@ -5,7 +5,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;

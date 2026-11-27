@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.Combination;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for {@code combination.multiset(options, r).lexOrder()} — r-combinations
+ * Tests for {@code Combination.multiset(options, r).lexOrder()} — r-combinations
  * of a multiset (each element {@code eᵢ} has multiplicity {@code nᵢ}). The number
  * of r-combinations of size r is the coefficient of {@code xʳ} in
  * {@code Π_i (1 + x + … + x^{nᵢ})}.
@@ -53,7 +54,7 @@ class MultisetCombinationTest {
                 options.put(A_B_C_D.get(i), frequencies[i]);
             }
             for (int size = 0; size <= maxSize; size++) {
-                long actualCount = combination.multiset(options, size).lexOrder()
+                long actualCount = Combination.multiset(options, size).lexOrder()
                         .stream().count();
                 // expectedCounts is symmetric — fall back if needed
                 int index = size < expectedCounts.length ? size : maxSize - size;
@@ -66,7 +67,7 @@ class MultisetCombinationTest {
         @DisplayName("count() agrees with stream().count() for a representative case")
         void builderCountMatchesStreamCount() {
             var options = new LinkedHashMap<>(Map.of('A', 2, 'B', 3, 'C', 2));
-            var builder = combination.multiset(options, 3);
+            var builder = Combination.multiset(options, 3);
             assertEquals(builder.count().longValue(),
                     builder.lexOrder().stream().count());
         }
@@ -82,7 +83,7 @@ class MultisetCombinationTest {
         @Test
         @DisplayName("Empty multiset, r=0: single empty selection")
         void emptyMultisetRZero() {
-            var b = combination.multiset(new LinkedHashMap<>(), 0);
+            var b = Combination.multiset(new LinkedHashMap<>(), 0);
             assertEquals(BigInteger.ONE, b.count());
             var result = b.lexOrder().stream().toList();
             assertEquals(1, result.size());
@@ -92,7 +93,7 @@ class MultisetCombinationTest {
         @Test
         @DisplayName("Empty multiset, r>0: empty stream")
         void emptyMultisetRPositive() {
-            var b = combination.multiset(new LinkedHashMap<>(), 2);
+            var b = Combination.multiset(new LinkedHashMap<>(), 2);
             assertEquals(BigInteger.ZERO, b.count());
             assertTrue(b.lexOrder().stream().toList().isEmpty());
         }
@@ -101,7 +102,7 @@ class MultisetCombinationTest {
         @DisplayName("Non-empty multiset, r=0: single empty selection")
         void nonEmptyMultisetRZero() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1));
-            var b = combination.multiset(options, 0);
+            var b = Combination.multiset(options, 0);
             assertEquals(BigInteger.ONE, b.count());
             var result = b.lexOrder().stream().toList();
             assertEquals(1, result.size());
@@ -114,7 +115,7 @@ class MultisetCombinationTest {
         @DisplayName("r exceeds total available: empty stream")
         void rGreaterThanTotal() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1));
-            var b = combination.multiset(options, 10);
+            var b = Combination.multiset(options, 10);
             assertEquals(BigInteger.ZERO, b.count());
             assertTrue(b.lexOrder().stream().toList().isEmpty());
         }
@@ -137,7 +138,7 @@ class MultisetCombinationTest {
             options.put("B", 2);
             options.put("A", 1);
             options.put("D", 1);
-            var out = combination.multiset(options, 3).lexOrder().stream().toList();
+            var out = Combination.multiset(options, 3).lexOrder().stream().toList();
             assertEquals(expected, out.toString());
         }
 
@@ -150,7 +151,7 @@ class MultisetCombinationTest {
             options.put("C", 2);
             String expected = "[{B=3}, {B=2, A=1}, {B=2, C=1}, {B=1, A=2}, {B=1, A=1, C=1}, "
                     + "{B=1, C=2}, {A=3}, {A=2, C=1}, {A=1, C=2}]";
-            var output = combination.multiset(options, 3).lexOrder().stream().toList();
+            var output = Combination.multiset(options, 3).lexOrder().stream().toList();
             assertEquals(expected, output.toString());
         }
     }
@@ -166,7 +167,7 @@ class MultisetCombinationTest {
         @DisplayName("Multiple stream() calls produce equal results")
         void multipleStreamCallsAreEqual() {
             var options = new LinkedHashMap<>(Map.of('A', 2, 'B', 3, 'C', 2));
-            var mc = combination.multiset(options, 2).lexOrder();
+            var mc = Combination.multiset(options, 2).lexOrder();
             var list1 = mc.stream().toList();
             var list2 = mc.stream().toList();
             assertIterableEquals(list1, list2);
@@ -187,7 +188,7 @@ class MultisetCombinationTest {
 
             int[] rValues = {10, 500};
             for (int r : rValues) {
-                MultisetCombination<String> mc = combination.multiset(input, r).lexOrder();
+                MultisetCombination<String> mc = Combination.multiset(input, r).lexOrder();
                 Iterator<Map<String, Integer>> arrayIterator = mc.new ArrayIterator();
                 Iterator<Map<String, Integer>> freqIterator  = mc.new FreqVectorIterator();
                 while (arrayIterator.hasNext() && freqIterator.hasNext()) {
@@ -218,7 +219,7 @@ class MultisetCombinationTest {
         options.clear();
         options.put('A', 3); options.put('B', 3); options.put('C', 3); options.put('D', 3); options.put('E', 3);
         for (int size = 0; size <= maxSize; size++) {
-            long actual = combination.multiset(options, size).lexOrder().stream().count();
+            long actual = Combination.multiset(options, size).lexOrder().stream().count();
             int idx = size < expected.length ? size : maxSize - size;
             assertEquals(expected[idx], actual, "size=" + size);
         }

@@ -3,7 +3,6 @@ package io.github.deepeshpatel.jnumbertools.generator.base;
 import io.github.deepeshpatel.jnumbertools.TestBase;
 
 import java.math.BigInteger;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;

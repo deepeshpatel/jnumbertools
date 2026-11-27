@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation;
 
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -14,7 +15,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.createMap;
-import static io.github.deepeshpatel.jnumbertools.TestBase.permutation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -125,28 +125,28 @@ class CommonTest {
     }
 
     private static List<?> uniqueLex(int size) {
-        return permutation.unique(size).lexOrder().stream().toList();
+        return Permutation.unique(size).lexOrder().stream().toList();
     }
 
     private static List<?> uniqueMth(int size, int increment) {
-        return permutation.unique(size).lexOrderMth(increment, 0).stream().toList();
+        return Permutation.unique(size).lexOrderMth(increment, 0).stream().toList();
     }
 
     private static List<?> multisetLex(int size) {
-        return permutation.multiset(createMap(rangeBoxed(size), onesOfLength(size)))
+        return Permutation.multiset(createMap(rangeBoxed(size), onesOfLength(size)))
                 .lexOrder().stream().toList();
     }
 
     private static List<?> multisetMth(int size, int increment) {
-        return permutation.multiset(createMap(rangeBoxed(size), onesOfLength(size)))
+        return Permutation.multiset(createMap(rangeBoxed(size), onesOfLength(size)))
                 .lexOrderMth(increment, 0).stream().toList();
     }
 
     private static List<?> kPermLex(int size) {
-        return permutation.nPk(size, size).lexOrder().stream().toList();
+        return Permutation.nPk(size, size).lexOrder().stream().toList();
     }
 
     private static List<?> kPermMth(int size, int increment) {
-        return permutation.nPk(size, size).lexOrderMth(increment, 0).stream().toList();
+        return Permutation.nPk(size, size).lexOrderMth(increment, 0).stream().toList();
     }
 }

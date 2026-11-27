@@ -1,6 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -26,20 +27,20 @@ class MultisetPermutationByRanksTest {
             // Multiset permutations: n!/(n₁!·n₂!·...·nₖ!)
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1, "C", 1));
             long expected = calculator.multinomial(options.values().stream().mapToInt(Integer::intValue).toArray()).longValue();
-            long actual = permutation.multiset(options).lexOrder().stream().count();
+            long actual = Permutation.multiset(options).lexOrder().stream().count();
             assertEquals(expected, actual);
         }
 
         @Test
         void assertCountAndContentForSpecialCase() {
             // Case 1: Empty map -> 0! = 1 -> should return [[]]
-            var emptyMapGenerator = permutation.multiset(new LinkedHashMap<>()).lexOrderMth(1, 0);
+            var emptyMapGenerator = Permutation.multiset(new LinkedHashMap<>()).lexOrderMth(1, 0);
             var emptyMapResult = emptyMapGenerator.stream().toList();
             assertEquals(1, emptyMapResult.size());
             assertTrue(emptyMapResult.get(0).isEmpty());
 
             // Case 2: Empty map with m>1 -> still should return [[]]
-            var emptyMapWithMthGenerator = permutation.multiset(new LinkedHashMap<>()).lexOrderMth(3, 0);
+            var emptyMapWithMthGenerator = Permutation.multiset(new LinkedHashMap<>()).lexOrderMth(3, 0);
             var emptyMapWithMthResult = emptyMapWithMthGenerator.stream().toList();
             assertEquals(1, emptyMapWithMthResult.size());
             assertTrue(emptyMapWithMthResult.get(0).isEmpty());
@@ -48,14 +49,14 @@ class MultisetPermutationByRanksTest {
             var zeroFreqOptions = new LinkedHashMap<String, Integer>();
             zeroFreqOptions.put("A", 0);
             zeroFreqOptions.put("B", 0);
-            var zeroFreqGenerator = permutation.multiset(zeroFreqOptions).lexOrderMth(1, 0);
+            var zeroFreqGenerator = Permutation.multiset(zeroFreqOptions).lexOrderMth(1, 0);
             var zeroFreqResult = zeroFreqGenerator.stream().toList();
             assertEquals(1, zeroFreqResult.size());
             assertTrue(zeroFreqResult.get(0).isEmpty());
 
             // Case 4: Single element with frequency f -> only one permutation
             var singleOptions = new LinkedHashMap<>(Map.of("X", 3));
-            var singleGenerator = permutation.multiset(singleOptions).lexOrderMth(1, 0);
+            var singleGenerator = Permutation.multiset(singleOptions).lexOrderMth(1, 0);
             var singleResult = singleGenerator.stream().toList();
             assertEquals(1, singleResult.size());
             assertEquals(3, singleResult.get(0).size());
@@ -67,7 +68,7 @@ class MultisetPermutationByRanksTest {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1, "C", 1));
             int start = 2;
             for (int m = 1; m <= 10; m += 2) {
-                var builder = permutation.multiset(options);
+                var builder = Permutation.multiset(options);
                 var all = builder.lexOrder();
                 var mth = builder.lexOrderMth(m, start);
                 assertEveryMthValue(all.stream(), mth.stream(), start, m);
@@ -77,7 +78,7 @@ class MultisetPermutationByRanksTest {
         @Test
         void shouldGenerateCorrectMthPermutationForSingleElement() {
             var options = new LinkedHashMap<>(Map.of("A", 3));
-            var result = permutation.multiset(options).lexOrderMth(1, 0).stream().toList();
+            var result = Permutation.multiset(options).lexOrderMth(1, 0).stream().toList();
             assertEquals(1, result.size(), "Should generate one permutation for single element type");
             assertEquals(3, result.get(0).size(), "Permutation should have correct size");
             assertEquals("A", result.get(0).get(0), "All elements should be A");
@@ -86,7 +87,7 @@ class MultisetPermutationByRanksTest {
         @Test
         void shouldReturnSameResultForDifferentIteratorObjects() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1, "C", 1));
-            var iterable = permutation.multiset(options).lexOrderMth(2, 0);
+            var iterable = Permutation.multiset(options).lexOrderMth(2, 0);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertIterableEquals(list1, list2);
@@ -95,7 +96,7 @@ class MultisetPermutationByRanksTest {
         @Test
         void shouldGenerateValidPermutationSizes() {
             var options = new LinkedHashMap<>(Map.of("A", 3, "B", 2));
-            var result = permutation.multiset(options).lexOrderMth(5, 0).stream().toList();
+            var result = Permutation.multiset(options).lexOrderMth(5, 0).stream().toList();
             for (var perm : result) {
                 assertEquals(5, perm.size(), "Each permutation should have total size equal to sum of frequencies");
                 // Verify all elements are from the original set
@@ -115,7 +116,7 @@ class MultisetPermutationByRanksTest {
 
             LinkedHashMap<Character, Integer> options = createMap(of('a', 'b', 'c'), new int[]{1, 2, 3});
 
-            var output = permutation.multiset(options)
+            var output = Permutation.multiset(options)
                     .lexOrderMth(20, 5)
                     .stream().toList();
             assertIterableEquals(expected, output);
@@ -129,7 +130,7 @@ class MultisetPermutationByRanksTest {
         void shouldGenerateSampledPermutationsWithinBounds() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1, "C", 1));
             int sampleSize = 3;
-            var permBuilder = permutation.multiset(options);
+            var permBuilder = Permutation.multiset(options);
             var sampled = permBuilder.sample(sampleSize, TestBase.random).stream().toList();
 
             assertEquals(sampleSize, sampled.size(), "Sample size should match requested size");
@@ -140,7 +141,7 @@ class MultisetPermutationByRanksTest {
         @Test
         void shouldThrowExceptionForInvalidSampleSize() {
             var options = new LinkedHashMap<>(Map.of("A", 1, "B", 1));
-            var permBuilder = permutation.multiset(options);
+            var permBuilder = Permutation.multiset(options);
             assertThrows(IllegalArgumentException.class, () -> permBuilder.sample(0, TestBase.random), "Sample size of 0 should throw exception");
             assertThrows(IllegalArgumentException.class, () -> permBuilder.sample(3, TestBase.random), "Sample size exceeding total permutations should throw exception");
         }
@@ -153,7 +154,7 @@ class MultisetPermutationByRanksTest {
         void shouldGenerateChoicePermutationsWithPossibleDuplicates() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1));
             int choiceSize = 4;
-            var permBuilder = permutation.multiset(options);
+            var permBuilder = Permutation.multiset(options);
             var chosen = permBuilder.choice(choiceSize, TestBase.random).stream().toList();
 
             assertEquals(choiceSize, chosen.size(), "Choice size should match requested size");
@@ -164,7 +165,7 @@ class MultisetPermutationByRanksTest {
         @Test
         void shouldThrowExceptionForInvalidChoiceSize() {
             var options = new LinkedHashMap<>(Map.of("A", 1, "B", 1));
-            var permBuilder = permutation.multiset(options);
+            var permBuilder = Permutation.multiset(options);
             assertThrows(IllegalArgumentException.class, () -> permBuilder.choice(0, TestBase.random), "Choice size of 0 should throw exception");
         }
     }
@@ -175,7 +176,7 @@ class MultisetPermutationByRanksTest {
         @Test
         void byRanks_withNegativeRank_shouldThrowException() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1));
-            var result = permutation.multiset(options).byRanks(java.util.List.of(java.math.BigInteger.valueOf(-1)));
+            var result = Permutation.multiset(options).byRanks(java.util.List.of(java.math.BigInteger.valueOf(-1)));
 
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
@@ -185,7 +186,7 @@ class MultisetPermutationByRanksTest {
         @Test
         void byRanks_withOutOfBoundRank_shouldThrowException() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1));
-            var result = permutation.multiset(options).byRanks(java.util.List.of(java.math.BigInteger.valueOf(1000000000)));
+            var result = Permutation.multiset(options).byRanks(java.util.List.of(java.math.BigInteger.valueOf(1000000000)));
 
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
@@ -195,7 +196,7 @@ class MultisetPermutationByRanksTest {
         @Test
         void byRanks_withValidRanks_shouldWork() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1));
-            var result = permutation.multiset(options).byRanks(java.util.List.of(
+            var result = Permutation.multiset(options).byRanks(java.util.List.of(
                     java.math.BigInteger.ZERO,
                     java.math.BigInteger.ONE,
                     java.math.BigInteger.valueOf(2)
@@ -217,7 +218,7 @@ class MultisetPermutationByRanksTest {
         void emptyAndAllZeroMapsHonourTheRankSource() {
             LinkedHashMap<String, Integer> allZero = new LinkedHashMap<>();
             allZero.put("A", 0);
-            for (var multiset : List.of(permutation.multiset(new LinkedHashMap<String, Integer>()), permutation.multiset(allZero))) {
+            for (var multiset : List.of(Permutation.multiset(new LinkedHashMap<String, Integer>()), Permutation.multiset(allZero))) {
                 assertEquals(List.of(List.of(), List.of()), multiset.byRanks(of(BigInteger.ZERO, BigInteger.ZERO)).stream().toList());
                 assertThrows(IllegalArgumentException.class, () -> multiset.byRanks(of(BigInteger.ONE)).stream().toList());
             }
@@ -235,7 +236,7 @@ class MultisetPermutationByRanksTest {
             List<String> descending = new ArrayList<>(ascending);
             Collections.reverse(descending);
 
-            var builder = permutation.multiset(options);
+            var builder = Permutation.multiset(options);
             BigInteger count = builder.count();
             assertTrue(count.compareTo(BigInteger.ONE.shiftLeft(63)) > 0);
 
@@ -262,7 +263,7 @@ class MultisetPermutationByRanksTest {
                 for (int i = 0; i < types; i++) {
                     options.put(i, random.nextInt(4)); // zero frequencies are dropped
                 }
-                var builder = permutation.multiset(options);
+                var builder = Permutation.multiset(options);
                 List<List<Integer>> inOrder = builder.lexOrder().stream().toList();
                 assertEquals(BigInteger.valueOf(inOrder.size()), builder.count(), "count " + options);
 
@@ -285,7 +286,7 @@ class MultisetPermutationByRanksTest {
             for (int i = 0; i < 300; i++) {
                 options.put(i, 1 + (i % 3));
             }
-            var builder = permutation.multiset(options);
+            var builder = Permutation.multiset(options);
             BigInteger count = builder.count();
 
             List<Integer> sorted = new ArrayList<>();

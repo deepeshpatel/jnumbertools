@@ -7,7 +7,6 @@ package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 import io.github.deepeshpatel.jnumbertools.base.Product;
 
 import io.github.deepeshpatel.jnumbertools.AllocationMeter;
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 

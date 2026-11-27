@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,7 +37,7 @@ class UniquePermutationSingleSwapTest {
         @ValueSource(ints = {1, 2, 3, 4, 5})
         @DisplayName("n elements produce n! permutations")
         void countIsFactorial(int n) {
-            long count = permutation.unique(n).singleSwap().stream().count();
+            long count = Permutation.unique(n).singleSwap().stream().count();
             assertEquals(calculator.factorial(n).longValue(), count,
                     "n=" + n + " should produce " + calculator.factorial(n) + " permutations");
         }
@@ -44,7 +45,7 @@ class UniquePermutationSingleSwapTest {
         @Test
         @DisplayName("n=0: exactly 1 permutation — the empty list")
         void zeroElements() {
-            var result = permutation.unique(0).singleSwap().stream().toList();
+            var result = Permutation.unique(0).singleSwap().stream().toList();
             assertEquals(1, result.size());
             assertTrue(result.get(0).isEmpty());
         }
@@ -53,7 +54,7 @@ class UniquePermutationSingleSwapTest {
         @DisplayName("count() matches stream count for n in [0,5]")
         void builderCountMatchesStreamCount() {
             for (int n = 0; n <= 5; n++) {
-                var builder = permutation.unique(n);
+                var builder = Permutation.unique(n);
                 long streamCount = builder.singleSwap().stream().count();
                 assertEquals(calculator.factorial(n).longValue(), streamCount,
                         "n=" + n + " count mismatch");
@@ -73,8 +74,8 @@ class UniquePermutationSingleSwapTest {
         @ValueSource(ints = {1, 2, 3, 4})
         @DisplayName("Single-swap set equals lex-order set for n elements")
         void singleSwapSetEqualsLexSet(int n) {
-            var singleSwap = new HashSet<>(permutation.unique(n).singleSwap().stream().toList());
-            var lex = new HashSet<>(permutation.unique(n).lexOrder().stream().toList());
+            var singleSwap = new HashSet<>(Permutation.unique(n).singleSwap().stream().toList());
+            var lex = new HashSet<>(Permutation.unique(n).lexOrder().stream().toList());
             assertEquals(lex, singleSwap,
                     "n=" + n + ": single-swap and lex-order must produce the same set");
         }
@@ -82,7 +83,7 @@ class UniquePermutationSingleSwapTest {
         @Test
         @DisplayName("All permutations are distinct")
         void allPermutationsAreDistinct() {
-            var perms = permutation.unique(4).singleSwap().stream().toList();
+            var perms = Permutation.unique(4).singleSwap().stream().toList();
             assertEquals(new HashSet<>(perms).size(), perms.size(),
                     "all single-swap permutations must be distinct");
         }
@@ -92,7 +93,7 @@ class UniquePermutationSingleSwapTest {
         void eachPermutationContainsAllElements() {
             int n = 4;
             var expected = new HashSet<>(of(0, 1, 2, 3));
-            var perms = permutation.unique(n).singleSwap().stream().toList();
+            var perms = Permutation.unique(n).singleSwap().stream().toList();
             for (var perm : perms) {
                 assertEquals(n, perm.size(), "permutation size must be n");
                 assertEquals(expected, new HashSet<>(perm),
@@ -103,7 +104,7 @@ class UniquePermutationSingleSwapTest {
         @Test
         @DisplayName("Consecutive permutations differ by exactly one swap")
         void consecutivePermsDifferByOneSwap() {
-            var perms = permutation.unique(4).singleSwap().stream().toList();
+            var perms = Permutation.unique(4).singleSwap().stream().toList();
             for (int i = 1; i < perms.size(); i++) {
                 List<Integer> prev = (List<Integer>) perms.get(i - 1);
                 List<Integer> curr = (List<Integer>) perms.get(i);
@@ -121,9 +122,9 @@ class UniquePermutationSingleSwapTest {
         @DisplayName("String elements: single-swap produces same set as lex-order")
         void stringElements() {
             var singleSwap = new HashSet<>(
-                    permutation.unique("A", "B", "C").singleSwap().stream().toList());
+                    Permutation.unique("A", "B", "C").singleSwap().stream().toList());
             var lex = new HashSet<>(
-                    permutation.unique("A", "B", "C").lexOrder().stream().toList());
+                    Permutation.unique("A", "B", "C").lexOrder().stream().toList());
             assertEquals(lex, singleSwap);
         }
     }
@@ -140,7 +141,7 @@ class UniquePermutationSingleSwapTest {
         @DisplayName("Multiple stream() calls on same iterable produce equal results")
         void multipleStreamCallsAreEqual() {
             UniquePermutationSingleSwap<Integer> iterable =
-                    permutation.unique(3).singleSwap();
+                    Permutation.unique(3).singleSwap();
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
             assertIterableEquals(list1, list2);
@@ -150,7 +151,7 @@ class UniquePermutationSingleSwapTest {
         @Test
         @DisplayName("Inner lists are immutable")
         void innerListsAreImmutable() {
-            var results = permutation.unique(3).singleSwap().stream().toList();
+            var results = Permutation.unique(3).singleSwap().stream().toList();
             var first = results.get(0);
             assertThrows(UnsupportedOperationException.class, () -> first.add(99));
             assertThrows(UnsupportedOperationException.class, () -> first.set(0, 99));
@@ -166,7 +167,7 @@ class UniquePermutationSingleSwapTest {
     @DisplayName("[STRESS] n! correct for n in [0,10], set equals lex-order set")
     void stressTesting() {
         for (int n = 0; n <= 10; n++) {
-            long count = permutation.unique(n).singleSwap().stream().count();
+            long count = Permutation.unique(n).singleSwap().stream().count();
             assertEquals(calculator.factorial(n).longValue(), count,
                     "n=" + n + " count mismatch");
         }

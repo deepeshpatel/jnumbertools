@@ -2,6 +2,7 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.base.Combination;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +11,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.assertEveryMthValue;
-import static io.github.deepeshpatel.jnumbertools.TestBase.combination;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MultisetCombinationByRanksTest {
@@ -27,7 +27,7 @@ class MultisetCombinationByRanksTest {
             var options = new LinkedHashMap<>(Map.of("A", 3, "B", 2, "C", 1));
             int combinationSize = 2;
 
-            long count = combination.multiset(options, combinationSize)
+            long count = Combination.multiset(options, combinationSize)
                     .lexOrderMth(increment, start)
                     .stream()
                     .count();
@@ -43,35 +43,35 @@ class MultisetCombinationByRanksTest {
         @Test
         void assertCountAndContentForSpecialCase() {
             // Case 1: Empty map, r=0 -> 1 -> should return [{}]
-            var emptyMapZeroGenerator = combination.multiset(new LinkedHashMap<>(), 0).lexOrderMth(1, 0);
+            var emptyMapZeroGenerator = Combination.multiset(new LinkedHashMap<>(), 0).lexOrderMth(1, 0);
             var emptyMapZeroResult = emptyMapZeroGenerator.stream().toList();
             assertEquals(1, emptyMapZeroResult.size());
             assertEquals(Map.of(), emptyMapZeroResult.get(0));
 
             // Case 2: Empty map, r>0 -> 0 -> should return [] (empty iterator)
-            var emptyMapPositiveGenerator = combination.multiset(new LinkedHashMap<>(), 2).lexOrderMth(1, 0);
+            var emptyMapPositiveGenerator = Combination.multiset(new LinkedHashMap<>(), 2).lexOrderMth(1, 0);
             assertTrue(emptyMapPositiveGenerator.stream().toList().isEmpty());
 
             // Case 3: Non-empty map, r=0 -> 1 -> should return [{}]
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1));
-            var positiveZeroGenerator = combination.multiset(options, 0).lexOrderMth(1, 0);
+            var positiveZeroGenerator = Combination.multiset(options, 0).lexOrderMth(1, 0);
             var positiveZeroResult = positiveZeroGenerator.stream().toList();
             assertEquals(1, positiveZeroResult.size());
             assertEquals(Map.of(), positiveZeroResult.get(0));
 
             // Case 4: r > total available -> 0 -> should return [] (empty iterator)
-            var greaterRGenerator = combination.multiset(options, 10).lexOrderMth(1, 0);
+            var greaterRGenerator = Combination.multiset(options, 10).lexOrderMth(1, 0);
             assertTrue(greaterRGenerator.stream().toList().isEmpty());
 
             // Case 5: With m>1, should still respect count=0
-            var emptyMapWithMthGenerator = combination.multiset(new LinkedHashMap<>(), 2).lexOrderMth(3, 0);
+            var emptyMapWithMthGenerator = Combination.multiset(new LinkedHashMap<>(), 2).lexOrderMth(3, 0);
             assertTrue(emptyMapWithMthGenerator.stream().toList().isEmpty());
 
             // Case 6: Map with all zero frequencies -> treated as empty -> count=0 for r>0
             var zeroFreqOptions = new LinkedHashMap<String, Integer>();
             zeroFreqOptions.put("A", 0);
             zeroFreqOptions.put("B", 0);
-            var zeroFreqGenerator = combination.multiset(zeroFreqOptions, 2).lexOrderMth(1, 0);
+            var zeroFreqGenerator = Combination.multiset(zeroFreqOptions, 2).lexOrderMth(1, 0);
             assertTrue(zeroFreqGenerator.stream().toList().isEmpty());
         }
 
@@ -80,7 +80,7 @@ class MultisetCombinationByRanksTest {
             int k = 8;
             int start = 10;
             var options = new LinkedHashMap<>(Map.of("A", 10, "B", 4, "C", 5, "D", 7, "E", 4, "F", 7, "G", 2, "H", 1, "I", 1, "J", 2));
-            var combBuilder = combination.multiset(options,k);
+            var combBuilder = Combination.multiset(options,k);
             var mth = combBuilder.lexOrderMth(1,start).stream().toList();
             var elementAtIndex10 = combBuilder.lexOrder().stream().skip(start).findFirst().get();
             assertEquals(elementAtIndex10, mth.get(0));
@@ -93,7 +93,7 @@ class MultisetCombinationByRanksTest {
             int start = 3;
             var options = new LinkedHashMap<>(Map.of("A", 10, "B", 4, "C", 5, "D", 7, "E", 4, "F", 7, "G", 2, "H", 1, "I", 1, "J", 2));
             for (int m = 1; m <= 32; m += 2) {
-                var builder = combination.multiset(options, size);
+                var builder = Combination.multiset(options, size);
                 var all = builder.lexOrder();
                 var mth = builder.lexOrderMth(m, start);
                 assertEveryMthValue(all.stream(), mth.stream(), start, m);
@@ -109,7 +109,7 @@ class MultisetCombinationByRanksTest {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1, "C", 1));
             int combinationSize = 2;
             int sampleSize = 3;
-            var combinations = combination.multiset(options, combinationSize)
+            var combinations = Combination.multiset(options, combinationSize)
                     .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
@@ -121,7 +121,7 @@ class MultisetCombinationByRanksTest {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1, "C", 1));
             int combinationSize = 2;
             int sampleSize = 4;
-            var combinations = combination.multiset(options, combinationSize)
+            var combinations = Combination.multiset(options, combinationSize)
                     .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
@@ -134,7 +134,7 @@ class MultisetCombinationByRanksTest {
             var options = new LinkedHashMap<>(Map.of("A", 3, "B", 2, "C", 1));
             int combinationSize = 3;
             int sampleSize = 3;
-            var combinations = combination.multiset(options, combinationSize)
+            var combinations = Combination.multiset(options, combinationSize)
                     .sample(sampleSize, TestBase.random)
                     .stream()
                     .toList();
@@ -157,7 +157,7 @@ class MultisetCombinationByRanksTest {
             var options = new LinkedHashMap<>(Map.of("A", 1, "B", 1));
             int combinationSize = 2;
             int totalCombinations = 1; // Only {A=1, B=1} possible
-            assertThrows(IllegalArgumentException.class, () -> combination.multiset(options, combinationSize)
+            assertThrows(IllegalArgumentException.class, () -> Combination.multiset(options, combinationSize)
                     .sample(totalCombinations + 1, TestBase.random)
                     .stream()
                     .toList(), "Sample size exceeding total combinations should throw exception");
@@ -166,7 +166,7 @@ class MultisetCombinationByRanksTest {
         @Test
         void shouldThrowExceptionForNegativeSampleSize() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1));
-            assertThrows(IllegalArgumentException.class, () -> combination.multiset(options, 1)
+            assertThrows(IllegalArgumentException.class, () -> Combination.multiset(options, 1)
                     .sample(-1, TestBase.random)
                     .stream()
                     .toList(), "Negative sampleSize should throw exception");
@@ -175,7 +175,7 @@ class MultisetCombinationByRanksTest {
         @Test
         void shouldHandleEmptyInputWithZeroSize() {
             var options = new LinkedHashMap<String, Integer>();
-            var combinations = combination.multiset(options, 0)
+            var combinations = Combination.multiset(options, 0)
                     .sample(1, TestBase.random)
                     .stream()
                     .toList();
@@ -186,7 +186,7 @@ class MultisetCombinationByRanksTest {
         @Test
         void shouldGenerateConsistentResultsAcrossIterators() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1, "C", 1));
-            var iterable = combination.multiset(options, 2).sample(3, TestBase.random);
+            var iterable = Combination.multiset(options, 2).sample(3, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
 
@@ -205,7 +205,7 @@ class MultisetCombinationByRanksTest {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1, "C", 1));
             int combinationSize = 2;
             int choiceSize = 4;
-            var combinations = combination.multiset(options, combinationSize)
+            var combinations = Combination.multiset(options, combinationSize)
                     .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
@@ -217,7 +217,7 @@ class MultisetCombinationByRanksTest {
             var options = new LinkedHashMap<>(Map.of("A", 1, "B", 1));
             int combinationSize = 2;
             int choiceSize = 4; // > total combinations to ensure duplicates
-            var combinations = combination.multiset(options, combinationSize)
+            var combinations = Combination.multiset(options, combinationSize)
                     .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
@@ -230,7 +230,7 @@ class MultisetCombinationByRanksTest {
             var options = new LinkedHashMap<>(Map.of("A", 3, "B", 2, "C", 1));
             int combinationSize = 3;
             int choiceSize = 3;
-            var combinations = combination.multiset(options, combinationSize)
+            var combinations = Combination.multiset(options, combinationSize)
                     .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
@@ -253,7 +253,7 @@ class MultisetCombinationByRanksTest {
             var options = new LinkedHashMap<>(Map.of("A", 1, "B", 1));
             int combinationSize = 2;
             int choiceSize = 5; // > total combinations
-            var combinations = combination.multiset(options, combinationSize)
+            var combinations = Combination.multiset(options, combinationSize)
                     .choice(choiceSize, TestBase.random)
                     .stream()
                     .toList();
@@ -263,7 +263,7 @@ class MultisetCombinationByRanksTest {
         @Test
         void shouldThrowExceptionForNegativeChoiceSize() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1));
-            assertThrows(IllegalArgumentException.class, () -> combination.multiset(options, 1)
+            assertThrows(IllegalArgumentException.class, () -> Combination.multiset(options, 1)
                     .choice(-1, TestBase.random)
                     .stream()
                     .toList(), "Negative choiceSize should throw exception");
@@ -272,7 +272,7 @@ class MultisetCombinationByRanksTest {
         @Test
         void shouldHandleEmptyInputWithZeroSize() {
             var options = new LinkedHashMap<String, Integer>();
-            var combinations = combination.multiset(options, 0)
+            var combinations = Combination.multiset(options, 0)
                     .choice(1, TestBase.random)
                     .stream()
                     .toList();
@@ -283,7 +283,7 @@ class MultisetCombinationByRanksTest {
         @Test
         void shouldGenerateConsistentResultsAcrossIterators() {
             var options = new LinkedHashMap<>(Map.of("A", 2, "B", 1, "C", 1));
-            var iterable = combination.multiset(options, 2).choice(3, TestBase.random);
+            var iterable = Combination.multiset(options, 2).choice(3, TestBase.random);
             var list1 = iterable.stream().toList();
             var list2 = iterable.stream().toList();
 
@@ -309,7 +309,7 @@ class MultisetCombinationByRanksTest {
             options.put("A", 2);
             options.put("B", 1);
 
-            var result = combination.multiset(options, 2).byRanks(java.util.List.of(java.math.BigInteger.valueOf(-1)));
+            var result = Combination.multiset(options, 2).byRanks(java.util.List.of(java.math.BigInteger.valueOf(-1)));
 
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
@@ -322,7 +322,7 @@ class MultisetCombinationByRanksTest {
             options.put("A", 2);
             options.put("B", 1);
 
-            var result = combination.multiset(options, 2).byRanks(java.util.List.of(java.math.BigInteger.valueOf(1000000000)));
+            var result = Combination.multiset(options, 2).byRanks(java.util.List.of(java.math.BigInteger.valueOf(1000000000)));
 
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
@@ -335,7 +335,7 @@ class MultisetCombinationByRanksTest {
             options.put("A", 2);
             options.put("B", 1);
 
-            var result = combination.multiset(options, 2).byRanks(java.util.List.of(
+            var result = Combination.multiset(options, 2).byRanks(java.util.List.of(
                     java.math.BigInteger.ZERO,
                     java.math.BigInteger.ONE
             ));

@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.rank;
 
+import io.github.deepeshpatel.jnumbertools.base.Combination;
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -130,7 +132,7 @@ public class RankOfTest {
                     BigInteger total = calculator.nCrRepetitive(n, r);
                     for (BigInteger rank = BigInteger.ZERO; rank.compareTo(total) < 0;
                          rank = rank.add(BigInteger.ONE)) {
-                        var expected = combination.repetitive(n, r)
+                        var expected = Combination.repetitive(n, r)
                                 .byRanks(java.util.List.of(rank)).iterator().next();
                         int[] indices = expected.stream().mapToInt(Integer::intValue).toArray();
                         assertEquals(rank, rankOf.combination().repetitive(n, indices));
@@ -151,7 +153,7 @@ public class RankOfTest {
             int[][] frequencyCases = {{}, {1}, {2}, {2, 1}, {1, 2, 1}, {2, 2, 1}, {0, 2, 1}};
             for (int[] frequencies : frequencyCases) {
                 java.util.LinkedHashMap<Integer, Integer> options = asFrequencyMap(frequencies);
-                var all = permutation.multiset(options).lexOrder().stream().toList();
+                var all = Permutation.multiset(options).lexOrder().stream().toList();
                 for (int i = 0; i < all.size(); i++) {
                     int[] values = all.get(i).stream().mapToInt(Integer::intValue).toArray();
                     assertEquals(BigInteger.valueOf(i), rankOf.permutation().multiset(frequencies, values));
@@ -169,7 +171,7 @@ public class RankOfTest {
                 java.util.LinkedHashMap<Integer, Integer> options = asFrequencyMap(frequencies);
                 int totalItems = java.util.Arrays.stream(frequencies).sum();
                 for (int r = 0; r <= totalItems + 1; r++) {
-                    var all = combination.multiset(options, r).lexOrder().stream().toList();
+                    var all = Combination.multiset(options, r).lexOrder().stream().toList();
                     for (int i = 0; i < all.size(); i++) {
                         int[] counts = new int[frequencies.length];
                         all.get(i).forEach((type, count) -> counts[type] = count);

@@ -39,7 +39,7 @@ class SubsetsTest {
         @Test
         @DisplayName("of(List<T>): valid list returns builder")
         void ofListValid() {
-            var builder = subsets.of(List.of("A", "B", "C"));
+            var builder = Subset.of(List.of("A", "B", "C"));
             assertNotNull(builder);
         }
 
@@ -47,28 +47,28 @@ class SubsetsTest {
         @DisplayName("of(List<T>): null input throws NPE")
         void ofListNullInput() {
             var nullExp = assertThrows(NullPointerException.class, () ->
-                    subsets.of((List<String>) null));
+                    Subset.of((List<String>) null));
             assertTrue(nullExp.getMessage().startsWith(errMsgNullInput));
         }
 
         @Test
         @DisplayName("of(T... elements): multiple elements returns builder")
         void ofVarArgsMultiple() {
-            var builder = subsets.of("A", "B", "C");
+            var builder = Subset.of("A", "B", "C");
             assertNotNull(builder);
         }
 
         @Test
         @DisplayName("of(T... elements): single element returns builder")
         void ofVarArgsSingle() {
-            var singleBuilder = subsets.of("X");
+            var singleBuilder = Subset.of("X");
             assertNotNull(singleBuilder);
         }
 
         @Test
         @DisplayName("of(T... elements): empty varargs returns builder")
         void ofVarArgsEmpty() {
-            var emptyBuilder = subsets.of(new String[0]);
+            var emptyBuilder = Subset.of(new String[0]);
             assertNotNull(emptyBuilder);
         }
 
@@ -77,20 +77,20 @@ class SubsetsTest {
         void ofVarArgsNullArray() {
             String[] nullArray = null;
             assertThrows(NullPointerException.class, () ->
-                    subsets.of(nullArray));
+                    Subset.of(nullArray));
         }
 
         @Test
         @DisplayName("of(int n): positive n returns builder")
         void ofIntPositive() {
-            var builder = subsets.of(3);
+            var builder = Subset.of(3);
             assertNotNull(builder);
         }
 
         @Test
         @DisplayName("of(int n): n=0 returns builder")
         void ofIntZero() {
-            var zeroBuilder = subsets.of(0);
+            var zeroBuilder = Subset.of(0);
             assertNotNull(zeroBuilder);
         }
 
@@ -98,7 +98,7 @@ class SubsetsTest {
         @DisplayName("of(int n): negative n throws IAE")
         void ofIntNegative() {
             var negativeNExp = assertThrows(IllegalArgumentException.class, () ->
-                    subsets.of(-1));
+                    Subset.of(-1));
             assertEquals("dataSize should be ≥ 0 to generate subsets", negativeNExp.getMessage());
         }
     }

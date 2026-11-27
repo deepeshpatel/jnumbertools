@@ -3,7 +3,6 @@ package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 import io.github.deepeshpatel.jnumbertools.base.Combination;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -147,8 +146,8 @@ class UniqueCombinationByRanksTest {
             int n = 8;
             int r = 4;
             for(int m=1; m<=32; m+=2) {
-                var all = combination.unique(n, r).lexOrder();
-                var mth = combination.unique(n, r).lexOrderMth(m, start);
+                var all = Combination.unique(n, r).lexOrder();
+                var mth = Combination.unique(n, r).lexOrderMth(m, start);
                 assertEveryMthValue(all.stream(), mth.stream(), start, m);
             }
         }
@@ -159,7 +158,7 @@ class UniqueCombinationByRanksTest {
 
         @Test
         void shouldGenerateConsistentPropertiesAcrossIterators() {
-            var iterable = combination
+            var iterable = Combination
                     .unique(2, "A", "B", "C")
                     .sample(2, TestBase.random);
             var list1 = iterable.stream().toList();
@@ -184,7 +183,7 @@ class UniqueCombinationByRanksTest {
             int n = 5;
             int r = 3;
             int sampleSize = 4;
-            var combinations = combination
+            var combinations = Combination
                     .unique(n, r)
                     .sample(sampleSize, TestBase.random)
                     .stream()
@@ -197,7 +196,7 @@ class UniqueCombinationByRanksTest {
             int n = 5;
             int r = 2;
             int sampleSize = 3;
-            var combinations = combination
+            var combinations = Combination
                     .unique(n, r)
                     .sample(sampleSize, TestBase.random)
                     .stream()
@@ -210,7 +209,7 @@ class UniqueCombinationByRanksTest {
             List<String> elements = of("A", "B", "C", "D");
             int r = 2;
             int sampleSize = 2;
-            var combinations = combination
+            var combinations = Combination
                     .unique(r, elements)
                     .sample(sampleSize, TestBase.random)
                     .stream()
@@ -229,7 +228,7 @@ class UniqueCombinationByRanksTest {
             int n = 4;
             int r = 2;
             int sampleSize = calculator.nCr(n, r).intValueExact(); // 4C2 = 6
-            var combinations = combination
+            var combinations = Combination
                     .unique(n, r)
                     .sample(sampleSize, TestBase.random)
                     .stream()
@@ -240,7 +239,7 @@ class UniqueCombinationByRanksTest {
 
         @Test
         void shouldHandleEmptyInputWithZeroSize() {
-            var combinations = combination
+            var combinations = Combination
                     .unique(0, Collections.emptyList())
                     .sample(1, TestBase.random)
                     .stream()
@@ -251,7 +250,7 @@ class UniqueCombinationByRanksTest {
 
         @Test
         void shouldThrowExceptionForEmptyInputWithNonZeroSize() {
-            assertThrows(IllegalArgumentException.class, () -> combination
+            assertThrows(IllegalArgumentException.class, () -> Combination
                     .unique(1, Collections.emptyList())
                     .sample(1, TestBase.random)
                     .stream()
@@ -263,7 +262,7 @@ class UniqueCombinationByRanksTest {
             List<Integer> largeInput = Stream.iterate(0, i -> i + 1).limit(20).collect(Collectors.toList());
             int r = 3;
             int sampleSize = 5;
-            var combinations = combination
+            var combinations = Combination
                     .unique(r, largeInput)
                     .sample(sampleSize, TestBase.random)
                     .stream()
@@ -283,7 +282,7 @@ class UniqueCombinationByRanksTest {
                 var input = Collections.nCopies(n, "A");
                 for (int increment = 1; increment <= 4; increment++) {
                     int combinationSize = input.size() / 2;
-                    long size = combination.unique(combinationSize, input).lexOrderMth(increment, 0).stream().count();
+                    long size = Combination.unique(combinationSize, input).lexOrderMth(increment, 0).stream().count();
                     double expected = Math.ceil(calculator.nCr(n, combinationSize).longValue() / (double) increment);
                     assertEquals((long) expected, size);
                 }
@@ -293,37 +292,37 @@ class UniqueCombinationByRanksTest {
         @Test
         void assertCountAndContentForSpecialCase() {
             // Case 1: n=0, r=0 -> ⁰C₀ = 1 -> should return [[]]
-            var zeroZeroGenerator = combination.unique(0, Collections.emptyList()).lexOrderMth(1, 0);
+            var zeroZeroGenerator = Combination.unique(0, Collections.emptyList()).lexOrderMth(1, 0);
             var zeroZeroResult = zeroZeroGenerator.stream().toList();
             assertEquals(1, zeroZeroResult.size());
             assertTrue(zeroZeroResult.get(0).isEmpty());
 
             // Case 2: n=0, r>0 -> ⁰Cᵣ = 0 -> should return [] (empty iterator)
-            var zeroPositiveGenerator = combination.unique(0, 2).lexOrderMth(1, 0);
+            var zeroPositiveGenerator = Combination.unique(0, 2).lexOrderMth(1, 0);
             assertTrue(zeroPositiveGenerator.stream().toList().isEmpty());
 
             // Case 3: n>0, r=0 -> ⁿC₀ = 1 -> should return [[]]
-            var positiveZeroGenerator = combination.unique(3, 0).lexOrderMth(1, 0);
+            var positiveZeroGenerator = Combination.unique(3, 0).lexOrderMth(1, 0);
             var positiveZeroResult = positiveZeroGenerator.stream().toList();
             assertEquals(1, positiveZeroResult.size());
             assertTrue(positiveZeroResult.get(0).isEmpty());
 
             // Case 4: n>0, r>n -> ⁿCᵣ = 0 -> should return [] (empty iterator)
-            var greaterRGenerator = combination.unique(2, 3).lexOrderMth(1, 0);
+            var greaterRGenerator = Combination.unique(2, 3).lexOrderMth(1, 0);
             assertTrue(greaterRGenerator.stream().toList().isEmpty());
 
             // Case 5: With m>1, should still respect count=0
-            var greaterRWithMthGenerator = combination.unique(2, 3).lexOrderMth(3, 0);
+            var greaterRWithMthGenerator = Combination.unique(2, 3).lexOrderMth(3, 0);
             assertTrue(greaterRWithMthGenerator.stream().toList().isEmpty());
 
             // Case 6: Empty list with r>0 -> ⁰Cᵣ = 0
-            var emptyListGenerator = combination.unique(2, Collections.emptyList()).lexOrderMth(1, 0);
+            var emptyListGenerator = Combination.unique(2, Collections.emptyList()).lexOrderMth(1, 0);
             assertTrue(emptyListGenerator.stream().toList().isEmpty());
         }
 
         @Test
         void shouldReturnSameResultForDifferentIteratorObjects() {
-            var iterable = combination.unique(2, A_B_C).lexOrderMth(2, 0);
+            var iterable = Combination.unique(2, A_B_C).lexOrderMth(2, 0);
             var lists1 = iterable.stream().toList();
             var lists2 = iterable.stream().toList();
             assertIterableEquals(lists1, lists2);
@@ -332,7 +331,7 @@ class UniqueCombinationByRanksTest {
         @Test
         void shouldGenerateCombinationsWithIncrementingToEvery3rdCombination() {
             var expected = List.of(of(0, 1, 2), of(0, 2, 3), of(1, 2, 3), of(2, 3, 4));
-            var output = combination.unique(3, of(0, 1, 2, 3, 4))
+            var output = Combination.unique(3, of(0, 1, 2, 3, 4))
                     .lexOrderMth(3, 0).stream().toList();
             assertIterableEquals(expected, output);
         }
@@ -348,7 +347,7 @@ class UniqueCombinationByRanksTest {
             int n = 34;
             int r = 17;
             int m = 1000_000_000; // jump to 1 billionth combination
-            var output = combination.unique(n, r).lexOrderMth(m, 0).stream().toList();
+            var output = Combination.unique(n, r).lexOrderMth(m, 0).stream().toList();
             assertIterableEquals(expected, output);
         }
 
@@ -358,8 +357,8 @@ class UniqueCombinationByRanksTest {
             int start = 1;
             for (int r = 1; r <= input.size() / 2; r++) {
                 for (int m = 1; m <= 10; m+=2) {
-                    var all = combination.unique(r, input).lexOrder().stream();
-                    var mth = combination.unique(r, input).lexOrderMth(m, start).stream();
+                    var all = Combination.unique(r, input).lexOrder().stream();
+                    var mth = Combination.unique(r, input).lexOrderMth(m, start).stream();
                     assertEveryMthValue(all, mth, start, m);
                 }
             }
@@ -371,7 +370,7 @@ class UniqueCombinationByRanksTest {
                     of('B', 'C'),
                     of('C', 'D')
             );
-            var output = combination.unique(2, 'A', 'B', 'C', 'D')
+            var output = Combination.unique(2, 'A', 'B', 'C', 'D')
                     .lexOrderMth(2, 3).stream().toList();
             assertIterableEquals(expected, output);
         }
@@ -385,7 +384,7 @@ class UniqueCombinationByRanksTest {
         void byRanks_withNegativeRank_shouldThrowException() {
             // Note: This test demonstrates that negative ranks pass validation
             // but cause exceptions during iteration
-            var result = combination.unique(3, 2, "A", "B", "C").byRanks(of(BigInteger.valueOf(-1)));
+            var result = Combination.unique(3, 2, "A", "B", "C").byRanks(of(BigInteger.valueOf(-1)));
 
             assertThrows(Exception.class, () -> {
                 result.stream().toList(); // Exception occurs during iteration
@@ -396,7 +395,7 @@ class UniqueCombinationByRanksTest {
         void byRanks_withOutOfBoundRank_shouldThrowException() {
             // Note: This test demonstrates that out-of-bounds ranks pass validation
             // but cause exceptions during iteration
-            var result = combination.unique(3, 2, "A", "B", "C").byRanks(of(BigInteger.valueOf(1000000000)));
+            var result = Combination.unique(3, 2, "A", "B", "C").byRanks(of(BigInteger.valueOf(1000000000)));
 
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Exception occurs during iteration
@@ -407,7 +406,7 @@ class UniqueCombinationByRanksTest {
         void byRanks_withMixedValidInvalidRanks_shouldThrowException() {
             // Note: This test demonstrates that mixed valid/invalid ranks pass validation
             // but cause exceptions during iteration when invalid ranks are encountered
-            var result = combination.unique(3, 2, "A", "B", "C").byRanks(of(
+            var result = Combination.unique(3, 2, "A", "B", "C").byRanks(of(
                     BigInteger.ZERO,        // valid
                     BigInteger.valueOf(10), // invalid - out of bounds
                     BigInteger.valueOf(-1)   // invalid - negative
@@ -422,7 +421,7 @@ class UniqueCombinationByRanksTest {
         @Test
         void byRanks_withValidRanks_shouldWork() {
             assertDoesNotThrow(() -> {
-                var result = combination.unique(3, 2, "A", "B", "C").byRanks(of(
+                var result = Combination.unique(3, 2, "A", "B", "C").byRanks(of(
                         BigInteger.ZERO,
                         BigInteger.ONE,
                         BigInteger.valueOf(2)
@@ -436,7 +435,7 @@ class UniqueCombinationByRanksTest {
         void byRanks_withRandomValidRanks_shouldWork() {
             assertDoesNotThrow(() -> {
                 // For n=4, r=2, total combinations = 6, valid ranks are 0-5
-                var result = combination.unique(4, 2, "A", "B", "C", "D").byRanks(of(
+                var result = Combination.unique(4, 2, "A", "B", "C", "D").byRanks(of(
                         BigInteger.valueOf(3),
                         BigInteger.ZERO,
                         BigInteger.valueOf(4),

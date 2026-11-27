@@ -5,7 +5,6 @@ import io.github.deepeshpatel.jnumbertools.base.Combinations;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
