@@ -32,23 +32,23 @@ import java.util.stream.IntStream;
  * import io.github.deepeshpatel.jnumbertools.entrypoint.Combination;
  *
  * // All combinations of size 2 from [A, B, C, D]
- * comb.unique(2, "A", "B", "C", "D")
+ * Combination.unique(2, "A", "B", "C", "D")
  *     .lexOrder()
  *     .forEach(System.out::println);
  * // Output: [A,B], [A,C], [A,D], [B,C], [B,D], [C,D]
  *
  * // Every 2nd combination starting from rank 0
- * comb.unique(5, 3)  // combinations of size 3 from {0,1,2,3,4}
+ * Combination.unique(5, 3)  // combinations of size 3 from {0,1,2,3,4}
  *     .lexOrderMth(2, 0)
  *     .forEach(System.out::println);
  *
  * // Random sample of 4 unique combinations without replacement
- * comb.unique(2, "A", "B", "C", "D", "E")
+ * Combination.unique(2, "A", "B", "C", "D", "E")
  *     .sample(4)
  *     .forEach(System.out::println);
  *
  * // Combinations at specific ranks
- * comb.unique(2, "A", "B", "C", "D")
+ * Combination.unique(2, "A", "B", "C", "D")
  *     .byRanks(List.of(BigInteger.ZERO, BigInteger.valueOf(3)))
  *     .forEach(System.out::println);
  * // Output: [A,B], [B,D] (assuming ranks 0 and 3)
@@ -57,13 +57,13 @@ import java.util.stream.IntStream;
  * <h3>Repetitive Combinations (with repetition)</h3>
  * <pre>
  * // All combinations of size 3 from [A, B] with repetition
- * comb.repetitive(3, "A", "B")
+ * Combination.repetitive(3, "A", "B")
  *     .lexOrder()
  *     .forEach(System.out::println);
  * // Output: [A,A,A], [A,A,B], [A,B,B], [B,B,B]
  *
  * // Every 2nd repetitive combination
- * comb.repetitive(4, 3)  // from {0,1,2} with size 4
+ * Combination.repetitive(4, 3)  // from {0,1,2} with size 4
  *     .lexOrderMth(2, 0)
  *     .forEach(System.out::println);
  * </pre>
@@ -76,7 +76,7 @@ import java.util.stream.IntStream;
  * multiset.put("B", 2);
  * multiset.put("C", 1);
  *
- * comb.multiset(multiset, 3)
+ * Combination.multiset(multiset, 3)
  *     .lexOrder()
  *     .forEach(System.out::println);
  * // Output frequency maps: {A=3}, {A=2,B=1}, {A=2,C=1}, {A=1,B=2}, {A=1,B=1,C=1}, {B=2,C=1}
