@@ -44,13 +44,13 @@ Selection of r distinct items out of n elements, also known as n-Choose-r. Gener
 
 ```java
 // All possible combinations of 3 numbers in range [0,5) in lex order
-JNumberTools.combinations()
+Combination
     .unique(5, 3)
     .lexOrder()
     .stream().forEach(System.out::println);
 
 // All possible combinations of 3 elements from ["A","B","C","D","E"] in lex order
-JNumberTools.combinations()
+Combination
     .unique(3, "A", "B", "C", "D", "E")
     .lexOrder()
     .stream().forEach(System.out::println);
@@ -61,13 +61,13 @@ Generates every m<sup>th</sup> combination in lexicographical order, starting fr
 
 ```java
 // 5th, 7th, 9th... combinations of 3 numbers in range [0,5) in lex order
-JNumberTools.combinations()
+Combination
     .unique(5, 3)
     .lexOrderMth(2, 5)
     .stream().forEach(System.out::println);
 
 // 5th, 7th, 9th... combinations of 3 elements from ["A","B","C","D","E"] in lex order
-JNumberTools.combinations()
+Combination
     .unique(3, "A", "B", "C", "D", "E")
     .lexOrderMth(2, 5)
     .stream().forEach(System.out::println);
@@ -78,13 +78,13 @@ Generates n random combinations with duplicates allowed.
 
 ```java
 // Generate any 5 random combinations of 10 items [0,10) from 20 items [0,20) with duplicates
-JNumberTools.combinations()
+Combination
     .unique(20, 10)
     .choice(5, new java.util.Random())
     .stream().forEach(System.out::println);
 
 // Generate any 5 random combinations of 5 items from ["A","B","C","D","E","F","G"] with duplicates
-JNumberTools.combinations()
+Combination
     .unique(5, "A", "B", "C", "D", "E", "F", "G")
     .choice(5, new java.util.Random())
     .stream().forEach(System.out::println);
@@ -95,13 +95,13 @@ Generates n random combinations without duplicates.
 
 ```java
 // Generate any 5 random combinations of 10 items [0,10) from 20 items [0,20) without duplicates
-JNumberTools.combinations()
+Combination
     .unique(20, 10)
     .sample(5, new java.util.Random())
     .stream().forEach(System.out::println);
 
 // Generate any 5 random combinations of 5 items from ["A","B","C","D","E","F","G"] without duplicates
-JNumberTools.combinations()
+Combination
     .unique(5, "A", "B", "C", "D", "E", "F", "G")
     .sample(5, new java.util.Random())
     .stream().forEach(System.out::println);
@@ -117,7 +117,7 @@ var iterable = List.of(
                 BigInteger.valueOf(20),
                 BigInteger.valueOf(1_000_000_000L),
                 new BigInteger("1000000000000000000000"));
-JNumberTools.combinations()
+Combination
     .unique(200, 100)
     .byRanks(iterable)
     .stream().forEach(System.out::println);
@@ -131,7 +131,7 @@ Generates all combinations of selecting r items from a multiset, where each item
 ```java
 // All combinations of 3 items from a multiset with 2 Apples and 1 Banana
 var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1));
-JNumberTools.combinations()
+Combination
     .multiset(elements, 3)
     .lexOrder()
     .stream().forEach(System.out::println);
@@ -148,7 +148,7 @@ elements.put("Banana", 2);
 elements.put("Cherry", 1);
 
 // This multiset has 6 combinations of size 3 (ranks 0 to 5), so start=5 is the last valid rank
-JNumberTools.combinations()
+Combination
         .multiset(elements, 3)
         .lexOrderMth(3, 5)  // Every 3rd combination starting from rank 5
         .stream()
@@ -161,7 +161,7 @@ Generates n random multiset combinations with duplicates allowed.
 ```java
 // Generate 5 random combinations of 3 items from a multiset with 2 Apples and 1 Banana, with duplicates
 var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1));
-JNumberTools.combinations()
+Combination
     .multiset(elements, 3)
     .choice(5, new java.util.Random())
     .stream().forEach(System.out::println);
@@ -173,7 +173,7 @@ Generates n random multiset combinations without duplicates.
 ```java
 // Generate 4 random combinations of 3 items from a multiset- [Apples:2, Banana:1, Guava 5], without duplicates
 var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1,  "Guava" ,5));
-        JNumberTools.combinations()
+        Combination
     .multiset(elements, 3)
     .sample(4, new java.util.Random())
     .stream().forEach(System.out::println);
@@ -186,7 +186,7 @@ Generates multiset combinations at indices specified by a custom sequence.
 // Generates combinations of 3 items from a multiset with 50 Apples and 50 Bananas at specified indices
 var elements = new LinkedHashMap<>(Map.of("Apple", 50, "Banana", 50));
 var iterable = List.of(BigInteger.valueOf(3),BigInteger.ZERO);
-JNumberTools.combinations()
+Combination
     .multiset(elements, 3)
     .byRanks(iterable)
     .stream().forEach(System.out::println);
@@ -199,13 +199,13 @@ Generates all combinations of r items from n elements with repetition allowed, a
 
 ```java
 // All combinations of 3 numbers with repetition from [0,5) in lex order
-JNumberTools.combinations()
+Combination
     .repetitive(5, 3)
     .lexOrder()
     .stream().forEach(System.out::println);
 
 // All combinations of 3 elements with repetition from ["A","B","C","D","E"] in lex order
-JNumberTools.combinations()
+Combination
     .repetitive(3, "A", "B", "C", "D", "E")
     .lexOrder()
     .stream().forEach(System.out::println);
@@ -216,13 +216,13 @@ Generates every m<sup>th</sup> repetitive combination in lexicographical order, 
 
 ```java
 // 5th, 7th, 9th... combinations of 3 numbers with repetition from [0,5) in lex order
-JNumberTools.combinations()
+Combination
     .repetitive(5, 3)
     .lexOrderMth(2, 5)
     .stream().forEach(System.out::println);
 
 // 5th, 7th, 9th... combinations of 3 elements with repetition from ["A","B","C","D","E"] in lex order
-JNumberTools.combinations()
+Combination
     .repetitive(3, "A", "B", "C", "D", "E")
     .lexOrderMth(2, 5)
     .stream().forEach(System.out::println);
@@ -233,7 +233,7 @@ Generates n random repetitive combinations with duplicates allowed.
 
 ```java
 // Generate 5 random combinations of 3 numbers with repetition from [0,5) with duplicates
-JNumberTools.combinations()
+Combination
     .repetitive(5, 3)
     .choice(5, new java.util.Random())
     .stream().forEach(System.out::println);
@@ -244,7 +244,7 @@ Generates n random repetitive combinations without duplicates.
 
 ```java
 // Generate 5 random combinations of 3 numbers with repetition from [0,5) without duplicates
-JNumberTools.combinations()
+Combination
     .repetitive(5, 3)
     .sample(5, new java.util.Random())
     .stream().forEach(System.out::println);
@@ -256,7 +256,7 @@ Generates repetitive combinations at indices specified by a custom sequence.
 ```java
 // Generates combinations of 100 items with repetition from 200 at specified indices
 var iterable = List.of(BigInteger.valueOf(10), BigInteger.valueOf(1_000_000_000L));
-JNumberTools.combinations()
+Combination
     .repetitive(200, 100)
     .byRanks(iterable)
     .stream().forEach(System.out::println);
