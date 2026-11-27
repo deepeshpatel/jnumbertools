@@ -29,7 +29,7 @@ import java.util.stream.IntStream;
  *
  * <h3>Unique Combinations</h3>
  * <pre>
- * Combinations comb = new Combinations();
+ * import io.github.deepeshpatel.jnumbertools.entrypoint.Combination;
  *
  * // All combinations of size 2 from [A, B, C, D]
  * comb.unique(2, "A", "B", "C", "D")
