@@ -27,7 +27,7 @@ import java.util.stream.IntStream;
  *
  * <h3>All Subsets</h3>
  * <pre>
- * Subsets subs = new Subsets();
+ * import io.github.deepeshpatel.jnumbertools.entrypoint.Subset;
  *
  * // All subsets of [A, B, C]
  * subs.of("A", "B", "C")
