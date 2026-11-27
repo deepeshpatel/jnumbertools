@@ -14,6 +14,8 @@ JNumberTools provides derangement (fixed-point-free permutation) generators for
 lists and integer ranges. All m<sup>th</sup> generators are BigInteger
 compatible, enabling rapid access to very large ranks.
 
+**Static entry point:** `Derangement`. Add `import io.github.deepeshpatel.jnumbertools.base.Derangement;` to use the examples in a Java source file.
+
 **Currently Available Algorithms**
 
 1. [Derangement in lex order](#1-derangement-in-lex-order)
