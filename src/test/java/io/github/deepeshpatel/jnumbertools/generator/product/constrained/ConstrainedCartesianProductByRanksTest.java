@@ -312,8 +312,7 @@ public class ConstrainedCartesianProductByRanksTest {
                     .boxed()
                     .collect(Collectors.toList());
 
-            var product = cartesianProduct
-                    .constrainedProductOfDistinct(17, elements)   // C(35,17) ≈ 4 billion
+            var product = Product.constrained().ofDistinct(17, elements)   // C(35,17) ≈ 4 billion
                     .andDistinct(2, of("X", "Y", "Z"));           // C(3,2) = 3
 
             long start  = System.currentTimeMillis();
