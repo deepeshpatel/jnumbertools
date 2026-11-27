@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 /**
- * Encapsulates the Factoradic representation of a positive integer.
+ * Encapsulates the Factoradic representation of a non-negative integer.
  * <p>
  * The Factoradic numeral system expresses an integer as a sum of factorials weighted by digits.
  * In this system, the digit at position <em>i</em> has a weight of <em>i!</em>. This class provides methods
@@ -47,7 +47,7 @@ public final class Factoradic implements Serializable {
     /**
      * Creates a {@link Factoradic} instance from a positive integer.
      *
-     * @param positiveInt the positive integer to be converted to Factoradic representation.
+     * @param positiveInt the non-negative integer to be converted to Factoradic representation.
      * @return a {@link Factoradic} instance representing the given positive integer.
      */
     public static Factoradic of(BigInteger positiveInt) {
@@ -57,9 +57,9 @@ public final class Factoradic implements Serializable {
     }
 
     /**
-     * Creates a {@link Factoradic} instance from a positive long value.
+     * Creates a {@link Factoradic} instance from a non-negative long value.
      *
-     * @param positiveInt the positive long value to be converted to Factoradic representation.
+     * @param positiveInt the non-negative long value to be converted to Factoradic representation.
      * @return a {@link Factoradic} instance representing the given positive long value.
      */
     public static Factoradic of(long positiveInt) {

@@ -66,11 +66,11 @@ import java.util.Random;
  * <h3>Random Sampling</h3>
  * <pre>
  * // Sample 4 unique combinations without replacement
- * builder.sample(4)
+ * builder.sample(4, new java.util.Random())
  *        .forEach(System.out::println);
  *
  * // Sample 5 combinations with replacement (duplicates allowed)
- * builder.choice(5)
+ * builder.choice(5, new java.util.Random())
  *        .forEach(System.out::println);
  * </pre>
  *

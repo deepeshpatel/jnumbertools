@@ -63,11 +63,11 @@ import java.util.Random;
  * <h3>Random Sampling</h3>
  * <pre>
  * // Sample 4 unique permutations without replacement
- * builder.sample(4)
+ * builder.sample(4, new java.util.Random())
  *        .forEach(System.out::println);
  *
  * // Sample 5 permutations with replacement (duplicates allowed)
- * builder.choice(5)
+ * builder.choice(5, new java.util.Random())
  *        .forEach(System.out::println);
  * </pre>
  *
@@ -165,7 +165,7 @@ public final class KPermutationBuilder<T> implements Builder<T> {
     /**
      * Generates k-permutations randomly without replacement using custom random generator.
      * <p>
-     * The total number of k-permutations is Pₙ,ₖ = n!/(n−kₖ)!.
+     * The total number of k-permutations is Pₙ,ₖ = n!/(n−k)!.
      * </p>
      *
      * @param sampleSize the number of permutations to generate; must be positive and ≤ Pₙ,ₖ

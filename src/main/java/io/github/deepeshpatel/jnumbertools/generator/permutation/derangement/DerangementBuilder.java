@@ -42,21 +42,21 @@ import java.util.Random;
  *
  * <h2>Usage</h2>
  * <pre>
- * Calculator calc = new Calculator();
+ * import io.github.deepeshpatel.jnumbertools.entrypoint.Derangement;
  *
  * // All derangements of {A, B, C, D}
- * new Derangements(calc).of("A", "B", "C", "D")
+ * Derangement.of("A", "B", "C", "D")
  *     .lexOrder()
  *     .forEach(System.out::println);
  *
  * // Every 3rd derangement of {0..9} starting from rank 0
- * new Derangements(calc).of(10)
+ * Derangement.of(10)
  *     .lexOrderMth(3, 0)
  *     .forEach(System.out::println);
  *
  * // 5 random derangements without replacement
- * new Derangements(calc).of("A", "B", "C", "D", "E")
- *     .sample(5)
+ * Derangement.of("A", "B", "C", "D", "E")
+ *     .sample(5, new java.util.Random())
  *     .forEach(System.out::println);
  * </pre>
  *

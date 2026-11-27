@@ -14,13 +14,14 @@ import java.util.*;
  * Generates every mᵗʰ multiset permutation in lexicographical order, starting from a specified rank.
  * <p>
  * This class produces permutations of a multiset with specified multiplicities, output as frequency maps,
- * in lexicographical order or by rank. The number of permutations is given by the multinomial coefficient
- * divided by m for every mᵗʰ permutation:
+ * in lexicographical order, selecting ranks {@code start}, {@code start + increment},
+ * {@code start + 2 * increment}, and so on, while the rank remains below the total count.
  * </p>
  * <p>
- * <strong>Formula:</strong> Total permutations = n!/(n₁!·n₂!·...·nₖ!)/m
- * <br>
- * where nᵢ are the multiplicities of each distinct element.
+ * <strong>Total available permutations:</strong>
+ * {@code N = n!/(n₁!·n₂!·...·nₖ!)}, where nᵢ are the multiplicities.
+ * The number emitted is {@code 0} when {@code start >= N}; otherwise it is
+ * {@code floor((N - 1 - start) / increment) + 1}.
  * </p>
  * <p>
  * <strong>Performance:</strong>

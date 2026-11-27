@@ -55,45 +55,55 @@ public final class Permutation {
         return new PermutationsBuilder();
     }
 
+    /** Creates unique permutations of the integer range {@code [0, n)}. */
     public static UniquePermutationBuilder<Integer> unique(int n) {
         return factory().unique(n);
     }
 
+    /** Creates unique permutations of the supplied list. */
     public static <T> UniquePermutationBuilder<T> unique(List<T> elements) {
         return factory().unique(elements);
     }
 
+    /** Creates unique permutations of the supplied elements. */
     @SafeVarargs
     public static <T> UniquePermutationBuilder<T> unique(T... elements) {
         return factory().unique(elements);
     }
 
+    /** Creates k-permutations of the integer range {@code [0, n)}. */
     public static KPermutationBuilder<Integer> nPk(int n, int k) {
         return factory().nPk(n, k);
     }
 
+    /** Creates k-permutations of the supplied list. */
     public static <T> KPermutationBuilder<T> nPk(int k, List<T> elements) {
         return factory().nPk(k, elements);
     }
 
+    /** Creates k-permutations of the supplied elements. */
     @SafeVarargs
     public static <T> KPermutationBuilder<T> nPk(int k, T... elements) {
         return factory().nPk(k, elements);
     }
 
+    /** Creates permutations of the supplied multiset frequencies. */
     public static <T> MultisetPermutationBuilder<T> multiset(LinkedHashMap<T, Integer> options) {
         return factory().multiset(options);
     }
 
+    /** Creates length-r permutations of the supplied list with repetition. */
     public static <T> RepetitivePermutationBuilder<T> repetitive(int r, List<T> elements) {
         return factory().repetitive(r, elements);
     }
 
+    /** Creates length-r permutations of the supplied elements with repetition. */
     @SafeVarargs
     public static <T> RepetitivePermutationBuilder<T> repetitive(int r, T... elements) {
         return factory().repetitive(r, elements);
     }
 
+    /** Creates length-r permutations of {@code [0, n)} with repetition. */
     public static RepetitivePermutationBuilder<Integer> repetitive(int r, int n) {
         return factory().repetitive(r, n);
     }

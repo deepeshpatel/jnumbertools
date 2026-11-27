@@ -43,7 +43,7 @@ import java.util.stream.IntStream;
  *
  * // 5 random derangements without replacement
  * Derangement.of("A", "B", "C", "D", "E")
- *    .sample(5)
+ *    .sample(5, new java.util.Random())
  *    .forEach(System.out::println);
  * </pre>
  *

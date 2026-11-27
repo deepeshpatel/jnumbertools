@@ -9,12 +9,17 @@ import io.github.deepeshpatel.jnumbertools.builders.PermutationUnrankOfBuilder;
  * An optional shared {@link io.github.deepeshpatel.jnumbertools.datastructure.Calculator} can be
  * supplied to reuse combinatorial caches.</p>
  */
-public class Unrank {
+public final class Unrank {
+
+    private Unrank() { }
+
+    /** Returns permutation and derangement unranking operations. */
 
     public static PermutationUnrankOfBuilder permutation() {
         return new PermutationUnrankOfBuilder(new Calculator());
     }
 
+    /** Returns permutation and derangement unranking operations using a shared calculator. */
     public static PermutationUnrankOfBuilder permutation(Calculator sharedCalculator) {
         return new PermutationUnrankOfBuilder(sharedCalculator);
     }
@@ -24,6 +29,7 @@ public class Unrank {
         return new CombinationUnrankOfBuilder(new Calculator());
     }
 
+    /** Returns combination unranking operations using a shared calculator. */
     public static CombinationUnrankOfBuilder combination(Calculator sharedCalculator) {
         return new CombinationUnrankOfBuilder(sharedCalculator);
     }

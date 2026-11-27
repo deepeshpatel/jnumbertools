@@ -47,7 +47,7 @@ import static java.util.Arrays.asList;
  *
  * // Random sample of 3 unique permutations without replacement
  * Permutation.unique("A", "B", "C", "D")
- *     .sample(3)
+ *     .sample(3, new java.util.Random())
  *     .forEach(System.out::println);
  * </pre>
  *

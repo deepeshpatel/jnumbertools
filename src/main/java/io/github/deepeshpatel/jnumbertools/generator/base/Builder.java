@@ -23,7 +23,10 @@ import java.util.Random;
  * Example usage:
  * <pre>
  * // Example with a concrete builder (e.g., UniquePermutationBuilder)
- * Builder&lt;String&gt; builder = new UniquePermutationBuilder&lt;&gt;(List.of("A", "B", "C"));
+ * import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
+ * import io.github.deepeshpatel.jnumbertools.generator.permutation.unique.UniquePermutationBuilder;
+ * import java.util.List;
+ * Builder&lt;String&gt; builder = new UniquePermutationBuilder&lt;&gt;(new Calculator(), List.of("A", "B", "C"));
  * builder.lexOrder().stream().forEach(System.out::println); // All permutations in lex order
  * builder.lexOrderMth(BigInteger.valueOf(2), BigInteger.ZERO).stream().forEach(System.out::println); // Every 2nd permutation
  * builder.byRanks(List.of(BigInteger.ZERO)).stream().forEach(System.out::println); // Permutations at specific ranks

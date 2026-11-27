@@ -84,12 +84,12 @@ import java.util.Random;
  * <pre>
  * // Sample 3 unique subsets without replacement
  * builder.inRange(1, 3)
- *        .sample(3)
+ *        .sample(3, new java.util.Random())
  *        .forEach(System.out::println);
  *
  * // Sample 4 subsets with replacement (duplicates allowed)
  * builder.all()
- *        .choice(4)
+ *        .choice(4, new java.util.Random())
  *        .forEach(System.out::println);
  * </pre>
  *
@@ -136,8 +136,8 @@ import java.util.Random;
  * <h3>Combining with Other Operations</h3>
  * <pre>
  * // Subsets can be used as dimensions in constrained Cartesian products
- * CartesianProduct cp = new CartesianProduct(calculator);
- * cp.constrainedProductOfDistinct(1, "X", "Y")
+ * 
+ * Product.constrained().ofDistinct(1, "X", "Y")
  *   .andInRange(1, 2, List.of("A", "B", "C"))  // Subsets as a dimension
  *   .lexOrder()
  *   .forEach(System.out::println);
@@ -145,7 +145,7 @@ import java.util.Random;
  *
  * <p>
  * A {@code SubsetBuilder} always has a size range: it is obtained from a {@link SubsetSelector}
- * ({@code subsets().of(...)}) by choosing {@code all()} or {@code inRange(from, to)}, so there is no
+ * ({@code Subset.of(...)}) by choosing {@code all()} or {@code inRange(from, to)}, so there is no
  * half-configured builder. The examples above call {@code all()} and {@code inRange(...)} on the
  * selector. This builder is immutable and thread-safe.
  * </p>

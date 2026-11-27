@@ -42,13 +42,13 @@ public final class Combinadic implements Serializable {
     }
 
     /**
-     * Creates a {@link Combinadic} object for the specified positive integer (as a {@code long})
+     * Creates a {@link Combinadic} object for the specified non-negative integer (as a {@code long})
      * and degree.
      *
-     * @param positiveNumber the positive integer to convert to combinadic representation.
+     * @param positiveNumber the non-negative integer to convert to combinadic representation.
      * @param degree the degree (length) of the combinadic representation.
      * @param calculator the calculator used for combinatorial calculations.
-     * @return a {@link Combinadic} object representing the given positive integer.
+     * @return a {@link Combinadic} object representing the given non-negative integer.
      */
     public static Combinadic of(long positiveNumber, int degree, Calculator calculator) {
         return of(BigInteger.valueOf(positiveNumber), degree, calculator);

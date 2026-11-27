@@ -61,13 +61,13 @@ import java.util.stream.IntStream;
  * // Random sample of 3 subsets without replacement
  * Subset.of(1, 2, 3, 4, 5)
  *     .inRange(2, 4)
- *     .sample(3)
+ *     .sample(3, new java.util.Random())
  *     .forEach(System.out::println);
  *
  * // Random sample of 5 subsets with replacement (duplicates allowed)
  * Subset.of("A", "B", "C")
  *     .all()
- *     .choice(5)
+ *     .choice(5, new java.util.Random())
  *     .forEach(System.out::println);
  * </pre>
  *

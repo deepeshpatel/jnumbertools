@@ -9,8 +9,9 @@
  * dimensions to be defined by combinatorial builders, such as combinations or subsets. Configure
  * products through the public Cartesian-product builder API.</p>
  *
- * <p>Conditional products restrict a simple product with rules between two dimensions and count, rank
- * and sample the valid tuples without enumerating the full product.</p>
+ * <p>Conditional products restrict a simple product with pairwise rules or predicates over multiple
+ * dimensions. They support counting, rank-based access and traversal of valid tuples without
+ * requiring callers to enumerate and filter the full Cartesian product.</p>
  *
  * @see io.github.deepeshpatel.jnumbertools.builders.CartesianProductBuilder
  */

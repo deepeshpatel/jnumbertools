@@ -16,7 +16,6 @@ import java.util.Objects;
 
 /**
  * Static entry point for Cartesian product generation.
-
  *
  * <h2>Simple products</h2>
  * <pre>{@code
@@ -25,8 +24,7 @@ import java.util.Objects;
  *
  * <h2>Constrained products</h2>
  * <pre>{@code
- * Calculator calculator = new Calculator();
- * Product.constrained(calculator)
+ * Product.constrained()
  *     .ofDistinct(2, colors)
  *     .andMultiSelect(3, sizes)
  *     .lexOrder();
@@ -97,7 +95,8 @@ public final class Product {
     }
 
     /**
-     * Creates a pairwise conditional-product builder over the supplied dimensions.
+     * Creates a conditional-product builder over the supplied dimensions.
+     * Pairwise rules and multi-dimension predicates can be added to the builder.
      *
      * @param dimensions product dimensions, in tuple order
      * @return a conditional-product builder

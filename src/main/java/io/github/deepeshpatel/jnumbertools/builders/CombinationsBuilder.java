@@ -44,14 +44,14 @@ import java.util.stream.IntStream;
  *
  * // Random sample of 4 unique combinations without replacement
  * Combination.unique(2, "A", "B", "C", "D", "E")
- *     .sample(4)
+ *     .sample(4, new java.util.Random())
  *     .forEach(System.out::println);
  *
  * // Combinations at specific ranks
  * Combination.unique(2, "A", "B", "C", "D")
  *     .byRanks(List.of(BigInteger.ZERO, BigInteger.valueOf(3)))
  *     .forEach(System.out::println);
- * // Output: [A,B], [B,D] (assuming ranks 0 and 3)
+ * // Output: [A,B], [B,C] (ranks 0 and 3 in lexicographical order)
  * </pre>
  *
  * <h3>Repetitive Combinations (with repetition)</h3>

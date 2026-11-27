@@ -21,7 +21,7 @@ import java.util.List;
  * (e.g., {A=2, B=1} → [A,A,B], [A,B,A], [B,A,A]). The total number of unique permutations is given by
  * the multinomial coefficient n! / ∏ (mᵢ!), where n = ∑mᵢ is the sum of frequencies and mᵢ are the frequencies
  * of distinct elements. Extends {@link AbstractMultisetPermutation} to leverage its sorting and multiset
- * management capabilities, ensuring consistent ordering via {@code Comparable}.
+ * management capabilities, using the insertion order of the map's keys.
  * </p>
  *
  * <p>
@@ -36,7 +36,7 @@ import java.util.List;
  * astronomically large numbers of permutations that cannot be enumerated in practice anyway.
  * </p>
  *
- * @param <T> the type of elements, must implement {@code Comparable} for lexicographical ordering
+ * @param <T> the element type; elements need not implement {@code Comparable}
  * @author Deepesh Patel
  * @see PermutationsBuilder#multiset(LinkedHashMap)
  */

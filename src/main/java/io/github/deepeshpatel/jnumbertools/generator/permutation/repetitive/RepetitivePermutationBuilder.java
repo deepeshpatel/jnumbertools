@@ -61,11 +61,11 @@ import java.util.Random;
  * <h3>Random Sampling</h3>
  * <pre>
  * // Sample 3 unique permutations without replacement
- * builder.sample(3)
+ * builder.sample(3, new java.util.Random())
  *        .forEach(System.out::println);
  *
  * // Sample 5 permutations with replacement (duplicates allowed)
- * builder.choice(5)
+ * builder.choice(5, new java.util.Random())
  *        .forEach(System.out::println);
  * </pre>
  *

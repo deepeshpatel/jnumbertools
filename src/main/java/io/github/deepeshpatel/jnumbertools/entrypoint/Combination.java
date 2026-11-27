@@ -53,32 +53,39 @@ public final class Combination {
         return new CombinationsBuilder();
     }
 
+    /** Creates unique r-combinations from the integer range {@code [0, n)}. */
     public static UniqueCombinationBuilder<Integer> unique(int n, int r) {
         return factory().unique(n, r);
     }
 
+    /** Creates unique r-combinations from the supplied elements. */
     @SafeVarargs
     public static <T> UniqueCombinationBuilder<T> unique(int r, T... elements) {
         return factory().unique(r, elements);
     }
 
+    /** Creates unique r-combinations from the supplied list. */
     public static <T> UniqueCombinationBuilder<T> unique(int r, List<T> elements) {
         return factory().unique(r, elements);
     }
 
+    /** Creates repetitive r-combinations from the integer range {@code [0, n)}. */
     public static RepetitiveCombinationBuilder<Integer> repetitive(int n, int r) {
         return factory().repetitive(n, r);
     }
 
+    /** Creates repetitive r-combinations from the supplied elements. */
     @SafeVarargs
     public static <T> RepetitiveCombinationBuilder<T> repetitive(int r, T... elements) {
         return factory().repetitive(r, elements);
     }
 
+    /** Creates repetitive r-combinations from the supplied list. */
     public static <T> RepetitiveCombinationBuilder<T> repetitive(int r, List<T> elements) {
         return factory().repetitive(r, elements);
     }
 
+    /** Creates r-combinations from the supplied multiset frequencies. */
     public static <T> MultisetCombinationBuilder<T> multiset(LinkedHashMap<T, Integer> options, int r) {
         return factory().multiset(options, r);
     }

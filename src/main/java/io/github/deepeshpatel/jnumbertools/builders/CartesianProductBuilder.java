@@ -43,7 +43,7 @@ import java.util.List;
  *
  * // Random sample of 3 products without replacement
  * Product.simple(List.of("A", "B", "C"), List.of("X", "Y"))
- *   .sample(3)
+ *   .sample(3, new java.util.Random())
  *   .forEach(System.out::println);
  * </pre>
  *
@@ -75,7 +75,7 @@ import java.util.List;
  *
  * @see SimpleProductBuilder
  * @see ConstrainedProductBuilder
- *  * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
+ * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  * @author Deepesh Patel
  */
 public final class CartesianProductBuilder {

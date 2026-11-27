@@ -90,11 +90,11 @@ import java.util.Random;
  * <h3>Random Sampling</h3>
  * <pre>
  * // Sample 2 unique permutations without replacement
- * builder.sample(2)
+ * builder.sample(2, new java.util.Random())
  *        .forEach(System.out::println);
  *
  * // Sample 4 permutations with replacement (duplicates allowed)
- * builder.choice(4)
+ * builder.choice(4, new java.util.Random())
  *        .forEach(System.out::println);
  * </pre>
  *

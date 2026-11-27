@@ -9,12 +9,14 @@ import io.github.deepeshpatel.jnumbertools.builders.PermutationRankOfBuilder;
  * An optional shared {@link io.github.deepeshpatel.jnumbertools.datastructure.Calculator} can be
  * supplied to reuse combinatorial caches.</p>
  */
-public class Rank {
+public final class Rank {
+    private Rank() { }
     /** Returns ranking operations for permutations and derangements. */
     public static PermutationRankOfBuilder permutation() {
         return new PermutationRankOfBuilder(new Calculator());
     }
 
+    /** Returns permutation and derangement ranking operations using a shared calculator. */
     public static PermutationRankOfBuilder permutation(Calculator sharedCalculator) {
         return new PermutationRankOfBuilder(sharedCalculator);
     }
@@ -25,6 +27,7 @@ public class Rank {
         return new CombinationRankOfBuilder(new Calculator());
     }
 
+    /** Returns combination ranking operations using a shared calculator. */
     public static CombinationRankOfBuilder combination(Calculator sharedCalculator) {
         return new CombinationRankOfBuilder(sharedCalculator);
     }
