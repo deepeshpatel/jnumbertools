@@ -29,7 +29,7 @@ Generates all subsets of a given set in lexicographical order, including the emp
 
 ```java
 // All subsets of ["Apple", "Banana", "Guava"] in lex order
-JNumberTools.subsets()
+Subset
     .of("Apple", "Banana", "Guava")
     .all()
     .lexOrder()
@@ -41,7 +41,7 @@ Generates every m<sup>th</sup> subset of a given set in lexicographical order, s
 
 ```java
 // Every 1 billionth subset of numbers in range [0,40) starting from 0th index
-JNumberTools.subsets()
+Subset
     .of(40)
     .all()
     .lexOrderMth(1_000_000_000, 0)
@@ -53,7 +53,7 @@ Generates all subsets within a specified size range in lexicographical order. Fo
 
 ```java
 // All subsets of ["Apple", "Banana", "Guava"] in size range [2,3] in lex order
-JNumberTools.subsets()
+Subset
     .of("Apple", "Banana", "Guava")
     .inRange(2, 3)
     .lexOrder()
@@ -65,7 +65,7 @@ Generates every m<sup>th</sup> subset within a specified size range in lexicogra
 
 ```java
 // Every 1 billionth subset of numbers in range [0,40) with size range [10,39] starting from 0th index
-JNumberTools.subsets()
+Subset
     .of(40)
     .inRange(10, 39)
     .lexOrderMth(1_000_000_000, 0)
@@ -77,14 +77,14 @@ Generates n random subsets with duplicates allowed.
 
 ```java
 // Generate 5 random subsets of numbers in range [0,10) with duplicates
-JNumberTools.subsets()
+Subset
     .of(10)
     .all()
     .choice(5, new java.util.Random())
     .stream().forEach(System.out::println);
 
 // Generate 5 random subsets of ["Apple", "Banana", "Guava"] with duplicates
-JNumberTools.subsets()
+Subset
     .of("Apple", "Banana", "Guava")
     .all()
     .choice(5, new java.util.Random())
@@ -96,14 +96,14 @@ Generates n random subsets without duplicates.
 
 ```java
 // Generate 5 random subsets of numbers in range [0,10) without duplicates
-JNumberTools.subsets()
+Subset
     .of(10)
     .all()
     .sample(5, new java.util.Random())
     .stream().forEach(System.out::println);
 
 // Generate 5 random subsets of ["Apple", "Banana", "Guava"] without duplicates
-JNumberTools.subsets()
+Subset
     .of("Apple", "Banana", "Guava")
     .all()
     .sample(5, new java.util.Random())
@@ -116,7 +116,7 @@ Generates subsets at indices specified by a custom sequence.
 ```java
 // Generates subsets of numbers in range [0,100) at specified indices
 var iterable = List.of(BigInteger.valueOf(10), BigInteger.valueOf(20), BigInteger.valueOf(1_000_000_000L), new BigInteger("1000000000000000000000"));
-JNumberTools.subsets()
+Subset
     .of(100)
     .all()
     .byRanks(iterable)
