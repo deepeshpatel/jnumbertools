@@ -52,11 +52,13 @@ The available operations depend on the product builder. Do not assume that every
 
 `generate()` on the Lambda Engine returns a lazy, re-iterable generator; it does not promise lexicographical encounter order or expose rank-based traversal and sampling.
 
-```java
-var combinations = JNumberTools.combinations().unique(5, 3);
+\`\`\`java
+import io.github.deepeshpatel.jnumbertools.base.Combination;
+
+var combinations = Combination.unique(5, 3);
 combinations.count();   // 10
 combinations.isEmpty(); // false
-JNumberTools.combinations().unique(2, 3).isEmpty(); // true: cannot choose 3 of 2
+Combination.unique(2, 3).isEmpty(); // true: cannot choose 3 of 2
 ```
 
 The argument checks and the exceptions each operation raises are specified in [ValidationRules.md](ValidationRules.md).
