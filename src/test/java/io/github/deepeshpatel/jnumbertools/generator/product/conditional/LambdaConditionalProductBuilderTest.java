@@ -90,7 +90,7 @@ class LambdaConditionalProductBuilderTest {
     @Test
     void alwaysTrueAndFalsePredicatesAreHandled() {
         List<Integer> a=List.of(1,2), b=List.of(1,2);
-        var all=cartesianProduct.withLambda(a,b).when((x,y)->true);
+        var all=Product.conditional(a,b).withLambda(a,b).when((x,y)->true);
         var none=cartesianProduct.withLambda(a,b).when((x,y)->false);
         assertEquals(BigInteger.valueOf(4),all.count());
         assertEquals(BigInteger.ZERO,none.count());
@@ -134,7 +134,7 @@ class LambdaConditionalProductBuilderTest {
         List<Integer> b=java.util.stream.IntStream.range(0,100).boxed().toList();
         List<Integer> unrelated=java.util.stream.IntStream.range(0,100).boxed().toList();
 
-        var product=cartesianProduct.withLambda(a,b,unrelated,unrelated,unrelated)
+        var product=Product.conditional(a,b,unrelated,unrelated,unrelated).withLambda(a,b,unrelated,unrelated,unrelated)
                 .when(new List<?>[]{a,b}).matches(values->(Integer)values[0]<(Integer)values[1]);
 
         assertEquals(BigInteger.valueOf(4_950L).multiply(BigInteger.valueOf(1_000_000L)),product.count());
@@ -151,7 +151,7 @@ class LambdaConditionalProductBuilderTest {
         List<Integer> a=range(4), b=range(4), c=range(4), d=range(4), e=range(4);
 
         LambdaConditionalProductBuilder.Typed5<Integer,Integer,Integer,Integer,Integer> product =
-                cartesianProduct.withLambda(a,b,c,d,e)
+                Product.conditional(a,b,c,d,e).withLambda(a,b,c,d,e)
                         .when(a,b).matches((x,y)->x<=y)                         // scoped, still a Typed5
                         .when((v,w,x,y,z)->v+z>=2)                             // typed full-tuple rule after it
                         .when(c,d,e).matches((x,y,z)->x!=y||y!=z);            // scoped again
@@ -183,7 +183,7 @@ class LambdaConditionalProductBuilderTest {
     void scopedRulesMixedWithTypedRulesInAnyOrderGiveTheSameProduct() {
         List<Integer> a=range(5), b=range(5), c=range(5);
 
-        var scopedFirst=cartesianProduct.withLambda(a,b,c)
+        var scopedFirst=Product.conditional(a,b,c).withLambda(a,b,c)
                 .when(a,c).matches((x,z)->x<z).when((x,y,z)->x+y!=z);
         var typedFirst=cartesianProduct.withLambda(a,b,c)
                 .when((x,y,z)->x+y!=z).when(a,c).matches((x,z)->x<z);
@@ -208,7 +208,7 @@ class LambdaConditionalProductBuilderTest {
     // ── a typed builder must be given exactly as many dimensions as its arity ──────────────────────
 
     @Test
-    void typedBuildersRejectAProductWithADifferentNumberOfDimensions() {
+    void typedLambdaEntryPointsRejectAnIncorrectDimensionCount() {
         List<Integer> a=range(2), b=range(2);
         var twoDimensions=new ConditionalProductBuilder(a,b);
 
@@ -253,7 +253,7 @@ class LambdaConditionalProductBuilderTest {
     @Test
     void parallelAndSequentialStreamsAgreeForLambdaRules() {
         List<Integer> a=range(6), b=range(6), c=range(6), d=range(6);
-        var product=cartesianProduct.withLambda(a,b,c,d)
+        var product=Product.conditional(a,b,c,d).withLambda(a,b,c,d)
                 .when(a,b).matches((x,y)->x!=y)
                 .when((x,y,z,w)->(x+y+z+w)%3!=0);
 
