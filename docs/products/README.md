@@ -141,6 +141,35 @@ Product.conditional(operatingSystems, browsers, networks)
 
 Scoped predicates can also be declared with `.when(dimensions...).matches(predicate)` when the predicate depends only on selected dimensions. Lambda predicates are compiled into constraints, subject to the documented probe limit; this is not an unbounded general-purpose constraint solver.
 
+For example, each rule below receives only the values from its named dimensions:
+
+```java
+var os = List.of("Linux", "Windows", "macOS");
+var browser = List.of("Firefox", "Chrome", "Safari");
+var network = List.of("WiFi", "Ethernet", "4G");
+var database = List.of("PostgreSQL", "MySQL", "MongoDB");
+var region = List.of("US", "EU", "APAC");
+
+var browserAccepted = Set.of("Firefox", "Chrome");
+var networkAccepted = Set.of("WiFi", "Ethernet");
+var databaseAccepted = Set.of("PostgreSQL", "MySQL");
+var regionAccepted = Set.of("US", "EU");
+var linux = "Linux";
+
+Product.conditional(os, browser, network, database, region)
+    .withLambda(os, browser, network, database, region)
+    .when(os, browser).matches((system, selectedBrowser) ->
+        browserAccepted.contains(selectedBrowser))
+    .when(os, network).matches((system, selectedNetwork) ->
+        !linux.equals(system) || networkAccepted.contains(selectedNetwork))
+    .when(os, database).matches((system, selectedDatabase) ->
+        databaseAccepted.contains(selectedDatabase))
+    .when(os, region).matches((system, selectedRegion) ->
+        regionAccepted.contains(selectedRegion))
+    .lexOrder()
+    .forEach(System.out::println);
+```
+
 The Lambda Engine supports lexicographical traversal, every-M-th traversal, rank-based access, counting and random selection. Its `anyOrder()` operation does not guarantee lexicographical order.
 
 ## 4. Conditional Product vs. Pruned Stream Filtering
