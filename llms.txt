@@ -43,12 +43,12 @@ Map the user's requirement to the exact `JNumberTools` entry point before writin
 - **Straightforward rules between two dimensions** -> Use `conditionalProductOf(...)` (Compiled Product).
 - **Arbitrary joint logic across named dimensions** -> Use `withLambda(...)` (Lambda Engine).
 
-## The Five Cartesian Product Styles
+## The Four Cartesian Product Styles
 
 - **Simple Product (`simpleProductOf`)**: The ordinary Cartesian product; generates all `|D1| x |D2| x ... x |Dd|` tuples, with lexicographical and every-mth traversal.
 - **Constrained Product (`constrainedProductOfDistinct`, `constrainedProductOfMultiSelect`, `constrainedProductOfInRange`)**: Each dimension is a combination, multi-select, or subset-range selection; the dimensions are then combined.
 - **Compiled Product (`conditionalProductOf`)**: Expresses pairwise rules with `.when(dimA).is(value).then(dimB).isOneOf(...)` and related matchers. The builder compiles these rules into constraints and supports lexicographical/rank-based operations, counting and sampling.
-- **Lambda Engine (`withLambda`)**: Intended for rules too complex to express clearly with the declarative builders. Joint Java predicates are compiled once into the existing constraint representation, so generation remains pruned rather than applying a predicate to every completed tuple. It exposes lazy `generate()`, exact `count()` and `isEmpty()`.
+- **Lambda Engine (`withLambda`)**: Intended for joint rules that are more complex than straightforward pairwise constraints. Joint Java predicates are compiled once into the existing constraint representation, so generation remains pruned rather than applying a predicate to every completed tuple. It exposes lazy `generate()`, exact `count()` and `isEmpty()`.
 
 The Lambda Engine provides lambda-style flexibility while retaining readable rule declarations and the constraint engine's pruned execution path. Predicates must be deterministic and side-effect-free; compilation is bounded by the configured joint-scope limit.
 
