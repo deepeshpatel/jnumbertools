@@ -7,77 +7,45 @@
 </head>
 <body>
 <h1>JNumberTools Overview</h1>
-<p>JNumberTools is a Java library for generating and working with combinatorial structures. Its public API covers permutations, derangements, combinations, subsets, Cartesian products, combinatorial ranking and unranking, and combinatorial number systems. Counts and ranks use <code>BigInteger</code> where the size of the combinatorial space can exceed primitive integer ranges.</p>
-<p>Start with the static entry points on <code>io.github.deepeshpatel.jnumbertools.base.JNumberTools</code>. Select the structure and its parameters through the returned builder, then choose an enumeration or sampling operation. This is the intended public usage; implementation classes in generator subpackages are not the normal entry points.</p>
-
+<p>JNumberTools is a Java library for generating and working with combinatorial structures. Its public API covers permutations, derangements, combinations, subsets, Cartesian products, combinatorial ranking and unranking, and combinatorial number systems. Counts and ranks use <code>BigInteger</code> where the combinatorial space can exceed primitive integer ranges.</p>
+<p>Start with the static entry points in <code>io.github.deepeshpatel.jnumbertools.entrypoint</code>: <code>Permutation</code>, <code>Combination</code>, <code>Subset</code>, <code>Derangement</code>, <code>Product</code>, <code>Rank</code> and <code>Unrank</code>. These return or create the appropriate builders. Builder classes live in <code>io.github.deepeshpatel.jnumbertools.builders</code>; <code>Calculator</code> and supporting data structures live in <code>io.github.deepeshpatel.jnumbertools.datastructure</code>.</p>
 <h2>Capabilities</h2>
 <ul>
     <li>Unique, repetitive, multiset and k-permutations; derangements.</li>
     <li>Unique, repetitive and multiset combinations; subsets.</li>
-    <li>Simple and constrained Cartesian products.</li>
+    <li>Simple, constrained, pairwise-conditional and lambda-predicate Cartesian products.</li>
     <li>Lexicographical enumeration, every-mth traversal where supported, and access by zero-based ranks.</li>
     <li>Random selection with replacement (<code>choice</code>) and without replacement (<code>sample</code>).</li>
     <li>Ranking, unranking, and BigInteger-based combinatorial counts and ranks.</li>
     <li>Factoradic, Combinadic, Permutadic and Derangadic representations.</li>
 </ul>
-
 <h2>Package structure</h2>
 <table>
     <caption>Package structure</caption>
     <thead><tr><th>Package</th><th>Purpose</th></tr></thead>
     <tbody>
-    <tr><td><code>base</code></td><td>Public entry points, structure-specific facades, Calculator, and rank/unrank APIs.</td></tr>
+    <tr><td><code>entrypoint</code></td><td>Static public entry points for generators, products, ranking and unranking.</td></tr>
+    <tr><td><code>builders</code></td><td>Builder APIs returned by the entry points.</td></tr>
+    <tr><td><code>datastructure</code></td><td>Calculator and supporting data structures.</td></tr>
     <tr><td><code>generator.base</code></td><td>Shared builder and iterable contracts used by generator implementations.</td></tr>
     <tr><td><code>generator.permutation</code></td><td>Permutation and derangement generation strategies.</td></tr>
     <tr><td><code>generator.combination</code></td><td>Unique, repetitive and multiset combination generation.</td></tr>
     <tr><td><code>generator.subset</code></td><td>Subset generation, including size-restricted subsets.</td></tr>
-    <tr><td><code>generator.product</code></td><td>Simple and constrained Cartesian-product generation.</td></tr>
+    <tr><td><code>generator.product</code></td><td>Simple, constrained and conditional Cartesian-product generation.</td></tr>
     <tr><td><code>numbersystem</code></td><td>Combinatorial number-system representations and conversions.</td></tr>
     </tbody>
 </table>
-
 <h2>Usage examples</h2>
-<h3>All unique permutations</h3>
-<pre><code>Permutation
-    .unique("A", "B", "C")
-    .lexOrder()
-    .forEach(System.out::println);</code></pre>
-
-<h3>Every fifth unique permutation, starting at zero-based rank two</h3>
-<pre><code>Permutation
-    .unique("A", "B", "C", "D")
-    .lexOrderMth(5, 2)
-    .forEach(System.out::println);</code></pre>
-
-<h3>Combinations and subsets</h3>
-<pre><code>Combination
-    .unique(2, "A", "B", "C", "D")
-    .lexOrder()
-    .forEach(System.out::println);
-
-Subset
-    .of("A", "B", "C")
-    .inRange(1, 2)
-    .lexOrder()
-    .forEach(System.out::println);</code></pre>
-
+<h3>Permutations, combinations and subsets</h3>
+<pre><code>Permutation.unique("A", "B", "C").lexOrder();
+Combination.unique(2, "A", "B", "C", "D").lexOrder();
+Subset.of("A", "B", "C").inRange(1, 2).lexOrder();</code></pre>
 <h3>Ranking and unranking</h3>
-<pre><code>BigInteger rank = JNumberTools.rankOf()
-    .permutation()
-    .unique(2, 0, 1);
-
-int[] permutation = JNumberTools.unrankOf()
-    .permutation()
-    .unique(BigInteger.valueOf(4), 3);</code></pre>
-
+<pre><code>BigInteger rank = Rank.permutation().unique(2, 0, 1);
+int[] permutation = Unrank.permutation().unique(rank, 3);</code></pre>
 <h3>Cartesian product</h3>
-<pre><code>JNumberTools.cartesianProduct()
-    .simpleProductOf("A", "B")
-    .and("X", "Y")
-    .lexOrder()
-    .forEach(System.out::println);</code></pre>
-
-<p>For complete method contracts, see the Javadoc for the relevant facade and builder. The project repository contains installation instructions and additional guides:</p>
+<pre><code>Product.simple(List.of("A", "B"), List.of("X", "Y")).lexOrder();</code></pre>
+<p>For complete method contracts, see the Javadoc for the relevant entry point and builder. The repository contains installation instructions and additional guides:</p>
 <ul>
     <li><a href="https://github.com/deepeshpatel/jnumbertools">GitHub repository</a></li>
     <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/README.md">README</a></li>
@@ -85,6 +53,7 @@ int[] permutation = JNumberTools.unrankOf()
     <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/docs/combinations/README.md">Combinations</a></li>
     <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/docs/permutations/README.md">Permutations</a></li>
     <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/docs/products/README.md">Cartesian products</a></li>
+    <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/docs/ranking/README.md">Ranking and unranking</a></li>
     <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/docs/numbersystem/README.md">Number systems</a></li>
     <li><a href="https://github.com/deepeshpatel/jnumbertools/blob/main/docs/sets/README.md">Subsets</a></li>
 </ul>
