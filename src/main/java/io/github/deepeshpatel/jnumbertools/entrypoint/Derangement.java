@@ -15,6 +15,21 @@ import java.util.List;
  * <p>A derangement is a permutation in which no element remains in its
  * original position.</p>
  *
+ * <p>The static factories use an internally managed {@link io.github.deepeshpatel.jnumbertools.datastructure.Calculator}
+ * for convenience. Advanced users who want to share calculation caches across generators can
+ * instantiate {@link DerangementBuilder} directly and pass the same calculator to multiple
+ * builders. For example:</p>
+ *
+ * <pre>{@code
+ * Calculator calculator = new Calculator();
+ * var first = new DerangementBuilder<>(calculator, List.of("A", "B", "C"));
+ * var second = new DerangementBuilder<>(calculator, List.of("D", "E", "F"));
+ * }</pre>
+ *
+ * <p>Import {@code Calculator} from {@code io.github.deepeshpatel.jnumbertools.datastructure}
+ * and {@code DerangementBuilder} from
+ * {@code io.github.deepeshpatel.jnumbertools.generator.permutation.derangement}.</p>
+ *
  * <pre>{@code
  * Derangement.of(4).lexOrder();
  * Derangement.of("A", "B", "C", "D").lexOrder();
