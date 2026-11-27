@@ -50,17 +50,14 @@ import java.util.function.Predicate;
  * <p>{@code when(A).is(x).then(B).isOneOf(y, z)} means: whenever the value chosen from {@code A}
  * is {@code x}, the value chosen from {@code B} must be {@code y} or {@code z}. Every completed
  * pairwise rule is combined with the other rules using AND. Dimensions are identified by the same
- * list instance passed to {@code conditionalProductOf} or {@code and}. For compound AND/OR trigger
- * expressions, use {@link CompoundConditionalProductBuilder} through
- * {@code compoundProductOf(...)}.</p>
+ * list instance passed to {@code conditionalProductOf} or {@code and}. More complex joint predicates
+ * can be expressed through the Lambda Conditional Product API.</p>
  *
  * <h2>What is supported</h2>
  * <p>This builder supports pairwise rules expressed with {@code when(...).then(...)}.
  * It provides lexicographic and any-order traversal, exact counting, rank-based traversal,
- * and random choice and sampling. Compound trigger expressions are built with {@link Condition}
- * and attached through {@link CompoundConditionalProductBuilder}; that builder intentionally
- * provides generation, counting and emptiness checks without exposing rank-based or
- * lexicographic operations.</p>
+ * and random choice and sampling. Joint predicates can also be compiled through the Lambda Conditional
+ * Product API while retaining the same counting and traversal capabilities.</p>
  *
  * <h2>Practical performance guidance: dimension order</h2>
  * <p>Dimension declaration order can affect the amount of work required by lexicographic traversal.
@@ -259,45 +256,6 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         return new WhenDimension(ruleCompiler.indexOf(dimension), List.of(), false);
     }
 
-    /**
-     * Starts a rule from a composed {@link Condition}, built with nested {@code and(...)}/{@code or(...)}
-     * calls. A {@code Condition} can express arbitrary nesting, including AND inside OR and OR inside AND.
-     *
-     * @param condition the trigger condition; dimensions inside it are identified by the same list
-     *                   instances passed to {@code conditionalProductOf}/{@code compoundProductOf} or
-     *                   {@code and}
-     * @return the next step of the rule
-     * @throws NullPointerException     if {@code condition} is null
-     * @throws IllegalArgumentException if a dimension referenced inside {@code condition} is not one of
-     *                                  this product's dimensions, or a value is not a value of its dimension
-     */
-    Trigger when(Condition condition) {
-        Objects.requireNonNull(condition, "condition must not be null");
-        return new Trigger(resolve(condition));
-    }
-
-    /** Resolves {@code dimension} to its position, by the same list-instance identity rule as every other rule API. */
-    int indexOfDimension(List<?> dimension) {
-        return ruleCompiler.indexOf(dimension);
-    }
-
-    private List<List<MultiTriggerRule.Condition>> resolve(Condition condition) {
-        List<List<Condition.Leaf>> groups = condition.groups();
-        List<List<MultiTriggerRule.Condition>> resolved = new ArrayList<>(groups.size());
-        for (List<Condition.Leaf> group : groups) {
-            List<MultiTriggerRule.Condition> resolvedGroup = new ArrayList<>(group.size());
-            for (Condition.Leaf leaf : group) {
-                int dim = ruleCompiler.indexOf(leaf.dimension);
-                BitSet matching = leaf.predicate != null
-                        ? ruleCompiler.matching(dim, leaf.predicate)
-                        : ruleCompiler.matching(dim, leaf.values, leaf.negate);
-                resolvedGroup.add(new MultiTriggerRule.Condition(dim, matching));
-            }
-            resolved.add(resolvedGroup);
-        }
-        return resolved;
-    }
-
     /** First step of a pairwise trigger condition. */
     public final class WhenDimension {
         private final int dim;
@@ -354,8 +312,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     }
 
     /**
-     * A completed trigger expression. Pairwise triggers contain one atomic condition; compound
-     * triggers are created from a composed {@link Condition}.
+     * A completed pairwise trigger expression.
      */
     public final class Trigger {
         private final List<List<MultiTriggerRule.Condition>> groups;
@@ -666,16 +623,16 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     }
 
     /**
-     * Compiles an arbitrary joint predicate over {@code scopeDims} into one or more multi-trigger rules:
-     * the same representation a compound {@link Condition} rule resolves into. The predicate is evaluated
+     * Compiles an arbitrary joint predicate over {@code scopeDims} into one or more multi-trigger rules.
+     * The predicate is evaluated
      * once per combination of the scope's dimensions, here, during compilation; it is never called again
      * during generation, counting, or emptiness checks.
      *
      * <h2>How this is compiled</h2>
      * <p>The last dimension in {@code scopeDims} is treated as the rule's target; the remaining dimensions
      * are its antecedent. Every combination of the antecedent dimensions' values is enumerated (bounded by
-     * {@link ConstraintGraph#MAX_LOOP_COMBINATIONS}, the same bound a compound rule's scope is checked
-     * against) and, for each one, the predicate is evaluated once per value of the target dimension to
+     * {@link ConstraintGraph#MAX_LOOP_COMBINATIONS}) and, for each one, the predicate is evaluated once
+     * per value of the target dimension to
      * determine that combination's allowed target values. Antecedent combinations that produce the same
      * allowed-target set are grouped into a single rule with one OR-group per combination, mirroring how
      * {@code .when(conditionA).then(dim).isX(); .when(conditionB).then(dim).isY();} compiles into separate
@@ -683,9 +640,8 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * target value is accepted contributes no rule at all, since it imposes no constraint.</p>
      *
      * <p>When the scope is exactly two dimensions (one antecedent, one target), each compiled group is
-     * routed to the lightweight binary {@code Relation} table instead of a multi-trigger rule — the same
-     * automatic pairwise detection {@code CompoundConditionalProductBuilder}'s {@code .then(dim).isX()}
-     * already performs for a single-dimension {@link Condition}. This keeps several independent two-dimension
+     * routed to the lightweight binary {@code Relation} table instead of a multi-trigger rule. This keeps
+     * several independent two-dimension
      * lambda rules that happen to share one dimension (e.g. four rules all triggered by the same {@code os})
      * from being merged into one oversized block purely because of how they were declared.</p>
      *
@@ -697,10 +653,8 @@ public final class ConditionalProductBuilder implements Builder<Object> {
      * <p>A scope of a single dimension is rejected: {@code ConstraintPlan} does not run a rule through its
      * node enumeration for a single-dimension node, so such a rule would be enforced by traversal but
      * ignored by counting and unranking, giving inconsistent results between {@code lexOrder()},
-     * {@code count()} and {@code byRanks(...)}. Use {@link Condition#condition(List)} with
-     * {@code .matches(Predicate)} as a trigger for a rule on a separate target dimension through the
-     * compound-product API. That does not filter the trigger dimension itself; to filter values from a
-     * dimension, pre-filter its input list before building the product.</p>
+     * {@code count()} and {@code byRanks(...)}. To filter a single dimension, pre-filter its input list
+     * before building the product; unary predicates are also supported by the one-dimension Lambda API.</p>
      *
      * @param scopeDims positions of the dimensions the predicate jointly depends on, in declaration order;
      *                  must contain at least two positions (one antecedent plus the target) and no duplicates
@@ -812,10 +766,8 @@ public final class ConditionalProductBuilder implements Builder<Object> {
 
         ConditionalProductBuilder result = this;
         if (antecedentDims.length == 1) {
-            // Exactly one antecedent dimension and one target: the same shape compound's .then(dim).isX()
-            // detects as pairwise and routes to the lightweight binary relation table, never a block, so a
-            // lambda rule gets the identical treatment instead of being forced into block territory just
-            // because it was written as a lambda.
+            // Exactly one antecedent dimension and one target: route to the lightweight binary relation
+            // table rather than a multi-trigger block.
             int antecedentDim = antecedentDims[0];
             for (Map.Entry<BitSet, List<int[]>> entry : combosByAllowedTargets.entrySet()) {
                 BitSet triggerValues = new BitSet(antecedentSizes[0]);
