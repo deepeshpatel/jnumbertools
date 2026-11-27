@@ -539,8 +539,12 @@ public final class ConditionalProductBuilder implements Builder<Object> {
             throw new IllegalArgumentException("Typed Lambda entry point requires exactly "
                     + dimensions.length + " dimensions, but this product has " + dimensionCount());
         }
-        for (List<?> dimension : dimensions) {
-            Objects.requireNonNull(dimension, "dimension must not be null");
+        for (int i = 0; i < dimensions.length; i++) {
+            Objects.requireNonNull(dimensions[i], "dimension must not be null");
+            if (originals.get(i) != dimensions[i]) {
+                throw new IllegalArgumentException("Typed Lambda dimensions must be the same list instances "
+                        + "registered with this product, in declaration order");
+            }
         }
     }
 
