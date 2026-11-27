@@ -33,7 +33,7 @@ import static java.util.Arrays.asList;
  *
  * <h3>Unique Permutations</h3>
  * <pre>
- * Permutations perm = new Permutations();
+ * import io.github.deepeshpatel.jnumbertools.entrypoint.Permutation;
  *
  * // All permutations of [A, B, C] in lexicographical order
  * perm.unique("A", "B", "C")
