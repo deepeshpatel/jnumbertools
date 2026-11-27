@@ -1,315 +1,94 @@
-
 [Home](../../README.md)
-</br>[Permutation Generators](../permutations/README.md)
-</br>[Derangement Generators](../derangements/README.md)
-</br>[Combination Generators](../combinations/README.md)
-</br>[Set/Subset Generators](../sets/README.md)
-</br>[Math Functions](../calculator/README.md)
-</br>[Ranking Algorithms](../ranking/README.md)
-</br>[Number System Algorithms](../numbersystem/README.md)
 
 # Cartesian Product Generators
 
-JNumberTools provides the following generators for Cartesian products. All m<sup>th</sup> generators are BigInteger compatible, enabling rapid generation of Cartesian products at very large indices, such as 10<sup>100</sup>.
+Use the static `Product` entry point in `io.github.deepeshpatel.jnumbertools.entrypoint`. It exposes simple, constrained and pairwise-conditional products. Lambda predicates are available from the conditional builder.
 
-**Currently Available Algorithms**
+## 1. Simple Cartesian product
 
-1. [Simple Cartesian Product](#1-simple-cartesian-product)
-    1. [Simple Cartesian product in lex order](#11-simple-cartesian-product-in-lex-order)
-    2. [Every m<sup>th</sup> simple Cartesian product in lex order](#12-m-th-simple-cartesian-product)
-
-2. [Constrained Cartesian Product](#2-constrained-cartesian-product)
-    1. [Constrained Cartesian product in lex order](#21-constrained-cartesian-product-in-lex-order)
-    2. [Every m<sup>th</sup> constrained Cartesian product in lex order](#22-m-th-constrained-cartesian-product)
-
-3. [Compiled Product: pairwise conditional rules](#3-compiled-product-pairwise-conditional-rules)
-
-4. [Lambda Engine: predicate-to-constraint compiler](#4-lambda-engine-predicate-to-constraint-compiler)
-
-5. [Products of ranks, random choice and random sample](#5-products-of-ranks-random-choice-and-random-sample)
-
----
-
-### 1. Simple Cartesian Product
-
-#### 1.1 Simple Cartesian product in lex order
-
-A Cartesian Product of two sets A and B, denoted by A × B, is the set of all ordered pairs (a, b) where a ∈ A and b ∈ B. This API supports the Cartesian product of n different sets, allowing direct computation of A × B × C × D × ... in a single API call.
+Pass each dimension as a `List`. The lists are supplied in tuple order.
 
 ```java
-// Every combination of 1 pizza base, 1 pizza crust, and 1 cheese
-var pizzaSize = List.of("Small", "Medium", "Large");
-var pizzaCrust = List.of("Flatbread", "Neapolitan", "Thin Crust");
-var cheese = List.of("Ricotta", "Mozzarella", "Cheddar");
+var sizes = List.of("Small", "Medium", "Large");
+var crusts = List.of("Flatbread", "Neapolitan");
+var cheeses = List.of("Ricotta", "Mozzarella");
 
-JNumberTools.cartesianProduct()
-   .simpleProductOf(pizzaSize)
-   .and(pizzaCrust)
-   .and(cheese)
-   .lexOrder()
-   .stream().forEach(System.out::println);
+Product.simple(sizes, crusts, cheeses)
+    .lexOrder()
+    .forEach(System.out::println);
 ```
 
-#### 1.2 m-th simple Cartesian product
+The simple-product builder also supports `lexOrderMth(m, start)`, `byRanks(...)`, `choice(...)`, `sample(...)`, `count()` and `isEmpty()`.
 
-Generates every m<sup>th</sup> Cartesian product starting from any chosen index in lexicographical order. This API directly generates the desired product without iterating through preceding values, making it highly efficient.
+## 2. Constrained Cartesian product
 
-```java
-// Every 10th combination of 1 pizza base, 1 pizza crust, and 1 cheese
-// starting from index 5 (zero-based) in lex order (i.e., the 6th, 16th, 26th, etc.)
-var pizzaSize = List.of("Small", "Medium", "Large");
-var pizzaCrust = List.of("Flatbread", "Neapolitan", "Thin Crust");
-var cheese = List.of("Ricotta", "Mozzarella", "Cheddar");
+Use `Product.constrained()` to start a constrained product. The first dimension is selected with one of these methods:
 
-JNumberTools.cartesianProduct()
-   .simpleProductOf(pizzaSize)
-   .and(pizzaCrust)
-   .and(cheese)
-   .lexOrderMth(10, 5)
-   .stream().forEach(System.out::println);
-```
+| Method | Meaning |
+|---|---|
+| `ofDistinct(quantity, elements)` | Fixed-size combinations without repetition |
+| `ofMultiSelect(quantity, elements)` | Fixed-size combinations with repetition |
+| `ofInRange(from, to, elements)` | Subsets whose sizes are in the inclusive range |
 
-### 2. Constrained Cartesian Product
-
-Generates a Cartesian product with custom constraints, allowing selection of multiple items, distinct or repeated elements, and subsets within a specified range from each input set, in lexicographical order.
-
-The first dimension is started with one of four methods, and further dimensions are added with the matching `and...` methods:
-
-| Start with | Adds a dimension with | Meaning |
-|---|---|---|
-| `constrainedProductOfDistinct(quantity, elements)` | `andDistinct(quantity, elements)` | `quantity` distinct elements (a combination) |
-| `constrainedProductOfMultiSelect(quantity, elements)` | `andMultiSelect(quantity, elements)` | `quantity` elements, repetition allowed |
-| `constrainedProductOfInRange(from, to, elements)` | `andInRange(from, to, elements)` | every subset whose size is in `[from, to]` |
-
-`constrainedProductOf(quantity, elements)` is deprecated for removal; use `constrainedProductOfDistinct`, which behaves identically.
-
-#### 2.1 Constrained Cartesian product in lex order
-
-Similar to the simple Cartesian product but allows selecting multiple items, repetitive elements, or items within a specified range from each set.
-
-```java
-// All combinations of:
-// - any 1 pizza base
-// - any 2 distinct cheeses
-// - any 2 sauces (repetition allowed)
-// - any toppings in range 1 to 5
-var pizzaBase = List.of("Small", "Medium", "Large");
-var cheese = List.of("Ricotta", "Mozzarella", "Cheddar");
-var sauce = List.of("Tomato Ketchup", "White Sauce", "Green Chutney");
-var toppings = List.of("Tomato", "Capsicum", "Onion", "Corn", "Mushroom");
-
-JNumberTools.cartesianProduct()
-   .constrainedProductOfDistinct(1, pizzaBase)
-   .andDistinct(2, cheese)
-   .andMultiSelect(2, sauce)
-   .andInRange(1, 5, toppings)
-   .lexOrder()
-   .stream().forEach(System.out::println);
-```
-
-#### 2.2 m-th constrained Cartesian product
-
-Generates every m<sup>th</sup> constrained Cartesian product directly without calculating preceding values. This API supports BigInteger, enabling efficient generation of products at extremely large indices, such as every 10<sup>18</sup>th or 10<sup>100</sup>th combination.
-
-```java
-// Every 10^18th lexicographical combination of:
-// - any 10 distinct small alphabets
-// - any 12 distinct capital alphabets
-// - any 3 symbols (repetition allowed)
-// - all subsets in size range [10, 20] of numbers in [0, 20)
-var smallAlphabets = IntStream.rangeClosed('a', 'z').mapToObj(c -> (char) c).toList();
-var capitalAlphabets = IntStream.rangeClosed('A', 'Z').mapToObj(c -> (char) c).toList();
-var symbols = List.of('~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')');
-var numbers = IntStream.rangeClosed(0, 20).boxed().toList();
-
-JNumberTools.cartesianProduct()
-   .constrainedProductOfDistinct(10, smallAlphabets) // distinct
-   .andDistinct(12, capitalAlphabets) // distinct
-   .andMultiSelect(3, symbols) // repetition allowed
-   .andInRange(10, 20, numbers) // all subsets in size range
-   .lexOrderMth(1_000_000_000_000_000_000L, 0)
-   .stream().forEach(System.out::println);
-```
-
-### 3. Compiled Product: Pairwise Conditional Rules
-
-A compiled Cartesian product restricted by pairwise rules between two dimensions, for example "if the network is 4G, the
-OS cannot be Linux". It counts, orders, ranks and samples only the valid tuples, **without generating and
-filtering the full product**, so it stays fast when the full product is huge and most of it is invalid.
-
-```java
-var os = List.of("Windows", "macOS", "Linux");
-var browser = List.of("Chrome", "Safari", "Firefox");
-var network = List.of("WiFi", "4G");
-
-var configs = JNumberTools.cartesianProduct()
-        .conditionalProductOf(os, browser, network)
-        .when(browser).is("Safari").then(os).isOneOf("macOS")
-        .when(network).is("4G").then(os).isNoneOf("Linux")
-        .when(network).is("4G").then(browser).isNoneOf("Chrome");
-
-configs.count();                    // 10 (of 18 in the full product)
-configs.lexOrder().stream().forEach(System.out::println);
-// [Windows, Chrome, WiFi], [Windows, Firefox, WiFi], [Windows, Firefox, 4G], [macOS, Chrome, WiFi], ...
-
-configs.lexOrderMth(3, 1);          // every 3rd valid tuple, from rank 1
-configs.byRanks(List.of(BigInteger.TWO));
-configs.choice(2, new Random(42));  // uniform over the valid tuples
-```
-
-**Traversal options.**
-
-- `lexOrder()` is the default and returns every valid tuple in lexicographic order.
-- `anyOrder()` returns every valid tuple exactly once, lazily and without an encounter-order guarantee.
-  It is useful when tuple order is not important. Its spliterator can partition work when consumed with
-  `stream().parallel()`; parallel execution is opt-in and is not guaranteed to use multiple workers.
-- `lexOrder(LexOrderStrategy.PRUNED_DFS)` selects dense relation rows when they fit the implementation's
-  memory cap, otherwise it falls back to `PRUNED_BITSET`.
-- `lexOrder(LexOrderStrategy.DP)` selects feasibility-guided traversal. The DP plan is also used for
-  exact counting and rank-based operations.
-- `lexOrder(LexOrderStrategy.ADAPTIVE, estimatedLimit)` selects the implementation-policy entry point.
-  In this version it resolves to `PRUNED_BITSET`; `estimatedLimit` is validated but does not select a
-  different strategy. This internal policy may change in later versions.
-
-The lexicographic strategy affects `lexOrder()` only. It does not change the semantics of
-`count()`, `byRanks(...)`, `lexOrderMth(...)`, `choice(...)` or `sample(...)`.
-
-
-**Reading a rule.** `when(A).is(x).then(B).isOneOf(y, z)` means: whenever the value chosen from `A` is `x`,
-the value chosen from `B` must be `y` or `z`. It says nothing about tuples where `A` is not `x`. All rules must
-hold together. The trigger side and the `then` side support equality and membership methods (`is`, `isNot`,
-`isOneOf`, `isNoneOf` and `isNotIn`), plus natural-order comparisons:
-`isGreaterThan`, `isGreaterThanOrEqual`, `isLessThan` and `isLessThanOrEqual`.
-The comparison methods accept values implementing `Comparable`; values are compared using
-`compareTo`. Dimension values must be mutually comparable with the supplied bound.
-The multi-value methods accept either varargs or a collection. `isNotIn(...)` is an alias
-of `isNoneOf(...)` and is retained as a familiar alternative name. Several rules may share the same trigger.
-
-**Dimensions are identified by list instance.** `when(...)` and `then(...)` take the same `List` object that was
-passed to `conditionalProductOf(...)` or to `withLambda(...)`. Using one list instance for two dimensions is ambiguous and is rejected.
-A rule value that is not in the dimension, or an empty list of values, is rejected, and so is a rule between a
-dimension and itself.
-
-**What it cannot do.**
-
-- Each pairwise rule relates two dimensions. A trigger involving three or more dimensions, or custom
-  joint predicates over multiple dimensions, belongs in the Lambda API below. Aggregate conditions
-  over a complete tuple (such as a sum across dimensions) are not supported by this API.
-- Rules that link dimensions in a loop are solved together as one block, so such a block is limited to 1,000,000
-  value combinations, and any two dimensions to 50,000,000 value pairs.
-- `lexOrder()` returns valid tuples in lexicographic order. `anyOrder()` returns the same valid tuple set exactly once but makes no encounter-order guarantee. Ranks used by `byRanks(...)` and `lexOrderMth(...)` are always positions in lexicographic order, so ranks change when rules change.
-- When almost every tuple is valid, a plain filter over a simple product is about as fast. The advantage grows as
-  the rules remove more of the space.
-
-### 4. Lambda Engine: Predicate-to-Constraint Compiler
-
-Use the Lambda Engine when a rule involves joint logic that is not naturally expressed
-as a set of pairwise rules in the Compiled Product. It provides
-the flexibility of writing rules in a lambda style while retaining readable code and the
-existing constraint engine's pruning and optimized execution path.
-
-The key design point is that this is **not a predicate filter applied to every generated tuple**.
-Each lambda rule is compiled when the rule is added. The builder enumerates the combinations
-of values in the rule's declared scope, evaluates the predicate, and converts the result into
-the internal conditional-product constraint representation. Subsequent
-generation, counting and emptiness checks use those compiled constraints; they do not invoke
-the predicate again.
-
-#### Typed rule over two dimensions
-
-For exactly two dimensions, the predicate is a typed `BiPredicate`:
-
-```java
-var cores = List.of(1, 2, 4, 8);
-var memoryGb = List.of(2, 4, 8, 16);
-
-var products = JNumberTools.cartesianProduct()
-        .withLambda(cores, memoryGb)
-        .when(cores, memoryGb).matches((c, m) -> c * m <= 256);
-
-products.count();                    // exact count
-products.isEmpty();                  // whether any valid tuple exists
-products.generate().stream().forEach(System.out::println);
-```
-
-#### Joint predicate over three or more dimensions
-
-For an arbitrary number of dimensions, the predicate receives an `Object[]` in the same
-order as the dimensions passed to `when(...)`:
-
-```java
-var cores = List.of(1, 2, 4, 8);
-var memoryGb = List.of(2, 4, 8, 16);
-var budget = List.of(8, 16, 32);
-
-var products = JNumberTools.cartesianProduct()
-        .withLambda(cores, memoryGb, budget)
-        .when(cores, memoryGb, budget).matches(values -> {
-            int c = (Integer) values[0];
-            int m = (Integer) values[1];
-            int b = (Integer) values[2];
-            return c * m <= b;
-        })
-        .when(memoryGb, budget).matches((m, b) -> m * 2 <= b);
-
-products.count();
-products.generate().stream().forEach(System.out::println);
-```
-
-Additional dimensions can be appended with `and(list)`. Add further rules with
-`.when(...).matches(...)`. Every completed lambda rule must hold; rules are combined
-with AND.
-
-**Compilation and limits.**
-
-- A two-dimension rule is compiled into pairwise constraints when possible.
-- A rule whose scope has more than two dimensions is compiled into a bounded joint constraint.
-- Compiling a rule is limited to 1,000,000 predicate probes (the product of the antecedent
-  combinations and target values). Narrow the scope or dimension sizes if this limit is exceeded.
-- Predicates must be deterministic and side-effect-free. For the `Object[]` form, read the
-  supplied values in scope order; do not mutate or retain the compilation array.
-- `generate()` is lazy and re-iterable and produces each valid tuple once, without an
-  encounter-order guarantee. The builder also exposes exact `count()` and `isEmpty()`.
-  Lexicographical traversal, rank-based access, choice and sampling are not exposed.
-
-**When to choose it.** Prefer the pairwise Compiled Product for straightforward two-dimension
-rules. Use the Lambda Engine when a rule is genuinely joint logic (arithmetic, relational or
-application-specific computation) and a Java predicate makes that logic clear.
-
-
-### 5. Products of ranks, random choice and random sample
-
-Simple, constrained and compiled products support `byRanks`, `choice` and `sample`. The Lambda Engine intentionally exposes a smaller terminal API. `byRanks` returns the products at the given ranks, `choice` draws random products with replacement (duplicates possible), and `sample` draws random distinct products.
+Add later dimensions with the corresponding `andDistinct`, `andMultiSelect` or `andInRange` builder methods.
 
 ```java
 var colors = List.of("Red", "Green", "Blue");
-var sizes = List.of("S", "M");
-var product = JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes);
+var sizes = List.of("S", "M", "L", "XL");
 
-// The products at ranks 5 and 0: [Blue, M], [Red, S]
-product.byRanks(List.of(BigInteger.valueOf(5), BigInteger.ZERO))
-       .stream().forEach(System.out::println);
-
-// 3 random products, duplicates possible
-product.choice(3, new Random(1)).stream().forEach(System.out::println);
-
-// 3 distinct random products
-product.sample(3, new Random(1)).stream().forEach(System.out::println);
-
-// The same operations on a constrained product (any 1 size, any 2 distinct cheeses)
-var cheese = List.of("Ricotta", "Mozzarella", "Cheddar");
-var constrained = JNumberTools.cartesianProduct()
-        .constrainedProductOfDistinct(1, sizes)
-        .andDistinct(2, cheese);
-constrained.byRanks(List.of(BigInteger.TWO)).stream().forEach(System.out::println); // [S, Mozzarella, Cheddar]
+Product.constrained()
+    .ofDistinct(2, colors)
+    .andMultiSelect(2, sizes)
+    .lexOrder()
+    .forEach(System.out::println);
 ```
 
-The number of products is available from `product.count()` (6 here).
-[Home](../../README.md)
-</br>[Permutation Generators](../permutations/README.md)
-</br>[Derangement Generators](../derangements/README.md)
-</br>[Combination Generators](../combinations/README.md)
-</br>[Set/Subset Generators](../sets/README.md)
-</br>[Math Functions](../calculator/README.md)
-</br>[Ranking Algorithms](../ranking/README.md)
-</br>[Number System Algorithms](../numbersystem/README.md)
+A shared `Calculator` can be supplied when creating the constrained factory. This allows combinatorial caches to be reused across factories.
+
+```java
+Calculator calculator = new Calculator();
+var constrained = Product.constrained(calculator)
+    .ofDistinct(2, colors);
+```
+
+## 3. Compiled pairwise conditional product
+
+Use `Product.conditional(dimensions...)` to create a product with pairwise rules. Each dimension is a list.
+
+```java
+var operatingSystems = List.of("Linux", "Windows", "macOS");
+var browsers = List.of("Firefox", "Safari", "Chrome");
+var networks = List.of("4G", "WiFi", "Ethernet");
+
+Product.conditional(operatingSystems, browsers, networks)
+    .when(operatingSystems).is("Linux")
+    .then(browsers).isOneOf("Firefox", "Safari")
+    .lexOrder()
+    .forEach(System.out::println);
+```
+
+The compiled pairwise builder supports lexicographical traversal, every-mth traversal, rank-based access, counting and sampling. Its rules are compiled into constraints rather than filtering completed tuples.
+
+## 4. Lambda predicates
+
+The conditional builder also exposes `withLambda(...)` for joint predicates. Typed overloads are available for one through five dimensions; the no-argument form provides an array-based predicate for arbitrary dimension counts.
+
+```java
+Product.conditional(operatingSystems, browsers, networks)
+    .withLambda(operatingSystems, browsers, networks)
+    .when((os, browser, network) ->
+        !os.equals("Linux") || browser.equals("Firefox") || browser.equals("Safari"))
+    .lexOrder()
+    .forEach(System.out::println);
+```
+
+Use scoped predicates with `.when(dimensions...).matches(predicate)` when the rule only depends on a subset of dimensions. Lambda predicates are compiled into constraints, subject to the documented probe limit; they are not intended as an unbounded general-purpose constraint solver.
+
+## 5. Choosing a product style
+
+- Use **simple** when every tuple is valid.
+- Use **constrained** when dimensions are combinations, multi-selects or subset ranges.
+- Use **conditional** for pairwise relationships between dimensions.
+- Use **lambda predicates** for joint rules involving multiple dimensions.
+
+The available terminal operations depend on the returned builder type. Consult the Javadoc for the exact builder contract rather than assuming all product styles expose identical methods.
