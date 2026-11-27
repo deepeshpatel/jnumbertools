@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,17 +22,17 @@ public class SimpleCartesianProductByRanksTest {
         void assertCountAndContentForSpecialCase() {
             // Case 1: Single empty dimension -> count=0 like any empty dimension; any start >= 0 is
             // accepted (ValidationRules.md) and the generator yields nothing
-            var singleEmpty = cartesianProduct.simpleProductOf(Collections.emptyList());
+            var singleEmpty = Product.simple(Collections.emptyList());
             assertTrue(singleEmpty.lexOrderMth(1, 0).stream().toList().isEmpty());
             assertTrue(singleEmpty.lexOrderMth(3, 7).stream().toList().isEmpty());
 
             // Case 2: Multiple dimensions with any empty -> count=0, mth should return []
-            var multiWithEmpty = cartesianProduct.simpleProductOf(A_B)
+            var multiWithEmpty = Product.simple(A_B)
                     .and(Collections.emptyList());
             assertTrue(multiWithEmpty.lexOrderMth(1, 0).stream().toList().isEmpty());
 
             // Case 3: All dimensions empty -> count=0, mth should return []
-            var allEmpty = cartesianProduct.simpleProductOf(Collections.emptyList())
+            var allEmpty = Product.simple(Collections.emptyList())
                     .and(Collections.emptyList());
             assertTrue(allEmpty.lexOrderMth(1, 0).stream().toList().isEmpty());
         }
@@ -39,7 +41,7 @@ public class SimpleCartesianProductByRanksTest {
         void shouldGenerateOutputSimilarToRepetitivePermMthWhenProductIsWithSameListMultipleTimes() {
             var decimalDigits = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
             for (int m = 2; m < 1000; m += 2) {
-                var result = cartesianProduct.simpleProductOf(decimalDigits)
+                var result = Product.simple(decimalDigits)
                         .and(decimalDigits)
                         .and(decimalDigits)
                         .lexOrderMth(m, 0).stream().toList();
@@ -51,7 +53,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateOutputSimilarToRepetitivePermWhenMEquals1AndProductIsWithSameListMultipleTimes() {
-            var result = cartesianProduct.simpleProductOf(A_B_C)
+            var result = Product.simple(A_B_C)
                     .and(A_B_C)
                     .and(A_B_C)
                     .lexOrderMth(1, 0).stream().toList();
@@ -77,7 +79,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateCorrectOutputForDifferentStartPositions() {
-            var builder = cartesianProduct.simpleProductOf(A_B_C).and(num_1_2_3);
+            var builder = Product.simple(A_B_C).and(num_1_2_3);
             assertEquals(
                     List.of(List.of('A', 1), List.of('A', 3), List.of('B', 2), List.of('C', 1), List.of('C', 3)),
                     builder.lexOrderMth(2, 0).stream().toList()
@@ -108,7 +110,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void testFailFastForLexOrderMth() {
-            var builder = cartesianProduct.simpleProductOf(A_B_C).and(num_1_2_3);
+            var builder = Product.simple(A_B_C).and(num_1_2_3);
 
             // m <= 0
             var exception = assertThrows(IllegalArgumentException.class,
@@ -135,7 +137,7 @@ public class SimpleCartesianProductByRanksTest {
     class Choice {
         @Test
         void shouldGenerateRandomChoice() {
-            var product = cartesianProduct.simpleProductOf(List.of("A", "B"))
+            var product = Product.simple(List.of("A", "B"))
                     .and(List.of("X", "Y"))
                     .choice(3, TestBase.random);
             var list = product.stream().toList();
@@ -149,7 +151,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateSingleListChoice() {
-            var product = cartesianProduct.simpleProductOf(List.of(0, 1, 2)).choice(2, TestBase.random);
+            var product = Product.simple(List.of(0, 1, 2)).choice(2, TestBase.random);
             var list = product.stream().toList();
             assertEquals(2, list.size());
             for (var item : list) {
@@ -160,7 +162,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void choice_withSingleCombination() {
-            var product = cartesianProduct.simpleProductOf(List.of("A")).choice(5, TestBase.random);
+            var product = Product.simple(List.of("A")).choice(5, TestBase.random);
             var list = product.stream().toList();
             assertEquals(5, list.size());
             assertEquals(List.of("A"), list.get(0));
@@ -171,7 +173,7 @@ public class SimpleCartesianProductByRanksTest {
     class Sample {
         @Test
         void shouldGenerateRandomSample() {
-            var product = cartesianProduct.simpleProductOf(List.of("A", "B"))
+            var product = Product.simple(List.of("A", "B"))
                     .and(List.of("X", "Y"))
                     .sample(2, TestBase.random);
             var list = product.stream().toList();
@@ -186,7 +188,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateSingleListSample() {
-            var product = cartesianProduct.simpleProductOf(List.of(0, 1, 2)).sample(2, TestBase.random);
+            var product = Product.simple(List.of(0, 1, 2)).sample(2, TestBase.random);
             var list = product.stream().toList();
             assertEquals(2, list.size());
             assertEquals(2, list.stream().distinct().count());
@@ -202,7 +204,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateSingleRank() {
-            var product = cartesianProduct.simpleProductOf(List.of("A", "B"))
+            var product = Product.simple(List.of("A", "B"))
                     .and(List.of(1, 2));
 
             var result = product.byRanks(List.of(BigInteger.valueOf(2))).stream().toList();
@@ -213,7 +215,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateMultipleRanks() {
-            var product = cartesianProduct.simpleProductOf(List.of("A", "B"))
+            var product = Product.simple(List.of("A", "B"))
                     .and(List.of(1, 2))
                     .and(List.of("X", "Y"));
 
@@ -235,7 +237,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldThrowExceptionForNegativeRank() {
-            var product = cartesianProduct.simpleProductOf(List.of("A", "B"))
+            var product = Product.simple(List.of("A", "B"))
                     .and(List.of(1, 2));
 
             var result = product.byRanks(List.of(BigInteger.valueOf(-1)));
@@ -248,7 +250,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldThrowExceptionForOutOfBoundRank() {
-            var product = cartesianProduct.simpleProductOf(List.of("A", "B"))
+            var product = Product.simple(List.of("A", "B"))
                     .and(List.of(1, 2)); // Total 4 tuples, valid ranks 0-3
 
             var result = product.byRanks(List.of(BigInteger.valueOf(4)));
@@ -261,7 +263,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldHandleMixedValidAndInvalidRanks() {
-            var product = cartesianProduct.simpleProductOf(List.of("A", "B"))
+            var product = Product.simple(List.of("A", "B"))
                     .and(List.of(1, 2)); // Total 4 tuples
 
             var ranks = List.of(
@@ -282,7 +284,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldWorkWithSingleListProduct() {
-            var product = cartesianProduct.simpleProductOf(List.of("A", "B", "C"));
+            var product = Product.simple(List.of("A", "B", "C"));
 
             var ranks = List.of(
                     BigInteger.ZERO,
@@ -299,7 +301,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldHandleEmptyProduct() {
-            var product = cartesianProduct.simpleProductOf(Collections.emptyList());
+            var product = Product.simple(Collections.emptyList());
 
             // An empty dimension makes count=0, so even rank 0 is out of range. This is reported lazily,
             // when the rank is reached, not when byRanks() is called.
@@ -309,7 +311,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldThrowExceptionForEmptyProductWithNonZeroRank() {
-            var product = cartesianProduct.simpleProductOf(Collections.emptyList());
+            var product = Product.simple(Collections.emptyList());
 
             var result = product.byRanks(List.of(BigInteger.ONE));
 
@@ -320,7 +322,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldHandleLargeRanks() {
-            var product = cartesianProduct.simpleProductOf(List.of(0, 1, 2, 3, 4))
+            var product = Product.simple(List.of(0, 1, 2, 3, 4))
                     .and(List.of(0, 1, 2, 3, 4))
                     .and(List.of(0, 1, 2, 3, 4)); // 5×5×5 = 125 total
 
@@ -335,7 +337,7 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldPreserveOrderOfRanks() {
-            var product = cartesianProduct.simpleProductOf(List.of("A", "B"))
+            var product = Product.simple(List.of("A", "B"))
                     .and(List.of(1, 2)); // 4 tuples: 0=[A,1], 1=[A,2], 2=[B,1], 3=[B,2]
 
             var ranks = List.of(
