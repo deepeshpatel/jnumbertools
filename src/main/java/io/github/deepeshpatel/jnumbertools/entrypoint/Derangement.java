@@ -48,14 +48,34 @@ public final class Derangement {
         return new DerangementsBuilder();
     }
 
+    /**
+     * Creates a derangement builder for the integer range {@code [0, n)}.
+     *
+     * @param n number of elements in the source range
+     * @return a builder for derangements of {@code n} elements
+     */
     public static DerangementBuilder<Integer> of(int n) {
         return factory().of(n);
     }
 
+    /**
+     * Creates a derangement builder for the supplied list elements.
+     *
+     * @param elements source elements
+     * @param <T> element type
+     * @return a builder for derangements of the supplied elements
+     */
     public static <T> DerangementBuilder<T> of(List<T> elements) {
         return factory().of(elements);
     }
 
+    /**
+     * Creates a derangement builder for the supplied elements.
+     *
+     * @param elements source elements
+     * @param <T> element type
+     * @return a builder for derangements of the supplied elements
+     */
     @SafeVarargs
     public static <T> DerangementBuilder<T> of(T... elements) {
         return factory().of(elements);

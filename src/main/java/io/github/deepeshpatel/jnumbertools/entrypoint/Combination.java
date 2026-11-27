@@ -19,10 +19,11 @@ import java.util.List;
  * multiset combinations. The returned builders provide the traversal,
  * ranking, and sampling operations available for each combination type.</p>
  *
- * <p>The static factories use an internally managed {@link io.github.deepeshpatel.jnumbertools.datastructure.Calculator}
- * for convenience. Advanced users who want to share calculation caches across generators can
- * instantiate the corresponding concrete builder directly and pass the same calculator to each
- * builder. For example:</p>
+ * <p>The unique and repetitive factories use an internally managed
+ * {@link io.github.deepeshpatel.jnumbertools.datastructure.Calculator}. The multiset factory does not
+ * require a calculator. Advanced users who want to share calculation caches across unique or
+ * repetitive combination generators can instantiate the corresponding concrete builder directly
+ * and pass the same calculator to each builder. For example:</p>
  *
  * <pre>{@code
  * import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;

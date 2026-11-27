@@ -6,7 +6,7 @@ JNumberTools provides lazy iterator/stream generators and mathematical utilities
 
 ## Coordinates & runtime
 
-- Maven: `io.github.deepeshpatel:jnumbertools:4.2.0`
+- Maven (this branch's target version): `io.github.deepeshpatel:jnumbertools:5.0.0` (use after 5.0.0 is published; the latest published release is 4.2.0)
 - Java: 21+
 - Runtime dependencies: none
 - License: Apache-2.0
@@ -71,7 +71,7 @@ Derangadic d = new Derangadic(4, BigInteger.valueOf(2), calculator);
 - `lexOrderMth(m,start)` and `byRanks(...)` are available only on builder types that document them.
 - `choice(n, random)` samples with replacement; `sample(n, random)` samples without replacement.
 - Generators are lazy and re-iterable. Use `.stream()` to consume them as streams.
-- The Compiled Conditional Product supports pairwise rules and rank-based operations. Lambda rules compile bounded joint predicates into constraints; do not assume the Lambda Engine has the same traversal operations as every other product builder.
+- The Compiled Conditional Product supports pairwise rules and rank-based operations. The Lambda builder exposes `lexOrder()`, `anyOrder()`, `lexOrderMth(...)`, `byRanks(...)`, `choice(...)`, `sample(...)`, `count()` and `isEmpty()`. Typed whole-product predicates support up to five dimensions; use the array-based form for arbitrary dimensions. Scoped predicates inspect only their selected dimensions.
 - The Calculator may be shared across entry points that accept it, allowing combinatorial caches to be reused.
 
 ## Documentation

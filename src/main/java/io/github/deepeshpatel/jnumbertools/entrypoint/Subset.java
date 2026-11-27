@@ -49,15 +49,35 @@ public final class Subset {
         return new SubsetsBuilder();
     }
 
+    /**
+     * Creates a selector for subsets of the supplied elements.
+     *
+     * @param elements source elements
+     * @param <T> element type
+     * @return a selector for choosing subset sizes and traversal order
+     */
     @SafeVarargs
     public static <T> SubsetSelector<T> of(T... elements) {
         return factory().of(elements);
     }
 
+    /**
+     * Creates a selector for subsets of the supplied list elements.
+     *
+     * @param elements source elements
+     * @param <T> element type
+     * @return a selector for choosing subset sizes and traversal order
+     */
     public static <T> SubsetSelector<T> of(List<T> elements) {
         return factory().of(elements);
     }
 
+    /**
+     * Creates a selector for subsets of the integer range {@code [0, dataSize)}.
+     *
+     * @param dataSize number of elements in the source range
+     * @return a selector for choosing subset sizes and traversal order
+     */
     public static SubsetSelector<Integer> of(int dataSize) {
         return factory().of(dataSize);
     }

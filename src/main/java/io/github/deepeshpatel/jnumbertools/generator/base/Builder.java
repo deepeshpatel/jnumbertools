@@ -116,7 +116,8 @@ public interface Builder<E> {
      * @param sampleSize the number of elements to generate
      * @param random the random generator to use
      * @return a generator producing random elements (duplicates allowed)
-     * @throws IllegalArgumentException if sampleSize is negative or random is null
+     * @throws IllegalArgumentException if sampleSize is not positive or the result domain is empty
+     * @throws NullPointerException if random is null
      */
     StreamableIterable<E> choice(int sampleSize, Random random);
 
@@ -126,7 +127,8 @@ public interface Builder<E> {
      * @param sampleSize the number of unique elements to generate
      * @param random the random generator to use
      * @return a generator producing unique random elements
-     * @throws IllegalArgumentException if sampleSize is negative, exceeds total count, or random is null
+     * @throws IllegalArgumentException if sampleSize is not positive, exceeds the total count, or the result domain is empty
+     * @throws NullPointerException if random is null
      */
     StreamableIterable<E> sample(int sampleSize, Random random);
 

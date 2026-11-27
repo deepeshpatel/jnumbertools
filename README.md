@@ -11,25 +11,25 @@
 4. Java APIs that can be adapted by application code for workflows using Spark, Flink, Hadoop, and other data-processing frameworks; JNumberTools does not provide framework-specific connectors.
 
 ## Latest Version
-The latest release of the library is available on [GitHub](https://github.com/deepeshpatel/jnumbertools/releases).
-It is available through The Maven Central Repository [here](https://mvnrepository.com/artifact/io.github.deepeshpatel/jnumbertools/versions).
-Add the following section to your configuration(pom/gradle etc) file.
+The latest published release is 4.2.0 and is available on [GitHub](https://github.com/deepeshpatel/jnumbertools/releases) and [Maven Central](https://mvnrepository.com/artifact/io.github.deepeshpatel/jnumbertools/versions).
+The API documented on this branch targets 5.0.0. Use the dependency below when 5.0.0 is published; the new API examples in this README are not compatible with 4.2.0.
+Add the following section to your configuration (pom/gradle etc.) file.
 
 ```xml
 <dependency>
     <groupId>io.github.deepeshpatel</groupId>
     <artifactId>jnumbertools</artifactId>
-    <version>4.2.0</version>
+    <version>5.0.0</version>
 </dependency>
 ```
 
 **Gradle**
 ```gradle
-implementation 'io.github.deepeshpatel:jnumbertools:4.2.0'
+implementation 'io.github.deepeshpatel:jnumbertools:5.0.0'
 ```
 **SBT**
 ```sbt
-libraryDependencies += "io.github.deepeshpatel" % "jnumbertools" % "4.2.0"
+libraryDependencies += "io.github.deepeshpatel" % "jnumbertools" % "5.0.0"
 ```
 
 ## Performance
