@@ -15,6 +15,21 @@ import java.util.List;
  * <p>Use {@code all()} or {@code inRange(from, to)} on the returned selector
  * to choose which subset sizes to generate.</p>
  *
+ * <p>The static factories use an internally managed {@link io.github.deepeshpatel.jnumbertools.datastructure.Calculator}
+ * for convenience. Advanced users who want to share calculation caches across selectors can
+ * instantiate {@link SubsetSelector} directly and pass the same calculator to multiple selectors.
+ * For example:</p>
+ *
+ * <pre>{@code
+ * Calculator calculator = new Calculator();
+ * var first = new SubsetSelector<>(List.of("A", "B", "C"), calculator);
+ * var second = new SubsetSelector<>(List.of("D", "E", "F"), calculator);
+ * }</pre>
+ *
+ * <p>Import {@code Calculator} from {@code io.github.deepeshpatel.jnumbertools.datastructure}
+ * and {@code SubsetSelector} from
+ * {@code io.github.deepeshpatel.jnumbertools.generator.subset}.</p>
+ *
  * <pre>{@code
  * Subset.of("A", "B", "C").all().lexOrder();
  * Subset.of("A", "B", "C").inRange(1, 2).lexOrder();
