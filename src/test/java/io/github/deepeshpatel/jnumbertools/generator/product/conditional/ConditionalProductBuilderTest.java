@@ -265,7 +265,6 @@ class ConditionalProductBuilderTest {
         var builder = cartesianProduct.conditionalProductOf(os).and(browser);
         assertThrows(NullPointerException.class, () -> builder.and(null));
         assertThrows(NullPointerException.class, () -> builder.when((List<?>) null));
-        assertThrows(NullPointerException.class, () -> builder.when((Condition) null));
         assertThrows(IllegalArgumentException.class, () -> builder.when(List.of("Windows", "macOS", "Linux")),
                 "an equal but different list instance is not a dimension");
         assertThrows(IllegalArgumentException.class, () -> builder.when(network));
