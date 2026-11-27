@@ -117,7 +117,7 @@ final class ConstraintPlan {
             }
         }
 
-        // Rules between two different nodes. Several rules may join the same two nodes when a compound
+        // Rules between two different nodes. Several rules may join the same two nodes when a multi-trigger rule
         // rule has split a loop into two nodes; all of them then restrict the pair together.
         List<Map<Integer, List<Link>>> adjacency = new ArrayList<>(m);
         for (int x = 0; x < m; x++) adjacency.add(new LinkedHashMap<>());
