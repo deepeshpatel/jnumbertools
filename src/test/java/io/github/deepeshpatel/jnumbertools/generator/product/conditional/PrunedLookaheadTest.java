@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -11,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,7 +39,7 @@ class PrunedLookaheadTest {
     }
 
     private static ConditionalProductBuilder base(List<List<Integer>> dims) {
-        ConditionalProductBuilder b = cartesianProduct.conditionalProductOf(dims.get(0));
+        ConditionalProductBuilder b = Product.conditional(dims.toArray(List[]::new));
         for (int d = 1; d < dims.size(); d++) b = b.and(dims.get(d));
         return b;
     }
