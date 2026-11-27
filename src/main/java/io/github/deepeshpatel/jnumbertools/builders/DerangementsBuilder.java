@@ -66,13 +66,13 @@ public final class DerangementsBuilder {
 
     private final Calculator calculator;
 
-    /** Constructs a {@code Derangements} factory with a fresh {@link Calculator}. */
+    /** Constructs a {@code DerangementsBuilder} with a fresh {@link Calculator}. */
     public DerangementsBuilder() {
         this(new Calculator());
     }
 
     /**
-     * Constructs a {@code Derangements} factory with the supplied
+     * Constructs a {@code DerangementsBuilder} with the supplied
      * {@link Calculator}. Reuse a single {@code Calculator} across the
      * different facade entry points to share memoization.
      */
