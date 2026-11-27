@@ -15,7 +15,7 @@ import java.util.Collections;
 /**
  * Immutable shared input model for a conditional Cartesian product.
  *
- * <p>The dimension snapshots, pairwise relations and compound rules are immutable inputs to the builder's generators.
+ * <p>The dimension snapshots, pairwise relations and multi-trigger rules are immutable inputs to the builder's generators.
  * The compact rows used by prefix-pruned traversal are materialized lazily and then
  * safely published for reuse by every generator created from this model.</p>
  */
@@ -85,7 +85,7 @@ final class ConstraintModel {
         return new ConstraintModel(dimensions, relations, indexes, updated);
     }
 
-    /** Checks a compound implication once every dimension in its scope has been assigned. */
+    /** Checks a multi-trigger implication once every dimension in its scope has been assigned. */
     boolean acceptsPrefix(int assignedThrough, int[] values) {
         if (multiRules.isEmpty()) return true;
         for (MultiTriggerRule rule : multiRules) {
