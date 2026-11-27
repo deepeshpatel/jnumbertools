@@ -109,7 +109,7 @@ Notes carried over from the retired `ConditionalProductRefactring.md`. They are 
 - Pivot by `cardinality()` (STAR_LAST experiment): no advantage when tested.
 - Do not treat a bimodal allocation figure on JIT-sensitive paths (for example DEEP_DEAD_END, 9.6 vs 15.4 MB) as a regression.
 
-## Conditional product: carried over from 4.2.0 (compound/pairwise engine unification)
+## Conditional product: carried over from 4.2.0 (multi-trigger/pairwise engine unification)
 
 Notes carried over from the retired `ENGINEERING-4.1.1.md`. They are not approved features.
 
