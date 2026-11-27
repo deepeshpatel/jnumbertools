@@ -335,7 +335,7 @@ Example:
 
 ```java
 Derangadic derangadic =
-        JNumberTools.numberSystem().derangadic(BigInteger.valueOf(5), 5);
+        new Derangadic(5, BigInteger.valueOf(5), new Calculator());
 
 System.out.println(Arrays.toString(derangadic.derangement())); // [1, 3, 0, 4, 2]
 System.out.println(derangadic.rank());                         // 5
@@ -412,37 +412,37 @@ Ranks are represented using `BigInteger`.
 | Description | API | Output |
 |---|---|---|
 | Find the rank of permutation `[3,2,1,0]` among permutations of 4 elements. | `Rank.permutation().unique(3, 2, 1, 0);` | `23` |
-| Find the rank of k-permutation `[4,6,2,0]` from 8 elements. | `JNumberTools.rankOf().permutation().k(8, 4, 6, 2, 0);` | A zero-based `BigInteger` rank. |
-| Find the rank of `[1,0,0,1]` among sequences of length 4 over 2 types. | `JNumberTools.rankOf().permutation().repetitive(2, 1, 0, 0, 1);` | `9` |
-| Find the rank of multiset permutation `[0,1,0]` with frequencies `[2,1]`. | `JNumberTools.rankOf().permutation().multiset(new int[]{2, 1}, new int[]{0, 1, 0});` | A zero-based `BigInteger` rank. |
-| Find the rank of derangement `[1,0,3,2]`. | `JNumberTools.rankOf().permutation().derangement(1, 0, 3, 2);` | A zero-based `BigInteger` rank. |
+| Find the rank of k-permutation `[4,6,2,0]` from 8 elements. | `Rank.permutation().k(8, 4, 6, 2, 0);` | A zero-based `BigInteger` rank. |
+| Find the rank of `[1,0,0,1]` among sequences of length 4 over 2 types. | `Rank.permutation().repetitive(2, 1, 0, 0, 1);` | `9` |
+| Find the rank of multiset permutation `[0,1,0]` with frequencies `[2,1]`. | `Rank.permutation().multiset(new int[]{2, 1}, new int[]{0, 1, 0});` | A zero-based `BigInteger` rank. |
+| Find the rank of derangement `[1,0,3,2]`. | `Rank.permutation().derangement(1, 0, 3, 2);` | A zero-based `BigInteger` rank. |
 
 ## 8.2 Ranking combinations
 
 | Description | API | Output |
 |---|---|---|
-| Find the rank of combination `[1,2,3,4]` among 4-combinations of 8 elements. | `JNumberTools.rankOf().combination().unique(8, 1, 2, 3, 4);` | A zero-based `BigInteger` rank. |
-| Find the rank of repetitive combination `[0,1,1]` from 3 types. | `JNumberTools.rankOf().combination().repetitive(3, 0, 1, 1);` | A zero-based `BigInteger` rank. |
-| Find the rank of a multiset combination selecting one item each of types 0 and 1. | `JNumberTools.rankOf().combination().multiset(new int[]{2, 2, 1}, new int[]{1, 1, 0});` | A zero-based `BigInteger` rank. |
+| Find the rank of combination `[1,2,3,4]` among 4-combinations of 8 elements. | `Rank.combination().unique(8, 1, 2, 3, 4);` | A zero-based `BigInteger` rank. |
+| Find the rank of repetitive combination `[0,1,1]` from 3 types. | `Rank.combination().repetitive(3, 0, 1, 1);` | A zero-based `BigInteger` rank. |
+| Find the rank of a multiset combination selecting one item each of types 0 and 1. | `Rank.combination().multiset(new int[]{2, 2, 1}, new int[]{1, 1, 0});` | A zero-based `BigInteger` rank. |
 
 ## 8.3 Unranking permutations
 
 | Description | API | Output |
 |---|---|---|
 | Decode rank 5 into a permutation of 3 elements. | `Unrank.permutation().unique(BigInteger.valueOf(5), 3);` | `[2,1,0]` |
-| Determine the smallest permutation size capable of containing rank 5. | `JNumberTools.unrankOf().permutation().uniqueMinimumSize(BigInteger.valueOf(5));` | An integer permutation. |
-| Decode rank 5 into a k-permutation from 8 elements, selecting 3. | `JNumberTools.unrankOf().permutation().k(BigInteger.valueOf(5), 8, 3);` | An integer array of length 3. |
-| Decode rank 5 into a repetitive permutation with 2 types and length 4. | `JNumberTools.unrankOf().permutation().repetitive(BigInteger.valueOf(5), 2, 4);` | An integer array of length 4. |
-| Decode rank 2 into a multiset permutation with frequencies 2 and 1. | `JNumberTools.unrankOf().permutation().multiset(BigInteger.valueOf(2), 2, 1);` | An integer array containing two occurrences of type 0 and one of type 1. |
-| Decode rank 2 into a derangement of order 4. | `JNumberTools.unrankOf().permutation().derangement(BigInteger.valueOf(2), 4);` | A derangement of length 4. |
+| Determine the smallest permutation size capable of containing rank 5. | `Unrank.permutation().uniqueMinimumSize(BigInteger.valueOf(5));` | An integer permutation. |
+| Decode rank 5 into a k-permutation from 8 elements, selecting 3. | `Unrank.permutation().k(BigInteger.valueOf(5), 8, 3);` | An integer array of length 3. |
+| Decode rank 5 into a repetitive permutation with 2 types and length 4. | `Unrank.permutation().repetitive(BigInteger.valueOf(5), 2, 4);` | An integer array of length 4. |
+| Decode rank 2 into a multiset permutation with frequencies 2 and 1. | `Unrank.permutation().multiset(BigInteger.valueOf(2), 2, 1);` | An integer array containing two occurrences of type 0 and one of type 1. |
+| Decode rank 2 into a derangement of order 4. | `Unrank.permutation().derangement(BigInteger.valueOf(2), 4);` | A derangement of length 4. |
 
 ## 8.4 Unranking combinations
 
 | Description | API | Output |
 |---|---|---|
-| Decode rank 9 into a 3-combination from 5 elements. | `JNumberTools.unrankOf().combination().unique(BigInteger.valueOf(9), 5, 3);` | An integer array of length 3. |
-| Decode rank 4 into a repetitive combination of size 3 from 3 types. | `JNumberTools.unrankOf().combination().repetitive(BigInteger.valueOf(4), 3, 3);` | An integer array of length 3. |
-| Decode rank 0 into a multiset combination with frequencies `[2,2,1]`, selecting 2 items. | `JNumberTools.unrankOf().combination().multiset(BigInteger.ZERO, new int[]{2, 2, 1}, 2);` | A count vector aligned with the frequency vector. |
+| Decode rank 9 into a 3-combination from 5 elements. | `Unrank.combination().unique(BigInteger.valueOf(9), 5, 3);` | An integer array of length 3. |
+| Decode rank 4 into a repetitive combination of size 3 from 3 types. | `Unrank.combination().repetitive(BigInteger.valueOf(4), 3, 3);` | An integer array of length 3. |
+| Decode rank 0 into a multiset combination with frequencies `[2,2,1]`, selecting 2 items. | `Unrank.combination().multiset(BigInteger.ZERO, new int[]{2, 2, 1}, 2);` | A count vector aligned with the frequency vector. |
 
 ## 8.5 Ranking and unranking together
 
@@ -450,7 +450,7 @@ For a valid combinatorial object, ranking and unranking are inverse operations.
 
 | Description | API | Output |
 |---|---|---|
-| Rank a permutation and decode the same rank. | `int[] p = {2, 0, 1}; BigInteger rank = JNumberTools.rankOf().permutation().unique(p); int[] decoded = JNumberTools.unrankOf().permutation().unique(rank, p.length);` | `decoded` is `[2,0,1]`, the original permutation. |
+| Rank a permutation and decode the same rank. | `int[] p = {2, 0, 1}; BigInteger rank = Rank.permutation().unique(p); int[] decoded = Unrank.permutation().unique(rank, p.length);` | `decoded` is `[2,0,1]`, the original permutation. |
 
 ---
 
@@ -469,8 +469,7 @@ Use the relevant builder family and documented methods. Do not assume that simil
 , '%', '^', '&', '*');
 var numbers = IntStream.range(0, 10).boxed().toList();
 
-JNumberTools.cartesianProduct()
-        .constrainedProductOfDistinct(1, smallAlphabets)
+Product.constrained().ofDistinct(1, smallAlphabets)
         .andDistinct(12, capitalAlphabets)
         .andMultiSelect(3, symbols)
         .andInRange(10, 20, numbers)
@@ -509,13 +508,13 @@ JNumberTools documents four combinatorial number-system representations: Factora
 
 | Description | API | Output |
 |---|---|---|
-| Convert decimal 859 to Factoradic. | `JNumberTools.numberSystem().factoradic(BigInteger.valueOf(859));` | A Factoradic representation whose decimal value is `859`. |
+| Convert decimal 859 to Factoradic. | `Factoradic.of(BigInteger.valueOf(859));` | A Factoradic representation whose decimal value is `859`. |
 
 Example:
 
 ```java
 BigInteger number = BigInteger.valueOf(859);
-Factoradic factoradic = JNumberTools.numberSystem().factoradic(number);
+Factoradic factoradic = Factoradic.of(number);
 
 System.out.println(factoradic);
 System.out.println(factoradic.decimalValue); // 859
@@ -527,13 +526,13 @@ Permutadic is a generalization of Factoradic for k-permutations.
 
 | Description | API | Output |
 |---|---|---|
-| Convert decimal 100 to a Permutadic representation of degree 3. | `JNumberTools.numberSystem().permutadic(BigInteger.valueOf(100), 3);` | A Permutadic representation whose decimal value is `100`. |
+| Convert decimal 100 to a Permutadic representation of degree 3. | `Permutadic.of(BigInteger.valueOf(100), 3);` | A Permutadic representation whose decimal value is `100`. |
 
 Example:
 
 ```java
 BigInteger number = BigInteger.valueOf(100);
-Permutadic permutadic = JNumberTools.numberSystem().permutadic(number, 3);
+Permutadic permutadic = Permutadic.of(number, 3);
 
 System.out.println(permutadic);
 System.out.println(permutadic.decimalValue); // 100
@@ -545,13 +544,13 @@ Combinadic represents combination ranks using binomial coefficients.
 
 | Description | API | Output |
 |---|---|---|
-| Convert decimal 35 to a Combinadic representation of degree 3. | `JNumberTools.numberSystem().combinadic(BigInteger.valueOf(35), 3);` | A Combinadic representation whose decimal value is `35`. |
+| Convert decimal 35 to a Combinadic representation of degree 3. | `Combinadic.of(BigInteger.valueOf(35), 3);` | A Combinadic representation whose decimal value is `35`. |
 
 Example:
 
 ```java
 BigInteger number = BigInteger.valueOf(35);
-Combinadic combinadic = JNumberTools.numberSystem().combinadic(number, 3);
+Combinadic combinadic = Combinadic.of(number, 3);
 
 System.out.println(combinadic);
 System.out.println(combinadic.decimalValue); // 35
@@ -563,7 +562,7 @@ Derangadic provides a bijection between ranks `0` through `!n - 1` and derangeme
 
 | Description | API | Output |
 |---|---|---|
-| Decode rank 5 into a derangement of order 5. | `JNumberTools.numberSystem().derangadic(BigInteger.valueOf(5), 5);` | Derangement `[1, 3, 0, 4, 2]`. |
+| Decode rank 5 into a derangement of order 5. | `new Derangadic(5, BigInteger.valueOf(5), new Calculator());` | Derangement `[1, 3, 0, 4, 2]`. |
 | Read the rank of the decoded derangement. | `derangadic.rank();` | `5` |
 | Read the number of derangements of order 5. | `derangadic.count();` | `44` |
 | Read the encoded digits. | `derangadic.encoded();` | `[0, 1, 0, 2, 0]` |
@@ -573,7 +572,7 @@ Example:
 
 ```java
 Derangadic derangadic =
-        JNumberTools.numberSystem().derangadic(BigInteger.valueOf(5), 5);
+        new Derangadic(5, BigInteger.valueOf(5), new Calculator());
 
 System.out.println(Arrays.toString(derangadic.derangement())); // [1, 3, 0, 4, 2]
 System.out.println(derangadic.rank());                         // 5
@@ -649,38 +648,38 @@ Ranks are represented using `BigInteger`.
 
 | Description | API | Output |
 |---|---|---|
-| Find the rank of permutation `[3,2,1,0]` among permutations of 4 elements. | `JNumberTools.rankOf().permutation().unique(3, 2, 1, 0);` | `23` |
-| Find the rank of k-permutation `[4,6,2,0]` from 8 elements. | `JNumberTools.rankOf().permutation().k(8, 4, 6, 2, 0);` | A zero-based `BigInteger` rank. |
-| Find the rank of `[1,0,0,1]` among sequences of length 4 over 2 types. | `JNumberTools.rankOf().permutation().repetitive(2, 1, 0, 0, 1);` | `9` |
-| Find the rank of multiset permutation `[0,1,0]` with frequencies `[2,1]`. | `JNumberTools.rankOf().permutation().multiset(new int[]{2, 1}, new int[]{0, 1, 0});` | A zero-based `BigInteger` rank. |
-| Find the rank of derangement `[1,0,3,2]`. | `JNumberTools.rankOf().permutation().derangement(1, 0, 3, 2);` | A zero-based `BigInteger` rank. |
+| Find the rank of permutation `[3,2,1,0]` among permutations of 4 elements. | `Rank.permutation().unique(3, 2, 1, 0);` | `23` |
+| Find the rank of k-permutation `[4,6,2,0]` from 8 elements. | `Rank.permutation().k(8, 4, 6, 2, 0);` | A zero-based `BigInteger` rank. |
+| Find the rank of `[1,0,0,1]` among sequences of length 4 over 2 types. | `Rank.permutation().repetitive(2, 1, 0, 0, 1);` | `9` |
+| Find the rank of multiset permutation `[0,1,0]` with frequencies `[2,1]`. | `Rank.permutation().multiset(new int[]{2, 1}, new int[]{0, 1, 0});` | A zero-based `BigInteger` rank. |
+| Find the rank of derangement `[1,0,3,2]`. | `Rank.permutation().derangement(1, 0, 3, 2);` | A zero-based `BigInteger` rank. |
 
 ## 8.2 Ranking combinations
 
 | Description | API | Output |
 |---|---|---|
-| Find the rank of combination `[1,2,3,4]` among 4-combinations of 8 elements. | `JNumberTools.rankOf().combination().unique(8, 1, 2, 3, 4);` | A zero-based `BigInteger` rank. |
-| Find the rank of repetitive combination `[0,1,1]` from 3 types. | `JNumberTools.rankOf().combination().repetitive(3, 0, 1, 1);` | A zero-based `BigInteger` rank. |
-| Find the rank of a multiset combination selecting one item each of types 0 and 1. | `JNumberTools.rankOf().combination().multiset(new int[]{2, 2, 1}, new int[]{1, 1, 0});` | A zero-based `BigInteger` rank. |
+| Find the rank of combination `[1,2,3,4]` among 4-combinations of 8 elements. | `Rank.combination().unique(8, 1, 2, 3, 4);` | A zero-based `BigInteger` rank. |
+| Find the rank of repetitive combination `[0,1,1]` from 3 types. | `Rank.combination().repetitive(3, 0, 1, 1);` | A zero-based `BigInteger` rank. |
+| Find the rank of a multiset combination selecting one item each of types 0 and 1. | `Rank.combination().multiset(new int[]{2, 2, 1}, new int[]{1, 1, 0});` | A zero-based `BigInteger` rank. |
 
 ## 8.3 Unranking permutations
 
 | Description | API | Output |
 |---|---|---|
-| Decode rank 5 into a permutation of 3 elements. | `JNumberTools.unrankOf().permutation().unique(BigInteger.valueOf(5), 3);` | `[2,1,0]` |
-| Determine the smallest permutation size capable of containing rank 5. | `JNumberTools.unrankOf().permutation().uniqueMinimumSize(BigInteger.valueOf(5));` | An integer permutation. |
-| Decode rank 5 into a k-permutation from 8 elements, selecting 3. | `JNumberTools.unrankOf().permutation().k(BigInteger.valueOf(5), 8, 3);` | An integer array of length 3. |
-| Decode rank 5 into a repetitive permutation with 2 types and length 4. | `JNumberTools.unrankOf().permutation().repetitive(BigInteger.valueOf(5), 2, 4);` | An integer array of length 4. |
-| Decode rank 2 into a multiset permutation with frequencies 2 and 1. | `JNumberTools.unrankOf().permutation().multiset(BigInteger.valueOf(2), 2, 1);` | An integer array containing two occurrences of type 0 and one of type 1. |
-| Decode rank 2 into a derangement of order 4. | `JNumberTools.unrankOf().permutation().derangement(BigInteger.valueOf(2), 4);` | A derangement of length 4. |
+| Decode rank 5 into a permutation of 3 elements. | `Unrank.permutation().unique(BigInteger.valueOf(5), 3);` | `[2,1,0]` |
+| Determine the smallest permutation size capable of containing rank 5. | `Unrank.permutation().uniqueMinimumSize(BigInteger.valueOf(5));` | An integer permutation. |
+| Decode rank 5 into a k-permutation from 8 elements, selecting 3. | `Unrank.permutation().k(BigInteger.valueOf(5), 8, 3);` | An integer array of length 3. |
+| Decode rank 5 into a repetitive permutation with 2 types and length 4. | `Unrank.permutation().repetitive(BigInteger.valueOf(5), 2, 4);` | An integer array of length 4. |
+| Decode rank 2 into a multiset permutation with frequencies 2 and 1. | `Unrank.permutation().multiset(BigInteger.valueOf(2), 2, 1);` | An integer array containing two occurrences of type 0 and one of type 1. |
+| Decode rank 2 into a derangement of order 4. | `Unrank.permutation().derangement(BigInteger.valueOf(2), 4);` | A derangement of length 4. |
 
 ## 8.4 Unranking combinations
 
 | Description | API | Output |
 |---|---|---|
-| Decode rank 9 into a 3-combination from 5 elements. | `JNumberTools.unrankOf().combination().unique(BigInteger.valueOf(9), 5, 3);` | An integer array of length 3. |
-| Decode rank 4 into a repetitive combination of size 3 from 3 types. | `JNumberTools.unrankOf().combination().repetitive(BigInteger.valueOf(4), 3, 3);` | An integer array of length 3. |
-| Decode rank 0 into a multiset combination with frequencies `[2,2,1]`, selecting 2 items. | `JNumberTools.unrankOf().combination().multiset(BigInteger.ZERO, new int[]{2, 2, 1}, 2);` | A count vector aligned with the frequency vector. |
+| Decode rank 9 into a 3-combination from 5 elements. | `Unrank.combination().unique(BigInteger.valueOf(9), 5, 3);` | An integer array of length 3. |
+| Decode rank 4 into a repetitive combination of size 3 from 3 types. | `Unrank.combination().repetitive(BigInteger.valueOf(4), 3, 3);` | An integer array of length 3. |
+| Decode rank 0 into a multiset combination with frequencies `[2,2,1]`, selecting 2 items. | `Unrank.combination().multiset(BigInteger.ZERO, new int[]{2, 2, 1}, 2);` | A count vector aligned with the frequency vector. |
 
 ## 8.5 Ranking and unranking together
 
@@ -688,7 +687,7 @@ For a valid combinatorial object, ranking and unranking are inverse operations.
 
 | Description | API | Output |
 |---|---|---|
-| Rank a permutation and decode the same rank. | `int[] p = {2, 0, 1}; BigInteger rank = JNumberTools.rankOf().permutation().unique(p); int[] decoded = JNumberTools.unrankOf().permutation().unique(rank, p.length);` | `decoded` is `[2,0,1]`, the original permutation. |
+| Rank a permutation and decode the same rank. | `int[] p = {2, 0, 1}; BigInteger rank = Rank.permutation().unique(p); int[] decoded = Unrank.permutation().unique(rank, p.length);` | `decoded` is `[2,0,1]`, the original permutation. |
 
 ---
 
