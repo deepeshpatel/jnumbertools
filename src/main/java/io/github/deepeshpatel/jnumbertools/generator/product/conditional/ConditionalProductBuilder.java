@@ -256,6 +256,11 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         return new WhenDimension(ruleCompiler.indexOf(dimension), List.of(), false);
     }
 
+    /** Resolves a dimension handle for the package-private Lambda builder. */
+    int indexOfDimension(List<?> dimension) {
+        return ruleCompiler.indexOf(dimension);
+    }
+
     /** First step of a pairwise trigger condition. */
     public final class WhenDimension {
         private final int dim;
