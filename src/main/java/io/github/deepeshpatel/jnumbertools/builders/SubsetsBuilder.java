@@ -30,7 +30,7 @@ import java.util.stream.IntStream;
  * import io.github.deepeshpatel.jnumbertools.entrypoint.Subset;
  *
  * // All subsets of [A, B, C]
- * subs.of("A", "B", "C")
+ * Subset.of("A", "B", "C")
  *     .all()
  *     .lexOrder()
  *     .forEach(System.out::println);
@@ -40,7 +40,7 @@ import java.util.stream.IntStream;
  * <h3>Subsets in Size Range</h3>
  * <pre>
  * // Subsets of size 1 to 2 from [A, B, C, D]
- * subs.of("A", "B", "C", "D")
+ * Subset.of("A", "B", "C", "D")
  *     .inRange(1, 2)
  *     .lexOrder()
  *     .forEach(System.out::println);
@@ -50,7 +50,7 @@ import java.util.stream.IntStream;
  * <h3>Every mᵗʰ Subset</h3>
  * <pre>
  * // Every 3rd subset of [A, B, C, D] starting from rank 1
- * subs.of("A", "B", "C", "D")
+ * Subset.of("A", "B", "C", "D")
  *     .all()
  *     .lexOrderMth(3, 1)
  *     .forEach(System.out::println);
@@ -59,13 +59,13 @@ import java.util.stream.IntStream;
  * <h3>Random Sampling</h3>
  * <pre>
  * // Random sample of 3 subsets without replacement
- * subs.of(1, 2, 3, 4, 5)
+ * Subset.of(1, 2, 3, 4, 5)
  *     .inRange(2, 4)
  *     .sample(3)
  *     .forEach(System.out::println);
  *
  * // Random sample of 5 subsets with replacement (duplicates allowed)
- * subs.of("A", "B", "C")
+ * Subset.of("A", "B", "C")
  *     .all()
  *     .choice(5)
  *     .forEach(System.out::println);
@@ -74,7 +74,7 @@ import java.util.stream.IntStream;
  * <h3>Subsets at Specific Ranks</h3>
  * <pre>
  * // Get subsets at ranks 0, 3, and 7
- * subs.of("A", "B", "C", "D")
+ * Subset.of("A", "B", "C", "D")
  *     .all()
  *     .byRanks(List.of(BigInteger.ZERO, BigInteger.valueOf(3), BigInteger.valueOf(7)))
  *     .forEach(System.out::println);
@@ -84,7 +84,7 @@ import java.util.stream.IntStream;
  * <h3>Integer Range Subsets</h3>
  * <pre>
  * // All subsets of {0, 1, 2, 3, 4}
- * subs.of(5)
+ * Subset.of(5)
  *     .all()
  *     .lexOrder()
  *     .forEach(System.out::println);
