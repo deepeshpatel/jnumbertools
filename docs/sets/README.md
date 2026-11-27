@@ -27,6 +27,8 @@ JNumberTools provides the following 7 generators for sets and subsets. All m<sup
 ### 1. All subsets in lex order
 Generates all subsets of a given set in lexicographical order, including the empty set (φ). For example, for the set ["A", "B", "C"], it generates: [], [A], [B], [C], [A, B], [A, C], [B, C], [A, B, C].
 
+**Static entry point:** `io.github.deepeshpatel.jnumbertools.base.Subset` (import `Subset`).
+
 ```java
 // All subsets of ["Apple", "Banana", "Guava"] in lex order
 Subset
