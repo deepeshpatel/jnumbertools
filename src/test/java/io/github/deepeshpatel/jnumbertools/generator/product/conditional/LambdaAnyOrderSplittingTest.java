@@ -51,8 +51,7 @@ class LambdaAnyOrderSplittingTest {
         List<Integer> empty = new ArrayList<>();
         var product = cartesianProduct.withLambda(a, b, c, large.get(0), large.get(1), large.get(2), large.get(3),
                         large.get(4), large.get(5), large.get(6), empty)
-                .when(a, b, c).matches(tuple ->
-                        (Integer) tuple[0] == 0 && (Integer) tuple[1] == 1);
+                .when(a, b, c).matches((av, bv, cv) -> av == 0 && bv == 1);
 
         Spliterator<List<Object>> spliterator = product.generate().spliterator();
         assertEquals(0L, spliterator.estimateSize());
