@@ -1,75 +1,85 @@
 # JNumberTools
 
-> Zero-dependency Java 21+ library for deterministic combinatorics, arbitrary-precision (`BigInteger`) ranking/unranking, lexicographical sampling, and rule-constrained Cartesian products.
+> Zero-dependency Java 21+ library for deterministic combinatorics, arbitrary-precision (`BigInteger`) ranking/unranking, lexicographical sampling, and Cartesian products with compiled constraints.
 
-JNumberTools provides lazy `Iterator` and `Stream` generators, `BigInteger` rank/unrank converters, and mathematical calculators under `io.github.deepeshpatel.jnumbertools`. Import `io.github.deepeshpatel.jnumbertools.datastructure.Calculator` and create it with `new Calculator()`.
+JNumberTools provides lazy iterator/stream generators and mathematical utilities.
 
-**Strict LLM Grounding Rule:** Use only classes, entry points, and builder methods explicitly documented in this file or the linked repository docs. Do not invent builder methods or assume that distinct generator families (such as permutations, combinations, and conditional Cartesian products) expose identical terminal methods.
+## Coordinates & runtime
 
-## Coordinates & Runtime Requirements
+- Maven: `io.github.deepeshpatel:jnumbertools:4.2.0`
+- Java: 21+
+- Runtime dependencies: none
+- License: Apache-2.0
 
-- **Maven Central:** `io.github.deepeshpatel:jnumbertools:4.2.0`
-- **Java Version:** Java 21+
-- **Dependencies:** Zero runtime dependencies
-- **License:** Apache-2.0
+## Public API packages
 
-## Capability Map
+- `io.github.deepeshpatel.jnumbertools.entrypoint`: static entry points `Permutation`, `Combination`, `Subset`, `Derangement`, `Product`, `Rank`, and `Unrank`.
+- `io.github.deepeshpatel.jnumbertools.builders`: builder implementations returned by the entry points.
+- `io.github.deepeshpatel.jnumbertools.datastructure`: `Calculator` and supporting data structures.
+- `io.github.deepeshpatel.jnumbertools.numbersystem`: Factoradic, Permutadic and Combinadic representations; Derangadic is in `numbersystem.derangadic`.
 
-Map the user's requirement to the exact `JNumberTools` entry point before writing code:
+Do not use the removed `JNumberTools` facade or assume that all builders expose the same terminal operations.
 
-| Problem / Requirement | Entry Point | Notes |
-| :--- | :--- | :--- |
-| All permutations (`n!`), `k`-permutations (`nPk`), repetitive or multiset permutations | `Permutation` | Ordered arrangements; supports `lexOrder()`, `byRanks()`, `sample()`, `count()` |
-| Unordered selections without repetition (`nCr`), with repetition, or from multisets | `Combination` | Unordered subsets of size `k`; do not use Cartesian products for unordered combinations |
-| All subsets (`2^n` power set) or subsets within size bounds | `Subset` | Generates unordered subsets of an input collection or range |
-| Derangements (`!n`, permutations with no fixed points) | `Derangement` | Generates permutations where `element[i] != original[i]` |
-| Standard Cartesian products across multiple dimensions | `JNumberTools.cartesianProduct()` | Ordered `d`-tuples (`List<T>`) formed across `d` input lists/collections |
-| Simple Cartesian product | `JNumberTools.cartesianProduct().simpleProductOf(...)` | One value from each input dimension; lexicographical and every-mth traversal |
-| Constrained Cartesian product | `JNumberTools.cartesianProduct().constrainedProductOfDistinct(...)` and related builders | Each dimension is a fixed-size combination, multi-select, or subset range; lexicographical and every-mth traversal |
-| Compiled Product (pairwise rules) | `JNumberTools.cartesianProduct().conditionalProductOf(...)` | Pairwise `when(...).then(...)` rules; lexicographical/rank traversal, count, choice and sample |
-| Lambda Engine (joint predicates) | `JNumberTools.cartesianProduct().withLambda(...)` | Compiles joint Java predicates into constraints; lazy `generate()`, count and emptiness |
-| Find the zero-based lexicographical `BigInteger` rank of a combinatorial object | `JNumberTools.rankOf()` | Direct mathematical ranking without iterating from rank `0` |
-| Reconstruct a combinatorial object directly from its zero-based `BigInteger` rank | `JNumberTools.unrankOf()` | Direct mathematical unranking without generating preceding elements |
-| Combinatorial counts (`nPr`, `nCr`, factorials, derangements and related combinatorial functions) | `new Calculator()` | Thread-safe `BigInteger` mathematical computations |
-| Factoradic, Permutadic, Combinadic and Derangadic number-system conversions | `JNumberTools.numberSystem()` | Representations for permutations, k-permutations, combinations and derangements |
+## Capability map
 
-## Choosing the Right Generator
+| Requirement | Entry point | Notes |
+|---|---|---|
+| Unique, k-, repetitive or multiset permutations | `Permutation` | `unique(...)`, `nPk(...)`, `repetitive(...)`, `multiset(...)` |
+| Unique, repetitive or multiset combinations | `Combination` | `unique(...)`, `repetitive(...)`, `multiset(...)` |
+| Power set or subsets within a size range | `Subset` | `Subset.of(...).all()` or `.inRange(from,to)` |
+| Derangements | `Derangement` | `Derangement.of(...)` |
+| Simple Cartesian product | `Product.simple(List<?>...)` | One list per dimension |
+| Constrained Cartesian product | `Product.constrained()` | Start with `ofDistinct`, `ofMultiSelect` or `ofInRange`; extend with matching builder methods |
+| Pairwise conditional product | `Product.conditional(List<?>...)` | Compiled pairwise `.when(...).then(...)` rules |
+| Joint lambda predicates | `Product.conditional(...).withLambda(...)` | Typed overloads for 1–5 dimensions; array form for arbitrary dimensions |
+| Rank a permutation or derangement | `Rank.permutation()` | `unique`, `k`, `repetitive`, `multiset`, `derangement` |
+| Rank a combination | `Rank.combination()` | `unique`, `repetitive`, `multiset` |
+| Unrank a permutation or derangement | `Unrank.permutation()` | `unique`, `uniqueMinimumSize`, `k`, `repetitive`, `multiset`, `derangement` |
+| Unrank a combination | `Unrank.combination()` | `unique`, `repetitive`, `multiset` |
+| Combinatorial arithmetic | `new Calculator()` | BigInteger factorials, binomials, permutations, subfactorials and related functions |
+| Number-system conversions | `Factoradic.of`, `Permutadic.of`, `Combinadic.of`, `new Derangadic(...)` | Use the representation classes directly |
 
-- **Ordered arrangements of one collection** -> Use `permutations()`.
-- **Unordered selection of `k` elements from one collection** -> Use `combinations()`.
-- **All subsets of one collection** -> Use `subsets()`.
-- **One value from each of several domains, without rules** -> Use `simpleProductOf(...)`.
-- **Each dimension is itself a combination, multi-select, or subset range** -> Use the constrained product builders.
-- **Straightforward rules between two dimensions** -> Use `conditionalProductOf(...)` (Compiled Product).
-- **Arbitrary joint logic across named dimensions** -> Use `withLambda(...)` (Lambda Engine).
+## Examples
 
-## The Four Cartesian Product Styles
+```java
+import io.github.deepeshpatel.jnumbertools.entrypoint.*;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
+import io.github.deepeshpatel.jnumbertools.numbersystem.*;
+import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic;
+import java.math.BigInteger;
+import java.util.List;
 
-- **Simple Product (`simpleProductOf`)**: The ordinary Cartesian product; generates all `|D1| x |D2| x ... x |Dd|` tuples, with lexicographical and every-mth traversal.
-- **Constrained Product (`constrainedProductOfDistinct`, `constrainedProductOfMultiSelect`, `constrainedProductOfInRange`)**: Each dimension is a combination, multi-select, or subset-range selection; the dimensions are then combined.
-- **Compiled Product (`conditionalProductOf`)**: Expresses pairwise rules with `.when(dimA).is(value).then(dimB).isOneOf(...)` and related matchers. The builder compiles these rules into constraints and supports lexicographical/rank-based operations, counting and sampling.
-- **Lambda Engine (`withLambda`)**: Intended for joint rules that are more complex than straightforward pairwise constraints. Joint Java predicates are compiled once into the existing constraint representation, so generation remains pruned rather than applying a predicate to every completed tuple. It exposes lazy `generate()`, exact `count()` and `isEmpty()`.
+var all = Permutation.unique("A", "B", "C").lexOrder();
+var chosen = Combination.unique(2, "A", "B", "C").sample(2, new java.util.Random());
+var product = Product.simple(List.of("Linux", "Windows"), List.of("Firefox", "Safari"));
 
-The Lambda Engine provides lambda-style flexibility while retaining readable rule declarations and the constraint engine's pruned execution path. Predicates must be deterministic and side-effect-free; compilation is bounded by the configured joint-scope limit.
+BigInteger rank = Rank.permutation().unique(2, 0, 1);
+int[] decoded = Unrank.permutation().unique(rank, 3);
 
-**Important modeling boundary:** Cartesian products describe ordered, dimension-based configurations. They are not a general-purpose SAT/CP solver and are not a substitute for constrained subset/combination selection from one pool.
+Calculator calculator = new Calculator();
+Factoradic f = Factoradic.of(859);
+Permutadic p = Permutadic.of(BigInteger.valueOf(100), 3);
+Combinadic c = Combinadic.of(BigInteger.valueOf(35), 3, calculator);
+Derangadic d = new Derangadic(4, BigInteger.valueOf(2), calculator);
+```
 
-## Core Semantic Contracts & Limitations
+## Semantic contracts
 
-- **Zero-based `BigInteger` indexing:** Ranks are zero-based (`0` to `count().subtract(BigInteger.ONE)`). `count()` returns `BigInteger` to support spaces larger than `Long.MAX_VALUE`.
-- **Lazy evaluation & reusability:** Generators produce elements lazily via `stream()` or `iterator()` without materializing the full combinatorial space in memory.
-- **Partitioning via `byRanks(...)`:** `byRanks(...)` accepts an `Iterable<BigInteger>` of ranks (for example, a `List<BigInteger>`), with convenience overloads for `long...` and decimal `String` ranks. A Java `Stream<BigInteger>` is not accepted directly. This allows distributed workers (e.g., Apache Spark or Flink) to process disjoint rank slices independently.
-- **Ordering:** `lexOrder()` guarantees standard lexicographical ordering. The `anyOrder()` traversal option is specific to the Compiled Product (`conditionalProductOf(...)`); it prioritizes traversal/pruning order and does **not** mean random order.
-- **Sampling semantics:** `sample(...)` draws random elements using rank-based selection rather than materializing and shuffling the entire space.
-- **Predicate compilation:** `withLambda(...).when(dimensions...).matches(...)` applies a joint predicate to combinations in the declared scope. Predicates are evaluated during rule compilation, not repeatedly for each generated tuple.
-- **Lambda compilation limit:** A lambda rule is rejected if compiling it would require more than 1,000,000 predicate probes. Keep rule scopes and dimension sizes bounded.
-- **Benchmark status:** JMH-measured (`ConditionalProductSpeedBenchmarkJMH`, average time, 5 warmup + 10 measurement iterations x 3 forks). At every tested dimension size (50 to 5000), the Lambda Engine tracks the Compiled Product within measurement noise (e.g. 0.848 ms vs. 0.835 ms at size 5000), because a two-dimension `withLambda(...).when(...).matches(...)` rule compiles to the same pairwise constraint table, and a three-or-more-dimension rule to the same bounded joint constraint, that those builders use. Both are one to almost three orders of magnitude faster than a hand-written, incrementally pruned Java `Stream.flatMap()` pipeline at the same size (6x at size 50, widening to roughly 580x at size 5000), since rules are compiled once rather than re-evaluated per generated tuple. Full table and reproduction command in `llms-full.txt` section 4.5.
+- Ranks are zero-based and represented by `BigInteger`.
+- `count()` returns `BigInteger`.
+- `lexOrder()` guarantees lexicographical order.
+- `lexOrderMth(m,start)` and `byRanks(...)` are available only on builder types that document them.
+- `choice(n, random)` samples with replacement; `sample(n, random)` samples without replacement.
+- Generators are lazy and re-iterable. Use `.stream()` to consume them as streams.
+- The Compiled Conditional Product supports pairwise rules and rank-based operations. Lambda rules compile bounded joint predicates into constraints; do not assume the Lambda Engine has the same traversal operations as every other product builder.
+- The Calculator may be shared across entry points that accept it, allowing combinatorial caches to be reused.
 
-## Repository Documentation & Source Index
+## Documentation
 
-- [Main README & Installation](https://github.com/deepeshpatel/jnumbertools/blob/main/README.md): Maven/Gradle/SBT coordinates (`4.2.0`) and overview.
-- [Products Documentation](https://github.com/deepeshpatel/jnumbertools/blob/main/docs/products/README.md): Simple, constrained, compiled and lambda-engine product builders and rule syntax.
-- [Sets, Permutations & Combinations Docs](https://github.com/deepeshpatel/jnumbertools/blob/main/docs/sets/README.md): Generator contracts, ordering, and sampling semantics.
-- [Calculator Documentation](https://github.com/deepeshpatel/jnumbertools/blob/main/docs/calculator/README.md): Thread-safe `BigInteger` combinatorial math functions.
-- [Validation Rules Specification](https://github.com/deepeshpatel/jnumbertools/blob/main/ValidationRules.md): Input validation, null handling, empty inputs, and boundary conditions.
-- [Changelog](https://github.com/deepeshpatel/jnumbertools/blob/main/CHANGELOG.md): Release history and API changes.
+- [README](https://github.com/deepeshpatel/jnumbertools/blob/main/README.md)
+- [Product guide](https://github.com/deepeshpatel/jnumbertools/blob/main/docs/products/README.md)
+- [Ranking guide](https://github.com/deepeshpatel/jnumbertools/blob/main/docs/ranking/README.md)
+- [Number-system guide](https://github.com/deepeshpatel/jnumbertools/blob/main/docs/numbersystem/README.md)
+- [Validation rules](https://github.com/deepeshpatel/jnumbertools/blob/main/ValidationRules.md)
+- [Full API examples](https://github.com/deepeshpatel/jnumbertools/blob/main/llms-full.txt)
+- [Changelog](https://github.com/deepeshpatel/jnumbertools/blob/main/CHANGELOG.md)
