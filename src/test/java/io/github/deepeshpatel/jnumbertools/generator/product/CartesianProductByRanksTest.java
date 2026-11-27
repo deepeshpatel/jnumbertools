@@ -5,7 +5,6 @@ import io.github.deepeshpatel.jnumbertools.base.Combination;
 import io.github.deepeshpatel.jnumbertools.base.Derangement;
 import io.github.deepeshpatel.jnumbertools.base.Subset;
 
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 
 import org.junit.jupiter.api.Test;
