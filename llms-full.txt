@@ -642,9 +642,9 @@ A rule such as `.when(browser).is("Safari").then(os).isOneOf("macOS")` means tha
 
 The pairwise API supports `is`, `isNot`, `isOneOf`, `isNoneOf` and `isNotIn` on both the trigger and consequence sides. `isNotIn` is an alias of `isNoneOf`. Dimensions are identified by the same list instances supplied to `conditionalProductOf(...)` and `and(...)`.
 
-Use the Compiled Product for pairwise rules. Use the Lambda Engine for joint predicates, and the Lambda Engine for arbitrary joint predicates.
+Use the Compiled Product for pairwise rules and the Lambda Engine for arbitrary joint predicates.
 
-## 4.5 Lambda Engine: strongly typed joint predicates
+## 4.4 Lambda Engine: strongly typed joint predicates
 
 Use the Lambda Engine for arbitrary Java logic over Cartesian-product dimensions. The
 predicate receives the values from **all dimensions registered with** `withLambda(...)`,
@@ -719,14 +719,14 @@ var products = JNumberTools.cartesianProduct()
   It does not expose lexicographical traversal, rank-based access, choice or sampling.
 
 Prefer `conditionalProductOf(...)` for straightforward pairwise rules and
-`withLambda(...)` when nested declarative conditions are clearer. The Lambda
-Engine is for custom joint logic that is most naturally expressed as Java predicates.
+`withLambda(...)` when a rule depends on multiple dimensions or involves custom joint
+logic that is most naturally expressed as Java predicates.
 
 **Benchmark note:** performance measurements published for the previous scoped-predicate
 API are not representative of this all-dimensions API. Re-run the benchmarks against this
 API before publishing comparative performance claims.
 
-## 4.6 Products of ranks, random choice and random sample
+## 4.5 Products of ranks, random choice and random sample
 
 Simple, constrained and compiled products support rank-based and random operations.
 `byRanks` returns products at the requested ranks, `choice` draws with replacement
@@ -983,7 +983,7 @@ For a valid combinatorial object, ranking and unranking are inverse operations.
 3. **Random choice versus random sample:** `choice` samples with replacement. `sample` samples without replacement and therefore cannot return more distinct results than the total number of available results.
 4. **Large ranks:** Use the `String` overload of `byRanks` when a rank does not fit in a `long`. For example, `.byRanks("1000000000000000000000")`.
 5. **Lazy generation:** Generator methods return lazy, re-iterable generators. They do not necessarily materialize all results in memory.
-6. **Product builder differences:** Simple, constrained and compiled products support lexicographical/rank-based operations and random choice or sampling. The Lambda Engine exposes lazy `generate()`, exact `count()` and `isEmpty()`; it does not expose rank-based traversal, choice or sampling. Compound scoped Lambda predicates predicates apply to one dimension, while Lambda Engine predicates may jointly inspect the values in a declared multi-dimension scope. Both are compiled before tuple generation.
+6. **Product builder differences:** Simple, constrained and compiled products support lexicographical/rank-based operations and random choice or sampling. The Lambda Engine exposes lazy `generate()`, exact `count()` and `isEmpty()`; it does not expose rank-based traversal, choice or sampling. Scoped Lambda predicates inspect only the selected dimensions; unscoped predicates inspect all dimensions registered at that point. Both are compiled before tuple generation.
 7. **Empty results:** A generator may have zero results. A generator containing one empty tuple is not empty.
 8. **Validation:** Input constraints and exception behavior are specified in the repository's `ValidationRules.md`.
 
