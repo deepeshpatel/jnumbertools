@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.jupiter.api.Test;
 
@@ -7,7 +9,6 @@ import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static io.github.deepeshpatel.jnumbertools.TestBase.errMsgNullInput;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,7 +19,7 @@ class SimpleProductBuilderTest {
 
     @Test
     void and() {
-        var builder = cartesianProduct.simpleProductOf(setA);
+        var builder = Product.simple(setA);
 
         // Test adding dimension
         var builderWithB = builder.and(setB);
@@ -36,7 +37,7 @@ class SimpleProductBuilderTest {
 
     @Test
     void lexOrder() {
-        var builder = cartesianProduct.simpleProductOf(setA);
+        var builder = Product.simple(setA);
 
         // Test returns generator (not null)
         assertNotNull(builder.lexOrder());
@@ -49,7 +50,7 @@ class SimpleProductBuilderTest {
 
     @Test
     void lexOrderMth() {
-        var builder = cartesianProduct.simpleProductOf(setA).and(setB);
+        var builder = Product.simple(setA).and(setB);
 
         // Test returns generator for valid params
         assertNotNull(builder.lexOrderMth(2, 1));
@@ -65,7 +66,7 @@ class SimpleProductBuilderTest {
 
     @Test
     void byRanks() {
-        var builder = cartesianProduct.simpleProductOf(setA).and(setB);
+        var builder = Product.simple(setA).and(setB);
 
         // Test returns generator for valid ranks
         var ranks = List.of(BigInteger.ZERO, BigInteger.ONE);
@@ -74,7 +75,7 @@ class SimpleProductBuilderTest {
 
     @Test
     void choice() {
-        var builder = cartesianProduct.simpleProductOf(setA).and(setB);
+        var builder = Product.simple(setA).and(setB);
 
         // Test returns generator for valid sample size
         assertNotNull(builder.choice(5, TestBase.random));
@@ -88,7 +89,7 @@ class SimpleProductBuilderTest {
 
     @Test
     void sample() {
-        var builder = cartesianProduct.simpleProductOf(setA).and(setB);
+        var builder = Product.simple(setA).and(setB);
 
         // Test returns generator for valid sample size
         assertNotNull(builder.sample(4, TestBase.random));
@@ -103,16 +104,16 @@ class SimpleProductBuilderTest {
 
     @Test
     void count() {
-        var builder = cartesianProduct.simpleProductOf(setA).and(setB);
+        var builder = Product.simple(setA).and(setB);
         assertEquals(BigInteger.valueOf(6), builder.count());
 
         // A × ∅ = ∅, so count should be 0
-        var builderWithEmpty = cartesianProduct.simpleProductOf(setA)
+        var builderWithEmpty = Product.simple(setA)
                 .and(Collections.emptyList());
         assertEquals(BigInteger.ZERO, builderWithEmpty.count());  // Changed from ONE to ZERO
 
         // ValidationRules.md: ANY dimension that is empty makes the product empty, a single one included
-        var emptyBuilder = cartesianProduct.simpleProductOf(Collections.emptyList());
+        var emptyBuilder = Product.simple(Collections.emptyList());
         assertEquals(BigInteger.ZERO, emptyBuilder.count());
         assertTrue(emptyBuilder.isEmpty());
     }
