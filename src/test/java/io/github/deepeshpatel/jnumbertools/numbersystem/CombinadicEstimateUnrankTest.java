@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
+import io.github.deepeshpatel.jnumbertools.base.Combination;
+
 import io.github.deepeshpatel.jnumbertools.AllocationMeter;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
@@ -135,7 +137,7 @@ class CombinadicEstimateUnrankTest {
 
     @Test
     void generatorByRanksAgreesWithLexOrderMthOnALargeSpace() {
-        var builder = JNumberTools.combinations().unique(200, 50);
+        var builder = Combination.unique(200, 50);
         BigInteger total = builder.count();
         Random random = new Random(9);
         for (int i = 0; i < 50; i++) {
