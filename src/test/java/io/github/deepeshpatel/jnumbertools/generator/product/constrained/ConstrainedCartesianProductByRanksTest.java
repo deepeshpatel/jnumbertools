@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -10,7 +12,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,7 +26,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void assertCount() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese)
                     .andInRange(1, 3, toppings);
 
@@ -39,22 +40,22 @@ public class ConstrainedCartesianProductByRanksTest {
         @Test
         void assertCountAndContentForSpecialCase() {
             // Case 1: Single dimension with empty list and quantity 0 -> count=1, mth should return [[]]
-            var singleEmptyZero = cartesianProduct.constrainedProductOfDistinct(0, Collections.emptyList());
+            var singleEmptyZero = Product.constrained().ofDistinct(0, Collections.emptyList());
             var result1 = singleEmptyZero.lexOrderMth(1, 0).stream().toList();
             assertEquals(1, result1.size());
             assertEquals(List.of(), result1.get(0));
 
             // Case 2: Single dimension with empty list and quantity > 0 -> count=0, mth should return []
-            var singleEmptyPositive = cartesianProduct.constrainedProductOfDistinct(2, Collections.emptyList());
+            var singleEmptyPositive = Product.constrained().ofDistinct(2, Collections.emptyList());
             assertTrue(singleEmptyPositive.lexOrderMth(1, 0).stream().toList().isEmpty());
 
             // Case 3: Multiple dimensions with any empty -> count=0, mth should return []
-            var multiWithEmpty = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var multiWithEmpty = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, Collections.emptyList());
             assertTrue(multiWithEmpty.lexOrderMth(1, 0).stream().toList().isEmpty());
 
             // Case 4: Multiple dimensions with all count=1 -> count=1, mth should return [[]]
-            var allOnes = cartesianProduct.constrainedProductOfDistinct(0, Collections.emptyList())
+            var allOnes = Product.constrained().ofDistinct(0, Collections.emptyList())
                     .andDistinct(0, Collections.emptyList());
             var result4 = allOnes.lexOrderMth(1, 0).stream().toList();
             assertEquals(1, result4.size());
@@ -63,7 +64,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateMultipleMthValues() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             int start = 2;
@@ -80,7 +81,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateCorrectMthValue() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese)
                     .andInRange(1, 3, toppings);
 
@@ -101,7 +102,7 @@ public class ConstrainedCartesianProductByRanksTest {
             // Cross-check: every mth element from lexOrderMth must equal the
             // corresponding index in lexOrder. This is the key regression guard
             // for rank decomposition bugs in the constrained path.
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese)
                     .andInRange(1, 3, toppings);
 
@@ -122,7 +123,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void testFailFastForLexOrderMth() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             // m <= 0
@@ -147,7 +148,7 @@ public class ConstrainedCartesianProductByRanksTest {
             var largeAlphabets = IntStream.rangeClosed('A', 'Z').mapToObj(c -> (char) c).toList();
             var numbers = IntStream.rangeClosed(0, 20).boxed().toList();
 
-            var product = cartesianProduct.constrainedProductOfDistinct(13, smallAlphabets)
+            var product = Product.constrained().ofDistinct(13, smallAlphabets)
                     .andDistinct(13, largeAlphabets)
                     .andInRange(0, 21, numbers);
 
@@ -177,7 +178,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateRandomChoiceWithReplacement() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             int sampleSize = 5;
@@ -188,7 +189,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldThrowForNegativeSampleSize() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             assertThrows(IllegalArgumentException.class, () ->
@@ -197,7 +198,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldThrowForZeroSampleSize() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             assertThrows(IllegalArgumentException.class, () ->
@@ -207,7 +208,7 @@ public class ConstrainedCartesianProductByRanksTest {
         @Test
         void shouldRejectChoiceFromAnEmptyProduct() {
             // ValidationRules.md: choice with count = 0 is an invalid-argument error (nothing can be drawn)
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, Collections.emptyList());
 
             assertEquals(java.math.BigInteger.ZERO, product.count());
@@ -216,7 +217,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateValidElements() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             var result = product.choice(3, TestBase.random).stream().toList();
@@ -236,7 +237,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateRandomSampleWithoutReplacement() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             int sampleSize = 4;
@@ -247,7 +248,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldThrowForSampleSizeExceedingTotal() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             BigInteger total = product.count();
@@ -257,7 +258,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldThrowForNegativeSampleSize() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             assertThrows(IllegalArgumentException.class, () ->
@@ -266,7 +267,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldThrowForZeroSampleSize() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             assertThrows(IllegalArgumentException.class, () ->
@@ -276,7 +277,7 @@ public class ConstrainedCartesianProductByRanksTest {
         @Test
         void shouldThrowForEmptyProduct() {
             // count=0; sample(1) -> 1 > 0 -> IAE (rule-book: s > count throws)
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, Collections.emptyList());
 
             assertThrows(IllegalArgumentException.class, () ->
@@ -285,7 +286,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateUniqueElements() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             int sampleSize = 5;
@@ -331,7 +332,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateSingleRank() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             var result = product.byRanks(List.of(BigInteger.ZERO)).stream().toList();
@@ -341,7 +342,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldGenerateMultipleRanks() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             // Total = 3 × 3 = 9, valid ranks 0-8
@@ -361,14 +362,14 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldThrowForNullRanks() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase).andDistinct(2, cheese);
+            var product = Product.constrained().ofDistinct(1, pizzaBase).andDistinct(2, cheese);
             List<BigInteger> nullList = null;
             assertThrows(IllegalArgumentException.class, () -> product.byRanks(nullList));
         }
 
         @Test
         void shouldThrowForNegativeRank() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             var result = product.byRanks(List.of(BigInteger.valueOf(-1)));
@@ -378,7 +379,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldThrowForOutOfBoundRank() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             BigInteger total = product.count();
@@ -389,7 +390,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldHandleEmptyRankSequence() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
             List<BigInteger> empty = List.of();
             var result = product.byRanks(empty).stream().toList();
@@ -398,7 +399,7 @@ public class ConstrainedCartesianProductByRanksTest {
 
         @Test
         void shouldPreserveRankOrder() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             // Total = 3 × 3 = 9, valid ranks 0-8
@@ -419,7 +420,7 @@ public class ConstrainedCartesianProductByRanksTest {
         @Test
         void byRanksShouldMatchLexOrder() {
             // Cross-check every rank against lexOrder output.
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese);
 
             var all = product.lexOrder().stream().toList();
