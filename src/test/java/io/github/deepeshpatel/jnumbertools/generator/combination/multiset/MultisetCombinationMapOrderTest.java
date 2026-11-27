@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
+import io.github.deepeshpatel.jnumbertools.base.Combination;
+
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Test;
 
@@ -52,24 +54,24 @@ class MultisetCombinationMapOrderTest {
 
     @Test
     void lexOrderKeepsOptionOrder() {
-        assertTrue(check(JNumberTools.combinations().multiset(options(), R).lexOrder()) > 0);
+        assertTrue(check(Combination.multiset(options(), R).lexOrder()) > 0);
     }
 
     @Test
     void lexOrderMthKeepsOptionOrder() {
-        assertTrue(check(JNumberTools.combinations().multiset(options(), R)
+        assertTrue(check(Combination.multiset(options(), R)
                 .lexOrderMth(BigInteger.valueOf(5), BigInteger.ZERO)) > 0);
     }
 
     @Test
     void choiceKeepsOptionOrder() {
-        assertEquals(200, check(JNumberTools.combinations().multiset(options(), R).choice(200, new Random(1))));
+        assertEquals(200, check(Combination.multiset(options(), R).choice(200, new Random(1))));
     }
 
     @Test
     void byRanksKeepsOptionOrder() {
         List<BigInteger> ranks = new ArrayList<>();
         for (int i = 0; i < 100; i++) ranks.add(BigInteger.valueOf(i));
-        assertEquals(100, check(JNumberTools.combinations().multiset(options(), R).byRanks(ranks)));
+        assertEquals(100, check(Combination.multiset(options(), R).byRanks(ranks)));
     }
 }
