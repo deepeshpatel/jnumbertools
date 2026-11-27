@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
+
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +27,7 @@ class KPermutationLexOrderOracleTest {
                 List<List<Integer>> expected = new ArrayList<>();
                 enumerate(n, k, new ArrayList<>(), new boolean[n], expected, Integer.MAX_VALUE);
                 List<List<Integer>> actual = new ArrayList<>();
-                for (List<Integer> p : JNumberTools.permutations().nPk(n, k).lexOrder()) actual.add(p);
+                for (List<Integer> p : Permutation.nPk(n, k).lexOrder()) actual.add(p);
                 assertEquals(expected, actual, "n=" + n + " k=" + k);
             }
         }
@@ -37,7 +39,7 @@ class KPermutationLexOrderOracleTest {
             List<List<Integer>> expected = new ArrayList<>();
             enumerate(nk[0], nk[1], new ArrayList<>(), new boolean[nk[0]], expected, 1000);
             List<List<Integer>> actual = new ArrayList<>();
-            Iterator<List<Integer>> it = JNumberTools.permutations().nPk(nk[0], nk[1]).lexOrder().iterator();
+            Iterator<List<Integer>> it = Permutation.nPk(nk[0], nk[1]).lexOrder().iterator();
             while (actual.size() < expected.size()) actual.add(it.next());
             assertEquals(expected, actual, "n=" + nk[0] + " k=" + nk[1]);
         }
@@ -45,7 +47,7 @@ class KPermutationLexOrderOracleTest {
 
     @Test
     void iteratorsAreIndependentAndExhaustionIsReported() {
-        var generator = JNumberTools.permutations().nPk(5, 3).lexOrder();
+        var generator = Permutation.nPk(5, 3).lexOrder();
         Iterator<List<Integer>> a = generator.iterator();
         Iterator<List<Integer>> b = generator.iterator();
         a.next();
@@ -62,7 +64,7 @@ class KPermutationLexOrderOracleTest {
 
     @Test
     void returnedListsAreNotChangedByLaterSteps() {
-        Iterator<List<Integer>> it = JNumberTools.permutations().nPk(5, 3).lexOrder().iterator();
+        Iterator<List<Integer>> it = Permutation.nPk(5, 3).lexOrder().iterator();
         List<List<Integer>> collected = new ArrayList<>();
         while (it.hasNext()) collected.add(it.next());
         assertEquals(List.of(0, 1, 2), collected.get(0));
