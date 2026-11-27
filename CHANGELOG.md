@@ -16,7 +16,7 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ### Added
 
-- Added dedicated static generator entry points: `Permutation`, `Combination`, `Derangement`, and `Subset`. They delegate to the existing generator builders; `JNumberTools` remains the entry point for ranking, unranking, and number-system operations.
+- Added dedicated static generator entry points: `Permutation`, `Combination`, `Derangement`, and `Subset`. They delegate to the corresponding generator builders.
 - Added natural-order comparison methods to conditional-product rule conditions and consequences:
   `isGreaterThan`, `isGreaterThanOrEqual`, `isLessThan` and `isLessThanOrEqual`.
   Comparisons use `Comparable.compareTo` and are compiled into positional bit sets.
