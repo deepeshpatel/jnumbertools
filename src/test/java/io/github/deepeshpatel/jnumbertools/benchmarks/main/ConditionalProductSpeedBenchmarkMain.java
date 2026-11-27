@@ -420,7 +420,7 @@ public class ConditionalProductSpeedBenchmarkMain {
 
 
 
-        return () -> checksum(builder.generate().stream());
+        return () -> checksum(builder.anyOrder().stream());
     }
 
     // -------------------------------------------------------------------------
