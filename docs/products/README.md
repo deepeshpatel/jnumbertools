@@ -20,7 +20,7 @@ The `Product` static entry point in `io.github.deepeshpatel.jnumbertools.entrypo
 
 Pass one list for each dimension. The lists are supplied in tuple order.
 
-### 1.1 Product in lexicographical order
+### 1.1 Simple product in lexicographical order
 
 ```java
 // Every combination of 1 pizza size, 1 pizza crust, and 1 cheese
@@ -33,7 +33,7 @@ Product.simple(pizzaSize, pizzaCrust, cheese)
     .forEach(System.out::println);
 ```
 
-### 1.2 Every M-th product in lexicographical order
+### 1.2 Every M-th simple product in lexicographical order
 
 `lexOrderMth(m, start)` generates every `m`-th product, beginning at the zero-based rank `start`.
 
@@ -58,7 +58,7 @@ Use `Product.constrained()` to start a constrained product. Each dimension is de
 
 Add subsequent dimensions with the corresponding `andDistinct`, `andMultiSelect` or `andInRange` methods.
 
-### 2.1 Product in lexicographical order
+### 2.1 Constrained product in lexicographical order
 
 ```java
 // All combinations of:
@@ -80,7 +80,7 @@ Product.constrained()
     .forEach(System.out::println);
 ```
 
-### 2.2 Every M-th product in lexicographical order
+### 2.2 Every M-th constrained product in lexicographical order
 
 ```java
 // Every 10^18th lexicographical product, starting at rank zero.
@@ -108,7 +108,7 @@ A shared `Calculator` can be supplied through `Product.constrained(calculator)` 
 
 Use `Product.conditional(dimensions...)` to create a product whose valid tuples are determined by conditions. Conditions are compiled before traversal, allowing invalid branches to be pruned without first generating complete tuples.
 
-### 3.1 Pairwise rules
+### 3.1 Pairwise precompiled condional product
 
 Pairwise rules express relationships between two dimensions using the values that satisfy the business requirement.
 
@@ -126,7 +126,7 @@ Product.conditional(operatingSystems, browsers, networks)
 
 The pairwise builder supports lexicographical traversal, every-M-th traversal, rank-based access, counting and random selection.
 
-### 3.2 Lambda Engine
+### 3.2 Lambda Engine - for precompiled complex conditions  
 
 Use `withLambda(...)` when a condition involves multiple dimensions and is more naturally expressed as a predicate. Typed whole-product predicate overloads are available for one through five dimensions; the no-argument `withLambda()` form provides an array-based predicate for arbitrary dimension counts.
 
