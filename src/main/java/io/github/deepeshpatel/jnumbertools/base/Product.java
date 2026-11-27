@@ -40,8 +40,8 @@ import java.util.Objects;
  *     .lexOrder();
  *
  * Product.conditional(os, browsers, networks)
- *     .withLambda()
- *     .when(os, browsers).matches((system, browser) ->
+ *     .withLambda(os, browsers, networks)
+ *     .when((system, browser, network) ->
  *         !system.equals("Linux") || browser.equals("Firefox") || browser.equals("Safari"))
  *     .lexOrder();
  * }</pre>
