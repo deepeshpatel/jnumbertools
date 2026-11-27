@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
+
 import io.github.deepeshpatel.jnumbertools.TestBase;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Nested;
@@ -333,7 +335,7 @@ class KPermutationByRanksTest {
 
         @Test
         void byRanks_withNegativeRank_shouldThrowException() {
-            var result = JNumberTools.permutations().nPk(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(-1)));
+            var result = Permutation.nPk(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(-1)));
 
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
@@ -342,7 +344,7 @@ class KPermutationByRanksTest {
 
         @Test
         void byRanks_withOutOfBoundRank_shouldThrowException() {
-            var result = JNumberTools.permutations().nPk(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(1000000000)));
+            var result = Permutation.nPk(2, "A", "B", "C").byRanks(of(java.math.BigInteger.valueOf(1000000000)));
 
             assertThrows(IllegalArgumentException.class, () -> {
                 result.stream().toList(); // Should throw during iteration
@@ -351,7 +353,7 @@ class KPermutationByRanksTest {
 
         @Test
         void byRanks_withValidRanks_shouldWork() {
-            var result = JNumberTools.permutations().nPk(2, "A", "B", "C").byRanks(of(
+            var result = Permutation.nPk(2, "A", "B", "C").byRanks(of(
                     java.math.BigInteger.ZERO,
                     java.math.BigInteger.ONE,
                     java.math.BigInteger.valueOf(2)
