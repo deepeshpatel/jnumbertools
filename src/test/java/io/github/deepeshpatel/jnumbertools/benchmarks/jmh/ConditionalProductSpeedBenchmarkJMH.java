@@ -191,7 +191,7 @@ public class ConditionalProductSpeedBenchmarkJMH {
                         && (LINUX.equals(os) ? LINUX_REGIONS.contains(region)
                                 : WINDOWS.equals(os) ? WINDOWS_REGIONS.contains(region) : true));
 
-        engineLambda = () -> builder.generate().stream();
+        engineLambda = () -> builder.anyOrder().stream();
     }
 
     // -------------------------------------------------------------------------
