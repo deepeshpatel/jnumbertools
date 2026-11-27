@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.unique;
 
-import io.github.deepeshpatel.jnumbertools.base.Combination;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Combination;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;

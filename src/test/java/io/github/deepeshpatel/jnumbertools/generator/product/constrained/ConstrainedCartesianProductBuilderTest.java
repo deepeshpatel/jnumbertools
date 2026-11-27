@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
-import io.github.deepeshpatel.jnumbertools.base.Product;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * of elements within a range.
  */
 @DisplayName("Constrained Cartesian Product")
-class ConstrainedCartesianProductTest {
+class ConstrainedCartesianProductBuilderTest {
 
     static final List<String> pizzaBase = of("Small ", "Medium", "Large");
     static final List<String> sauce     = of("Tomato Ketchup", "White Sauce", "Green Chutney");

@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

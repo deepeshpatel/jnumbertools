@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
-import io.github.deepeshpatel.jnumbertools.base.Product;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.jupiter.api.Nested;
@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ConstrainedCartesianProductByRanksTest {
+public class ConstrainedCartesianProductBuilderByRanksTest {
 
     private final List<String> pizzaBase = of("Small ", "Medium", "Large");
     private final List<String> cheese    = of("Ricotta", "Mozzarella", "Cheddar");

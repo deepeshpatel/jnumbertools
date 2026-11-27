@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
-import io.github.deepeshpatel.jnumbertools.base.Product;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 
 import org.junit.jupiter.api.Test;
 import java.math.BigInteger;

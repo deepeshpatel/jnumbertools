@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;

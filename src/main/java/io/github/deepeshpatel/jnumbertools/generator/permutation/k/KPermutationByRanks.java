@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.PermutadicAlgorithms;
 
 import java.math.BigInteger;

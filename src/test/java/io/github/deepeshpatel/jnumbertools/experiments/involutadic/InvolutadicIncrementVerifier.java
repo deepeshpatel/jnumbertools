@@ -5,7 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.experiments.involutadic;
 
 import org.junit.jupiter.api.Disabled;
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.InvolutadicAlgorithms;
 import io.github.deepeshpatel.jnumbertools.numbersystem.involutadic.InvolutadicIncrementStateMachine;
 

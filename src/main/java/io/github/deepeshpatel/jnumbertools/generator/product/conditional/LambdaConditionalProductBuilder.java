@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
+import io.github.deepeshpatel.jnumbertools.builders.CartesianProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
 
 import java.math.BigInteger;
@@ -16,7 +17,7 @@ import java.util.function.Predicate;
 
 /**
  * Namespace for the strongly typed lambda predicates and builders used by
- * {@link io.github.deepeshpatel.jnumbertools.base.CartesianProduct#withLambda(List)}.
+ * {@link CartesianProductBuilder#withLambda(List)}.
  *
  * <p>One dimension uses {@link Predicate}; two use {@link BiPredicate}; three through five use
  * {@link Predicate3} through {@link Predicate5}. Products with more than five dimensions use

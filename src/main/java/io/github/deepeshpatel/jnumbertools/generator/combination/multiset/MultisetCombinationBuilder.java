@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.base.MultisetBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;

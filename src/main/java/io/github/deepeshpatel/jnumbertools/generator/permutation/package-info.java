@@ -10,7 +10,7 @@
  * implementations generate permutations with no fixed points. Use the public builder APIs
  * in {@link io.github.deepeshpatel.jnumbertools.base.JNumberTools} to configure generation.</p>
  *
- * @see io.github.deepeshpatel.jnumbertools.base.Permutations
- * @see io.github.deepeshpatel.jnumbertools.base.Derangements
+ * @see io.github.deepeshpatel.jnumbertools.builders.PermutationsBuilder
+ * @see io.github.deepeshpatel.jnumbertools.builders.DerangementsBuilder
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation;

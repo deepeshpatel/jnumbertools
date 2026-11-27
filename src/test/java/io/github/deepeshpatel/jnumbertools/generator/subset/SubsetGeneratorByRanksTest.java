@@ -5,7 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import io.github.deepeshpatel.jnumbertools.base.Subset;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Subset;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

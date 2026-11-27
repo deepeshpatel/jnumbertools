@@ -4,7 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
+import io.github.deepeshpatel.jnumbertools.builders.PermutationsBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 import io.github.deepeshpatel.jnumbertools.generator.base.EveryMthIterable;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
@@ -108,7 +109,7 @@ public final class KPermutationBuilder<T> implements Builder<T> {
      *
      * @param elements the list of elements to permute (e.g., [A, B, C])
      * @param k the size of each permutation; assumed non-negative and ≤ n when used via
-     *          {@link io.github.deepeshpatel.jnumbertools.base.Permutations#nPk}
+     *          {@link PermutationsBuilder#nPk}
      * @param calculator utility for combinatorial calculations
      */
     public KPermutationBuilder(List<T> elements, int k, Calculator calculator) {

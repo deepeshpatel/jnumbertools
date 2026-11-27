@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import org.junit.jupiter.api.*;
 
 import java.math.BigInteger;

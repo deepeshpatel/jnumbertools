@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,7 @@ import static io.github.deepeshpatel.jnumbertools.TestBase.errMsgNullInput;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Product Factory Validation")
-class CartesianProductTest {
+class CartesianProductBuilderTest {
 
     @Test
     @DisplayName("simpleProductOf: null input throws NPE, empty input allowed")

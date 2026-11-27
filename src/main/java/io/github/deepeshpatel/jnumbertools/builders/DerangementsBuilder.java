@@ -2,8 +2,9 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.builders;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.derangement.DerangementBuilder;
 
@@ -17,8 +18,8 @@ import java.util.stream.IntStream;
  * <p>
  * A derangement of {@code n} distinct elements exists in {@code D_n = !n}
  * arrangements (the subfactorial). This class is the user-facing entry point
- * to the derangement generator, mirroring the role of {@link Permutations} and
- * {@link Combinations} for their respective combinatorial families.
+ * to the derangement generator, mirroring the role of {@link PermutationsBuilder} and
+ * {@link CombinationsBuilder} for their respective combinatorial families.
  * </p>
  *
  * <h2>Usage</h2>
@@ -56,17 +57,17 @@ import java.util.stream.IntStream;
  * <p>This class is immutable and thread-safe. All factory methods return new
  * builder instances.</p>
  *
- * @see Permutations
- * @see Combinations
+ * @see PermutationsBuilder
+ * @see CombinationsBuilder
  * @see io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic
  * @author Deepesh Patel &amp; Aditya Patel
  */
-public final class Derangements {
+public final class DerangementsBuilder {
 
     private final Calculator calculator;
 
     /** Constructs a {@code Derangements} factory with a fresh {@link Calculator}. */
-    public Derangements() {
+    public DerangementsBuilder() {
         this(new Calculator());
     }
 
@@ -75,7 +76,7 @@ public final class Derangements {
      * {@link Calculator}. Reuse a single {@code Calculator} across the
      * different facade entry points to share memoization.
      */
-    public Derangements(Calculator calculator) {
+    public DerangementsBuilder(Calculator calculator) {
         this.calculator = calculator;
     }
 

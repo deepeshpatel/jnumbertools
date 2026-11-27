@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.numberSystem;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -77,19 +76,6 @@ class CombinadicTest {
             }
             assertEquals(expected, output.toString());
         }
-
-        @Test
-        @DisplayName("Via numberSystem.combinadic produces same results as Combinadic.of")
-        void numberSystemEntryPointConsistency() {
-            for (int i = 0; i <= 100; i++) {
-                Combinadic direct = Combinadic.of(i, 3, calculator);
-                Combinadic viaNS  = numberSystem.combinadic(i, 3);
-                assertEquals(direct.toString(), viaNS.toString(),
-                        "Mismatch at rank=" + i);
-                assertEquals(direct.decimalValue, viaNS.decimalValue,
-                        "decimalValue mismatch at rank=" + i);
-            }
-        }
     }
 
     // =========================================================
@@ -115,7 +101,8 @@ class CombinadicTest {
         @DisplayName("Round-trip via numberSystem entry point")
         void roundTripViaNumberSystem() {
             for (int i = 0; i <= 100; i++) {
-                assertEquals(i, numberSystem.combinadic(i, 3).decimalValue.intValue(),
+                Combinadic combinadic = Combinadic.of(i, 3, calculator); //Combinadic.of(positiveNumber, degree, calculator);
+                assertEquals(i,  combinadic.decimalValue.intValue(),
                         "numberSystem round-trip failed at rank=" + i);
             }
         }

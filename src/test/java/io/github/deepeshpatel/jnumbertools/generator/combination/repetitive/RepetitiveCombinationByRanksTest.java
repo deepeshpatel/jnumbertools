@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 
-import io.github.deepeshpatel.jnumbertools.base.Combination;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Combination;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.jupiter.api.Nested;

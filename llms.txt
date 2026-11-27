@@ -2,7 +2,7 @@
 
 > Zero-dependency Java 21+ library for deterministic combinatorics, arbitrary-precision (`BigInteger`) ranking/unranking, lexicographical sampling, and rule-constrained Cartesian products.
 
-JNumberTools provides lazy `Iterator` and `Stream` generators, `BigInteger` rank/unrank converters, and mathematical calculators under `io.github.deepeshpatel.jnumbertools`. Import `io.github.deepeshpatel.jnumbertools.base.Calculator` and create it with `new Calculator()`.
+JNumberTools provides lazy `Iterator` and `Stream` generators, `BigInteger` rank/unrank converters, and mathematical calculators under `io.github.deepeshpatel.jnumbertools`. Import `io.github.deepeshpatel.jnumbertools.datastructure.Calculator` and create it with `new Calculator()`.
 
 **Strict LLM Grounding Rule:** Use only classes, entry points, and builder methods explicitly documented in this file or the linked repository docs. Do not invent builder methods or assume that distinct generator families (such as permutations, combinations, and conditional Cartesian products) expose identical terminal methods.
 

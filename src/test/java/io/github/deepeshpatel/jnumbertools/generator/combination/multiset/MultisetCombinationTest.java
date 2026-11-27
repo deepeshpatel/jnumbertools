@@ -4,8 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.base.Combination;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Combination;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.derangement;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithms;
 

@@ -2,8 +2,9 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.entrypoint;
 
+import io.github.deepeshpatel.jnumbertools.builders.CombinationsBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.combination.multiset.MultisetCombinationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.combination.repetitive.RepetitiveCombinationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.combination.unique.UniqueCombinationBuilder;
@@ -24,7 +25,7 @@ import java.util.List;
  * Combination.multiset(multiset, 2).lexOrder();
  * }</pre>
  *
- * @see Combinations
+ * @see CombinationsBuilder
  * @author Deepesh Patel
  */
 public final class Combination {
@@ -33,8 +34,8 @@ public final class Combination {
         // Static factory class.
     }
 
-    private static Combinations factory() {
-        return new Combinations();
+    private static CombinationsBuilder factory() {
+        return new CombinationsBuilder();
     }
 
     public static UniqueCombinationBuilder<Integer> unique(int n, int r) {

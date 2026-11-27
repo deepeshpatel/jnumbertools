@@ -1,8 +1,8 @@
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import io.github.deepeshpatel.jnumbertools.base.Subset;
-import io.github.deepeshpatel.jnumbertools.base.Subsets;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Subset;
+import io.github.deepeshpatel.jnumbertools.builders.SubsetsBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -46,7 +46,7 @@ class SubsetBuilderTest {
     constructor   | null list / null element                          | NullPointerException
     */
 
-    private final Subsets subsets = new Subsets(calculator);
+    private final SubsetsBuilder subsetsBuilder = new SubsetsBuilder(calculator);
     private final List<String> elements = List.of("A", "B", "C");
 
     @Test

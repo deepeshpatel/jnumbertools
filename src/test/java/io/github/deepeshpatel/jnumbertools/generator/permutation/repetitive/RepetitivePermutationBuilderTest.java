@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
-import io.github.deepeshpatel.jnumbertools.base.Permutations;
+import io.github.deepeshpatel.jnumbertools.builders.PermutationsBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.BuilderTestHelper;
 import org.junit.jupiter.api.Test;
 
@@ -34,9 +34,9 @@ class RepetitivePermutationBuilderTest {
     count()       | none (always valid)                               | -
     */
 
-    private final Permutations permutations = new Permutations(calculator);
+    private final PermutationsBuilder permutationsBuilder = new PermutationsBuilder(calculator);
     private final List<String> elements = List.of("A", "B");
-    private final RepetitivePermutationBuilder<String> builder = permutations.repetitive(3, elements);
+    private final RepetitivePermutationBuilder<String> builder = permutationsBuilder.repetitive(3, elements);
 
     @Test
     void lexOrder() {
@@ -69,19 +69,19 @@ class RepetitivePermutationBuilderTest {
         assertEquals(BigInteger.valueOf(8), builder.count());
 
         // r = 0 -> n⁰ = 1
-        var zeroWidthBuilder = permutations.repetitive(0, elements);
+        var zeroWidthBuilder = permutationsBuilder.repetitive(0, elements);
         assertEquals(BigInteger.ONE, zeroWidthBuilder.count());
 
         // n = 0, r = 0 -> 0⁰ = 1
-        var emptyZeroBuilder = permutations.repetitive(0, Collections.emptyList());
+        var emptyZeroBuilder = permutationsBuilder.repetitive(0, Collections.emptyList());
         assertEquals(BigInteger.ONE, emptyZeroBuilder.count());
 
         // n = 0, r > 0 -> 0ʳ = 0
-        var emptyPositiveBuilder = permutations.repetitive(2, Collections.emptyList());
+        var emptyPositiveBuilder = permutationsBuilder.repetitive(2, Collections.emptyList());
         assertEquals(BigInteger.ZERO, emptyPositiveBuilder.count());
 
         // Single element
-        var singleBuilder = permutations.repetitive(3, "X");
+        var singleBuilder = permutationsBuilder.repetitive(3, "X");
         assertEquals(BigInteger.ONE, singleBuilder.count()); // 1³ = 1
     }
 
@@ -92,25 +92,25 @@ class RepetitivePermutationBuilderTest {
     @Test
     void isEmpty() {
         assertFalse(builder.isEmpty());
-        assertFalse(permutations.repetitive(0, elements).isEmpty());                // r = 0: the only result is []
-        assertFalse(permutations.repetitive(0, Collections.emptyList()).isEmpty()); // 0⁰ = 1: the only result is []
-        assertTrue(permutations.repetitive(2, Collections.emptyList()).isEmpty());  // 0ʳ = 0: nothing to generate
+        assertFalse(permutationsBuilder.repetitive(0, elements).isEmpty());                // r = 0: the only result is []
+        assertFalse(permutationsBuilder.repetitive(0, Collections.emptyList()).isEmpty()); // 0⁰ = 1: the only result is []
+        assertTrue(permutationsBuilder.repetitive(2, Collections.emptyList()).isEmpty());  // 0ʳ = 0: nothing to generate
         for (int n = 0; n <= 4; n++) {
             for (int r = 0; r <= 4; r++) {
-                BuilderTestHelper.testIsEmpty(permutations.repetitive(r, range(n)));
+                BuilderTestHelper.testIsEmpty(permutationsBuilder.repetitive(r, range(n)));
             }
         }
     }
 
     @Test
     void zeroWidthIsASingleEmptyResult() {
-        BuilderTestHelper.testSingleEmptyResultDomain(permutations.repetitive(0, elements));
-        BuilderTestHelper.testSingleEmptyResultDomain(permutations.repetitive(0, Collections.emptyList()));
+        BuilderTestHelper.testSingleEmptyResultDomain(permutationsBuilder.repetitive(0, elements));
+        BuilderTestHelper.testSingleEmptyResultDomain(permutationsBuilder.repetitive(0, Collections.emptyList()));
     }
 
     @Test
     void emptySetWithPositiveWidthIsAnEmptyDomain() {
-        BuilderTestHelper.testEmptyDomain(permutations.repetitive(2, Collections.emptyList()));
+        BuilderTestHelper.testEmptyDomain(permutationsBuilder.repetitive(2, Collections.emptyList()));
     }
 
     @Test
@@ -131,22 +131,22 @@ class RepetitivePermutationBuilderTest {
 
     @Test
     void nullInputIsRejected() {
-        assertThrows(NullPointerException.class, () -> permutations.repetitive(2, (List<String>) null));
+        assertThrows(NullPointerException.class, () -> permutationsBuilder.repetitive(2, (List<String>) null));
     }
 
     @Test
     void nullElementsAreRejectedWhenBuilderIsCreated() {
         for (List<String> list : List.of(Arrays.asList(null, "B"), Arrays.asList("A", null))) {
-            assertThrows(NullPointerException.class, () -> permutations.repetitive(2, list), "repetitive " + list);
+            assertThrows(NullPointerException.class, () -> permutationsBuilder.repetitive(2, list), "repetitive " + list);
             assertThrows(NullPointerException.class, () -> new RepetitivePermutationBuilder<>(2, list, calculator), "constructor " + list);
         }
-        assertThrows(NullPointerException.class, () -> permutations.repetitive(1, "A", null));
+        assertThrows(NullPointerException.class, () -> permutationsBuilder.repetitive(1, "A", null));
     }
 
     @Test
     void builderSnapshotsItsInput() {
         List<String> input = new ArrayList<>(List.of("A", "B"));
-        var snapshot = permutations.repetitive(2, input);
+        var snapshot = permutationsBuilder.repetitive(2, input);
         var lexBefore = snapshot.lexOrder().stream().toList();
         var generatorCreatedEarlier = snapshot.lexOrder();
 
@@ -164,7 +164,7 @@ class RepetitivePermutationBuilderTest {
         BigInteger twoPow63 = BigInteger.ONE.shiftLeft(63);
         BigInteger base = BigInteger.valueOf(100);
         int draws = 100, above = 0;
-        for (List<Integer> p : permutations.repetitive(100, range(100)).choice(draws, new Random(1))) {
+        for (List<Integer> p : permutationsBuilder.repetitive(100, range(100)).choice(draws, new Random(1))) {
             BigInteger rank = BigInteger.ZERO;
             for (int digit : p) {
                 rank = rank.multiply(base).add(BigInteger.valueOf(digit));

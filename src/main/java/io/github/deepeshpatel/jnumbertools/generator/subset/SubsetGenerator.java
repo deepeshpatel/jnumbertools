@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.subset;
 
-import io.github.deepeshpatel.jnumbertools.base.Combinations;
+import io.github.deepeshpatel.jnumbertools.builders.CombinationsBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 
 import java.util.Collections;
@@ -103,7 +103,7 @@ public final class SubsetGenerator<T> extends AbstractGenerator<T> {
             // Advance past exhausted (or empty) size blocks. Iterative, so the number of blocks is not
             // limited by stack depth.
             while (!current.hasNext() && nextSize <= lastSize) {
-                current = new Combinations(null).unique(nextSize++, elements).lexOrder().iterator();
+                current = new CombinationsBuilder(null).unique(nextSize++, elements).lexOrder().iterator();
             }
             return current.hasNext();
         }

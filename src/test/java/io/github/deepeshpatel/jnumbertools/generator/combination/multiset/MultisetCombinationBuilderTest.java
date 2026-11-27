@@ -1,7 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import io.github.deepeshpatel.jnumbertools.base.Combinations;
+import io.github.deepeshpatel.jnumbertools.builders.CombinationsBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -33,7 +33,7 @@ class MultisetCombinationBuilderTest {
     count()       | none (always valid)                               | -
     */
 
-    private final Combinations combinations = new Combinations(calculator);
+    private final CombinationsBuilder combinationsBuilder = new CombinationsBuilder(calculator);
     private final LinkedHashMap<String, Integer> options = new LinkedHashMap<>();
     private final MultisetCombinationBuilder<String> builder;
 
@@ -41,7 +41,7 @@ class MultisetCombinationBuilderTest {
         options.put("A", 3);
         options.put("B", 2);
         options.put("C", 1);
-        builder = combinations.multiset(options, 2);
+        builder = combinationsBuilder.multiset(options, 2);
     }
 
     @Test
@@ -118,25 +118,25 @@ class MultisetCombinationBuilderTest {
         assertTrue(builder.count().compareTo(BigInteger.ZERO) > 0);
 
         // r = 0 -> always 1
-        var zeroRBuilder = combinations.multiset(options, 0);
+        var zeroRBuilder = combinationsBuilder.multiset(options, 0);
         assertEquals(BigInteger.ONE, zeroRBuilder.count());
 
         // Empty map, r = 0 -> 1
-        var emptyZeroBuilder = combinations.multiset(new LinkedHashMap<>(), 0);
+        var emptyZeroBuilder = combinationsBuilder.multiset(new LinkedHashMap<>(), 0);
         assertEquals(BigInteger.ONE, emptyZeroBuilder.count());
 
         // Empty map, r > 0 -> 0
-        var emptyPositiveBuilder = combinations.multiset(new LinkedHashMap<>(), 2);
+        var emptyPositiveBuilder = combinationsBuilder.multiset(new LinkedHashMap<>(), 2);
         assertEquals(BigInteger.ZERO, emptyPositiveBuilder.count());
 
         // r > total available -> 0
-        var greaterRBuilder = combinations.multiset(options, 10);
+        var greaterRBuilder = combinationsBuilder.multiset(options, 10);
         assertEquals(BigInteger.ZERO, greaterRBuilder.count());
 
         // Single element with frequency
         var singleOptions = new LinkedHashMap<String, Integer>();
         singleOptions.put("X", 5);
-        var singleBuilder = combinations.multiset(singleOptions, 3);
+        var singleBuilder = combinationsBuilder.multiset(singleOptions, 3);
         assertEquals(BigInteger.ONE, singleBuilder.count()); // Only one way to choose 3 from 5 identical items
     }
 
@@ -144,20 +144,20 @@ class MultisetCombinationBuilderTest {
 
     @Test
     void isEmpty() {
-        assertFalse(combinations.multiset(new LinkedHashMap<String, Integer>(), 0).isEmpty()); // one empty multiset
-        assertTrue(combinations.multiset(new LinkedHashMap<String, Integer>(), 2).isEmpty());  // nothing to select from
-        assertFalse(combinations.multiset(options, 0).isEmpty());                              // [{}]
-        assertFalse(combinations.multiset(options, 6).isEmpty());                              // 3 + 2 + 1 available
-        assertTrue(combinations.multiset(options, 7).isEmpty());                               // r > sum of frequencies
+        assertFalse(combinationsBuilder.multiset(new LinkedHashMap<String, Integer>(), 0).isEmpty()); // one empty multiset
+        assertTrue(combinationsBuilder.multiset(new LinkedHashMap<String, Integer>(), 2).isEmpty());  // nothing to select from
+        assertFalse(combinationsBuilder.multiset(options, 0).isEmpty());                              // [{}]
+        assertFalse(combinationsBuilder.multiset(options, 6).isEmpty());                              // 3 + 2 + 1 available
+        assertTrue(combinationsBuilder.multiset(options, 7).isEmpty());                               // r > sum of frequencies
 
         var zeroOnly = new LinkedHashMap<String, Integer>();
         zeroOnly.put("A", 0);                                                                  // zero frequency = absent
-        assertTrue(combinations.multiset(zeroOnly, 1).isEmpty());
-        assertFalse(combinations.multiset(zeroOnly, 0).isEmpty());
+        assertTrue(combinationsBuilder.multiset(zeroOnly, 1).isEmpty());
+        assertFalse(combinationsBuilder.multiset(zeroOnly, 0).isEmpty());
 
         // isEmpty() must agree with count() == 0 for every r
         for (int r = 0; r <= 8; r++) {
-            var b = combinations.multiset(options, r);
+            var b = combinationsBuilder.multiset(options, r);
             assertEquals(b.count().signum() == 0, b.isEmpty(), "r=" + r);
         }
     }
@@ -167,7 +167,7 @@ class MultisetCombinationBuilderTest {
         var live = new LinkedHashMap<String, Integer>();
         live.put("a", 2);
         live.put("b", 2);
-        var snapshotBuilder = combinations.multiset(live, 2);
+        var snapshotBuilder = combinationsBuilder.multiset(live, 2);
         BigInteger countBefore = snapshotBuilder.count();
         List<Map<String, Integer>> lexBefore = snapshotBuilder.lexOrder().stream().toList();
 
@@ -182,11 +182,11 @@ class MultisetCombinationBuilderTest {
     void nullKeysAndNullFrequenciesAreRejectedWhenBuilderIsCreated() {
         var nullKey = new LinkedHashMap<String, Integer>();
         nullKey.put(null, 2);
-        assertThrows(NullPointerException.class, () -> combinations.multiset(nullKey, 1));
+        assertThrows(NullPointerException.class, () -> combinationsBuilder.multiset(nullKey, 1));
 
         var nullFrequency = new LinkedHashMap<String, Integer>();
         nullFrequency.put("A", null);
-        assertThrows(NullPointerException.class, () -> combinations.multiset(nullFrequency, 1));
+        assertThrows(NullPointerException.class, () -> combinationsBuilder.multiset(nullFrequency, 1));
     }
 
     @Test
@@ -198,8 +198,8 @@ class MultisetCombinationBuilderTest {
         withoutZero.put("B", 2);
 
         for (int r = 0; r <= 3; r++) {
-            var a = combinations.multiset(withZero, r);
-            var b = combinations.multiset(withoutZero, r);
+            var a = combinationsBuilder.multiset(withZero, r);
+            var b = combinationsBuilder.multiset(withoutZero, r);
             assertEquals(b.count(), a.count(), "r=" + r);
             assertEquals(b.lexOrder().stream().toList(), a.lexOrder().stream().toList(), "r=" + r);
         }
@@ -208,7 +208,7 @@ class MultisetCombinationBuilderTest {
     @Test
     void resultsAreImmutable() {
         for (int r : new int[]{0, 1, 3, 6, 7}) {   // r = 7 exceeds the 6 available: nothing to return
-            var b = combinations.multiset(options, r);
+            var b = combinationsBuilder.multiset(options, r);
             List<Map<String, Integer>> all = new ArrayList<>();
             b.lexOrder().forEach(all::add);
             if (!b.isEmpty()) {
@@ -231,7 +231,7 @@ class MultisetCombinationBuilderTest {
         big.put("A", 1000);
         big.put("B", 1000);
 
-        List<Map<String, Integer>> firstFew = combinations.multiset(big, 1000).lexOrder().stream().limit(3).toList();
+        List<Map<String, Integer>> firstFew = combinationsBuilder.multiset(big, 1000).lexOrder().stream().limit(3).toList();
 
         assertEquals(3, firstFew.size());
         for (Map<String, Integer> combination : firstFew) {
@@ -253,7 +253,7 @@ class MultisetCombinationBuilderTest {
             }
             int r = random.nextInt(total + 2);
 
-            var builder = combinations.multiset(multiset, r);
+            var builder = combinationsBuilder.multiset(multiset, r);
             List<Map<Integer, Integer>> inOrder = builder.lexOrder().stream().toList();
 
             assertEquals(BigInteger.valueOf(inOrder.size()), builder.count(), "count " + multiset + " r=" + r);
@@ -272,7 +272,7 @@ class MultisetCombinationBuilderTest {
         for (int i = 0; i < types; i++) {
             multiset.put(i, 1);
         }
-        var builder = combinations.multiset(multiset, 3);
+        var builder = combinationsBuilder.multiset(multiset, 3);
 
         // choosing 3 of 20,000 distinct items
         assertEquals(calculator.nCr(types, 3), builder.count());
@@ -291,8 +291,8 @@ class MultisetCombinationBuilderTest {
         multiset.put("B", 400);
         multiset.put("C", 400);
         // no type can exceed 400 when choosing 400 in total, so this is C(402, 2)
-        assertEquals(calculator.nCr(402, 2), combinations.multiset(multiset, 400).count());
+        assertEquals(calculator.nCr(402, 2), combinationsBuilder.multiset(multiset, 400).count());
         // symmetric around half of the 1,200 items
-        assertEquals(combinations.multiset(multiset, 300).count(), combinations.multiset(multiset, 900).count());
+        assertEquals(combinationsBuilder.multiset(multiset, 300).count(), combinationsBuilder.multiset(multiset, 900).count());
     }
 }

@@ -2,8 +2,9 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.entrypoint;
 
+import io.github.deepeshpatel.jnumbertools.builders.PermutationsBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.k.KPermutationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.multiset.MultisetPermutationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive.RepetitivePermutationBuilder;
@@ -26,7 +27,7 @@ import java.util.List;
  * Permutation.multiset(multiset).lexOrder();
  * }</pre>
  *
- * @see Permutations
+ * @see PermutationsBuilder
  * @author Deepesh Patel
  */
 public final class Permutation {
@@ -35,8 +36,8 @@ public final class Permutation {
         // Static factory class.
     }
 
-    private static Permutations factory() {
-        return new Permutations();
+    private static PermutationsBuilder factory() {
+        return new PermutationsBuilder();
     }
 
     public static UniquePermutationBuilder<Integer> unique(int n) {

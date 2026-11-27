@@ -2,8 +2,9 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.builders;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.*;
 
 import java.math.BigInteger;
@@ -82,7 +83,7 @@ public final class CombinationUnrankOfBuilder {
         Objects.requireNonNull(rank, "rank must not be null");
         if (n < 0) throw new IllegalArgumentException("n must be non-negative");
         if (r < 0) throw new IllegalArgumentException("r must be non-negative");
-        List<Integer> result = new Combinations(calculator).repetitive(n, r)
+        List<Integer> result = new CombinationsBuilder(calculator).repetitive(n, r)
                 .byRanks(List.of(rank)).iterator().next();
         return result.stream().mapToInt(Integer::intValue).toArray();
     }
@@ -104,7 +105,7 @@ public final class CombinationUnrankOfBuilder {
         Objects.requireNonNull(frequencies, "frequencies must not be null");
         LinkedHashMap<Integer, Integer> options = new LinkedHashMap<>();
         for (int i = 0; i < frequencies.length; i++) options.put(i, frequencies[i]);
-        Map<Integer, Integer> selected = new Combinations(calculator).multiset(options, r)
+        Map<Integer, Integer> selected = new CombinationsBuilder(calculator).multiset(options, r)
                 .byRanks(List.of(rank)).iterator().next();
         int[] result = new int[frequencies.length];
         selected.forEach((type, count) -> result[type] = count);

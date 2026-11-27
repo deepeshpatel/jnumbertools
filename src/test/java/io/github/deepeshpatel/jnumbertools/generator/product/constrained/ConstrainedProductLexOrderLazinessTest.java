@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
-import io.github.deepeshpatel.jnumbertools.base.Product;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 
 import org.junit.jupiter.api.Test;
 

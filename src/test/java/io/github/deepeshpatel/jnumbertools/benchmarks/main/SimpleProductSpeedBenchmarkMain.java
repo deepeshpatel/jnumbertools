@@ -1,7 +1,7 @@
 
 package io.github.deepeshpatel.jnumbertools.benchmarks.main;
 
-import io.github.deepeshpatel.jnumbertools.base.Product;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 
 import java.util.ArrayList;
 import java.util.Arrays;

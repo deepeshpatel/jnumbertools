@@ -1,7 +1,7 @@
 
 package io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct;
 
-import io.github.deepeshpatel.jnumbertools.base.Product;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.List;

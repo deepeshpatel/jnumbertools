@@ -1,7 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.repetitive;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import io.github.deepeshpatel.jnumbertools.base.Permutation;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Permutation;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;

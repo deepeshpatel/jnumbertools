@@ -2,11 +2,8 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.datastructure;
 
-
-import io.github.deepeshpatel.jnumbertools.datastructure.BinomialCoefficientMap;
-import io.github.deepeshpatel.jnumbertools.datastructure.TwoLevelMap;
 
 import java.math.BigInteger;
 import java.util.*;

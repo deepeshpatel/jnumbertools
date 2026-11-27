@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithms;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

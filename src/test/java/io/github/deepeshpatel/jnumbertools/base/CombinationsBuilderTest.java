@@ -1,5 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.builders.CombinationsBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,9 +12,9 @@ import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Combinations Factory")
-class CombinationsTest {
+class CombinationsBuilderTest {
 
-    private final Combinations combinations = new Combinations(calculator);
+    private final CombinationsBuilder combinationsBuilder = new CombinationsBuilder(calculator);
 
     /*
     ===============================================================================
@@ -38,7 +39,7 @@ class CombinationsTest {
         @DisplayName("unique(List<T>): null input throws NPE")
         void uniqueListNullInput() {
             var nullExp = assertThrows(NullPointerException.class, () ->
-                    combinations.unique(2, (List<String>) null));
+                    combinationsBuilder.unique(2, (List<String>) null));
             assertTrue(nullExp.getMessage().startsWith(errMsgNullInput));
         }
 
@@ -46,7 +47,7 @@ class CombinationsTest {
         @DisplayName("unique(List<T>): negative n throws IAE")
         void uniqueListNegativeN() {
             var negativeNExp = assertThrows(IllegalArgumentException.class, () ->
-                    combinations.unique(-1, 2));
+                    combinationsBuilder.unique(-1, 2));
             assertTrue(negativeNExp.getMessage().startsWith(errMsgNK));
         }
 
@@ -54,7 +55,7 @@ class CombinationsTest {
         @DisplayName("unique(List<T>): negative r throws IAE")
         void uniqueListNegativeR() {
             var negativeRExp = assertThrows(IllegalArgumentException.class, () ->
-                    combinations.unique(5, -2));
+                    combinationsBuilder.unique(5, -2));
             assertTrue(negativeRExp.getMessage().startsWith(errMsgNK));
         }
 
@@ -63,21 +64,21 @@ class CombinationsTest {
         void uniqueVarArgsNullInput() {
             String[] nullArray = null;
             assertThrows(NullPointerException.class, () ->
-                    combinations.unique(2, nullArray));
+                    combinationsBuilder.unique(2, nullArray));
         }
 
         @Test
         @DisplayName("unique(n, r): negative n throws IAE")
         void uniqueIntNegativeN() {
             assertThrows(IllegalArgumentException.class, () ->
-                    combinations.unique(-1, 2));
+                    combinationsBuilder.unique(-1, 2));
         }
 
         @Test
         @DisplayName("unique(n, r): negative r throws IAE")
         void uniqueIntNegativeR() {
             assertThrows(IllegalArgumentException.class, () ->
-                    combinations.unique(5, -2));
+                    combinationsBuilder.unique(5, -2));
         }
     }
 
@@ -103,7 +104,7 @@ class CombinationsTest {
         @DisplayName("repetitive(List<T>): null input throws NPE")
         void repetitiveListNullInput() {
             var nullExp = assertThrows(NullPointerException.class, () ->
-                    combinations.repetitive(2, (List<String>) null));
+                    combinationsBuilder.repetitive(2, (List<String>) null));
             assertTrue(nullExp.getMessage().startsWith(errMsgNullInput));
         }
 
@@ -111,7 +112,7 @@ class CombinationsTest {
         @DisplayName("repetitive(List<T>): negative n throws IAE")
         void repetitiveListNegativeN() {
             var negativeNExp = assertThrows(IllegalArgumentException.class, () ->
-                    combinations.repetitive(-1, 2));
+                    combinationsBuilder.repetitive(-1, 2));
             assertTrue(negativeNExp.getMessage().startsWith(errMsgNK));
         }
 
@@ -119,7 +120,7 @@ class CombinationsTest {
         @DisplayName("repetitive(List<T>): negative r throws IAE")
         void repetitiveListNegativeR() {
             var negativeRExp = assertThrows(IllegalArgumentException.class, () ->
-                    combinations.repetitive(3, -2));
+                    combinationsBuilder.repetitive(3, -2));
             assertTrue(negativeRExp.getMessage().startsWith(errMsgNK));
         }
 
@@ -128,21 +129,21 @@ class CombinationsTest {
         void repetitiveVarArgsNullInput() {
             String[] nullArray = null;
             assertThrows(NullPointerException.class, () ->
-                    combinations.repetitive(2, nullArray));
+                    combinationsBuilder.repetitive(2, nullArray));
         }
 
         @Test
         @DisplayName("repetitive(n, r): negative n throws IAE")
         void repetitiveIntNegativeN() {
             assertThrows(IllegalArgumentException.class, () ->
-                    combinations.repetitive(-1, 2));
+                    combinationsBuilder.repetitive(-1, 2));
         }
 
         @Test
         @DisplayName("repetitive(n, r): negative r throws IAE")
         void repetitiveIntNegativeR() {
             assertThrows(IllegalArgumentException.class, () ->
-                    combinations.repetitive(3, -2));
+                    combinationsBuilder.repetitive(3, -2));
         }
     }
 
@@ -168,7 +169,7 @@ class CombinationsTest {
         @DisplayName("null map throws NPE")
         void nullMap() {
             var nullExp = assertThrows(NullPointerException.class, () ->
-                    combinations.multiset(null, 2));
+                    combinationsBuilder.multiset(null, 2));
             assertEquals(errMsgOptions, nullExp.getMessage());
         }
 
@@ -178,7 +179,7 @@ class CombinationsTest {
             var negativeFreqOptions = new LinkedHashMap<String, Integer>();
             negativeFreqOptions.put("A", -1);
             var negativeExp = assertThrows(IllegalArgumentException.class, () ->
-                    combinations.multiset(negativeFreqOptions, 2));
+                    combinationsBuilder.multiset(negativeFreqOptions, 2));
             assertEquals(errMsgOptions, negativeExp.getMessage());
         }
     }

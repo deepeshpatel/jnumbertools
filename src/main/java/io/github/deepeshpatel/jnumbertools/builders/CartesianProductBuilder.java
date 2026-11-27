@@ -2,8 +2,9 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.builders;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.ConditionalProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.LambdaConditionalProductBuilder;
@@ -80,14 +81,14 @@ import java.util.List;
  * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  * @author Deepesh Patel
  */
-public final class CartesianProduct {
+public final class CartesianProductBuilder {
 
     private final Calculator calculator;
 
     /**
      * Constructs a new CartesianProduct instance with a default Calculator.
      */
-    public CartesianProduct() {
+    public CartesianProductBuilder() {
         this(new Calculator());
     }
 
@@ -96,7 +97,7 @@ public final class CartesianProduct {
      *
      * @param calculator the Calculator for combinatorial computations
      */
-    public CartesianProduct(Calculator calculator) {
+    public CartesianProductBuilder(Calculator calculator) {
         this.calculator = calculator;
     }
 

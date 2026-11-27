@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
+import io.github.deepeshpatel.jnumbertools.builders.PermutationsBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermutationLexElementIterator;
 
@@ -36,7 +37,7 @@ public final class KPermutationLexOrder<T> extends AbstractKPermutation<T> {
      * <p>
      * <strong>Note:</strong> This constructor is intended for internal use only.
      * Instances should be created via
-     * {@link io.github.deepeshpatel.jnumbertools.base.Permutations#nPk(int, List)}.
+     * {@link PermutationsBuilder#nPk(int, List)}.
      * All parameter validation (null check, 0 ≤ k ≤ n) is handled by the builder.
      * </p>
      *

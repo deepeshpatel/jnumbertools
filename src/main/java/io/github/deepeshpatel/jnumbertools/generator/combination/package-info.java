@@ -9,6 +9,6 @@
  * combinations. Their traversal and rank-based access are configured through the public
  * combination builder API.</p>
  *
- * @see io.github.deepeshpatel.jnumbertools.base.Combinations
+ * @see io.github.deepeshpatel.jnumbertools.builders.CombinationsBuilder
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination;

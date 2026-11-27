@@ -17,11 +17,11 @@ Common imports used in examples:
 
 ```java
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
-import io.github.deepeshpatel.jnumbertools.base.Permutation;
-import io.github.deepeshpatel.jnumbertools.base.Combination;
-import io.github.deepeshpatel.jnumbertools.base.Derangement;
-import io.github.deepeshpatel.jnumbertools.base.Subset;
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Permutation;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Combination;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Derangement;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Subset;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.*;
 import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic;
 

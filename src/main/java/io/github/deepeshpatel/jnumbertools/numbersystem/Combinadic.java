@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 
 import java.io.Serializable;
 import java.math.BigInteger;

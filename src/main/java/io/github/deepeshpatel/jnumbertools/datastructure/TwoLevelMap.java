@@ -4,8 +4,6 @@
  */
 package io.github.deepeshpatel.jnumbertools.datastructure;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;

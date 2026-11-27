@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.builders.SubsetsBuilder;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Subset;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,7 +13,7 @@ import static io.github.deepeshpatel.jnumbertools.TestBase.errMsgNullInput;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Subsets Factory")
-class SubsetsTest {
+class SubsetsBuilderTest {
 
     /*
     ===============================================================================
@@ -30,7 +32,7 @@ class SubsetsTest {
     null input   | any range         | invalid          | -     | THROW NullPointerException
     */
 
-    private final Subsets subsets = new Subsets(calculator);
+    private final SubsetsBuilder subsetsBuilder = new SubsetsBuilder(calculator);
 
     @Nested
     @DisplayName("of(List<T>) | of(T... elements) | of(int n)")

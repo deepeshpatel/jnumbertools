@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.rank;
 
+import io.github.deepeshpatel.jnumbertools.entrypoint.Rank;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Unrank;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -13,8 +15,6 @@ import java.util.List;
 import java.util.Random;
 
 import static io.github.deepeshpatel.jnumbertools.TestBase.calculator;
-import static io.github.deepeshpatel.jnumbertools.TestBase.rankOf;
-import static io.github.deepeshpatel.jnumbertools.TestBase.unrankOf;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -38,8 +38,8 @@ class KPermutationRankUnrankRoundTripTest {
             assertEquals(calculator.nPr(n, k), BigInteger.valueOf(expected.size()), "count n=" + n + " k=" + k);
             for (int i = 0; i < expected.size(); i++) {
                 BigInteger rank = BigInteger.valueOf(i);
-                assertArrayEquals(expected.get(i), unrankOf.permutation().k(rank, n, k), "unrank n=" + n + " k=" + k + " rank=" + i);
-                assertEquals(rank, rankOf.permutation().k(n, expected.get(i)), "rank n=" + n + " k=" + k + " i=" + i);
+                assertArrayEquals(expected.get(i), Unrank.permutation().k(rank, n, k), "unrank n=" + n + " k=" + k + " rank=" + i);
+                assertEquals(rank, Rank.permutation().k(n, expected.get(i)), "rank n=" + n + " k=" + k + " i=" + i);
             }
         }
     }
@@ -76,7 +76,7 @@ class KPermutationRankUnrankRoundTripTest {
                 ranks.add(new BigInteger(total.bitLength() + 8, random).mod(total));
             }
             for (BigInteger rank : ranks) {
-                int[] permutation = unrankOf.permutation().k(rank, n, k);
+                int[] permutation = Unrank.permutation().k(rank, n, k);
                 assertEquals(k, permutation.length, "n=" + n + " k=" + k);
                 boolean[] seen = new boolean[n];
                 for (int value : permutation) {
@@ -84,11 +84,11 @@ class KPermutationRankUnrankRoundTripTest {
                     assertFalse(seen[value], "distinct, n=" + n + " k=" + k);
                     seen[value] = true;
                 }
-                assertEquals(rank, rankOf.permutation().k(n, permutation), "round trip n=" + n + " k=" + k + " rank=" + rank);
+                assertEquals(rank, Rank.permutation().k(n, permutation), "round trip n=" + n + " k=" + k + " rank=" + rank);
             }
 
-            int[] first = unrankOf.permutation().k(BigInteger.ZERO, n, k);
-            int[] last = unrankOf.permutation().k(total.subtract(BigInteger.ONE), n, k);
+            int[] first = Unrank.permutation().k(BigInteger.ZERO, n, k);
+            int[] last = Unrank.permutation().k(total.subtract(BigInteger.ONE), n, k);
             for (int i = 0; i < k; i++) {
                 assertEquals(i, first[i], "first n=" + n + " k=" + k);
                 assertEquals(n - 1 - i, last[i], "last n=" + n + " k=" + k);

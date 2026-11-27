@@ -12,6 +12,6 @@
  * <p>Conditional products restrict a simple product with rules between two dimensions and count, rank
  * and sample the valid tuples without enumerating the full product.</p>
  *
- * @see io.github.deepeshpatel.jnumbertools.base.CartesianProduct
+ * @see io.github.deepeshpatel.jnumbertools.builders.CartesianProductBuilder
  */
 package io.github.deepeshpatel.jnumbertools.generator.product;

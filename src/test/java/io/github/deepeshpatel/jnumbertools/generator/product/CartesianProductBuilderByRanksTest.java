@@ -1,9 +1,9 @@
 package io.github.deepeshpatel.jnumbertools.generator.product;
 
-import io.github.deepeshpatel.jnumbertools.base.Permutation;
-import io.github.deepeshpatel.jnumbertools.base.Combination;
-import io.github.deepeshpatel.jnumbertools.base.Derangement;
-import io.github.deepeshpatel.jnumbertools.base.Subset;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Permutation;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Combination;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Derangement;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Subset;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * product does not fit in 62 bits. Every result must equal the straightforward reference: split the rank in mixed
  * radix and unrank each dimension separately.
  */
-class CartesianProductByRanksTest {
+class CartesianProductBuilderByRanksTest {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static List<Builder<Object>> dims(Builder<?>... builders) {

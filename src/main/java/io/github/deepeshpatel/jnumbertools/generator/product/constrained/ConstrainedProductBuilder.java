@@ -4,9 +4,9 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.base.Combinations;
-import io.github.deepeshpatel.jnumbertools.base.Subsets;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
+import io.github.deepeshpatel.jnumbertools.builders.CombinationsBuilder;
+import io.github.deepeshpatel.jnumbertools.builders.SubsetsBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.*;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerChoice;
 import io.github.deepeshpatel.jnumbertools.generator.numbers.BigIntegerSample;
@@ -78,8 +78,8 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
             firstBuilder = new EmptyBuilder(n);
         } else {
             firstBuilder = isMultiSelect
-                    ? new Combinations(calculator).repetitive(n, elements)
-                    : new Combinations(calculator).unique(n, elements);
+                    ? new CombinationsBuilder(calculator).repetitive(n, elements)
+                    : new CombinationsBuilder(calculator).unique(n, elements);
         }
         this.builders.add(firstBuilder);
         this.isEmptyProduct = firstBuilder.isEmpty();
@@ -93,7 +93,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
     public ConstrainedProductBuilder(int from, int to, List<?> elements, Calculator calculator) {
         this.calculator = calculator;
         this.builders = new ArrayList<>();
-        Builder<?> firstBuilder = new Subsets(calculator).of(elements).inRange(from, to);
+        Builder<?> firstBuilder = new SubsetsBuilder(calculator).of(elements).inRange(from, to);
         this.builders.add(firstBuilder);
         this.isEmptyProduct = firstBuilder.isEmpty();
         this.cachedCount = computeCount(this.builders, this.isEmptyProduct);
@@ -176,7 +176,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         // Building the dimension validates it (null elements, sizes) and snapshots the list.
         Builder<?> newBuilder = elements.isEmpty()
                 ? new EmptyBuilder(quantity)
-                : new Combinations(calculator).unique(quantity, elements);
+                : new CombinationsBuilder(calculator).unique(quantity, elements);
         return append(newBuilder);
     }
 
@@ -193,7 +193,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
         Util.validateNotNegative(quantity, "quantity");
         Builder<?> newBuilder = elements.isEmpty()
                 ? new EmptyBuilder(quantity)
-                : new Combinations(calculator).repetitive(quantity, elements);
+                : new CombinationsBuilder(calculator).repetitive(quantity, elements);
         return append(newBuilder);
     }
 
@@ -208,7 +208,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
     public ConstrainedProductBuilder andInRange(int from, int to, List<?> elements) {
         Util.validateInput(elements);
         // Building the dimension validates the range and the elements and snapshots the list.
-        return append(new Subsets(calculator).of(elements).inRange(from, to));
+        return append(new SubsetsBuilder(calculator).of(elements).inRange(from, to));
     }
 
     /**

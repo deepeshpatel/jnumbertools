@@ -1,6 +1,5 @@
 package io.github.deepeshpatel.jnumbertools.datastructure;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

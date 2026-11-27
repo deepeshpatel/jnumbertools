@@ -2,8 +2,9 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.builders;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.k.KPermutationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.multiset.MultisetPermutationBuilder;
@@ -92,14 +93,14 @@ import static java.util.Arrays.asList;
  * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  * @author Deepesh Patel
  */
-public final class Permutations {
+public final class PermutationsBuilder {
 
     private final Calculator calculator;
 
     /**
      * Constructs a new Permutations instance with a default Calculator.
      */
-    public Permutations() {
+    public PermutationsBuilder() {
         this(new Calculator());
     }
 
@@ -108,7 +109,7 @@ public final class Permutations {
      *
      * @param calculator the Calculator for combinatorial computations
      */
-    public Permutations(Calculator calculator) {
+    public PermutationsBuilder(Calculator calculator) {
         this.calculator = calculator;
     }
 

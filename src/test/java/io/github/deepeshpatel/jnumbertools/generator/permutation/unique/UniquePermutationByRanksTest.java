@@ -5,7 +5,8 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import io.github.deepeshpatel.jnumbertools.base.Permutation;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Permutation;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Rank;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -352,7 +353,7 @@ class UniquePermutationByRanksTest {
             for (BigInteger rank : of(BigInteger.ONE.shiftLeft(64).add(BigInteger.valueOf(5)),
                     BigInteger.ONE.shiftLeft(80).add(BigInteger.valueOf(123)), last.divide(BigInteger.TWO))) {
                 int[] permutationOfIndices = builder.byRanks(of(rank)).iterator().next().stream().mapToInt(Integer::intValue).toArray();
-                assertEquals(rank, rankOf.permutation().unique(permutationOfIndices), "rank " + rank);
+                assertEquals(rank, Rank.permutation().unique(permutationOfIndices), "rank " + rank);
             }
         }
     }

@@ -2,8 +2,9 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.builders;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.*;
 import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicAlgorithms;
 
@@ -127,7 +128,7 @@ public final class PermutationUnrankOfBuilder {
         if (n < 0) throw new IllegalArgumentException("n must be non-negative");
         if (width < 0) throw new IllegalArgumentException("width must be non-negative");
         List<Integer> elements = IntStream.range(0, n).boxed().toList();
-        List<Integer> result = new Permutations(calculator).repetitive(width, elements)
+        List<Integer> result = new PermutationsBuilder(calculator).repetitive(width, elements)
                 .byRanks(List.of(rank)).iterator().next();
         return result.stream().mapToInt(Integer::intValue).toArray();
     }
@@ -148,7 +149,7 @@ public final class PermutationUnrankOfBuilder {
         Objects.requireNonNull(frequencies, "frequencies must not be null");
         LinkedHashMap<Integer, Integer> options = new LinkedHashMap<>();
         for (int i = 0; i < frequencies.length; i++) options.put(i, frequencies[i]);
-        List<Integer> result = new Permutations(calculator).multiset(options)
+        List<Integer> result = new PermutationsBuilder(calculator).multiset(options)
                 .byRanks(List.of(rank)).iterator().next();
         return result.stream().mapToInt(Integer::intValue).toArray();
     }

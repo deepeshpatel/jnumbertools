@@ -4,9 +4,9 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.base.Combinations;
-import io.github.deepeshpatel.jnumbertools.base.Permutations;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
+import io.github.deepeshpatel.jnumbertools.builders.CombinationsBuilder;
+import io.github.deepeshpatel.jnumbertools.builders.PermutationsBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermutationLexElementIterator;
 
@@ -45,7 +45,7 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
      * <p>
      * <strong>Note:</strong> This constructor is intended for internal use only.
      * Instances should be created via
-     * {@link io.github.deepeshpatel.jnumbertools.base.Permutations#nPk(int, List)} and then
+     * {@link PermutationsBuilder#nPk(int, List)} and then
      * {@link io.github.deepeshpatel.jnumbertools.generator.permutation.k.KPermutationBuilder#combinationOrder()}.
      * All parameter validation (null check, 0 ≤ k ≤ n) is handled by the builder.
      * </p>
@@ -95,7 +95,7 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
     }
 
     private class Itr implements Iterator<List<T>> {
-        private final Permutations permutations = new Permutations(calculator);
+        private final PermutationsBuilder permutationsBuilder = new PermutationsBuilder(calculator);
         private final Iterator<List<T>> combinationIterator;
         private Iterator<List<T>> currentIterator;
 
@@ -104,7 +104,7 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
          * Only reached when 0 < k < n, so at least one combination exists.
          */
         public Itr() {
-            combinationIterator = new Combinations(calculator).unique(k, elements).lexOrder().iterator();
+            combinationIterator = new CombinationsBuilder(calculator).unique(k, elements).lexOrder().iterator();
             getNextIterator();
         }
 
@@ -131,7 +131,7 @@ public final class KPermutationCombinationOrder<T> extends AbstractKPermutation<
          * (never empty, because k! >= 1).
          */
         private Iterator<List<T>> getNextIterator() {
-            currentIterator = permutations
+            currentIterator = permutationsBuilder
                     .unique(combinationIterator.next())
                     .lexOrder()
                     .iterator();

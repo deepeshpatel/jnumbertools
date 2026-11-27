@@ -4,8 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.multiset;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.base.Permutations;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
+import io.github.deepeshpatel.jnumbertools.builders.PermutationsBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
 
 import io.github.deepeshpatel.jnumbertools.datastructure.Tuple;
@@ -44,7 +44,7 @@ public abstract class AbstractMultisetPermutation<T> implements StreamableIterab
      * Constructs an {@code AbstractMultisetPermutation} instance with an insertion-ordered multiset.
      * <p>
      * <strong>For internal/library use only.</strong>
-     * Application code must use the {@link Permutations} builder instead.
+     * Application code must use the {@link PermutationsBuilder} builder instead.
      * </p>
      * <p>
      * This constructor assumes that the input has already been validated by the builder:

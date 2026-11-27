@@ -4,6 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
+import io.github.deepeshpatel.jnumbertools.builders.PermutationsBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.AbstractGenerator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.iterator.UniquePermutationLexElementIterator;
@@ -32,7 +33,7 @@ public final class UniquePermutation<T> extends AbstractGenerator<T> {
      * Constructs a generator for unique permutations of the specified elements.
      * <p>
      * <strong>Note:</strong> This constructor is intended for internal use only.
-     * Instances should be created via {@link io.github.deepeshpatel.jnumbertools.base.Permutations#unique(List)}.
+     * Instances should be created via {@link PermutationsBuilder#unique(List)}.
      * All parameter validation is handled by the builder.
      * </p>
      *

@@ -4,7 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.permutation.derangement;
 
-import io.github.deepeshpatel.jnumbertools.base.Derangement;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Derangement;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Unrank;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -162,23 +163,23 @@ class DerangementTest {
 
     // =========================================================
     // 3. Consistency with unrankOf
-    //    These tests verify the decode correctness of unrankOf.permutation().derangement(rank, n)
+    //    These tests verify the decode correctness of Unrank.permutation().derangement(rank, n)
     //    specifically — not just mth iteration order.
     // =========================================================
 
     @Nested
-    @DisplayName("Consistency with unrankOf.permutation().derangement")
+    @DisplayName("Consistency with Unrank.permutation().derangement")
     class ConsistencyWithUnrank {
 
         @ParameterizedTest(name = "n={0}")
         @ValueSource(ints = {3, 4, 5})
-        @DisplayName("k-th lexOrder element equals unrankOf.permutation().derangement(k, n)")
+        @DisplayName("k-th lexOrder element equals Unrank.permutation().derangement(k, n)")
         void lexOrderMatchesUnrank(int n) {
             var lexList = Derangement.of(n).lexOrder().stream().toList();
             assertEquals(calculator.subFactorial(n).intValue(), lexList.size());
 
             for (int rank = 0; rank < lexList.size(); rank++) {
-                int[] viaUnrank = unrankOf.permutation().derangement(rank, n);
+                int[] viaUnrank = Unrank.permutation().derangement(rank, n);
                 var expected = new ArrayList<Integer>(n);
                 for (int v : viaUnrank) expected.add(v);
                 assertEquals(expected, lexList.get(rank),

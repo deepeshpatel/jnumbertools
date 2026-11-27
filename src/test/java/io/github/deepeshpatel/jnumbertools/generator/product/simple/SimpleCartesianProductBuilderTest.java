@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
-import io.github.deepeshpatel.jnumbertools.base.Product;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * to be empty (count = 0, output = []).
  */
 @DisplayName("Simple Cartesian Product (lex order)")
-class SimpleCartesianProductTest {
+class SimpleCartesianProductBuilderTest {
 
     // =========================================================
     // 1. Count correctness: Π |Lᵢ|

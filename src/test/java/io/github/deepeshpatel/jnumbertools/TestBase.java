@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools;
 
-import io.github.deepeshpatel.jnumbertools.base.*;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import org.junit.jupiter.api.Assertions;
 
 import java.util.Collections;
@@ -17,9 +17,8 @@ public class TestBase {
     }
 
     public static final Calculator calculator = new Calculator();
-    public static final NumberSystem numberSystem = new NumberSystem(calculator);
-    public static final RankOf rankOf = new RankOf(calculator);
-    public static final UnrankOf unrankOf = new UnrankOf(calculator);
+    //public static final NumberSystem numberSystem = new NumberSystem(calculator);
+    //public static final UnrankOf unrankOf = new UnrankOf(calculator);
 
     public static final List<?> listOfEmptyList = List.of(Collections.emptyList());
     public static final List<?> listOfEmptyMap = List.of(Collections.emptyMap());

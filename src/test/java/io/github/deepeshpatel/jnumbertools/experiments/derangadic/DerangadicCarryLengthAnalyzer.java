@@ -1,6 +1,6 @@
 package io.github.deepeshpatel.jnumbertools.experiments.derangadic;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.DerangadicIncrementStateMachine;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

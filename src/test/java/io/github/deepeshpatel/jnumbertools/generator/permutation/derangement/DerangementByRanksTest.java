@@ -5,7 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.derangement;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
-import io.github.deepeshpatel.jnumbertools.base.Derangement;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Derangement;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

@@ -4,11 +4,12 @@
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem;
 
-import io.github.deepeshpatel.jnumbertools.base.Combination;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Unrank;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Combination;
 
 import io.github.deepeshpatel.jnumbertools.AllocationMeter;
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Rank;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
@@ -128,9 +129,9 @@ class CombinadicEstimateUnrankTest {
             if (total.bitLength() <= 62 || r >= 256) continue;    // those use the long path and the walk
             for (int i = 0; i < 100; i++) {
                 BigInteger rank = new BigInteger(total.bitLength() + 8, random).mod(total);
-                int[] combination = JNumberTools.unrankOf().combination().unique(rank, n, r);
+                int[] combination = Unrank.combination().unique(rank, n, r);
                 assertArrayEquals(viaSearch(rank, total, n, r), combination, n + "C" + r);
-                assertEquals(rank, JNumberTools.rankOf().combination().unique(n, combination), n + "C" + r);
+                assertEquals(rank, Rank.combination().unique(n, combination), n + "C" + r);
             }
         }
     }

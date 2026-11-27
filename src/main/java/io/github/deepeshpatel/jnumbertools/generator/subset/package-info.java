@@ -9,6 +9,6 @@
  * power set or within a configured range of subset sizes. Use the public subset builder API
  * to configure and obtain subset generators.</p>
  *
- * @see io.github.deepeshpatel.jnumbertools.base.Subsets
+ * @see io.github.deepeshpatel.jnumbertools.builders.SubsetsBuilder
  */
 package io.github.deepeshpatel.jnumbertools.generator.subset;

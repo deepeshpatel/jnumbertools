@@ -1,7 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
-import io.github.deepeshpatel.jnumbertools.base.Permutation;
-import io.github.deepeshpatel.jnumbertools.base.Product;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Permutation;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
 import org.junit.jupiter.api.Nested;
@@ -14,7 +14,7 @@ import java.util.List;
 import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SimpleCartesianProductByRanksTest {
+public class SimpleCartesianProductBuilderByRanksTest {
 
     @Nested
     class Mth {

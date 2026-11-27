@@ -2,8 +2,9 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.entrypoint;
 
+import io.github.deepeshpatel.jnumbertools.builders.SubsetsBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetSelector;
 
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.List;
  * Subset.of(5).all().lexOrder();
  * }</pre>
  *
- * @see Subsets
+ * @see SubsetsBuilder
  * @author Deepesh Patel
  */
 public final class Subset {
@@ -29,8 +30,8 @@ public final class Subset {
         // Static factory class.
     }
 
-    private static Subsets factory() {
-        return new Subsets();
+    private static SubsetsBuilder factory() {
+        return new SubsetsBuilder();
     }
 
     @SafeVarargs

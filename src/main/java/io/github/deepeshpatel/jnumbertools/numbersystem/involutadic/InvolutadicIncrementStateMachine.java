@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.numbersystem.involutadic;
 
-import io.github.deepeshpatel.jnumbertools.base.Calculator;
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 
 import java.math.BigInteger;
 import java.util.Arrays;

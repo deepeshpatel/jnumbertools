@@ -1,8 +1,9 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.k;
 
-import io.github.deepeshpatel.jnumbertools.base.Permutation;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Permutation;
 
 import io.github.deepeshpatel.jnumbertools.TestBase;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Rank;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -399,7 +400,7 @@ class KPermutationByRanksTest {
 
             for (BigInteger rank : of(BigInteger.ONE.shiftLeft(66).add(BigInteger.valueOf(777)), count.divide(BigInteger.TWO))) {
                 int[] arrangement = builder.byRanks(of(rank)).iterator().next().stream().mapToInt(Integer::intValue).toArray();
-                assertEquals(rank, rankOf.permutation().k(n, arrangement), "rank " + rank);
+                assertEquals(rank, Rank.permutation().k(n, arrangement), "rank " + rank);
             }
         }
     }

@@ -2,8 +2,10 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.entrypoint;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
+import io.github.deepeshpatel.jnumbertools.builders.CartesianProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.ConditionalProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder;
@@ -14,10 +16,7 @@ import java.util.Objects;
 
 /**
  * Static entry point for Cartesian product generation.
- *
- * <p>Use {@link JNumberTools} for the library's other combinatorial generators. This class
- * groups the Cartesian product factories and allows a {@link Calculator} to be shared by
- * constrained products that need combinatorial counts.</p>
+
  *
  * <h2>Simple products</h2>
  * <pre>{@code
@@ -46,8 +45,7 @@ import java.util.Objects;
  *     .lexOrder();
  * }</pre>
  *
- * @see JNumberTools
- * @see CartesianProduct
+ * @see CartesianProductBuilder
  * @author Deepesh Patel
  */
 public final class Product {
@@ -69,7 +67,7 @@ public final class Product {
         if (dimensions.length == 0) {
             throw new IllegalArgumentException("At least one product dimension is required");
         }
-        CartesianProduct products = new CartesianProduct();
+        CartesianProductBuilder products = new CartesianProductBuilder();
         if (dimensions.length == 1) {
             return products.simpleProductOf(dimensions[0]);
         }
@@ -111,7 +109,7 @@ public final class Product {
         if (dimensions.length == 0) {
             throw new IllegalArgumentException("At least one product dimension is required");
         }
-        CartesianProduct products = new CartesianProduct();
+        CartesianProductBuilder products = new CartesianProductBuilder();
         if (dimensions.length == 1) {
             return products.conditionalProductOf(dimensions[0]);
         }
@@ -140,7 +138,7 @@ public final class Product {
          * @return the constrained product builder
          */
         public ConstrainedProductBuilder ofDistinct(int quantity, List<?> elements) {
-            return new CartesianProduct(calculator).constrainedProductOfDistinct(quantity, elements);
+            return new CartesianProductBuilder(calculator).constrainedProductOfDistinct(quantity, elements);
         }
 
         /**
@@ -163,7 +161,7 @@ public final class Product {
          * @return the constrained product builder
          */
         public ConstrainedProductBuilder ofMultiSelect(int quantity, List<?> elements) {
-            return new CartesianProduct(calculator).constrainedProductOfMultiSelect(quantity, elements);
+            return new CartesianProductBuilder(calculator).constrainedProductOfMultiSelect(quantity, elements);
         }
 
         /**
@@ -187,7 +185,7 @@ public final class Product {
          * @return the constrained product builder
          */
         public ConstrainedProductBuilder ofInRange(int from, int to, List<?> elements) {
-            return new CartesianProduct(calculator).constrainedProductOfInRange(from, to, elements);
+            return new CartesianProductBuilder(calculator).constrainedProductOfInRange(from, to, elements);
         }
 
         /**

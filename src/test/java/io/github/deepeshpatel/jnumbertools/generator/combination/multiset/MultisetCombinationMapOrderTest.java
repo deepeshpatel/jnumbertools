@@ -4,7 +4,7 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.combination.multiset;
 
-import io.github.deepeshpatel.jnumbertools.base.Combination;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Combination;
 
 import org.junit.jupiter.api.Test;
 

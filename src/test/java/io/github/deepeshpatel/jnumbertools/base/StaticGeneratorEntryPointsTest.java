@@ -4,6 +4,10 @@
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.entrypoint.Combination;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Derangement;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Permutation;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Subset;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -63,12 +67,5 @@ class StaticGeneratorEntryPointsTest {
         assertEquals(BigInteger.valueOf(8), Subset.of(List.of("A", "B", "C")).all().count());
         assertEquals(BigInteger.valueOf(8), Subset.of("A", "B", "C").all().count());
         assertEquals(BigInteger.valueOf(6), Subset.of("A", "B", "C").inRange(1, 2).count());
-    }
-
-    @Test
-    void jNumberToolsRetainsItsRemainingEntryPoints() {
-        assertEquals(RankOf.class, JNumberTools.rankOf().getClass());
-        assertEquals(UnrankOf.class, JNumberTools.unrankOf().getClass());
-        assertEquals(NumberSystem.class, JNumberTools.numberSystem().getClass());
     }
 }

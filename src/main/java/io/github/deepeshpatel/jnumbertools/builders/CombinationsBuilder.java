@@ -2,8 +2,9 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.builders;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.combination.multiset.MultisetCombinationBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.combination.repetitive.RepetitiveCombinationBuilder;
@@ -87,14 +88,14 @@ import java.util.stream.IntStream;
  * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  * @author Deepesh Patel
  */
-public final class Combinations {
+public final class CombinationsBuilder {
 
     private final Calculator calculator;
 
     /**
      * Constructs a new Combinations instance with a default Calculator.
      */
-    public Combinations() {
+    public CombinationsBuilder() {
         this(new Calculator());
     }
 
@@ -103,7 +104,7 @@ public final class Combinations {
      *
      * @param calculator the Calculator for combinatorial computations
      */
-    public Combinations(Calculator calculator) {
+    public CombinationsBuilder(Calculator calculator) {
         this.calculator = calculator;
     }
 

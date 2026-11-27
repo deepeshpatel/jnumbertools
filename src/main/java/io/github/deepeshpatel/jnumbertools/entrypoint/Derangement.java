@@ -2,8 +2,9 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.entrypoint;
 
+import io.github.deepeshpatel.jnumbertools.builders.DerangementsBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.permutation.derangement.DerangementBuilder;
 
 import java.util.List;
@@ -19,7 +20,7 @@ import java.util.List;
  * Derangement.of("A", "B", "C", "D").lexOrder();
  * }</pre>
  *
- * @see Derangements
+ * @see DerangementsBuilder
  * @author Deepesh Patel &amp; Aditya Patel
  */
 public final class Derangement {
@@ -28,8 +29,8 @@ public final class Derangement {
         // Static factory class.
     }
 
-    private static Derangements factory() {
-        return new Derangements();
+    private static DerangementsBuilder factory() {
+        return new DerangementsBuilder();
     }
 
     public static DerangementBuilder<Integer> of(int n) {

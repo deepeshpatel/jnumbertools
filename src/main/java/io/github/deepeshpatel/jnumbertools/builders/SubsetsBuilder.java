@@ -2,8 +2,9 @@
  * Copyright (c) 2021-2026 Deepesh Patel
  * SPDX-License-Identifier: Apache-2.0
  */
-package io.github.deepeshpatel.jnumbertools.base;
+package io.github.deepeshpatel.jnumbertools.builders;
 
+import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetSelector;
@@ -100,14 +101,14 @@ import java.util.stream.IntStream;
  * @see <a href="overview.html">Overview</a> for detailed examples and usage scenarios
  * @author Deepesh Patel
  */
-public final class Subsets {
+public final class SubsetsBuilder {
 
     private final Calculator calculator;
 
     /**
      * Constructs a new Subsets instance with a default Calculator.
      */
-    public Subsets() {
+    public SubsetsBuilder() {
         this(new Calculator());
     }
 
@@ -116,7 +117,7 @@ public final class Subsets {
      *
      * @param calculator the Calculator for combinatorial computations
      */
-    public Subsets(Calculator calculator) {
+    public SubsetsBuilder(Calculator calculator) {
         this.calculator = calculator;
     }
 

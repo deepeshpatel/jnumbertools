@@ -1,6 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.permutation.unique;
 
-import io.github.deepeshpatel.jnumbertools.base.Permutations;
+import io.github.deepeshpatel.jnumbertools.builders.PermutationsBuilder;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Rank;
 import io.github.deepeshpatel.jnumbertools.generator.base.BuilderTestHelper;
 import org.junit.jupiter.api.Test;
 
@@ -12,13 +13,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
-import static io.github.deepeshpatel.jnumbertools.TestBase.rankOf;
 
 class UniquePermutationBuilderTest {
 
-    private final Permutations permutations = new Permutations(calculator);
+    private final PermutationsBuilder permutationsBuilder = new PermutationsBuilder(calculator);
     private final List<String> elements = List.of("A", "B", "C");
-    private final UniquePermutationBuilder<String> builder = permutations.unique(elements);
+    private final UniquePermutationBuilder<String> builder = permutationsBuilder.unique(elements);
 
     @Test
     void lexOrder() {
@@ -50,22 +50,22 @@ class UniquePermutationBuilderTest {
         // Builder-specific count tests
         assertEquals(BigInteger.valueOf(6), builder.count());
 
-        var emptyBuilder = permutations.unique(List.of());
+        var emptyBuilder = permutationsBuilder.unique(List.of());
         assertEquals(BigInteger.ONE, emptyBuilder.count());
     }
 
     @Test
     void isEmpty() {
         assertFalse(builder.isEmpty());
-        assertFalse(permutations.unique(List.of()).isEmpty());        // 0! = 1: the only result is []
+        assertFalse(permutationsBuilder.unique(List.of()).isEmpty());        // 0! = 1: the only result is []
         for (int n = 0; n <= 5; n++) {
-            BuilderTestHelper.testIsEmpty(permutations.unique(n));
+            BuilderTestHelper.testIsEmpty(permutationsBuilder.unique(n));
         }
     }
 
     @Test
     void emptySetIsASingleEmptyResult() {
-        BuilderTestHelper.testSingleEmptyResultDomain(permutations.unique(List.of()));
+        BuilderTestHelper.testSingleEmptyResultDomain(permutationsBuilder.unique(List.of()));
     }
 
     @Test
@@ -86,22 +86,22 @@ class UniquePermutationBuilderTest {
 
     @Test
     void nullInputIsRejected() {
-        assertThrows(NullPointerException.class, () -> permutations.unique((List<String>) null));
+        assertThrows(NullPointerException.class, () -> permutationsBuilder.unique((List<String>) null));
     }
 
     @Test
     void nullElementsAreRejectedWhenBuilderIsCreated() {
         for (List<String> list : List.of(Arrays.asList(null, "B", "C"), Arrays.asList("A", null, "C"), Arrays.asList("A", "B", null))) {
-            assertThrows(NullPointerException.class, () -> permutations.unique(list), "unique " + list);
+            assertThrows(NullPointerException.class, () -> permutationsBuilder.unique(list), "unique " + list);
             assertThrows(NullPointerException.class, () -> new UniquePermutationBuilder<>(calculator, list), "constructor " + list);
         }
-        assertThrows(NullPointerException.class, () -> permutations.unique("A", null));
+        assertThrows(NullPointerException.class, () -> permutationsBuilder.unique("A", null));
     }
 
     @Test
     void builderSnapshotsItsInput() {
         List<String> input = new ArrayList<>(List.of("A", "B", "C"));
-        var snapshot = permutations.unique(input);
+        var snapshot = permutationsBuilder.unique(input);
         var lexBefore = snapshot.lexOrder().stream().toList();
         var generatorCreatedEarlier = snapshot.lexOrder();
 
@@ -118,9 +118,9 @@ class UniquePermutationBuilderTest {
         // 25! > Long.MAX_VALUE: ranks >= 2^63 must be reachable, not only the first 2^63 permutations
         BigInteger twoPow63 = BigInteger.ONE.shiftLeft(63);
         int draws = 200, above = 0;
-        for (List<Integer> p : permutations.unique(25).choice(draws, new Random(1))) {
+        for (List<Integer> p : permutationsBuilder.unique(25).choice(draws, new Random(1))) {
             int[] indices = p.stream().mapToInt(Integer::intValue).toArray();
-            if (rankOf.permutation().unique(indices).compareTo(twoPow63) >= 0) {
+            if (Rank.permutation().unique(indices).compareTo(twoPow63) >= 0) {
                 above++;
             }
         }
