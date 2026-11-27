@@ -250,14 +250,14 @@ var products = JNumberTools.cartesianProduct()
             int b = (Integer) values[2];
             return c * m <= b;
         })
-        .andWhen(memoryGb, budget).matches((m, b) -> m * 2 <= b);
+        .when(memoryGb, budget).matches((m, b) -> m * 2 <= b);
 
 products.count();
 products.generate().stream().forEach(System.out::println);
 ```
 
 Additional dimensions can be appended with `and(list)`. Add further rules with
-`andWhen(...).matches(...)`. Every completed lambda rule must hold; rules are combined
+`.when(...).matches(...)`. Every completed lambda rule must hold; rules are combined
 with AND.
 
 **Compilation and limits.**
