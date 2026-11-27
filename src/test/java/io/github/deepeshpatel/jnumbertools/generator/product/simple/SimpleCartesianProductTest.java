@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -17,7 +19,7 @@ import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for {@code cartesianProduct.simpleProductOf(L₁).and(L₂)...} — Cartesian
+ * Tests for {@code Product.simple(L₁).and(L₂)...} — Cartesian
  * product whose count is {@code |L₁|·|L₂|·…·|Lₖ|}.
  *
  * <p>Convention: a single empty dimension yields the unique empty tuple
@@ -37,7 +39,7 @@ class SimpleCartesianProductTest {
         @Test
         @DisplayName("|L₁|·|L₂|·|L₃| for non-empty dimensions")
         void countFormula() {
-            var product = cartesianProduct.simpleProductOf(List.of(0, 1))
+            var product = Product.simple(List.of(0, 1))
                     .and(A_B)
                     .and(num_1_2_3);
             long expected = 2L * 2 * 3;
@@ -48,7 +50,7 @@ class SimpleCartesianProductTest {
         @Test
         @DisplayName("count() agrees with stream count")
         void builderCountMatchesStreamCount() {
-            var product = cartesianProduct.simpleProductOf(num_1_to_4).and(A_B_C);
+            var product = Product.simple(num_1_to_4).and(A_B_C);
             assertEquals(product.count().longValue(),
                     product.lexOrder().stream().count());
         }
@@ -64,7 +66,7 @@ class SimpleCartesianProductTest {
         @Test
         @DisplayName("Single empty dimension: any empty dimension makes the product empty (count=0, no tuples)")
         void singleEmpty() {
-            var b = cartesianProduct.simpleProductOf(Collections.emptyList());
+            var b = Product.simple(Collections.emptyList());
             assertEquals(BigInteger.ZERO, b.count());
             assertTrue(b.isEmpty());
             assertTrue(b.lexOrder().stream().toList().isEmpty());
@@ -73,7 +75,7 @@ class SimpleCartesianProductTest {
         @Test
         @DisplayName("Non-empty × empty: count=0, no tuples")
         void nonEmptyTimesEmpty() {
-            var b = cartesianProduct.simpleProductOf(A_B).and(Collections.emptyList());
+            var b = Product.simple(A_B).and(Collections.emptyList());
             assertEquals(BigInteger.ZERO, b.count());
             assertTrue(b.lexOrder().stream().toList().isEmpty());
         }
@@ -81,7 +83,7 @@ class SimpleCartesianProductTest {
         @Test
         @DisplayName("Empty × non-empty: count=0, no tuples")
         void emptyTimesNonEmpty() {
-            var b = cartesianProduct.simpleProductOf(Collections.emptyList()).and(A_B);
+            var b = Product.simple(Collections.emptyList()).and(A_B);
             assertEquals(BigInteger.ZERO, b.count());
             assertTrue(b.lexOrder().stream().toList().isEmpty());
         }
@@ -89,7 +91,7 @@ class SimpleCartesianProductTest {
         @Test
         @DisplayName("Empty × empty: count=0, no tuples")
         void emptyTimesEmpty() {
-            var b = cartesianProduct.simpleProductOf(Collections.emptyList())
+            var b = Product.simple(Collections.emptyList())
                     .and(Collections.emptyList());
             assertEquals(BigInteger.ZERO, b.count());
             assertTrue(b.lexOrder().stream().toList().isEmpty());
@@ -98,7 +100,7 @@ class SimpleCartesianProductTest {
         @Test
         @DisplayName("Empty in the middle of multiple dimensions: count=0")
         void emptyInMiddle() {
-            var b = cartesianProduct.simpleProductOf(A_B)
+            var b = Product.simple(A_B)
                     .and(Collections.emptyList())
                     .and(num_1_2_3);
             assertEquals(BigInteger.ZERO, b.count());
@@ -108,7 +110,7 @@ class SimpleCartesianProductTest {
         @Test
         @DisplayName("and(empty) returns a NEW builder; original is unchanged")
         void andEmptyDoesNotMutateOriginal() {
-            var original = cartesianProduct.simpleProductOf(A_B);
+            var original = Product.simple(A_B);
             var withEmpty = original.and(Collections.emptyList());
             assertEquals(BigInteger.valueOf(2), original.count(),
                     "the builder used to start the chain must remain unchanged");
@@ -144,7 +146,7 @@ class SimpleCartesianProductTest {
         @DisplayName("Single dimension: identity, one 1-tuple per element")
         void singleDimensionIsIdentity() {
             var list = List.of("A", "B", "C");
-            var product = cartesianProduct.simpleProductOf(list).lexOrder().stream().toList();
+            var product = Product.simple(list).lexOrder().stream().toList();
             assertEquals(list.size(), product.size());
             for (int i = 0; i < list.size(); i++) {
                 assertEquals(List.of(list.get(i)), product.get(i));
@@ -154,7 +156,7 @@ class SimpleCartesianProductTest {
         @Test
         @DisplayName("Last (rightmost) dimension varies fastest (lex order)")
         void rightmostDimensionVariesFastest() {
-            var list = cartesianProduct.simpleProductOf(List.of(0, 1)).and(A_B)
+            var list = Product.simple(List.of(0, 1)).and(A_B)
                     .lexOrder().stream().toList();
             assertEquals(List.of(0, 'A'), list.get(0));
             assertEquals(List.of(0, 'B'), list.get(1));
@@ -173,7 +175,7 @@ class SimpleCartesianProductTest {
         @Test
         @DisplayName("Multiple stream() calls produce equal results")
         void multipleStreamCallsAreEqual() {
-            var p = cartesianProduct.simpleProductOf(A_B).and(num_1_2_3).lexOrder();
+            var p = Product.simple(A_B).and(num_1_2_3).lexOrder();
             var list1 = p.stream().toList();
             var list2 = p.stream().toList();
             assertIterableEquals(list1, list2);
@@ -182,7 +184,7 @@ class SimpleCartesianProductTest {
         @Test
         @DisplayName("Inner lists are immutable")
         void innerListsAreImmutable() {
-            var results = cartesianProduct.simpleProductOf(A_B).and(num_1_2_3)
+            var results = Product.simple(A_B).and(num_1_2_3)
                     .lexOrder().stream().toList();
             assertThrows(UnsupportedOperationException.class, () -> results.get(0).add("X"));
         }
@@ -196,7 +198,7 @@ class SimpleCartesianProductTest {
     @DisplayName("[STRESS] 10×10×10 product produces 1000 tuples")
     void stressTesting() {
         var digits = List.of(0,1,2,3,4,5,6,7,8,9);
-        var product = cartesianProduct.simpleProductOf(digits).and(digits).and(digits);
+        var product = Product.simple(digits).and(digits).and(digits);
         assertEquals(1000L, product.lexOrder().stream().count());
         assertEquals(BigInteger.valueOf(1000), product.count());
     }
