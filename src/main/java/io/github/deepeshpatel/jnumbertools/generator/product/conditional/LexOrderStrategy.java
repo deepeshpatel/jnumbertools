@@ -14,7 +14,7 @@ public enum LexOrderStrategy {
     DP,
     /**
      * Implementation-policy entry point. The API makes no guarantee about which algorithm runs for a workload
-     * or condition; the policy may change between versions. In this version it resolves to PRUNED_BITSET.
+     * or condition; the policy may change between versions. In this version it resolves to PRUNED_BITSET for pairwise-only products and DP when multi-trigger Lambda rules are present.
      * Use an explicit strategy when a specific algorithm is required.
      */
     ADAPTIVE
