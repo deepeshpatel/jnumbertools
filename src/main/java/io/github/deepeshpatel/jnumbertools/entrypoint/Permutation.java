@@ -26,14 +26,14 @@ import java.util.List;
  * builder. For example:</p>
  *
  * <pre>{@code
+ * import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
+ * import io.github.deepeshpatel.jnumbertools.generator.permutation.unique.UniquePermutationBuilder;
+ * import java.util.List;
+ *
  * Calculator calculator = new Calculator();
  * var first = new UniquePermutationBuilder<>(calculator, List.of("A", "B", "C"));
  * var second = new UniquePermutationBuilder<>(calculator, List.of("D", "E", "F"));
  * }</pre>
- *
- * <p>Import {@code Calculator} from {@code io.github.deepeshpatel.jnumbertools.datastructure}
- * and {@code UniquePermutationBuilder} from
- * {@code io.github.deepeshpatel.jnumbertools.generator.permutation.unique}.</p>
  *
  * <pre>{@code
  * Permutation.unique("A", "B", "C").lexOrder();
