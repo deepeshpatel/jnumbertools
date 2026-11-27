@@ -14,7 +14,7 @@
  *
  * <p>Use the facade and its returned builders as the normal public API. For example:</p>
  * <pre>{@code
- * JNumberTools.permutations()
+ * Permutation
  *     .unique("A", "B", "C")
  *     .lexOrder()
  *     .forEach(System.out::println);
