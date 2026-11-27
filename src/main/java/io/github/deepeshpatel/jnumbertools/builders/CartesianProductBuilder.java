@@ -21,8 +21,6 @@ import java.util.List;
  *   <li><b>Simple Product</b>: Aⁿ where A is a single set repeated n times</li>
  *   <li><b>Constrained Product</b>: A₁ × A₂ × ... × Aₖ where each Aᵢ can be a set, combination, or subset with constraints</li>
  *   <li><b>Conditional Product</b>: a simple product restricted by pairwise rules</li>
- *   <li><b>Lambda Product</b>: a simple product restricted by Java predicates over some or all dimensions,
- *       compiled once into the same constraints (see {@link #withLambda(List)})</li>
  * </ul>
  *
  * <h2>Usage Examples</h2>
