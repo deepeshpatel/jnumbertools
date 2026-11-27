@@ -87,14 +87,14 @@ public final class CartesianProductBuilder {
     private final Calculator calculator;
 
     /**
-     * Constructs a new CartesianProduct instance with a default Calculator.
+     * Constructs a new {@code CartesianProductBuilder} with a default Calculator.
      */
     public CartesianProductBuilder() {
         this(new Calculator());
     }
 
     /**
-     * Constructs a new CartesianProduct instance with the specified Calculator.
+     * Constructs a new {@code CartesianProductBuilder} with the specified Calculator.
      *
      * @param calculator the Calculator for combinatorial computations
      */
