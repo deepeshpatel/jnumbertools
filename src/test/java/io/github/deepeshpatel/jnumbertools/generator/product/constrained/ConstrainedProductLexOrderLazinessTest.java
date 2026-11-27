@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -10,7 +12,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -55,7 +56,7 @@ class ConstrainedProductLexOrderLazinessTest {
 
     @Test
     void hugeDimensionLast() {
-        var product = cartesianProduct.constrainedProductOfDistinct(2, A_B_C)      // 3 combinations
+        var product = Product.constrained().ofDistinct(2, A_B_C)      // 3 combinations
                 .andDistinct(17, THIRTY_FOUR);                                      // C(34,17)
 
         var first = firstTuples(product, 3);
@@ -72,7 +73,7 @@ class ConstrainedProductLexOrderLazinessTest {
 
     @Test
     void hugeDimensionFirst() {
-        var product = cartesianProduct.constrainedProductOfDistinct(17, THIRTY_FOUR)   // C(34,17)
+        var product = Product.constrained().ofDistinct(17, THIRTY_FOUR)   // C(34,17)
                 .andDistinct(2, A_B_C);                                                  // 3 combinations
 
         var first = firstTuples(product, 4);
@@ -92,7 +93,7 @@ class ConstrainedProductLexOrderLazinessTest {
 
     @Test
     void hugeDimensionInTheMiddle() {
-        var product = cartesianProduct.constrainedProductOfDistinct(1, List.of("X", "Y"))
+        var product = Product.constrained().ofDistinct(1, List.of("X", "Y"))
                 .andDistinct(17, THIRTY_FOUR)
                 .andMultiSelect(1, List.of("p", "q"));
 
@@ -110,7 +111,7 @@ class ConstrainedProductLexOrderLazinessTest {
 
     @Test
     void lexOrderIsTheNestedLoopOrder() {
-        var product = cartesianProduct.constrainedProductOfDistinct(1, List.of("X", "Y"))
+        var product = Product.constrained().ofDistinct(1, List.of("X", "Y"))
                 .andDistinct(2, A_B_C)
                 .andInRange(0, 1, List.of(1, 2));
 
@@ -131,11 +132,11 @@ class ConstrainedProductLexOrderLazinessTest {
     @Test
     void lexOrderAgreesWithByRanksForEveryRank() {
         var products = List.of(
-                cartesianProduct.constrainedProductOfDistinct(2, A_B_C),
-                cartesianProduct.constrainedProductOfDistinct(1, List.of("X", "Y")).andMultiSelect(2, A_B_C),
-                cartesianProduct.constrainedProductOfInRange(0, 2, A_B_C).andDistinct(1, List.of("X", "Y")),
-                cartesianProduct.constrainedProductOfDistinct(0, A_B_C).andDistinct(2, A_B_C).andMultiSelect(0, Collections.emptyList()),
-                cartesianProduct.constrainedProductOfMultiSelect(2, List.of("X", "Y")).andDistinct(3, A_B_C).andInRange(0, 0, A_B_C));
+                Product.constrained().ofDistinct(2, A_B_C),
+                Product.constrained().ofDistinct(1, List.of("X", "Y")).andMultiSelect(2, A_B_C),
+                Product.constrained().ofInRange(0, 2, A_B_C).andDistinct(1, List.of("X", "Y")),
+                Product.constrained().ofDistinct(0, A_B_C).andDistinct(2, A_B_C).andMultiSelect(0, Collections.emptyList()),
+                Product.constrained().ofMultiSelect(2, List.of("X", "Y")).andDistinct(3, A_B_C).andInRange(0, 0, A_B_C));
 
         for (var product : products) {
             var lex = product.lexOrder().stream().toList();
@@ -148,18 +149,18 @@ class ConstrainedProductLexOrderLazinessTest {
     @Test
     void singleDimensionAndSingleTuplePaths() {
         assertEquals(List.of(tuple("A", "B"), tuple("A", "C"), tuple("B", "C")),
-                cartesianProduct.constrainedProductOfDistinct(2, A_B_C).lexOrder().stream().toList());
+                Product.constrained().ofDistinct(2, A_B_C).lexOrder().stream().toList());
         // every dimension selects nothing: exactly one, empty, tuple
         assertEquals(List.of(List.of()),
-                cartesianProduct.constrainedProductOfDistinct(0, A_B_C).andMultiSelect(0, A_B_C).lexOrder().stream().toList());
+                Product.constrained().ofDistinct(0, A_B_C).andMultiSelect(0, A_B_C).lexOrder().stream().toList());
         // an impossible dimension anywhere makes the product empty
         assertEquals(List.of(),
-                cartesianProduct.constrainedProductOfDistinct(1, A_B_C).andDistinct(4, A_B_C).lexOrder().stream().toList());
+                Product.constrained().ofDistinct(1, A_B_C).andDistinct(4, A_B_C).lexOrder().stream().toList());
     }
 
     @Test
     void iteratorsAreIndependentAndFailPastTheEnd() {
-        var generator = cartesianProduct.constrainedProductOfDistinct(1, List.of("X", "Y"))
+        var generator = Product.constrained().ofDistinct(1, List.of("X", "Y"))
                 .andDistinct(1, List.of(1, 2)).lexOrder();
 
         Iterator<List<Object>> it1 = generator.iterator();
