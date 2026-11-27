@@ -60,7 +60,8 @@ All notable changes to JNumberTools are recorded here. The format follows
 - Added `withLambda(...)` as a separate Cartesian-product entry point, with overloads for
   one dimension (`withLambda(List<?> elements)`) and for two or more dimensions
   (`withLambda(List<?> first, List<?> second, List<?>... additional)`). The
-  `LambdaConditionalProductBuilder` supports `when(...)` and `andWhen(...)` scopes, using
+  `LambdaConditionalProductBuilder` supports typed `when(...)` predicates and scoped
+  `when(...).matches(...)` predicates, using
   `Predicate<Object[]>` for arbitrary scope sizes or a typed
   `BiPredicate<? super A, ? super B>` for two dimensions. Each predicate is compiled once into
   the conditional-product constraint representation; predicates are not re-evaluated during
