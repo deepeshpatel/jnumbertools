@@ -6,7 +6,6 @@ package io.github.deepeshpatel.jnumbertools.base;
 
 import io.github.deepeshpatel.jnumbertools.generator.base.Util;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.ConditionalProductBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.product.conditional.CompoundConditionalProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.conditional.LambdaConditionalProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder;
@@ -22,7 +21,6 @@ import java.util.List;
  *   <li><b>Simple Product</b>: Aⁿ where A is a single set repeated n times</li>
  *   <li><b>Constrained Product</b>: A₁ × A₂ × ... × Aₖ where each Aᵢ can be a set, combination, or subset with constraints</li>
  *   <li><b>Conditional Product</b>: a simple product restricted by pairwise rules</li>
- *   <li><b>Compound Product</b>: a simple product restricted by compound AND/OR trigger rules</li>
  *   <li><b>Lambda Product</b>: a simple product restricted by Java predicates over some or all dimensions,
  *       compiled once into the same constraints (see {@link #withLambda(List)})</li>
  * </ul>
@@ -152,8 +150,8 @@ public final class CartesianProduct {
      * such as {@code when(browser).is("Safari").then(os).isOneOf("macOS")}.
      * <p>
      * Add further dimensions with {@code and(list)}. Rules refer to dimensions by the same list
-     * instances passed to this builder. For compound AND/OR trigger expressions, use
-     * {@link #compoundProductOf(List)} instead.
+     * instances passed to this builder. More complex joint predicates can be expressed through
+     * the Lambda Conditional Product API.
      * See {@link ConditionalProductBuilder} for rule semantics and constraint-size limits.
      * </p>
      *
@@ -183,35 +181,6 @@ public final class CartesianProduct {
     public ConditionalProductBuilder conditionalProductOf(
             List<?> first, List<?> second, List<?>... additional) {
         return new ConditionalProductBuilder(first, second, additional);
-    }
-
-    /**
-     * Creates a builder for a Cartesian product constrained by compound trigger expressions.
-     *
-     * <p>Build a composed {@link io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition}
-     * with nested {@code and(Condition)} and {@code or(Condition)} calls, then attach it with
-     * {@code when(condition)}. The resulting builder exposes generation, exact counting and
-     * emptiness checks; it does not expose lexicographic or rank-based operations.</p>
-     *
-     * @param elements the first dimension; copied
-     * @return a compound conditional product builder
-     * @throws NullPointerException if {@code elements} is null or contains a null element
-     */
-    public CompoundConditionalProductBuilder compoundProductOf(List<?> elements) {
-        return new CompoundConditionalProductBuilder(elements);
-    }
-
-    /**
-     * Creates a compound conditional product builder with two or more dimensions.
-     *
-     * @param first the first dimension
-     * @param second the second dimension
-     * @param additional further dimensions, in product order
-     * @return a compound conditional product builder containing all supplied dimensions
-     */
-    public CompoundConditionalProductBuilder compoundProductOf(
-            List<?> first, List<?> second, List<?>... additional) {
-        return new CompoundConditionalProductBuilder(first, second, additional);
     }
 
     /**
