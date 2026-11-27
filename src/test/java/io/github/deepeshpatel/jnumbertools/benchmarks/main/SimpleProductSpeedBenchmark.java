@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  *
  * No additional result collection is materialized.
  */
-public final class SimpleProductSpeedBenchmarkMain {
+public final class SimpleProductSpeedBenchmark {
 
     private static final int WARMUP_ROUNDS = 5;
     private static final int MEASUREMENT_ROUNDS = 9;
@@ -32,7 +32,7 @@ public final class SimpleProductSpeedBenchmarkMain {
 
     private static volatile long blackhole;
 
-    private SimpleProductSpeedBenchmarkMain() {
+    private SimpleProductSpeedBenchmark() {
     }
 
     public static void main(String[] args) {

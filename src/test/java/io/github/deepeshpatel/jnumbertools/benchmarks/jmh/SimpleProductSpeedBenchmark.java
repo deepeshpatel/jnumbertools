@@ -46,7 +46,7 @@ import java.util.function.Supplier;
 @Measurement(iterations = 10)
 @Fork(3)
 @State(Scope.Thread)
-public class SimpleProductSpeedBenchmarkJMH {
+public class SimpleProductSpeedBenchmark {
 
     @Param({
             "5", "10", "15", "20", "30", "40"
