@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.constrained;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,13 +15,12 @@ import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for the constrained Cartesian product builder:
- * <pre>{@code cartesianProduct.constrainedProductOfDistinct(qty, list)
+ * <pre>{@code Product.constrained().ofDistinct(qty, list)
  *                     .andDistinct(qty, list)
  *                     .andMultiSelect(qty, list)
  *                     .andInRange(min, max, list)
@@ -47,7 +48,7 @@ class ConstrainedCartesianProductTest {
         @Test
         @DisplayName("Pizza builder: count() agrees with stream().count()")
         void builderCountMatchesStreamCount() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese)
                     .andMultiSelect(2, sauce)
                     .andInRange(1, 5, toppings);
@@ -66,7 +67,7 @@ class ConstrainedCartesianProductTest {
         @Test
         @DisplayName("Single distinct dimension, qty=0, empty list: count=1, [[]]")
         void singleEmptyZeroQty() {
-            var b = cartesianProduct.constrainedProductOfDistinct(0, Collections.emptyList());
+            var b = Product.constrained().ofDistinct(0, Collections.emptyList());
             assertEquals(BigInteger.ONE, b.count());
             var result = b.lexOrder().stream().toList();
             assertEquals(1, result.size());
@@ -76,7 +77,7 @@ class ConstrainedCartesianProductTest {
         @Test
         @DisplayName("Single distinct dimension, qty>0, empty list: count=0, []")
         void singleEmptyPositiveQty() {
-            var b = cartesianProduct.constrainedProductOfDistinct(2, Collections.emptyList());
+            var b = Product.constrained().ofDistinct(2, Collections.emptyList());
             assertEquals(BigInteger.ZERO, b.count());
             assertTrue(b.lexOrder().stream().toList().isEmpty());
         }
@@ -84,7 +85,7 @@ class ConstrainedCartesianProductTest {
         @Test
         @DisplayName("Any empty distinct dimension with qty>0 makes whole product empty")
         void anyEmptyDistinctMakesWholeEmpty() {
-            var b = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var b = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, Collections.emptyList())
                     .andMultiSelect(2, sauce);
             assertEquals(BigInteger.ZERO, b.count());
@@ -94,7 +95,7 @@ class ConstrainedCartesianProductTest {
         @Test
         @DisplayName("All-empty dimensions with all qty=0: single empty tuple")
         void allEmptyZeroQty() {
-            var b = cartesianProduct.constrainedProductOfDistinct(0, Collections.emptyList())
+            var b = Product.constrained().ofDistinct(0, Collections.emptyList())
                     .andDistinct(0, Collections.emptyList())
                     .andMultiSelect(0, Collections.emptyList());
             assertEquals(BigInteger.ONE, b.count());
@@ -114,7 +115,7 @@ class ConstrainedCartesianProductTest {
         @Test
         @DisplayName("Specific indices in the pizza product match known tuples")
         void specificIndicesAreCorrect() {
-            var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var product = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese)
                     .andMultiSelect(2, sauce)
                     .andInRange(1, 5, toppings);
@@ -155,7 +156,7 @@ class ConstrainedCartesianProductTest {
         @Test
         @DisplayName("Multiple stream() calls produce equal results")
         void multipleStreamCallsAreEqual() {
-            var p = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var p = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese)
                     .andMultiSelect(2, sauce)
                     .andInRange(1, 5, toppings)
@@ -168,7 +169,7 @@ class ConstrainedCartesianProductTest {
         @Test
         @DisplayName("Inner lists are immutable")
         void innerListsAreImmutable() {
-            var results = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+            var results = Product.constrained().ofDistinct(1, pizzaBase)
                     .andDistinct(2, cheese)
                     .andMultiSelect(2, sauce)
                     .andInRange(1, 5, toppings)
@@ -188,7 +189,7 @@ class ConstrainedCartesianProductTest {
         // × inRange(1..5, 7) toppings
         var bigToppings = of("tomato", "capsicum", "onion", "paneer", "corn", "olive", "jalapeno");
         var bigCheese   = of("Ricotta", "Mozzarella", "Cheddar", "Parmesan", "Feta");
-        var product = cartesianProduct.constrainedProductOfDistinct(1, pizzaBase)
+        var product = Product.constrained().ofDistinct(1, pizzaBase)
                 .andDistinct(2, bigCheese)
                 .andMultiSelect(3, sauce)
                 .andInRange(1, 5, bigToppings);
