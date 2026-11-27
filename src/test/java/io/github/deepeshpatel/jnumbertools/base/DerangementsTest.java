@@ -114,7 +114,7 @@ class DerangementsTest {
         @Test
         @DisplayName("Derangement is wired and functional")
         void shouldBeWiredIntoJNumberToolsFacade() {
-            assertNotNull(Derangement);
+            assertNotNull(Derangement.of(4));
             assertEquals(BigInteger.valueOf(9),
                     Derangement.of(4).count());
         }
