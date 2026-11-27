@@ -29,8 +29,6 @@ import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Combinadic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.*;
-import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic;
-
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.*;
@@ -550,7 +548,7 @@ Example:
 
 ```java
 BigInteger number = BigInteger.valueOf(35);
-Combinadic combinadic = Combinadic.of(number, 3);
+Combinadic combinadic = Combinadic.of(number, 3, new Calculator());
 
 System.out.println(combinadic);
 System.out.println(combinadic.decimalValue); // 35
