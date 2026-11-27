@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.jmh.apicomparison;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.Product;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.ArrayList;
@@ -45,13 +46,7 @@ public class SimpleProductApiBenchmark {
         c = range(size, size * 2);
         d = range(size, size * 3);
 
-        product = JNumberTools.cartesianProduct()
-                .simpleProductOf(a)
-                .and(b)
-                .and(c)
-                .and(d)
-                .lexOrder();
-
+        product = Product.simple(a,b,c,d).lexOrder();
         Summary expected = summarize(streamProduct());
         Summary actual = summarize(product);
         if (!expected.equals(actual)) {

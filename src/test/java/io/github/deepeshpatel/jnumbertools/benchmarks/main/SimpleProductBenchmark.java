@@ -1,6 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.main;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.Product;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,11 +50,7 @@ public final class SimpleProductBenchmark {
         List<Integer> c = range(size, size * 2);
         List<Integer> d = range(size, size * 3);
 
-        var builder = JNumberTools.cartesianProduct()
-                .simpleProductOf(a)
-                .and(b)
-                .and(c)
-                .and(d);
+        var builder = Product.simple(a,b,c,d);
 
         Supplier<Summary> library = () -> summarize(builder.lexOrder());
         Supplier<Summary> streams = () -> summarize(streamProduct(a, b, c, d));

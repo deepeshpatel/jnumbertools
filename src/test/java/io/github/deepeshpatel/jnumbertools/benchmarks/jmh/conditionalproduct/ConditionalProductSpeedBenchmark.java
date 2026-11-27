@@ -2,6 +2,7 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.Product;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.List;
@@ -31,12 +32,7 @@ public class ConditionalProductSpeedBenchmark {
     @Setup(Level.Trial)
     public void verifyCorrectness() {
 
-        var builderResult = JNumberTools.cartesianProduct()
-                .conditionalProductOf(os)
-                .and(browser)
-                .and(database)
-                .and(deployment)
-                .and(region)
+        var builderResult = Product.conditional(os, browser, database, deployment, region)
                 .when(browser).is("Safari").then(os).isOneOf("macOS")
                 .when(os).is("Linux").then(database).isOneOf("PostgreSQL", "Oracle")
                 .when(database).is("Oracle").then(deployment).isOneOf("On-Prem")
@@ -64,12 +60,7 @@ public class ConditionalProductSpeedBenchmark {
     @Benchmark
     public long jnumberTools() {
 
-        var builder = JNumberTools.cartesianProduct()
-                .conditionalProductOf(os)
-                .and(browser)
-                .and(database)
-                .and(deployment)
-                .and(region)
+        var builder = Product.conditional(os,browser, database, deployment, region)
                 .when(browser).is("Safari").then(os).isOneOf("macOS")
                 .when(os).is("Linux").then(database).isOneOf("PostgreSQL", "Oracle")
                 .when(database).is("Oracle").then(deployment).isOneOf("On-Prem")

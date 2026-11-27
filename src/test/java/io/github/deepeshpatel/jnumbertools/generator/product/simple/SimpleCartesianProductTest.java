@@ -39,9 +39,7 @@ class SimpleCartesianProductTest {
         @Test
         @DisplayName("|L₁|·|L₂|·|L₃| for non-empty dimensions")
         void countFormula() {
-            var product = Product.simple(List.of(0, 1))
-                    .and(A_B)
-                    .and(num_1_2_3);
+            var product = Product.simple(List.of(0, 1), A_B, num_1_2_3 );
             long expected = 2L * 2 * 3;
             assertEquals(expected, product.lexOrder().stream().count());
             assertEquals(BigInteger.valueOf(expected), product.count());
@@ -134,10 +132,7 @@ class SimpleCartesianProductTest {
                     List.of(1, 'A', 1), List.of(1, 'A', 2), List.of(1, 'A', 3),
                     List.of(1, 'B', 1), List.of(1, 'B', 2), List.of(1, 'B', 3)
             );
-            var actual = cartesianProduct
-                    .simpleProductOf(List.of(0, 1))
-                    .and(A_B)
-                    .and(num_1_2_3)
+            var actual = Product.simple(List.of(0, 1), A_B, num_1_2_3 )
                     .lexOrder().stream().toList();
             assertIterableEquals(expected, actual);
         }

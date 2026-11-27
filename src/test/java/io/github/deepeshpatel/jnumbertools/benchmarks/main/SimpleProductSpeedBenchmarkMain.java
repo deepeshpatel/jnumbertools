@@ -2,6 +2,7 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.main;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.Product;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,11 +95,7 @@ public final class SimpleProductSpeedBenchmarkMain {
          * Build the JNumberTools product once.
          * Builder construction is outside the timed sections.
          */
-        var builder = JNumberTools.cartesianProduct()
-                .simpleProductOf(a)
-                .and(b)
-                .and(c)
-                .and(d);
+        var builder = Product.simple(a,b,c,d);
 
         /*
          * Obtain a fresh stream for every traversal.

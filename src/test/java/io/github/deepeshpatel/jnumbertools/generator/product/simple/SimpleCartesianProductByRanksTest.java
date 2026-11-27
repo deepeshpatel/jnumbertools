@@ -67,10 +67,7 @@ public class SimpleCartesianProductByRanksTest {
             int max = A_B_C.size() * num_1_2_3.size() * num_1_to_4.size();
             int start = 3;
             for (int m = 2; m <= max / 2; m++) {
-                var builder = cartesianProduct
-                        .simpleProductOf(A_B_C)
-                        .and(num_1_2_3)
-                        .and(num_1_to_4);
+                var builder = Product.simple(A_B_C, num_1_2_3, num_1_to_4);
                 var all = builder.lexOrder().stream();
                 var mth = builder.lexOrderMth(m, start).stream();
                 assertEveryMthValue(all, mth, start, m);
@@ -96,8 +93,8 @@ public class SimpleCartesianProductByRanksTest {
 
         @Test
         void shouldReturnCorrectTupleAtSpecificRank() {
-            var builder = cartesianProduct
-                    .simpleProductOf(List.of('A', 'B', 'C'))   // size 3
+            var builder = Product.simple(List.of('A', 'B', 'C'))//cartesianProduct
+                    //.simpleProductOf(List.of('A', 'B', 'C'))   // size 3
                     .and(List.of(1, 2, 3, 4))                  // size 4
                     .and(List.of("X", "Y"));                   // size 2
 

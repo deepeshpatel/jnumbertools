@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.support;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.Product;
 import io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.baseline.ImperativeBacktrackingBaseline;
 import io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.baseline.NestedStreamBaseline;
 import io.github.deepeshpatel.jnumbertools.benchmarks.jmh.conditionalproduct.scenario.Rule;
@@ -77,7 +78,8 @@ public final class ConditionalProductCaseSupport {
             ScenarioData scenario, List<PreparedRule> preparedRules) {
         List<List<Integer>> dimensions = scenario.dimensions();
         ConditionalProductBuilder builder =
-                JNumberTools.cartesianProduct().conditionalProductOf(dimensions.get(0));
+                Product.conditional(dimensions.get(0));
+
         for (int d = 1; d < dimensions.size(); d++) {
             builder = builder.and(dimensions.get(d));
         }

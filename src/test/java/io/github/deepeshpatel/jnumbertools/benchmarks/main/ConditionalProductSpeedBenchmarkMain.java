@@ -2,6 +2,7 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.main;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.Product;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -357,9 +358,7 @@ public class ConditionalProductSpeedBenchmarkMain {
 
     private static Supplier<Result> whenThen(Dimensions d) {
 
-        var builder = JNumberTools.cartesianProduct()
-                .conditionalProductOf(
-                        d.os, d.browser, d.network, d.database, d.region)
+        var builder = Product.conditional( d.os, d.browser, d.network, d.database, d.region)
 
                 // Linux rules
                 .when(d.os).is(LINUX)
@@ -393,7 +392,7 @@ public class ConditionalProductSpeedBenchmarkMain {
 
     private static Supplier<Result> buildEngineLambda(Dimensions d) {
 
-        var builder = JNumberTools.cartesianProduct()
+        var builder = Product.conditional(d.os, d.browser, d.network, d.database, d.region)
                 .withLambda(d.os, d.browser, d.network, d.database, d.region)
 
                 .when(d.os, d.browser).matches((os, browser) ->

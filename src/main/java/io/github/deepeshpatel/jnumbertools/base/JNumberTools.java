@@ -206,23 +206,6 @@ public final class JNumberTools {
     }
 
     /**
-     * Creates a CartesianProduct instance for generating Cartesian products.
-     * <p>
-     * Supports both simple products (Aⁿ) and constrained products with combinations,
-     * subsets, and multi-select dimensions. Generates all possible tuples in
-     * lexicographical order or by rank.
-     * </p>
-     *
-     * @return a CartesianProduct instance for Cartesian product generation
-     * @see CartesianProduct
-     * @see SimpleProductBuilder
-     * @see ConstrainedProductBuilder
-     */
-    public static CartesianProduct cartesianProduct() {
-        return new CartesianProduct(new Calculator());
-    }
-
-    /**
      * Creates a NumberSystem instance for converting numbers to specialized number systems.
      * <p>
      * Supports conversions to permutadic (based on ⁿPₖ), combinadic (based on ⁿCᵣ),

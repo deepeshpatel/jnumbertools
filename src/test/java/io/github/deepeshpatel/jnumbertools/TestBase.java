@@ -20,7 +20,6 @@ public class TestBase {
     public static final Permutations permutation = new Permutations(calculator);
     public static final Combinations combination = new Combinations(calculator);
     public static final Derangements derangement = new Derangements(calculator);
-    public static final CartesianProduct cartesianProduct = new CartesianProduct(calculator);
     public static final Subsets subsets = new Subsets(calculator);
     public static final NumberSystem numberSystem = new NumberSystem(calculator);
     public static final RankOf rankOf = new RankOf(calculator);

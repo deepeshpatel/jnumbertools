@@ -5,6 +5,7 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.jmh.apicomparison;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.Product;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.ArrayList;
@@ -96,8 +97,7 @@ public class ConditionalProductApiBenchmark {
     private static Supplier<Set<List<Object>>> createOperation(Dimensions d, String implementation) {
         return switch (implementation) {
             case "WHEN_THEN" -> {
-                var builder = JNumberTools.cartesianProduct()
-                        .conditionalProductOf(d.os, d.browser, d.network, d.database, d.region)
+                var builder = Product.conditional(d.os, d.browser, d.network, d.database, d.region)
                         .when(d.os).is(LINUX).then(d.browser).isOneOf(LINUX_BROWSERS)
                         .when(d.os).is(LINUX).then(d.network).isOneOf(LINUX_NETWORKS)
                         .when(d.os).is(LINUX).then(d.database).isOneOf(LINUX_DATABASES)
@@ -110,7 +110,7 @@ public class ConditionalProductApiBenchmark {
                         .collect(Collectors.toSet());
             }
             case "LAMBDA" -> {
-                var builder = JNumberTools.cartesianProduct()
+                var builder = Product.conditional(d.os, d.browser, d.network, d.database, d.region)
                         .withLambda(d.os, d.browser, d.network, d.database, d.region)
                          .when((os, browser, network, database, region) ->
                         (LINUX.equals(os) ? LINUX_BROWSERS.contains(browser)

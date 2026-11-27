@@ -2,6 +2,7 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.jmh;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.Product;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -76,12 +77,7 @@ public class SimpleProductSpeedBenchmarkJMH {
          * Build the JNumberTools product once.
          * Builder construction is not part of the measured operation.
          */
-        var builder = JNumberTools.cartesianProduct()
-                .simpleProductOf(a)
-                .and(b)
-                .and(c)
-                .and(d);
-
+        var builder = Product.simple(a,b,c,d);
         libraryProduct = () -> builder.lexOrder().stream();
 
         verifyCorrectness();

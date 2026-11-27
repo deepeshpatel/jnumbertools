@@ -2,6 +2,7 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.jmh;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.Product;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -128,8 +129,7 @@ public class ConditionalProductSpeedBenchmarkJMH {
 
     private void buildPairwise() {
 
-        var builder = JNumberTools.cartesianProduct()
-                .conditionalProductOf(
+        var builder = Product.conditional(
                         dimensions.os,
                         dimensions.browser,
                         dimensions.network,
@@ -169,7 +169,12 @@ public class ConditionalProductSpeedBenchmarkJMH {
 
     private void buildEngineLambda() {
 
-        var builder = JNumberTools.cartesianProduct()
+        var builder = Product.conditional(
+                        dimensions.os,
+                        dimensions.browser,
+                        dimensions.network,
+                        dimensions.database,
+                        dimensions.region)
                 .withLambda(
                         dimensions.os,
                         dimensions.browser,
