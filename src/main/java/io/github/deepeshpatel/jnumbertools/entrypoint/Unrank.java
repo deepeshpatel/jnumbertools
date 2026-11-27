@@ -4,6 +4,11 @@ import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
 import io.github.deepeshpatel.jnumbertools.builders.CombinationUnrankOfBuilder;
 import io.github.deepeshpatel.jnumbertools.builders.PermutationUnrankOfBuilder;
 
+/** Static entry point for reconstructing permutations, derangements and combinations from zero-based ranks.
+ * <p>Use {@link #permutation()} or {@link #combination()} to obtain the corresponding unrank builder.
+ * An optional shared {@link io.github.deepeshpatel.jnumbertools.datastructure.Calculator} can be
+ * supplied to reuse combinatorial caches.</p>
+ */
 public class Unrank {
 
     public static PermutationUnrankOfBuilder permutation() {
