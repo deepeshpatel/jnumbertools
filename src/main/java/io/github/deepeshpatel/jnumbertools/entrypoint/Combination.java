@@ -19,6 +19,21 @@ import java.util.List;
  * multiset combinations. The returned builders provide the traversal,
  * ranking, and sampling operations available for each combination type.</p>
  *
+ * <p>The static factories use an internally managed {@link io.github.deepeshpatel.jnumbertools.datastructure.Calculator}
+ * for convenience. Advanced users who want to share calculation caches across generators can
+ * instantiate the corresponding concrete builder directly and pass the same calculator to each
+ * builder. For example:</p>
+ *
+ * <pre>{@code
+ * Calculator calculator = new Calculator();
+ * var first = new UniqueCombinationBuilder<>(List.of("A", "B", "C"), 2, calculator);
+ * var second = new UniqueCombinationBuilder<>(List.of("D", "E", "F"), 2, calculator);
+ * }</pre>
+ *
+ * <p>Import {@code Calculator} from {@code io.github.deepeshpatel.jnumbertools.datastructure}
+ * and {@code UniqueCombinationBuilder} from
+ * {@code io.github.deepeshpatel.jnumbertools.generator.combination.unique}.</p>
+ *
  * <pre>{@code
  * Combination.unique(2, "A", "B", "C").lexOrder();
  * Combination.repetitive(3, "A", "B").lexOrder();
