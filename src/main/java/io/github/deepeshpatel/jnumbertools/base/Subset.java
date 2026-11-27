@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
+import io.github.deepeshpatel.jnumbertools.generator.subset.SubsetSelector;
+
 import java.util.List;
 
 /**
