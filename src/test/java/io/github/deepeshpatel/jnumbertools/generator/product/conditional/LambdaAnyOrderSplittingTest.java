@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -11,7 +13,6 @@ import java.util.List;
 import java.util.Spliterator;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,8 +30,8 @@ class LambdaAnyOrderSplittingTest {
         List<List<Integer>> large = new ArrayList<>();
         for (int i = 0; i < 7; i++) large.add(range(1000));
         List<Integer> empty = new ArrayList<>();
-        var product = cartesianProduct.withLambda(large.get(0), large.get(1), large.get(2), large.get(3),
-                large.get(4), large.get(5), large.get(6), empty);
+        var product = Product.conditional(large.get(0), large.get(1), large.get(2), large.get(3),
+                large.get(4), large.get(5), large.get(6), empty).withLambda();
 
         Spliterator<List<Object>> spliterator = product.generate().spliterator();
         assertEquals(0L, spliterator.estimateSize());
@@ -49,8 +50,8 @@ class LambdaAnyOrderSplittingTest {
         List<List<Integer>> large = new ArrayList<>();
         for (int i = 0; i < 7; i++) large.add(range(1000));
         List<Integer> empty = new ArrayList<>();
-        var product = cartesianProduct.withLambda(a, b, c, large.get(0), large.get(1), large.get(2), large.get(3),
-                        large.get(4), large.get(5), large.get(6), empty)
+        var product = Product.conditional(a, b, c, large.get(0), large.get(1), large.get(2), large.get(3),
+                        large.get(4), large.get(5), large.get(6), empty).withLambda()
                 .when(a, b, c).matches((av, bv, cv) -> av == 0 && bv == 1);
 
         Spliterator<List<Object>> spliterator = product.generate().spliterator();
