@@ -12,7 +12,7 @@
  * {@link io.github.deepeshpatel.jnumbertools.base.UnrankOf} for rank conversion, and
  * {@link io.github.deepeshpatel.jnumbertools.base.NumberSystem} for combinatorial number systems.
  *
- * <p>Use the facade and its returned builders as the normal public API. For example:</p>
+ * <p>Use the dedicated static entry points and their returned builders as the normal public API. For example:</p>
  * <pre>{@code
  * Permutation
  *     .unique("A", "B", "C")
