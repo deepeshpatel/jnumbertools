@@ -1,0 +1,62 @@
+/*
+ * Copyright (c) 2021-2026 Deepesh Patel
+ * SPDX-License-Identifier: Apache-2.0
+ */
+package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Spliterator;
+import java.util.stream.IntStream;
+
+import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+/** Work estimation of the unordered traversal used by compiled Lambda constraints. */
+class LambdaAnyOrderSplittingTest {
+
+    private static List<Integer> range(int size) {
+        return IntStream.range(0, size).boxed().toList();
+    }
+
+    @Test
+    void anEmptyDimensionAfterOverflowingDimensionsMeansNoWorkAndNoSplit() {
+        // Seven dimensions of 1,000 values multiply past Long.MAX_VALUE. The empty dimension after them still
+        // makes the product empty, so the spliterator must report no work and must not split.
+        List<List<Integer>> large = new ArrayList<>();
+        for (int i = 0; i < 7; i++) large.add(range(1000));
+        List<Integer> empty = new ArrayList<>();
+        var product = cartesianProduct.withLambda(large.get(0), large.get(1), large.get(2), large.get(3),
+                large.get(4), large.get(5), large.get(6), empty);
+
+        Spliterator<List<Object>> spliterator = product.generate().spliterator();
+        assertEquals(0L, spliterator.estimateSize());
+        assertTrue(spliterator.trySplit() == null, "an empty product has nothing to split");
+        List<List<Object>> actual = new ArrayList<>();
+        spliterator.forEachRemaining(actual::add);
+        assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    void aMultiDimensionLambdaProductWithAnEmptyDimensionIsEmptyAndNotSplit() {
+        // The predicate scope is small; the seven large dimensions and the empty one are outside it.
+        List<Integer> a = range(3);
+        List<Integer> b = range(3);
+        List<Integer> c = range(3);
+        List<List<Integer>> large = new ArrayList<>();
+        for (int i = 0; i < 7; i++) large.add(range(1000));
+        List<Integer> empty = new ArrayList<>();
+        var product = cartesianProduct.withLambda(a, b, c, large.get(0), large.get(1), large.get(2), large.get(3),
+                        large.get(4), large.get(5), large.get(6), empty)
+                .when(a, b, c).matches(tuple ->
+                        (Integer) tuple[0] == 0 && (Integer) tuple[1] == 1);
+
+        Spliterator<List<Object>> spliterator = product.generate().spliterator();
+        assertEquals(0L, spliterator.estimateSize());
+        assertTrue(spliterator.trySplit() == null);
+        assertTrue(product.isEmpty());
+    }
+}
