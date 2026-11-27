@@ -2,7 +2,6 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.jmh;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
-import io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -28,12 +27,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * JMH comparison of four implementations of the same conditional Cartesian product:
+ * JMH comparison of three implementations of the same conditional Cartesian product:
  *
  * 1. Pairwise when-then conditional product
- * 2. Compound conditional product
- * 3. Lambda conditional product
- * 4. Incrementally pruned Java Stream baseline
+ * 2. Lambda conditional product
+ * 3. Incrementally pruned Java Stream baseline
  *
  * Builder construction and rule registration happen once in @Setup(Level.Trial).
  *
@@ -105,7 +103,6 @@ public class ConditionalProductSpeedBenchmarkJMH {
     private Dimensions dimensions;
 
     private Supplier<Stream<List<Object>>> pairwise;
-    private Supplier<Stream<List<Object>>> compound;
     private Supplier<Stream<List<Object>>> engineLambda;
     private Supplier<Stream<List<Object>>> prunedStream;
 
@@ -119,7 +116,6 @@ public class ConditionalProductSpeedBenchmarkJMH {
         dimensions = createDimensions(size);
 
         buildPairwise();
-        buildCompound();
         buildEngineLambda();
         buildPrunedStream();
 
@@ -168,48 +164,7 @@ public class ConditionalProductSpeedBenchmarkJMH {
     }
 
     // -------------------------------------------------------------------------
-    // 2. Compound conditional product
-    // -------------------------------------------------------------------------
-
-    private void buildCompound() {
-
-        var builder = JNumberTools.cartesianProduct()
-                .compoundProductOf(
-                        dimensions.os,
-                        dimensions.browser,
-                        dimensions.network,
-                        dimensions.database,
-                        dimensions.region
-                )
-
-                // Linux rules
-                .when(Condition.condition(dimensions.os).is(LINUX))
-                .then(dimensions.browser).isOneOf(LINUX_BROWSERS)
-
-                .when(Condition.condition(dimensions.os).is(LINUX))
-                .then(dimensions.network).isOneOf(LINUX_NETWORKS)
-
-                .when(Condition.condition(dimensions.os).is(LINUX))
-                .then(dimensions.database).isOneOf(LINUX_DATABASES)
-
-                .when(Condition.condition(dimensions.os).is(LINUX))
-                .then(dimensions.region).isOneOf(LINUX_REGIONS)
-
-                // Windows rules
-                .when(Condition.condition(dimensions.os).is(WINDOWS))
-                .then(dimensions.browser).isOneOf(WINDOWS_BROWSERS)
-
-                .when(Condition.condition(dimensions.os).is(WINDOWS))
-                .then(dimensions.database).isOneOf(WINDOWS_DATABASES)
-
-                .when(Condition.condition(dimensions.os).is(WINDOWS))
-                .then(dimensions.region).isOneOf(WINDOWS_REGIONS);
-
-        compound = () -> builder.generate().stream();
-    }
-
-    // -------------------------------------------------------------------------
-    // 3. Lambda conditional product
+    // 2. Lambda conditional product
     // -------------------------------------------------------------------------
 
     private void buildEngineLambda() {
@@ -307,11 +262,6 @@ public class ConditionalProductSpeedBenchmarkJMH {
     }
 
     @Benchmark
-    public long compound(Blackhole blackhole) {
-        return consume(compound.get(), blackhole);
-    }
-
-    @Benchmark
     public long engineLambda(Blackhole blackhole) {
         return consume(engineLambda.get(), blackhole);
     }
@@ -360,15 +310,8 @@ public class ConditionalProductSpeedBenchmarkJMH {
 
         Set<List<Object>> expected = collect(pairwise.get());
 
-        Set<List<Object>> compoundResult = collect(compound.get());
         Set<List<Object>> lambdaResult = collect(engineLambda.get());
         Set<List<Object>> streamResult = collect(prunedStream.get());
-
-        if (!expected.equals(compoundResult)) {
-            throw new AssertionError(
-                    "Compound result differs from pairwise result for size " + size
-            );
-        }
 
         if (!expected.equals(lambdaResult)) {
             throw new AssertionError(
@@ -494,11 +437,6 @@ mvn test-compile exec:exec \
 # VM options: <none>
 
 Benchmark                                                                (size)  Mode  Cnt       Score    Error   Units
-ConditionalProductSpeedBenchmarkJMH.compound                                 50  avgt   30       0.010 ±  0.001   ms/op
-ConditionalProductSpeedBenchmarkJMH.compound:gc.alloc.rate                   50  avgt   30    1462.204 ± 68.958  MB/sec
-ConditionalProductSpeedBenchmarkJMH.compound:gc.alloc.rate.norm              50  avgt   30   15472.065 ±  0.003    B/op
-ConditionalProductSpeedBenchmarkJMH.compound:gc.count                        50  avgt   30     484.000           counts
-ConditionalProductSpeedBenchmarkJMH.compound:gc.time                         50  avgt   30     117.000               ms
 ConditionalProductSpeedBenchmarkJMH.engineLambda                             50  avgt   30       0.010 ±  0.001   ms/op
 ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.alloc.rate               50  avgt   30    1510.936 ± 41.046  MB/sec
 ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.alloc.rate.norm          50  avgt   30   15472.062 ±  0.002    B/op
@@ -516,11 +454,6 @@ ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.count                50 
 ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.time                 50  avgt   30     118.000               ms
 
 Benchmark                                                                (size)  Mode  Cnt       Score    Error   Units
-ConditionalProductSpeedBenchmarkJMH.compound                                100  avgt   30       0.019 ±  0.001   ms/op
-ConditionalProductSpeedBenchmarkJMH.compound:gc.alloc.rate                  100  avgt   30    1492.552 ± 44.526  MB/sec
-ConditionalProductSpeedBenchmarkJMH.compound:gc.alloc.rate.norm             100  avgt   30   29864.122 ±  7.689    B/op
-ConditionalProductSpeedBenchmarkJMH.compound:gc.count                       100  avgt   30     676.000           counts
-ConditionalProductSpeedBenchmarkJMH.compound:gc.time                        100  avgt   30     122.000               ms
 ConditionalProductSpeedBenchmarkJMH.engineLambda                            100  avgt   30       0.019 ±  0.001   ms/op
 ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.alloc.rate              100  avgt   30    1535.093 ± 18.185  MB/sec
 ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.alloc.rate.norm         100  avgt   30   29872.118 ±  0.001    B/op
@@ -538,11 +471,6 @@ ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.count               100 
 ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.time                100  avgt   30     117.000               ms
 
 Benchmark                                                                (size)  Mode  Cnt       Score     Error   Units
-ConditionalProductSpeedBenchmarkJMH.compound                                200  avgt   30       0.037 ±   0.001   ms/op
-ConditionalProductSpeedBenchmarkJMH.compound:gc.alloc.rate                  200  avgt   30    1520.651 ±  46.591  MB/sec
-ConditionalProductSpeedBenchmarkJMH.compound:gc.alloc.rate.norm             200  avgt   30   58656.235 ±   7.691    B/op
-ConditionalProductSpeedBenchmarkJMH.compound:gc.count                       200  avgt   30     787.000            counts
-ConditionalProductSpeedBenchmarkJMH.compound:gc.time                        200  avgt   30     143.000                ms
 ConditionalProductSpeedBenchmarkJMH.engineLambda                            200  avgt   30       0.044 ±   0.005   ms/op
 ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.alloc.rate              200  avgt   30    1287.682 ± 123.719  MB/sec
 ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.alloc.rate.norm         200  avgt   30   58656.283 ±   7.706    B/op
@@ -560,11 +488,6 @@ ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.count               200 
 ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.time                200  avgt   30     101.000                ms
 
 Benchmark                                                                (size)  Mode  Cnt        Score    Error   Units
-ConditionalProductSpeedBenchmarkJMH.compound                               1000  avgt   30        0.185 ±  0.005   ms/op
-ConditionalProductSpeedBenchmarkJMH.compound:gc.alloc.rate                 1000  avgt   30     1489.389 ± 40.649  MB/sec
-ConditionalProductSpeedBenchmarkJMH.compound:gc.alloc.rate.norm            1000  avgt   30   289073.181 ±  0.032    B/op
-ConditionalProductSpeedBenchmarkJMH.compound:gc.count                      1000  avgt   30     1009.000           counts
-ConditionalProductSpeedBenchmarkJMH.compound:gc.time                       1000  avgt   30      145.000               ms
 ConditionalProductSpeedBenchmarkJMH.engineLambda                           1000  avgt   30        0.229 ±  0.016   ms/op
 ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.alloc.rate             1000  avgt   30     1217.621 ± 91.394  MB/sec
 ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.alloc.rate.norm        1000  avgt   30   289073.459 ±  0.102    B/op
@@ -582,11 +505,6 @@ ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.count              1000 
 ConditionalProductSpeedBenchmarkJMH.prunedJavaStream:gc.time               1000  avgt   30       56.000               ms
 
 Benchmark                                                                (size)  Mode  Cnt        Score    Error   Units
-ConditionalProductSpeedBenchmarkJMH.compound                               5000  avgt   30        0.847 ±   0.050   ms/op
-ConditionalProductSpeedBenchmarkJMH.compound:gc.alloc.rate                 5000  avgt   30     1630.918 ±  70.605  MB/sec
-ConditionalProductSpeedBenchmarkJMH.compound:gc.alloc.rate.norm            5000  avgt   30  1441077.401 ±   0.319    B/op
-ConditionalProductSpeedBenchmarkJMH.compound:gc.count                      5000  avgt   30      368.000            counts
-ConditionalProductSpeedBenchmarkJMH.compound:gc.time                       5000  avgt   30      108.000                ms
 ConditionalProductSpeedBenchmarkJMH.engineLambda                           5000  avgt   30        0.848 ±   0.033   ms/op
 ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.alloc.rate             5000  avgt   30     1624.351 ±  53.944  MB/sec
 ConditionalProductSpeedBenchmarkJMH.engineLambda:gc.alloc.rate.norm        5000  avgt   30  1441077.405 ±   0.215    B/op
