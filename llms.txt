@@ -19,10 +19,10 @@ Map the user's requirement to the exact `JNumberTools` entry point before writin
 
 | Problem / Requirement | Entry Point | Notes |
 | :--- | :--- | :--- |
-| All permutations (`n!`), `k`-permutations (`nPk`), repetitive or multiset permutations | `JNumberTools.permutations()` | Ordered arrangements; supports `lexOrder()`, `byRanks()`, `sample()`, `count()` |
-| Unordered selections without repetition (`nCr`), with repetition, or from multisets | `JNumberTools.combinations()` | Unordered subsets of size `k`; do not use Cartesian products for unordered combinations |
-| All subsets (`2^n` power set) or subsets within size bounds | `JNumberTools.subsets()` | Generates unordered subsets of an input collection or range |
-| Derangements (`!n`, permutations with no fixed points) | `JNumberTools.derangements()` | Generates permutations where `element[i] != original[i]` |
+| All permutations (`n!`), `k`-permutations (`nPk`), repetitive or multiset permutations | `Permutation` | Ordered arrangements; supports `lexOrder()`, `byRanks()`, `sample()`, `count()` |
+| Unordered selections without repetition (`nCr`), with repetition, or from multisets | `Combination` | Unordered subsets of size `k`; do not use Cartesian products for unordered combinations |
+| All subsets (`2^n` power set) or subsets within size bounds | `Subset` | Generates unordered subsets of an input collection or range |
+| Derangements (`!n`, permutations with no fixed points) | `Derangement` | Generates permutations where `element[i] != original[i]` |
 | Standard Cartesian products across multiple dimensions | `JNumberTools.cartesianProduct()` | Ordered `d`-tuples (`List<T>`) formed across `d` input lists/collections |
 | Simple Cartesian product | `JNumberTools.cartesianProduct().simpleProductOf(...)` | One value from each input dimension; lexicographical and every-mth traversal |
 | Constrained Cartesian product | `JNumberTools.cartesianProduct().constrainedProductOfDistinct(...)` and related builders | Each dimension is a fixed-size combination, multi-select, or subset range; lexicographical and every-mth traversal |
