@@ -52,7 +52,7 @@ The available operations depend on the product builder. Do not assume that every
 
 `generate()` on the Lambda Engine returns a lazy, re-iterable generator; it does not promise lexicographical encounter order or expose rank-based traversal and sampling.
 
-\`\`\`java
+```java
 import io.github.deepeshpatel.jnumbertools.base.Combination;
 
 var combinations = Combination.unique(5, 3);
