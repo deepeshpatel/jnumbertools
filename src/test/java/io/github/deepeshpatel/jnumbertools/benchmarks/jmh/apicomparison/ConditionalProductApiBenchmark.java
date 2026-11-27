@@ -5,7 +5,6 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.jmh.apicomparison;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
-import io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
 
 
 /**
- * Public API comparison of the three JNumberTools conditional-product builders
+ * Public API comparison of the Pairwise and Lambda conditional-product builders
  * against an independently written, incrementally pruned Java Stream baseline.
  *
  * Builder construction and rule registration happen in trial setup, matching
@@ -54,7 +53,7 @@ public class ConditionalProductApiBenchmark {
     @Param({"100", "200", "300", "400", "500", "1000", "2000", "3000", "4000", "5000"})
     public int size;
 
-    @Param({"WHEN_THEN", "COMPOUND", "LAMBDA", "PRUNED_STREAM"})
+    @Param({"WHEN_THEN", "LAMBDA", "PRUNED_STREAM"})
     public String implementation;
 
     private Dimensions dimensions;
@@ -107,20 +106,6 @@ public class ConditionalProductApiBenchmark {
                         .when(d.os).is(WINDOWS).then(d.database).isOneOf(WINDOWS_DATABASES)
                         .when(d.os).is(WINDOWS).then(d.region).isOneOf(WINDOWS_REGIONS);
                 yield () -> builder.anyOrder().stream()
-                        .map(tuple -> List.copyOf(tuple))
-                        .collect(Collectors.toSet());
-            }
-            case "COMPOUND" -> {
-                var builder = JNumberTools.cartesianProduct()
-                        .compoundProductOf(d.os, d.browser, d.network, d.database, d.region)
-                        .when(Condition.condition(d.os).is(LINUX)).then(d.browser).isOneOf(LINUX_BROWSERS)
-                        .when(Condition.condition(d.os).is(LINUX)).then(d.network).isOneOf(LINUX_NETWORKS)
-                        .when(Condition.condition(d.os).is(LINUX)).then(d.database).isOneOf(LINUX_DATABASES)
-                        .when(Condition.condition(d.os).is(LINUX)).then(d.region).isOneOf(LINUX_REGIONS)
-                        .when(Condition.condition(d.os).is(WINDOWS)).then(d.browser).isOneOf(WINDOWS_BROWSERS)
-                        .when(Condition.condition(d.os).is(WINDOWS)).then(d.database).isOneOf(WINDOWS_DATABASES)
-                        .when(Condition.condition(d.os).is(WINDOWS)).then(d.region).isOneOf(WINDOWS_REGIONS);
-                yield () -> builder.generate().stream()
                         .map(tuple -> List.copyOf(tuple))
                         .collect(Collectors.toSet());
             }
