@@ -12,6 +12,8 @@
 
 JNumberTools provides the following 15 combination generation APIs. All m<sup>th</sup> generators are BigInteger compatible, enabling rapid generation of combinations at very large indices, such as 10<sup>100</sup>.
 
+**Static entry point:** `Combination`. Add `import io.github.deepeshpatel.jnumbertools.base.Combination;` to use the examples in a Java source file.
+
 **Currently Available Algorithms**
 
 1. [Unique Combinations](#1-unique-combinations)
