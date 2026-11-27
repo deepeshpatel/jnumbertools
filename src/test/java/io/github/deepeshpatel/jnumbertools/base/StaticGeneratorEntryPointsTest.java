@@ -67,7 +67,8 @@ class StaticGeneratorEntryPointsTest {
 
     @Test
     void jNumberToolsRetainsItsRemainingEntryPoints() {
-        assertEquals(JNumberTools.rankOf().getClass(), RankOf.class);
-        assertEquals(JNumberTools.unrankOf().getClass(), UnrankOf.class);
-        assertEquals(JNumberTools.numberSystem().getClass(), NumberSystem.class);
-    }}
+        assertEquals(RankOf.class, JNumberTools.rankOf().getClass());
+        assertEquals(UnrankOf.class, JNumberTools.unrankOf().getClass());
+        assertEquals(NumberSystem.class, JNumberTools.numberSystem().getClass());
+    }
+}
