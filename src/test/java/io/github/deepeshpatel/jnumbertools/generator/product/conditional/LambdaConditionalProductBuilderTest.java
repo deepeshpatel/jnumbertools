@@ -4,17 +4,18 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 import java.util.List;
-import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LambdaConditionalProductBuilderTest {
     @Test
     void oneDimensionPredicateFiltersAndRepeatedWhenUsesAnd() {
         List<Integer> values=List.of(1,2,3,4,5,6);
-        var product=cartesianProduct.withLambda(values).when(v->v%2==0).when(v->v<5);
+        var product=Product.conditional(values).withLambda(values).when(v->v%2==0).when(v->v<5);
         assertEquals(BigInteger.valueOf(2),product.count());
         assertEquals(List.of(List.of(2),List.of(4)),product.generate().stream().toList());
     }
@@ -22,7 +23,7 @@ class LambdaConditionalProductBuilderTest {
     @Test
     void twoDimensionPredicateIsTypedAndSupportsOr() {
         List<Integer> cores=List.of(1,2,4,8), budgets=List.of(8,16,32);
-        var product=cartesianProduct.withLambda(cores,budgets).when((core,budget)->core<=2||budget>=32);
+        var product=Product.conditional(cores,budgets).withLambda(cores,budgets).when((core,budget)->core<=2||budget>=32);
         long expected=0;
         for(int c:cores) for(int b:budgets) if(c<=2||b>=32) expected++;
         assertEquals(BigInteger.valueOf(expected),product.count());
@@ -32,7 +33,7 @@ class LambdaConditionalProductBuilderTest {
     @Test
     void threeDimensionPredicateSupportsNestedAndOr() {
         List<Integer> cores=List.of(1,2,4,8), memory=List.of(2,4,8), budget=List.of(8,16,32);
-        var product=cartesianProduct.withLambda(cores,memory,budget)
+        var product=Product.conditional(cores,memory,budget).withLambda(cores,memory,budget)
                 .when((core,memoryGb,maxBudget)->(core<=2&&memoryGb<=4)||(core>=8&&maxBudget>=16));
         long expected=0;
         for(int c:cores) for(int m:memory) for(int b:budget)
@@ -44,7 +45,7 @@ class LambdaConditionalProductBuilderTest {
     @Test
     void repeatedWhenCallsAreCombinedWithAnd() {
         List<Integer> a=List.of(1,2,3,4), b=List.of(1,2,3,4);
-        var product=cartesianProduct.withLambda(a,b).when((x,y)->x+y>=4).when((x,y)->x<=y);
+        var product=Product.conditional(a,b).withLambda(a,b).when((x,y)->x+y>=4).when((x,y)->x<=y);
         long expected=0;
         for(int x:a) for(int y:b) if(x+y>=4&&x<=y) expected++;
         assertEquals(BigInteger.valueOf(expected),product.count());
@@ -54,7 +55,7 @@ class LambdaConditionalProductBuilderTest {
     @Test
     void fiveDimensionsUseStronglyTypedPredicate() {
         List<Integer> d=List.of(0,1);
-        var product=cartesianProduct.withLambda(d,d,d,d,d)
+        var product=Product.conditional(d,d,d,d,d).withLambda(d,d,d,d,d)
                 .when((a,b,c,d4,e)->a+b+c+d4+e>=1);
         assertEquals(BigInteger.valueOf(31),product.count());
         assertEquals(31,product.generate().stream().count());
@@ -63,7 +64,7 @@ class LambdaConditionalProductBuilderTest {
     @Test
     void sixDimensionsUseArrayPredicate() {
         List<Integer> d=List.of(0,1);
-        var product=cartesianProduct.withLambda(d,d,d,d,d,d)
+        var product=Product.conditional(d,d,d,d,d,d).withLambda()
                 .when(values->values[0].equals(values[5]));
         assertEquals(BigInteger.valueOf(32),product.count());
         assertEquals(32,product.generate().stream().count());
@@ -72,7 +73,7 @@ class LambdaConditionalProductBuilderTest {
     @Test
     void elevenDimensionsUseArrayPredicateFallback() {
         List<Integer> d=List.of(0,1);
-        var product=cartesianProduct.withLambda(d,d,d,d,d,d,d,d,d,d,d)
+        var product=Product.conditional(d,d,d,d,d,d,d,d,d,d,d).withLambda()
                 .when(values->values[0].equals(values[10]));
         assertEquals(BigInteger.valueOf(1024),product.count());
         assertEquals(1024,product.generate().stream().count());
@@ -81,7 +82,7 @@ class LambdaConditionalProductBuilderTest {
     @Test
     void appendingDimensionsBeforeThePredicatePreservesTypedArity() {
         List<Integer> a=List.of(1,2), b=List.of(1,2), c=List.of(1,2);
-        var product=cartesianProduct.withLambda(a).and(b).and(c).when((x,y,z)->x+y+z<=4);
+        var product=Product.conditional(a,b,c).withLambda(a,b,c).when((x,y,z)->x+y+z<=4);
         assertEquals(BigInteger.valueOf(4),product.count());
         assertEquals(4,product.generate().stream().count());
     }
@@ -104,7 +105,7 @@ class LambdaConditionalProductBuilderTest {
         List<Integer> d=java.util.stream.IntStream.range(0,10).boxed().toList();
         List<Integer> e=java.util.stream.IntStream.range(0,10).boxed().toList();
 
-        var product=cartesianProduct.withLambda(a,b,c,d,e)
+        var product=Product.conditional(a,b,c,d,e).withLambda(a,b,c,d,e)
                 .when(a,b).matches((x,y)->x<=y);
 
         assertEquals(BigInteger.valueOf(55_000),product.count());
@@ -118,7 +119,7 @@ class LambdaConditionalProductBuilderTest {
         List<Integer> c=java.util.stream.IntStream.range(0,10).boxed().toList();
         List<Integer> d=java.util.stream.IntStream.range(0,10).boxed().toList();
 
-        var product=cartesianProduct.withLambda(a,b,c,d)
+        var product=Product.conditional(a,b,c,d).withLambda(a,b,c,d)
                 .when(a,b,c).matches((x,y,z)->x+y<=z);
 
         long scopedCount=0;
@@ -167,7 +168,7 @@ class LambdaConditionalProductBuilderTest {
     void aScopedRuleOnAThreeDimensionBuilderCanStillAppendADimension() {
         List<Integer> a=range(3), b=range(3), c=range(3), d=range(3);
 
-        var product=cartesianProduct.withLambda(a,b,c)
+        var product=Product.conditional(a,b,c).withLambda(a,b,c)
                 .when(a,b).matches((x,y)->x!=y)
                 .and(d)                                                         // typed and(...) is still available
                 .when((x,y,z,w)->x+w<=z+2);
@@ -196,7 +197,7 @@ class LambdaConditionalProductBuilderTest {
     void arrayScopeOnATypedBuilderReturnsTheTypedBuilder() {
         List<Integer> a=range(3), b=range(3), c=range(3), d=range(3), e=range(3), f=range(3);
 
-        var product=cartesianProduct.withLambda(a,b,c,d,e,f)                   // six dimensions: array-based
+        var product=Product.conditional(a,b,c,d,e,f).withLambda()                   // six dimensions: array-based
                 .when(a,b,c,d,e,f).matches(values->(Integer)values[0]+(Integer)values[5]==2);
 
         long expected=0;
