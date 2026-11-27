@@ -91,7 +91,7 @@ class LambdaConditionalProductBuilderTest {
     void alwaysTrueAndFalsePredicatesAreHandled() {
         List<Integer> a=List.of(1,2), b=List.of(1,2);
         var all=Product.conditional(a,b).withLambda(a,b).when((x,y)->true);
-        var none=cartesianProduct.withLambda(a,b).when((x,y)->false);
+        var none=Product.conditional(a,b).withLambda(a,b).when((x,y)->false);
         assertEquals(BigInteger.valueOf(4),all.count());
         assertEquals(BigInteger.ZERO,none.count());
         assertTrue(none.isEmpty());
@@ -185,7 +185,7 @@ class LambdaConditionalProductBuilderTest {
 
         var scopedFirst=Product.conditional(a,b,c).withLambda(a,b,c)
                 .when(a,c).matches((x,z)->x<z).when((x,y,z)->x+y!=z);
-        var typedFirst=cartesianProduct.withLambda(a,b,c)
+        var typedFirst=Product.conditional(a,b,c).withLambda(a,b,c)
                 .when((x,y,z)->x+y!=z).when(a,c).matches((x,z)->x<z);
 
         assertEquals(scopedFirst.count(),typedFirst.count());
