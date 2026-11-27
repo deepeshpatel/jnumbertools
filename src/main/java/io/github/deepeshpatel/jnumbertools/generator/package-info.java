@@ -11,6 +11,7 @@
  * obtain generators through those facade/builder APIs rather than instantiate implementation
  * classes in these packages directly.</p>
  *
- * @see io.github.deepeshpatel.jnumbertools.base.JNumberTools
+ * @see io.github.deepeshpatel.jnumbertools.entrypoint.Permutation
+ * @see io.github.deepeshpatel.jnumbertools.entrypoint.Product
  */
 package io.github.deepeshpatel.jnumbertools.generator;
