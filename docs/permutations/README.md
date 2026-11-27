@@ -12,6 +12,8 @@
 
 JNumberTools provides the following 23 permutation generation APIs. All m<sup>th</sup> generators are BigInteger compatible, enabling rapid generation of permutations at very large indices, such as 10<sup>100</sup>.
 
+**Static entry point:** `Permutation`. Add `import io.github.deepeshpatel.jnumbertools.base.Permutation;` to use the examples in a Java source file.
+
 **Currently Available Algorithms**
 
 1. [Unique Permutations: 6 different types of permutations](#1-unique-permutation-generators)
