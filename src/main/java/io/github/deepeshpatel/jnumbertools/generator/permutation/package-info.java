@@ -8,7 +8,7 @@
  * <p>Permutation strategies include unique, repetitive, multiset and k-permutations, with
  * lexicographical, combination-based or other supported traversal orders. Derangement
  * implementations generate permutations with no fixed points. Use the public builder APIs
- * in {@link io.github.deepeshpatel.jnumbertools.base.JNumberTools} to configure generation.</p>
+ * through {@link io.github.deepeshpatel.jnumbertools.entrypoint.Permutation} and {@link io.github.deepeshpatel.jnumbertools.entrypoint.Derangement} to configure generation.</p>
  *
  * @see io.github.deepeshpatel.jnumbertools.builders.PermutationsBuilder
  * @see io.github.deepeshpatel.jnumbertools.builders.DerangementsBuilder
