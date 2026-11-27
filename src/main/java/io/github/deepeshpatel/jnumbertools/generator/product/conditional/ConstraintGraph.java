@@ -61,7 +61,7 @@ final class ConstraintGraph {
         }
         if (multiRules.isEmpty()) return;
 
-        // Two nodes joined by several rules (which happens when a compound rule splits a loop into two nodes)
+        // Two nodes joined by several rules (which happens when a multi-trigger rule splits a loop into two nodes)
         // are related through one combined table with a cell for every pair of node values. Bound its size by
         // the product of the nodes' domain sizes, as a pairwise rule's table is bounded by MAX_PAIR_CELLS.
         Map<Long, Integer> linksBetweenNodes = new HashMap<>();
@@ -75,7 +75,7 @@ final class ConstraintGraph {
             long pa = product[(int) (pair.getKey() >>> 32)];
             long pb = product[(int) (long) pair.getKey()];
             if (pa != 0 && pb > MAX_PAIR_CELLS / pa) {
-                throw new IllegalArgumentException("A compound rule joins two groups of dimensions that have too many "
+                throw new IllegalArgumentException("A multi-trigger rule joins two groups of dimensions that have too many "
                         + "value pairs together; the limit is " + MAX_PAIR_CELLS);
             }
         }
@@ -137,21 +137,21 @@ final class ConstraintGraph {
      * Groups the dimensions into the nodes of the counting plan. Returns, per dimension, the lowest dimension
      * index of its node.
      *
-     * <p>Without compound rules the nodes are the loop blocks of {@link #blockOf}. A compound rule needs every
+     * <p>Without multi-trigger rules the nodes are the loop blocks of {@link #blockOf}. A multi-trigger rule needs every
      * dimension in its scope in one node, because the rule is checked on complete assignments of a node. Joining
      * the scope can close a cycle through rules that were a plain chain, as in
      * {@code A-B-C-D-E} plus a rule over {@code A, E, F}. Merging that whole cycle into one node would
      * enumerate the product of all its dimensions, although the chain {@code B, C, D} has no loop of its own.
      * Instead the dimensions of the cycle other than the rule's scope form a second node that is related to the
      * scope's node through the conjunction of the rules between them, so the nodes still form a forest and each
-     * is enumerated separately. When a cycle passes through more than one compound-rule scope, the whole cycle
+     * is enumerated separately. When a cycle passes through more than one multi-trigger rule scope, the whole cycle
      * is merged into one node.</p>
      */
     static int[] nodeOf(int n, Collection<Long> keys, List<MultiTriggerRule> multiRules) {
         int[] node = blockOf(n, keys);
         if (multiRules.isEmpty()) return node;
 
-        // 1. every compound rule's scope lies in one node
+        // 1. every multi-trigger rule's scope lies in one node
         for (MultiTriggerRule rule : multiRules) {
             int target = node[rule.scope[0]];
             for (int dimension : rule.scope) {
