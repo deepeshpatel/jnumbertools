@@ -16,12 +16,18 @@ JNumberTools is a Java 21+ library for combinatorics and number theory. It provi
 Common imports used in examples:
 
 ```java
-import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Rank;
+import io.github.deepeshpatel.jnumbertools.entrypoint.Unrank;
 import io.github.deepeshpatel.jnumbertools.entrypoint.Permutation;
 import io.github.deepeshpatel.jnumbertools.entrypoint.Combination;
 import io.github.deepeshpatel.jnumbertools.entrypoint.Derangement;
 import io.github.deepeshpatel.jnumbertools.entrypoint.Subset;
 import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
+import io.github.deepeshpatel.jnumbertools.numbersystem.Factoradic;
+import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
+import io.github.deepeshpatel.jnumbertools.numbersystem.Combinadic;
+import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.*;
 import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic;
 
@@ -172,214 +178,73 @@ A subset generator includes the empty set `[]` (the empty set, ∅) when using `
 
 # 4. Cartesian Products
 
-JNumberTools provides five product styles. Choose the builder by the structure of each dimension and the complexity of the rules:
-
-| Product style | Entry point | Use it when | Traversal and operations |
-|---|---|---|---|
-| Simple Product | `simpleProductOf(...)` | Each dimension contributes one value and there are no constraints. | Lexicographical and every-mth traversal; rank-based and random operations. |
-| Constrained Product | `constrainedProductOfDistinct(...)` and related methods | A dimension represents a combination, a multi-select, or a subset range. | Lexicographical and every-mth traversal; rank-based and random operations. |
-| Compiled Product | `conditionalProductOf(...)` | Rules connect pairs of dimensions using `when(...).then(...)`. | Lexicographical/rank traversal, counting, choice and sample. |
-| Lambda Engine | `withLambda(...)` | Rules are too complex or application-specific for the declarative rule builders and are clearer as Java predicates. | Joint predicates are compiled into constraints; lazy `generate()`, exact `count()`, `isEmpty()`; no rank or sampling API. |
+Use the `Product` static entry point in `io.github.deepeshpatel.jnumbertools.entrypoint`. It exposes simple, constrained and pairwise-conditional product builders. Lambda predicates are configured on the conditional builder.
 
 ## 4.1 Simple Cartesian product
 
-A simple Cartesian product combines one element from each input dimension.
+Pass one list for each dimension, in tuple order:
 
 ```java
 var colors = List.of("Red", "Green");
 var sizes = List.of("S", "M");
-```
+var product = Product.simple(colors, sizes);
 
-| Description | API | Output |
-|---|---|---|
-| Generate the Cartesian product of colors and sizes. | `JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes).lexOrder();` | `[Red,S], [Red,M], [Green,S], [Green,M]` |
-| Generate every second product, starting at rank 0. | `JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes).lexOrderMth(2, 0);` | `[Red,S], [Green,S]` |
-| Generate products at ranks 0, 2 and 3. | `JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes).byRanks(0, 2, 3);` | `[Red,S], [Green,S], [Green,M]` |
-| Select 3 random products; duplicates are possible. | `JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes).choice(3, new Random());` | Three random products. |
-| Select 3 distinct random products. | `JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes).sample(3, new Random());` | Three distinct products. |
+product.lexOrder().forEach(System.out::println);
+product.lexOrderMth(2, 0).forEach(System.out::println);
+product.byRanks(0, 2, 3).forEach(System.out::println);
+product.choice(3, new Random()).forEach(System.out::println);
+product.sample(3, new Random()).forEach(System.out::println);
+```
 
 ## 4.2 Constrained Cartesian product
 
-A constrained Cartesian product lets each dimension select a fixed number of distinct elements, a fixed number with repetition, or subsets within a size range. The resulting dimensions are combined into a Cartesian product.
-
-```java
-// All combinations of:
-// - any 1 pizza base
-// - any 2 distinct cheeses
-// - any 2 sauces (repetition allowed)
-// - any toppings in range 1 to 5
-var pizzaBase = List.of("Small", "Medium", "Large");
-var cheese = List.of("Ricotta", "Mozzarella", "Cheddar");
-var sauce = List.of("Tomato Ketchup", "White Sauce", "Green Chutney");
-var toppings = List.of("Tomato", "Capsicum", "Onion", "Corn", "Mushroom");
-
-JNumberTools.cartesianProduct()
-   .constrainedProductOfDistinct(1, pizzaBase)
-   .andDistinct(2, cheese)
-   .andMultiSelect(2, sauce)
-   .andInRange(1, 5, toppings)
-   .lexOrder()
-   .stream().forEach(System.out::println);
-```
-
-The supported dimension methods are:
-
-| Start dimension | Additional dimension | Meaning |
-|---|---|---|
-| `constrainedProductOfDistinct(quantity, elements)` | `andDistinct(quantity, elements)` | Select a fixed number of distinct elements. |
-| `constrainedProductOfMultiSelect(quantity, elements)` | `andMultiSelect(quantity, elements)` | Select a fixed number of elements with repetition allowed. |
-| `constrainedProductOfInRange(from, to, elements)` | `andInRange(from, to, elements)` | Select subsets whose sizes are within the specified range. |
-
-Use `constrainedProductOfDistinct` instead of the deprecated `constrainedProductOf`.
-
-The constrained builder supports lexicographical traversal and every-mth traversal directly. For example:
-
-```java
-var smallAlphabets = IntStream.rangeClosed('a', 'z').mapToObj(c -> (char) c).toList();
-var capitalAlphabets = IntStream.rangeClosed('A', 'Z').mapToObj(c -> (char) c).toList();
-var symbols = List.of('~', '!', '@', '#', '
-```
-
-## 4.3 Compiled Product: pairwise conditional rules
-
-The Compiled Product uses `conditionalProductOf(...)` to express rules between pairs of dimensions. The builder compiles the rules into constraints, so invalid branches can be pruned before complete tuples are materialized. It supports lexicographical and rank-based traversal, exact counting, choice and sampling.
-
-```java
-var os = List.of("Windows", "macOS", "Linux");
-var browser = List.of("Chrome", "Safari", "Firefox");
-var network = List.of("WiFi", "4G");
-
-var configs = JNumberTools.cartesianProduct()
-    .conditionalProductOf(os)
-    .and(browser)
-    .and(network)
-    .when(browser).is("Safari").then(os).isOneOf("macOS")
-    .when(network).is("4G").then(os).isNot("Linux")
-    .when(network).is("4G").then(browser).isNot("Chrome");
-```
-
-| Description | API | Output |
-|---|---|---|
-| Count valid configurations. | `configs.count();` | `10` |
-| Check whether any valid configuration exists. | `configs.isEmpty();` | `false` |
-| Generate valid configurations in lexicographical order. | `configs.lexOrder();` | Valid tuples only, in lexicographical order. |
-| Generate every third valid tuple, starting at rank 1. | `configs.lexOrderMth(3, 1);` | Valid tuples at lexicographical ranks `1, 4, 7, ...` |
-| Generate valid tuples at ranks 0 and 2. | `configs.byRanks(0, 2);` | Valid tuples at those ranks. |
-| Select 2 random valid tuples. | `configs.choice(2, new Random(42));` | Two valid tuples; duplicates are possible. |
-| Select 2 distinct random valid tuples. | `configs.sample(2, new Random(42));` | Two distinct valid tuples. |
-| Generate valid tuples without an encounter-order guarantee. | `configs.anyOrder();` | Every valid tuple exactly once, in unspecified order. |
-
-A rule such as `.when(browser).is("Safari").then(os).isOneOf("macOS")` means that whenever the chosen browser is Safari, the chosen OS must be macOS. It does not constrain tuples where the browser is not Safari. Every completed rule must hold.
-
-The pairwise API supports `is`, `isNot`, `isOneOf`, `isNoneOf` and `isNotIn` on both the trigger and consequence sides. `isNotIn` is an alias of `isNoneOf`. Dimensions are identified by the same list instances supplied to `conditionalProductOf(...)` and `and(...)`.
-
-Use the Compiled Product for pairwise rules and the Lambda Engine for arbitrary joint predicates.
-
-## 4.4 Lambda Engine: typed and scoped joint predicates
-
-Use the Lambda Engine for arbitrary Java logic over Cartesian-product dimensions.
-
-### Full-tuple predicates
-
-The `.when(predicate)` overload receives every dimension registered with
-`withLambda(...)`, in declaration order. One dimension uses Java `Predicate<T>`;
-two use `BiPredicate<A, B>`; three through five use `Predicate3` through
-`Predicate5`; more than five use `Predicate<Object[]>`.
-
-```java
-var products = JNumberTools.cartesianProduct()
-        .withLambda(cores, memoryGb, budget)
-        .when((core, memory, maxBudget) ->
-                (core * memory <= maxBudget && memory <= 8)
-                || (core >= 8 && maxBudget >= 16));
-```
-
-### Scoped predicates
-
-Use `.when(dim1, dim2, ...).matches(predicate)` when a condition depends on
-only some of the registered dimensions. The arguments are the exact list instances
-passed to `withLambda(...)` or `.and(...)`. The predicate receives only the selected
-values, in the order supplied.
-
-```java
-var products = JNumberTools.cartesianProduct()
-        .withLambda(os, browser, database, region, cache)
-        .when(os, browser).matches((operatingSystem, webBrowser) ->
-                !webBrowser.equals("Safari") || operatingSystem.equals("macOS"))
-        .when(database, region).matches((db, deploymentRegion) ->
-                !db.equals("Oracle") || deploymentRegion.equals("EU"));
-```
-
-Two through five selected dimensions have typed predicate interfaces. For an arbitrary
-scope arity, pass an explicit `List<?>[]` to select the array form:
-
-```java
-.when(new List<?>[]{dimA, dimB, dimC}).matches(values ->
-        (Integer) values[0] + (Integer) values[1] <= (Integer) values[2])
-```
-
-### Compilation and constraints
-
-- Each rule is compiled when added. Full-tuple predicates probe the complete registered
-  tuple scope; scoped predicates probe only the selected dimensions.
-- For a scoped rule, the probe count is the product of the selected antecedent dimension
-  sizes and the selected target dimension size. The final selected dimension is the target.
-  The one-million-probe limit applies independently to each rule.
-- A scope containing two million-element dimensions still requires one trillion probes
-  and is rejected. Scoping avoids multiplying work by unrelated dimensions; it does not
-  make a huge selected scope inexpensive.
-- Rules are combined with AND. Use Java Boolean operators and parentheses for OR and
-  nested expressions within a predicate.
-- Predicates must be deterministic and side-effect-free. They are evaluated during
-  compilation, not during subsequent generation or counting.
-- The builder exposes lazy, re-iterable `generate()`, exact `count()` and `isEmpty()`.
-  It does not expose lexicographical traversal, rank-based access, choice or sampling.
-
-Prefer `conditionalProductOf(...)` for straightforward pairwise rules and
-The Lambda
-Engine is for custom joint logic that is most naturally expressed as Java predicates.
-
-## 4.5 Products of ranks, random choice and random sample
-
-Simple, constrained and compiled products support rank-based and random operations.
-`byRanks` returns products at the requested ranks, `choice` draws with replacement
-(duplicates possible), and `sample` draws distinct products without replacement.
+Start with a constrained dimension, then add further dimensions using the matching builder methods:
 
 ```java
 var colors = List.of("Red", "Green", "Blue");
-var sizes = List.of("S", "M");
-var product = JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes);
+var sizes = List.of("S", "M", "L", "XL");
 
-// The products at ranks 5 and 0: [Blue, M], [Red, S]
-product.byRanks(List.of(BigInteger.valueOf(5), BigInteger.ZERO))
-       .stream().forEach(System.out::println);
-
-// 3 random products, duplicates possible
-product.choice(3, new Random(1)).stream().forEach(System.out::println);
-
-// 3 distinct random products
-product.sample(3, new Random(1)).stream().forEach(System.out::println);
-
-// The same operations on a constrained product
-var cheese = List.of("Ricotta", "Mozzarella", "Cheddar");
-var constrained = JNumberTools.cartesianProduct()
-        .constrainedProductOfDistinct(1, sizes)
-        .andDistinct(2, cheese);
-constrained.byRanks(List.of(BigInteger.TWO)).stream().forEach(System.out::println);
-
-// The same rank/choice/sample family is available on a compiled pairwise product.
-var os = List.of("Windows", "macOS", "Linux");
-var browser = List.of("Chrome", "Safari", "Firefox");
-var compiled = JNumberTools.cartesianProduct()
-        .conditionalProductOf(os, browser)
-        .when(browser).is("Safari").then(os).is("macOS");
-compiled.byRanks(0, 2).stream().forEach(System.out::println);
+Product.constrained()
+    .ofDistinct(2, colors)
+    .andMultiSelect(2, sizes)
+    .lexOrder()
+    .forEach(System.out::println);
 ```
 
-The Lambda Engine intentionally does not expose these rank-based or
-random operations; use `generate()` for their lazy, re-iterable output.
+The first dimension can use `ofDistinct(quantity, elements)`, `ofMultiSelect(quantity, elements)` or `ofInRange(from, to, elements)`. Later dimensions use `andDistinct`, `andMultiSelect` or `andInRange`. A shared `Calculator` can be supplied with `Product.constrained(calculator)`.
 
----
+## 4.3 Compiled pairwise conditional product
+
+```java
+var os = List.of("Windows", "macOS", "Linux");
+var browsers = List.of("Chrome", "Safari", "Firefox");
+var networks = List.of("WiFi", "4G");
+
+var configs = Product.conditional(os, browsers, networks)
+    .when(browsers).is("Safari").then(os).isOneOf("macOS")
+    .when(networks).is("4G").then(os).isNot("Linux");
+
+configs.count();
+configs.lexOrder().forEach(System.out::println);
+configs.byRanks(0, 2).forEach(System.out::println);
+```
+
+Pairwise rules are compiled into constraints so invalid branches can be pruned before complete tuples are generated. The builder supports counting, lexicographical/rank traversal and random selection.
+
+## 4.4 Lambda predicates
+
+The conditional builder also supports `withLambda(...)`. Typed whole-product predicate overloads are available for one through five dimensions; the no-argument form supports array-based predicates for arbitrary dimension counts.
+
+```java
+Product.conditional(os, browsers, networks)
+    .withLambda(os, browsers, networks)
+    .when((system, browser, network) ->
+        !system.equals("Linux") || browser.equals("Firefox") || browser.equals("Safari"))
+    .lexOrder()
+    .forEach(System.out::println);
+```
+
+Scoped predicates can be declared with `.when(dimensions...).matches(predicate)`. Predicates are compiled into constraints, subject to the documented probe limit. The Lambda Engine exposes lazy `generate()`, `count()` and `isEmpty()`; do not assume it has all rank and sampling operations of other product builders.
 
 # 5. Derangements
 
@@ -406,13 +271,13 @@ JNumberTools documents four combinatorial number-system representations: Factora
 
 | Description | API | Output |
 |---|---|---|
-| Convert decimal 859 to Factoradic. | `JNumberTools.numberSystem().factoradic(BigInteger.valueOf(859));` | A Factoradic representation whose decimal value is `859`. |
+| Convert decimal 859 to Factoradic. | `Factoradic.of(BigInteger.valueOf(859));` | A Factoradic representation whose decimal value is `859`. |
 
 Example:
 
 ```java
 BigInteger number = BigInteger.valueOf(859);
-Factoradic factoradic = JNumberTools.numberSystem().factoradic(number);
+Factoradic factoradic = Factoradic.of(number);
 
 System.out.println(factoradic);
 System.out.println(factoradic.decimalValue); // 859
@@ -424,13 +289,13 @@ Permutadic is a generalization of Factoradic for k-permutations.
 
 | Description | API | Output |
 |---|---|---|
-| Convert decimal 100 to a Permutadic representation of degree 3. | `JNumberTools.numberSystem().permutadic(BigInteger.valueOf(100), 3);` | A Permutadic representation whose decimal value is `100`. |
+| Convert decimal 100 to a Permutadic representation of degree 3. | `Permutadic.of(BigInteger.valueOf(100), 3);` | A Permutadic representation whose decimal value is `100`. |
 
 Example:
 
 ```java
 BigInteger number = BigInteger.valueOf(100);
-Permutadic permutadic = JNumberTools.numberSystem().permutadic(number, 3);
+Permutadic permutadic = Permutadic.of(number, 3);
 
 System.out.println(permutadic);
 System.out.println(permutadic.decimalValue); // 100
@@ -442,13 +307,13 @@ Combinadic represents combination ranks using binomial coefficients.
 
 | Description | API | Output |
 |---|---|---|
-| Convert decimal 35 to a Combinadic representation of degree 3. | `JNumberTools.numberSystem().combinadic(BigInteger.valueOf(35), 3);` | A Combinadic representation whose decimal value is `35`. |
+| Convert decimal 35 to a Combinadic representation of degree 3. | `Combinadic.of(BigInteger.valueOf(35), 3, new Calculator());` | A Combinadic representation whose decimal value is `35`. |
 
 Example:
 
 ```java
 BigInteger number = BigInteger.valueOf(35);
-Combinadic combinadic = JNumberTools.numberSystem().combinadic(number, 3);
+Combinadic combinadic = Combinadic.of(number, 3, new Calculator());
 
 System.out.println(combinadic);
 System.out.println(combinadic.decimalValue); // 35
@@ -460,7 +325,7 @@ Derangadic provides a bijection between ranks `0` through `!n - 1` and derangeme
 
 | Description | API | Output |
 |---|---|---|
-| Decode rank 5 into a derangement of order 5. | `JNumberTools.numberSystem().derangadic(BigInteger.valueOf(5), 5);` | Derangement `[1, 3, 0, 4, 2]`. |
+| Decode rank 5 into a derangement of order 5. | `new Derangadic(5, BigInteger.valueOf(5), new Calculator());` | Derangement `[1, 3, 0, 4, 2]`. |
 | Read the rank of the decoded derangement. | `derangadic.rank();` | `5` |
 | Read the number of derangements of order 5. | `derangadic.count();` | `44` |
 | Read the encoded digits. | `derangadic.encoded();` | `[0, 1, 0, 2, 0]` |
@@ -546,7 +411,7 @@ Ranks are represented using `BigInteger`.
 
 | Description | API | Output |
 |---|---|---|
-| Find the rank of permutation `[3,2,1,0]` among permutations of 4 elements. | `JNumberTools.rankOf().permutation().unique(3, 2, 1, 0);` | `23` |
+| Find the rank of permutation `[3,2,1,0]` among permutations of 4 elements. | `Rank.permutation().unique(3, 2, 1, 0);` | `23` |
 | Find the rank of k-permutation `[4,6,2,0]` from 8 elements. | `JNumberTools.rankOf().permutation().k(8, 4, 6, 2, 0);` | A zero-based `BigInteger` rank. |
 | Find the rank of `[1,0,0,1]` among sequences of length 4 over 2 types. | `JNumberTools.rankOf().permutation().repetitive(2, 1, 0, 0, 1);` | `9` |
 | Find the rank of multiset permutation `[0,1,0]` with frequencies `[2,1]`. | `JNumberTools.rankOf().permutation().multiset(new int[]{2, 1}, new int[]{0, 1, 0});` | A zero-based `BigInteger` rank. |
@@ -564,7 +429,7 @@ Ranks are represented using `BigInteger`.
 
 | Description | API | Output |
 |---|---|---|
-| Decode rank 5 into a permutation of 3 elements. | `JNumberTools.unrankOf().permutation().unique(BigInteger.valueOf(5), 3);` | `[2,1,0]` |
+| Decode rank 5 into a permutation of 3 elements. | `Unrank.permutation().unique(BigInteger.valueOf(5), 3);` | `[2,1,0]` |
 | Determine the smallest permutation size capable of containing rank 5. | `JNumberTools.unrankOf().permutation().uniqueMinimumSize(BigInteger.valueOf(5));` | An integer permutation. |
 | Decode rank 5 into a k-permutation from 8 elements, selecting 3. | `JNumberTools.unrankOf().permutation().k(BigInteger.valueOf(5), 8, 3);` | An integer array of length 3. |
 | Decode rank 5 into a repetitive permutation with 2 types and length 4. | `JNumberTools.unrankOf().permutation().repetitive(BigInteger.valueOf(5), 2, 4);` | An integer array of length 4. |
@@ -613,164 +478,11 @@ JNumberTools.cartesianProduct()
         .stream().forEach(System.out::println);
 ```
 
-## 4.3 Compiled Product: pairwise conditional rules
+## Product API details
 
-The Compiled Product uses `conditionalProductOf(...)` to express rules between pairs of dimensions. The builder compiles the rules into constraints, so invalid branches can be pruned before complete tuples are materialized. It supports lexicographical and rank-based traversal, exact counting, choice and sampling.
+The `Product` entry point accepts product dimensions directly. Use `Product.simple(list1, list2, ...)` for an unconstrained product, `Product.constrained()` for combination/subset dimensions, and `Product.conditional(list1, list2, ...)` for pairwise rules or lambda predicates.
 
-```java
-var os = List.of("Windows", "macOS", "Linux");
-var browser = List.of("Chrome", "Safari", "Firefox");
-var network = List.of("WiFi", "4G");
-
-var configs = JNumberTools.cartesianProduct()
-    .conditionalProductOf(os)
-    .and(browser)
-    .and(network)
-    .when(browser).is("Safari").then(os).isOneOf("macOS")
-    .when(network).is("4G").then(os).isNot("Linux")
-    .when(network).is("4G").then(browser).isNot("Chrome");
-```
-
-| Description | API | Output |
-|---|---|---|
-| Count valid configurations. | `configs.count();` | `10` |
-| Check whether any valid configuration exists. | `configs.isEmpty();` | `false` |
-| Generate valid configurations in lexicographical order. | `configs.lexOrder();` | Valid tuples only, in lexicographical order. |
-| Generate every third valid tuple, starting at rank 1. | `configs.lexOrderMth(3, 1);` | Valid tuples at lexicographical ranks `1, 4, 7, ...` |
-| Generate valid tuples at ranks 0 and 2. | `configs.byRanks(0, 2);` | Valid tuples at those ranks. |
-| Select 2 random valid tuples. | `configs.choice(2, new Random(42));` | Two valid tuples; duplicates are possible. |
-| Select 2 distinct random valid tuples. | `configs.sample(2, new Random(42));` | Two distinct valid tuples. |
-| Generate valid tuples without an encounter-order guarantee. | `configs.anyOrder();` | Every valid tuple exactly once, in unspecified order. |
-
-A rule such as `.when(browser).is("Safari").then(os).isOneOf("macOS")` means that whenever the chosen browser is Safari, the chosen OS must be macOS. It does not constrain tuples where the browser is not Safari. Every completed rule must hold.
-
-The pairwise API supports `is`, `isNot`, `isOneOf`, `isNoneOf` and `isNotIn` on both the trigger and consequence sides. `isNotIn` is an alias of `isNoneOf`. Dimensions are identified by the same list instances supplied to `conditionalProductOf(...)` and `and(...)`.
-
-Use the Compiled Product for pairwise rules and the Lambda Engine for arbitrary joint predicates.
-
-## 4.4 Lambda Engine: strongly typed joint predicates
-
-Use the Lambda Engine for arbitrary Java logic over Cartesian-product dimensions. The
-predicate receives the values from **all dimensions registered with** `withLambda(...)`,
-in declaration order. It is not a filter applied after every complete tuple has been
-generated: predicates are evaluated while the rule is compiled, and the compiled
-constraint is used by generation, counting and emptiness checks.
-
-### Predicate arities
-
-- One dimension: Java `Predicate<T>`; it filters that dimension's values.
-- Two dimensions: Java `BiPredicate<A, B>`.
-- Three through five dimensions: `LambdaConditionalProductBuilder.Predicate3` through
-  `Predicate5`, with strongly typed lambda parameters.
-- More than five dimensions: `Predicate<Object[]>`; array positions follow dimension order.
-
-### Strongly typed example and Boolean logic
-
-```java
-var cores = List.of(1, 2, 4, 8);
-var memoryGb = List.of(2, 4, 8, 16);
-var budget = List.of(8, 16, 32);
-
-var products = JNumberTools.cartesianProduct()
-        .withLambda(cores, memoryGb, budget)
-        .when((core, memory, maxBudget) ->
-                (core * memory <= maxBudget && memory <= 8)
-                || (core >= 8 && maxBudget >= 16));
-
-products.count();
-products.generate().stream().forEach(System.out::println);
-```
-
-Use Java's `&&`, `||`, `!` and parentheses for arbitrary Boolean expressions, including
-`(A && B) || (C && D)`. No separate `orWhen` or `andWhen` methods are needed.
-
-### Multiple conditions
-
-Every `.when(predicate)` call adds another condition, and repeated calls are combined
-with AND:
-
-```java
-var products = JNumberTools.cartesianProduct()
-        .withLambda(cores, memoryGb, budget)
-        .when((core, memory, maxBudget) -> core * memory <= maxBudget)
-        .when((core, memory, maxBudget) -> memory <= 8 || maxBudget >= 32);
-```
-
-This is logically equivalent to combining both predicates with `&&` inside one
-`.when(...)` call. Their compilation costs may differ; benchmark the two forms if that
-difference matters.
-
-### More than five dimensions
-
-Products with more than five dimensions use the array form:
-
-```java
-var products = JNumberTools.cartesianProduct()
-        .withLambda(d1, d2, d3, d4, d5, d6)
-        .when(values -> values[0].equals(values[5]));
-```
-
-### Compilation and constraints
-
-- For two or more dimensions, each predicate is compiled over the complete Cartesian
-  product of the registered dimensions.
-- The existing compilation limit is 1,000,000 predicate probes per `.when(...)` call.
-  If the product of the dimension sizes exceeds this limit, rule compilation is rejected.
-- Predicates must be deterministic and side-effect-free. The array supplied to the
-  greater-than-ten form is a temporary compilation array; do not retain or mutate it.
-- Predicates are evaluated during compilation, not during subsequent generation or counting.
-- The builder exposes lazy, re-iterable `generate()`, exact `count()` and `isEmpty()`.
-  It does not expose lexicographical traversal, rank-based access, choice or sampling.
-
-Prefer `conditionalProductOf(...)` for straightforward pairwise rules and
-`withLambda(...)` when a rule depends on multiple dimensions or involves custom joint
-logic that is most naturally expressed as Java predicates.
-
-**Benchmark note:** performance measurements published for the previous scoped-predicate
-API are not representative of this all-dimensions API. Re-run the benchmarks against this
-API before publishing comparative performance claims.
-
-## 4.5 Products of ranks, random choice and random sample
-
-Simple, constrained and compiled products support rank-based and random operations.
-`byRanks` returns products at the requested ranks, `choice` draws with replacement
-(duplicates possible), and `sample` draws distinct products without replacement.
-
-```java
-var colors = List.of("Red", "Green", "Blue");
-var sizes = List.of("S", "M");
-var product = JNumberTools.cartesianProduct().simpleProductOf(colors).and(sizes);
-
-// The products at ranks 5 and 0: [Blue, M], [Red, S]
-product.byRanks(List.of(BigInteger.valueOf(5), BigInteger.ZERO))
-       .stream().forEach(System.out::println);
-
-// 3 random products, duplicates possible
-product.choice(3, new Random(1)).stream().forEach(System.out::println);
-
-// 3 distinct random products
-product.sample(3, new Random(1)).stream().forEach(System.out::println);
-
-// The same operations on a constrained product
-var cheese = List.of("Ricotta", "Mozzarella", "Cheddar");
-var constrained = JNumberTools.cartesianProduct()
-        .constrainedProductOfDistinct(1, sizes)
-        .andDistinct(2, cheese);
-constrained.byRanks(List.of(BigInteger.TWO)).stream().forEach(System.out::println);
-
-// The same rank/choice/sample family is available on a compiled pairwise product.
-var os = List.of("Windows", "macOS", "Linux");
-var browser = List.of("Chrome", "Safari", "Firefox");
-var compiled = JNumberTools.cartesianProduct()
-        .conditionalProductOf(os, browser)
-        .when(browser).is("Safari").then(os).is("macOS");
-compiled.byRanks(0, 2).stream().forEach(System.out::println);
-```
-
-The Lambda Engine intentionally do not expose these rank-based or
-random operations; use `generate()` for their lazy, re-iterable output.
-
----
+The Lambda API has typed whole-product predicate overloads for one through five dimensions. For more dimensions, use the array-based `withLambda()` form. Scoped rules use `.when(dimensions...).matches(predicate)`; predicates must be deterministic and side-effect-free and are evaluated during compilation.
 
 # 5. Derangements
 
