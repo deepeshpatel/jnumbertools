@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Constraint topology, bounded compound-rule blocks and the two lookahead tiers built on them. The dimensions are grouped into <em>nodes</em>: a dimension that is on no loop of
+ * Constraint topology, bounded multi-trigger rule blocks and the two lookahead tiers built on them. The dimensions are grouped into <em>nodes</em>: a dimension that is on no loop of
  * rules is a node by itself; the dimensions of a loop (a block) form one node whose values are the
- * valid joint assignments of its dimensions. Nodes and the rules between them form a forest (when a compound rule has
+ * valid joint assignments of its dimensions. Nodes and the rules between them form a forest (when a multi-trigger rule has
  * split a loop, several rules join the same two nodes and restrict them together);
  * each tree is rooted at its node with the lowest dimension index.
  * <ul>
@@ -496,8 +496,8 @@ final class ConstraintPlan {
     }
 
     /**
-     * Checks a dimension against its earlier pairwise neighbours. Compound-rule validation is handled by the
-     * compound traversal, not by this pairwise plan operation.
+     * Checks a dimension against its earlier pairwise neighbours. multi-trigger rule validation is handled by the
+     * multi-trigger traversal, not by this pairwise plan operation.
      */
     boolean agreesWithBelow(int d, int idx, int[] val) {
         int[] dimsBelow = belowDims[d];
