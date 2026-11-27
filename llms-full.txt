@@ -17,6 +17,10 @@ Common imports used in examples:
 
 ```java
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
+import io.github.deepeshpatel.jnumbertools.base.Combination;
+import io.github.deepeshpatel.jnumbertools.base.Derangement;
+import io.github.deepeshpatel.jnumbertools.base.Subset;
 import io.github.deepeshpatel.jnumbertools.base.Calculator;
 import io.github.deepeshpatel.jnumbertools.numbersystem.*;
 import io.github.deepeshpatel.jnumbertools.numbersystem.derangadic.Derangadic;
@@ -34,13 +38,13 @@ import java.util.stream.*;
 
 | Description | API | Output |
 |---|---|---|
-| Generate all permutations of integers `0, 1, 2`. | `JNumberTools.permutations().unique(3).lexOrder();` | `[0,1,2], [0,2,1], [1,0,2], [1,2,0], [2,0,1], [2,1,0]` |
-| Generate all permutations of `A, B, C`. | `JNumberTools.permutations().unique("A", "B", "C").lexOrder();` | `[A,B,C], [A,C,B], [B,A,C], [B,C,A], [C,A,B], [C,B,A]` |
-| Generate permutations at ranks 1, 3 and 5. | `JNumberTools.permutations().unique("A", "B", "C").byRanks(1, 3, 5);` | `[A,C,B], [B,C,A], [C,B,A]` |
-| Generate every second permutation, starting at rank 0. | `JNumberTools.permutations().unique("A", "B", "C").lexOrderMth(2, 0);` | `[A,B,C], [B,A,C], [C,A,B]` |
-| Generate permutations where each result differs from the previous by a single swap. | `JNumberTools.permutations().unique("A", "B", "C").singleSwap();` | All six permutations in minimum-change order. |
-| Select 3 random permutations; duplicates are possible. | `JNumberTools.permutations().unique("A", "B", "C").choice(3, new Random());` | Three randomly selected permutations. |
-| Select 3 distinct random permutations. | `JNumberTools.permutations().unique("A", "B", "C").sample(3, new Random());` | Three distinct randomly selected permutations. |
+| Generate all permutations of integers `0, 1, 2`. | `Permutation.unique(3).lexOrder();` | `[0,1,2], [0,2,1], [1,0,2], [1,2,0], [2,0,1], [2,1,0]` |
+| Generate all permutations of `A, B, C`. | `Permutation.unique("A", "B", "C").lexOrder();` | `[A,B,C], [A,C,B], [B,A,C], [B,C,A], [C,A,B], [C,B,A]` |
+| Generate permutations at ranks 1, 3 and 5. | `Permutation.unique("A", "B", "C").byRanks(1, 3, 5);` | `[A,C,B], [B,C,A], [C,B,A]` |
+| Generate every second permutation, starting at rank 0. | `Permutation.unique("A", "B", "C").lexOrderMth(2, 0);` | `[A,B,C], [B,A,C], [C,A,B]` |
+| Generate permutations where each result differs from the previous by a single swap. | `Permutation.unique("A", "B", "C").singleSwap();` | All six permutations in minimum-change order. |
+| Select 3 random permutations; duplicates are possible. | `Permutation.unique("A", "B", "C").choice(3, new Random());` | Three randomly selected permutations. |
+| Select 3 distinct random permutations. | `Permutation.unique("A", "B", "C").sample(3, new Random());` | Three distinct randomly selected permutations. |
 
 ## 1.2 Multiset permutations
 
@@ -55,12 +59,12 @@ elements.put("C", 1);
 
 | Description | API | Output |
 |---|---|---|
-| Generate all permutations of two A's, one B and one C. | `JNumberTools.permutations().multiset(elements).lexOrder();` | `[A,A,B,C], [A,A,C,B], [A,B,A,C], ...` |
-| Generate permutations at ranks 0, 2 and 5. | `JNumberTools.permutations().multiset(elements).byRanks(0, 2, 5);` | Results at those three zero-based ranks. |
-| Generate every second multiset permutation, starting at rank 0. | `JNumberTools.permutations().multiset(elements).lexOrderMth(2, 0);` | Ranks `0, 2, 4, ...` |
-| Select 3 random multiset permutations; duplicates are possible. | `JNumberTools.permutations().multiset(elements).choice(3, new Random());` | Three random multiset permutations. |
-| Select 3 distinct random multiset permutations. | `JNumberTools.permutations().multiset(elements).sample(3, new Random());` | Three distinct multiset permutations. |
-| Generate results at large ranks supplied as decimal strings. | `JNumberTools.permutations().multiset(elements).byRanks("10", "1000000000000000000000");` | Results at the two specified ranks. |
+| Generate all permutations of two A's, one B and one C. | `Permutation.multiset(elements).lexOrder();` | `[A,A,B,C], [A,A,C,B], [A,B,A,C], ...` |
+| Generate permutations at ranks 0, 2 and 5. | `Permutation.multiset(elements).byRanks(0, 2, 5);` | Results at those three zero-based ranks. |
+| Generate every second multiset permutation, starting at rank 0. | `Permutation.multiset(elements).lexOrderMth(2, 0);` | Ranks `0, 2, 4, ...` |
+| Select 3 random multiset permutations; duplicates are possible. | `Permutation.multiset(elements).choice(3, new Random());` | Three random multiset permutations. |
+| Select 3 distinct random multiset permutations. | `Permutation.multiset(elements).sample(3, new Random());` | Three distinct multiset permutations. |
+| Generate results at large ranks supplied as decimal strings. | `Permutation.multiset(elements).byRanks("10", "1000000000000000000000");` | Results at the two specified ranks. |
 
 ## 1.3 k-permutations
 
@@ -68,15 +72,15 @@ A k-permutation selects and orders `k` distinct elements from `n` elements. The 
 
 | Description | API | Output |
 |---|---|---|
-| Generate all 2-permutations of integers `0` through `4`. | `JNumberTools.permutations().nPk(5, 2).lexOrder();` | `[0,1], [0,2], [0,3], [0,4], [1,0], ...` |
-| Generate all 2-permutations of A, B, C and D. | `JNumberTools.permutations().nPk(2, "A", "B", "C", "D").lexOrder();` | `[A,B], [A,C], [A,D], [B,A], ...` |
-| Generate every third k-permutation, starting at rank 0. | `JNumberTools.permutations().nPk(5, 2).lexOrderMth(3, 0);` | Results at ranks `0, 3, 6, 9, ...` |
-| Generate every third k-permutation, starting at rank 1. | `JNumberTools.permutations().nPk(5, 2).lexOrderMth(3, 1);` | Results at ranks `1, 4, 7, 10, ...` |
-| Generate k-permutations in combination order. | `JNumberTools.permutations().nPk(3, 2).combinationOrder();` | `[0,1], [1,0], [0,2], [2,0], [1,2], [2,1]` |
-| Generate every second k-permutation in combination order. | `JNumberTools.permutations().nPk(3, 2).combinationOrderMth(2, 0);` | Results at combination-order ranks `0, 2, 4`. |
-| Generate k-permutations at ranks 1, 3 and 5. | `JNumberTools.permutations().nPk(5, 2).byRanks(1, 3, 5);` | Results at those three ranks. |
-| Select 3 random k-permutations; duplicates are possible. | `JNumberTools.permutations().nPk(5, 2).choice(3, new Random());` | Three random k-permutations. |
-| Select 3 distinct random k-permutations. | `JNumberTools.permutations().nPk(5, 2).sample(3, new Random());` | Three distinct k-permutations. |
+| Generate all 2-permutations of integers `0` through `4`. | `Permutation.nPk(5, 2).lexOrder();` | `[0,1], [0,2], [0,3], [0,4], [1,0], ...` |
+| Generate all 2-permutations of A, B, C and D. | `Permutation.nPk(2, "A", "B", "C", "D").lexOrder();` | `[A,B], [A,C], [A,D], [B,A], ...` |
+| Generate every third k-permutation, starting at rank 0. | `Permutation.nPk(5, 2).lexOrderMth(3, 0);` | Results at ranks `0, 3, 6, 9, ...` |
+| Generate every third k-permutation, starting at rank 1. | `Permutation.nPk(5, 2).lexOrderMth(3, 1);` | Results at ranks `1, 4, 7, 10, ...` |
+| Generate k-permutations in combination order. | `Permutation.nPk(3, 2).combinationOrder();` | `[0,1], [1,0], [0,2], [2,0], [1,2], [2,1]` |
+| Generate every second k-permutation in combination order. | `Permutation.nPk(3, 2).combinationOrderMth(2, 0);` | Results at combination-order ranks `0, 2, 4`. |
+| Generate k-permutations at ranks 1, 3 and 5. | `Permutation.nPk(5, 2).byRanks(1, 3, 5);` | Results at those three ranks. |
+| Select 3 random k-permutations; duplicates are possible. | `Permutation.nPk(5, 2).choice(3, new Random());` | Three random k-permutations. |
+| Select 3 distinct random k-permutations. | `Permutation.nPk(5, 2).sample(3, new Random());` | Three distinct k-permutations. |
 
 ## 1.4 Repetitive permutations
 
@@ -84,12 +88,12 @@ A repetitive permutation allows an element to appear more than once. The first a
 
 | Description | API | Output |
 |---|---|---|
-| Generate all sequences of length 2 using integers `0, 1, 2`. | `JNumberTools.permutations().repetitive(2, 3).lexOrder();` | `[0,0], [0,1], [0,2], [1,0], [1,1], ...` |
-| Generate all sequences of length 2 using A, B and C. | `JNumberTools.permutations().repetitive(2, "A", "B", "C").lexOrder();` | `[A,A], [A,B], [A,C], [B,A], ...` |
-| Generate every second repetitive permutation, starting at rank 0. | `JNumberTools.permutations().repetitive(2, 3).lexOrderMth(2, 0);` | Results at ranks `0, 2, 4, 6, ...` |
-| Generate repetitive permutations at ranks 1, 3 and 5. | `JNumberTools.permutations().repetitive(2, 3).byRanks(1, 3, 5);` | Results at those three ranks. |
-| Select 3 random repetitive permutations; duplicates are possible. | `JNumberTools.permutations().repetitive(2, 3).choice(3, new Random());` | Three random sequences. |
-| Select 3 distinct random repetitive permutations. | `JNumberTools.permutations().repetitive(2, 3).sample(3, new Random());` | Three distinct sequences. |
+| Generate all sequences of length 2 using integers `0, 1, 2`. | `Permutation.repetitive(2, 3).lexOrder();` | `[0,0], [0,1], [0,2], [1,0], [1,1], ...` |
+| Generate all sequences of length 2 using A, B and C. | `Permutation.repetitive(2, "A", "B", "C").lexOrder();` | `[A,A], [A,B], [A,C], [B,A], ...` |
+| Generate every second repetitive permutation, starting at rank 0. | `Permutation.repetitive(2, 3).lexOrderMth(2, 0);` | Results at ranks `0, 2, 4, 6, ...` |
+| Generate repetitive permutations at ranks 1, 3 and 5. | `Permutation.repetitive(2, 3).byRanks(1, 3, 5);` | Results at those three ranks. |
+| Select 3 random repetitive permutations; duplicates are possible. | `Permutation.repetitive(2, 3).choice(3, new Random());` | Three random sequences. |
+| Select 3 distinct random repetitive permutations. | `Permutation.repetitive(2, 3).sample(3, new Random());` | Three distinct sequences. |
 
 ---
 
@@ -101,12 +105,12 @@ A unique combination selects `r` distinct elements from `n` elements. The order 
 
 | Description | API | Output |
 |---|---|---|
-| Generate all combinations of 2 elements from integers `0` through `3`. | `JNumberTools.combinations().unique(4, 2).lexOrder();` | `[0,1], [0,2], [0,3], [1,2], [1,3], [2,3]` |
-| Generate all combinations of 2 elements from A, B, C and D. | `JNumberTools.combinations().unique(2, "A", "B", "C", "D").lexOrder();` | `[A,B], [A,C], [A,D], [B,C], [B,D], [C,D]` |
-| Generate every second combination, starting at rank 0. | `JNumberTools.combinations().unique(4, 2).lexOrderMth(2, 0);` | `[0,1], [0,3], [1,3]` |
-| Generate combinations at ranks 0, 2 and 5. | `JNumberTools.combinations().unique(4, 2).byRanks(0, 2, 5);` | `[0,1], [0,3], [2,3]` |
-| Select 3 random combinations; duplicates are possible. | `JNumberTools.combinations().unique(5, 2).choice(3, new Random());` | Three random combinations. |
-| Select 3 distinct random combinations. | `JNumberTools.combinations().unique(5, 2).sample(3, new Random());` | Three distinct combinations. |
+| Generate all combinations of 2 elements from integers `0` through `3`. | `Combination.unique(4, 2).lexOrder();` | `[0,1], [0,2], [0,3], [1,2], [1,3], [2,3]` |
+| Generate all combinations of 2 elements from A, B, C and D. | `Combination.unique(2, "A", "B", "C", "D").lexOrder();` | `[A,B], [A,C], [A,D], [B,C], [B,D], [C,D]` |
+| Generate every second combination, starting at rank 0. | `Combination.unique(4, 2).lexOrderMth(2, 0);` | `[0,1], [0,3], [1,3]` |
+| Generate combinations at ranks 0, 2 and 5. | `Combination.unique(4, 2).byRanks(0, 2, 5);` | `[0,1], [0,3], [2,3]` |
+| Select 3 random combinations; duplicates are possible. | `Combination.unique(5, 2).choice(3, new Random());` | Three random combinations. |
+| Select 3 distinct random combinations. | `Combination.unique(5, 2).sample(3, new Random());` | Three distinct combinations. |
 
 ## 2.2 Multiset combinations
 
@@ -120,11 +124,11 @@ elements.put("Banana", 1);
 
 | Description | API | Output |
 |---|---|---|
-| Generate all combinations of 2 elements from the multiset. | `JNumberTools.combinations().multiset(elements, 2).lexOrder();` | `{Apple=2}, {Apple=1, Banana=1}` |
-| Generate every second multiset combination, starting at rank 0. | `JNumberTools.combinations().multiset(elements, 2).lexOrderMth(2, 0);` | Results at ranks `0, 2, 4, ...` |
-| Generate multiset combinations at ranks 0 and 1. | `JNumberTools.combinations().multiset(elements, 2).byRanks(0, 1);` | Results at those ranks. |
-| Select 2 random multiset combinations; duplicates are possible. | `JNumberTools.combinations().multiset(elements, 2).choice(2, new Random());` | Two random multiset combinations. |
-| Select 2 distinct random multiset combinations. | `JNumberTools.combinations().multiset(elements, 2).sample(2, new Random());` | Two distinct multiset combinations. |
+| Generate all combinations of 2 elements from the multiset. | `Combination.multiset(elements, 2).lexOrder();` | `{Apple=2}, {Apple=1, Banana=1}` |
+| Generate every second multiset combination, starting at rank 0. | `Combination.multiset(elements, 2).lexOrderMth(2, 0);` | Results at ranks `0, 2, 4, ...` |
+| Generate multiset combinations at ranks 0 and 1. | `Combination.multiset(elements, 2).byRanks(0, 1);` | Results at those ranks. |
+| Select 2 random multiset combinations; duplicates are possible. | `Combination.multiset(elements, 2).choice(2, new Random());` | Two random multiset combinations. |
+| Select 2 distinct random multiset combinations. | `Combination.multiset(elements, 2).sample(2, new Random());` | Two distinct multiset combinations. |
 
 ## 2.3 Repetitive combinations
 
@@ -132,11 +136,11 @@ A repetitive combination allows an element to be selected more than once.
 
 | Description | API | Output |
 |---|---|---|
-| Generate all combinations of size 2 from 3 types with repetition. | `JNumberTools.combinations().repetitive(3, 2).lexOrder();` | `[0,0], [0,1], [0,2], [1,1], [1,2], [2,2]` |
-| Generate every second repetitive combination, starting at rank 0. | `JNumberTools.combinations().repetitive(3, 2).lexOrderMth(2, 0);` | Results at ranks `0, 2, 4, ...` |
-| Generate repetitive combinations at ranks 0, 2 and 5. | `JNumberTools.combinations().repetitive(3, 2).byRanks(0, 2, 5);` | Results at those ranks. |
-| Select 3 random repetitive combinations; duplicates are possible. | `JNumberTools.combinations().repetitive(3, 2).choice(3, new Random());` | Three random combinations. |
-| Select 3 distinct random repetitive combinations. | `JNumberTools.combinations().repetitive(3, 2).sample(3, new Random());` | Three distinct combinations. |
+| Generate all combinations of size 2 from 3 types with repetition. | `Combination.repetitive(3, 2).lexOrder();` | `[0,0], [0,1], [0,2], [1,1], [1,2], [2,2]` |
+| Generate every second repetitive combination, starting at rank 0. | `Combination.repetitive(3, 2).lexOrderMth(2, 0);` | Results at ranks `0, 2, 4, ...` |
+| Generate repetitive combinations at ranks 0, 2 and 5. | `Combination.repetitive(3, 2).byRanks(0, 2, 5);` | Results at those ranks. |
+| Select 3 random repetitive combinations; duplicates are possible. | `Combination.repetitive(3, 2).choice(3, new Random());` | Three random combinations. |
+| Select 3 distinct random repetitive combinations. | `Combination.repetitive(3, 2).sample(3, new Random());` | Three distinct combinations. |
 
 ---
 
@@ -148,21 +152,21 @@ A subset generator includes the empty set `[]` (the empty set, ∅) when using `
 
 | Description | API | Output |
 |---|---|---|
-| Generate all subsets of A, B and C. | `JNumberTools.subsets().of("A", "B", "C").all().lexOrder();` | `[], [A], [B], [C], [A,B], [A,C], [B,C], [A,B,C]` |
-| Generate all subsets of integers `0` through `2`. | `JNumberTools.subsets().of(3).all().lexOrder();` | `[], [0], [1], [2], [0,1], [0,2], [1,2], [0,1,2]` |
-| Generate every second subset, starting at rank 0. | `JNumberTools.subsets().of(3).all().lexOrderMth(2, 0);` | Results at ranks `0, 2, 4, 6`. |
-| Generate subsets at ranks 0, 2 and 7. | `JNumberTools.subsets().of(3).all().byRanks(0, 2, 7);` | `[], [1], [0,1,2]` |
-| Select 3 random subsets; duplicates are possible. | `JNumberTools.subsets().of(3).all().choice(3, new Random());` | Three random subsets. |
-| Select 3 distinct random subsets. | `JNumberTools.subsets().of(3).all().sample(3, new Random());` | Three distinct subsets. |
+| Generate all subsets of A, B and C. | `Subset.of("A", "B", "C").all().lexOrder();` | `[], [A], [B], [C], [A,B], [A,C], [B,C], [A,B,C]` |
+| Generate all subsets of integers `0` through `2`. | `Subset.of(3).all().lexOrder();` | `[], [0], [1], [2], [0,1], [0,2], [1,2], [0,1,2]` |
+| Generate every second subset, starting at rank 0. | `Subset.of(3).all().lexOrderMth(2, 0);` | Results at ranks `0, 2, 4, 6`. |
+| Generate subsets at ranks 0, 2 and 7. | `Subset.of(3).all().byRanks(0, 2, 7);` | `[], [1], [0,1,2]` |
+| Select 3 random subsets; duplicates are possible. | `Subset.of(3).all().choice(3, new Random());` | Three random subsets. |
+| Select 3 distinct random subsets. | `Subset.of(3).all().sample(3, new Random());` | Three distinct subsets. |
 
 ## 3.2 Subsets within a size range
 
 | Description | API | Output |
 |---|---|---|
-| Generate subsets of A, B and C having sizes 1 through 2. | `JNumberTools.subsets().of("A", "B", "C").inRange(1, 2).lexOrder();` | `[A], [B], [C], [A,B], [A,C], [B,C]` |
-| Generate subsets of integers `0` through `3` having sizes 2 through 3. | `JNumberTools.subsets().of(4).inRange(2, 3).lexOrder();` | `[0,1], [0,2], [0,3], [1,2], [1,3], [2,3], [0,1,2], ...` |
-| Generate every second subset in the size range, starting at rank 0. | `JNumberTools.subsets().of(4).inRange(2, 3).lexOrderMth(2, 0);` | Results at ranks `0, 2, 4, ...` |
-| Generate subsets in the size range at ranks 0, 2 and 5. | `JNumberTools.subsets().of(4).inRange(2, 3).byRanks(0, 2, 5);` | Results at those ranks. |
+| Generate subsets of A, B and C having sizes 1 through 2. | `Subset.of("A", "B", "C").inRange(1, 2).lexOrder();` | `[A], [B], [C], [A,B], [A,C], [B,C]` |
+| Generate subsets of integers `0` through `3` having sizes 2 through 3. | `Subset.of(4).inRange(2, 3).lexOrder();` | `[0,1], [0,2], [0,3], [1,2], [1,3], [2,3], [0,1,2], ...` |
+| Generate every second subset in the size range, starting at rank 0. | `Subset.of(4).inRange(2, 3).lexOrderMth(2, 0);` | Results at ranks `0, 2, 4, ...` |
+| Generate subsets in the size range at ranks 0, 2 and 5. | `Subset.of(4).inRange(2, 3).byRanks(0, 2, 5);` | Results at those ranks. |
 
 ---
 
@@ -385,12 +389,12 @@ A derangement is a permutation in which no element remains in its original posit
 
 | Description | API | Output |
 |---|---|---|
-| Generate all derangements of integers `0, 1, 2, 3`. | `JNumberTools.derangements().of(4).lexOrder();` | `[1,0,3,2], [1,2,3,0], [1,3,0,2], ...` |
-| Generate all derangements of A, B, C and D. | `JNumberTools.derangements().of("A", "B", "C", "D").lexOrder();` | Derangements with no element in its original position. |
-| Generate every third derangement, starting at rank 0. | `JNumberTools.derangements().of(5).lexOrderMth(3, 0);` | Derangements at ranks `0, 3, 6, ...` |
-| Generate derangements at ranks 0, 2 and 10. | `JNumberTools.derangements().of(5).byRanks(0, 2, 10);` | Derangements at those ranks. |
-| Select 3 random derangements; duplicates are possible. | `JNumberTools.derangements().of(5).choice(3, new Random());` | Three random derangements. |
-| Select 3 distinct random derangements. | `JNumberTools.derangements().of(5).sample(3, new Random());` | Three distinct derangements. |
+| Generate all derangements of integers `0, 1, 2, 3`. | `Derangement.of(4).lexOrder();` | `[1,0,3,2], [1,2,3,0], [1,3,0,2], ...` |
+| Generate all derangements of A, B, C and D. | `Derangement.of("A", "B", "C", "D").lexOrder();` | Derangements with no element in its original position. |
+| Generate every third derangement, starting at rank 0. | `Derangement.of(5).lexOrderMth(3, 0);` | Derangements at ranks `0, 3, 6, ...` |
+| Generate derangements at ranks 0, 2 and 10. | `Derangement.of(5).byRanks(0, 2, 10);` | Derangements at those ranks. |
+| Select 3 random derangements; duplicates are possible. | `Derangement.of(5).choice(3, new Random());` | Three random derangements. |
+| Select 3 distinct random derangements. | `Derangement.of(5).sample(3, new Random());` | Three distinct derangements. |
 
 ---
 
@@ -776,12 +780,12 @@ A derangement is a permutation in which no element remains in its original posit
 
 | Description | API | Output |
 |---|---|---|
-| Generate all derangements of integers `0, 1, 2, 3`. | `JNumberTools.derangements().of(4).lexOrder();` | `[1,0,3,2], [1,2,3,0], [1,3,0,2], ...` |
-| Generate all derangements of A, B, C and D. | `JNumberTools.derangements().of("A", "B", "C", "D").lexOrder();` | Derangements with no element in its original position. |
-| Generate every third derangement, starting at rank 0. | `JNumberTools.derangements().of(5).lexOrderMth(3, 0);` | Derangements at ranks `0, 3, 6, ...` |
-| Generate derangements at ranks 0, 2 and 10. | `JNumberTools.derangements().of(5).byRanks(0, 2, 10);` | Derangements at those ranks. |
-| Select 3 random derangements; duplicates are possible. | `JNumberTools.derangements().of(5).choice(3, new Random());` | Three random derangements. |
-| Select 3 distinct random derangements. | `JNumberTools.derangements().of(5).sample(3, new Random());` | Three distinct derangements. |
+| Generate all derangements of integers `0, 1, 2, 3`. | `Derangement.of(4).lexOrder();` | `[1,0,3,2], [1,2,3,0], [1,3,0,2], ...` |
+| Generate all derangements of A, B, C and D. | `Derangement.of("A", "B", "C", "D").lexOrder();` | Derangements with no element in its original position. |
+| Generate every third derangement, starting at rank 0. | `Derangement.of(5).lexOrderMth(3, 0);` | Derangements at ranks `0, 3, 6, ...` |
+| Generate derangements at ranks 0, 2 and 10. | `Derangement.of(5).byRanks(0, 2, 10);` | Derangements at those ranks. |
+| Select 3 random derangements; duplicates are possible. | `Derangement.of(5).choice(3, new Random());` | Three random derangements. |
+| Select 3 distinct random derangements. | `Derangement.of(5).sample(3, new Random());` | Three distinct derangements. |
 
 ---
 
