@@ -1,6 +1,6 @@
 # JNumberTools — Full API Examples
 
-JNumberTools is a Java 21+ library for combinatorics and number theory. It provides generators for permutations, derangements, combinations, subsets and five Cartesian product styles (simple, constrained, compiled, compound and lambda-engine), together with ranking, unranking, number-system representations and mathematical functions.
+JNumberTools is a Java 21+ library for combinatorics and number theory. It provides generators for permutations, derangements, combinations, subsets and four Cartesian product styles (simple, constrained, compiled and lambda-engine), together with ranking, unranking, number-system representations and mathematical functions.
 
 ## Common conventions
 
@@ -175,7 +175,6 @@ JNumberTools provides five product styles. Choose the builder by the structure o
 | Simple Product | `simpleProductOf(...)` | Each dimension contributes one value and there are no constraints. | Lexicographical and every-mth traversal; rank-based and random operations. |
 | Constrained Product | `constrainedProductOfDistinct(...)` and related methods | A dimension represents a combination, a multi-select, or a subset range. | Lexicographical and every-mth traversal; rank-based and random operations. |
 | Compiled Product | `conditionalProductOf(...)` | Rules connect pairs of dimensions using `when(...).then(...)`. | Lexicographical/rank traversal, counting, choice and sample. |
-| Compound Product | `compoundProductOf(...)` | A trigger depends on multiple dimensions or needs nested Boolean grouping. | Lazy `generate()`, exact `count()`, `isEmpty()`; no rank or sampling API. |
 | Lambda Engine | `withLambda(...)` | Rules are too complex or application-specific for the declarative rule builders and are clearer as Java predicates. | Joint predicates are compiled into constraints; lazy `generate()`, exact `count()`, `isEmpty()`; no rank or sampling API. |
 
 ## 4.1 Simple Cartesian product
@@ -270,52 +269,9 @@ A rule such as `.when(browser).is("Safari").then(os).isOneOf("macOS")` means tha
 
 The pairwise API supports `is`, `isNot`, `isOneOf`, `isNoneOf` and `isNotIn` on both the trigger and consequence sides. `isNotIn` is an alias of `isNoneOf`. Dimensions are identified by the same list instances supplied to `conditionalProductOf(...)` and `and(...)`.
 
-Use the Compiled Product for pairwise rules. Use the Compound Product for nested Boolean triggers, and the Lambda Engine for arbitrary joint predicates.
+Use the Compiled Product for pairwise rules and the Lambda Engine for arbitrary joint predicates.
 
-## 4.4 Compound Product: nested Boolean rules
-
-The Compound Product uses `compoundProductOf(...)` and a composed `Condition` when a trigger depends on multiple dimensions or needs nested Boolean grouping.
-
-```java
-import static io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition.condition;
-
-var os = List.of("Windows", "macOS", "Linux");
-var browser = List.of("Chrome", "Safari", "Firefox");
-var database = List.of("PostgreSQL", "Oracle");
-
-var trigger = condition(browser).is("Safari")
-        .and(condition(os).is("Windows"))
-        .or(condition(browser).is("Chrome")
-        .and(condition(os).is("Linux")));
-
-var products = JNumberTools.cartesianProduct()
-        .compoundProductOf(os, browser, database)
-        .when(trigger)
-        .then(database).isNot("PostgreSQL");
-```
-
-The trigger means:
-`(browser = Safari AND os = Windows) OR (browser = Chrome AND os = Linux)`.
-Conditions can be nested to express groupings such as `A AND (B OR C)` and
-`(A OR B) AND C`. Multiple completed rules are combined with AND.
-
-| Description | API | Output |
-|---|---|---|
-| Count valid tuples. | `products.count();` | Exact number of valid tuples. |
-| Check whether the result is empty. | `products.isEmpty();` | `true` or `false`. |
-| Generate all valid tuples lazily. | `products.generate();` | Each valid tuple exactly once; encounter order is unspecified. |
-| Match a custom predicate on one dimension. | `condition(browser).matches(value -> value.startsWith("Ch"));` | Matches browser values beginning with `Ch`. |
-
-Atomic `Condition.matches(Predicate)` applies to one explicitly named dimension. The
-predicate is evaluated for that dimension's values while the condition is attached and
-the matching positions are compiled before tuple generation. It is not a joint predicate
-over multiple dimensions.
-
-The Compound Product exposes lazy, re-iterable `generate()`, exact `count()` and
-`isEmpty()`. It does not expose lexicographical traversal, rank-based operations,
-random choice or sampling.
-
-## 4.5 Lambda Engine: typed and scoped joint predicates
+## 4.4 Lambda Engine: typed and scoped joint predicates
 
 Use the Lambda Engine for arbitrary Java logic over Cartesian-product dimensions.
 
@@ -376,10 +332,10 @@ scope arity, pass an explicit `List<?>[]` to select the array form:
   It does not expose lexicographical traversal, rank-based access, choice or sampling.
 
 Prefer `conditionalProductOf(...)` for straightforward pairwise rules and
-`compoundProductOf(...)` when nested declarative conditions are clearer. The Lambda
+The Lambda
 Engine is for custom joint logic that is most naturally expressed as Java predicates.
 
-## 4.6 Products of ranks, random choice and random sample
+## 4.5 Products of ranks, random choice and random sample
 
 Simple, constrained and compiled products support rank-based and random operations.
 `byRanks` returns products at the requested ranks, `choice` draws with replacement
@@ -416,7 +372,7 @@ var compiled = JNumberTools.cartesianProduct()
 compiled.byRanks(0, 2).stream().forEach(System.out::println);
 ```
 
-The Compound Product and Lambda Engine intentionally do not expose these rank-based or
+The Lambda Engine intentionally does not expose these rank-based or
 random operations; use `generate()` for their lazy, re-iterable output.
 
 ---
@@ -636,7 +592,7 @@ For a valid combinatorial object, ranking and unranking are inverse operations.
 3. **Random choice versus random sample:** `choice` samples with replacement. `sample` samples without replacement and therefore cannot return more distinct results than the total number of available results.
 4. **Large ranks:** Use the `String` overload of `byRanks` when a rank does not fit in a `long`. For example, `.byRanks("1000000000000000000000")`.
 5. **Lazy generation:** Generator methods return lazy, re-iterable generators. They do not necessarily materialize all results in memory.
-6. **Product builder differences:** Simple, constrained and compiled products support lexicographical/rank-based operations and random choice or sampling. Compound Product and Lambda Engine expose lazy `generate()`, exact `count()` and `isEmpty()`; they do not expose rank-based traversal, choice or sampling. Compound `Condition.matches(...)` predicates apply to one dimension, while Lambda Engine predicates inspect all registered dimension values in tuple order. Both are compiled before tuple generation.
+6. **Product builder differences:** Simple, constrained and compiled products support lexicographical/rank-based operations and random choice or sampling. The Lambda Engine exposes lazy `generate()`, exact `count()` and `isEmpty()`; it does not expose rank-based traversal, choice or sampling. Lambda predicates are compiled before tuple generation.
 7. **Empty results:** A generator may have zero results. A generator containing one empty tuple is not empty.
 8. **Validation:** Input constraints and exception behavior are specified in the repository's `ValidationRules.md`.
 
@@ -686,50 +642,7 @@ A rule such as `.when(browser).is("Safari").then(os).isOneOf("macOS")` means tha
 
 The pairwise API supports `is`, `isNot`, `isOneOf`, `isNoneOf` and `isNotIn` on both the trigger and consequence sides. `isNotIn` is an alias of `isNoneOf`. Dimensions are identified by the same list instances supplied to `conditionalProductOf(...)` and `and(...)`.
 
-Use the Compiled Product for pairwise rules. Use the Compound Product for nested Boolean triggers, and the Lambda Engine for arbitrary joint predicates.
-
-## 4.4 Compound Product: nested Boolean rules
-
-The Compound Product uses `compoundProductOf(...)` and a composed `Condition` when a trigger depends on multiple dimensions or needs nested Boolean grouping.
-
-```java
-import static io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition.condition;
-
-var os = List.of("Windows", "macOS", "Linux");
-var browser = List.of("Chrome", "Safari", "Firefox");
-var database = List.of("PostgreSQL", "Oracle");
-
-var trigger = condition(browser).is("Safari")
-        .and(condition(os).is("Windows"))
-        .or(condition(browser).is("Chrome")
-        .and(condition(os).is("Linux")));
-
-var products = JNumberTools.cartesianProduct()
-        .compoundProductOf(os, browser, database)
-        .when(trigger)
-        .then(database).isNot("PostgreSQL");
-```
-
-The trigger means:
-`(browser = Safari AND os = Windows) OR (browser = Chrome AND os = Linux)`.
-Conditions can be nested to express groupings such as `A AND (B OR C)` and
-`(A OR B) AND C`. Multiple completed rules are combined with AND.
-
-| Description | API | Output |
-|---|---|---|
-| Count valid tuples. | `products.count();` | Exact number of valid tuples. |
-| Check whether the result is empty. | `products.isEmpty();` | `true` or `false`. |
-| Generate all valid tuples lazily. | `products.generate();` | Each valid tuple exactly once; encounter order is unspecified. |
-| Match a custom predicate on one dimension. | `condition(browser).matches(value -> value.startsWith("Ch"));` | Matches browser values beginning with `Ch`. |
-
-Atomic `Condition.matches(Predicate)` applies to one explicitly named dimension. The
-predicate is evaluated for that dimension's values while the condition is attached and
-the matching positions are compiled before tuple generation. It is not a joint predicate
-over multiple dimensions.
-
-The Compound Product exposes lazy, re-iterable `generate()`, exact `count()` and
-`isEmpty()`. It does not expose lexicographical traversal, rank-based operations,
-random choice or sampling.
+Use the Compiled Product for pairwise rules. Use the Lambda Engine for joint predicates, and the Lambda Engine for arbitrary joint predicates.
 
 ## 4.5 Lambda Engine: strongly typed joint predicates
 
@@ -806,7 +719,7 @@ var products = JNumberTools.cartesianProduct()
   It does not expose lexicographical traversal, rank-based access, choice or sampling.
 
 Prefer `conditionalProductOf(...)` for straightforward pairwise rules and
-`compoundProductOf(...)` when nested declarative conditions are clearer. The Lambda
+`withLambda(...)` when nested declarative conditions are clearer. The Lambda
 Engine is for custom joint logic that is most naturally expressed as Java predicates.
 
 **Benchmark note:** performance measurements published for the previous scoped-predicate
@@ -850,7 +763,7 @@ var compiled = JNumberTools.cartesianProduct()
 compiled.byRanks(0, 2).stream().forEach(System.out::println);
 ```
 
-The Compound Product and Lambda Engine intentionally do not expose these rank-based or
+The Lambda Engine intentionally do not expose these rank-based or
 random operations; use `generate()` for their lazy, re-iterable output.
 
 ---
@@ -1070,7 +983,7 @@ For a valid combinatorial object, ranking and unranking are inverse operations.
 3. **Random choice versus random sample:** `choice` samples with replacement. `sample` samples without replacement and therefore cannot return more distinct results than the total number of available results.
 4. **Large ranks:** Use the `String` overload of `byRanks` when a rank does not fit in a `long`. For example, `.byRanks("1000000000000000000000")`.
 5. **Lazy generation:** Generator methods return lazy, re-iterable generators. They do not necessarily materialize all results in memory.
-6. **Product builder differences:** Simple, constrained and compiled products support lexicographical/rank-based operations and random choice or sampling. Compound Product and Lambda Engine expose lazy `generate()`, exact `count()` and `isEmpty()`; they do not expose rank-based traversal, choice or sampling. Compound `Condition.matches(...)` predicates apply to one dimension, while Lambda Engine predicates may jointly inspect the values in a declared multi-dimension scope. Both are compiled before tuple generation.
+6. **Product builder differences:** Simple, constrained and compiled products support lexicographical/rank-based operations and random choice or sampling. The Lambda Engine exposes lazy `generate()`, exact `count()` and `isEmpty()`; it does not expose rank-based traversal, choice or sampling. Compound scoped Lambda predicates predicates apply to one dimension, while Lambda Engine predicates may jointly inspect the values in a declared multi-dimension scope. Both are compiled before tuple generation.
 7. **Empty results:** A generator may have zero results. A generator containing one empty tuple is not empty.
 8. **Validation:** Input constraints and exception behavior are specified in the repository's `ValidationRules.md`.
 
