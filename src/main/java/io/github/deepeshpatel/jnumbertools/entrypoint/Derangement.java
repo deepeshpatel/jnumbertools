@@ -21,14 +21,14 @@ import java.util.List;
  * builders. For example:</p>
  *
  * <pre>{@code
+ * import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
+ * import io.github.deepeshpatel.jnumbertools.generator.permutation.derangement.DerangementBuilder;
+ * import java.util.List;
+ *
  * Calculator calculator = new Calculator();
  * var first = new DerangementBuilder<>(calculator, List.of("A", "B", "C"));
  * var second = new DerangementBuilder<>(calculator, List.of("D", "E", "F"));
  * }</pre>
- *
- * <p>Import {@code Calculator} from {@code io.github.deepeshpatel.jnumbertools.datastructure}
- * and {@code DerangementBuilder} from
- * {@code io.github.deepeshpatel.jnumbertools.generator.permutation.derangement}.</p>
  *
  * <pre>{@code
  * Derangement.of(4).lexOrder();
