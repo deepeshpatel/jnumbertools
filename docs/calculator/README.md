@@ -10,7 +10,7 @@
 
 # Math Functions in Calculator
 
-The `Calculator` class in **JNumberTools** provides efficient, thread-safe mathematical functions for combinatorics and number theory computations. It uses memoization for performance, supporting operations like factorials, binomial coefficients, multinomial coefficients, and more, with `BigInteger` compatibility for large-scale calculations.
+The `Calculator` class in `io.github.deepeshpatel.jnumbertools.datastructure` provides efficient, thread-safe mathematical functions for combinatorics and number theory computations. It uses memoization for performance, supporting operations like factorials, binomial coefficients, multinomial coefficients, and more, with `BigInteger` compatibility for large-scale calculations.
 
 **Key Features:**
 - Thread-safe with synchronized caches for `nCr`, `nPr`, factorial, and subfactorial values.
