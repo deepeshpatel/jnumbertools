@@ -76,7 +76,7 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
         nextCandidate[baseDepth] = candidateFrom;
         candidateLimit[baseDepth] = candidateTo;
         if (candidateFrom == candidateTo) exhausted = true;
-        this.traversal = model.multiRules.isEmpty() ? new PairwiseTraversal() : new CompoundTraversal();
+        this.traversal = model.multiRules.isEmpty() ? new PairwiseTraversal() : new MultiTriggerTraversal();
     }
 
     /** Whether completion lookahead is active (for tests). */
@@ -106,7 +106,7 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
 
     /**
      * Traversal strategies are selected once when the iterator is constructed. The pairwise
-     * candidate loop therefore contains no compound-mode test or compound-rule evaluation.
+     * candidate loop therefore contains no multi-trigger mode test or multi-trigger rule evaluation.
      */
     private abstract class Traversal {
         abstract boolean advance();
@@ -149,8 +149,8 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
         }
     }
 
-    /** Compound traversal checks each compound implication as soon as its scope is assigned. */
-    private final class CompoundTraversal extends Traversal {
+    /** multi-trigger traversal checks each multi-trigger implication as soon as its scope is assigned. */
+    private final class MultiTriggerTraversal extends Traversal {
         @Override
         boolean advance() {
             while (depth >= 0) {
