@@ -5,9 +5,22 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ## [Unreleased]
 
+### Breaking changes
+
+- Reorganized public packages: static entry points are in `entrypoint`, builders are in
+  `builders`, and `Calculator` plus supporting data structures are in `datastructure`.
+- Removed the central `JNumberTools`, `RankOf`, `UnrankOf`, and `NumberSystem`
+  facades. Use `Permutation`, `Combination`, `Subset`, `Derangement`, and
+  `Product` for generation; `Rank` and `Unrank` for ranking and unranking.
+- Product creation now starts with `Product.simple(...)`, `Product.constrained(...)`,
+  or `Product.conditional(...)`. Simple and conditional entry points receive all
+  dimensions as lists rather than using the old `cartesianProduct().and(...)` chain.
+- Construct number-system representations directly with `Factoradic.of(...)`,
+  `Permutadic.of(...)`, `Combinadic.of(..., calculator)`, or
+  `new Derangadic(order, rank, calculator)`.
+
 ### Removed
 
-- Removed the `JNumberTools.permutations()`, `combinations()`, `derangements()`, and `subsets()` factories. Use the dedicated static entry points `Permutation`, `Combination`, `Derangement`, and `Subset`.
 - Removed the public Compound Product builder and the public Condition DSL. Use the Compiled
   Pairwise Conditional Product for pairwise rules and the Lambda Conditional Product for joint
   predicates, including nested Boolean logic. The internal multi-trigger constraint representation
@@ -16,7 +29,7 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ### Added
 
-- Added dedicated static generator entry points: `Permutation`, `Combination`, `Derangement`, and `Subset`. They delegate to the corresponding generator builders.
+- Added dedicated static entry points: `Permutation`, `Combination`, `Subset`, `Derangement`, `Product`, `Rank`, and `Unrank`.
 - Added natural-order comparison methods to conditional-product rule conditions and consequences:
   `isGreaterThan`, `isGreaterThanOrEqual`, `isLessThan` and `isLessThanOrEqual`.
   Comparisons use `Comparable.compareTo` and are compiled into positional bit sets.
