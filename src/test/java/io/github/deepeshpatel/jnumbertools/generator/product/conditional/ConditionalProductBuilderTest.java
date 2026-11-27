@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import io.github.deepeshpatel.jnumbertools.generator.base.BuilderTestHelper;
 import org.junit.jupiter.api.Test;
 
@@ -11,11 +13,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for {@code cartesianProduct.conditionalProductOf(...)}. The valid tuples are cross-checked against
+ * Tests for {@code Product.conditional(...)}. The valid tuples are cross-checked against
  * a plain filter over the full product, so the tests establish that counting, lexicographic order,
  * unranking and sampling over the rules agree with the brute-force definition.
  */
@@ -28,7 +29,7 @@ class ConditionalProductBuilderTest {
     // ── The worked example ───────────────────────────────────────────────────
 
     private List<List<Object>> expectedConfigs(boolean safariOnlyOnMac) {
-        return cartesianProduct.simpleProductOf(os).and(browser).and(network).lexOrder().stream()
+        return Product.simple(os).and(browser).and(network).lexOrder().stream()
                 .filter(t -> !(t.get(2).equals("4G") && t.get(0).equals("Linux")))
                 .filter(t -> !(t.get(2).equals("4G") && t.get(1).equals("Chrome")))
                 .filter(t -> !safariOnlyOnMac || !(t.get(1).equals("Safari") && !t.get(0).equals("macOS")))
@@ -36,7 +37,7 @@ class ConditionalProductBuilderTest {
     }
 
     private ConditionalProductBuilder twoRules() {
-        return cartesianProduct.conditionalProductOf(os).and(browser).and(network)
+        return Product.conditional(os).and(browser).and(network)
                 .when(network).is("4G").then(os).isNot("Linux")
                 .when(network).is("4G").then(browser).isNot("Chrome");
     }
@@ -78,7 +79,7 @@ class ConditionalProductBuilderTest {
     void prunedDfsFallsBackToBitSetWhenDenseRowsExceedTheMemoryCap() {
         List<Integer> left = java.util.stream.IntStream.range(0, 2_100).boxed().toList();
         List<Integer> right = java.util.stream.IntStream.range(0, 2_000).boxed().toList();
-        var builder = cartesianProduct.conditionalProductOf(left).and(right)
+        var builder = Product.conditional(left).and(right)
                 .when(left).is(0).then(right).is(0);
 
         var expectedPrefix = builder.lexOrder(LexOrderStrategy.PRUNED_BITSET).stream().limit(20).toList();
@@ -104,7 +105,7 @@ class ConditionalProductBuilderTest {
         List<Integer> trigger = List.of(1, 2, 3, 4, 5);
         List<Integer> target = List.of(10, 20, 30, 40);
 
-        var greater = cartesianProduct.conditionalProductOf(trigger).and(target)
+        var greater = Product.conditional(trigger).and(target)
                 .when(trigger).isGreaterThan(3).then(target).isGreaterThanOrEqual(30);
         assertEquals(List.of(
                 List.of(1, 10), List.of(1, 20), List.of(1, 30), List.of(1, 40),
@@ -114,7 +115,7 @@ class ConditionalProductBuilderTest {
                 List.of(5, 30), List.of(5, 40)),
                 greater.lexOrder().stream().toList());
 
-        var less = cartesianProduct.conditionalProductOf(trigger).and(target)
+        var less = Product.conditional(trigger).and(target)
                 .when(trigger).isLessThanOrEqual(2).then(target).isLessThan(30);
         assertEquals(List.of(
                 List.of(1, 10), List.of(1, 20),
@@ -127,16 +128,16 @@ class ConditionalProductBuilderTest {
 
     @Test
     void ruleVocabularyIsEquivalent() {
-        var a = cartesianProduct.conditionalProductOf(os).and(browser)
+        var a = Product.conditional(os).and(browser)
                 .when(browser).is("Safari").then(os).isOneOf("macOS");
-        var b = cartesianProduct.conditionalProductOf(os).and(browser)
+        var b = Product.conditional(os).and(browser)
                 .when(browser).is("Safari").then(os).isNot("Windows")
                 .when(browser).is("Safari").then(os).isNoneOf("Linux");
-        var c = cartesianProduct.conditionalProductOf(os).and(browser)
+        var c = Product.conditional(os).and(browser)
                 .when(browser).isOneOf("Safari").then(os).isNotIn("Windows", "Linux");
-        var d = cartesianProduct.conditionalProductOf(os).and(browser)
+        var d = Product.conditional(os).and(browser)
                 .when(browser).isNoneOf("Chrome", "Firefox").then(os).isOneOf(List.of("macOS"));
-        var e = cartesianProduct.conditionalProductOf(os).and(browser)
+        var e = Product.conditional(os).and(browser)
                 .when(browser).isNot("Chrome").then(os).is("macOS")
                 .when(browser).is("Firefox").then(os).isOneOf(os); // all values: adds nothing to the Firefox rule above
 
@@ -151,7 +152,7 @@ class ConditionalProductBuilderTest {
 
     @Test
     void rulesCanBeFollowedByMoreDimensions() {
-        var withRule = cartesianProduct.conditionalProductOf(os).and(browser)
+        var withRule = Product.conditional(os).and(browser)
                 .when(browser).is("Safari").then(os).isOneOf("macOS");
         var extended = withRule.and(network);
         assertEquals(BigInteger.valueOf(7), withRule.count());
@@ -163,16 +164,16 @@ class ConditionalProductBuilderTest {
     @Test
     void ruleOnDimensionsInAnyDirection() {
         // rule written against the declaration order: later dimension triggers, earlier one is restricted
-        var builder = cartesianProduct.conditionalProductOf(os).and(browser)
+        var builder = Product.conditional(os).and(browser)
                 .when(browser).is("Safari").then(os).isOneOf("macOS");
-        var reversed = cartesianProduct.conditionalProductOf(os).and(browser)
+        var reversed = Product.conditional(os).and(browser)
                 .when(os).isNoneOf("macOS").then(browser).isNot("Safari");
         assertEquals(builder.lexOrder().stream().toList(), reversed.lexOrder().stream().toList());
     }
 
     @Test
     void ruleThatForbidsEverythingMakesTheProductEmpty() {
-        var builder = cartesianProduct.conditionalProductOf(os).and(browser)
+        var builder = Product.conditional(os).and(browser)
                 .when(browser).is("Safari").then(os).isNoneOf("Windows", "macOS", "Linux")
                 .when(browser).isNoneOf("Safari").then(os).isNoneOf("Windows", "macOS", "Linux");
         BuilderTestHelper.testEmptyDomain(builder);
@@ -180,7 +181,7 @@ class ConditionalProductBuilderTest {
 
     @Test
     void emptyDimensionMakesTheProductEmpty() {
-        var builder = cartesianProduct.conditionalProductOf(os).and(Collections.emptyList());
+        var builder = Product.conditional(os).and(Collections.emptyList());
         BuilderTestHelper.testEmptyDomain(builder);
     }
 
@@ -203,7 +204,7 @@ class ConditionalProductBuilderTest {
 
     @Test
     void immutability() {
-        var base = cartesianProduct.conditionalProductOf(os).and(browser);
+        var base = Product.conditional(os).and(browser);
         var withRule = base.when(browser).is("Safari").then(os).isOneOf("macOS");
         assertNotSame(base, withRule);
         assertEquals(BigInteger.valueOf(9), base.count());
@@ -213,7 +214,7 @@ class ConditionalProductBuilderTest {
 
     @Test
     void persistentRelationUpdatesPreserveEarlierBuildersAndSortedIteration() {
-        var base = cartesianProduct.conditionalProductOf(os).and(browser);
+        var base = Product.conditional(os).and(browser);
         var safariRule = base.when(browser).is("Safari").then(os).is("macOS");
         var safariAndChromeRules = safariRule.when(browser).is("Chrome").then(os).is("Windows");
         var independentBranch = base.when(browser).is("Firefox").then(os).is("Linux");
@@ -245,7 +246,7 @@ class ConditionalProductBuilderTest {
     void snapshotOfTheCallersLists() {
         var mutable = new ArrayList<>(List.of("a", "b"));
         var other = new ArrayList<>(List.of("x", "y"));
-        var builder = cartesianProduct.conditionalProductOf(mutable).and(other);
+        var builder = Product.conditional(mutable).and(other);
         mutable.add("c");
         mutable.set(0, "changed");
         assertEquals(BigInteger.valueOf(4), builder.count());
@@ -259,10 +260,10 @@ class ConditionalProductBuilderTest {
 
     @Test
     void nullAndUnknownInput() {
-        assertThrows(NullPointerException.class, () -> cartesianProduct.conditionalProductOf(null));
+        assertThrows(NullPointerException.class, () -> Product.conditional(null));
         assertThrows(NullPointerException.class,
-                () -> cartesianProduct.conditionalProductOf(java.util.Arrays.asList("a", null)));
-        var builder = cartesianProduct.conditionalProductOf(os).and(browser);
+                () -> Product.conditional(java.util.Arrays.asList("a", null)));
+        var builder = Product.conditional(os).and(browser);
         assertThrows(NullPointerException.class, () -> builder.and(null));
         assertThrows(NullPointerException.class, () -> builder.when((List<?>) null));
         assertThrows(IllegalArgumentException.class, () -> builder.when(List.of("Windows", "macOS", "Linux")),
@@ -275,7 +276,7 @@ class ConditionalProductBuilderTest {
 
     @Test
     void ruleValuesMustBeValuesOfTheDimension() {
-        var builder = cartesianProduct.conditionalProductOf(os).and(browser);
+        var builder = Product.conditional(os).and(browser);
         assertThrows(IllegalArgumentException.class, () -> builder.when(browser).is("Safary"));
         assertThrows(IllegalArgumentException.class, () -> builder.when(browser).isNot("Safary"));
         assertThrows(IllegalArgumentException.class, () -> builder.when(browser).isOneOf("Safari", "Opera"));
@@ -290,21 +291,21 @@ class ConditionalProductBuilderTest {
 
     @Test
     void aRuleNeedsTwoDifferentDimensions() {
-        var builder = cartesianProduct.conditionalProductOf(os).and(browser);
+        var builder = Product.conditional(os).and(browser);
         assertThrows(IllegalArgumentException.class, () -> builder.when(os).is("Linux").then(os));
     }
 
     @Test
     void sameListInstanceForTwoDimensionsIsAmbiguous() {
         var die = new ArrayList<>(List.of(1, 2, 3));
-        var builder = cartesianProduct.conditionalProductOf(die).and(die);
+        var builder = Product.conditional(die).and(die);
         assertEquals(BigInteger.valueOf(9), builder.count());
         assertThrows(IllegalArgumentException.class, () -> builder.when(die));
     }
 
     @Test
     void rulesFormingALoopAreSolvedTogether() {
-        var builder = cartesianProduct.conditionalProductOf(os).and(browser).and(network)
+        var builder = Product.conditional(os).and(browser).and(network)
                 .when(browser).is("Safari").then(os).isOneOf("macOS")
                 .when(network).is("4G").then(browser).isNot("Chrome")
                 .when(network).is("4G").then(os).isNot("Linux");   // closes the loop os - browser - network
@@ -314,7 +315,7 @@ class ConditionalProductBuilderTest {
 
     @Test
     void addingAnotherRuleToAnExistingPairDoesNotChangeTheLoopStructure() {
-        var builder = cartesianProduct.conditionalProductOf(os).and(browser).and(network)
+        var builder = Product.conditional(os).and(browser).and(network)
                 .when(browser).is("Safari").then(os).isOneOf("macOS")
                 .when(network).is("4G").then(browser).isNot("Chrome")
                 .when(network).is("4G").then(os).isNot("Linux")
@@ -345,7 +346,7 @@ class ConditionalProductBuilderTest {
 
         // The a-b-c cycle has exactly 1,000,000 combinations. d is attached by a bridge,
         // so its 1,001 values must not be included in the loop-block limit.
-        var builder = cartesianProduct.conditionalProductOf(a).and(b).and(c).and(d)
+        var builder = Product.conditional(a).and(b).and(c).and(d)
                 .when(a).is(0).then(b).is(0)
                 .when(b).is(0).then(c).is(0)
                 .when(c).is(0).then(a).is(0)
@@ -360,7 +361,7 @@ class ConditionalProductBuilderTest {
         var b = new ArrayList<Integer>();
         var c = new ArrayList<Integer>();
         for (int i = 0; i < 1001; i++) { a.add(i); b.add(i); c.add(i); }
-        var builder = cartesianProduct.conditionalProductOf(a).and(b).and(c)
+        var builder = Product.conditional(a).and(b).and(c)
                 .when(a).is(0).then(b).is(0)
                 .when(b).is(0).then(c).is(0);
         assertThrows(IllegalArgumentException.class, () -> builder.when(c).is(0).then(a).is(0));
@@ -399,7 +400,7 @@ class ConditionalProductBuilderTest {
             }
         }
 
-        ConditionalProductBuilder builder = cartesianProduct.conditionalProductOf(lists.get(0));
+        ConditionalProductBuilder builder = Product.conditional(lists.get(0));
         for (int d = 1; d < n; d++) builder = builder.and(lists.get(d));
 
         List<Rule> rules = new ArrayList<>();
@@ -525,7 +526,7 @@ class ConditionalProductBuilderTest {
             for (int i = 0; i < 100; i++) values.add(i);
             dims.add(values);
         }
-        var builder = cartesianProduct.conditionalProductOf(dims.get(0));
+        var builder = Product.conditional(dims.get(0));
         for (int d = 1; d < dims.size(); d++) builder = builder.and(dims.get(d));
         builder = builder.when(dims.get(0)).is(0).then(dims.get(1)).is(0);
 
@@ -566,7 +567,7 @@ class ConditionalProductBuilderTest {
     @Test
     void choiceWithFewValidTuplesStillUsesRanks() {
         // exactly one valid tuple out of 3*3*2: far below a quarter, so the rank-based path is used
-        var builder = cartesianProduct.conditionalProductOf(os).and(browser).and(network)
+        var builder = Product.conditional(os).and(browser).and(network)
                 .when(os).isNot("Windows").then(network).is("WiFi")
                 .when(os).isNot("Windows").then(browser).is("Chrome")
                 .when(network).is("WiFi").then(os).is("macOS")
