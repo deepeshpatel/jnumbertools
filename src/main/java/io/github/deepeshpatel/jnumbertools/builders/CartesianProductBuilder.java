@@ -30,7 +30,8 @@ import java.util.List;
  *
  * <h3>Simple Cartesian Product</h3>
  * <pre>
- * CartesianProduct cp = new CartesianProduct();
+ * import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
+ * import java.util.List;
  *
  * // Product of [A, B] × [1, 2] × [X, Y]
  * cp.simpleProductOf(List.of("A", "B"), List.of(1, 2), List.of("X", "Y"))
