@@ -95,12 +95,13 @@ class ProductTest {
     }
 
     @Test
-    void typedLambdaEntryPointsValidateArityAndNullDimensions() {
+    void typedLambdaEntryPointsValidateDimensionOrderAndArity() {
         List<Integer> first = List.of(0, 1);
         List<Integer> second = List.of(2, 3);
 
         var product = Product.conditional(first, second);
 
+        assertThrows(IllegalArgumentException.class, () -> product.withLambda(second, first));
         assertThrows(IllegalArgumentException.class, () -> product.withLambda(first));
         assertThrows(NullPointerException.class, () -> product.withLambda(first, null));
     }
