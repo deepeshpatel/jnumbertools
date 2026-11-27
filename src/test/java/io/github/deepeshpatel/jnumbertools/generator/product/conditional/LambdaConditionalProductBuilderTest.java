@@ -273,6 +273,16 @@ class LambdaConditionalProductBuilderTest {
     }
 
     @Test
+    void adaptiveStrategySupportsMultiTriggerLambdaRules() {
+        List<Integer> a = List.of(0, 1);
+        var product = Product.conditional(a, a, a).withLambda(a, a, a)
+                .when((x, y, z) -> x + y + z >= 1);
+
+        assertEquals(product.lexOrder(LexOrderStrategy.DP).stream().toList(),
+                product.lexOrder(LexOrderStrategy.ADAPTIVE, 100).stream().toList());
+    }
+
+    @Test
     void lambdaBuilderExposesLexicographicRanksChoiceAndSampling() {
         List<Integer> a = List.of(0, 1);
         List<Integer> b = List.of(0, 1);
