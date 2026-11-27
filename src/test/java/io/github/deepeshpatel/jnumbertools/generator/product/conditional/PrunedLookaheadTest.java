@@ -39,7 +39,7 @@ class PrunedLookaheadTest {
     }
 
     private static ConditionalProductBuilder base(List<List<Integer>> dims) {
-        ConditionalProductBuilder b = Product.conditional(dims.toArray(List[]::new));
+        ConditionalProductBuilder b = Product.conditional(dims.toArray(List<?>[]::new));
         for (int d = 1; d < dims.size(); d++) b = b.and(dims.get(d));
         return b;
     }
