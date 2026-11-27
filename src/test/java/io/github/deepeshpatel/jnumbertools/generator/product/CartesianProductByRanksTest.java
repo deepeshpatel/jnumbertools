@@ -1,5 +1,10 @@
 package io.github.deepeshpatel.jnumbertools.generator.product;
 
+import io.github.deepeshpatel.jnumbertools.base.Permutation;
+import io.github.deepeshpatel.jnumbertools.base.Combination;
+import io.github.deepeshpatel.jnumbertools.base.Derangement;
+import io.github.deepeshpatel.jnumbertools.base.Subset;
+
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
 
@@ -30,25 +35,25 @@ class CartesianProductByRanksTest {
 
     @Test
     void smallProductsEveryRank() {
-        check(dims(JNumberTools.combinations().unique(5, 2), JNumberTools.combinations().unique(4, 3)), true);
-        check(dims(JNumberTools.permutations().unique(3), JNumberTools.derangements().of(4),
-                JNumberTools.subsets().of(4).inRange(1, 3)), true);
-        check(dims(JNumberTools.permutations().unique(5)), true);
-        check(dims(JNumberTools.permutations().repetitive(2, 3), JNumberTools.permutations().nPk(4, 2),
-                JNumberTools.combinations().repetitive(4, 2)), true);
+        check(dims(Combination.unique(5, 2), Combination.unique(4, 3)), true);
+        check(dims(Permutation.unique(3), Derangement.of(4),
+                Subset.of(4).inRange(1, 3)), true);
+        check(dims(Permutation.unique(5)), true);
+        check(dims(Permutation.repetitive(2, 3), Permutation.nPk(4, 2),
+                Combination.repetitive(4, 2)), true);
     }
 
     @Test
     void productsAroundTheSixtyTwoBitLimit() {
-        check(dims(JNumberTools.permutations().unique(20), JNumberTools.combinations().unique(1, 1)), false); // 20! x 1
-        check(dims(JNumberTools.permutations().unique(20), JNumberTools.combinations().unique(2, 1)), false); // 20! x 2
-        check(dims(JNumberTools.permutations().unique(25), JNumberTools.permutations().unique(25),
-                JNumberTools.permutations().unique(25)), false);                                              // far beyond a long
+        check(dims(Permutation.unique(20), Combination.unique(1, 1)), false); // 20! x 1
+        check(dims(Permutation.unique(20), Combination.unique(2, 1)), false); // 20! x 2
+        check(dims(Permutation.unique(25), Permutation.unique(25),
+                Permutation.unique(25)), false);                                              // far beyond a long
     }
 
     @Test
     void secondIteratorStartsClean() {
-        List<Builder<Object>> builders = dims(JNumberTools.permutations().unique(4), JNumberTools.combinations().unique(5, 2));
+        List<Builder<Object>> builders = dims(Permutation.unique(4), Combination.unique(5, 2));
         List<BigInteger> ranks = List.of(BigInteger.valueOf(7), BigInteger.valueOf(200), BigInteger.ZERO, BigInteger.valueOf(239));
         CartesianProductByRanks<Object> product = new CartesianProductByRanks<>(builders, ranks);
         List<List<Object>> first = new ArrayList<>();
@@ -61,7 +66,7 @@ class CartesianProductByRanksTest {
 
     @Test
     void outOfRangeRankIsRejected() {
-        List<Builder<Object>> builders = dims(JNumberTools.permutations().unique(3), JNumberTools.combinations().unique(4, 2));
+        List<Builder<Object>> builders = dims(Permutation.unique(3), Combination.unique(4, 2));
         BigInteger total = BigInteger.valueOf(6 * 6);
         assertThrows(IllegalArgumentException.class, () -> new CartesianProductByRanks<>(builders, List.of(total)).iterator().next());
         assertThrows(IllegalArgumentException.class,
