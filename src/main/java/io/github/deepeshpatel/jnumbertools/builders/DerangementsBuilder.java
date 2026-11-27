@@ -24,7 +24,7 @@ import java.util.stream.IntStream;
  *
  * <h2>Usage</h2>
  * <pre>
- * Derangements der = new Derangements();
+ * import io.github.deepeshpatel.jnumbertools.entrypoint.Derangement;
  *
  * // All derangements of [0, 1, 2, 3] in lexicographical order
  * der.of(4)
