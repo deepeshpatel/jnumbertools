@@ -4,8 +4,44 @@
  */
 package io.github.deepeshpatel.jnumbertools.base;
 
-import io.github.deepeshpatel.jnumbertools.generator.product.constrained.ConstrainedProductBuilder;
-import io.github.deepeshpatel.jnumbertools.generator.product.simple.SimpleProductBuilder;
+import io.github.deepeshpatel.jnumbertools.numbersystem.Combinadic;
+import io.github.deepeshpatel.jnumbertools.numbersystem.Factoradic;
+import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
+
+/**
+ * Central entry point for ranking, unranking, and number-system operations.
+ *
+ * <p>Dedicated static entry points provide generators for each combinatorial
+ * family: {@link Permutation}, {@link Combination}, {@link Derangement},
+ * {@link Subset}, and {@link Product}.</p>
+ *
+ * <h2>Ranking and Unranking</h2>
+ * <pre>{@code
+ * BigInteger rank = JNumberTools.rankOf()
+ *     .permutation()
+ *     .unique(2, 0, 1);
+ *
+ * int[] permutation = JNumberTools.unrankOf()
+ *     .permutation()
+ *     .unique(BigInteger.valueOf(5), 3);
+ *
+ * BigInteger combinationRank = JNumberTools.rankOf()
+ *     .combination()
+ *     .unique(4, 1, 3);
+ * }</pre>
+ *
+ * @see Permutation
+ * @see Combination
+ * @see Derangement
+ * @see Subset
+ * @see Product
+ * @author Deepesh Patel
+ */
+ * Copyright (c) 2021-2026 Deepesh Patel
+ * SPDX-License-Identifier: Apache-2.0
+ */
+package io.github.deepeshpatel.jnumbertools.base;
+
 import io.github.deepeshpatel.jnumbertools.numbersystem.Combinadic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Factoradic;
 import io.github.deepeshpatel.jnumbertools.numbersystem.Permutadic;
@@ -116,65 +152,6 @@ public final class JNumberTools {
 
     private JNumberTools() {
         // Prevent instantiation
-    }
-
-    /**
-     * Creates a Permutations instance for generating permutations.
-     * <p>
-     * Supports unique permutations (n!), k-permutations (ⁿPₖ), repetitive permutations (nʳ),
-     * and multiset permutations, in lexicographical, single-swap, or combination order,
-     * or by rank.
-     * </p>
-     *
-     * @return a Permutations instance for permutation generation
-     * @see Permutations
-     */
-    public static Permutations permutations() {
-        return new Permutations();
-    }
-
-    /**
-     * Creates a Derangements instance for generating derangements
-     * (fixed-point-free permutations).
-     * <p>
-     * Supports lexicographical enumeration, every-mᵗʰ traversal, sampling and
-     * ranked access for the {@code D_n = !n} derangements of {@code n} distinct
-     * elements.
-     * </p>
-     *
-     * @return a Derangements instance for derangement generation
-     * @see Derangements
-     */
-    public static Derangements derangements() {
-        return new Derangements();
-    }
-
-    /**
-     * Creates a Combinations instance for generating combinations.
-     * <p>
-     * Supports unique combinations (ⁿCᵣ), repetitive combinations (ⁿ⁺ʳ⁻¹Cᵣ), and multiset
-     * combinations, in lexicographical order or by rank.
-     * </p>
-     *
-     * @return a Combinations instance for combination generation
-     * @see Combinations
-     */
-    public static Combinations combinations() {
-        return new Combinations();
-    }
-
-    /**
-     * Creates a Subsets instance for generating subsets.
-     * <p>
-     * Generates all 2ⁿ subsets of a set in lexicographical order, with support for
-     * size ranges, random sampling, and rank-based access.
-     * </p>
-     *
-     * @return a Subsets instance for subset generation
-     * @see Subsets
-     */
-    public static Subsets subsets() {
-        return new Subsets();
     }
 
     /**
