@@ -232,7 +232,7 @@ class LambdaConditionalProductBuilderTest {
     void aFullTupleRuleOverTooManyCombinationsPointsToTheScopedForm() {
         List<Integer> a=range(101), b=range(101), c=range(101);     // 101^3 = 1,030,301 probes > 1,000,000
 
-        var typed=cartesianProduct.withLambda(a,b,c);
+        var typed=Product.conditional(a,b,c).withLambda(a,b,c);
         var e=assertThrows(IllegalArgumentException.class,()->typed.when((x,y,z)->true));
 
         assertTrue(e.getMessage().contains("1030301"),e.getMessage());
@@ -270,7 +270,7 @@ class LambdaConditionalProductBuilderTest {
         List<Integer> b = List.of(0, 1);
         List<Integer> c = List.of(0, 1);
 
-        var product = cartesianProduct.withLambda(a, b, c)
+        var product = Product.conditional(a, b, c).withLambda(a, b, c)
                 .when(a, b).matches((x, y) -> x != 0 || y != 0);
 
         List<List<Object>> expected = List.of(
