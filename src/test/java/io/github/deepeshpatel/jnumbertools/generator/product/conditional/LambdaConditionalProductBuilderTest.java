@@ -244,7 +244,7 @@ class LambdaConditionalProductBuilderTest {
     void aScopedRuleOverTheSameDimensionsFitsWhenItNamesFewerOfThem() {
         List<Integer> a=range(101), b=range(101), c=range(101);
 
-        var product=cartesianProduct.withLambda(a,b,c).when(a,b).matches((x,y)->x<=y);
+        var product=Product.conditional(a,b,c).withLambda(a,b,c).when(a,b).matches((x,y)->x<=y);
         assertEquals(BigInteger.valueOf(5151L*101),product.count());      // 5151 pairs with x <= y, times 101 values of c
     }
 
