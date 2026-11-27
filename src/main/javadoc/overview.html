@@ -38,24 +38,24 @@
 
 <h2>Usage examples</h2>
 <h3>All unique permutations</h3>
-<pre><code>JNumberTools.permutations()
+<pre><code>Permutation
     .unique("A", "B", "C")
     .lexOrder()
     .forEach(System.out::println);</code></pre>
 
 <h3>Every fifth unique permutation, starting at zero-based rank two</h3>
-<pre><code>JNumberTools.permutations()
+<pre><code>Permutation
     .unique("A", "B", "C", "D")
     .lexOrderMth(5, 2)
     .forEach(System.out::println);</code></pre>
 
 <h3>Combinations and subsets</h3>
-<pre><code>JNumberTools.combinations()
+<pre><code>Combination
     .unique(2, "A", "B", "C", "D")
     .lexOrder()
     .forEach(System.out::println);
 
-JNumberTools.subsets()
+Subset
     .of("A", "B", "C")
     .inRange(1, 2)
     .lexOrder()
