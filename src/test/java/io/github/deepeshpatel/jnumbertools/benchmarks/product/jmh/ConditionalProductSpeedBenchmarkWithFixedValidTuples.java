@@ -1,5 +1,5 @@
 
-package io.github.deepeshpatel.jnumbertools.benchmarks.jmh;
+package io.github.deepeshpatel.jnumbertools.benchmarks.product.jmh;
 
 import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 import org.openjdk.jmh.annotations.Benchmark;

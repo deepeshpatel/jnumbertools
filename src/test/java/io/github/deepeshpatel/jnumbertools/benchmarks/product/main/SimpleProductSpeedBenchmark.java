@@ -1,5 +1,5 @@
 
-package io.github.deepeshpatel.jnumbertools.benchmarks.main;
+package io.github.deepeshpatel.jnumbertools.benchmarks.product.main;
 
 import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 
