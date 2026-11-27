@@ -41,7 +41,7 @@ class ConstraintPlanTierTest {
     private record Rule(int trigger, List<Integer> triggerValues, int target, List<Integer> allowed) {}
 
     private static ConditionalProductBuilder build(List<List<Integer>> dims, List<Rule> rules) {
-        var builder = Product.conditional(dims.toArray(List[]::new));
+        var builder = Product.conditional(dims.toArray(List<?>[]::new));
         for (int d = 1; d < dims.size(); d++) builder = builder.and(dims.get(d));
         for (Rule r : rules) {
             builder = builder.when(dims.get(r.trigger())).isOneOf(r.triggerValues())
