@@ -13,11 +13,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class LambdaConditionalProductBuilderTest {
     @Test
+    void arrayBasedLambdaEntryRejectsSingleDimensionImmediately() {
+        List<Integer> values = List.of(1, 2, 3);
+        var conditional = Product.conditional(values);
+        var error = assertThrows(IllegalStateException.class, conditional::withLambda);
+        assertTrue(error.getMessage().contains("withLambda(dimension)"));
+    }
+
+    @Test
     void oneDimensionPredicateFiltersAndRepeatedWhenUsesAnd() {
         List<Integer> values=List.of(1,2,3,4,5,6);
         var product=Product.conditional(values).withLambda(values).when(v->v%2==0).when(v->v<5);
         assertEquals(BigInteger.valueOf(2),product.count());
-        assertEquals(List.of(List.of(2),List.of(4)),product.generate().stream().toList());
+        assertEquals(List.of(List.of(2),List.of(4)),product.anyOrder().stream().toList());
     }
 
     @Test
@@ -27,7 +35,7 @@ class LambdaConditionalProductBuilderTest {
         long expected=0;
         for(int c:cores) for(int b:budgets) if(c<=2||b>=32) expected++;
         assertEquals(BigInteger.valueOf(expected),product.count());
-        assertEquals(expected,product.generate().stream().count());
+        assertEquals(expected,product.anyOrder().stream().count());
     }
 
     @Test
@@ -39,7 +47,7 @@ class LambdaConditionalProductBuilderTest {
         for(int c:cores) for(int m:memory) for(int b:budget)
             if((c<=2&&m<=4)||(c>=8&&b>=16)) expected++;
         assertEquals(BigInteger.valueOf(expected),product.count());
-        assertEquals(expected,product.generate().stream().count());
+        assertEquals(expected,product.anyOrder().stream().count());
     }
 
     @Test
@@ -49,7 +57,7 @@ class LambdaConditionalProductBuilderTest {
         long expected=0;
         for(int x:a) for(int y:b) if(x+y>=4&&x<=y) expected++;
         assertEquals(BigInteger.valueOf(expected),product.count());
-        assertEquals(expected,product.generate().stream().count());
+        assertEquals(expected,product.anyOrder().stream().count());
     }
 
     @Test
@@ -58,7 +66,7 @@ class LambdaConditionalProductBuilderTest {
         var product=Product.conditional(d,d,d,d,d).withLambda(d,d,d,d,d)
                 .when((a,b,c,d4,e)->a+b+c+d4+e>=1);
         assertEquals(BigInteger.valueOf(31),product.count());
-        assertEquals(31,product.generate().stream().count());
+        assertEquals(31,product.anyOrder().stream().count());
     }
 
     @Test
@@ -67,7 +75,7 @@ class LambdaConditionalProductBuilderTest {
         var product=Product.conditional(d,d,d,d,d,d).withLambda()
                 .when(values->values[0].equals(values[5]));
         assertEquals(BigInteger.valueOf(32),product.count());
-        assertEquals(32,product.generate().stream().count());
+        assertEquals(32,product.anyOrder().stream().count());
     }
 
     @Test
@@ -76,7 +84,7 @@ class LambdaConditionalProductBuilderTest {
         var product=Product.conditional(d,d,d,d,d,d,d,d,d,d,d).withLambda()
                 .when(values->values[0].equals(values[10]));
         assertEquals(BigInteger.valueOf(1024),product.count());
-        assertEquals(1024,product.generate().stream().count());
+        assertEquals(1024,product.anyOrder().stream().count());
     }
 
     @Test
@@ -84,7 +92,7 @@ class LambdaConditionalProductBuilderTest {
         List<Integer> a=List.of(1,2), b=List.of(1,2), c=List.of(1,2);
         var product=Product.conditional(a,b,c).withLambda(a,b,c).when((x,y,z)->x+y+z<=4);
         assertEquals(BigInteger.valueOf(4),product.count());
-        assertEquals(4,product.generate().stream().count());
+        assertEquals(4,product.anyOrder().stream().count());
     }
 
     @Test
@@ -109,7 +117,7 @@ class LambdaConditionalProductBuilderTest {
                 .when(a,b).matches((x,y)->x<=y);
 
         assertEquals(BigInteger.valueOf(55_000),product.count());
-        assertEquals(55_000,product.generate().stream().count());
+        assertEquals(55_000,product.anyOrder().stream().count());
     }
 
     @Test
@@ -125,7 +133,7 @@ class LambdaConditionalProductBuilderTest {
         long scopedCount=0;
         for(int x:a) for(int y:b) for(int z:c) if(x+y<=z) scopedCount++;
         assertEquals(BigInteger.valueOf(scopedCount*10),product.count());
-        assertEquals(scopedCount*10,product.generate().stream().count());
+        assertEquals(scopedCount*10,product.anyOrder().stream().count());
     }
 
     @Test
@@ -160,8 +168,8 @@ class LambdaConditionalProductBuilderTest {
         for(int v:a) for(int w:b) for(int x:c) for(int y:d) for(int z:e)
             if(v<=w && v+z>=2 && (x!=y||y!=z)) expected++;
         assertEquals(BigInteger.valueOf(expected),product.count());
-        assertEquals(expected,product.generate().stream().count());
-        assertEquals(expected,product.generate().stream().parallel().count());
+        assertEquals(expected,product.anyOrder().stream().count());
+        assertEquals(expected,product.anyOrder().stream().parallel().count());
     }
 
     @Test
@@ -189,8 +197,8 @@ class LambdaConditionalProductBuilderTest {
                 .when((x,y,z)->x+y!=z).when(a,c).matches((x,z)->x<z);
 
         assertEquals(scopedFirst.count(),typedFirst.count());
-        assertEquals(new java.util.HashSet<>(scopedFirst.generate().stream().toList()),
-                new java.util.HashSet<>(typedFirst.generate().stream().toList()));
+        assertEquals(new java.util.HashSet<>(scopedFirst.anyOrder().stream().toList()),
+                new java.util.HashSet<>(typedFirst.anyOrder().stream().toList()));
     }
 
     @Test
@@ -259,8 +267,8 @@ class LambdaConditionalProductBuilderTest {
 
         long expected=0;
         for(int x:a) for(int y:b) for(int z:c) for(int w:d) if(x!=y&&(x+y+z+w)%3!=0) expected++;
-        assertEquals(expected,product.generate().stream().count());
-        assertEquals(expected,product.generate().stream().parallel().count());
+        assertEquals(expected,product.anyOrder().stream().count());
+        assertEquals(expected,product.anyOrder().stream().parallel().count());
         assertEquals(BigInteger.valueOf(expected),product.count());
     }
 
