@@ -93,7 +93,7 @@ class ConstrainedProductBuilderTest {
 
     @Test
     void lexOrder() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(2, setA)
+        var builder = product.ofDistinct(2, setA)
                 .andMultiSelect(2, setB);
 
         // Test returns generator (not null)
@@ -107,7 +107,7 @@ class ConstrainedProductBuilderTest {
 
     @Test
     void lexOrderMth() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(2, setA)
+        var builder = product.ofDistinct(2, setA)
                 .andMultiSelect(2, setB);
 
         // Test returns generator for valid params
@@ -124,7 +124,7 @@ class ConstrainedProductBuilderTest {
 
     @Test
     void byRanks() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(2, setA)
+        var builder = product.ofDistinct(2, setA)
                 .andMultiSelect(2, setB);
 
         // Test returns generator for valid ranks
@@ -142,35 +142,35 @@ class ConstrainedProductBuilderTest {
 
     @Test
     void count() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(2, setA)
+        var builder = product.ofDistinct(2, setA)
                 .andMultiSelect(2, setB);
 
         BigInteger expected = calculator.nCr(3,2).multiply(calculator.nCrRepetitive(4,2)); // 3 × 10 = 30
         assertEquals(expected, builder.count());
 
         // Test with empty dimension (quantity=0) - count unchanged
-        var builderWithEmpty = cartesianProduct.constrainedProductOfDistinct(2, setA)
+        var builderWithEmpty = product.ofDistinct(2, setA)
                 .andDistinct(0, Collections.emptyList());
         assertEquals(calculator.nCr(3,2), builderWithEmpty.count()); // Only first dimension counts (3)
 
         // Test empty first dimension with quantity > 0
-        var emptyFirst = cartesianProduct.constrainedProductOfDistinct(0, Collections.emptyList())
+        var emptyFirst = product.ofDistinct(0, Collections.emptyList())
                 .andMultiSelect(2, setB);
         assertEquals(calculator.nCrRepetitive(4,2), emptyFirst.count()); // 1 × 10 = 10
 
         // Test empty input (Φ) - should have count 1
-        var emptyBuilder = cartesianProduct.constrainedProductOfDistinct(0, Collections.emptyList());
+        var emptyBuilder = product.ofDistinct(0, Collections.emptyList());
         assertEquals(BigInteger.ONE, emptyBuilder.count());
 
         // Test product with empty dimension (quantity>0) - should be zero
-        var productWithEmpty = cartesianProduct.constrainedProductOfDistinct(2, setA)
+        var productWithEmpty = product.ofDistinct(2, setA)
                 .andDistinct(2, Collections.emptyList());
         assertEquals(BigInteger.ZERO, productWithEmpty.count());
     }
 
     @Test
     void    choice() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(2, setA)
+        var builder = product.ofDistinct(2, setA)
                 .andMultiSelect(2, setB);
 
         // Test returns generator for valid sample size
@@ -185,7 +185,7 @@ class ConstrainedProductBuilderTest {
 
     @Test
     void sample() {
-        var builder = cartesianProduct.constrainedProductOfDistinct(2, setA)
+        var builder = product.ofDistinct(2, setA)
                 .andMultiSelect(2, setB);
 
         BigInteger total = builder.count();
