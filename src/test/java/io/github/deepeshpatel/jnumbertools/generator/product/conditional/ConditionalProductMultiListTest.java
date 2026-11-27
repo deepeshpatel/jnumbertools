@@ -4,11 +4,12 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ConditionalProductMultiListTest {
@@ -19,9 +20,9 @@ class ConditionalProductMultiListTest {
         List<String> b = List.of("b0", "b1");
         List<String> c = List.of("c0", "c1");
 
-        var overloaded = cartesianProduct.conditionalProductOf(a, b, c)
+        var overloaded = Product.conditional(a, b, c)
                 .when(a).is("a1").then(c).is("c1");
-        var chained = cartesianProduct.conditionalProductOf(a)
+        var chained = Product.conditional(a)
                 .and(b).and(c)
                 .when(a).is("a1").then(c).is("c1");
 
