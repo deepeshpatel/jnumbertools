@@ -34,18 +34,18 @@ import java.util.List;
  * import java.util.List;
  *
  * // Product of [A, B] × [1, 2] × [X, Y]
- * cp.simpleProductOf(List.of("A", "B"), List.of(1, 2), List.of("X", "Y"))
+ * Product.simple(List.of("A", "B"), List.of(1, 2), List.of("X", "Y"))
  *   .lexOrder()
  *   .forEach(System.out::println);
  * // Output: [A,1,X], [A,1,Y], [A,2,X], [A,2,Y], [B,1,X], [B,1,Y], [B,2,X], [B,2,Y]
  *
  * // Every 2nd product starting from rank 1
- * cp.simpleProductOf(List.of(0, 1, 2), List.of(0, 1, 2))
+ * Product.simple(List.of(0, 1, 2), List.of(0, 1, 2))
  *   .lexOrderMth(2, 1)
  *   .forEach(System.out::println);
  *
  * // Random sample of 3 products without replacement
- * cp.simpleProductOf(List.of("A", "B", "C"), List.of("X", "Y"))
+ * Product.simple(List.of("A", "B", "C"), List.of("X", "Y"))
  *   .sample(3)
  *   .forEach(System.out::println);
  * </pre>
@@ -58,7 +58,7 @@ import java.util.List;
  * // - 2 sauces (with repetition allowed) from [Tomato, White, Green]
  * // - 1 to 5 toppings from [tomato, capsicum, onion, paneer, corn]
  *
- * cp.constrainedProductOfDistinct(1, "Small", "Medium", "Large")
+ * Product.constrained().ofDistinct(1, "Small", "Medium", "Large")
  *   .andDistinct(2, "Ricotta", "Mozzarella", "Cheddar")
  *   .andMultiSelect(2, "Tomato", "White", "Green")
  *   .andInRange(1, 5, "tomato", "capsicum", "onion", "paneer", "corn")
@@ -66,7 +66,7 @@ import java.util.List;
  *   .forEach(System.out::println);
  *
  * // Get specific rank in constrained product space
- * cp.constrainedProductOfDistinct(1, "A", "B")
+ * Product.constrained().ofDistinct(1, "A", "B")
  *   .andDistinct(1, "X", "Y", "Z")
  *   .byRanks(List.of(BigInteger.valueOf(3)))
  *   .forEach(System.out::println);
