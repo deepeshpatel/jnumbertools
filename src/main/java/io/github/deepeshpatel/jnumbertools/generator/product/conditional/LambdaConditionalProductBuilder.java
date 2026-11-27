@@ -4,7 +4,6 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
-import io.github.deepeshpatel.jnumbertools.builders.CartesianProductBuilder;
 import io.github.deepeshpatel.jnumbertools.generator.base.StreamableIterable;
 
 import java.math.BigInteger;
@@ -17,7 +16,7 @@ import java.util.function.Predicate;
 
 /**
  * Namespace for the strongly typed lambda predicates and builders used by
- * {@link CartesianProductBuilder#withLambda(List)}.
+ * {@link ConditionalProductBuilder#withLambda()}.
  *
  * <p>One dimension uses {@link Predicate}; two use {@link BiPredicate}; three through five use
  * {@link Predicate3} through {@link Predicate5}. Products with more than five dimensions use
@@ -122,7 +121,7 @@ public final class LambdaConditionalProductBuilder {
         }
 
         /** Returns the valid tuples, with no guarantee about their order. */
-        public StreamableIterable<Object> generate() { return delegate.anyOrder(); }
+        public StreamableIterable<Object> anyOrder() { return delegate.anyOrder(); }
 
         /** Returns the exact number of valid tuples. */
         public BigInteger count() { return delegate.count(); }
