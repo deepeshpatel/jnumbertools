@@ -7,16 +7,15 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayName("CartesianProduct Factory Validation")
+@DisplayName("Product Factory Validation")
 class CartesianProductTest {
 
     @Test
     @DisplayName("simpleProductOf: null input throws NPE, empty input allowed")
     void simpleProductOf() {
-        var exp = assertThrows(NullPointerException.class, ()-> cartesianProduct.simpleProductOf((List<?>)null));
+        var exp = assertThrows(NullPointerException.class, ()-> Product.simple((List<?>)null));
         assertTrue(exp.getMessage().startsWith(errMsgNullInput));
 
         // Empty list is allowed and will be treated as empty-set(∅)
@@ -72,7 +71,7 @@ class CartesianProductTest {
         @DisplayName("null input throws NPE")
         void nullInput() {
             var exp1 = assertThrows(NullPointerException.class, ()->
-                    cartesianProduct.constrainedProductOfDistinct(1, (List<?>)null));
+                    Product.constrained().ofDistinct(1, (List<?>)null));
             assertTrue(exp1.getMessage().startsWith(errMsgNullInput));
         }
 
@@ -100,7 +99,7 @@ class CartesianProductTest {
         @DisplayName("null input throws NPE")
         void nullInput() {
             var exp = assertThrows(NullPointerException.class, ()->
-                    cartesianProduct.constrainedProductOfMultiSelect(1, (List<?>)null));
+                    Product.constrained().ofMultiSelect(1, (List<?>)null));
             assertTrue(exp.getMessage().startsWith(errMsgNullInput));
         }
 
@@ -128,7 +127,7 @@ class CartesianProductTest {
         @DisplayName("null input throws NPE")
         void nullInput() {
             var exp1 = assertThrows(NullPointerException.class, ()->
-                    cartesianProduct.constrainedProductOfInRange(1, 2, (List<?>)null));
+                    Product.constrained().ofInRange(1, 2, (List<?>)null));
             assertTrue(exp1.getMessage().startsWith(errMsgNullInput));
         }
 
