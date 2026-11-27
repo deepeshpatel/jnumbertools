@@ -108,12 +108,12 @@ class DerangementsTest {
     }
 
     @Nested
-    @DisplayName("Integration with JNumberTools facade")
+    @DisplayName("Integration with Derangement entry point")
     class IntegrationTests {
 
         @Test
         @DisplayName("Derangement is wired and functional")
-        void shouldBeWiredIntoJNumberToolsFacade() {
+        void shouldBeWiredIntoDerangementEntryPoint() {
             assertNotNull(Derangement.of(4));
             assertEquals(BigInteger.valueOf(9),
                     Derangement.of(4).count());
