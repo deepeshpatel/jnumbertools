@@ -2,7 +2,6 @@
 package io.github.deepeshpatel.jnumbertools.benchmarks.main;
 
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
-import io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,9 +15,8 @@ import java.util.stream.Stream;
  * Quick screening comparison of conditional Cartesian product implementations:
  *
  * 1. Pairwise when-then conditional product
- * 2. Compound conditional product built from Condition.is(...)
- * 3. Lambda-scoped conditional product
- * 4. Incrementally pruned Java Stream baseline
+ * 2. Lambda-scoped conditional product
+ * 3. Incrementally pruned Java Stream baseline
  *
  * <p>Each benchmark method builds its product once per size. Only generation
  * and traversal of the generated tuples are timed.</p>
@@ -134,10 +132,6 @@ public class ConditionalProductSpeedBenchmarkMain {
                 new BenchmarkMethod(
                         "Pairwise when-then",
                         ConditionalProductSpeedBenchmarkMain::whenThen),
-
-                new BenchmarkMethod(
-                        "Compound",
-                        ConditionalProductSpeedBenchmarkMain::buildCompound),
 
                 new BenchmarkMethod(
                         "engineLambda",
@@ -394,43 +388,7 @@ public class ConditionalProductSpeedBenchmarkMain {
     }
 
     // -------------------------------------------------------------------------
-    // 2. Compound conditional product
-    // -------------------------------------------------------------------------
-
-    private static Supplier<Result> buildCompound(Dimensions d) {
-
-        var builder = JNumberTools.cartesianProduct()
-                .compoundProductOf(
-                        d.os, d.browser, d.network, d.database, d.region)
-
-                // Linux rules
-                .when(Condition.condition(d.os).is(LINUX))
-                .then(d.browser).isOneOf(LINUX_BROWSERS)
-
-                .when(Condition.condition(d.os).is(LINUX))
-                .then(d.network).isOneOf(LINUX_NETWORKS)
-
-                .when(Condition.condition(d.os).is(LINUX))
-                .then(d.database).isOneOf(LINUX_DATABASES)
-
-                .when(Condition.condition(d.os).is(LINUX))
-                .then(d.region).isOneOf(LINUX_REGIONS)
-
-                // Windows rules
-                .when(Condition.condition(d.os).is(WINDOWS))
-                .then(d.browser).isOneOf(WINDOWS_BROWSERS)
-
-                .when(Condition.condition(d.os).is(WINDOWS))
-                .then(d.database).isOneOf(WINDOWS_DATABASES)
-
-                .when(Condition.condition(d.os).is(WINDOWS))
-                .then(d.region).isOneOf(WINDOWS_REGIONS);
-
-        return () -> checksum(builder.generate().stream());
-    }
-
-    // -------------------------------------------------------------------------
-    // 3. Lambda Engine
+    // 2. Lambda Engine
     // -------------------------------------------------------------------------
 
     private static Supplier<Result> buildEngineLambda(Dimensions d) {
@@ -724,17 +682,3 @@ public class ConditionalProductSpeedBenchmarkMain {
 }
 
 
-/*
-Size     Matches      Pairwise when-then ms Compound ms       engineLambda ms   Pruned Stream ms
----------------------------------------------------------------------------------------------
-100      616          0.163             0.163             0.161             0.594
-200      1216         0.061             0.051             0.068             0.799
-300      1816         0.058             0.056             0.057             1.626
-400      2416         0.079             0.078             0.079             2.708
-500      3016         0.105             0.094             0.094             4.343
-1000     6016         0.214             0.208             0.203             15.071
-2000     12016        0.359             0.360             0.376             57.271
-3000     18016        0.571             0.531             0.524             126.792
-4000     24016        0.710             0.715             0.723             221.740
-5000     30016        0.878             0.865             0.865             349.215
- */
