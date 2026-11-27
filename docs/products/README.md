@@ -24,11 +24,9 @@ JNumberTools provides the following generators for Cartesian products. All m<sup
 
 3. [Compiled Product: pairwise conditional rules](#3-compiled-product-pairwise-conditional-rules)
 
-4. [Compound Product: nested Boolean rules](#4-compound-product-nested-boolean-rules)
+4. [Lambda Engine: predicate-to-constraint compiler](#4-lambda-engine-predicate-to-constraint-compiler)
 
-5. [Lambda Engine: predicate-to-constraint compiler](#5-lambda-engine-predicate-to-constraint-compiler)
-
-6. [Products of ranks, random choice and random sample](#6-products-of-ranks-random-choice-and-random-sample)
+5. [Products of ranks, random choice and random sample](#5-products-of-ranks-random-choice-and-random-sample)
 
 ---
 
@@ -179,7 +177,7 @@ The lexicographic strategy affects `lexOrder()` only. It does not change the sem
 
 **Reading a rule.** `when(A).is(x).then(B).isOneOf(y, z)` means: whenever the value chosen from `A` is `x`,
 the value chosen from `B` must be `y` or `z`. It says nothing about tuples where `A` is not `x`. All rules must
-hold together. The condition side and the `then` side support equality and membership methods (`is`, `isNot`,
+hold together. The trigger side and the `then` side support equality and membership methods (`is`, `isNot`,
 `isOneOf`, `isNoneOf` and `isNotIn`), plus natural-order comparisons:
 `isGreaterThan`, `isGreaterThanOrEqual`, `isLessThan` and `isLessThanOrEqual`.
 The comparison methods accept values implementing `Comparable`; values are compared using
@@ -188,14 +186,14 @@ The multi-value methods accept either varargs or a collection. `isNotIn(...)` is
 of `isNoneOf(...)` and is retained as a familiar alternative name. Several rules may share the same trigger.
 
 **Dimensions are identified by list instance.** `when(...)` and `then(...)` take the same `List` object that was
-passed to `conditionalProductOf` or to `compoundProductOf(...)`. Using one list instance for two dimensions is ambiguous and is rejected.
+passed to `conditionalProductOf(...)` or to `withLambda(...)`. Using one list instance for two dimensions is ambiguous and is rejected.
 A rule value that is not in the dimension, or an empty list of values, is rejected, and so is a rule between a
 dimension and itself.
 
 **What it cannot do.**
 
 - Each pairwise rule relates two dimensions. A trigger involving three or more dimensions, or custom
-  predicates on individual dimensions, belongs in the compound conditional API below. Aggregate conditions
+  joint predicates over multiple dimensions, belongs in the Lambda API below. Aggregate conditions
   over a complete tuple (such as a sum across dimensions) are not supported by this API.
 - Rules that link dimensions in a loop are solved together as one block, so such a block is limited to 1,000,000
   value combinations, and any two dimensions to 50,000,000 value pairs.
@@ -203,80 +201,17 @@ dimension and itself.
 - When almost every tuple is valid, a plain filter over a simple product is about as fast. The advantage grows as
   the rules remove more of the space.
 
-### 4. Compound Product: Nested Boolean Rules
+### 4. Lambda Engine: Predicate-to-Constraint Compiler
 
-For rules whose trigger depends on multiple dimensions or requires nested Boolean
-grouping, use the separate `compoundProductOf(...)` entry point with a composed
-`Condition`. Its concrete `CompoundConditionalProductBuilder` exposes lazy
-generation, exact counting and emptiness checks. Use this declarative form when the rule can be expressed clearly as nested `AND`/`OR` conditions.
-
-```java
-var os = List.of("Windows", "macOS", "Linux");
-var browser = List.of("Chrome", "Safari", "Firefox");
-var database = List.of("PostgreSQL", "Oracle");
-
-import static io.github.deepeshpatel.jnumbertools.generator.product.conditional.Condition.condition;
-
-var trigger = condition(browser).is("Safari").and(condition(os).is("Windows"))
-        .or(condition(browser).is("Chrome").and(condition(os).is("Linux")));
-
-var products = JNumberTools.cartesianProduct()
-        .compoundProductOf(os, browser, database)
-        .when(trigger)
-        .then(database).isNot("PostgreSQL");
-
-products.count();                     // exact count, without generating tuples
-products.isEmpty();                   // whether any valid tuple exists
-products.generate().stream().forEach(System.out::println);
-```
-
-The trigger above means
-`(browser = Safari AND os = Windows) OR (browser = Chrome AND os = Linux)`.
-Conditions can be nested to express either grouping order, for example
-`A AND (B OR C)` or `(A OR B) AND C`. The consequence applies when the
-composed trigger matches. Multiple completed rules are combined with AND.
-
-Atomic conditions can also use `matches(Predicate<? super T>)` for custom
-logic on one dimension. This predicate receives one value from that dimension;
-it is not a joint predicate over multiple dimensions. The dimension is explicit,
-so the compiler evaluates the predicate against that dimension's values and
-compiles the matching positions before tuple generation:
-
-```java
-var trigger = condition(browser).matches(value -> value.startsWith("Ch"))
-        .and(condition(memory).matches(value -> value >= 16));
-```
-
-The predicate is evaluated when the condition is attached through `.when(trigger)`,
-once for each position in the builder's dimension snapshot, not during tuple
-generation. Predicates should be deterministic and side-effect-free. The generic
-factory infers the predicate's value type from the dimension list.
-
-`generate()` returns a lazy, re-iterable generator. It produces each valid tuple once,
-but makes no encounter-order guarantee. Lexicographic traversal, rank-based operations,
-random choice and sampling are deliberately not exposed by this builder. Use
-`conditionalProductOf(...)` for pairwise rules and its lexicographic/rank-based APIs.
-
-Compound trigger scopes are compiled as bounded joint-assignment nodes. The dimensions in
-a rule's scope are enumerated together, so the product of their sizes is subject to the
-1,000,000 combination limit (`MAX_LOOP_COMBINATIONS`). If two of those dimensions are also
-linked by a chain of pairwise rules, the dimensions of that chain are enumerated as a
-separate node, joined to the scope's node by the rules between them: the chain is not merged
-into the scope. Each node is subject to the same combination limit, and the pair of nodes to
-the 50,000,000 value-pair limit (`MAX_PAIR_CELLS`). When a chain passes through the scopes
-of several compound rules, the dimensions on that cycle are enumerated together.
-
-### 5. Lambda Engine: Predicate-to-Constraint Compiler
-
-Use the Lambda Engine when the rules are too complex to express clearly with the pairwise
-Compiled Product or the declarative nested conditions of the Compound Product. It provides
+Use the Lambda Engine when a rule involves joint logic that is not naturally expressed
+as a set of pairwise rules in the Compiled Product. It provides
 the flexibility of writing rules in a lambda style while retaining readable code and the
 existing constraint engine's pruning and optimized execution path.
 
 The key design point is that this is **not a predicate filter applied to every generated tuple**.
 Each lambda rule is compiled when the rule is added. The builder enumerates the combinations
 of values in the rule's declared scope, evaluates the predicate, and converts the result into
-the same internal constraint representation used by the Compound Product. Subsequent
+the internal conditional-product constraint representation. Subsequent
 generation, counting and emptiness checks use those compiled constraints; they do not invoke
 the predicate again.
 
@@ -338,15 +273,13 @@ with AND.
   Lexicographical traversal, rank-based access, choice and sampling are not exposed.
 
 **When to choose it.** Prefer the pairwise Compiled Product for straightforward two-dimension
-rules. Prefer the Compound Product when a rule is naturally expressed as nested Boolean
-conditions over dimensions. Use the Lambda Engine when the rule is genuinely joint logic
-(arithmetic, relational or application-specific computation) and the lambda makes that logic
-clearer than a condition tree.
+rules. Use the Lambda Engine when a rule is genuinely joint logic (arithmetic, relational or
+application-specific computation) and a Java predicate makes that logic clear.
 
 
-### 6. Products of ranks, random choice and random sample
+### 5. Products of ranks, random choice and random sample
 
-Simple, constrained and compiled products support `byRanks`, `choice` and `sample`. The Compound Product and Lambda Engine intentionally expose a smaller terminal API. `byRanks` returns the products at the given ranks, `choice` draws random products with replacement (duplicates possible), and `sample` draws random distinct products.
+Simple, constrained and compiled products support `byRanks`, `choice` and `sample`. The Lambda Engine intentionally exposes a smaller terminal API. `byRanks` returns the products at the given ranks, `choice` draws random products with replacement (duplicates possible), and `sample` draws random distinct products.
 
 ```java
 var colors = List.of("Red", "Green", "Blue");
