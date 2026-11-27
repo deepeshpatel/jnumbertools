@@ -126,7 +126,7 @@ public final class LambdaConditionalProductBuilder {
         /** Returns the exact number of valid tuples. */
         public BigInteger count() { return delegate.count(); }
 
-        /** Returns valid tuples in lexicographic order. Compound rules use the DP strategy. */
+        /** Returns valid tuples in lexicographic order. Multi-trigger Lambda rules use the DP strategy. */
         public StreamableIterable<Object> lexOrder() { return delegate.lexOrder(); }
 
         /** Returns valid tuples in lexicographic order using the requested strategy. */
