@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
  * <p>
  * The Factoradic numeral system expresses an integer as a sum of factorials weighted by digits.
  * In this system, the digit at position <em>i</em> has a weight of <em>i!</em>. This class provides methods
- * to convert a positive integer into its Factoradic representation and to retrieve the original decimal value.
+ * to convert a non-negative integer into its Factoradic representation and to retrieve the original decimal value.
  * </p>
  * <p>
  * The {@code factoradicValues} list stores the digits in order from the least significant digit (index 0)
@@ -45,10 +45,10 @@ public final class Factoradic implements Serializable {
     }
 
     /**
-     * Creates a {@link Factoradic} instance from a positive integer.
+     * Creates a {@link Factoradic} instance from a non-negative integer.
      *
      * @param positiveInt the non-negative integer to be converted to Factoradic representation.
-     * @return a {@link Factoradic} instance representing the given positive integer.
+     * @return a {@link Factoradic} instance representing the given non-negative integer.
      */
     public static Factoradic of(BigInteger positiveInt) {
         int[] intValues = FactoradicAlgorithms.intToFactoradic(positiveInt);
@@ -60,7 +60,7 @@ public final class Factoradic implements Serializable {
      * Creates a {@link Factoradic} instance from a non-negative long value.
      *
      * @param positiveInt the non-negative long value to be converted to Factoradic representation.
-     * @return a {@link Factoradic} instance representing the given positive long value.
+     * @return a {@link Factoradic} instance representing the given non-negative long value.
      */
     public static Factoradic of(long positiveInt) {
         return Factoradic.of(BigInteger.valueOf(positiveInt));

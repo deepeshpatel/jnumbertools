@@ -49,9 +49,9 @@ public final class FactoradicAlgorithms {
     }
 
     /**
-     * Converts a positive long value to its Factoradic representation.
+     * Converts a non-negative long value to its Factoradic representation.
      *
-     * @param k the positive long value to be converted.
+     * @param k the non-negative long value to be converted.
      * @return an array representing the Factoradic digits of the given number.
      */
     public static int[] intToFactoradic(long k) {
@@ -59,13 +59,13 @@ public final class FactoradicAlgorithms {
     }
 
     /**
-     * Converts a positive integer to its Factoradic representation.
+     * Converts a non-negative integer to its Factoradic representation.
      * <p>
      * The conversion is performed by repeatedly dividing the number by increasing integers
      * and recording the remainders as the Factoradic digits.
      * </p>
      *
-     * @param k the positive integer (as a {@link BigInteger}) to be converted.
+     * @param k the non-negative integer (as a {@link BigInteger}) to be converted.
      * @return an array representing the Factoradic digits of the given integer.
      */
     public static int[] intToFactoradic(BigInteger k) {
@@ -73,7 +73,7 @@ public final class FactoradicAlgorithms {
             return new int[]{0};
         }
 
-        // The maximum number of factoradic digits for a positive BigInteger
+        // The maximum number of factoradic digits for a non-negative BigInteger
         // is bounded by its bit length plus one.
         int[] digits = new int[k.bitLength() + 1];
         int size = 0;
@@ -92,13 +92,13 @@ public final class FactoradicAlgorithms {
     }
 
     /**
-     * Converts a positive integer to its Factoradic representation with a specified size.
+     * Converts a non-negative integer to its Factoradic representation with a specified size.
      * <p>
      * The resulting array will have a length of {@code sizeOfFactoradic}. If the number is too small,
      * the leading digits will be zeros.
      * </p>
      *
-     * @param k the positive integer (as a {@link BigInteger}) to be converted.
+     * @param k the non-negative integer (as a {@link BigInteger}) to be converted.
      * @param sizeOfFactoradic the desired size of the Factoradic representation array.
      * @return an array representing the Factoradic digits of the given integer.
      */

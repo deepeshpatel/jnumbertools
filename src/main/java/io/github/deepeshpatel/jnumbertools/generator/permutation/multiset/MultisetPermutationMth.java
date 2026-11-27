@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * Generates every mᵗʰ multiset permutation in lexicographical order, starting from a specified rank.
  * <p>
- * This class produces permutations of a multiset with specified multiplicities, output as frequency maps,
+ * This class produces permutations of a multiset with specified multiplicities, returning each permutation as a list of elements,
  * in lexicographical order, selecting ranks {@code start}, {@code start + increment},
  * {@code start + 2 * increment}, and so on, while the rank remains below the total count.
  * </p>

@@ -24,7 +24,9 @@ import java.util.Random;
  * <pre>
  * // Example with a concrete builder (e.g., UniquePermutationBuilder)
  * import io.github.deepeshpatel.jnumbertools.datastructure.Calculator;
+ * import io.github.deepeshpatel.jnumbertools.generator.base.Builder;
  * import io.github.deepeshpatel.jnumbertools.generator.permutation.unique.UniquePermutationBuilder;
+ * import java.math.BigInteger;
  * import java.util.List;
  * Builder&lt;String&gt; builder = new UniquePermutationBuilder&lt;&gt;(new Calculator(), List.of("A", "B", "C"));
  * builder.lexOrder().stream().forEach(System.out::println); // All permutations in lex order
