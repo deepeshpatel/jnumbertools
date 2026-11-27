@@ -434,6 +434,20 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         return ConditionalProductGenerators.anyOrder(model);
     }
 
+    /**
+     * Switches to the Lambda rule-definition style while retaining the dimensions and any
+     * pairwise rules already configured on this builder.
+     *
+     * <p>The returned array-based Lambda builder supports both whole-product predicates and
+     * scoped {@code when(...).matches(...)} predicates. The existing typed Lambda entry points
+     * remain available through {@code CartesianProduct.withLambda(...)}.</p>
+     *
+     * @return a Lambda builder over the current conditional product
+     */
+    public LambdaConditionalProductBuilder.ArrayBased withLambda() {
+        return new LambdaConditionalProductBuilder.ArrayBased(this);
+    }
+
     // Builder interface Methods
     /**
      * Returns valid tuples in lexicographic order. Pairwise-only products use {@link LexOrderStrategy#PRUNED_BITSET};
