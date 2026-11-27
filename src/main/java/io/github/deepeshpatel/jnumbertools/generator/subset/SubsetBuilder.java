@@ -62,8 +62,10 @@ import java.util.Random;
  *
  * <h3>Integer Range Input</h3>
  * <pre>
+ * import io.github.deepeshpatel.jnumbertools.entrypoint.Subset;
+ *
  * // Subsets of {0,1,2,3,4}
- * SubsetSelector&lt;Integer&gt; intBuilder = new SubsetSelector&lt;&gt;(5, calculator);
+ * var intBuilder = Subset.of(5);
  *
  * // All subsets of size 2 to 4
  * intBuilder.inRange(2, 4)

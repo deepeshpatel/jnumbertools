@@ -239,11 +239,11 @@ public final class PermutationsBuilder {
      * [A,A,B], [A,B,A], [B,A,A]
      * </p>
      *
-     * @param options a map of elements to their multiplicities (must not be null or empty)
+     * @param options a map of elements to their multiplicities; an empty map is allowed. Zero-frequency entries are ignored.
      * @param <T> the type of elements
      * @return a MultisetPermutationBuilder for the specified multiset
-     * @throws IllegalArgumentException if options is null, or contains non-positive frequencies
-     * (empty map is allowed, treated as ∅)
+     * @throws NullPointerException if options is null or contains a null key or frequency
+     * @throws IllegalArgumentException if any frequency is negative
      */
     public <T> MultisetPermutationBuilder<T> multiset(LinkedHashMap<T, Integer> options) {
         Util.validateMapOptions(options);

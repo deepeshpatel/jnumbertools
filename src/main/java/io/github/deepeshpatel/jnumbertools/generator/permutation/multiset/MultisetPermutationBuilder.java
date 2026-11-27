@@ -182,15 +182,16 @@ public final class MultisetPermutationBuilder<T> implements Builder<T> {
     /**
      * Creates an instance of {@link MultisetPermutationMth} to generate the mᵗʰ permutation directly.
      * <p>
-     * This method retrieves a specific permutation without generating all prior permutations, based on the
-     * lexicographical order of {@code options.keySet()}. The {@code m} parameter specifies the 0-based offset
-     * from the {@code start} index to select the desired permutation.
+     * This method generates permutations at ranks {@code start}, {@code start + m},
+     * {@code start + 2m}, and so on, without generating the intervening permutations.
+     * Ranks follow the lexicographical order of {@code options.keySet()}.
      * </p>
      *
-     * @param m the 0-based offset from the start index for the desired permutation
-     * @param start the starting index for permutation generation
-     * @return a new {@link MultisetPermutationMth} instance for generating the mᵗʰ permutation
-     * @throws IllegalArgumentException if {@code m} or {@code start} is negative
+     * @param m the positive rank increment (step size)
+     * @param start the zero-based rank of the first permutation to generate
+     * @return a new {@link MultisetPermutationMth} instance for generating every m-th permutation
+     * @throws IllegalArgumentException if {@code m} or {@code start} is null, {@code m} is not positive,
+     *         {@code start} is negative, or the total count is positive and {@code start} is not less than it
      */
     public MultisetPermutationMth<T> lexOrderMth(BigInteger m, BigInteger start) {
         Util.validateLexOrderMthParams(m,start, count());

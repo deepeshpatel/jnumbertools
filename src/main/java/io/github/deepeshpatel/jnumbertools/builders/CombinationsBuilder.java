@@ -251,11 +251,12 @@ public final class CombinationsBuilder {
      * {A=2}, {A=1,B=1}, {B=2}
      * </p>
      *
-     * @param options a map of elements to their multiplicities (must not be null, and all frequencies must be positive)
+     * @param options a map of elements to their multiplicities; an empty map is allowed. Zero-frequency entries are ignored.
      * @param r the size of each combination (r ≥ 0)
      * @param <T> the type of elements
      * @return a MultisetCombinationBuilder for the specified multiset
-     * @throws IllegalArgumentException if options is null, contains non-positive frequencies, or r &lt; 0
+     * @throws NullPointerException if options is null or contains a null key or frequency
+     * @throws IllegalArgumentException if any frequency is negative or r &lt; 0
      */
     public <T> MultisetCombinationBuilder<T> multiset(LinkedHashMap<T, Integer> options, int r) {
         Util.validateMapOptions(options, r);

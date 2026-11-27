@@ -159,7 +159,10 @@ Permutation
 Permutations where every item has an associated frequency that denotes how many times an item can be repeated in a permutation. For example, permutations of 3 apples and 2 oranges.
 
 ```java
-var elements = new LinkedHashMap<>(Map.of("Red", 2, "Green", 1, "Blue", 3));
+var elements = new LinkedHashMap<String, Integer>();
+elements.put("Red", 2);
+elements.put("Green", 1);
+elements.put("Blue", 3);
 
 // Permutation of 2 Red, 1 Green, and 3 Blue colors in lex order
 Permutation
@@ -169,11 +172,14 @@ Permutation
 ```
 
 #### 2.2 Every m-th multiset permutation
-Generates every m<sup>th</sup> multiset permutation from a given start index. This API directly generates the desired permutation without searching a sorted list, making it very efficient. There are a total of (∑ aᵢ × sᵢ)!/Π(sᵢ!) such permutations.
+Generates every m<sup>th</sup> multiset permutation from a given start index. This API directly generates the desired permutation without searching a sorted list, making it very efficient. There are a total of n!/Π(sᵢ!) such permutations, where n = ∑sᵢ.
 
 ```java
 // Every 3rd permutation of 2 Apple, 1 Banana, and 3 Guava, starting from 5th (i.e., 5th, 8th, 11th...)
-var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1, "Guava", 3));
+var elements = new LinkedHashMap<String, Integer>();
+elements.put("Apple", 2);
+elements.put("Banana", 1);
+elements.put("Guava", 3);
 Permutation
     .multiset(elements)
     .lexOrderMth(3, 5)
@@ -186,7 +192,10 @@ Generates random permutations of a multiset with duplicates allowed.
 
 ```java
 // Generates exactly 10 permutations of multiset which may contain duplicates
-var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1, "Guava", 3));
+var elements = new LinkedHashMap<String, Integer>();
+elements.put("Apple", 2);
+elements.put("Banana", 1);
+elements.put("Guava", 3);
 Permutation
     .multiset(elements)
     .choice(10, new java.util.Random())
@@ -198,7 +207,10 @@ Generates random permutations of a multiset without duplicates.
 
 ```java
 // Generates exactly 10 permutations of multiset without duplicates
-var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1, "Guava", 3));
+var elements = new LinkedHashMap<String, Integer>();
+elements.put("Apple", 2);
+elements.put("Banana", 1);
+elements.put("Guava", 3);
 Permutation
     .multiset(elements)
     .sample(10, new java.util.Random())
@@ -211,7 +223,10 @@ Generates all permutations at indices specified by a custom sequence.
 ```java
 // Generates all permutations of a multiset at indices specified by Iterable<Number>
 var iterable = List.of(BigInteger.valueOf(10), BigInteger.valueOf(20), BigInteger.valueOf(1_000_000_000L), new BigInteger("1000000000000000000000"));
-var elements = new LinkedHashMap<>(Map.of("Apple", 50, "Banana", 200, "Guava", 50));
+var elements = new LinkedHashMap<String, Integer>();
+elements.put("Apple", 50);
+elements.put("Banana", 200);
+elements.put("Guava", 50);
 Permutation
     .multiset(elements)
     .byRanks(iterable)
@@ -344,7 +359,7 @@ Permutation
 ```
 
 #### 4.2 Every m-th repetitive permutation
-This is equivalent to generating an arithmetic progression of base-n numbers with given n symbols and a=start, d=m. If a=0, there are a total of n<sup>r</sup>/m such permutations.
+This is equivalent to generating an arithmetic progression of base-n numbers with given n symbols and a=start, d=m. For a non-empty domain and a valid starting rank a (0 ≤ a < n<sup>r</sup>), the number generated is ⌊(n<sup>r</sup> − 1 − a)/m⌋ + 1.
 
 ```java
 // Generates every 2nd repetitive permutation of 3 numbers in range [0,5), starting from 5th (i.e., 5th, 7th, 9th...)

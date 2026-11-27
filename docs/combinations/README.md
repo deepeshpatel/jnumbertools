@@ -134,7 +134,9 @@ Generates all combinations of selecting r items from a multiset, where each item
 
 ```java
 // All combinations of 3 items from a multiset with 2 Apples and 1 Banana
-var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1));
+var elements = new LinkedHashMap<String, Integer>();
+elements.put("Apple", 2);
+elements.put("Banana", 1);
 Combination
     .multiset(elements, 3)
     .lexOrder()
@@ -164,7 +166,9 @@ Generates n random multiset combinations with duplicates allowed.
 
 ```java
 // Generate 5 random combinations of 3 items from a multiset with 2 Apples and 1 Banana, with duplicates
-var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1));
+var elements = new LinkedHashMap<String, Integer>();
+elements.put("Apple", 2);
+elements.put("Banana", 1);
 Combination
     .multiset(elements, 3)
     .choice(5, new java.util.Random())
@@ -176,7 +180,10 @@ Generates n random multiset combinations without duplicates.
 
 ```java
 // Generate 4 random combinations of 3 items from a multiset- [Apples:2, Banana:1, Guava 5], without duplicates
-var elements = new LinkedHashMap<>(Map.of("Apple", 2, "Banana", 1,  "Guava" ,5));
+var elements = new LinkedHashMap<String, Integer>();
+elements.put("Apple", 2);
+elements.put("Banana", 1);
+elements.put("Guava", 5);
         Combination
     .multiset(elements, 3)
     .sample(4, new java.util.Random())
@@ -188,7 +195,9 @@ Generates multiset combinations at indices specified by a custom sequence.
 
 ```java
 // Generates combinations of 3 items from a multiset with 50 Apples and 50 Bananas at specified indices
-var elements = new LinkedHashMap<>(Map.of("Apple", 50, "Banana", 50));
+var elements = new LinkedHashMap<String, Integer>();
+elements.put("Apple", 50);
+elements.put("Banana", 50);
 var iterable = List.of(BigInteger.valueOf(3),BigInteger.ZERO);
 Combination
     .multiset(elements, 3)
