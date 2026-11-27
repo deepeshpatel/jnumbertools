@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.product.simple;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -13,12 +15,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * One test per ValidationRules.md rule that applies to the public API of the SIMPLE CARTESIAN PRODUCT
- * builder, reached only through {@code cartesianProduct.simpleProductOf(..).and(..)}.
+ * builder, reached only through {@code Product.simple(..).and(..)}.
  *
  * Conventions follow the already-migrated builders (see ConstrainedProductValidationRulesTest):
  *   null list / null element / null Random -> NullPointerException
@@ -49,7 +50,7 @@ class SimpleProductValidationRulesTest {
     }
 
     private static SimpleProductBuilder product(int... dimensionSizes) {
-        SimpleProductBuilder b = cartesianProduct.simpleProductOf(ints(dimensionSizes[0]));
+        SimpleProductBuilder b = Product.simple(ints(dimensionSizes[0]));
         for (int i = 1; i < dimensionSizes.length; i++) b = b.and(ints(dimensionSizes[i]));
         return b;
     }
@@ -62,7 +63,7 @@ class SimpleProductValidationRulesTest {
 
     /** A product that is empty for sure: its second dimension is empty. */
     private static SimpleProductBuilder emptyProduct() {
-        SimpleProductBuilder p = cartesianProduct.simpleProductOf(AB).and(Collections.emptyList());
+        SimpleProductBuilder p = Product.simple(AB).and(Collections.emptyList());
         assertEquals(BigInteger.ZERO, p.count());
         return p;
     }
@@ -70,8 +71,8 @@ class SimpleProductValidationRulesTest {
     @Test
     void nullListsAreRejected() {
         List<String> nothing = null;
-        assertThrows(NullPointerException.class, () -> cartesianProduct.simpleProductOf(nothing));
-        assertThrows(NullPointerException.class, () -> cartesianProduct.simpleProductOf(AB).and(nothing));
+        assertThrows(NullPointerException.class, () -> Product.simple(nothing));
+        assertThrows(NullPointerException.class, () -> Product.simple(AB).and(nothing));
         // also when the product is already empty
         var empty = emptyProduct();
         assertThrows(NullPointerException.class, () -> empty.and(nothing));
@@ -84,8 +85,8 @@ class SimpleProductValidationRulesTest {
     @Test
     void nullElementsAreRejectedWhenBuilderIsCreated() {
         for (List<String> list : List.of(Arrays.asList(null, "B", "C"), Arrays.asList("A", null, "C"), Arrays.asList("A", "B", null))) {
-            assertThrows(NullPointerException.class, () -> cartesianProduct.simpleProductOf(list), "first dimension " + list);
-            assertThrows(NullPointerException.class, () -> cartesianProduct.simpleProductOf(AB).and(list), "added dimension " + list);
+            assertThrows(NullPointerException.class, () -> Product.simple(list), "first dimension " + list);
+            assertThrows(NullPointerException.class, () -> Product.simple(AB).and(list), "added dimension " + list);
             assertThrows(NullPointerException.class, () -> emptyProduct().and(list), "added to an empty product " + list);
         }
     }
@@ -102,7 +103,7 @@ class SimpleProductValidationRulesTest {
     void builderSnapshotsItsInput() {
         List<String> letters = new ArrayList<>(List.of("A", "B"));
         List<Integer> numbers = new ArrayList<>(List.of(1, 2));
-        var builder = cartesianProduct.simpleProductOf(letters).and(numbers);
+        var builder = Product.simple(letters).and(numbers);
 
         BigInteger countBefore = builder.count();
         var lexBefore = builder.lexOrder().stream().toList();
@@ -124,7 +125,7 @@ class SimpleProductValidationRulesTest {
 
     @Test
     void andDoesNotChangeTheBuilderItWasCalledOn() {
-        var base = cartesianProduct.simpleProductOf(AB);
+        var base = Product.simple(AB);
         var extended = base.and(ONE_TWO_THREE);
 
         assertEquals(bi(2), base.count());
@@ -186,9 +187,9 @@ class SimpleProductValidationRulesTest {
     @Test
     void resultsAreImmutable() {
         var builders = List.of(
-                cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE),
-                cartesianProduct.simpleProductOf(List.of("A", "B", "C")),            // a single dimension
-                cartesianProduct.simpleProductOf(List.of("A")).and(List.of(1)));      // a single tuple
+                Product.simple(AB).and(ONE_TWO_THREE),
+                Product.simple(List.of("A", "B", "C")),            // a single dimension
+                Product.simple(List.of("A")).and(List.of(1)));      // a single tuple
         for (var builder : builders) {
             assertImmutable("lexOrder", builder.lexOrder().stream().limit(3).toList());
             assertImmutable("lexOrderMth", builder.lexOrderMth(1, 0).stream().limit(3).toList());
@@ -213,7 +214,7 @@ class SimpleProductValidationRulesTest {
      */
     @Test
     void generatorsAreReIterable() {
-        var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);
+        var builder = Product.simple(AB).and(ONE_TWO_THREE);
         var generators = new java.util.LinkedHashMap<String, Iterable<?>>();
         generators.put("lexOrder", builder.lexOrder());
         generators.put("lexOrderMth(2, 1)", builder.lexOrderMth(2, 1));
@@ -238,7 +239,7 @@ class SimpleProductValidationRulesTest {
 
     @Test
     void lexOrderMthRules() {
-        var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);     // count 6
+        var builder = Product.simple(AB).and(ONE_TWO_THREE);     // count 6
         var lex = drain(builder.lexOrder());
 
         assertThrows(IllegalArgumentException.class, () -> builder.lexOrderMth(BigInteger.ZERO, BigInteger.ZERO));
@@ -261,7 +262,7 @@ class SimpleProductValidationRulesTest {
     /**  byRanks lazy validation and rank consumption. */
     @Test
     void byRanksRules() {
-        var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);
+        var builder = Product.simple(AB).and(ONE_TWO_THREE);
         var lex = drain(builder.lexOrder());
 
         // consumed lazily: nothing is read at the call, the caller may stop whenever it likes
@@ -296,7 +297,7 @@ class SimpleProductValidationRulesTest {
 
     @Test
     void sampleRules() {
-        var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);     // count 6
+        var builder = Product.simple(AB).and(ONE_TWO_THREE);     // count 6
         var lex = drain(builder.lexOrder());
 
         assertThrows(IllegalArgumentException.class, () -> builder.sample(0, new Random(1)));
@@ -316,7 +317,7 @@ class SimpleProductValidationRulesTest {
     /** choice is with replacement, so s > count is accepted. */
     @Test
     void choiceRules() {
-        var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);     // count 6
+        var builder = Product.simple(AB).and(ONE_TWO_THREE);     // count 6
         var members = new HashSet<>(drain(builder.lexOrder()));
 
         assertThrows(IllegalArgumentException.class, () -> builder.choice(0, new Random(1)));
@@ -344,14 +345,14 @@ class SimpleProductValidationRulesTest {
      */
     @Test
     void nullRandomIsANullInputError() {
-        var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);
+        var builder = Product.simple(AB).and(ONE_TWO_THREE);
         assertThrows(NullPointerException.class, () -> builder.choice(1, null));
         assertThrows(NullPointerException.class, () -> builder.sample(1, null));
     }
 
     @Test
     void sampleAndChoiceAreReproducibleForAGivenSeed() {
-        var builder = cartesianProduct.simpleProductOf(AB).and(ONE_TWO_THREE);
+        var builder = Product.simple(AB).and(ONE_TWO_THREE);
         assertEquals(drain(builder.sample(5, new Random(99))), drain(builder.sample(5, new Random(99))));
         assertEquals(drain(builder.choice(9, new Random(99))), drain(builder.choice(9, new Random(99))));
     }
@@ -367,7 +368,7 @@ class SimpleProductValidationRulesTest {
     @Test
     void choiceAndSampleDrawFromTheWholeRangeWhenCountExceeds64Bits() {
         List<String> abc = List.of("A", "B", "C");
-        SimpleProductBuilder builder = cartesianProduct.simpleProductOf(abc);
+        SimpleProductBuilder builder = Product.simple(abc);
         for (int i = 1; i < 41; i++) builder = builder.and(abc);
         final SimpleProductBuilder product = builder;
         assertTrue(product.count().bitLength() > 64);
