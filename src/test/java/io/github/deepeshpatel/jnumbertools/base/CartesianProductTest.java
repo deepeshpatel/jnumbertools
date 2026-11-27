@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
+import static io.github.deepeshpatel.jnumbertools.TestBase.A_B;
+import static io.github.deepeshpatel.jnumbertools.TestBase.A_B_C;
 import static io.github.deepeshpatel.jnumbertools.TestBase.errMsgNullInput;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,9 +62,9 @@ class CartesianProductTest {
         assertThrows(NullPointerException.class,
                 () -> Product.simple(List.of("A"), null));
         assertThrows(NullPointerException.class,
-                () -> Product.simple(List.of("A"), List.of(1), (List<?>[]) null));
+                () -> Product.simple((List<?>[]) null));
         assertThrows(NullPointerException.class,
-                () -> Product.simple(List.of("A"), List.of(1), java.util.Arrays.asList("X", null)));
+                () -> Product.simple(List.of("A"), List.of(1), (List<?>) null));
     }
 
     @Nested
