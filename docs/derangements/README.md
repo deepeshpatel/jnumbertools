@@ -30,13 +30,13 @@ A derangement is a permutation where no element appears in its original position
 
 ```java
 // All derangements of [0,1,2,3] in lex order
-JNumberTools.derangements()
+Derangement
     .of(4)
     .lexOrder()
     .stream().forEach(System.out::println);
 
 // All derangements of ["A","B","C","D"] in lex order
-JNumberTools.derangements()
+Derangement
     .of("A", "B", "C", "D")
     .lexOrder()
     .stream().forEach(System.out::println);
@@ -51,13 +51,13 @@ int m = 3;
 int start = 0;
 
 // Every 3rd derangement of [0,1,2,3,4] starting from rank 0
-JNumberTools.derangements()
+Derangement
     .of(5)
     .lexOrderMth(m, start)
     .stream().forEach(System.out::println);
 
 // Every 3rd derangement of ["A","B","C","D","E"] starting from rank 0
-JNumberTools.derangements()
+Derangement
     .of("A", "B", "C", "D", "E")
     .lexOrderMth(m, start)
     .stream().forEach(System.out::println);
@@ -68,7 +68,7 @@ Generates random derangements with replacement (duplicates allowed).
 
 ```java
 // Generate any 5 derangements of [0,1,2,3] with duplicates allowed
-JNumberTools.derangements()
+Derangement
     .of(4)
     .choice(5, new java.util.Random())
     .stream().forEach(System.out::println);
@@ -79,7 +79,7 @@ Generates random derangements without replacement (unique output).
 
 ```java
 // Generate 5 unique derangements of ["A","B","C","D","E"]
-JNumberTools.derangements()
+Derangement
     .of("A", "B", "C", "D", "E")
     .sample(5, new java.util.Random())
     .stream().forEach(System.out::println);
@@ -96,7 +96,7 @@ var ranks = List.of(
         BigInteger.valueOf(100));
 
 // Generate derangements of size 8 at specific ranks
-JNumberTools.derangements()
+Derangement
     .of(8)
     .byRanks(ranks)
     .stream().forEach(System.out::println);
