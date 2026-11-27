@@ -37,8 +37,8 @@ import java.util.*;
  * </ul>
  *
  * <p>
- * <strong>Implementation class: intended to be used through {@link io.github.deepeshpatel.jnumbertools.base.RankOf} and
- * {@link io.github.deepeshpatel.jnumbertools.base.UnrankOf} (and the builders).</strong> Those validate their input (null, negative sizes, duplicate or
+ * <strong>Implementation class: intended to be used through {@link io.github.deepeshpatel.jnumbertools.entrypoint.Rank} and
+ * {@link io.github.deepeshpatel.jnumbertools.entrypoint.Unrank} (and the builders).</strong> Those validate their input (null, negative sizes, duplicate or
  * out-of-range values, ranks outside [0, nPk), ...) as described in {@code ValidationRules.md}. The methods here
  * assume valid input and do not check it, so that internal callers that already hold valid values pay nothing.
  * </p>
@@ -224,7 +224,7 @@ public final class PermutadicAlgorithms {
      * @param size the size of the set from which the permutation is selected.
      * @param mth_kPermutation the permutation to be ranked.
      * @return the zero-based rank of the permutation.
-     * @see io.github.deepeshpatel.jnumbertools.base.RankOf
+     * @see io.github.deepeshpatel.jnumbertools.entrypoint.Rank
      */
     public static BigInteger rank(int size, int... mth_kPermutation) {
         int degree = size - mth_kPermutation.length;
@@ -379,7 +379,7 @@ public final class PermutadicAlgorithms {
      * @param size the total number of elements (n)
      * @param k the number of elements to select for the permutation
      * @return an array of length k representing the k-permutation at the specified rank
-     * @see io.github.deepeshpatel.jnumbertools.base.UnrankOf
+     * @see io.github.deepeshpatel.jnumbertools.entrypoint.Unrank
      */
     public static int[] unRank(BigInteger rank, int size, int k) {
         if (useSparseSelect(size, k)) {
