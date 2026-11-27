@@ -98,14 +98,14 @@ public final class PermutationsBuilder {
     private final Calculator calculator;
 
     /**
-     * Constructs a new Permutations instance with a default Calculator.
+     * Constructs a new {@code PermutationsBuilder} with a default Calculator.
      */
     public PermutationsBuilder() {
         this(new Calculator());
     }
 
     /**
-     * Constructs a new Permutations instance with the specified Calculator.
+     * Constructs a new {@code PermutationsBuilder} with the specified Calculator.
      *
      * @param calculator the Calculator for combinatorial computations
      */
