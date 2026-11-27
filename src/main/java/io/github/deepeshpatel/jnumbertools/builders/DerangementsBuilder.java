@@ -27,22 +27,22 @@ import java.util.stream.IntStream;
  * import io.github.deepeshpatel.jnumbertools.entrypoint.Derangement;
  *
  * // All derangements of [0, 1, 2, 3] in lexicographical order
- * der.of(4)
+ * Derangement.of(4)
  *    .lexOrder()
  *    .forEach(System.out::println);
  *
  * // All derangements of {A, B, C, D}
- * der.of("A", "B", "C", "D")
+ * Derangement.of("A", "B", "C", "D")
  *    .lexOrder()
  *    .forEach(System.out::println);
  *
  * // Every 3rd derangement starting from rank 1
- * der.of(5)
+ * Derangement.of(5)
  *    .lexOrderMth(3, 1)
  *    .forEach(System.out::println);
  *
  * // 5 random derangements without replacement
- * der.of("A", "B", "C", "D", "E")
+ * Derangement.of("A", "B", "C", "D", "E")
  *    .sample(5)
  *    .forEach(System.out::println);
  * </pre>
