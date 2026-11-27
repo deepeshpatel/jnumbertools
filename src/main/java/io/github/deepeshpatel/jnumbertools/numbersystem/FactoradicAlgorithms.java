@@ -20,7 +20,7 @@ import java.util.Arrays;
  * </p>
  *
  * <p>
- * <strong>Implementation class: intended to be used through {@link io.github.deepeshpatel.jnumbertools.base.UnrankOf} and the builders.</strong>
+ * <strong>Implementation class: intended to be used through {@link io.github.deepeshpatel.jnumbertools.entrypoint.Unrank} and the builders.</strong>
  * Argument validation and its error signalling belong to those; this class assumes valid input. The few
  * checks that remain here are intrinsic to a conversion (for example a value that cannot be represented with the
  * requested number of digits) and cost a single comparison.
