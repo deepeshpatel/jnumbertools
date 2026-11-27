@@ -64,7 +64,7 @@ class ConditionalProductRuleOrderTest {
     }
 
     private static ConditionalProductBuilder build(List<Rule> rules, List<List<Integer>> dimensions) {
-        ConditionalProductBuilder builder = JNumberTools.cartesianProduct().conditionalProductOf(dimensions.get(0));
+        ConditionalProductBuilder builder = Product.conditional(dimensions.get(0));
         for (int d = 1; d < DIMENSIONS; d++) builder = builder.and(dimensions.get(d));
         for (Rule rule : rules) {
             builder = builder.when(dimensions.get(rule.triggerDim())).isOneOf(rule.trigger().toArray())
@@ -166,7 +166,7 @@ class ConditionalProductRuleOrderTest {
     @Test
     void everyIntermediateBuilderKeepsTheOrderToo() throws ReflectiveOperationException {
         List<List<Integer>> dimensions = newDimensions();
-        ConditionalProductBuilder builder = JNumberTools.cartesianProduct().conditionalProductOf(dimensions.get(0));
+        ConditionalProductBuilder builder = Product.conditional(dimensions.get(0));
         for (int d = 1; d < DIMENSIONS; d++) builder = builder.and(dimensions.get(d));
         List<Rule> shuffled = new ArrayList<>(RULES);
         Collections.shuffle(shuffled, new Random(5));
