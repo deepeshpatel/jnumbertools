@@ -28,7 +28,7 @@ compatible, enabling rapid access to very large ranks.
 Generates all derangements of the given elements in lexicographical order.
 A derangement is a permutation where no element appears in its original position.
 
-**Static entry point:** `io.github.deepeshpatel.jnumbertools.base.Derangement` (import `Derangement`).
+**Static entry point:** `Derangement`. Add `import io.github.deepeshpatel.jnumbertools.base.Derangement;` to use the examples in a Java source file.
 
 ```java
 // All derangements of [0,1,2,3] in lex order
