@@ -47,7 +47,7 @@ import java.util.function.Predicate;
  * <p>{@code when(A).is(x).then(B).isOneOf(y, z)} means: whenever the value chosen from {@code A}
  * is {@code x}, the value chosen from {@code B} must be {@code y} or {@code z}. Every completed
  * pairwise rule is combined with the other rules using AND. Dimensions are identified by the same
- * list instance passed to {@link Product#conditional(List, List, List[])} or {@code and}. More complex joint predicates
+ * list instance passed to {@code Product.conditional(...)} or {@code and}. More complex joint predicates
  * can be expressed through the Lambda Conditional Product API.</p>
  *
  * <h2>What is supported</h2>
@@ -58,7 +58,7 @@ import java.util.function.Predicate;
  *
  * <h2>Practical performance guidance: dimension order</h2>
  * <p>Dimension declaration order can affect the amount of work required by lexicographic traversal.
- * The order is the order in which the dimensions are supplied to {@code conditionalProductOf(...)}
+ * The order is the order in which the dimensions are supplied to {@code Product.conditional(...)}
  * and {@link #and(List)}. It also defines the tuple positions and lexicographic encounter order, so
  * changing it changes the order (and positional meaning) of the generated tuples.</p>
  *
