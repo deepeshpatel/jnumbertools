@@ -242,7 +242,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
     /**
      * Starts a rule: {@code when(A).is(x).then(B).isOneOf(y, z)}.
      *
-     * @param dimension the same list instance that was passed to {@code conditionalProductOf} or
+     * @param dimension the same list instance that was passed to {@code Product.conditional(...)} or
      *                  {@code and}
      * @return the next step of the rule
      * @throws NullPointerException     if {@code dimension} is null
