@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import io.github.deepeshpatel.jnumbertools.AllocationMeter;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Assumptions;
@@ -235,7 +237,7 @@ class RelationTest {
             }
             List<Integer> trigger = new ArrayList<>();
             for (int i = 0; i < size / 10; i++) trigger.add(i);
-            ConditionalProductBuilder builder = JNumberTools.cartesianProduct().conditionalProductOf(dimensions.get(0))
+            ConditionalProductBuilder builder = Product.conditional(dimensions.get(0))
                     .and(dimensions.get(1)).and(dimensions.get(2));
             for (int d = 0; d + 1 < 3; d++) {
                 builder = builder.when(dimensions.get(d)).isOneOf(trigger).then(dimensions.get(d + 1)).is(0);
