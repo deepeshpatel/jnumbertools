@@ -4,6 +4,8 @@
  */
 package io.github.deepeshpatel.jnumbertools.generator.product.conditional;
 
+import io.github.deepeshpatel.jnumbertools.base.Product;
+
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -17,7 +19,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import static io.github.deepeshpatel.jnumbertools.TestBase.cartesianProduct;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -163,7 +164,7 @@ class ConditionalProductShapeOracleTest {
     // ------------------------------------------------------------------ oracle
 
     private static ConditionalProductBuilder build(Shape shape) {
-        var builder = cartesianProduct.conditionalProductOf(shape.dims().get(0));
+        var builder = Product.conditional(shape.dims().get(0));
         for (int d = 1; d < shape.dims().size(); d++) builder = builder.and(shape.dims().get(d));
         for (Rule r : shape.rules()) {
             builder = builder.when(shape.dims().get(r.trigger())).isOneOf(r.triggerValues())
