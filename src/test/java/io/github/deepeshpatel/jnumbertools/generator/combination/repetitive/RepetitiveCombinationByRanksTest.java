@@ -1,5 +1,7 @@
 package io.github.deepeshpatel.jnumbertools.generator.combination.repetitive;
 
+import io.github.deepeshpatel.jnumbertools.base.Combination;
+
 import io.github.deepeshpatel.jnumbertools.TestBase;
 import io.github.deepeshpatel.jnumbertools.base.JNumberTools;
 import org.junit.jupiter.api.Nested;
@@ -132,7 +134,7 @@ class RepetitiveCombinationByRanksTest {
         void shouldGenerateExactSampleSize() {
             int r = 2;
             int sampleSize = 3;
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .repetitive(r, "A", "B", "C")
                     .sample(sampleSize, TestBase.random)
                     .stream()
@@ -144,7 +146,7 @@ class RepetitiveCombinationByRanksTest {
         void shouldGenerateUniqueCombinationsWithinSample() {
             int r = 2;
             int sampleSize = 4;
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .repetitive(r, "A", "B", "C")
                     .sample(sampleSize, TestBase.random)
                     .stream()
@@ -158,7 +160,7 @@ class RepetitiveCombinationByRanksTest {
             List<String> elements = of("A", "B", "C");
             int r = 2;
             int sampleSize = 3;
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .repetitive(r, elements)
                     .sample(sampleSize, TestBase.random)
                     .stream()
@@ -176,7 +178,7 @@ class RepetitiveCombinationByRanksTest {
             int n = 2;
             int r = 2;
             int sampleSize = calculator.nCrRepetitive(n, r).intValueExact(); // (2+2-1)C2 = 3C2 = 3
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .repetitive(r, "A", "B")
                     .sample(sampleSize, TestBase.random)
                     .stream()
@@ -187,7 +189,7 @@ class RepetitiveCombinationByRanksTest {
 
         @Test
         void shouldHandleEmptyInputWithZeroSize() {
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .repetitive(0, Collections.emptyList())
                     .sample(1, TestBase.random)
                     .stream()
@@ -198,7 +200,7 @@ class RepetitiveCombinationByRanksTest {
 
         @Test
         void shouldThrowExceptionForNegativeRValue() {
-            assertThrows(IllegalArgumentException.class, () -> JNumberTools.combinations()
+            assertThrows(IllegalArgumentException.class, () -> Combination
                     .repetitive(-1, "A", "B")
                     .sample(1, TestBase.random)
                     .stream()
@@ -210,7 +212,7 @@ class RepetitiveCombinationByRanksTest {
             List<String> elements = of("A", "B", "C");
             int r = 4; // r > n
             int sampleSize = 5; // (3+4-1)C4 = 6C4 = 15
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .repetitive(r, elements)
                     .sample(sampleSize, TestBase.random)
                     .stream()
@@ -225,7 +227,7 @@ class RepetitiveCombinationByRanksTest {
 
         @Test
         void shouldGenerateConsistentPropertiesAcrossIterators() {
-            var iterable = JNumberTools.combinations()
+            var iterable = Combination
                     .repetitive(2, "A", "B", "C")
                     .sample(3, TestBase.random);
             var list1 = iterable.stream().toList();
@@ -256,7 +258,7 @@ class RepetitiveCombinationByRanksTest {
         void shouldGenerateExactSampleSize() {
             int r = 2;
             int sampleSize = 4;
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .repetitive(r, "A", "B", "C")
                     .choice(sampleSize, TestBase.random)
                     .stream()
@@ -269,7 +271,7 @@ class RepetitiveCombinationByRanksTest {
             int n = 2;
             int r = 2;
             int sampleSize = 4; // nCrRepetitive = (2+2-1)C2 = 3C2 = 3
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .repetitive(r, "A", "B")
                     .choice(sampleSize, TestBase.random)
                     .stream()
@@ -284,7 +286,7 @@ class RepetitiveCombinationByRanksTest {
             List<String> elements = of("A", "B", "C");
             int r = 2;
             int sampleSize = 3;
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .repetitive(r, elements)
                     .choice(sampleSize, TestBase.random)
                     .stream()
@@ -301,7 +303,7 @@ class RepetitiveCombinationByRanksTest {
         void shouldHandleSampleSizeLargerThanNcrRepetitive() {
             int r = 2;
             int sampleSize = 5; // nCrRepetitive = 3C2 = 3, sampleSize > nCrRepetitive
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .repetitive(r, "A", "B")
                     .choice(sampleSize, TestBase.random)
                     .stream()
@@ -311,7 +313,7 @@ class RepetitiveCombinationByRanksTest {
 
         @Test
         void shouldHandleEmptyInputWithZeroSize() {
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .repetitive(0, Collections.emptyList())
                     .choice(1, TestBase.random)
                     .stream()
@@ -322,7 +324,7 @@ class RepetitiveCombinationByRanksTest {
 
         @Test
         void shouldThrowExceptionForNegativeRValue() {
-            assertThrows(IllegalArgumentException.class, () -> JNumberTools.combinations()
+            assertThrows(IllegalArgumentException.class, () -> Combination
                     .repetitive(-1, "A", "B")
                     .choice(1, TestBase.random)
                     .stream()
@@ -334,7 +336,7 @@ class RepetitiveCombinationByRanksTest {
             List<String> elements = of("A", "B", "C");
             int r = 4; // r > n
             int sampleSize = 7; // (3+4-1)C4 = 6C4 = 15
-            var combinations = JNumberTools.combinations()
+            var combinations = Combination
                     .repetitive(r, elements)
                     .choice(sampleSize, TestBase.random)
                     .stream()
@@ -348,7 +350,7 @@ class RepetitiveCombinationByRanksTest {
 
         @Test
         void shouldGenerateConsistentPropertiesAcrossIterators() {
-            var iterable = JNumberTools.combinations()
+            var iterable = Combination
                     .repetitive(2, "A", "B", "C")
                     .choice(4, TestBase.random);
             var list1 = iterable.stream().toList();
