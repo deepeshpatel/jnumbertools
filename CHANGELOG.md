@@ -5,6 +5,14 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ## [Unreleased]
 
+### Removed
+
+- Removed the public Compound Product builder and the public Condition DSL. Use the Compiled
+  Pairwise Conditional Product for pairwise rules and the Lambda Conditional Product for joint
+  predicates, including nested Boolean logic. The internal multi-trigger constraint representation
+  remains available to the Lambda compiler.
+
+
 ### Added
 
 - Added natural-order comparison methods to conditional-product rule conditions and consequences:
