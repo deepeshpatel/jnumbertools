@@ -29,7 +29,7 @@ import java.util.stream.Stream;
  * <p>The checksum is order-independent, so implementations may generate
  * equivalent tuples in different orders.</p>
  */
-public class ConditionalProductSpeedBenchmarkMain {
+public class ConditionalProductSpeedBenchmarkWithFixedValidTuples {
 
     private static final int WARMUP_ROUNDS = 0;
     private static final int MEASUREMENT_ROUNDS = 1;
@@ -131,15 +131,15 @@ public class ConditionalProductSpeedBenchmarkMain {
         return new BenchmarkMethod[]{
                 new BenchmarkMethod(
                         "Pairwise when-then",
-                        ConditionalProductSpeedBenchmarkMain::whenThen),
+                        ConditionalProductSpeedBenchmarkWithFixedValidTuples::whenThen),
 
                 new BenchmarkMethod(
                         "engineLambda",
-                        ConditionalProductSpeedBenchmarkMain::buildEngineLambda),
+                        ConditionalProductSpeedBenchmarkWithFixedValidTuples::buildEngineLambda),
 
                 new BenchmarkMethod(
                         "Pruned Stream",
-                        ConditionalProductSpeedBenchmarkMain::buildPrunedStream)
+                        ConditionalProductSpeedBenchmarkWithFixedValidTuples::buildPrunedStream)
         };
     }
 

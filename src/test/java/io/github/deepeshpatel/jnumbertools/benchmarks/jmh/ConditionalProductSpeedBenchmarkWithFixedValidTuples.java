@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 @Measurement(iterations = 10)
 @Fork(3)
 @State(Scope.Thread)
-public class ConditionalProductSpeedBenchmarkFixedValidTuples {
+public class ConditionalProductSpeedBenchmarkWithFixedValidTuples {
 
     @Param({
             "50", "100", "200", "300", "400", "500",
