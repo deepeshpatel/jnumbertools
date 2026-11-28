@@ -27,7 +27,7 @@ public final class MainSimpleProductSpeedBenchmark {
     private static final int MEASUREMENT_ROUNDS = 9;
 
     private static final int[] SIZES = {
-            5, 10, 15, 20, 30, 40
+            5, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100
     };
 
     private static volatile long blackhole;
@@ -334,7 +334,7 @@ public final class MainSimpleProductSpeedBenchmark {
             double speedup) {
 
         System.out.printf(
-                "%-8d %-14d %-22.3f %-22.3f %-12.2fx%n",
+                "%-8d %-14d %-22.3f %-22.3f %.2fx%n",
                 size,
                 tupleCount,
                 libraryMillis,
@@ -350,24 +350,18 @@ public final class MainSimpleProductSpeedBenchmark {
 }
 
 /*
-Simple Cartesian Product Speed Benchmark
-=====================================================================
-Baseline:            Nested Java Stream.flatMap()
-Comparison:          JNumberTools SimpleProduct
-Dimensions:          4
-Warmup rounds:       5
-Measurement rounds:  9 (median)
-
-Java version: 26.0.1
-JVM:          OpenJDK 64-Bit Server VM
-OS:           Mac OS X
-
 Size     Tuples         JNumberTools ms        Stream.flatMap ms      Speedup
 --------------------------------------------------------------------------------------
-5        625            0.096                  0.209                  2.17x
-10       10000          0.364                  0.632                  1.74x
-15       50625          1.004                  1.581                  1.58x
-20       160000         3.309                  5.055                  1.53x
-30       810000         9.387                  17.579                 1.87x
-40       2560000        29.219                 55.244                 1.89x
+5        625            0.097                  0.173                  1.79x
+10       10000          0.304                  0.807                  2.65x
+15       50625          0.950                  1.366                  1.44x
+20       160000         3.352                  5.151                  1.54x
+30       810000         9.359                  17.596                 1.88x
+40       2560000        29.477                 54.945                 1.86x
+50       6250000        71.898                 136.099                1.89x
+60       12960000       148.985                283.398                1.90x
+70       24010000       300.902                613.217                2.04x
+80       40960000       583.383                1296.921               2.22x
+90       65610000       883.213                2278.759               2.58x
+100      100000000      1528.032               3559.027               2.33x
  */

@@ -1,0 +1,346 @@
+Benchmark                                                                (size)  (targetValidityRatio)  Mode  Cnt           Score         Error   Units
+JMHConditionalProductSpeedBenchmark.compiled                                 10                   0.02  avgt    3           9.467 ±       5.731   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   10                   0.02  avgt    3        2298.265 ±    1365.728  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              10                   0.02  avgt    3       22800.066 ±       0.044    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        10                   0.02  avgt    3          28.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         10                   0.02  avgt    3          11.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 10                   0.05  avgt    3          21.619 ±       2.396   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   10                   0.05  avgt    3        2544.234 ±     281.270  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              10                   0.05  avgt    3       57680.152 ±       0.037    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        10                   0.05  avgt    3          57.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         10                   0.05  avgt    3          14.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 10                   0.10  avgt    3          43.188 ±       0.696   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   10                   0.10  avgt    3        2656.934 ±      42.815  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              10                   0.10  avgt    3      120336.304 ±       0.051    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        10                   0.10  avgt    3          60.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         10                   0.10  avgt    3          14.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 10                   0.25  avgt    3         131.852 ±      16.859   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   10                   0.25  avgt    3        2701.400 ±     346.276  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              10                   0.25  avgt    3      373520.922 ±       0.117    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        10                   0.25  avgt    3          61.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         10                   0.25  avgt    3          15.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 10                   0.50  avgt    3         190.046 ±      30.163   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   10                   0.50  avgt    3        2961.331 ±     470.909  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              10                   0.50  avgt    3      590161.331 ±       0.218    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        10                   0.50  avgt    3          72.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         10                   0.50  avgt    3          15.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 10                   0.75  avgt    3         277.242 ±       7.810   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   10                   0.75  avgt    3        3050.145 ±      85.401  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              10                   0.75  avgt    3      886801.940 ±       0.054    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        10                   0.75  avgt    3          69.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         10                   0.75  avgt    3          16.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 20                   0.02  avgt    3         127.765 ±       1.032   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   20                   0.02  avgt    3        2685.064 ±      21.978  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              20                   0.02  avgt    3      359760.895 ±       0.015    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        20                   0.02  avgt    3          61.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         20                   0.02  avgt    3          14.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 20                   0.05  avgt    3         302.678 ±      15.857   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   20                   0.05  avgt    3        2891.617 ±     151.222  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              20                   0.05  avgt    3      917842.117 ±       0.111    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        20                   0.05  avgt    3          66.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         20                   0.05  avgt    3          16.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 20                   0.10  avgt    3         555.095 ±      32.082   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   20                   0.10  avgt    3        3298.821 ±     190.219  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              20                   0.10  avgt    3     1920348.138 ±     260.957    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        20                   0.10  avgt    3          75.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         20                   0.10  avgt    3          18.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 20                   0.25  avgt    3        1213.421 ±     216.012   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   20                   0.25  avgt    3        3646.867 ±     651.747  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              20                   0.25  avgt    3     4640432.483 ±       1.475    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        20                   0.25  avgt    3          83.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         20                   0.25  avgt    3          20.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 20                   0.50  avgt    3        2438.640 ±     955.976   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   20                   0.50  avgt    3        3691.328 ±    1466.629  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              20                   0.50  avgt    3     9437561.060 ±       6.928    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        20                   0.50  avgt    3         192.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         20                   0.50  avgt    3          25.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 20                   0.75  avgt    3        3294.837 ±     344.864   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   20                   0.75  avgt    3        4105.007 ±     428.978  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              20                   0.75  avgt    3    14183807.056 ±       2.758    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        20                   0.75  avgt    3         229.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         20                   0.75  avgt    3          26.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 30                   0.02  avgt    3         584.749 ±     183.203   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   30                   0.02  avgt    3        2968.393 ±     931.961  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              30                   0.02  avgt    3     1819933.160 ±     236.430    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        30                   0.02  avgt    3          67.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         30                   0.02  avgt    3          16.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 30                   0.05  avgt    3        1210.689 ±     133.425   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   30                   0.05  avgt    3        3658.763 ±     401.436  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              30                   0.05  avgt    3     4645232.466 ±       0.956    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        30                   0.05  avgt    3          82.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         30                   0.05  avgt    3          19.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 30                   0.10  avgt    3        2452.644 ±     653.960   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   30                   0.10  avgt    3        3779.700 ±    1009.143  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              30                   0.10  avgt    3     9720377.139 ±       4.192    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        30                   0.10  avgt    3          85.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         30                   0.10  avgt    3          21.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 30                   0.25  avgt    3        6576.907 ±    4490.651   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   30                   0.25  avgt    3        3715.190 ±    2591.285  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              30                   0.25  avgt    3    25600405.903 ±      30.862    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        30                   0.25  avgt    3         187.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         30                   0.25  avgt    3          25.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 30                   0.50  avgt    3       14143.754 ±    1447.861   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   30                   0.50  avgt    3        3708.174 ±     380.631  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              30                   0.50  avgt    3    55000460.011 ±      53.827    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        30                   0.50  avgt    3          71.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         30                   0.50  avgt    3          18.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                 30                   0.75  avgt    3       19619.255 ±   13033.740   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                   30                   0.75  avgt    3        3963.966 ±    2584.989  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm              30                   0.75  avgt    3    81486319.333 ±      83.851    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                        30                   0.75  avgt    3          25.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                         30                   0.75  avgt    3          13.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                100                   0.02  avgt    3       63339.995 ±   17045.636   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                  100                   0.02  avgt    3        3760.707 ±    1009.698  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm             100                   0.02  avgt    3   249768534.882 ±     272.309    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                       100                   0.02  avgt    3           9.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                        100                   0.02  avgt    3          31.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                100                   0.05  avgt    3      180447.847 ±   20231.765   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                  100                   0.05  avgt    3        3286.726 ±     368.133  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm             100                   0.05  avgt    3   621944636.000 ±       0.001    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                       100                   0.05  avgt    3          10.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                        100                   0.05  avgt    3           5.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                100                   0.10  avgt    3      308351.486 ±   47659.453   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                  100                   0.10  avgt    3        3964.613 ±     614.455  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm             100                   0.10  avgt    3  1281941382.000 ±       0.001    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                       100                   0.10  avgt    3           9.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                        100                   0.10  avgt    3           7.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                100                   0.25  avgt    3      914662.653 ± 1759508.981   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                  100                   0.25  avgt    3        3374.783 ±    6134.709  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm             100                   0.25  avgt    3  3214559992.000 ±   37034.092    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                       100                   0.25  avgt    3          12.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                        100                   0.25  avgt    3           7.000                    ms
+JMHConditionalProductSpeedBenchmark.compiled                                100                   0.50  avgt    3     1577243.028 ±   98673.357   us/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate                  100                   0.50  avgt    3        3882.929 ±     242.981  MB/sec
+JMHConditionalProductSpeedBenchmark.compiled:gc.alloc.rate.norm             100                   0.50  avgt    3  6422341856.000 ±       0.001    B/op
+JMHConditionalProductSpeedBenchmark.compiled:gc.count                       100                   0.50  avgt    3          16.000                counts
+JMHConditionalProductSpeedBenchmark.compiled:gc.time                        100                   0.50  avgt    3           8.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   10                   0.02  avgt    3           9.375 ±       2.641   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     10                   0.02  avgt    3        2319.477 ±     659.536  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                10                   0.02  avgt    3       22800.066 ±       0.020    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          10                   0.02  avgt    3          62.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           10                   0.02  avgt    3          12.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   10                   0.05  avgt    3          21.515 ±       2.652   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     10                   0.05  avgt    3        2556.527 ±     314.658  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                10                   0.05  avgt    3       57680.151 ±       0.026    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          10                   0.05  avgt    3          58.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           10                   0.05  avgt    3          14.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   10                   0.10  avgt    3          43.535 ±       4.137   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     10                   0.10  avgt    3        2635.839 ±     251.479  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                10                   0.10  avgt    3      120336.306 ±       0.017    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          10                   0.10  avgt    3          59.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           10                   0.10  avgt    3          14.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   10                   0.25  avgt    3         128.192 ±       3.796   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     10                   0.25  avgt    3        2778.488 ±      82.081  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                10                   0.25  avgt    3      373520.897 ±       0.026    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          10                   0.25  avgt    3          64.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           10                   0.25  avgt    3          15.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   10                   0.50  avgt    3         189.211 ±      13.630   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     10                   0.50  avgt    3        2974.278 ±     213.821  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                10                   0.50  avgt    3      590161.327 ±       0.038    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          10                   0.50  avgt    3          68.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           10                   0.50  avgt    3          15.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   10                   0.75  avgt    3         289.961 ±      14.066   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     10                   0.75  avgt    3        2916.368 ±     141.190  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                10                   0.75  avgt    3      886802.032 ±       0.059    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          10                   0.75  avgt    3          66.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           10                   0.75  avgt    3          15.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   20                   0.02  avgt    3         127.118 ±      35.763   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     20                   0.02  avgt    3        2699.149 ±     755.483  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                20                   0.02  avgt    3      359760.889 ±       0.251    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          20                   0.02  avgt    3          62.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           20                   0.02  avgt    3          15.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   20                   0.05  avgt    3         304.983 ±      21.920   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     20                   0.05  avgt    3        2869.787 ±     205.737  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                20                   0.05  avgt    3      917842.135 ±       0.150    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          20                   0.05  avgt    3          65.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           20                   0.05  avgt    3          15.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   20                   0.10  avgt    3         543.385 ±      59.086   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     20                   0.10  avgt    3        3370.013 ±     366.283  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                20                   0.10  avgt    3     1920347.428 ±     240.515    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          20                   0.10  avgt    3          78.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           20                   0.10  avgt    3          17.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   20                   0.25  avgt    3        1165.458 ±      34.533   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     20                   0.25  avgt    3        3796.783 ±     112.652  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                20                   0.25  avgt    3     4640432.151 ±       0.263    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          20                   0.25  avgt    3          85.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           20                   0.25  avgt    3          19.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   20                   0.50  avgt    3        2434.370 ±     554.170   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     20                   0.50  avgt    3        3697.157 ±     846.042  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                20                   0.50  avgt    3     9437561.028 ±       3.435    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          20                   0.50  avgt    3          84.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           20                   0.50  avgt    3          19.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   20                   0.75  avgt    3        3311.040 ±     295.695   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     20                   0.75  avgt    3        4084.787 ±     363.900  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                20                   0.75  avgt    3    14183807.107 ±       2.113    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          20                   0.75  avgt    3          94.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           20                   0.75  avgt    3          19.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   30                   0.02  avgt    3         588.666 ±     165.475   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     30                   0.02  avgt    3        2948.530 ±     833.632  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                30                   0.02  avgt    3     1819933.146 ±     237.084    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          30                   0.02  avgt    3          67.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           30                   0.02  avgt    3          15.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   30                   0.05  avgt    3        1273.010 ±     152.441   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     30                   0.05  avgt    3        3479.696 ±     417.615  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                30                   0.05  avgt    3     4645232.909 ±       0.855    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          30                   0.05  avgt    3          79.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           30                   0.05  avgt    3          17.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   30                   0.10  avgt    3        2431.701 ±     469.235   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     30                   0.10  avgt    3        3811.998 ±     739.705  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                30                   0.10  avgt    3     9720376.987 ±       3.244    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          30                   0.10  avgt    3          86.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           30                   0.10  avgt    3          19.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   30                   0.25  avgt    3        6302.531 ±    1240.335   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     30                   0.25  avgt    3        3873.630 ±     763.656  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                30                   0.25  avgt    3    25600404.047 ±      10.419    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          30                   0.25  avgt    3          87.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           30                   0.25  avgt    3          20.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   30                   0.50  avgt    3       13581.009 ±     310.428   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     30                   0.50  avgt    3        3861.736 ±      88.341  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                30                   0.50  avgt    3    55000455.956 ±      29.348    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          30                   0.50  avgt    3          27.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           30                   0.50  avgt    3          11.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                   30                   0.75  avgt    3       19602.435 ±    4741.722   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                     30                   0.75  avgt    3        3964.341 ±     950.470  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm                30                   0.75  avgt    3    81486322.063 ±      53.404    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                          30                   0.75  avgt    3          27.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                           30                   0.75  avgt    3          12.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                  100                   0.02  avgt    3       60172.016 ±    2479.409   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                    100                   0.02  avgt    3        3958.179 ±     163.022  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm               100                   0.02  avgt    3   249768517.647 ±       0.001    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                         100                   0.02  avgt    3           9.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                          100                   0.02  avgt    3          28.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                  100                   0.05  avgt    3      155225.571 ±   11906.870   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                    100                   0.05  avgt    3        3820.728 ±     293.725  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm               100                   0.05  avgt    3   621944468.571 ±       0.001    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                         100                   0.05  avgt    3          10.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                          100                   0.05  avgt    3           7.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                  100                   0.10  avgt    3      343199.551 ±  205363.797   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                    100                   0.10  avgt    3        3564.251 ±    2100.844  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm               100                   0.10  avgt    3  1281941968.000 ±       0.001    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                         100                   0.10  avgt    3           7.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                          100                   0.10  avgt    3           7.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                  100                   0.25  avgt    3      785723.576 ±  171660.442   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                    100                   0.25  avgt    3        3901.663 ±     846.977  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm               100                   0.25  avgt    3  3214558820.000 ±       0.001    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                         100                   0.25  avgt    3           9.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                          100                   0.25  avgt    3           7.000                    ms
+JMHConditionalProductSpeedBenchmark.lambda                                  100                   0.50  avgt    3     1527091.042 ±  218914.184   us/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate                    100                   0.50  avgt    3        4010.510 ±     573.845  MB/sec
+JMHConditionalProductSpeedBenchmark.lambda:gc.alloc.rate.norm               100                   0.50  avgt    3  6422341856.000 ±       0.001    B/op
+JMHConditionalProductSpeedBenchmark.lambda:gc.count                         100                   0.50  avgt    3          14.000                counts
+JMHConditionalProductSpeedBenchmark.lambda:gc.time                          100                   0.50  avgt    3           9.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         10                   0.02  avgt    3          15.585 ±       0.572   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           10                   0.02  avgt    3        4782.705 ±     175.763  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      10                   0.02  avgt    3       78168.109 ±       0.006    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                10                   0.02  avgt    3          40.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 10                   0.02  avgt    3          15.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         10                   0.05  avgt    3          29.571 ±       1.105   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           10                   0.05  avgt    3        5029.306 ±     187.073  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      10                   0.05  avgt    3      155960.208 ±       0.031    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                10                   0.05  avgt    3          36.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 10                   0.05  avgt    3          15.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         10                   0.10  avgt    3          55.050 ±       7.513   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           10                   0.10  avgt    3        4865.244 ±     662.081  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      10                   0.10  avgt    3      280872.385 ±       0.057    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                10                   0.10  avgt    3          36.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 10                   0.10  avgt    3          15.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         10                   0.25  avgt    3         147.974 ±       8.998   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           10                   0.25  avgt    3        4620.237 ±     280.400  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      10                   0.25  avgt    3      716953.035 ±       0.063    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                10                   0.25  avgt    3          34.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 10                   0.25  avgt    3          14.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         10                   0.50  avgt    3         189.898 ±       7.958   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           10                   0.50  avgt    3        5326.332 ±     224.618  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      10                   0.50  avgt    3     1060713.331 ±       0.123    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                10                   0.50  avgt    3          38.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 10                   0.50  avgt    3          17.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         10                   0.75  avgt    3         308.675 ±      20.663   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           10                   0.75  avgt    3        4655.146 ±     312.630  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      10                   0.75  avgt    3     1506874.162 ±       0.192    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                10                   0.75  avgt    3          34.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 10                   0.75  avgt    3          15.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         20                   0.02  avgt    3         179.385 ±       9.658   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           20                   0.02  avgt    3        4015.121 ±     215.524  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      20                   0.02  avgt    3      755321.258 ±       0.040    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                20                   0.02  avgt    3          82.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 20                   0.02  avgt    3          24.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         20                   0.05  avgt    3         406.285 ±       7.329   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           20                   0.05  avgt    3        3876.357 ±      70.322  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      20                   0.05  avgt    3     1651578.842 ±       0.055    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                20                   0.05  avgt    3          78.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 20                   0.05  avgt    3          24.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         20                   0.10  avgt    3         604.850 ±      28.613   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           20                   0.10  avgt    3        5014.964 ±     238.360  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      20                   0.10  avgt    3     3180972.236 ±       0.081    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                20                   0.10  avgt    3          36.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 20                   0.10  avgt    3          17.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         20                   0.25  avgt    3        1502.060 ±       8.343   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           20                   0.25  avgt    3        4422.004 ±      23.804  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      20                   0.25  avgt    3     6965522.501 ±       0.165    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                20                   0.25  avgt    3          31.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 20                   0.25  avgt    3          19.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         20                   0.50  avgt    3        2860.104 ±     265.289   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           20                   0.50  avgt    3        4457.473 ±     413.302  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      20                   0.50  avgt    3    13369339.996 ±       1.587    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                20                   0.50  avgt    3          31.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 20                   0.50  avgt    3          21.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         20                   0.75  avgt    3        4374.016 ±     122.318   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           20                   0.75  avgt    3        4230.322 ±     117.583  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      20                   0.75  avgt    3    19404310.530 ±       1.394    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                20                   0.75  avgt    3          28.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 20                   0.75  avgt    3          23.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         30                   0.02  avgt    3         900.310 ±     168.839   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           30                   0.02  avgt    3        3298.812 ±     616.038  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      30                   0.02  avgt    3     3114334.302 ±       1.194    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                30                   0.02  avgt    3          68.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 30                   0.02  avgt    3          23.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         30                   0.05  avgt    3        1753.748 ±     659.678   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           30                   0.05  avgt    3        3885.703 ±    1445.398  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      30                   0.05  avgt    3     7144404.262 ±       4.675    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                30                   0.05  avgt    3          51.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 30                   0.05  avgt    3          25.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         30                   0.10  avgt    3        2749.056 ±     414.493   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           30                   0.10  avgt    3        4847.432 ±     728.058  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      30                   0.10  avgt    3    13974075.196 ±       2.772    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                30                   0.10  avgt    3          48.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 30                   0.10  avgt    3          34.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         30                   0.25  avgt    3        8223.591 ±     222.258   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           30                   0.25  avgt    3        3992.487 ±     110.073  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      30                   0.25  avgt    3    34432081.327 ±       4.936    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                30                   0.25  avgt    3          26.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 30                   0.25  avgt    3          45.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         30                   0.50  avgt    3       21176.879 ±   31028.099   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           30                   0.50  avgt    3        3195.405 ±    4803.078  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      30                   0.50  avgt    3    70652555.038 ±     196.165    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                30                   0.50  avgt    3          12.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 30                   0.50  avgt    3         536.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                         30                   0.75  avgt    3       33472.003 ±   29695.643   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate           30                   0.75  avgt    3        2995.102 ±    2713.386  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm      30                   0.75  avgt    3   104966272.211 ±     210.230    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count                30                   0.75  avgt    3          18.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                 30                   0.75  avgt    3         727.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                        100                   0.02  avgt    3      128734.232 ±  180335.751   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate          100                   0.02  avgt    3        2322.517 ±    3217.854  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm     100                   0.02  avgt    3   312347590.444 ±    1028.725    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count               100                   0.02  avgt    3          19.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                100                   0.02  avgt    3         704.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                        100                   0.05  avgt    3      363324.703 ±  561461.645   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate          100                   0.05  avgt    3        1978.158 ±    3212.314  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm     100                   0.05  avgt    3   750002828.667 ±    6172.349    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count               100                   0.05  avgt    3          20.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                100                   0.05  avgt    3        1183.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                        100                   0.10  avgt    3      757575.833 ± 1583005.345   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate          100                   0.10  avgt    3        1917.535 ±    3830.447  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm     100                   0.10  avgt    3  1510786436.000 ±       0.001    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count               100                   0.10  avgt    3          25.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                100                   0.10  avgt    3        1684.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                        100                   0.25  avgt    3     1986911.653 ± 2975897.471   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate          100                   0.25  avgt    3        1796.243 ±    2693.643  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm     100                   0.25  avgt    3  3726516080.000 ±       0.001    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count               100                   0.25  avgt    3          36.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                100                   0.25  avgt    3        2368.000                    ms
+JMHConditionalProductSpeedBenchmark.prunedJavaStream                        100                   0.50  avgt    3     3940480.875 ± 1343756.702   us/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate          100                   0.50  avgt    3        1780.449 ±     610.218  MB/sec
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.alloc.rate.norm     100                   0.50  avgt    3  7355649488.000 ±       0.001    B/op
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.count               100                   0.50  avgt    3         103.000                counts
+JMHConditionalProductSpeedBenchmark.prunedJavaStream:gc.time                100                   0.50  avgt    3        4033.000                    ms

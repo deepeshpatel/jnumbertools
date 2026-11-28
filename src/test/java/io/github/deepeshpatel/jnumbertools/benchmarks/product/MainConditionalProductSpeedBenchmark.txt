@@ -1,0 +1,370 @@
+Conditional Product Full API Comparison Benchmark (V4, tabular)
+============================================================
+Warmup rounds:       2
+Measurement rounds:  3
+Pruned Stream limit: 1000000000
+Sizes:               [10, 20, 30, 40, 60, 80, 100, 120, 130, 150]
+Enabled APIs:        [COMPILED, LAMBDA, PRUNED_STREAM]
+Enabled operations:  [COUNT, BY_RANKS, LEX_ORDER]
+
+Problem Statement
+============================================================
+
+Find valid configurations of:
+
+    Operating System x Browser x Network x Database x Region
+
+Operating System has two possible values: Linux, Windows.
+
+Rules:
+1. Linux:   Browser, Network, Database and Region must each be in their accepted values.
+2. Windows: Browser, Database and Region must each be in their accepted values;
+            Network has no restriction.
+
+The accepted values are generated according to the requested validity ratio.
+The integer accepted-value count is selected to produce the closest achievable
+overall validity ratio. The remaining values are rejected wherever a restriction applies.
+
+Operations compared (toggle in ENABLED_OPS):
+    count()
+    byRanks(midrank)
+    lexOrder() -- full walk via forEach(), counted and sequence-verified
+
+Implementations compared (toggle in ENABLED_APIS):
+    Compiled pairwise when-then API
+    Compound Condition API
+    Lambda Engine API
+    Incrementally pruned Java Stream
+
+============================================================
+
+
+Validity ratio = 2%
+--------------------------------------------------------------------------------------
+Method               Size               Compiled      Lambda Engine      Pruned-Stream
+--------------------------------------------------------------------------------------
+
+  Size 10 | Matches: 351 | Actual validity: 1.755%
+count()              10                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     10                 0.007 ms           0.007 ms                 NA
+Full Iteration       10                 0.063 ms           0.065 ms           0.218 ms
+
+  Size 20 | Matches: 5616 | Actual validity: 1.755%
+count()              20                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     20                 0.006 ms           0.007 ms                 NA
+Full Iteration       20                 0.388 ms           0.307 ms           1.031 ms
+
+  Size 30 | Matches: 28431 | Actual validity: 1.755%
+count()              30                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     30                 0.006 ms           0.005 ms                 NA
+Full Iteration       30                 1.107 ms           0.671 ms           3.863 ms
+
+  Size 40 | Matches: 89856 | Actual validity: 1.755%
+count()              40                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     40                 0.003 ms           0.003 ms                 NA
+Full Iteration       40                 3.424 ms           2.339 ms           4.663 ms
+
+  Size 60 | Matches: 541861 | Actual validity: 2.091%
+count()              60                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     60                 0.008 ms           0.007 ms                 NA
+Full Iteration       60                13.590 ms          11.914 ms          20.692 ms
+
+  Size 80 | Matches: 1640625 | Actual validity: 2.003%
+count()              80                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     80                 0.012 ms           0.016 ms                 NA
+Full Iteration       80                34.614 ms          34.339 ms          60.949 ms
+
+  Size 100 | Matches: 3902621 | Actual validity: 1.951%
+count()              100                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     100                0.008 ms           0.007 ms                 NA
+Full Iteration       100               80.369 ms          83.796 ms         145.246 ms
+
+  Size 120 | Matches: 7952521 | Actual validity: 1.918%
+count()              120                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     120                0.008 ms           0.008 ms                 NA
+Full Iteration       120              159.771 ms         159.864 ms         306.514 ms
+
+  Size 130 | Matches: 11785491 | Actual validity: 2.063%
+count()              130                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     130                0.003 ms           0.003 ms                 NA
+Full Iteration       130              236.280 ms         236.272 ms         466.525 ms
+
+  Size 150 | Matches: 20453131 | Actual validity: 2.020%
+count()              150                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     150                0.003 ms           0.004 ms                 NA
+Full Iteration       150              408.168 ms         410.213 ms         807.433 ms
+
+Validity ratio = 5%
+--------------------------------------------------------------------------------------
+Method               Size               Compiled      Lambda Engine      Pruned-Stream
+--------------------------------------------------------------------------------------
+
+  Size 10 | Matches: 896 | Actual validity: 4.480%
+count()              10                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     10                 0.001 ms           0.001 ms                 NA
+Full Iteration       10                 0.021 ms           0.021 ms           0.048 ms
+
+  Size 20 | Matches: 14336 | Actual validity: 4.480%
+count()              20                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     20                 0.001 ms           0.001 ms                 NA
+Full Iteration       20                 0.300 ms           0.311 ms           0.576 ms
+
+  Size 30 | Matches: 72576 | Actual validity: 4.480%
+count()              30                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     30                 0.002 ms           0.002 ms                 NA
+Full Iteration       30                 1.485 ms           1.516 ms           2.830 ms
+
+  Size 40 | Matches: 280041 | Actual validity: 5.470%
+count()              40                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     40                 0.002 ms           0.002 ms                 NA
+Full Iteration       40                 5.602 ms           5.613 ms          10.104 ms
+
+  Size 60 | Matches: 1328125 | Actual validity: 5.124%
+count()              60                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     60                 0.002 ms           0.002 ms                 NA
+Full Iteration       60                26.677 ms          26.968 ms          46.776 ms
+
+  Size 80 | Matches: 4060881 | Actual validity: 4.957%
+count()              80                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     80                 0.004 ms           0.003 ms                 NA
+Full Iteration       80                81.891 ms          80.782 ms         143.465 ms
+
+  Size 100 | Matches: 9717861 | Actual validity: 4.859%
+count()              100                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     100                0.003 ms           0.002 ms                 NA
+Full Iteration       100              194.489 ms         203.456 ms         362.642 ms
+
+  Size 120 | Matches: 21250000 | Actual validity: 5.124%
+count()              120                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     120                0.003 ms           0.003 ms                 NA
+Full Iteration       120              424.237 ms         425.104 ms         734.437 ms
+
+  Size 130 | Matches: 28973376 | Actual validity: 5.072%
+count()              130                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     130                0.003 ms           0.003 ms                 NA
+Full Iteration       130              575.755 ms         576.367 ms         970.841 ms
+
+  Size 150 | Matches: 50525536 | Actual validity: 4.990%
+count()              150                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     150                0.002 ms           0.002 ms                 NA
+Full Iteration       150             1001.798 ms        1001.485 ms        1789.797 ms
+
+Validity ratio = 10%
+--------------------------------------------------------------------------------------
+Method               Size               Compiled      Lambda Engine      Pruned-Stream
+--------------------------------------------------------------------------------------
+
+  Size 10 | Matches: 1875 | Actual validity: 9.375%
+count()              10                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     10                 0.002 ms           0.001 ms                 NA
+Full Iteration       10                 0.042 ms           0.041 ms           0.094 ms
+
+  Size 20 | Matches: 30000 | Actual validity: 9.375%
+count()              20                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     20                 0.001 ms           0.001 ms                 NA
+Full Iteration       20                 0.634 ms           0.628 ms           1.149 ms
+
+  Size 30 | Matches: 151875 | Actual validity: 9.375%
+count()              30                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     30                 0.002 ms           0.002 ms                 NA
+Full Iteration       30                 3.065 ms           3.053 ms           5.305 ms
+
+  Size 40 | Matches: 480000 | Actual validity: 9.375%
+count()              40                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     40                 0.001 ms           0.001 ms                 NA
+Full Iteration       40                 9.720 ms           9.825 ms          17.073 ms
+
+  Size 60 | Matches: 2710981 | Actual validity: 10.459%
+count()              60                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     60                 0.003 ms           0.002 ms                 NA
+Full Iteration       60                53.824 ms          54.408 ms          90.399 ms
+
+  Size 80 | Matches: 8339441 | Actual validity: 10.180%
+count()              80                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     80                 0.007 ms           0.008 ms                 NA
+Full Iteration       80               165.835 ms         165.497 ms         301.675 ms
+
+  Size 100 | Matches: 20030301 | Actual validity: 10.015%
+count()              100                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     100                0.003 ms           0.004 ms                 NA
+Full Iteration       100              397.412 ms         398.331 ms         685.208 ms
+
+  Size 120 | Matches: 41083561 | Actual validity: 9.906%
+count()              120                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     120                0.005 ms           0.004 ms                 NA
+Full Iteration       120              809.558 ms         810.457 ms        1388.094 ms
+
+  Size 130 | Matches: 56349216 | Actual validity: 9.865%
+count()              130                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     130                0.002 ms           0.002 ms                 NA
+Full Iteration       130             1117.708 ms        1127.542 ms        1960.479 ms
+
+  Size 150 | Matches: 99208576 | Actual validity: 9.798%
+count()              150                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     150                0.003 ms           0.003 ms                 NA
+Full Iteration       150             1979.476 ms        1973.173 ms        3472.668 ms
+
+Validity ratio = 25%
+--------------------------------------------------------------------------------------
+Method               Size               Compiled      Lambda Engine      Pruned-Stream
+--------------------------------------------------------------------------------------
+
+  Size 10 | Matches: 5831 | Actual validity: 29.155%
+count()              10                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     10                 0.001 ms           0.001 ms                 NA
+Full Iteration       10                 0.128 ms           0.127 ms           0.232 ms
+
+  Size 20 | Matches: 72501 | Actual validity: 22.657%
+count()              20                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     20                 0.001 ms           0.001 ms                 NA
+Full Iteration       20                 1.575 ms           1.466 ms           2.744 ms
+
+  Size 30 | Matches: 400000 | Actual validity: 24.691%
+count()              30                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     30                 0.001 ms           0.001 ms                 NA
+Full Iteration       30                 8.029 ms           8.826 ms          14.728 ms
+
+  Size 40 | Matches: 1318761 | Actual validity: 25.757%
+count()              40                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     40                 0.002 ms           0.002 ms                 NA
+Full Iteration       40                26.652 ms          26.226 ms          43.636 ms
+
+  Size 60 | Matches: 6400000 | Actual validity: 24.691%
+count()              60                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     60                 0.001 ms           0.001 ms                 NA
+Full Iteration       60               127.762 ms         128.013 ms         214.053 ms
+
+  Size 80 | Matches: 21100176 | Actual validity: 25.757%
+count()              80                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     80                 0.002 ms           0.002 ms                 NA
+Full Iteration       80               419.137 ms         422.352 ms         680.351 ms
+
+  Size 100 | Matches: 50227421 | Actual validity: 25.114%
+count()              100                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     100                0.003 ms           0.002 ms                 NA
+Full Iteration       100             1011.595 ms        1010.665 ms        1647.404 ms
+
+  Size 120 | Matches: 102400000 | Actual validity: 24.691%
+count()              120                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     120                0.001 ms           0.002 ms                 NA
+Full Iteration       120             2038.639 ms        2070.191 ms        3335.373 ms
+
+  Size 130 | Matches: 142895151 | Actual validity: 25.016%
+count()              130                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     130                0.004 ms           0.004 ms                 NA
+Full Iteration       130             2861.651 ms        2860.422 ms        4751.706 ms
+
+  Size 150 | Matches: 250000000 | Actual validity: 24.691%
+count()              150                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     150                0.003 ms           0.003 ms                 NA
+Full Iteration       150             5033.494 ms        5057.451 ms        7923.823 ms
+
+Validity ratio = 50%
+--------------------------------------------------------------------------------------
+Method               Size               Compiled      Lambda Engine      Pruned-Stream
+--------------------------------------------------------------------------------------
+
+  Size 10 | Matches: 9216 | Actual validity: 46.080%
+count()              10                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     10                 0.000 ms           0.001 ms                 NA
+Full Iteration       10                 0.206 ms           0.203 ms           0.345 ms
+
+  Size 20 | Matches: 147456 | Actual validity: 46.080%
+count()              20                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     20                 0.001 ms           0.001 ms                 NA
+Full Iteration       20                 3.061 ms           3.026 ms           4.861 ms
+
+  Size 30 | Matches: 859375 | Actual validity: 53.048%
+count()              30                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     30                 0.001 ms           0.001 ms                 NA
+Full Iteration       30                17.291 ms          18.477 ms          27.442 ms
+
+  Size 40 | Matches: 2623401 | Actual validity: 51.238%
+count()              40                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     40                 0.001 ms           0.002 ms                 NA
+Full Iteration       40                55.787 ms          52.890 ms          86.613 ms
+
+  Size 60 | Matches: 12823741 | Actual validity: 49.474%
+count()              60                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     60                 0.002 ms           0.002 ms                 NA
+Full Iteration       60               256.758 ms         269.985 ms         424.272 ms
+
+  Size 80 | Matches: 41974416 | Actual validity: 51.238%
+count()              80                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     80                 0.001 ms           0.002 ms                 NA
+Full Iteration       80               847.083 ms         850.404 ms        1360.598 ms
+
+  Size 100 | Matches: 100348976 | Actual validity: 50.174%
+count()              100                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     100                0.001 ms           0.002 ms                 NA
+Full Iteration       100             2059.276 ms        2047.132 ms        3280.627 ms
+
+  Size 120 | Matches: 205179856 | Actual validity: 49.474%
+count()              120                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     120                0.003 ms           0.002 ms                 NA
+Full Iteration       120             4193.859 ms        4174.438 ms        6438.427 ms
+
+  Size 130 | Matches: 281079776 | Actual validity: 49.207%
+count()              130                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     130                0.003 ms           0.002 ms                 NA
+Full Iteration       130             5807.757 ms        5800.495 ms        8837.507 ms
+
+  Size 150 | Matches: 508016691 | Actual validity: 50.174%
+count()              150                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     150                0.002 ms           0.002 ms                 NA
+Full Iteration       150            10799.863 ms       10585.807 ms       16130.437 ms
+
+Validity ratio = 75%
+--------------------------------------------------------------------------------------
+Method               Size               Compiled      Lambda Engine      Pruned-Stream
+--------------------------------------------------------------------------------------
+
+  Size 10 | Matches: 13851 | Actual validity: 69.255%
+count()              10                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     10                 0.000 ms           0.001 ms                 NA
+Full Iteration       10                 0.307 ms           0.308 ms           0.497 ms
+
+  Size 20 | Matches: 221616 | Actual validity: 69.255%
+count()              20                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     20                 0.001 ms           0.001 ms                 NA
+Full Iteration       20                 4.774 ms           4.755 ms           7.376 ms
+
+  Size 30 | Matches: 1273216 | Actual validity: 78.594%
+count()              30                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     30                 0.001 ms           0.001 ms                 NA
+Full Iteration       30                28.288 ms          27.959 ms          40.482 ms
+
+  Size 40 | Matches: 3900281 | Actual validity: 76.177%
+count()              40                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     40                 0.001 ms           0.001 ms                 NA
+Full Iteration       40                83.474 ms          84.171 ms         129.212 ms
+
+  Size 60 | Matches: 19133125 | Actual validity: 73.816%
+count()              60                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     60                 0.001 ms           0.001 ms                 NA
+Full Iteration       60               407.369 ms         404.406 ms         590.021 ms
+
+  Size 80 | Matches: 62404496 | Actual validity: 76.177%
+count()              80                 0.000 ms           0.000 ms                 NA
+byRanks(midrank)     80                 0.001 ms           0.001 ms                 NA
+Full Iteration       80              1304.960 ms        1319.941 ms        1988.888 ms
+
+  Size 100 | Matches: 149508096 | Actual validity: 74.754%
+count()              100                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     100                0.001 ms           0.002 ms                 NA
+Full Iteration       100             3232.140 ms        3267.980 ms        4728.992 ms
+
+  Size 120 | Matches: 315922761 | Actual validity: 76.177%
+count()              120                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     120                0.002 ms           0.002 ms                 NA
+Full Iteration       120             6616.080 ms        6809.487 ms        9824.357 ms
+
+  Size 130 | Matches: 432000000 | Actual validity: 75.628%
+count()              130                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     130                0.002 ms           0.002 ms                 NA
+Full Iteration       130             9575.987 ms        9537.529 ms       14083.312 ms
+
+  Size 150 | Matches: 756884736 | Actual validity: 74.754%
+count()              150                0.000 ms           0.000 ms                 NA
+byRanks(midrank)     150                0.002 ms           0.002 ms                 NA
+Full Iteration       150            15276.911 ms       15633.959 ms       23319.951 ms

@@ -48,7 +48,7 @@ public class MainConditionalProductSpeedBenchmark {
     private enum Op {
         COUNT("count()"),
         BY_RANKS("byRanks(midrank)"),
-        LEX_ORDER("lexOrder()");
+        LEX_ORDER("Full Iteration");
 
         final String label;
 
@@ -67,11 +67,11 @@ public class MainConditionalProductSpeedBenchmark {
             Op.COUNT, Op.BY_RANKS, Op.LEX_ORDER
     );
 
-    private static final int WARMUP_ROUNDS = 0;
-    private static final int MEASUREMENT_ROUNDS = 1;
+    private static final int WARMUP_ROUNDS = 2;
+    private static final int MEASUREMENT_ROUNDS = 3;
 
     private static final int[] SIZES = {
-            10, 20, 30, 100
+            10, 20, 30, 40, 60, 80, 100, 120, 130, 150
     };
 
     private static final double[] VALIDITY_RATIOS = {
@@ -171,7 +171,7 @@ public class MainConditionalProductSpeedBenchmark {
             Map<Api, Double> timings = new LinkedHashMap<>();
 
             for (Api api : methods.keySet()) {
-                if (api == Api.PRUNED_STREAM && skipPrunedStream) continue;
+                if (api == Api.PRUNED_STREAM ) continue; //&& skipPrunedStream
 
                 timings.put(api, measureCount(methods.get(api).count, expectedCount));
             }
@@ -188,7 +188,7 @@ public class MainConditionalProductSpeedBenchmark {
                 Object expectedMiddle = methods.get(reference).byRank.apply(midrank);
 
                 for (Api api : methods.keySet()) {
-                    if (api == Api.PRUNED_STREAM && skipPrunedStream) continue;
+                    if (api == Api.PRUNED_STREAM ) continue; //&& skipPrunedStream
 
                     timings.put(
                             api,
@@ -235,7 +235,7 @@ public class MainConditionalProductSpeedBenchmark {
             int size) {
 
         for (Map.Entry<Api, BenchmarkMethod> entry : methods.entrySet()) {
-            if (entry.getKey() == Api.PRUNED_STREAM && skipPrunedStream) continue;
+            if (entry.getKey() == Api.PRUNED_STREAM ) continue; //&& skipPrunedStream
 
             BigInteger actual = entry.getValue().count.get();
 
@@ -254,7 +254,7 @@ public class MainConditionalProductSpeedBenchmark {
 
         for (Map.Entry<Api, BenchmarkMethod> entry : methods.entrySet()) {
             if (entry.getKey() == reference) continue;
-            if (entry.getKey() == Api.PRUNED_STREAM && skipPrunedStream) continue;
+            if (entry.getKey() == Api.PRUNED_STREAM ) continue; //&& skipPrunedStream
 
             Object actualMiddle = entry.getValue().byRank.apply(midrank);
 
@@ -758,6 +758,15 @@ public class MainConditionalProductSpeedBenchmark {
 
         for (Api api : CANONICAL_ORDER) {
             if (!presentApis.contains(api)) continue;
+
+            if (api == Api.PRUNED_STREAM
+                    && (op == Op.COUNT || op == Op.BY_RANKS)) {
+                row.append(String.format(
+                        " %" + VALUE_COL_WIDTH + "s",
+                        "NA"
+                ));
+                continue;
+            }
 
             if (api == Api.PRUNED_STREAM && skipPrunedStream) {
                 row.append(String.format(

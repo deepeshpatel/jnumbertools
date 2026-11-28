@@ -108,7 +108,7 @@ A shared `Calculator` can be supplied through `Product.constrained(calculator)` 
 
 Use `Product.conditional(dimensions...)` to create a product whose valid tuples are determined by conditions. Conditions are compiled before traversal, allowing invalid branches to be pruned without first generating complete tuples.
 
-### 3.1 Pairwise precompiled condional product
+### 3.1 Pairwise precompiled conditional product
 
 Pairwise rules express relationships between two dimensions using the values that satisfy the business requirement.
 
@@ -126,7 +126,7 @@ Product.conditional(operatingSystems, browsers, networks)
 
 The pairwise builder supports lexicographical traversal, every-M-th traversal, rank-based access, counting and random selection.
 
-### 3.2 Lambda Engine - for precompiled complex conditions  
+### 3.2 Lambda Engine - for precompiled complex conditions
 
 Use `withLambda(...)` when a condition involves multiple dimensions and is more naturally expressed as a predicate. Typed whole-product predicate overloads are available for one through five dimensions; the no-argument `withLambda()` form provides an array-based predicate for arbitrary dimension counts.
 
@@ -172,29 +172,68 @@ Product.conditional(os, browser, network, database, region)
 
 The Lambda Engine supports lexicographical traversal, every-M-th traversal, rank-based access, counting and random selection. Its `anyOrder()` operation does not guarantee lexicographical order.
 
-### 3.3 The probe limit, and a hybrid pattern for conditions that do not decompose
+### 3.3 Compilation limits and a hybrid pattern for conditions that do not decompose
 
-A Lambda rule is compiled by evaluating its predicate once for every combination of its antecedent dimensions against every value of its target dimension (`antecedent combinations x target values`). To keep builder construction bounded, this probe count is capped; a rule that would exceed the cap is rejected immediately, with the exact count reported in the exception message, rather than silently doing an unbounded amount of work.
+The conditional-product implementation uses different safeguards for different stages of compilation. These limits address different sources of computational and memory cost; they should not be treated as one interchangeable limit.
 
-Most multi-dimension conditions are actually several independent two-dimension rules sharing a common trigger, and these decompose cleanly:
+**Lambda predicate probe limit — 1,000,000**
+
+A Lambda rule is compiled by treating the last dimension in its scope as the target and the preceding dimensions as its antecedent. The predicate is evaluated once for every combination of antecedent values and every value of the target dimension:
+
+`antecedent combinations × target values`
+
+The total number of predicate probes is capped at 1,000,000. A rule that would exceed this limit is rejected during builder construction, with the required probe count reported in the exception message.
+
+For example:
+
+| Lambda scope | Dimension sizes | Predicate probes |
+|---|---:|---:|
+| 2 dimensions | 100 × 100 | 10,000 |
+| 3 dimensions | 100 × 100 × 100 | 1,000,000 |
+| 4 dimensions | 50 × 50 × 20 × 20 | 1,000,000 |
+| 4 dimensions | 100 × 100 × 100 × 100 | 100,000,000 |
+
+The limit applies to scoped Lambda predicates too. Restricting a predicate to fewer dimensions reduces the number of probes, but does not remove the limit. A two-dimension Lambda predicate, for example, is still subject to the same probe limit.
+
+**Contracted loop-block enumeration limit — 1,000,000**
+
+After rules are compiled, the constraint graph groups dimensions that must be enumerated together into loop blocks. The product of the original dimension sizes in a multi-dimension loop block is also bounded by 1,000,000 combinations.
+
+This is a separate limit from Lambda predicate probing. A set of individually acceptable rules can still create a loop block whose combined dimension product exceeds this limit.
+
+**Combined pair-table limit — 50,000,000 cells**
+
+When multiple rules connect the same pair of contracted blocks, the implementation may need a combined table representing pairs of their joint assignments. The size of this table is bounded by 50,000,000 cells.
+
+This is another separate safeguard. Whether it applies depends on the structure of the constraint graph.
+
+#### Decomposing conditions into independent pairwise rules
+
+Many multi-dimension conditions are actually several independent two-dimension rules sharing a common trigger. These can be decomposed when the original condition is a conjunction (AND) of independently-checkable conditions.
 
 ```java
 // One four-dimension-looking rule...
 .when((os, browser, network, database) ->
     accepted(os, browser) && accepted(os, network) && accepted(os, database))
 
-// ...is equivalent to three independent two-dimension rules, because registered
-// rules combine by intersection (AND). Each one routes to the lightweight
-// pairwise relation table and never approaches the probe limit, regardless of
-// dimension size:
+// ...is equivalent to three independent two-dimension rules,
+// because registered rules combine by intersection (AND).
 .when(os, browser).matches((o, b) -> accepted(o, b))
 .when(os, network).matches((o, n) -> accepted(o, n))
 .when(os, database).matches((o, d) -> accepted(o, d))
 ```
 
-This decomposition only works for conditions that are conjunctive (AND) across independently-checkable dimension pairs. It does **not** work for a condition that is a disjunction (OR) spanning three or more dimensions, such as "valid if the browser is accepted **or** the network is accepted **or** the database is accepted." Splitting an OR into separate rules is incorrect, not just inefficient: the builder combines separately-registered rules by intersection, so two rules meant to express an OR would silently produce the AND of both conditions instead. A condition like this must be evaluated jointly, and if it spans enough dimensions at large enough sizes, it can exceed the probe limit with no equivalent pairwise rewrite.
+Each two-dimension Lambda rule is compiled into a lightweight binary relation table rather than a multi-trigger rule. This avoids combining those independent rules into one larger multi-trigger scope merely because they share a dimension.
 
-When that happens, and an exact `count()`, `byRanks(...)` or `lexOrder()` traversal is not required, apply the non-decomposable part as a plain stream filter on top of `anyOrder()`, after letting the builder prune whatever part of the condition *is* compilable:
+However, each scoped Lambda predicate still has to evaluate its own antecedent combinations against its target values and is subject to the 1,000,000 probe limit. The resulting constraint graph is also subject to the loop-block and combined pair-table limits described above.
+
+This decomposition only works for conditions that are conjunctive (AND) across independently-checkable dimension pairs. It does **not** work for a condition that is a disjunction (OR) spanning three or more dimensions, such as "valid if the browser is accepted **or** the network is accepted **or** the database is accepted."
+
+Splitting an OR into separate rules is incorrect, not just inefficient: the builder combines separately registered rules by intersection, so two rules meant to express an OR would silently produce the AND of both conditions instead. A condition like this must be evaluated jointly, and if it spans enough dimensions at large enough sizes, it can exceed the probe limit with no equivalent pairwise rewrite.
+
+#### Hybrid approach for non-decomposable conditions
+
+When the non-decomposable part exceeds the Lambda probe limit, and an exact `count()`, `byRanks(...)` or `lexOrder()` traversal over the fully filtered result is not required, apply that part as a plain stream filter on top of `anyOrder()`. The builder can still prune whatever part of the condition is compilable.
 
 ```java
 Product.conditional(os, browser, network, database, region)
@@ -209,7 +248,9 @@ Product.conditional(os, browser, network, database, region)
     .forEach(System.out::println);
 ```
 
-This never triggers Lambda compilation for the OR condition, so the probe limit does not apply to it; the cost is visiting every tuple the compiled part of the rule still lets through, the same cost a manually pruned stream would pay for that part of the condition. The trade-off is that `count()`, `byRanks(...)` and exact-position `lexOrder()` access no longer reflect the filtered-out tuples once a plain `.filter()` is layered on top — use this pattern only when `anyOrder()` traversal is sufficient and an exact count or rank over the fully-filtered result is not required.
+This never triggers Lambda compilation for the OR condition, so the Lambda probe limit does not apply to it. The cost is visiting every tuple that survives the compiled constraints, just as a manually pruned stream would have to do.
+
+The trade-off is that `count()`, `byRanks(...)` and exact-position `lexOrder()` access no longer reflect the tuples filtered out by the plain `.filter()` operation. Use this pattern only when `anyOrder()` traversal is sufficient and an exact count or rank over the fully filtered result is not required.
 
 ## 4. Conditional Product vs. Pruned Stream Filtering
 
