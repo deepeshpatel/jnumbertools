@@ -34,10 +34,14 @@ libraryDependencies += "io.github.deepeshpatel" % "jnumbertools" % "5.0.0"
 
 ## Performance
 
-- **BigInteger Support**: Handle indices up to 10^100 and beyond
-- **Memory Efficient**: Stream-based generation for massive datasets
-- **Data-processing workflows**: Java iterators and streams can be adapted for use in applications built with Apache Spark, Flink, and Hadoop; framework-specific integration is handled by the application.
-- **Optimized Algorithms**: Efficient lexicographical generation and ranking
+Benchmarks comparing JNumberTools Cartesian Product generators with Java Stream implementations demonstrate:
+
+- **Simple Cartesian Product:** Approximately **2.1×–2.4× faster** than nested Java Streams in JMH full-traversal benchmarks, tested with products containing up to **2.56 million tuples**.
+- **Conditional Cartesian Product:** Approximately **1.5×–2× faster** than an incrementally pruned Java Stream in the supplied full-traversal benchmark.
+- **Compiled and Lambda engines:** The Conditional Product pairwise-rule and Lambda implementations have nearly identical traversal performance.
+- **Large conditional result spaces:** The Conditional Product benchmark completed full traversal of up to approximately **756.9 million valid configurations** in a five-dimensional workload.
+
+These are benchmark observations, not performance guarantees. Results depend on dimension sizes, validity ratios, constraint structure, and tuple-consumption costs. See the [Products guide](docs/products/README.md) for the product APIs.
 
 ## Public API entry points
 
