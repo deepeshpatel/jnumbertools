@@ -31,7 +31,7 @@ import java.util.Set;
  * @param <K> the element type
  * @author Deepesh Patel
  */
-public final class FrequencyMap<K> extends AbstractMap<K, Integer> implements Serializable {
+public final class FrequencyMap<K> extends AbstractMap<K, Integer> {
 
     private final Object[] keys;
     private final int[] counts;

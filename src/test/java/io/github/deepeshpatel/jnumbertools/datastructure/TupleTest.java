@@ -103,16 +103,4 @@ class TupleTest {
         assertEquals("owner changed it", t.get(0));
         assertThrows(NullPointerException.class, () -> Tuple.wrap(null));
     }
-
-    @Test
-    void survivesSerialization() throws Exception {
-        var t = tuple("A", 2);
-        var bytes = new ByteArrayOutputStream();
-        try (var out = new ObjectOutputStream(bytes)) {
-            out.writeObject(t);
-        }
-        try (var in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
-            assertEquals(t, in.readObject());
-        }
-    }
 }

@@ -26,7 +26,7 @@ import java.util.RandomAccess;
  * @param <E> the element type
  * @author Deepesh Patel
  */
-public final class Tuple<E> extends AbstractList<E> implements RandomAccess, Serializable {
+public final class Tuple<E> extends AbstractList<E> implements RandomAccess {
 
     private final Object[] items;
 

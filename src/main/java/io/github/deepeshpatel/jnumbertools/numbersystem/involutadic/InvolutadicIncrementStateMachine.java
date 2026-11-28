@@ -33,15 +33,14 @@ import java.util.Objects;
  */
 public final class InvolutadicIncrementStateMachine {
 
-    private final InvolutadicAlgorithms alg;
     private final int n;
 
-    private int[] digits;
-    private int[] maxDigit;
-    private int[] involution;
+    private final int[] digits;
+    private final int[] maxDigit;
+    private final int[] involution;
 
     // Persistent consumed state to avoid O(n) prefix replay
-    private boolean[] consumed;
+    private final boolean[] consumed;
 
     public InvolutadicIncrementStateMachine(int n, Calculator calculator) {
         this(n, BigInteger.ZERO, calculator);
@@ -57,7 +56,7 @@ public final class InvolutadicIncrementStateMachine {
         Objects.requireNonNull(calculator, "calculator");
 
         this.n   = n;
-        this.alg = new InvolutadicAlgorithms(calculator);
+        InvolutadicAlgorithms alg = new InvolutadicAlgorithms(calculator);
 
         this.digits     = alg.encode(rank, n);
         this.maxDigit   = new int[n];
