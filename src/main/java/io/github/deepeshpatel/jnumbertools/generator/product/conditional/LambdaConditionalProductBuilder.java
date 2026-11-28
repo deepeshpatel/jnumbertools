@@ -30,8 +30,10 @@ import java.util.function.Predicate;
  *
  * <p>Typed and scoped rules can be mixed in any order. A scoped rule returns the same builder type it was
  * started from, so a {@code Typed3} stays a {@code Typed3} and can still take a typed {@code when(predicate)}
- * or {@code and(list)}. Rules are combined with AND. The one-million-probe limit applies to each rule's
- * selected scope.</p>
+ * or {@code and(list)}. Rules are combined with AND. For predicates involving at least two dimensions, the
+ * one-million-probe limit applies to each rule's selected scope; the probe count is the product of the sizes
+ * of those dimensions. A unary predicate on a one-dimension product is different: it filters that dimension
+ * directly, evaluates the predicate once per input value, and is not subject to the one-million-probe limit.</p>
  *
  * <p>Every predicate must be deterministic and free of side effects. It is evaluated while the rule is being
  * added, not during counting or generation, so its result is fixed at that moment. Predicates that receive an
@@ -172,7 +174,16 @@ public final class LambdaConditionalProductBuilder {
         Typed1(ConditionalProductBuilder delegate) { super(requireDimensions(delegate, 1, "Typed1")); }
         @Override Typed1<A> with(ConditionalProductBuilder next) { return new Typed1<>(next); }
 
-        /** Keeps only the values of the dimension that satisfy {@code predicate}. */
+        /**
+         * Keeps only the values of the sole dimension that satisfy {@code predicate}.
+         *
+         * <p>The predicate is evaluated once per input value. This direct unary filter is not subject to the
+         * one-million-probe limit used when compiling predicates over two or more dimensions.</p>
+         *
+         * @param predicate condition each value must satisfy
+         * @return a builder containing only the values accepted by {@code predicate}
+         * @throws NullPointerException if {@code predicate} is null
+         */
         @SuppressWarnings("unchecked")
         public Typed1<A> when(Predicate<? super A> predicate) {
             Objects.requireNonNull(predicate, "predicate must not be null");
