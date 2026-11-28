@@ -32,7 +32,6 @@ import java.util.*;
  *   <li>Space Complexity: O(L + T), for the output/index arrays and frequency counts</li>
  *   <li>Memory Efficient: Generates permutations on-demand</li>
  * </ul>
- * </p>
  * <p>
  * <strong>Example:</strong> For multiset {A:2, B:1, C:1} with m=2, start=0:
  * Generates 0th, 2nd, 4th... permutations instead of all 12 permutations.

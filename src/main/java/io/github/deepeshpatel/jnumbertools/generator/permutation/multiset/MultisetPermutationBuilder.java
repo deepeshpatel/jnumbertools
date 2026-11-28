@@ -255,17 +255,15 @@ public final class MultisetPermutationBuilder<T> implements Builder<T> {
      *
      * byRanks([0, 2, 11]) → [A,A,B,C], [A,B,A,C], [C,B,A,A]
      * </pre>
-     * </p>
      *
      * <p>
      * <strong>Rank Validation:</strong>
      * <ul>
      *   <li>Ranks are 0-based positions in lexicographical order</li>
-     *   <li>Each rank must satisfy 0 ≤ rank < total permutations (n!/(∏fᵢ!))</li>
+     *   <li>Each rank must satisfy 0 ≤ rank &lt; total permutations (n!/(∏fᵢ!))</li>
      *   <li>Invalid ranks (negative, out of bounds) will throw {@link IllegalArgumentException} during iteration</li>
      *   <li>Null rank iterable throws {@link IllegalArgumentException} immediately</li>
      * </ul>
-     * </p>
      *
      * @param ranks Iterable of 0-based rank numbers
      * @return a new {@link MultisetPermutationByRanks} instance for generating permutations at specified ranks

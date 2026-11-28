@@ -213,7 +213,7 @@ public final class RepetitivePermutationBuilder<T> implements Builder<T> {
      * byRanks([0, 7]) → [A, A, A], [B, B, B]
      * </pre>
      *
-     * @param ranks Iterable of 0-based rank numbers (0 ≤ rank < nᵏ)
+     * @param ranks Iterable of 0-based rank numbers (0 ≤ rank &lt; nᵏ)
      * @return Permutation generator for specified ranks
      * @throws IllegalArgumentException if any rank ≥ nᵏ
      * @throws IllegalStateException if length k was not configured

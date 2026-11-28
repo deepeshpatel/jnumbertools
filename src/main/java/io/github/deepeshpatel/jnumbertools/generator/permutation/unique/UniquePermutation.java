@@ -21,7 +21,6 @@ import java.util.List;
  * [A, B, C], [A, C, B], [B, A, C], [B, C, A], [C, A, B], [C, B, A]
  * </pre>
  * Instances should be created via a builder (e.g., {@code new Permutations().unique(size).lexOrder()}).
- * </p>
  *
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel

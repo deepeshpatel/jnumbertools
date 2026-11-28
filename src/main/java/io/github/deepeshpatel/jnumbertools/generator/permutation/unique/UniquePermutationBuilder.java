@@ -39,7 +39,6 @@ import java.util.Random;
  *   <li><b>Rank-Based Access</b> - {@link #byRanks(Iterable)}: Generate permutations
  *       at specific lexicographical rank positions.</li>
  * </ul>
- * </p>
  *
  * <h2>Usage Examples</h2>
  *
@@ -148,9 +147,9 @@ public final class UniquePermutationBuilder<T> implements Builder<T> {
      * </p>
      *
      * @param m the step size between selected permutations (must be > 0)
-     * @param start the starting rank (0-based, must be ≥ 0 and < total permutations)
+     * @param start the starting rank (0-based, must be ≥ 0 and &lt; total permutations)
      * @return a generator for every mᵗʰ permutation in lexicographical order
-     * @throws IllegalArgumentException if m ≤ 0, start < 0, or start ≥ total permutations
+     * @throws IllegalArgumentException if m ≤ 0, start &lt; 0, or start ≥ total permutations
      */
     public UniquePermutationByRanks<T> lexOrderMth(BigInteger m, BigInteger start) {
         Util.validateLexOrderMthParams(m,start,count());
@@ -175,7 +174,7 @@ public final class UniquePermutationBuilder<T> implements Builder<T> {
      * byRanks([0, 2, 4]) → [A, B, C], [B, A, C], [C, A, B]
      * </pre>
      *
-     * @param ranks Iterable of 0-based rank numbers (0 ≤ rank < n!)
+     * @param ranks Iterable of 0-based rank numbers (0 ≤ rank &lt; n!)
      * @return Permutation generator for specified ranks
      * @throws IllegalArgumentException if any rank ≥ n!
      * @throws IllegalStateException if no generation strategy was selected

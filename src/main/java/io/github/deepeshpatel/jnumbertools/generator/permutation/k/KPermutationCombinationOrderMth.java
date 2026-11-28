@@ -29,7 +29,6 @@ import java.util.NoSuchElementException;
  * </ul>
  * For example, for [A, B, C], k=2, increment=2, start=0, it might generate [A, B], [A, C], [B, C],
  * skipping every other permutation (e.g., omitting [B, A], [C, A], [C, B]).
- * </p>
  *
  * @param <T> the type of elements in the permutations
  * @author Deepesh Patel

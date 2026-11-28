@@ -25,7 +25,7 @@ import java.util.NoSuchElementException;
  * </p>
  * <p>
  * <strong>This class is intended for internal use via {@link UniquePermutationBuilder}.</strong>
- * All parameter validation (non-negative ranks, ranks < n!, etc.) is performed in the builder methods
+ * All parameter validation (non-negative ranks, ranks &lt; n!, etc.) is performed in the builder methods
  * ({@code lexOrderMth}, {@code byRanks}, {@code choice}, {@code sample}) to ensure fail-fast behavior.
  * Direct instantiation of this class bypasses validation and is not part of the public API.
  * </p>

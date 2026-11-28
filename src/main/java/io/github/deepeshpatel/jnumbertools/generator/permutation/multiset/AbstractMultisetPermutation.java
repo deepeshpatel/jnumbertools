@@ -55,7 +55,6 @@ public abstract class AbstractMultisetPermutation<T> implements StreamableIterab
      * </ul>
      * Zero frequencies are permitted (element is ignored in generation but preserved for order).
      * An empty map is allowed and results in a single empty permutation.
-     * </p>
      *
      * @param multiset   a {@link LinkedHashMap} defining the multiset; keys determine lexicographical order,
      *                   values are non-negative frequencies (zero allowed)
