@@ -74,6 +74,16 @@ Derangadic d = new Derangadic(4, BigInteger.valueOf(2), calculator);
 - The Compiled Conditional Product supports pairwise rules and rank-based operations. The Lambda builder exposes `lexOrder()`, `anyOrder()`, `lexOrderMth(...)`, `byRanks(...)`, `choice(...)`, `sample(...)`, `count()` and `isEmpty()`. Typed whole-product predicates support up to five dimensions; use the array-based form for arbitrary dimensions. Scoped predicates inspect only their selected dimensions.
 - The Calculator may be shared across entry points that accept it, allowing combinatorial caches to be reused.
 
+## Cartesian Product Performance
+
+Benchmarks against Java Stream implementations show:
+
+- **Simple Product:** JMH full-traversal measurements show approximately 2.1×–2.4× faster execution than nested Java Streams for tested dimension sizes 5–40 (up to 2.56 million tuples).
+- **Conditional Product:** The compiled pairwise-rule and Lambda engines show nearly identical traversal performance and are approximately 1.5×–2× faster than an incrementally pruned Java Stream in the supplied five-dimensional benchmark.
+- **Scale tested:** Conditional Product completed full traversal of up to approximately 756.9 million valid configurations.
+
+The Simple Product and Conditional Product figures come from different workloads and baselines; do not compare their speedup figures directly. These are benchmark observations, not guarantees. Performance depends on dimension sizes, validity ratios, constraint structure, and tuple-consumption costs.
+
 ## Documentation
 
 - [README](https://github.com/deepeshpatel/jnumbertools/blob/main/README.md)
