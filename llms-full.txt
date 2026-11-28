@@ -470,3 +470,65 @@ Use the relevant builder family and documented methods. Do not assume that simil
 The `Product` entry point exposes three builder families: `Product.simple(list1, list2, ...)` for an unconstrained Cartesian product; `Product.constrained()` for combination, multi-selection and subset-range dimensions; and `Product.conditional(list1, list2, ...)` for a Pre-Compiled Conditional Product. The conditional builder supports Pairwise Rules and a Lambda Engine configured through `withLambda(...)` or `withLambda()`.
 
 The Lambda Engine has typed whole-product predicate overloads for one through five dimensions. For more dimensions, use the array-based `withLambda()` form. Scoped rules use `.when(dimensions...).matches(predicate)`. Predicates are compiled into constraints, subject to the documented probe limit.
+
+
+---
+
+# Cartesian Product Benchmarks
+
+The following measurements compare JNumberTools product generators with Java Stream implementations. They are workload-specific observations, not universal performance guarantees.
+
+## Simple Cartesian Product
+
+The Simple Product benchmark performs full traversal and consumption of the complete Cartesian product. The JMH results below are used as the representative measurements.
+
+| Dimension size | Tuples | JNumberTools (ms/op) | Nested Java Stream (ms/op) | Speedup |
+|---:|---:|---:|---:|---:|
+| 5 | 625 | 0.005 | 0.012 | 2.40× |
+| 10 | 10,000 | 0.066 | 0.144 | 2.18× |
+| 15 | 50,625 | 0.342 | 0.758 | 2.22× |
+| 20 | 160,000 | 1.086 | 2.322 | 2.14× |
+| 30 | 810,000 | 5.856 | 12.276 | 2.10× |
+| 40 | 2,560,000 | 17.229 | 37.117 | 2.15× |
+
+Across these JMH cases, JNumberTools achieved approximately **2.1×–2.4× faster full traversal** than nested Java Streams.
+
+## Conditional Cartesian Product
+
+The Conditional Product benchmark uses five dimensions:
+
+Operating System × Browser × Network × Database × Region
+
+The Operating System dimension has two values; each of the other dimensions has the configured size.
+
+Rules:
+- Linux: Browser, Network, Database, and Region must each be accepted.
+- Windows: Browser, Database, and Region must each be accepted; Network is unrestricted.
+
+The benchmark compares:
+1. Compiled pairwise `when-then` rules.
+2. The Lambda Engine.
+3. An incrementally pruned Java Stream.
+
+The table shows full-traversal measurements at dimension size 150.
+
+| Actual validity | Valid configurations | Compiled (ms) | Lambda (ms) | Pruned Stream (ms) | Compiled speedup |
+|---:|---:|---:|---:|---:|---:|
+| 2.020% | 20,453,131 | 408.168 | 410.213 | 807.433 | 1.98× |
+| 4.990% | 50,525,536 | 1,001.798 | 1,001.485 | 1,789.797 | 1.79× |
+| 9.798% | 99,208,576 | 1,979.476 | 1,973.173 | 3,472.668 | 1.75× |
+| 24.691% | 250,000,000 | 5,033.494 | 5,057.451 | 7,923.823 | 1.57× |
+| 50.174% | 508,016,691 | 10,799.863 | 10,585.807 | 16,130.437 | 1.49× |
+| 74.754% | 756,884,736 | 15,276.911 | 15,633.959 | 23,319.951 | 1.53× |
+
+Observations:
+- The compiled pairwise API and Lambda Engine have nearly identical full-traversal performance in this workload.
+- Both outperform the incrementally pruned Java Stream, by approximately 1.5×–2× in these largest-size cases.
+- The benchmark completed full traversal of up to approximately 756.9 million valid configurations.
+- The reported `count()` and `byRanks(midrank)` operations were very fast in this test, generally reported below 0.01 ms. The displayed values are rounded measurements and should not be interpreted as zero execution time.
+
+## How to Interpret These Results
+
+The Simple Product comparison uses nested Java Streams for an unrestricted Cartesian product. The Conditional Product comparison uses an incrementally pruned Stream, which is a stronger baseline than generating the complete product and filtering afterward. Their speedup figures therefore describe different workloads and should not be compared directly.
+
+The Simple Product figures above use the supplied JMH measurements. The Conditional Product figures use the supplied main-method benchmark output, treated here as benchmark measurements for the current comparison. The benchmark configurations, JVM, warmup, measurement rounds, and tuple-consumption logic affect results. Actual performance depends on dimension sizes, validity ratios, constraint structure, and the work performed for each tuple.
