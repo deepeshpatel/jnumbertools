@@ -1,4 +1,4 @@
-package io.github.deepeshpatel.jnumbertools.benchmarks.product.main;
+package io.github.deepeshpatel.jnumbertools.benchmarks.product;
 
 
 import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
@@ -27,7 +27,7 @@ import java.util.stream.Stream;
  * - Handles configurations with no usable reference API.
  * - Uses multiple warmup and measurement rounds.
  */
-public class ConditionalProductSpeedBenchmark {
+public class MainConditionalProductSpeedBenchmark {
 
     // ---------------------------------------------------------------------------------------------
     // Configuration

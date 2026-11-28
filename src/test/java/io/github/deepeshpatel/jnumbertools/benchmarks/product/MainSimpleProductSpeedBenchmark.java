@@ -1,5 +1,5 @@
 
-package io.github.deepeshpatel.jnumbertools.benchmarks.product.main;
+package io.github.deepeshpatel.jnumbertools.benchmarks.product;
 
 import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  *
  * No additional result collection is materialized.
  */
-public final class SimpleProductSpeedBenchmark {
+public final class MainSimpleProductSpeedBenchmark {
 
     private static final int WARMUP_ROUNDS = 5;
     private static final int MEASUREMENT_ROUNDS = 9;
@@ -32,7 +32,7 @@ public final class SimpleProductSpeedBenchmark {
 
     private static volatile long blackhole;
 
-    private SimpleProductSpeedBenchmark() {
+    private MainSimpleProductSpeedBenchmark() {
     }
 
     public static void main(String[] args) {

@@ -1,5 +1,5 @@
 
-package io.github.deepeshpatel.jnumbertools.benchmarks.product.main;
+package io.github.deepeshpatel.jnumbertools.benchmarks.product;
 
 import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 
@@ -29,7 +29,7 @@ import java.util.stream.Stream;
  * <p>The checksum is order-independent, so implementations may generate
  * equivalent tuples in different orders.</p>
  */
-public class ConditionalProductSpeedBenchmarkWithFixedValidTuples {
+public class MainFixedValidTuplesConditionalProductBenchmark {
 
     private static final int WARMUP_ROUNDS = 0;
     private static final int MEASUREMENT_ROUNDS = 1;
@@ -131,15 +131,15 @@ public class ConditionalProductSpeedBenchmarkWithFixedValidTuples {
         return new BenchmarkMethod[]{
                 new BenchmarkMethod(
                         "Pairwise when-then",
-                        ConditionalProductSpeedBenchmarkWithFixedValidTuples::whenThen),
+                        MainFixedValidTuplesConditionalProductBenchmark::whenThen),
 
                 new BenchmarkMethod(
                         "engineLambda",
-                        ConditionalProductSpeedBenchmarkWithFixedValidTuples::buildEngineLambda),
+                        MainFixedValidTuplesConditionalProductBenchmark::buildEngineLambda),
 
                 new BenchmarkMethod(
                         "Pruned Stream",
-                        ConditionalProductSpeedBenchmarkWithFixedValidTuples::buildPrunedStream)
+                        MainFixedValidTuplesConditionalProductBenchmark::buildPrunedStream)
         };
     }
 

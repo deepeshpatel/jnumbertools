@@ -1,5 +1,5 @@
 
-package io.github.deepeshpatel.jnumbertools.benchmarks.product.jmh;
+package io.github.deepeshpatel.jnumbertools.benchmarks.product;
 
 import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -46,7 +46,7 @@ import java.util.function.Supplier;
 @Measurement(iterations = 10)
 @Fork(3)
 @State(Scope.Thread)
-public class SimpleProductSpeedBenchmark {
+public class JMHSimpleProductSpeedBenchmark {
 
     @Param({
             "5", "10", "15", "20", "30", "40"

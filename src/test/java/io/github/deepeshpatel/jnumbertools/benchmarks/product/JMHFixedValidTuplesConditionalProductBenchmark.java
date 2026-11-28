@@ -1,5 +1,5 @@
 
-package io.github.deepeshpatel.jnumbertools.benchmarks.product.jmh;
+package io.github.deepeshpatel.jnumbertools.benchmarks.product;
 
 import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 @Measurement(iterations = 10)
 @Fork(3)
 @State(Scope.Thread)
-public class ConditionalProductSpeedBenchmarkWithFixedValidTuples {
+public class JMHFixedValidTuplesConditionalProductBenchmark {
 
     @Param({
             "50", "100", "200", "300", "400", "500",
@@ -182,14 +182,34 @@ public class ConditionalProductSpeedBenchmarkWithFixedValidTuples {
                         dimensions.region
                 )
 
-                 .when((os, browser, network, database, region) ->
-                        (LINUX.equals(os) ? LINUX_BROWSERS.contains(browser)
-                                : WINDOWS.equals(os) ? WINDOWS_BROWSERS.contains(browser) : true)
-                        && (!LINUX.equals(os) || LINUX_NETWORKS.contains(network))
-                        && (LINUX.equals(os) ? LINUX_DATABASES.contains(database)
-                                : WINDOWS.equals(os) ? WINDOWS_DATABASES.contains(database) : true)
-                        && (LINUX.equals(os) ? LINUX_REGIONS.contains(region)
-                                : WINDOWS.equals(os) ? WINDOWS_REGIONS.contains(region) : true));
+                // Scoped to two dimensions per rule so each one compiles onto the
+                // lightweight pairwise Relation table instead of probing the full
+                // antecedent x target cross-product (which blows the compile-time
+                // probe limit at larger sizes -- see the five-argument predicate
+                // this replaced).
+                .when(dimensions.os, dimensions.browser).matches((os, browser) ->
+                        LINUX.equals(os)
+                                ? LINUX_BROWSERS.contains(browser)
+                                : WINDOWS.equals(os)
+                                  ? WINDOWS_BROWSERS.contains(browser)
+                                  : true)
+
+                .when(dimensions.os, dimensions.network).matches((os, network) ->
+                        !LINUX.equals(os) || LINUX_NETWORKS.contains(network))
+
+                .when(dimensions.os, dimensions.database).matches((os, database) ->
+                        LINUX.equals(os)
+                                ? LINUX_DATABASES.contains(database)
+                                : WINDOWS.equals(os)
+                                  ? WINDOWS_DATABASES.contains(database)
+                                  : true)
+
+                .when(dimensions.os, dimensions.region).matches((os, region) ->
+                        LINUX.equals(os)
+                                ? LINUX_REGIONS.contains(region)
+                                : WINDOWS.equals(os)
+                                  ? WINDOWS_REGIONS.contains(region)
+                                  : true);
 
         engineLambda = () -> builder.anyOrder().stream();
     }

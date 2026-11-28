@@ -1,5 +1,5 @@
 
-package io.github.deepeshpatel.jnumbertools.benchmarks.product.jmh;
+package io.github.deepeshpatel.jnumbertools.benchmarks.product;
 
 import io.github.deepeshpatel.jnumbertools.entrypoint.Product;
 import org.openjdk.jmh.annotations.*;
@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 @Measurement(iterations = 10)
 @Fork(3)
 @State(Scope.Thread)
-public class ConditionalProductSpeedBenchmark {
+public class JMHConditionalProductSpeedBenchmark {
 
     @Param({"10", "20", "30", "100"})
     public int size;
