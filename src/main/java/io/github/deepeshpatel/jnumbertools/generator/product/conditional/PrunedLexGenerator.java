@@ -108,7 +108,7 @@ abstract class PrunedLexGenerator implements Iterator<List<Object>> {
      * Traversal strategies are selected once when the iterator is constructed. The pairwise
      * candidate loop therefore contains no multi-trigger mode test or multi-trigger rule evaluation.
      */
-    private abstract class Traversal {
+    private abstract static class Traversal {
         abstract boolean advance();
     }
 

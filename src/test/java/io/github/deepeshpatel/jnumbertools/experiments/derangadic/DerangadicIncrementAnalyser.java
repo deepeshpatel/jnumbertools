@@ -157,10 +157,11 @@ public class DerangadicIncrementAnalyser {
                 // Assert equality
                 assertNotNull(nextViaBrute, "Brute-force found no next derangement but machine claims there is one");
                 assertArrayEquals(nextViaBrute, nextViaMachine,
-                        String.format("Mismatch at n=%d, startRank=%s, iteration=%d\n" +
-                                        "  Current: %s\n" +
-                                        "  Expected next: %s\n" +
-                                        "  Machine next:  %s",
+                        String.format("""
+                                        Mismatch at n=%d, startRank=%s, iteration=%d
+                                          Current: %s
+                                          Expected next: %s
+                                          Machine next:  %s""",
                                 n, rank, i + 1,
                                 Arrays.toString(current),
                                 Arrays.toString(nextViaBrute),

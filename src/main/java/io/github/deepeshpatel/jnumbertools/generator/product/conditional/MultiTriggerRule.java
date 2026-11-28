@@ -11,15 +11,12 @@ import java.util.List;
 
 /** A non-binary implication with an OR of AND-groups as its antecedent. */
 final class MultiTriggerRule {
-    static final class Condition {
-        final int dimension;
-        final BitSet values;
-
-        Condition(int dimension, BitSet values) {
-            this.dimension = dimension;
-            this.values = (BitSet) values.clone();
+    record Condition(int dimension, BitSet values) {
+            Condition(int dimension, BitSet values) {
+                this.dimension = dimension;
+                this.values = (BitSet) values.clone();
+            }
         }
-    }
 
     final List<List<Condition>> groups;
     final int targetDimension;
@@ -77,7 +74,7 @@ final class MultiTriggerRule {
             // Condition is immutable — its BitSet is cloned in its own constructor and never exposed
             // mutably. Only the list containers need to be copied here; sharing Condition references
             // avoids re-cloning every BitSet on every call to this method.
-            copy.add(Collections.unmodifiableList(new ArrayList<>(group)));
+            copy.add(List.copyOf(group));
         }
         return Collections.unmodifiableList(copy);
     }

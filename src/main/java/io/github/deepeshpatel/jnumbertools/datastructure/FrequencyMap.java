@@ -33,8 +33,6 @@ import java.util.Set;
  */
 public final class FrequencyMap<K> extends AbstractMap<K, Integer> implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
     private final Object[] keys;
     private final int[] counts;
 

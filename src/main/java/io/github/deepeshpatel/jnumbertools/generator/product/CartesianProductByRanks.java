@@ -187,7 +187,7 @@ public class CartesianProductByRanks<T> implements StreamableIterable<T> {
             Object[] output = new Object[total];
             int position = 0;
             for (List<T> part : parts) {
-                for (int j = 0, size = part.size(); j < size; j++) output[position++] = part.get(j);
+                for (T t : part) output[position++] = t;
             }
             return Tuple.wrap(output);
         }

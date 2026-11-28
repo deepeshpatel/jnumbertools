@@ -394,7 +394,7 @@ public final class ConstrainedProductBuilder implements Builder<Object> {
             Util.validateByRanksParams(ranks);
             // quantity > 0: no element at all (count 0), so every rank is out of range.
             // quantity = 0: exactly one element, the empty list, at rank 0.
-            return new StreamableIteratorImpl<>(new Iterator<List<Object>>() {
+            return new StreamableIteratorImpl<>(new Iterator<>() {
                 private final Iterator<BigInteger> rankIterator = ranks.iterator();
 
                 @Override

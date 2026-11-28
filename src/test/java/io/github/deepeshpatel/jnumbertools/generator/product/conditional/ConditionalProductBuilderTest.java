@@ -436,9 +436,9 @@ class ConditionalProductBuilderTest {
         }
 
         final ConditionalProductBuilder product = builder;
-        assertEquals(BigInteger.valueOf(expected.size()), product.count(), () -> product.toString());
+        assertEquals(BigInteger.valueOf(expected.size()), product.count(), product::toString);
         assertEquals(expected.isEmpty(), product.isEmpty());
-        assertEquals(expected, product.lexOrder().stream().toList(), () -> product.toString());
+        assertEquals(expected, product.lexOrder().stream().toList(), product::toString);
 
         if (!expected.isEmpty()) {
             int size = expected.size();

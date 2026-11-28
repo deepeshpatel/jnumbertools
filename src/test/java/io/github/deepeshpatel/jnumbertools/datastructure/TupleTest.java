@@ -81,7 +81,7 @@ class TupleTest {
         assertThrows(NoSuchElementException.class, it::next);
 
         List<Object> seen = new ArrayList<>();
-        t.forEach(seen::add);
+        seen.addAll(t);
         assertEquals(List.of("A", "B"), seen);
         assertEquals(List.of("A", "B"), t.stream().toList());
     }

@@ -172,7 +172,7 @@ class PrunedLookaheadTest {
         for (LexOrderStrategy s : List.of(LexOrderStrategy.PRUNED_BITSET, LexOrderStrategy.PRUNED_DFS)) {
             var it = b.lexOrder(s).iterator();
             var generator = (PrunedLexGenerator) it;
-            var seen = new ArrayList<Object>();
+            var seen = new ArrayList<>();
             int switchedAfter = -1;
             while (it.hasNext()) {
                 if (switchedAfter < 0 && generator.lookaheadEnabled()) switchedAfter = seen.size();
@@ -227,7 +227,7 @@ class PrunedLookaheadTest {
         assertEquals(8 * 7 * 7 * 7, expected.size());
         for (LexOrderStrategy s : List.of(LexOrderStrategy.PRUNED_BITSET, LexOrderStrategy.PRUNED_DFS)) {
             var it = b.lexOrder(s).iterator();
-            var seen = new ArrayList<Object>();
+            var seen = new ArrayList<>();
             while (it.hasNext()) seen.add(it.next());
             assertEquals(expected, seen, s.name());
             assertFalse(((PrunedLexGenerator) it).lookaheadEnabled(), s.name() + ": a chain has no waste");

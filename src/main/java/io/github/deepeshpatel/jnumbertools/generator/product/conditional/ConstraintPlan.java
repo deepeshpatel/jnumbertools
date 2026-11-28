@@ -366,17 +366,12 @@ final class ConstraintPlan {
         }
     }
 
-    /** A rule between a dimension of one node and a dimension of another, as seen from the first node. */
-    private static final class Link {
-        final int parentDim;
-        final int childDim;
-        final BitSet[] rowsByParentValue;   // values of childDim allowed when parentDim has value a
-
-        Link(int parentDim, int childDim, BitSet[] rowsByParentValue) {
-            this.parentDim = parentDim;
-            this.childDim = childDim;
-            this.rowsByParentValue = rowsByParentValue;
-        }
+    /**
+     * A rule between a dimension of one node and a dimension of another, as seen from the first node.
+     *
+     * @param rowsByParentValue values of childDim allowed when parentDim has value a
+     */
+        private record Link(int parentDim, int childDim, BitSet[] rowsByParentValue) {
     }
 
     /** Hash key for the values that a node value takes on the dimensions that link it to another node. */

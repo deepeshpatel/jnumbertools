@@ -85,10 +85,6 @@ public class Util {
         }
     }
 
-    public static boolean isEmptyList(List<List<Object>> list) {
-        return list.size() == 1 && list.get(0).isEmpty();
-    }
-
     public static void validateNK(int n, int k) {
         if (n < 0 || k < 0) {
             throw new IllegalArgumentException(

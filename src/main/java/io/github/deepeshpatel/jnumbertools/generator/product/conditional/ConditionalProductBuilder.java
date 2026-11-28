@@ -219,7 +219,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
         List<List<?>> lists = new ArrayList<>(count);
         lists.add(first);
         lists.add(second);
-        for (List<?> dimension : additional) lists.add(dimension);
+        lists.addAll(Arrays.asList(additional));
         return lists;
     }
 
@@ -334,7 +334,7 @@ public final class ConditionalProductBuilder implements Builder<Object> {
             int target = ruleCompiler.indexOf(dimension);
             for (List<MultiTriggerRule.Condition> group : groups) {
                 for (MultiTriggerRule.Condition condition : group) {
-                    if (condition.dimension == target) {
+                    if (condition.dimension() == target) {
                         throw new IllegalArgumentException("The target dimension must differ from every trigger dimension");
                     }
                 }
@@ -393,13 +393,13 @@ public final class ConditionalProductBuilder implements Builder<Object> {
             for (List<MultiTriggerRule.Condition> group : groups) {
                 BitSet groupValues = null;
                 for (MultiTriggerRule.Condition condition : group) {
-                    if (singleTriggerDimension < 0) singleTriggerDimension = condition.dimension;
-                    if (singleTriggerDimension != condition.dimension) {
+                    if (singleTriggerDimension < 0) singleTriggerDimension = condition.dimension();
+                    if (singleTriggerDimension != condition.dimension()) {
                         pairwise = false;
                         break;
                     }
-                    if (groupValues == null) groupValues = (BitSet) condition.values.clone();
-                    else groupValues.and(condition.values);
+                    if (groupValues == null) groupValues = (BitSet) condition.values().clone();
+                    else groupValues.and(condition.values());
                 }
                 if (!pairwise) break;
                 if (groupValues != null) combinedTriggers.or(groupValues);

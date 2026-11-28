@@ -136,7 +136,6 @@ public final class SubsetGeneratorMth<T> extends AbstractGenerator<T> {
         return indicesToValues(lpre != null ? mthLong(rank.longValue() + lpre[from]) : mth(rank.add(pre[from])));
     }
 
-    /** Absolute rank -> index array of the corresponding subset. */
     /** {@link #mth(BigInteger)} in primitive arithmetic; only valid when the long tables exist. */
     private int[] mthLong(long m) {
         int lo = 0, hi = lpre.length - 1, block = 0;      // size of the subset: last block starting at or before m

@@ -28,8 +28,6 @@ import java.util.RandomAccess;
  */
 public final class Tuple<E> extends AbstractList<E> implements RandomAccess, Serializable {
 
-    private static final long serialVersionUID = 1L;
-
     private final Object[] items;
 
     private Tuple(Object[] items) {

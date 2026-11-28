@@ -42,7 +42,6 @@ import java.util.NoSuchElementException;
 public final class DerangementByRanks<T> extends AbstractGenerator<T> {
 
     private final Iterable<BigInteger> ranks;
-    private final Calculator calculator;
     private final DerangadicAlgorithms algorithms;
     private final BigInteger totalDerangements;
 
@@ -56,7 +55,6 @@ public final class DerangementByRanks<T> extends AbstractGenerator<T> {
     public DerangementByRanks(List<T> elements, Iterable<BigInteger> ranks, Calculator calculator) {
         super(elements);
         this.ranks = ranks;
-        this.calculator = calculator;
         this.algorithms = new DerangadicAlgorithms(calculator);
         this.totalDerangements = calculator.subFactorial(elements.size());
     }

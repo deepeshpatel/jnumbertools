@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
  */
 public final class UniquePermutationLexIndicesIterator implements Iterator<int[]> {
 
-    private int[] indices;
+    private final int[] indices;
     private boolean exhausted;
 
     UniquePermutationLexIndicesIterator(int size) {

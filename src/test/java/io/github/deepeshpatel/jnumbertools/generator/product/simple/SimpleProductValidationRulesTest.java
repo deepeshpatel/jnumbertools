@@ -374,7 +374,7 @@ class SimpleProductValidationRulesTest {
         assertTrue(product.count().bitLength() > 64);
 
         for (var source : List.of(product.choice(300, new Random(1)), product.sample(300, new Random(1)))) {
-            var firstValues = new HashSet<Object>();
+            var firstValues = new HashSet<>();
             for (Object tuple : source) {
                 List<?> t = (List<?>) tuple;
                 assertEquals(41, t.size());

@@ -33,7 +33,6 @@ public final class RepetitivePermutationByRanks<T> extends AbstractGenerator<T> 
     private final int width;
     private final BigInteger totalPermutations;
     private final Iterable<BigInteger> ranks;
-    private final Calculator calculator;
 
     /**
      * Constructs a generator for repetitive permutations based on a rank sequence.
@@ -59,7 +58,6 @@ public final class RepetitivePermutationByRanks<T> extends AbstractGenerator<T> 
 
         this.width = width;
         this.ranks = ranks;
-        this.calculator = calculator;
         this.totalPermutations = calculator.power(elements.size(), width);
     }
 

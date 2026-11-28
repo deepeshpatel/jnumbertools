@@ -278,20 +278,18 @@ public final class BenchmarkCommandGenerator {
      * benchmark generation, as the decision log requires before any default is revisited.
      */
     static String presetCommand(String preset, String runName) {
-        switch (preset) {
-            case "quick":
-                return buildCommand(runName, QUICK_SCENARIOS, QUICK_IMPLEMENTATIONS, 2, 3, 1, "gc");
-            case "full":
+        return switch (preset) {
+            case "quick" -> buildCommand(runName, QUICK_SCENARIOS, QUICK_IMPLEMENTATIONS, 2, 3, 1, "gc");
+            case "full" -> {
                 List<String> all = buildScenarios(
                         TOPOLOGIES,
                         distinct(TOPOLOGIES, 0),
                         distinct(TOPOLOGIES, 1));
-                return buildCommand(runName, all, IMPLEMENTATIONS, 5, 8, 2, "gc");
-            case "special":
-                return specialOperationsCommand(runName);
-            default:
-                throw new IllegalArgumentException("Unknown preset: " + preset);
-        }
+                yield buildCommand(runName, all, IMPLEMENTATIONS, 5, 8, 2, "gc");
+            }
+            case "special" -> specialOperationsCommand(runName);
+            default -> throw new IllegalArgumentException("Unknown preset: " + preset);
+        };
     }
 
     /**

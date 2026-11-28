@@ -361,7 +361,7 @@ public class CalculatorTest {
         @Test
         @DisplayName("LCM with empty array throws exception")
         void testInvalidInputEmptyArray() {
-            var exception = assertThrows(IllegalArgumentException.class, () -> Calculator.lcm());
+            var exception = assertThrows(IllegalArgumentException.class, Calculator::lcm);
             assertEquals("At least one number required",exception.getMessage());
         }
 

@@ -17,8 +17,6 @@ public class TestBase {
     }
 
     public static final Calculator calculator = new Calculator();
-    //public static final NumberSystem numberSystem = new NumberSystem(calculator);
-    //public static final UnrankOf unrankOf = new UnrankOf(calculator);
 
     public static final List<?> listOfEmptyList = List.of(Collections.emptyList());
     public static final List<?> listOfEmptyMap = List.of(Collections.emptyMap());

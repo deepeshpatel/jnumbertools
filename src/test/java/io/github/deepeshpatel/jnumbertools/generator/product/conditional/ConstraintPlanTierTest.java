@@ -164,7 +164,7 @@ class ConstraintPlanTierTest {
     }
 
     @Test
-    void randomRuleSetsAgreeWithBruteForceOnEveryDpPath() throws Exception {
+    void randomRuleSetsAgreeWithBruteForceOnEveryDpPath() {
         Random random = new Random(20261117L);
         for (int round = 0; round < 400; round++) {
             int n = 2 + random.nextInt(4);

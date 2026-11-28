@@ -27,17 +27,10 @@ import java.util.Map;
  */
 final class Relation {
 
-    /** A rule for this pair, as written: values in {@code trigger} allow only the values in {@code allowed}. */
-    private static final class Rule {
-        final boolean triggerIsU;
-        final BitSet trigger;
-        final BitSet allowed;
-
-        Rule(boolean triggerIsU, BitSet trigger, BitSet allowed) {
-            this.triggerIsU = triggerIsU;
-            this.trigger = trigger;
-            this.allowed = allowed;
-        }
+    /**
+     * A rule for this pair, as written: values in {@code trigger} allow only the values in {@code allowed}.
+     */
+        private record Rule(boolean triggerIsU, BitSet trigger, BitSet allowed) {
     }
 
     /** Up to this many rules, the set of rules that constrain a value fits in a long and rows can be shared. */
@@ -50,15 +43,10 @@ final class Relation {
     private volatile BitSet[] uToV;
     private volatile BitSet[] vToU;
 
-    /** One rule in the chain; a relation and the relation it was derived from share every earlier link. */
-    private static final class Link {
-        final Rule rule;
-        final Link previous;
-
-        Link(Rule rule, Link previous) {
-            this.rule = rule;
-            this.previous = previous;
-        }
+    /**
+     * One rule in the chain; a relation and the relation it was derived from share every earlier link.
+     */
+        private record Link(Rule rule, Link previous) {
     }
 
     private Relation(int du, int dv, Link last, int ruleCount) {
