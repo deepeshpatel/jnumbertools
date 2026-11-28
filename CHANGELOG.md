@@ -5,6 +5,8 @@ All notable changes to JNumberTools are recorded here. The format follows
 
 ## [Unreleased]
 
+## [5.0.0] - Released 2026-11-28
+
 ### Breaking changes
 
 - Reorganized public packages: static entry points are in `entrypoint`, builders are in
@@ -35,6 +37,9 @@ All notable changes to JNumberTools are recorded here. The format follows
   Comparisons use `Comparable.compareTo` and are compiled into positional bit sets.
 
 ### Changed
+
+- Clarified that the one-million predicate-probe limit applies to compiled rules over two or more dimensions.
+  Unary predicates on a one-dimension product filter input values directly and are not subject to that limit.
 
 - The strongly typed lambda predicates now stop at five dimensions: `Predicate3` through `Predicate5`
   and the typed builders `Typed1` through `Typed5`. Products with more than five dimensions use
